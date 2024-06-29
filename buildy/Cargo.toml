@@ -1,0 +1,11 @@
+[package]
+name = "buildy"
+
+edition = { workspace = true }
+version = { workspace = true }
+
+[lints]
+workspace = true
+
+[dependencies]
+buildy-macros = { workspace = true }
