@@ -1,6 +1,28 @@
 use easy_ext::ext;
 use syn::punctuated::Punctuated;
 
+#[ext(AttributeExt)]
+pub impl syn::Attribute {
+    /// Returns `true` if the attribute represents a `#[doc = ...]` attribute.
+    fn is_doc(&self) -> bool {
+        self.as_doc().is_some()
+    }
+
+    /// Checks if the attribute represents a `#[doc = ...]` attribute. If so,
+    /// returns the expression that represents the documentation value.
+    fn as_doc(&self) -> Option<&syn::Expr> {
+        let syn::Meta::NameValue(attr) = &self.meta else {
+            return None;
+        };
+
+        if !attr.path.is_ident("doc") {
+            return None;
+        }
+
+        Some(&attr.value)
+    }
+}
+
 #[ext(MetaListExt)]
 pub impl syn::MetaList {
     /// Parse the comma-separated list of [`syn::Meta`] in the list

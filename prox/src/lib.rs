@@ -4,9 +4,10 @@
 extern crate proc_macro;
 
 mod attrs;
-mod ident_ext;
 mod entrypoint;
 mod expr_ext;
+mod ident_ext;
+mod fn_arg_ext;
 mod path_ext;
 mod printing;
 mod type_ext;
@@ -16,16 +17,17 @@ mod visibility_ext;
 pub mod test;
 
 pub use attrs::*;
-pub use ident_ext::*;
 pub use entrypoint::*;
+pub use ident_ext::*;
 pub use printing::*;
 
 pub mod prelude {
-    pub use crate::attrs::MetaListExt;
+    pub use crate::attrs::{AttributeExt, MetaListExt};
     pub use crate::expr_ext::ExprExt;
+    pub use crate::ident_ext::IdentExt;
     pub use crate::path_ext::PathExt;
     pub use crate::type_ext::TypeExt;
-    pub use crate::ident_ext::IdentExt;
+    pub use crate::fn_arg_ext::FnArgExt;
     pub use crate::visibility_ext::VisibilityExt;
 }
 
