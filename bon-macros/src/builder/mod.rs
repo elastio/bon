@@ -147,15 +147,30 @@ impl MacroCtx {
     }
 
     fn entry_func(&self) -> TokenStream2 {
-        let docs = self.func.attrs.iter().filter(|attr| {
-            let syn::Meta::NameValue(attr) = &attr.meta else {
-                return false;
-            };
-            attr.path.is_ident("doc")
+        let builder_ident = &self.builder_ident;
+
+        let func_docs = self.func.attrs.iter().filter(|attr| attr.is_doc()).cloned();
+        let args_docs = self.setters.iter().flat_map(|setter| {
+            let setter_ident = &setter.fn_arg_ident;
+            let header = format!("## [`{setter_ident}`]({builder_ident}::{setter_ident})");
+            let header = syn::parse_quote!(#[doc = #header]);
+
+            // TODO: adapt docs on the setter to the context of the entry function
+            // docs. For example adjust the levels of markdown headers so that they
+            // don't violate the headers hierarchy (change headers to a lower level).
+            [header].into_iter().chain(setter.docs.iter().cloned())
         });
 
+        let docs = if self.setters.is_empty() {
+            func_docs.collect_vec()
+        } else {
+            func_docs
+                .chain([syn::parse_quote!(#[doc = "# Parameters"])])
+                .chain(args_docs)
+                .collect_vec()
+        };
+
         let current_mod_vis = &self.func.vis;
-        let builder_ident = &self.builder_ident;
         let builder_private_impl_ident = &self.builder_private_impl_ident;
         let entry_func_ident = &self.func.sig.ident;
 

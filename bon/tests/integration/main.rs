@@ -4,7 +4,7 @@ use bon::builder;
 fn smoke() {
     #[builder]
     fn sut(
-        /// # Documentation
+        /// ### Documentation
         /// **Docs** for arg1.
         ///
         /// Multiline with `code` *examples* __even__!
