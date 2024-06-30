@@ -272,7 +272,7 @@ impl MacroCtx {
                 /// declared inside of other fn items like this:
                 ///
                 /// ```ignore
-                /// use buildy::builder;
+                /// use bon::builder;
                 ///
                 /// fn foo() {
                 ///     struct Foo;
@@ -429,7 +429,7 @@ impl MacroCtx {
                         .enumerate()
                         .map(|(other_setter_index, other_setter)| {
                             if other_setter_index == setter_index {
-                                quote!(buildy::Set::new(value))
+                                quote!(bon::Set::new(value))
                             } else {
                                 let ident = &other_setter.fn_arg_ident;
                                 quote!(self.__private_impl.#ident)
@@ -540,13 +540,13 @@ impl Setter {
     fn unset_state_type(&self) -> TokenStream2 {
         let ty = &self.fn_arg_type;
         ty.option_item_ty()
-            .map(|ty| quote!(buildy::Optional<#ty>))
-            .unwrap_or_else(|| quote!(buildy::Required<#ty>))
+            .map(|ty| quote!(bon::Optional<#ty>))
+            .unwrap_or_else(|| quote!(bon::Required<#ty>))
     }
 
     fn set_state_type(&self) -> TokenStream2 {
         let ty = &self.fn_arg_type;
-        quote!(buildy::Set<#ty>)
+        quote!(bon::Set<#ty>)
     }
 }
 

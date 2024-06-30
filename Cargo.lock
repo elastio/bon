@@ -33,15 +33,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "buildy"
+name = "bon"
 version = "0.1.0"
 dependencies = [
- "buildy-macros",
+ "bon-macros",
  "tokio",
 ]
 
 [[package]]
-name = "buildy-macros"
+name = "bon-macros"
 version = "0.1.0"
 dependencies = [
  "darling",

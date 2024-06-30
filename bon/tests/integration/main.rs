@@ -1,4 +1,4 @@
-use buildy::builder;
+use bon::builder;
 
 #[test]
 fn smoke() {

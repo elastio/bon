@@ -1,4 +1,4 @@
-pub use buildy_macros::*;
+pub use bon_macros::*;
 use std::mem::MaybeUninit;
 
 #[repr(transparent)]

@@ -1,5 +1,5 @@
 [package]
-name = "buildy-macros"
+name = "bon-macros"
 
 edition = { workspace = true }
 version = { workspace = true }

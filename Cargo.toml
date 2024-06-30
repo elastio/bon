@@ -1,5 +1,5 @@
 [workspace]
-members  = ["buildy", "buildy-macros", "prox"]
+members  = ["bon", "bon-macros", "prox"]
 resolver = "2"
 
 [workspace.package]
@@ -121,7 +121,7 @@ wildcard_dependencies             = "warn"
 zero_sized_map_values             = "warn"
 
 [workspace.dependencies]
-buildy-macros = { path = "buildy-macros" }
+bon-macros = { path = "bon-macros" }
 prox          = { path = "prox" }
 
 darling      = "0.20"
