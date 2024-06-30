@@ -361,6 +361,10 @@ impl MacroCtx {
             .func_generic_args()
             .filter(|arg| !matches!(arg, syn::GenericArgument::Lifetime(_)));
 
+        // Bind the span of the original function to `call` such that "Go to definition"
+        // invoked on `call` in IDEs leads to the original function.
+        let call_ident = syn::Ident::new("call", self.func.sig.ident.span());
+
         quote! {
             impl<
                 #(#generics_decl,)*
@@ -374,7 +378,7 @@ impl MacroCtx {
                 #( #where_clause_predicates, )*
                 #(#fields_states_vars: std::convert::Into<#set_state_types>,)*
             {
-                #vis #asyncness #unsafety fn call(self) #output_type {
+                #vis #asyncness #unsafety fn #call_ident(self) #output_type {
                     #positional_func_ident::<#(#generic_fn_args,)*>(
                         #(
                             self.__private_impl.#setter_idents.into().into_inner()
