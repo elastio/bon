@@ -74,8 +74,8 @@ fn impl_traits() {
     #[builder]
     fn sut(
         /// Some documentation
-        iterable: impl IntoIterator<Item = impl Into<u32>>,
-        showable: impl std::fmt::Display + std::fmt::Debug,
+        iterable: impl IntoIterator<Item = impl Into<u32>> + '_,
+        showable: impl std::fmt::Display + std::fmt::Debug + '_,
     ) -> (String, Vec<u32>) {
         let str = format!("{showable} + {showable:#?}");
         let vec = iterable.into_iter().map(Into::into).collect();
