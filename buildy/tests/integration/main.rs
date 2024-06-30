@@ -1,44 +1,67 @@
 use buildy::builder;
 
-fn foo(a: u32, b: bool) {
-    let output = compute_stuff1()
-        .arg1(32)
-        .arg2("asd".to_owned())
-        // .arg3(Some(true))
-        .arg4(vec!["a".to_owned(), "b".to_owned()])
+#[test]
+fn smoke() {
+    #[builder]
+    fn sut(
+        /// # Documentation
+        /// **Docs** for arg1.
+        ///
+        /// Multiline with `code` *examples* __even__!
+        ///
+        /// ```
+        /// let wow_such_code = true;
+        /// println!("Code is so lovely! {wow_such_code}");
+        /// ```
+        ///
+        /// - List item 1
+        /// - List item 2
+        arg1: bool,
+
+        /// Docs for arg2
+        arg2: &str,
+        arg3: String,
+        arg4: u32,
+        arg5: Option<u32>,
+        arg6: Option<&str>,
+        arg7: Vec<String>,
+    ) -> String {
+        let _ = (arg1, arg2, arg4, arg5, arg6, arg7);
+
+        arg3.sd
+    }
+
+    let returned = sut()
+        .arg1(true)
+        .arg2("arg2")
+        .arg3("arg3".to_string())
+        .arg4(1)
+        .arg5(Some(1))
+        .arg6(Some("arg6"))
+        .arg7(vec!["arg7".to_string()])
         .call();
+
+    assert_eq!(returned, "asd");
 }
 
-#[builder]
-fn empty() {}
+// #[test]
+// fn nested_items_in_fn() {
+//     struct Foo;
+//     struct Bar;
 
-#[builder]
-fn compute_stuff1(arg1: u32, arg2: String, arg3: Option<bool>, arg4: Vec<String>) -> String {
-    // compute_stuff().foo(&23);
+//     mod imp {
+//         use super::*;
 
-    // let foo = arg1;
-    "Hello, world!".to_string()
-}
+//         struct Builder {
+//             bar: Bar,
+//         }
+//     }
 
-/// Some documentation here
-#[builder]
-fn compute_stuff<'a, T, U, B: IntoIterator>(
-    /// Arg documentation
-    /// Multi-line
-    foo: &'a u32,
+//     fn sut(bar: Bar) {
+//         impl Foo {
+//             fn bar() {}
+//         }
+//     }
 
-    /// Arg documentation 2
-    /// Multi-line 2
-    u: U,
-
-    b: B::Item
-) -> String
-where
-    T: Default,
-    'a: 'static,
-{
-    // compute_stuff().foo(&23);
-
-    // let foo = arg1;
-    "Hello, world!".to_string()
-}
+//     Foo::bar();
+// }

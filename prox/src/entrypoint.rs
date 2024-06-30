@@ -4,7 +4,10 @@ use proc_macro2::TokenStream as TokenStream2;
 
 /// Parse a pair of [`proc_macro::TokenStream`] that an attribute macro accepts
 /// into a structured input.
-fn parse_attr_macro_input<Opts, Item>(opts: TokenStream, item: TokenStream) -> Result<(Opts, Item)>
+pub fn parse_attr_macro_input<Opts, Item>(
+    opts: TokenStream,
+    item: TokenStream,
+) -> Result<(Opts, Item)>
 where
     Opts: darling::FromMeta,
     Item: syn::parse::Parse,

@@ -1,3 +1,6 @@
+mod error_handling;
+mod normalization;
+
 use darling::FromMeta;
 use heck::AsPascalCase;
 use itertools::Itertools;
@@ -5,6 +8,8 @@ use proc_macro2::TokenStream as TokenStream2;
 use prox::prelude::*;
 use prox::Result;
 use quote::{quote, ToTokens};
+
+pub(crate) use error_handling::error_into_token_stream;
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct Opts {
@@ -29,13 +34,17 @@ struct MacroCtx {
     original_func: syn::ItemFn,
     setters: Vec<Setter>,
     builder_ident: syn::Ident,
+    builder_private_impl_ident: syn::Ident,
     vis: syn::Visibility,
 }
 
 impl MacroCtx {
-    fn from_item_fn(original_func: syn::ItemFn) -> Result<Self> {
+    fn from_item_fn(mut original_func: syn::ItemFn) -> Result<Self> {
+        normalization::normalize_fn_item(&mut original_func);
+
         let pascal_case_func = AsPascalCase(original_func.sig.ident.to_string());
         let builder_ident = quote::format_ident!("{pascal_case_func}Builder");
+        let builder_private_impl_ident = quote::format_ident!("__{builder_ident}PrivateImpl");
 
         let setters: Vec<_> = original_func
             .sig
@@ -44,16 +53,14 @@ impl MacroCtx {
             .map(Setter::from_fn_arg)
             .try_collect()?;
 
-        let vis = original_func
-            .vis
-            .clone()
-            .into_equivalent_in_child_module()?;
+        let vis = original_func.vis.clone();
 
         let ctx = MacroCtx {
             vis,
             original_func,
             setters,
             builder_ident,
+            builder_private_impl_ident,
         };
 
         Ok(ctx)
@@ -62,7 +69,7 @@ impl MacroCtx {
     fn setter_idents(&self) -> impl Iterator<Item = syn::Ident> + '_ {
         self.setters
             .iter()
-            .map(|setter| setter.fn_arg_ident.to_snake_case())
+            .map(|setter| setter.fn_arg_ident.clone())
     }
 
     fn unset_state_types(&self) -> impl Iterator<Item = TokenStream2> + '_ {
@@ -79,26 +86,27 @@ impl MacroCtx {
 
     fn positional_func_ident(&self) -> syn::Ident {
         let ident = &self.original_func.sig.ident;
-        quote::format_ident!("__buildy_func_{}", ident.to_string())
-    }
-
-    fn impl_mod_ident(&self) -> syn::Ident {
-        quote::format_ident!(
-            "__buildy_mod_{}",
-            &self.original_func.sig.ident.to_snake_case()
-        )
+        quote::format_ident!("__positional_{}", ident.to_string())
     }
 
     fn original_func_generics_decl(&self) -> impl Iterator<Item = &syn::GenericParam> + '_ {
         self.original_func.sig.generics.params.iter()
     }
 
-    fn original_func_generic_args(&self) -> impl Iterator<Item = TokenStream2> + '_ {
+    fn original_func_generic_args(&self) -> impl Iterator<Item = syn::GenericArgument> + '_ {
         let params = &self.original_func.sig.generics.params;
         params.iter().map(|param| match param {
-            syn::GenericParam::Lifetime(param) => param.lifetime.to_token_stream(),
-            syn::GenericParam::Type(param) => param.ident.to_token_stream(),
-            syn::GenericParam::Const(param) => param.ident.to_token_stream(),
+            syn::GenericParam::Lifetime(param) => {
+                syn::GenericArgument::Lifetime(param.lifetime.clone())
+            }
+            syn::GenericParam::Type(param) => {
+                let ident = &param.ident;
+                syn::GenericArgument::Type(syn::parse_quote!(#ident))
+            }
+            syn::GenericParam::Const(param) => {
+                let ident = &param.ident;
+                syn::GenericArgument::Const(syn::parse_quote!(#ident))
+            }
         })
     }
 
@@ -107,74 +115,18 @@ impl MacroCtx {
     }
 
     fn output(self) -> TokenStream2 {
-        let impl_mod_ident = self.impl_mod_ident();
         let entry_func = self.entry_func();
-        let builder_type_alias = self.builder_type_alias();
-        let builder_declaration = self.builder_declaration();
-        let builder_constructor = self.builder_constructor();
+        let builder_decl = self.builder_decl();
         let call_method_impl = self.call_method_impl();
         let setter_methods_impls = self.setter_methods_impls();
         let positional_func = self.positional_func();
 
         quote! {
-            #builder_type_alias
             #entry_func
-
-            #[doc(hidden)]
-            mod #impl_mod_ident {
-                use super::*;
-
-                #builder_declaration
-                #builder_constructor
-                #call_method_impl
-                #setter_methods_impls
-            }
-
-            #[doc(hidden)]
+            #builder_decl
+            #call_method_impl
+            #setter_methods_impls
             #positional_func
-        }
-    }
-
-    fn builder_type_alias(&self) -> TokenStream2 {
-        let current_mod_vis = &self.original_func.vis;
-        let builder_ident = &self.builder_ident;
-        let unset_state_types = self.unset_state_types();
-        let impl_mod_ident = self.impl_mod_ident();
-
-        let generics_decl = self.original_func_generics_decl();
-        let generic_args = self.original_func_generic_args();
-        let where_clause = self.original_func_where_clause();
-
-        quote! {
-            // This lint is ignored, because bounds in type aliases are still useful
-            // to make the following example usage compile:
-            // ```
-            // type Bar<T: IntoIterator> = T::Item;
-            // ```
-            // In this case the bound is necessary for `T::Item` access to be valid.
-            // The compiler proposes this:
-            //
-            // > use fully disambiguated paths (i.e., `<T as Trait>::Assoc`) to refer
-            // > to associated types in type aliases
-            //
-            // But, come on... Why would you want to write `T::Item` as `<T as IntoIterator>::Item`
-            // especially if that `T::Item` access is used in multiple places? It's a waste of time
-            // to implement logic that rewrites the user's type expressions to that syntax when just
-            // having bounds on the type alias is enough already.
-            #[allow(type_alias_bounds)]
-            #current_mod_vis type #builder_ident<#(#generics_decl),*>
-            // The where clause in this position will be deprecated. The preferred
-            // position will be at the end of the entire type alias syntax construct.
-            // See details at https://github.com/rust-lang/rust/issues/112792.
-            //
-            // However, at the time of this writing the only way to put the where
-            // clause on a type alias is here.
-            //
-            #where_clause
-            = #impl_mod_ident::#builder_ident<
-                #(#generic_args,)*
-                #(#unset_state_types),*
-            >;
         }
     }
 
@@ -185,14 +137,16 @@ impl MacroCtx {
         let mut positional_func = self.original_func.clone();
         positional_func.sig.ident = self.positional_func_ident();
 
-        // Remove all doc comments attributes from function arguments, because they are
-        // not valid in that position in regular Rust code. The cool trick is that they
-        // are still valid syntactically when a proc macro like this one pre-processes
-        // them and removes them from the expanded code. We use the doc comments to put
-        // them on the generated setter methods.
-        for arg in &mut positional_func.sig.inputs {
-            arg.attrs_mut().retain(|attr| !attr.is_doc());
-        }
+        normalization::strip_doc_comments_from_args(&mut positional_func.sig);
+
+        // It's fine if there are too many positional arguments in the function
+        // because the whole purpose of this macro is to fight with this problem
+        // at the call site by generating a builder, while keeping the fn definition
+        // site the same with tons of positional arguments which don't harm readability
+        // there because their names are explicitly specified at the definition site.
+        // positional_func
+        //     .attrs
+        //     .push(syn::parse_quote!(#[allow(clippy::too_many_arguments)]));
 
         positional_func.into_token_stream()
     }
@@ -207,19 +161,41 @@ impl MacroCtx {
 
         let current_mod_vis = &self.original_func.vis;
         let builder_ident = &self.builder_ident;
+        let builder_private_impl_ident = &self.builder_private_impl_ident;
         let entry_func_ident = &self.original_func.sig.ident;
+
+        // TODO: we can use a shorter syntax with anonymous lifetimes to make
+        // the generate code and function signature displayed by rust-analyzer
+        // a bit shorter and easier to read. However, the caveat is that we can
+        // do this only for lifetimes that have no bounds and if they don't appear
+        // in the where clause. Research `darling`'s lifetime tracking API and
+        // maybe implement this in the future
 
         let generics_decl = self.original_func_generics_decl();
         let generic_args = self.original_func_generic_args();
         let where_clause = self.original_func_where_clause();
 
+        let setter_idents = self.setter_idents();
+        let phantom_data = self.phantom_data_field_init();
+
+        let unset_state_types = self.unset_state_types();
+
         quote! {
             #(#docs)*
-            #current_mod_vis fn #entry_func_ident<#(#generics_decl),*> ()
-                -> #builder_ident<#(#generic_args),*>
+            #current_mod_vis fn #entry_func_ident<#(#generics_decl),*>() -> #builder_ident<
+                #(#generic_args,)*
+                #(#unset_state_types,)*
+            >
             #where_clause
             {
-                #builder_ident::new()
+                #builder_ident {
+                    __private_impl: #builder_private_impl_ident {
+                        #phantom_data
+                        #(
+                            #setter_idents: ::core::default::Default::default(),
+                        )*
+                    }
+                }
             }
         }
     }
@@ -243,7 +219,7 @@ impl MacroCtx {
             .map(|type_param| &type_param.ident);
 
         Some(quote! {
-            ::std::marker::PhantomData<(
+            ::core::marker::PhantomData<(
                 #(#lifetime_refs,)*
                 #(#type_refs,)*
             )>
@@ -253,19 +229,20 @@ impl MacroCtx {
     fn phantom_data_field_init(&self) -> Option<TokenStream2> {
         self.phantom_data().map(|_| {
             quote! {
-                _phantom: ::std::marker::PhantomData,
+                _phantom: ::core::marker::PhantomData,
             }
         })
     }
 
-    fn builder_declaration(&self) -> TokenStream2 {
+    fn builder_decl(&self) -> TokenStream2 {
         let vis = &self.vis;
         let builder_ident = &self.builder_ident;
+        let builder_private_impl_ident = &self.builder_private_impl_ident;
         let setter_idents = self.setter_idents();
         let fields_states_vars = self.fields_states_vars().collect_vec();
-
-        let generics_decl = self.original_func_generics_decl();
+        let generics_decl = self.original_func_generics_decl().collect_vec();
         let where_clause = self.original_func_where_clause();
+        let generic_args = self.original_func_generic_args();
 
         let phantom_data = self.phantom_data().map(|phantom_data| {
             quote! {
@@ -274,41 +251,88 @@ impl MacroCtx {
         });
 
         quote! {
-            #vis struct #builder_ident<#(#generics_decl,)* #(#fields_states_vars,)*>
+            #vis struct #builder_ident<
+                #(#generics_decl,)*
+
+                // We could set default values for `fields_states_vars` here
+                // to their initial unset states, but we don't do that and
+                // pass these generic params explicitly to workaround the following
+                // bug in rust-analyzer where it stops providing completions for
+                // builder methods completely if we rely on default generic type
+                // params values. See the issue in rust-analyzer for details:
+                // https://github.com/rust-lang/rust-analyzer/issues/17515
+                #(#fields_states_vars,)*
+            >
+            #where_clause
+            {
+                /// Please don't touch this field. It's an implementation
+                /// detail that is exempt from the API stability guarantees.
+                /// It's visible to you only because of the limitations of
+                /// the Rust language.
+                ///
+                /// The limitation is that we can't make the fields of the
+                /// generated struct private other than by placing its
+                /// declaration inside of a nested submodule. However, we
+                /// can't do that because this breaks support for fn items
+                /// declared inside of other fn items like this:
+                ///
+                /// ```ignore
+                /// use buildy::builder;
+                ///
+                /// fn foo() {
+                ///     struct Foo;
+                ///
+                ///     #[builder]
+                ///     fn nested(foo: Foo) {}
+                ///
+                ///     nested().foo(Foo).call();
+                /// }
+                /// ```
+                ///
+                /// If we were to generate a child module like this then code
+                /// in that child module would lose access to the symbol `Foo`
+                /// in the parent module. The following code doesn't compile.
+                ///
+                /// ```ignore
+                /// fn foo() {
+                ///     struct Foo;
+                ///
+                ///     mod __private_child_module {
+                ///         use super::*;
+                ///
+                ///         pub(super) struct Builder {
+                ///             foo: Foo,
+                ///         }
+                ///     }
+                /// }
+                /// ```
+                ///
+                /// `Foo` symbol is inaccessible inside of `__private_child_module`
+                /// because it is defined inside of the function `foo()` and not
+                /// inside of the parent module.
+                ///
+                /// Child modules are kinda implicitly "hoisted" to the top-level of
+                /// the module and they can't see the local symbols defined inside
+                /// of the same function scope.
+                __private_impl: #builder_private_impl_ident<
+                    #(#generic_args,)*
+                    #(#fields_states_vars,)*
+                >
+            }
+
+            /// This struct exists only to reduce the number of private fields
+            /// that pop up in IDE completions for developers. It groups all
+            /// the private fields in it leaving the builder type higher with
+            /// just a single field of this type that documents the fact that
+            /// the developers shouldn't touch it.
+            struct #builder_private_impl_ident<
+                #(#generics_decl,)*
+                #(#fields_states_vars,)*
+            >
             #where_clause
             {
                 #phantom_data
                 #( #setter_idents: #fields_states_vars, )*
-            }
-        }
-    }
-
-    fn builder_constructor(&self) -> TokenStream2 {
-        let vis = &self.vis;
-        let builder_ident = &self.builder_ident;
-        let setter_idents = self.setter_idents();
-        let unset_state_types = self.unset_state_types();
-        let phantom_data = self.phantom_data_field_init();
-
-        let generics_decl = self.original_func_generics_decl();
-        let generic_args = self.original_func_generic_args();
-        let where_clause = self.original_func_where_clause();
-
-        quote! {
-            impl<#(#generics_decl),*> #builder_ident<
-                #(#generic_args,)*
-                #(#unset_state_types),*
-            >
-            #where_clause
-            {
-                #vis fn new() -> Self {
-                    Self {
-                        #phantom_data
-                        #(
-                            #setter_idents: ::std::default::Default::default(),
-                        )*
-                    }
-                }
             }
         }
     }
@@ -326,11 +350,21 @@ impl MacroCtx {
         let fields_states_vars = self.fields_states_vars().collect_vec();
         let set_state_types = self.set_state_types();
         let generics_decl = self.original_func_generics_decl();
-        let generic_args = self.original_func_generic_args().collect_vec();
         let where_clause_predicates = self
             .original_func_where_clause()
             .into_iter()
             .flat_map(|where_clause| where_clause.predicates.iter());
+
+        let generic_builder_args = self.original_func_generic_args();
+
+        // Filter out lifetime generic arguments, because they are not needed
+        // to be specified explicitly when calling the function. This also avoids
+        // the problem that it's not always possible to specify lifetimes in
+        // the turbofish syntax. See the problem of late-bound lifetimes specification
+        // in the issue https://github.com/rust-lang/rust/issues/42868
+        let generic_fn_args = self
+            .original_func_generic_args()
+            .filter(|arg| !matches!(arg, syn::GenericArgument::Lifetime(_)));
 
         quote! {
             impl<
@@ -338,7 +372,7 @@ impl MacroCtx {
                 #(#fields_states_vars),*
             >
             #builder_ident<
-                #(#generic_args,)*
+                #(#generic_builder_args,)*
                 #(#fields_states_vars),*
             >
             where
@@ -346,9 +380,9 @@ impl MacroCtx {
                 #(#fields_states_vars: std::convert::Into<#set_state_types>,)*
             {
                 #vis #asyncness #unsafety fn call(self) #output_type {
-                    #positional_func_ident::<#(#generic_args,)*>(
+                    #positional_func_ident::<#(#generic_fn_args,)*>(
                         #(
-                            self.#setter_idents.into().into_inner()
+                            self.__private_impl.#setter_idents.into().into_inner()
                         ),*
                     )
                     #maybe_await
@@ -399,7 +433,7 @@ impl MacroCtx {
                                 quote!(::buildy::Set::new(value))
                             } else {
                                 let ident = &other_setter.fn_arg_ident;
-                                quote!(self.#ident)
+                                quote!(self.__private_impl.#ident)
                             }
                         });
 
@@ -408,6 +442,7 @@ impl MacroCtx {
                 let docs = &setter.docs;
                 let vis = &self.vis;
                 let builder_ident = &self.builder_ident;
+                let builder_private_impl_ident = &self.builder_private_impl_ident;
                 let setter_idents = self.setter_idents();
                 let phantom_data = self.phantom_data_field_init();
                 let generics_decl = self.original_func_generics_decl();
@@ -431,10 +466,12 @@ impl MacroCtx {
                         >
                         {
                             #builder_ident {
-                                #phantom_data
-                                #(
-                                    #setter_idents: #field_exprs,
-                                )*
+                                __private_impl: #builder_private_impl_ident {
+                                    #phantom_data
+                                    #(
+                                        #setter_idents: #field_exprs,
+                                    )*
+                                }
                             }
                         }
                     }
@@ -494,7 +531,7 @@ impl Setter {
             .collect();
 
         Ok(Self {
-            generic_var_ident: quote::format_ident!("__Buildy{}", pat.ident.to_pascal_case()),
+            generic_var_ident: quote::format_ident!("__B{}", pat.ident.to_pascal_case()),
             fn_arg_ident: pat.ident.clone(),
             fn_arg_type: arg.ty.clone(),
             docs,
