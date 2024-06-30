@@ -1,10 +1,23 @@
 [workspace]
-members  = ["bon", "bon-macros", "prox"]
+members  = ["bon", "bon-macros"]
 resolver = "2"
 
 [workspace.package]
 edition = "2021"
 version = "0.1.0"
+
+[workspace.dependencies]
+bon-macros = { path = "bon-macros" }
+prox       = { path = "../prox" }
+
+darling      = "0.20"
+easy-ext     = "1.0"
+heck         = "0.5"
+itertools    = "0.13"
+prettyplease = "0.2"
+proc-macro2  = "1.0"
+quote        = "1.0"
+syn          = "2.0"
 
 [workspace.lints.clippy]
 # Turn on lints that are allow by default in `clippy`.
@@ -119,16 +132,3 @@ useless_transmute                 = "warn"
 verbose_bit_mask                  = "warn"
 wildcard_dependencies             = "warn"
 zero_sized_map_values             = "warn"
-
-[workspace.dependencies]
-bon-macros = { path = "bon-macros" }
-prox          = { path = "prox" }
-
-darling      = "0.20"
-easy-ext     = "1.0"
-heck         = "0.5"
-itertools    = "0.13"
-prettyplease = "0.2"
-proc-macro2  = "1.0"
-quote        = "1.0"
-syn          = "2.0"
