@@ -25,13 +25,13 @@ fn smoke() {
         arg5: Option<u32>,
         arg6: Option<&str>,
         arg7: Vec<String>,
+        arg8: (u32, &[bool]),
     ) -> String {
-        let _ = (arg1, arg2, arg4, arg5, arg6, arg7);
-
-        arg3.sd
+        let _ = (arg1, arg2, arg4, arg5, arg6, arg7, arg8);
+        arg3
     }
 
-    let returned = sut()
+    let actual = sut()
         .arg1(true)
         .arg2("arg2")
         .arg3("arg3".to_string())
@@ -39,29 +39,55 @@ fn smoke() {
         .arg5(Some(1))
         .arg6(Some("arg6"))
         .arg7(vec!["arg7".to_string()])
+        .arg8((1, &[true]))
         .call();
 
-    assert_eq!(returned, "asd");
+    assert_eq!(actual, "arg3");
 }
 
-// #[test]
-// fn nested_items_in_fn() {
-//     struct Foo;
-//     struct Bar;
+#[tokio::test]
+async fn async_func() {
+    #[builder]
+    async fn sut<Fut: std::future::Future>(fut: Fut) -> Fut::Output {
+        fut.await
+    }
 
-//     mod imp {
-//         use super::*;
+    let actual = sut().fut(async { 42 }).call().await;
+    assert_eq!(actual, 42);
+}
 
-//         struct Builder {
-//             bar: Bar,
-//         }
-//     }
+#[test]
+fn unsafe_func() {
+    #[builder]
+    unsafe fn sut(arg: bool) {
+        let _ = arg;
+    }
 
-//     fn sut(bar: Bar) {
-//         impl Foo {
-//             fn bar() {}
-//         }
-//     }
+    let builder = sut().arg(true);
 
-//     Foo::bar();
-// }
+    // Only the call method should be unsafe
+    unsafe { builder.call() };
+}
+
+#[test]
+fn impl_traits() {
+    #[builder]
+    fn sut(
+        /// Some documentation
+        iterable: impl IntoIterator<Item = impl Into<u32>>,
+        showable: impl std::fmt::Display + std::fmt::Debug,
+    ) -> (String, Vec<u32>) {
+        let str = format!("{showable} + {showable:#?}");
+        let vec = iterable.into_iter().map(Into::into).collect();
+
+        (str, vec)
+    }
+
+    let (str, vec) = sut()
+        .iterable(vec![1_u32, 2, 3])
+        .showable("showable")
+        .call();
+
+    assert_eq!(str, "showable + \"showable\"");
+    assert_eq!(vec, [1, 2, 3]);
+}

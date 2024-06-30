@@ -1,8 +1,29 @@
 use prox::prelude::*;
+use syn::punctuated::Punctuated;
 use syn::visit_mut::VisitMut;
 
-pub(crate) fn normalize_fn_item(fn_item: &mut syn::ItemFn) {
+pub(crate) fn normalize_fn_item(mut fn_item: syn::ItemFn) -> syn::ItemFn {
     normalize_references(&mut fn_item.sig);
+    normalize_impl_traits(&mut fn_item.sig);
+    fn_item
+}
+
+fn normalize_references(signature: &mut syn::Signature) {
+    let mut visitor = NormalizeReferences::default();
+
+    for arg in &mut signature.inputs {
+        visitor.visit_type_mut(arg.ty_mut());
+    }
+
+    for i in 0..visitor.total_anon_lifetimes {
+        let lifetime = NormalizeReferences::make_lifetime_with_index(i);
+        let lifetime = syn::LifetimeParam::new(lifetime);
+        let lifetime = syn::GenericParam::Lifetime(lifetime);
+
+        // Unfortunately, there is no `spilce` in `Punctuated`, so we just do
+        // a dumb insert in a loop.
+        signature.generics.params.insert(i, lifetime);
+    }
 }
 
 #[derive(Default)]
@@ -27,24 +48,6 @@ impl VisitMut for NormalizeReferences {
     }
 }
 
-fn normalize_references(signature: &mut syn::Signature) {
-    let mut visitor = NormalizeReferences::default();
-
-    for arg in &mut signature.inputs {
-        visitor.visit_type_mut(arg.ty_mut());
-    }
-
-    for i in 0..visitor.total_anon_lifetimes {
-        let lifetime = NormalizeReferences::make_lifetime_with_index(i);
-        let lifetime = syn::LifetimeParam::new(lifetime);
-        let lifetime = syn::GenericParam::Lifetime(lifetime);
-
-        // Unfortunately, there is no `spilce` in `Punctuated`, so we just do
-        // a dumb insert in a loop.
-        signature.generics.params.insert(i, lifetime);
-    }
-}
-
 impl NormalizeReferences {
     /// Make a lifetime with the next index. It's used to generate unique
     /// lifetimes for every occurrence of a reference with the anonymous
@@ -58,6 +61,71 @@ impl NormalizeReferences {
     fn make_lifetime_with_index(index: usize) -> syn::Lifetime {
         let symbol = format!("'__b{index}");
         syn::Lifetime::new(&symbol, proc_macro2::Span::call_site())
+    }
+}
+
+fn normalize_impl_traits(signature: &mut syn::Signature) {
+    let mut visitor = NormalizeImplTraits::default();
+
+    for arg in &mut signature.inputs {
+        visitor.visit_type_mut(arg.ty_mut());
+    }
+
+    if visitor.impl_traits.is_empty() {
+        return;
+    }
+
+    let new_generic_params = (0..visitor.impl_traits.len()).map(|i| {
+        let ident = NormalizeImplTraits::make_type_param_ident(i);
+        syn::GenericParam::Type(syn::parse_quote!(#ident))
+    });
+
+    signature.generics.params.extend(new_generic_params);
+
+    let new_predicates =
+        visitor
+            .impl_traits
+            .into_iter()
+            .enumerate()
+            .map(|(i, bounds)| -> syn::WherePredicate {
+                let ident = NormalizeImplTraits::make_type_param_ident(i);
+                syn::parse_quote!(#ident: #bounds)
+            });
+
+    signature
+        .generics
+        .make_where_clause()
+        .predicates
+        .extend(new_predicates);
+}
+
+#[derive(Default)]
+struct NormalizeImplTraits {
+    impl_traits: Vec<Punctuated<syn::TypeParamBound, syn::Token![+]>>,
+}
+
+impl VisitMut for NormalizeImplTraits {
+    fn visit_type_mut(&mut self, ty: &mut syn::Type) {
+        syn::visit_mut::visit_type_mut(self, ty);
+
+        if !matches!(ty, syn::Type::ImplTrait(_)) {
+            return;
+        };
+
+        let type_param = Self::make_type_param_ident(self.impl_traits.len());
+        let impl_trait = std::mem::replace(ty, syn::Type::Path(syn::parse_quote!(#type_param)));
+
+        let syn::Type::ImplTrait(impl_trait) = impl_trait else {
+            panic!("BUG: code higher validated that this is impl trait: {impl_trait:?}",)
+        };
+
+        self.impl_traits.push(impl_trait.bounds);
+    }
+}
+
+impl NormalizeImplTraits {
+    fn make_type_param_ident(index: usize) -> syn::Ident {
+        quote::format_ident!("__{index}")
     }
 }
 

@@ -2,6 +2,7 @@ pub use buildy_macros::*;
 use std::mem::MaybeUninit;
 
 #[repr(transparent)]
+#[doc(hidden)]
 pub struct Required<T> {
     /// `MaybeUninit` is used to make the memory layout of `Required<T>` be equal
     /// to `T` such that the compiler may optimize away moving data between
@@ -24,6 +25,7 @@ impl<T> Default for Required<T> {
 }
 
 #[repr(transparent)]
+#[doc(hidden)]
 pub struct Optional<T>(Option<T>);
 
 impl<T> Optional<T> {
@@ -45,6 +47,7 @@ impl<T> From<Optional<T>> for Set<Option<T>> {
 }
 
 #[repr(transparent)]
+#[doc(hidden)]
 pub struct Set<T>(T);
 
 impl<T> Set<T> {
