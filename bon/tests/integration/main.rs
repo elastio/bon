@@ -1,4 +1,4 @@
-use bon::builder;
+use bon::{bon, builder};
 
 #[test]
 fn smoke() {
@@ -90,4 +90,27 @@ fn impl_traits() {
 
     assert_eq!(str, "showable + \"showable\"");
     assert_eq!(vec, [1, 2, 3]);
+}
+
+#[test]
+fn receiver() {
+    // use bon::builder;
+
+    // #[derive(Clone)]
+    // struct Counter {
+    //     val: u32,
+    // }
+
+    // #[bon::bon]
+    // impl Counter {
+    //     #[builder]
+    //     fn increment(&self, disabled: bool) -> Self {
+    //         if disabled {
+    //             return self.clone();
+    //         }
+    //         Self { val: self.val + 1 }
+    //     }
+    // }
+
+    // let counter = Counter { val: 0 };
 }

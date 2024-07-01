@@ -1,44 +1,36 @@
-mod error_handling;
+mod free_fn_item;
+mod impl_block;
 mod normalization;
 
-use darling::FromMeta;
+pub(crate) use free_fn_item::*;
+pub(crate) use impl_block::*;
+
 use heck::AsPascalCase;
 use itertools::Itertools;
-use proc_macro2::TokenStream as TokenStream2;
 use prox::prelude::*;
-use prox::Result;
 use quote::{quote, ToTokens};
 
-pub(crate) use error_handling::error_into_token_stream;
-
-#[derive(Debug, FromMeta)]
-pub(crate) struct Opts {
-    // There may be config options for the proc macro in the future here
+struct ImplBlock<'a> {
+    self_ty: &'a syn::Type,
+    generics: &'a syn::Generics,
 }
 
-pub(crate) fn generate(_: Opts, item: syn::Item) -> Result<TokenStream2> {
-    match item {
-        syn::Item::Fn(func) => {
-            let ctx = MacroCtx::from_item_fn(func)?;
-            Ok(ctx.output())
-        }
-        _ => prox::bail!(
-            &item,
-            "The attribute is expected to be placed on an `fn` \
-            item, but it was placed on other syntax instead"
-        ),
-    }
-}
-
-struct MacroCtx {
+struct MacroCtx<'a> {
+    impl_block: Option<ImplBlock<'a>>,
     func: syn::ItemFn,
     setters: Vec<Setter>,
     builder_ident: syn::Ident,
     builder_private_impl_ident: syn::Ident,
 }
 
-impl MacroCtx {
-    fn from_item_fn(func: syn::ItemFn) -> Result<Self> {
+struct MacroOutput {
+    entry_func: syn::ItemFn,
+    positional_func: syn::ItemFn,
+    other_items: TokenStream2,
+}
+
+impl<'a> MacroCtx<'a> {
+    fn new(func: syn::ItemFn, impl_block: Option<ImplBlock<'a>>) -> Result<Self> {
         let func = normalization::normalize_fn_item(func);
         let pascal_case_func = AsPascalCase(func.sig.ident.to_string());
         let builder_ident = quote::format_ident!("{pascal_case_func}Builder");
@@ -48,10 +40,12 @@ impl MacroCtx {
             .sig
             .inputs
             .iter()
-            .map(Setter::from_fn_arg)
+            .filter_map(syn::FnArg::as_typed)
+            .map(Setter::from_typed_fn_arg)
             .try_collect()?;
 
         let ctx = MacroCtx {
+            impl_block,
             func,
             setters,
             builder_ident,
@@ -88,6 +82,14 @@ impl MacroCtx {
         self.func.sig.generics.params.iter()
     }
 
+    fn func_receiver(&self) -> Option<&syn::Receiver> {
+        self.func
+            .sig
+            .inputs
+            .first()
+            .and_then(syn::FnArg::as_receiver)
+    }
+
     fn func_generic_args(&self) -> impl Iterator<Item = syn::GenericArgument> + '_ {
         let params = &self.func.sig.generics.params;
         params.iter().map(|param| match param {
@@ -109,23 +111,27 @@ impl MacroCtx {
         self.func.sig.generics.where_clause.as_ref()
     }
 
-    fn output(self) -> TokenStream2 {
+    fn output(self) -> MacroOutput {
         let entry_func = self.entry_func();
         let builder_decl = self.builder_decl();
         let call_method_impl = self.call_method_impl();
         let setter_methods_impls = self.setter_methods_impls();
         let positional_func = self.positional_func();
 
-        quote! {
-            #entry_func
+        let other_items = quote! {
             #builder_decl
             #call_method_impl
             #setter_methods_impls
-            #positional_func
+        };
+
+        MacroOutput {
+            entry_func,
+            positional_func,
+            other_items,
         }
     }
 
-    fn positional_func(&self) -> TokenStream2 {
+    fn positional_func(&self) -> syn::ItemFn {
         // Change to an implementation function's visibility to private inside of a
         // child module to avoid exposing it to the surrounding code. The surrounding
         // code is supposed to use this function through the builder only.
@@ -143,32 +149,13 @@ impl MacroCtx {
             .attrs
             .push(syn::parse_quote!(#[allow(clippy::too_many_arguments)]));
 
-        positional_func.into_token_stream()
+        positional_func
     }
 
-    fn entry_func(&self) -> TokenStream2 {
+    fn entry_func(&self) -> syn::ItemFn {
         let builder_ident = &self.builder_ident;
 
-        let func_docs = self.func.attrs.iter().filter(|attr| attr.is_doc()).cloned();
-        let args_docs = self.setters.iter().flat_map(|setter| {
-            let setter_ident = &setter.fn_arg_ident;
-            let header = format!("## [`{setter_ident}`]({builder_ident}::{setter_ident})");
-            let header = syn::parse_quote!(#[doc = #header]);
-
-            // TODO: adapt docs on the setter to the context of the entry function
-            // docs. For example adjust the levels of markdown headers so that they
-            // don't violate the headers hierarchy (change headers to a lower level).
-            [header].into_iter().chain(setter.docs.iter().cloned())
-        });
-
-        let docs = if self.setters.is_empty() {
-            func_docs.collect_vec()
-        } else {
-            func_docs
-                .chain([syn::parse_quote!(#[doc = "# Parameters"])])
-                .chain(args_docs)
-                .collect_vec()
-        };
+        let docs = self.func.attrs.iter().filter(|attr| attr.is_doc());
 
         let current_mod_vis = &self.func.vis;
         let builder_private_impl_ident = &self.builder_private_impl_ident;
@@ -190,9 +177,11 @@ impl MacroCtx {
 
         let unset_state_types = self.unset_state_types();
 
-        quote! {
+        let receiver = self.func_receiver();
+
+        syn::parse_quote! {
             #(#docs)*
-            #current_mod_vis fn #entry_func_ident<#(#generics_decl),*>() -> #builder_ident<
+            #current_mod_vis fn #entry_func_ident<#(#generics_decl),*>(#receiver) -> #builder_ident<
                 #(#generic_args,)*
                 #(#unset_state_types,)*
             >
@@ -519,14 +508,7 @@ struct Setter {
 }
 
 impl Setter {
-    fn from_fn_arg(arg: &syn::FnArg) -> Result<Self> {
-        let arg = match arg {
-            syn::FnArg::Receiver(_) => {
-                prox::bail!(arg, "Methods with `self` aren't supported yet")
-            }
-            syn::FnArg::Typed(arg) => arg,
-        };
-
+    fn from_typed_fn_arg(arg: &syn::PatType) -> Result<Self> {
         let syn::Pat::Ident(pat) = arg.pat.as_ref() else {
             // We may allow setting a name for the builder method in parameter
             // attributes and relax this requirement
