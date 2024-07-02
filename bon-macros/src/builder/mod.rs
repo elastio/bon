@@ -4,6 +4,7 @@ mod impl_block;
 pub(crate) use free_fn_item::*;
 pub(crate) use impl_block::*;
 
+use crate::normalization::NormalizeSelfTy;
 use heck::AsPascalCase;
 use itertools::Itertools;
 use prox::prelude::*;
@@ -11,14 +12,15 @@ use quote::{quote, ToTokens};
 use syn::punctuated::Punctuated;
 use syn::visit_mut::VisitMut;
 
-struct ImplBlock<'a> {
+struct ImplCtx<'a> {
     self_ty: &'a syn::Type,
     generics: &'a syn::Generics,
 }
 
 struct MacroCtx<'a> {
-    impl_block: Option<ImplBlock<'a>>,
-    func: syn::ItemFn,
+    impl_ctx: Option<ImplCtx<'a>>,
+    adapted_func: syn::ItemFn,
+    norm_func: syn::ItemFn,
     setters: Vec<Setter>,
     builder_ident: syn::Ident,
     builder_private_impl_ident: syn::Ident,
@@ -26,13 +28,17 @@ struct MacroCtx<'a> {
 
 struct MacroOutput {
     entry_func: syn::ItemFn,
-    positional_func: syn::ItemFn,
+    adapted_func: syn::ItemFn,
     other_items: TokenStream2,
 }
 
 impl<'a> MacroCtx<'a> {
-    fn new(func: syn::ItemFn, impl_block: Option<ImplBlock<'a>>) -> Result<Self> {
-        if let Some(receiver) = func.sig.receiver() {
+    fn new(
+        orig_func: syn::ItemFn,
+        norm_func: syn::ItemFn,
+        impl_block: Option<ImplCtx<'a>>,
+    ) -> Result<Self> {
+        if let Some(receiver) = norm_func.sig.receiver() {
             if impl_block.is_none() {
                 prox::bail!(
                     &receiver.self_token,
@@ -45,11 +51,20 @@ impl<'a> MacroCtx<'a> {
             }
         }
 
-        let pascal_case_func = AsPascalCase(func.sig.ident.to_string());
-        let builder_ident = quote::format_ident!("{pascal_case_func}Builder");
-        let builder_private_impl_ident = quote::format_ident!("__{builder_ident}PrivateImpl");
+        let self_ty_prefix = impl_block
+            .as_ref()
+            .and_then(|impl_block| match &impl_block.self_ty {
+                syn::Type::Path(path) => Some(path.path.segments.last()?.ident.to_string()),
+                _ => None,
+            })
+            .unwrap_or_default();
 
-        let setters: Vec<_> = func
+        let pascal_case_func = AsPascalCase(norm_func.sig.ident.to_string());
+        let builder_ident = quote::format_ident!("{self_ty_prefix}{pascal_case_func}Builder");
+        let builder_private_impl_ident =
+            quote::format_ident!("__{self_ty_prefix}{builder_ident}PrivateImpl");
+
+        let setters: Vec<_> = norm_func
             .sig
             .inputs
             .iter()
@@ -58,8 +73,9 @@ impl<'a> MacroCtx<'a> {
             .try_collect()?;
 
         let ctx = MacroCtx {
-            impl_block,
-            func,
+            impl_ctx: impl_block,
+            adapted_func: adapt_orig_func(orig_func),
+            norm_func,
             setters,
             builder_ident,
             builder_private_impl_ident,
@@ -86,30 +102,28 @@ impl<'a> MacroCtx<'a> {
         self.setters.iter().map(|arg| &arg.generic_var_ident)
     }
 
-    fn func_ident(&self) -> syn::Ident {
-        let ident = &self.func.sig.ident;
-        quote::format_ident!("__positional_{}", ident.to_string())
-    }
+    fn norm_func_receiver_ty(&self) -> Option<Box<syn::Type>> {
+        let mut ty = self.norm_func.sig.receiver()?.ty.clone();
+        let self_ty = &self.impl_ctx.as_ref()?.self_ty;
 
-    fn func_receiver_ty(&self) -> Option<Box<syn::Type>> {
-        let mut ty = self.func.sig.receiver()?.ty.clone();
-        let self_ty = &self.impl_block.as_ref()?.self_ty;
-
-        crate::normalization::self_ty::NormalizeSelfTy { self_ty }.visit_type_mut(&mut ty);
+        NormalizeSelfTy { self_ty }.visit_type_mut(&mut ty);
 
         Some(ty)
     }
 
-    fn impl_and_func_generics_decl(&self) -> Vec<&syn::GenericParam> {
-        let Some(impl_block) = &self.impl_block else {
-            return self.func_generics_decl().collect();
+    fn impl_and_norm_func_generics_decl(&self) -> Vec<&syn::GenericParam> {
+        let Some(impl_block) = &self.impl_ctx else {
+            return self.norm_func_generics_decl().collect();
         };
 
-        merge_generic_params(&impl_block.generics.params, &self.func.sig.generics.params)
+        merge_generic_params(
+            &impl_block.generics.params,
+            &self.norm_func.sig.generics.params,
+        )
     }
 
-    fn func_generics_decl(&self) -> impl Iterator<Item = &syn::GenericParam> + '_ {
-        self.func.sig.generics.params.iter()
+    fn norm_func_generics_decl(&self) -> impl Iterator<Item = &syn::GenericParam> + '_ {
+        self.norm_func.sig.generics.params.iter()
     }
 
     fn generic_param_to_arg(param: &syn::GenericParam) -> syn::GenericArgument {
@@ -128,21 +142,16 @@ impl<'a> MacroCtx<'a> {
         }
     }
 
-    fn func_generic_args(&self) -> impl Iterator<Item = syn::GenericArgument> + '_ {
-        self.func_generics_decl()
-            .map(MacroCtx::generic_param_to_arg)
-    }
-
-    fn impl_and_func_generic_args(&self) -> impl Iterator<Item = syn::GenericArgument> + '_ {
-        self.impl_and_func_generics_decl()
+    fn impl_and_norm_func_generic_args(&self) -> impl Iterator<Item = syn::GenericArgument> + '_ {
+        self.impl_and_norm_func_generics_decl()
             .into_iter()
             .map(MacroCtx::generic_param_to_arg)
     }
 
-    fn impl_and_func_where_clause(&self) -> Option<syn::WhereClause> {
-        let func_where_clause = self.func.sig.generics.where_clause.clone();
+    fn impl_and_norm_func_where_clause(&self) -> Option<syn::WhereClause> {
+        let func_where_clause = self.norm_func.sig.generics.where_clause.clone();
         let impl_where_clause = self
-            .impl_block
+            .impl_ctx
             .as_ref()
             .and_then(|impl_block| impl_block.generics.where_clause.clone());
 
@@ -162,9 +171,8 @@ impl<'a> MacroCtx<'a> {
     fn output(self) -> MacroOutput {
         let entry_func = self.entry_func();
         let builder_decl = self.builder_decl();
-        let call_method_impl = self.call_method_impl();
+        let call_method_impl = self.exit_method_impl();
         let setter_methods_impls = self.setter_methods_impls();
-        let positional_func = self.positional_func();
 
         let other_items = quote! {
             #builder_decl
@@ -174,40 +182,19 @@ impl<'a> MacroCtx<'a> {
 
         MacroOutput {
             entry_func,
-            positional_func,
+            adapted_func: self.adapted_func,
             other_items,
         }
-    }
-
-    fn positional_func(&self) -> syn::ItemFn {
-        // Change to an implementation function's visibility to private inside of a
-        // child module to avoid exposing it to the surrounding code. The surrounding
-        // code is supposed to use this function through the builder only.
-        let mut positional_func = self.func.clone();
-        positional_func.sig.ident = self.func_ident();
-
-        strip_doc_comments_from_args(&mut positional_func.sig);
-
-        // It's fine if there are too many positional arguments in the function
-        // because the whole purpose of this macro is to fight with this problem
-        // at the call site by generating a builder, while keeping the fn definition
-        // site the same with tons of positional arguments which don't harm readability
-        // there because their names are explicitly specified at the definition site.
-        positional_func
-            .attrs
-            .push(syn::parse_quote!(#[allow(clippy::too_many_arguments)]));
-
-        positional_func
     }
 
     fn entry_func(&self) -> syn::ItemFn {
         let builder_ident = &self.builder_ident;
 
-        let docs = self.func.attrs.iter().filter(|attr| attr.is_doc());
+        let docs = self.norm_func.attrs.iter().filter(|attr| attr.is_doc());
 
-        let current_mod_vis = &self.func.vis;
+        let current_mod_vis = &self.norm_func.vis;
         let builder_private_impl_ident = &self.builder_private_impl_ident;
-        let entry_func_ident = &self.func.sig.ident;
+        let entry_func_ident = &self.norm_func.sig.ident;
 
         // TODO: we can use a shorter syntax with anonymous lifetimes to make
         // the generate code and function signature displayed by rust-analyzer
@@ -216,16 +203,16 @@ impl<'a> MacroCtx<'a> {
         // in the where clause. Research `darling`'s lifetime tracking API and
         // maybe implement this in the future
 
-        let generics_decl = self.func_generics_decl();
-        let generic_args = self.impl_and_func_generic_args();
-        let where_clause = &self.func.sig.generics.where_clause;
+        let generics_decl = self.norm_func_generics_decl();
+        let generic_args = self.impl_and_norm_func_generic_args();
+        let where_clause = &self.norm_func.sig.generics.where_clause;
 
         let setter_idents = self.setter_idents();
         let phantom_field_init = self.phantom_field_init();
 
         let unset_state_types = self.unset_state_types();
 
-        let receiver = self.func.sig.receiver();
+        let receiver = self.norm_func.sig.receiver();
         let receiver_field_init = receiver.map(|receiver| {
             let self_token = &receiver.self_token;
             quote! {
@@ -259,7 +246,7 @@ impl<'a> MacroCtx<'a> {
     }
 
     fn phantom_data(&self) -> Option<TokenStream2> {
-        let func_generics = &self.func.sig.generics;
+        let func_generics = &self.norm_func.sig.generics;
         let generic_lifetimes = func_generics.lifetimes().collect_vec();
         let generic_type_params = func_generics.type_params().collect_vec();
 
@@ -293,14 +280,14 @@ impl<'a> MacroCtx<'a> {
     }
 
     fn builder_decl(&self) -> TokenStream2 {
-        let vis = &self.func.vis;
+        let vis = &self.norm_func.vis;
         let builder_ident = &self.builder_ident;
         let builder_private_impl_ident = &self.builder_private_impl_ident;
         let setter_idents = self.setter_idents();
         let fields_states_vars = self.fields_states_vars().collect_vec();
-        let generics_decl = self.impl_and_func_generics_decl();
-        let where_clause = self.impl_and_func_where_clause();
-        let generic_args = self.impl_and_func_generic_args();
+        let generics_decl = self.impl_and_norm_func_generics_decl();
+        let where_clause = self.impl_and_norm_func_where_clause();
+        let generic_args = self.impl_and_norm_func_generic_args();
 
         let phantom_field = self.phantom_data().map(|phantom_data| {
             quote! {
@@ -308,7 +295,7 @@ impl<'a> MacroCtx<'a> {
             }
         });
 
-        let receiver_field = self.func_receiver_ty().map(|receiver_ty| {
+        let receiver_field = self.norm_func_receiver_ty().map(|receiver_ty| {
             quote! {
                 receiver: #receiver_ty,
             }
@@ -402,44 +389,57 @@ impl<'a> MacroCtx<'a> {
         }
     }
 
-    fn call_method_impl(&self) -> TokenStream2 {
-        let asyncness = &self.func.sig.asyncness;
+    fn exit_method_impl(&self) -> TokenStream2 {
+        let asyncness = &self.norm_func.sig.asyncness;
         let maybe_await = asyncness.is_some().then(|| quote!(.await));
 
-        let positional_func_ident = self.func_ident();
+        let adapted_func_ident = &self.adapted_func.sig.ident;
         let setter_idents = self.setter_idents();
-        let unsafety = &self.func.sig.unsafety;
-        let vis = &self.func.vis;
+        let unsafety = &self.norm_func.sig.unsafety;
+        let vis = &self.norm_func.vis;
         let builder_ident = &self.builder_ident;
         let fields_states_vars = self.fields_states_vars().collect_vec();
         let set_state_types = self.set_state_types();
-        let generics_decl = self.impl_and_func_generics_decl();
+        let generics_decl = self.impl_and_norm_func_generics_decl();
         let where_clause_predicates = self
-            .impl_and_func_where_clause()
+            .impl_and_norm_func_where_clause()
             .into_iter()
             .flat_map(|where_clause| where_clause.predicates);
 
-        let generic_builder_args = self.impl_and_func_generic_args();
+        let generic_builder_args = self.impl_and_norm_func_generic_args();
 
         // Filter out lifetime generic arguments, because they are not needed
         // to be specified explicitly when calling the function. This also avoids
         // the problem that it's not always possible to specify lifetimes in
         // the turbofish syntax. See the problem of late-bound lifetimes specification
         // in the issue https://github.com/rust-lang/rust/issues/42868
-        let generic_fn_args = self
-            .func_generic_args()
-            .filter(|arg| !matches!(arg, syn::GenericArgument::Lifetime(_)));
+        let generic_adapted_fn_args = self
+            .adapted_func
+            .sig
+            .generics
+            .params
+            .iter()
+            .filter(|arg| !matches!(arg, syn::GenericParam::Lifetime(_)))
+            .map(MacroCtx::generic_param_to_arg);
 
-        // Bind the span of the original function to `call` such that "Go to definition"
-        // invoked on `call` in IDEs leads to the original function.
-        let call_ident = syn::Ident::new("call", self.func.sig.ident.span());
+        // Bind the span of the original function to call such that "Go to definition"
+        // invoked on it in IDEs leads to the original function.
+        let exit_fn_ident = syn::Ident::new("build", self.norm_func.sig.ident.span());
 
-        let maybe_receiver = self.func.sig.receiver().map(|receiver| {
-            let self_token = &receiver.self_token;
-            quote!(#self_token.__private_impl.receiver.)
-        });
+        let prefix = self
+            .norm_func
+            .sig
+            .receiver()
+            .map(|receiver| {
+                let self_token = &receiver.self_token;
+                quote!(#self_token.__private_impl.receiver.)
+            })
+            .or_else(|| {
+                let self_ty = &self.impl_ctx.as_ref()?.self_ty;
+                Some(quote!(<#self_ty>::))
+            });
 
-        let output_type = &self.func.sig.output;
+        let output_type = &self.norm_func.sig.output;
 
         quote! {
             impl<
@@ -454,8 +454,8 @@ impl<'a> MacroCtx<'a> {
                 #( #where_clause_predicates, )*
                 #(#fields_states_vars: std::convert::Into<#set_state_types>,)*
             {
-                #vis #asyncness #unsafety fn #call_ident(self) #output_type {
-                    #maybe_receiver #positional_func_ident::<#(#generic_fn_args,)*>(
+                #vis #asyncness #unsafety fn #exit_fn_ident(self) #output_type {
+                    #prefix #adapted_func_ident::<#(#generic_adapted_fn_args,)*>(
                         #(
                             self.__private_impl.#setter_idents.into().into_inner()
                         ),*
@@ -467,7 +467,7 @@ impl<'a> MacroCtx<'a> {
     }
 
     fn setter_methods_impls(&self) -> TokenStream2 {
-        let generic_args = self.impl_and_func_generic_args().collect_vec();
+        let generic_args = self.impl_and_norm_func_generic_args().collect_vec();
 
         self.setters
             .iter()
@@ -515,15 +515,15 @@ impl<'a> MacroCtx<'a> {
                 let setter_ident = &setter.fn_arg_ident;
                 let setter_type = &setter.fn_arg_type;
                 let docs = &setter.docs;
-                let vis = &self.func.vis;
+                let vis = &self.norm_func.vis;
                 let builder_ident = &self.builder_ident;
                 let builder_private_impl_ident = &self.builder_private_impl_ident;
                 let setter_idents = self.setter_idents();
                 let maybe_phantom_field = self.phantom_field_init();
-                let generics_decl = self.impl_and_func_generics_decl();
-                let where_clause = self.impl_and_func_where_clause();
+                let generics_decl = self.impl_and_norm_func_generics_decl();
+                let where_clause = self.impl_and_norm_func_where_clause();
                 let maybe_receiver_field = self
-                    .func
+                    .norm_func
                     .sig
                     .receiver()
                     .map(|_| quote!(receiver: self.__private_impl.receiver,));
@@ -631,6 +631,28 @@ fn skip_nth<I: IntoIterator>(iterable: I, n: usize) -> impl Iterator<Item = I::I
         .enumerate()
         .filter(move |(index, _)| *index != n)
         .map(|(_, item)| item)
+}
+
+fn adapt_orig_func(mut orig: syn::ItemFn) -> syn::ItemFn {
+    let ident = &orig.sig.ident;
+    orig.sig.ident = quote::format_ident!("__orig_{}", ident.to_string());
+
+    // Change to an implementation function's visibility to private inside of a
+    // child module to avoid exposing it to the surrounding code. The surrounding
+    // code is supposed to use this function through the builder only.
+    orig.vis = syn::Visibility::Inherited;
+
+    strip_doc_comments_from_args(&mut orig.sig);
+
+    // It's fine if there are too many positional arguments in the function
+    // because the whole purpose of this macro is to fight with this problem
+    // at the call site by generating a builder, while keeping the fn definition
+    // site the same with tons of positional arguments which don't harm readability
+    // there because their names are explicitly specified at the definition site.
+    orig.attrs
+        .push(syn::parse_quote!(#[allow(clippy::too_many_arguments)]));
+
+    orig
 }
 
 /// Remove all doc comments attributes from function arguments, because they are

@@ -1,18 +1,16 @@
-use super::{ImplBlock, MacroCtx, MacroOutput};
+use super::{ImplCtx, MacroCtx};
 use itertools::{Either, Itertools};
 use prox::prelude::*;
 use quote::quote;
 use syn::visit_mut::VisitMut;
 
-pub(crate) fn generate_for_impl_block(mut impl_block: syn::ItemImpl) -> Result<TokenStream2> {
-    if let Some((_, trait_path, _)) = &impl_block.trait_ {
+pub(crate) fn generate_for_impl_block(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream2> {
+    if let Some((_, trait_path, _)) = &orig_impl_block.trait_ {
         bail!(trait_path, "Impls of traits are not supported yet");
     }
 
-    crate::normalization::Normalize.visit_item_impl_mut(&mut impl_block);
-
     let (other_items, builder_funcs): (Vec<_>, Vec<_>) =
-        impl_block.items.into_iter().partition_map(|item| {
+        orig_impl_block.items.into_iter().partition_map(|item| {
             let syn::ImplItem::Fn(mut fn_item) = item else {
                 return Either::Left(item);
             };
@@ -28,7 +26,7 @@ pub(crate) fn generate_for_impl_block(mut impl_block: syn::ItemImpl) -> Result<T
 
             fn_item.attrs.remove(builder_attr_index);
 
-            Either::Right(fn_item)
+            Either::Right(syn::ImplItem::Fn(fn_item))
         });
 
     if builder_funcs.is_empty() {
@@ -39,42 +37,66 @@ pub(crate) fn generate_for_impl_block(mut impl_block: syn::ItemImpl) -> Result<T
         );
     }
 
-    let outputs: Vec<_> = builder_funcs
-        .into_iter()
-        .map(|fn_item| {
-            let impl_item = ImplBlock {
-                self_ty: &impl_block.self_ty,
-                generics: &impl_block.generics,
+    orig_impl_block.items = builder_funcs;
+
+    let mut norm_impl_block = orig_impl_block.clone();
+
+    crate::normalization::NormalizeLifetimes.visit_item_impl_mut(&mut norm_impl_block);
+    crate::normalization::NormalizeImplTraits.visit_item_impl_mut(&mut norm_impl_block);
+
+    let mut norm_selfful_impl_block = norm_impl_block.clone();
+
+    crate::normalization::NormalizeSelfTy {
+        self_ty: &orig_impl_block.self_ty,
+    }
+    .visit_item_impl_mut(&mut norm_impl_block);
+
+    eprintln!("NORMSTART\n{}\nNORMEND", quote::quote!(#norm_impl_block));
+
+    let outputs: Vec<_> = std::iter::zip(orig_impl_block.items, norm_impl_block.items)
+        .map(|(orig_item, norm_item)| {
+            let syn::ImplItem::Fn(norm_func) = norm_item else {
+                unreachable!();
+            };
+            let syn::ImplItem::Fn(orig_func) = orig_item else {
+                unreachable!();
             };
 
-            generate_for_assoc_fn_item(impl_item, fn_item)
+            let norm_func = impl_item_fn_into_fn_item(norm_func)?;
+            let orig_func = impl_item_fn_into_fn_item(orig_func)?;
+
+            let impl_ctx = ImplCtx {
+                self_ty: &norm_impl_block.self_ty,
+                generics: &norm_impl_block.generics,
+            };
+
+            let ctx = MacroCtx::new(orig_func, norm_func, Some(impl_ctx))?;
+
+            Result::<_>::Ok(ctx.output())
         })
         .try_collect()?;
 
     let new_impl_items = outputs.iter().flat_map(|output| {
         let entry_func = &output.entry_func;
-        let positional_func = &output.positional_func;
+        let adapted_func = &output.adapted_func;
         [
             syn::parse_quote!(#entry_func),
-            syn::parse_quote!(#positional_func),
+            syn::parse_quote!(#adapted_func),
         ]
     });
 
-    impl_block.items = other_items;
-    impl_block.items.extend(new_impl_items);
+    norm_selfful_impl_block.items = other_items;
+    norm_selfful_impl_block.items.extend(new_impl_items);
 
     let other_items = outputs.iter().map(|output| &output.other_items);
 
     Ok(quote! {
-        #impl_block
         #(#other_items)*
+        #norm_selfful_impl_block
     })
 }
 
-fn generate_for_assoc_fn_item(
-    impl_item: ImplBlock<'_>,
-    func: syn::ImplItemFn,
-) -> Result<MacroOutput> {
+fn impl_item_fn_into_fn_item(func: syn::ImplItemFn) -> Result<syn::ItemFn> {
     let syn::ImplItemFn {
         attrs,
         vis,
@@ -87,14 +109,10 @@ fn generate_for_assoc_fn_item(
         bail!(defaultness, "Default functions are not supported yet");
     }
 
-    let func = syn::ItemFn {
+    Ok(syn::ItemFn {
         attrs,
         vis,
         sig,
         block: Box::new(block),
-    };
-
-    let ctx = MacroCtx::new(func, Some(impl_item))?;
-
-    Ok(ctx.output())
+    })
 }

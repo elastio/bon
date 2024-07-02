@@ -4,10 +4,10 @@ use syn::visit_mut::VisitMut;
 pub(crate) struct NormalizeImplTraits;
 
 impl VisitMut for NormalizeImplTraits {
-    fn visit_impl_item_mut(&mut self, impl_item: &mut syn::ImplItem) {
-        if let Some(fn_item) = super::as_builder_impl_item_fn(impl_item) {
-            self.visit_impl_item_fn_mut(fn_item);
-        }
+    fn visit_impl_item_fn_mut(&mut self, fn_item: &mut syn::ImplItemFn) {
+        // We are interested only in signatures of functions. Don't recurse
+        // into the function's block.
+        self.visit_signature_mut(&mut fn_item.sig);
     }
 
     fn visit_signature_mut(&mut self, signature: &mut syn::Signature) {

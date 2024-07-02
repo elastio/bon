@@ -14,13 +14,16 @@ pub(crate) fn generate_for_free_fn_item(
     item: syn::Item,
 ) -> Result<TokenStream2> {
     match item {
-        syn::Item::Fn(mut func) => {
-            crate::normalization::Normalize.visit_item_fn_mut(&mut func);
+        syn::Item::Fn(orig_func) => {
+            let mut norm_func = orig_func.clone();
 
-            let ctx = MacroCtx::new(func, None)?;
+            crate::normalization::NormalizeLifetimes.visit_item_fn_mut(&mut norm_func);
+            crate::normalization::NormalizeImplTraits.visit_item_fn_mut(&mut norm_func);
+
+            let ctx = MacroCtx::new(orig_func, norm_func, None)?;
             let MacroOutput {
                 entry_func,
-                positional_func,
+                adapted_func,
                 other_items,
             } = ctx.output();
 
@@ -28,11 +31,11 @@ pub(crate) fn generate_for_free_fn_item(
                 #entry_func
                 #other_items
 
-                // Keep positional function at the end. It seems like rust-analyzer
+                // Keep original function at the end. It seems like rust-analyzer
                 // does better job of highlighting syntax when it is here. Assuming
                 // this is because rust-analyzer prefers the last occurrence of the
                 // span when highlighting.
-                #positional_func
+                #adapted_func
             })
         }
         _ => prox::bail!(

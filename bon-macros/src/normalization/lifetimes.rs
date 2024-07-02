@@ -12,10 +12,10 @@ impl VisitMut for NormalizeLifetimes {
         AssignLifetimes::new("i", &mut impl_block.generics).visit_type_mut(&mut impl_block.self_ty);
     }
 
-    fn visit_impl_item_mut(&mut self, impl_item: &mut syn::ImplItem) {
-        if let Some(fn_item) = super::as_builder_impl_item_fn(impl_item) {
-            self.visit_impl_item_fn_mut(fn_item);
-        }
+    fn visit_impl_item_fn_mut(&mut self, fn_item: &mut syn::ImplItemFn) {
+        // We are interested only in signatures of functions. Don't recurse
+        // into the function's block.
+        self.visit_signature_mut(&mut fn_item.sig);
     }
 
     fn visit_signature_mut(&mut self, signature: &mut syn::Signature) {

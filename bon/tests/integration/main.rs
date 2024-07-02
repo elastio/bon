@@ -19,7 +19,7 @@ fn smoke() {
         arg1: bool,
 
         /// Docs for arg2
-        arg2: &str,
+        arg2: &'_ str,
         arg3: String,
         arg4: u32,
         arg5: Option<u32>,
@@ -40,7 +40,7 @@ fn smoke() {
         .arg6(Some("arg6"))
         .arg7(vec!["arg7".to_string()])
         .arg8((1, &[true]))
-        .call();
+        .build();
 
     assert_eq!(actual, "arg3");
 }
@@ -52,7 +52,7 @@ fn lifetime_elision() {
         (arg, arg, [arg])
     }
 
-    let actual = sut().arg("blackjack")._arg2(32).call();
+    let actual = sut().arg("blackjack")._arg2(32).build();
     assert_eq!(actual, ("blackjack", "blackjack", ["blackjack"]));
 }
 
@@ -63,7 +63,7 @@ async fn async_func() {
         fut.await
     }
 
-    let actual = sut().fut(async { 42 }).call().await;
+    let actual = sut().fut(async { 42 }).build().await;
     assert_eq!(actual, 42);
 }
 
@@ -77,7 +77,7 @@ fn unsafe_func() {
     let builder = sut().arg(true);
 
     // Only the call method should be unsafe
-    unsafe { builder.call() };
+    unsafe { builder.build() };
 }
 
 #[test]
@@ -85,8 +85,8 @@ fn impl_traits() {
     #[builder]
     fn sut(
         /// Some documentation
-        iterable: impl IntoIterator<Item = impl Into<u32>> + '_,
-        showable: impl std::fmt::Display + std::fmt::Debug + '_,
+        iterable: impl IntoIterator<Item = impl Into<u32>>,
+        showable: impl std::fmt::Display + std::fmt::Debug,
     ) -> (String, Vec<u32>) {
         let str = format!("{showable} + {showable:#?}");
         let vec = iterable.into_iter().map(Into::into).collect();
@@ -97,10 +97,31 @@ fn impl_traits() {
     let (str, vec) = sut()
         .iterable(vec![1_u32, 2, 3])
         .showable("showable")
-        .call();
+        .build();
 
     assert_eq!(str, "showable + \"showable\"");
     assert_eq!(vec, [1, 2, 3]);
+}
+
+#[test]
+fn constructor() {
+    struct Counter {
+        val: u32,
+    }
+
+    #[bon]
+    impl Counter {
+        #[builder]
+        fn builder(initial: Option<u32>) -> Self {
+            Self {
+                val: initial.unwrap_or_default(),
+            }
+        }
+    }
+
+    let counter = Counter::builder().initial(Some(3)).build();
+
+    assert_eq!(counter.val, 3);
 }
 
 #[test]
@@ -110,7 +131,7 @@ fn receiver() {
         val: u32,
     }
 
-    #[bon::bon]
+    #[bon]
     impl Counter {
         #[builder]
         fn increment(&self, disabled: bool) -> Self {
@@ -123,9 +144,30 @@ fn receiver() {
 
     let counter = Counter { val: 0 };
 
-    counter.increment().disabled(false).call();
+    counter.increment().disabled(false).build();
 
     assert_eq!(counter.val, 1);
+}
+
+#[test]
+fn self_in_a_bunch_of_places() {
+    struct Sut;
+
+    #[bon]
+    impl Sut
+    where
+        Self: Sized + 'static,
+    {
+        #[builder]
+        fn method(&self, me: Option<Self>) -> impl Iterator<Item = Self>
+        where
+            Self: Sized,
+        {
+            me.into_iter()
+        }
+    }
+
+    assert_eq!(Sut.method().me(Some(Sut)).build().count(), 1);
 }
 
 #[test]
@@ -146,7 +188,7 @@ fn receiver_is_non_default() {
         str: "blackjack".to_string(),
     };
 
-    assert_eq!(sut.method().call(), "blackjack");
+    assert_eq!(sut.method().build(), "blackjack");
 }
 
 #[test]
@@ -154,18 +196,19 @@ fn impl_block_ty_contains_a_reference() {
     struct Sut<T>(T);
 
     #[bon]
-    impl<T> Sut<&T> {
+    impl<T> Sut<&'_ T> {
         #[builder]
         fn get(&self) -> &T {
             self.0
         }
     }
 
-    assert_eq!(Sut(&42).get().call(), &42);
+    assert_eq!(Sut(&42).get().build(), &42);
 }
 
 #[test]
 fn impl_block_with_self_in_const_generics() {
+    #[derive(Default)]
     struct Sut<const N: usize>;
 
     impl<const N: usize> Sut<N> {
@@ -175,12 +218,15 @@ fn impl_block_with_self_in_const_generics() {
     }
 
     #[bon]
-    impl Sut<{ Sut::<3>.val() }> {
+    impl Sut<{ Sut::<3>.val() }>
+    where
+        Self:,
+    {
         #[builder]
         fn method(self) -> usize {
             self.val()
         }
     }
 
-    assert_eq!(Sut::<42>.method().call(), 42);
+    assert_eq!(Sut::<42>.method().build(), 42);
 }

@@ -13,8 +13,6 @@ struct Greeter {
 
 #[bon]
 impl Greeter {
-    // TODO: the default naming should be `builder()/build()`
-    // if method is called `new()`
     #[builder]
     fn builder(label: String, level: usize) -> Self {
         Self { label, level }
