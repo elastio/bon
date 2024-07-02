@@ -39,6 +39,18 @@ pub(crate) fn generate_for_impl_block(mut orig_impl_block: syn::ItemImpl) -> Res
 
     orig_impl_block.items = builder_funcs;
 
+    // We do this back-and-forth with normalizing various syntax and saving original
+    // to provide cleaner code generation that is easier to consume for IDEs and for
+    // rust-analyzer specifically.
+    //
+    // For codegen logic we would like to have everything normalized. For example, we
+    // want to assume `Self` is replaced with the original type and all lifetimes are
+    // named, and `impl Traits` are desugared into type parameters.
+    //
+    // However, in output code we want to preserve existing `Self` references to make
+    // sure rust-analyzer highlights them properly. If we just strip `Self` from output
+    // code, then rust-analyzer won't be able to associate what `Self` token maps to in
+    // the input. It would highlight `Self` as an "unresolved symbol"
     let mut norm_impl_block = orig_impl_block.clone();
 
     crate::normalization::NormalizeLifetimes.visit_item_impl_mut(&mut norm_impl_block);
@@ -50,8 +62,6 @@ pub(crate) fn generate_for_impl_block(mut orig_impl_block: syn::ItemImpl) -> Res
         self_ty: &orig_impl_block.self_ty,
     }
     .visit_item_impl_mut(&mut norm_impl_block);
-
-    eprintln!("NORMSTART\n{}\nNORMEND", quote::quote!(#norm_impl_block));
 
     let outputs: Vec<_> = std::iter::zip(orig_impl_block.items, norm_impl_block.items)
         .map(|(orig_item, norm_item)| {

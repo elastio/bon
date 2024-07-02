@@ -143,10 +143,30 @@ fn receiver() {
     }
 
     let counter = Counter { val: 0 };
-
-    counter.increment().disabled(false).build();
+    let counter = counter.increment().disabled(false).build();
 
     assert_eq!(counter.val, 1);
+}
+
+#[test]
+fn receiver_with_lifetimes() {
+    struct Sut<'a, 'b> {
+        a: &'a str,
+        b: &'b str,
+    }
+
+    #[bon]
+    impl Sut<'_, '_> {
+        #[builder]
+        fn method(&self, c: &str) -> String {
+            let Self { a, b } = self;
+
+            format!("{a}{b}{c}")
+        }
+    }
+
+    let actual = Sut { a: "a", b: "b" }.method().c("c").build();
+    assert_eq!(actual, "abc");
 }
 
 #[test]
