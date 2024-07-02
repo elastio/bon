@@ -2,6 +2,37 @@
 
 Batteries-included tools for building and reshaping Rust data structures.
 
+// TODO: add docs about the associated methods syntax
+```rust
+use bon::bon;
+
+struct Greeter {
+    label: String,
+    level: usize,
+}
+
+#[bon]
+impl Greeter {
+    // TODO: the default naming should be `builder()/build()`
+    // if method is called `new()`
+    #[builder]
+    fn builder(label: String, level: usize) -> Self {
+        Self { label, level }
+    }
+
+    #[builder]
+    fn greet(&self, name: &str, surname: &str) -> String {
+        let Self { label, level } = self;
+        format!("{label}: Hello {name} {suname} at level {level}")
+    }
+}
+
+let greeter = Greeter::builder().label("INFO").level(42).call();
+let greeting = greeter.greet().name("John").surname("Doe").call();
+
+assert_eq!(greeting, "INFO: Hello John Doe at level 42");
+```
+
 ## Named function parameters via a type-safe builder
 
 Turn functions with many positional parameters into a function with "named" parameters via a builder. It's as easy as placing `#[builder]` macro on top of your function.
@@ -80,9 +111,9 @@ All of the following is supported.
 - Nested functions defined inside of other items bodies. E.g.
   ```rust
   fn foo() {
-    // Just works
-    #[bon::builder]
-    fn bar() {}
+      // Just works
+      #[bon::builder]
+      fn bar() {}
   }
   ```
 
@@ -91,16 +122,16 @@ All of the following is supported.
 - Functions must use simple named parameters. Complex pattern destructuring directly in function arguments is unsupported since it's not clear what name the setter method should have for such arguments. This limitation can be removed in the future with custom name overrides via attributes.
   ```rust
   fn foo_unsupported(
-    // There isn't an obvious way to generate a setter method for this function parameter
-    // because it doesn't have a single name.
-    (x, y): (u32, u32)
+      // There isn't an obvious way to generate a setter method for this function parameter
+      // because it doesn't have a single name.
+      (x, y): (u32, u32)
   ) {}
 
   // If you need to destructure your arguments, then do it separately in the function body
   fn foo_supported(
-    point: (u32, u32)
+      point: (u32, u32)
   ) {
-    let (x, y) = point;
+      let (x, y) = point;
   }
   ```
 
