@@ -2,6 +2,7 @@ use super::{MacroCtx, MacroOutput};
 use darling::FromMeta;
 use prox::prelude::*;
 use quote::quote;
+use syn::visit_mut::VisitMut;
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct FreeFnItemParams {
@@ -13,7 +14,9 @@ pub(crate) fn generate_for_free_fn_item(
     item: syn::Item,
 ) -> Result<TokenStream2> {
     match item {
-        syn::Item::Fn(func) => {
+        syn::Item::Fn(mut func) => {
+            crate::normalization::Normalize.visit_item_fn_mut(&mut func);
+
             let ctx = MacroCtx::new(func, None)?;
             let MacroOutput {
                 entry_func,

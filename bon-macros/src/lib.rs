@@ -8,6 +8,7 @@
 mod bon;
 mod builder;
 mod error;
+mod normalization;
 
 use proc_macro::TokenStream;
 

@@ -2,11 +2,14 @@ use super::{ImplBlock, MacroCtx, MacroOutput};
 use itertools::{Either, Itertools};
 use prox::prelude::*;
 use quote::quote;
+use syn::visit_mut::VisitMut;
 
 pub(crate) fn generate_for_impl_block(mut impl_block: syn::ItemImpl) -> Result<TokenStream2> {
     if let Some((_, trait_path, _)) = &impl_block.trait_ {
         bail!(trait_path, "Impls of traits are not supported yet");
     }
+
+    crate::normalization::Normalize.visit_item_impl_mut(&mut impl_block);
 
     let (other_items, builder_funcs): (Vec<_>, Vec<_>) =
         impl_block.items.into_iter().partition_map(|item| {
@@ -17,7 +20,7 @@ pub(crate) fn generate_for_impl_block(mut impl_block: syn::ItemImpl) -> Result<T
             let builder_attr_index = fn_item
                 .attrs
                 .iter()
-                .position(|attr| attr.meta.path().is_ident("builder"));
+                .position(|attr| attr.path().is_ident("builder"));
 
             let Some(builder_attr_index) = builder_attr_index else {
                 return Either::Left(syn::ImplItem::Fn(fn_item));
