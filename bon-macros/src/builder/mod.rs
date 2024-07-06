@@ -24,6 +24,7 @@ struct MacroCtx<'a> {
     setters: Vec<Setter>,
     builder_ident: syn::Ident,
     builder_private_impl_ident: syn::Ident,
+    builder_state_trait_ident: syn::Ident,
 }
 
 struct MacroOutput {
@@ -61,8 +62,8 @@ impl<'a> MacroCtx<'a> {
 
         let pascal_case_func = AsPascalCase(norm_func.sig.ident.to_string());
         let builder_ident = quote::format_ident!("{self_ty_prefix}{pascal_case_func}Builder");
-        let builder_private_impl_ident =
-            quote::format_ident!("__{self_ty_prefix}{builder_ident}PrivateImpl");
+        let builder_private_impl_ident = quote::format_ident!("__{builder_ident}PrivateImpl");
+        let builder_state_trait_ident = quote::format_ident!("__{builder_ident}State");
 
         let setters: Vec<_> = norm_func
             .sig
@@ -79,6 +80,7 @@ impl<'a> MacroCtx<'a> {
             setters,
             builder_ident,
             builder_private_impl_ident,
+            builder_state_trait_ident,
         };
 
         Ok(ctx)
@@ -90,16 +92,18 @@ impl<'a> MacroCtx<'a> {
             .map(|setter| setter.fn_arg_ident.clone())
     }
 
+    fn setters_assoc_type_idents(&self) -> impl Iterator<Item = &syn::Ident> {
+        self.setters
+            .iter()
+            .map(|setter| &setter.state_assoc_type_ident)
+    }
+
     fn unset_state_types(&self) -> impl Iterator<Item = TokenStream2> + '_ {
         self.setters.iter().map(|arg| arg.unset_state_type())
     }
 
     fn set_state_types(&self) -> impl Iterator<Item = TokenStream2> + '_ {
         self.setters.iter().map(|arg| arg.set_state_type())
-    }
-
-    fn fields_states_vars(&self) -> impl Iterator<Item = &syn::Ident> + '_ {
-        self.setters.iter().map(|arg| &arg.generic_var_ident)
     }
 
     fn norm_func_receiver_ty(&self) -> Option<Box<syn::Type>> {
@@ -170,11 +174,13 @@ impl<'a> MacroCtx<'a> {
 
     fn output(self) -> MacroOutput {
         let entry_func = self.entry_func();
+        let builder_state_trait_decl = self.builder_state_trait_decl();
         let builder_decl = self.builder_decl();
         let call_method_impl = self.exit_method_impl();
         let setter_methods_impls = self.setter_methods_impls();
 
         let other_items = quote! {
+            #builder_state_trait_decl
             #builder_decl
             #call_method_impl
             #setter_methods_impls
@@ -226,7 +232,7 @@ impl<'a> MacroCtx<'a> {
                 #receiver
             ) -> #builder_ident<
                 #(#generic_args,)*
-                #(#unset_state_types,)*
+                (#(#unset_state_types,)*)
             >
             #where_clause
             {
@@ -250,35 +256,50 @@ impl<'a> MacroCtx<'a> {
         let generic_lifetimes = func_generics.lifetimes().collect_vec();
         let generic_type_params = func_generics.type_params().collect_vec();
 
-        if generic_type_params.is_empty() && generic_lifetimes.is_empty() {
+        if generic_type_params.is_empty()
+            && generic_lifetimes.is_empty()
+            && !self.setters.is_empty()
+        {
             return None;
         }
 
         let fn_arg_types = self.setters.iter().map(|setter| &setter.fn_arg_type);
 
+        // A special case of zero setters requires storing `__State` in phantom data
+        // otherwise it would be reported as an unused type parameter. Another way we
+        // could solve it is by special-casing the codegen by not adding the __State
+        // generic type parameter to the builder type at all if it has no fields, but
+        // to keep code simpler we just do this one small crutch here for a really
+        // unlikely case of a builder with zero setters.
+        let state = self.setters.is_empty().then(|| quote! { __State });
+
         Some(quote! {
-            // There is an interesting quirk with lifetimes in Rust, which is the
-            // reason why we thoughtlessly store all the function parameter types
-            // in phantom data here.
-            //
-            // Suppose a function was defined with an argument of type `&'a T`
-            // and we then generate the an impl block (simplified):
-            //
-            // ```
-            // impl<'a, T, U> for Foo<U>
-            // where
-            //     U: Into<&'a T>,
-            // {}
-            // ```
-            // Then compiler will complain with the message "the parameter type `T`
-            // may not live long enough". So we would need to manually add the bound
-            // `T: 'a` to fix this. However, it's hard to infer such a bound in macro
-            // context. A workaround for that would be to store the `&'a T` inside of
-            // the struct itself, which auto-implies this bound for us implicitly.
-            //
-            // That's a weird implicit behavior in Rust, I suppose there is a reasonable
-            // explanation for it, I just didn't care to research it yet ¯\_(ツ)_/¯.
-            ::core::marker::PhantomData<(#(#fn_arg_types,)*)>
+            ::core::marker::PhantomData<(
+                // There is an interesting quirk with lifetimes in Rust, which is the
+                // reason why we thoughtlessly store all the function parameter types
+                // in phantom data here.
+                //
+                // Suppose a function was defined with an argument of type `&'a T`
+                // and we then generate the an impl block (simplified):
+                //
+                // ```
+                // impl<'a, T, U> for Foo<U>
+                // where
+                //     U: Into<&'a T>,
+                // {}
+                // ```
+                // Then compiler will complain with the message "the parameter type `T`
+                // may not live long enough". So we would need to manually add the bound
+                // `T: 'a` to fix this. However, it's hard to infer such a bound in macro
+                // context. A workaround for that would be to store the `&'a T` inside of
+                // the struct itself, which auto-implies this bound for us implicitly.
+                //
+                // That's a weird implicit behavior in Rust, I suppose there is a reasonable
+                // explanation for it, I just didn't care to research it yet ¯\_(ツ)_/¯.
+                #(#fn_arg_types,)*
+
+                #state
+            )>
         })
     }
 
@@ -290,12 +311,28 @@ impl<'a> MacroCtx<'a> {
         })
     }
 
+    fn builder_state_trait_decl(&self) -> TokenStream2 {
+        let trait_ident = &self.builder_state_trait_ident;
+        let assoc_types_idents = self.setters_assoc_type_idents().collect_vec();
+
+        quote! {
+            trait #trait_ident {
+                #( type #assoc_types_idents; )*
+            }
+
+            impl<#(#assoc_types_idents),*> #trait_ident for (#(#assoc_types_idents,)*) {
+                #( type #assoc_types_idents = #assoc_types_idents; )*
+            }
+        }
+    }
+
     fn builder_decl(&self) -> TokenStream2 {
         let vis = &self.norm_func.vis;
         let builder_ident = &self.builder_ident;
         let builder_private_impl_ident = &self.builder_private_impl_ident;
+        let builder_state_trait_ident = &self.builder_state_trait_ident;
         let setter_idents = self.setter_idents();
-        let fields_states_vars = self.fields_states_vars().collect_vec();
+        let setters_assoc_type_idents = self.setters_assoc_type_idents().collect_vec();
         let generics_decl = self.impl_and_norm_func_generics_decl();
         let where_clause = self.impl_and_norm_func_where_clause();
         let generic_args = self.impl_and_norm_func_generic_args();
@@ -323,7 +360,7 @@ impl<'a> MacroCtx<'a> {
                 // builder methods completely if we rely on default generic type
                 // params values. See the issue in rust-analyzer for details:
                 // https://github.com/rust-lang/rust-analyzer/issues/17515
-                #(#fields_states_vars,)*
+                __State: #builder_state_trait_ident,
             >
             #where_clause
             {
@@ -378,7 +415,7 @@ impl<'a> MacroCtx<'a> {
                 /// of the same function scope.
                 __private_impl: #builder_private_impl_ident<
                     #(#generic_args,)*
-                    #(#fields_states_vars,)*
+                    __State
                 >
             }
 
@@ -389,13 +426,13 @@ impl<'a> MacroCtx<'a> {
             /// the developers shouldn't touch it.
             struct #builder_private_impl_ident<
                 #(#generics_decl,)*
-                #(#fields_states_vars,)*
+                __State: #builder_state_trait_ident
             >
             #where_clause
             {
                 #phantom_field
                 #receiver_field
-                #( #setter_idents: #fields_states_vars, )*
+                #( #setter_idents: __State::#setters_assoc_type_idents, )*
             }
         }
     }
@@ -409,7 +446,8 @@ impl<'a> MacroCtx<'a> {
         let unsafety = &self.norm_func.sig.unsafety;
         let vis = &self.norm_func.vis;
         let builder_ident = &self.builder_ident;
-        let fields_states_vars = self.fields_states_vars().collect_vec();
+        let builder_state_trait_ident = &self.builder_state_trait_ident;
+        let setters_assoc_type_idents = self.setters_assoc_type_idents().collect_vec();
         let set_state_types = self.set_state_types();
         let generics_decl = self.impl_and_norm_func_generics_decl();
         let where_clause_predicates = self
@@ -455,15 +493,15 @@ impl<'a> MacroCtx<'a> {
         quote! {
             impl<
                 #(#generics_decl,)*
-                #(#fields_states_vars),*
+                __State: #builder_state_trait_ident
             >
             #builder_ident<
                 #(#generic_builder_args,)*
-                #(#fields_states_vars),*
+                __State
             >
             where
                 #( #where_clause_predicates, )*
-                #(#fields_states_vars: std::convert::Into<#set_state_types>,)*
+                #(__State::#setters_assoc_type_idents: std::convert::Into<#set_state_types>,)*
             {
                 #vis #asyncness #unsafety fn #exit_fn_ident(self) #output_type {
                     #prefix #adapted_func_ident::<#(#generic_adapted_fn_args,)*>(
@@ -484,30 +522,17 @@ impl<'a> MacroCtx<'a> {
             .iter()
             .enumerate()
             .map(|(setter_index, setter)| {
-                let fields_states_vars = skip_nth(self.fields_states_vars(), setter_index);
-
-                let input_builder_fields_states =
+                let output_fields_states =
                     self.setters
                         .iter()
                         .enumerate()
                         .map(|(other_setter_index, other_setter)| {
                             if other_setter_index == setter_index {
-                                other_setter.unset_state_type()
-                            } else {
-                                other_setter.generic_var_ident.to_token_stream()
+                                return setter.set_state_type().to_token_stream();
                             }
-                        });
 
-                let output_builder_fields_states =
-                    self.setters
-                        .iter()
-                        .enumerate()
-                        .map(|(other_setter_index, other_setter)| {
-                            if other_setter_index == setter_index {
-                                other_setter.set_state_type()
-                            } else {
-                                other_setter.generic_var_ident.to_token_stream()
-                            }
+                            let state_assoc_type_ident = &other_setter.state_assoc_type_ident;
+                            quote!(__State::#state_assoc_type_ident)
                         });
 
                 let field_exprs =
@@ -523,37 +548,90 @@ impl<'a> MacroCtx<'a> {
                             }
                         });
 
+                let state_assoc_type_ident = &setter.state_assoc_type_ident;
                 let setter_ident = &setter.fn_arg_ident;
                 let setter_type = &setter.fn_arg_type;
                 let docs = &setter.docs;
                 let vis = &self.norm_func.vis;
                 let builder_ident = &self.builder_ident;
                 let builder_private_impl_ident = &self.builder_private_impl_ident;
+                let builder_state_trait_ident = &self.builder_state_trait_ident;
                 let setter_idents = self.setter_idents();
                 let maybe_phantom_field = self.phantom_field_init();
                 let generics_decl = self.impl_and_norm_func_generics_decl();
                 let where_clause = self.impl_and_norm_func_where_clause();
+                let unset_state_type = setter.unset_state_type();
+                let output_builder_alias_ident =
+                    quote::format_ident!("__{builder_ident}Set{state_assoc_type_ident}");
                 let maybe_receiver_field = self
                     .norm_func
                     .sig
                     .receiver()
                     .map(|_| quote!(receiver: self.__private_impl.receiver,));
 
+                // A case where there is just one setter is special, because the type alias would
+                // receive a generic `__State` parameter that it wouldn't use, so we create it
+                // only if there are 2 or more fields.
+                let (
+                    output_builder_alias_state_var_decl,
+                    output_builder_alias_state_arg
+                ) = (self.setters.len() > 1).then(||
+                    (
+                        quote!(__State: #builder_state_trait_ident),
+                        quote!(__State)
+                    )
+                )
+                        .unzip();
+
                 quote! {
+                    // This lint is ignored, because bounds in type aliases are still useful
+                    // to make the following example usage compile:
+                    // ```
+                    // type Bar<T: IntoIterator> = T::Item;
+                    // ```
+                    // In this case the bound is necessary for `T::Item` access to be valid.
+                    // The compiler proposes this:
+                    //
+                    // > use fully disambiguated paths (i.e., `<T as Trait>::Assoc`) to refer
+                    // > to associated types in type aliases
+                    //
+                    // But, come on... Why would you want to write `T::Item` as `<T as IntoIterator>::Item`
+                    // especially if that `T::Item` access is used in multiple places? It's a waste of time
+                    // to implement logic that rewrites the user's type expressions to that syntax when just
+                    // having bounds on the type alias is enough already.
+                    #[allow(type_alias_bounds)]
+                    type #output_builder_alias_ident<
+                        #(#generics_decl,)*
+                        #output_builder_alias_state_var_decl
+                    >
+                    // The where clause in this position will be deprecated. The preferred
+                    // position will be at the end of the entire type alias syntax construct.
+                    // See details at https://github.com/rust-lang/rust/issues/112792.
+                    //
+                    // However, at the time of this writing the only way to put the where
+                    // clause on a type alias is here.
+                    #where_clause
+                    = #builder_ident<
+                        #(#generic_args,)*
+                        ( #(#output_fields_states,)* )
+                    >;
+
                     impl<
                         #(#generics_decl,)*
-                        #(#fields_states_vars),*
+                        __State: #builder_state_trait_ident<
+                            #state_assoc_type_ident = #unset_state_type
+                        >
                     >
                     #builder_ident<
                         #(#generic_args,)*
-                        #(#input_builder_fields_states),*
+                        __State
                     >
                     #where_clause
                     {
                         #(#docs)*
-                        #vis fn #setter_ident(self, value: #setter_type) -> #builder_ident<
+                        #vis fn #setter_ident(self, value: #setter_type) -> #output_builder_alias_ident<
                             #(#generic_args,)*
-                            #(#output_builder_fields_states,)*
+                            #output_builder_alias_state_arg
                         >
                         {
                             #builder_ident {
@@ -591,9 +669,9 @@ struct Setter {
     /// resulting type that the builder should generate a setter for.
     fn_arg_type: Box<syn::Type>,
 
-    /// Derived from [`BuilderField::ident`] to make a conventional PascalCase
-    /// generic type parameter identifier for this field.
-    generic_var_ident: syn::Ident,
+    /// The name of the associated type in the builder state trait that corresponds
+    /// to this field.
+    state_assoc_type_ident: syn::Ident,
 }
 
 impl Setter {
@@ -616,7 +694,7 @@ impl Setter {
             .collect();
 
         Ok(Self {
-            generic_var_ident: quote::format_ident!("__B{}", pat.ident.to_pascal_case()),
+            state_assoc_type_ident: pat.ident.to_pascal_case(),
             fn_arg_ident: pat.ident.clone(),
             fn_arg_type: arg.ty.clone(),
             docs,
@@ -634,14 +712,6 @@ impl Setter {
         let ty = &self.fn_arg_type;
         quote!(bon::Set<#ty>)
     }
-}
-
-fn skip_nth<I: IntoIterator>(iterable: I, n: usize) -> impl Iterator<Item = I::Item> {
-    iterable
-        .into_iter()
-        .enumerate()
-        .filter(move |(index, _)| *index != n)
-        .map(|(_, item)| item)
 }
 
 fn adapt_orig_func(mut orig: syn::ItemFn) -> syn::ItemFn {
