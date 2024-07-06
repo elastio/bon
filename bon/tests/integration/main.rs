@@ -34,11 +34,9 @@ fn smoke() {
     let actual = sut()
         .arg1(true)
         .arg2("arg2")
-        .arg3("arg3".to_string())
+        .arg3("arg3".to_owned())
         .arg4(1)
-        .arg5(Some(1))
-        .arg6(Some("arg6"))
-        .arg7(vec!["arg7".to_string()])
+        .arg7(vec!["arg7".to_owned()])
         .arg8((1, &[true]))
         .build();
 
@@ -205,7 +203,7 @@ fn receiver_is_non_default() {
     }
 
     let sut = Sut {
-        str: "blackjack".to_string(),
+        str: "blackjack".to_owned(),
     };
 
     assert_eq!(sut.method().build(), "blackjack");
@@ -249,4 +247,14 @@ fn impl_block_with_self_in_const_generics() {
     }
 
     assert_eq!(Sut::<42>.method().build(), 42);
+}
+
+#[test]
+fn generics_with_lifetimes() {
+    #[builder]
+    fn sut<T>(arg: &&&&&T) {
+        let _ = arg;
+    }
+
+    sut().arg(&&&&&&&&&&42).build();
 }

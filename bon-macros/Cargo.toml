@@ -8,7 +8,7 @@ version = { workspace = true }
 workspace = true
 
 [lib]
-proc_macro = true
+proc-macro = true
 
 [dependencies]
 darling     = { workspace = true }

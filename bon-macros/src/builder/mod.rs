@@ -254,20 +254,31 @@ impl<'a> MacroCtx<'a> {
             return None;
         }
 
-        let lifetime_refs = generic_lifetimes.iter().map(|lifetime| {
-            let lifetime = &lifetime.lifetime;
-            quote!(&#lifetime ())
-        });
-
-        let type_refs = generic_type_params
-            .iter()
-            .map(|type_param| &type_param.ident);
+        let fn_arg_types = self.setters.iter().map(|setter| &setter.fn_arg_type);
 
         Some(quote! {
-            ::core::marker::PhantomData<(
-                #(#lifetime_refs,)*
-                #(#type_refs,)*
-            )>
+            // There is an interesting quirk with lifetimes in Rust, which is the
+            // reason why we thoughtlessly store all the function parameter types
+            // in phantom data here.
+            //
+            // Suppose a function was defined with an argument of type `&'a T`
+            // and we then generate the an impl block (simplified):
+            //
+            // ```
+            // impl<'a, T, U> for Foo<U>
+            // where
+            //     U: Into<&'a T>,
+            // {}
+            // ```
+            // Then compiler will complain with the message "the parameter type `T`
+            // may not live long enough". So we would need to manually add the bound
+            // `T: 'a` to fix this. However, it's hard to infer such a bound in macro
+            // context. A workaround for that would be to store the `&'a T` inside of
+            // the struct itself, which auto-implies this bound for us implicitly.
+            //
+            // That's a weird implicit behavior in Rust, I suppose there is a reasonable
+            // explanation for it, I just didn't care to research it yet ¯\_(ツ)_/¯.
+            ::core::marker::PhantomData<(#(#fn_arg_types,)*)>
         })
     }
 
