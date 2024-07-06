@@ -24,6 +24,8 @@ fn smoke() {
         arg2: &'_ str,
         arg3: String,
         arg4: u32,
+
+        /// Docs on optional parameter
         arg5: Option<u32>,
         arg6: Option<&str>,
         arg7: Vec<String>,
@@ -40,7 +42,7 @@ fn smoke() {
         .arg4(1)
         .arg7(vec!["arg7".to_owned()])
         .arg8((1, &[true]))
-        .build();
+        .call();
 
     assert_eq!(actual, "arg3");
 }
@@ -52,7 +54,7 @@ fn lifetime_elision() {
         (arg, arg, [arg])
     }
 
-    let actual = sut().arg("blackjack")._arg2(32).build();
+    let actual = sut().arg("blackjack")._arg2(32).call();
     assert_eq!(actual, ("blackjack", "blackjack", ["blackjack"]));
 }
 
@@ -63,7 +65,7 @@ async fn async_func() {
         fut.await
     }
 
-    let actual = sut().fut(async { 42 }).build().await;
+    let actual = sut().fut(async { 42 }).call().await;
     assert_eq!(actual, 42);
 }
 
@@ -77,7 +79,7 @@ fn unsafe_func() {
     let builder = sut().arg(true);
 
     // Only the call method should be unsafe
-    unsafe { builder.build() };
+    unsafe { builder.call() };
 }
 
 #[test]
@@ -97,7 +99,7 @@ fn impl_traits() {
     let (str, vec) = sut()
         .iterable(vec![1_u32, 2, 3])
         .showable("showable")
-        .build();
+        .call();
 
     assert_eq!(str, "showable + \"showable\"");
     assert_eq!(vec, [1, 2, 3]);
@@ -119,7 +121,7 @@ fn constructor() {
         }
     }
 
-    let counter = Counter::builder().initial(Some(3)).build();
+    let counter = Counter::builder().initial(3).build();
 
     assert_eq!(counter.val, 3);
 }
@@ -145,7 +147,7 @@ fn receiver() {
     }
 
     let counter = Counter { val: 0 };
-    let counter = counter.increment().disabled(false).build();
+    let counter = counter.increment().disabled(false).call();
 
     assert_eq!(counter.val, 1);
 }
@@ -167,7 +169,7 @@ fn receiver_with_lifetimes() {
         }
     }
 
-    let actual = Sut { a: "a", b: "b" }.method().c("c").build();
+    let actual = Sut { a: "a", b: "b" }.method().c("c").call();
     assert_eq!(actual, "abc");
 }
 
@@ -189,7 +191,7 @@ fn self_in_a_bunch_of_places() {
         }
     }
 
-    assert_eq!(Sut.method().me(Some(Sut)).build().count(), 1);
+    assert_eq!(Sut.method().me(Sut).call().count(), 1);
 }
 
 #[test]
@@ -210,7 +212,7 @@ fn receiver_is_non_default() {
         str: "blackjack".to_owned(),
     };
 
-    assert_eq!(sut.method().build(), "blackjack");
+    assert_eq!(sut.method().call(), "blackjack");
 }
 
 #[test]
@@ -225,7 +227,7 @@ fn impl_block_ty_contains_a_reference() {
         }
     }
 
-    assert_eq!(Sut(&42).get().build(), &42);
+    assert_eq!(Sut(&42).get().call(), &42);
 }
 
 #[test]
@@ -250,7 +252,7 @@ fn impl_block_with_self_in_const_generics() {
         }
     }
 
-    assert_eq!(Sut::<42>.method().build(), 42);
+    assert_eq!(Sut::<42>.method().call(), 42);
 }
 
 #[test]
@@ -260,5 +262,5 @@ fn generics_with_lifetimes() {
         let _ = arg;
     }
 
-    sut().arg(&&&&&&&&&&42).build();
+    sut().arg(&&&&&&&&&&42).call();
 }
