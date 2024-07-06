@@ -92,7 +92,7 @@ impl<'a> MacroCtx<'a> {
     }
 
     fn field_idents(&self) -> impl Iterator<Item = syn::Ident> + '_ {
-        self.fields.iter().map(|field| field.fn_arg_ident.clone())
+        self.fields.iter().map(|field| field.ident.clone())
     }
 
     fn field_assoc_type_idents(&self) -> impl Iterator<Item = &syn::Ident> {
@@ -264,7 +264,7 @@ impl<'a> MacroCtx<'a> {
             return None;
         }
 
-        let fn_arg_types = self.fields.iter().map(|field| &field.fn_arg_type);
+        let fn_arg_types = self.fields.iter().map(|field| &field.ty);
 
         // A special case of zero fields requires storing `__State` in phantom data
         // otherwise it would be reported as an unused type parameter. Another way we
@@ -533,11 +533,11 @@ impl<'a> MacroCtx<'a> {
 }
 
 struct Field {
-    /// Original name of the argument in the function signature is used as the
-    /// name of the builder field and in its setter methods. Function parameters
-    /// conventionally use snake_case in Rust, but this isn't enforced, so this
-    /// field isn't guaranteed to be in snake case, but 99% of the time it will be.
-    fn_arg_ident: syn::Ident,
+    /// Original name of the field is used as the name of the builder field and
+    /// in its setter methods. Field names conventionally use snake_case in Rust,
+    /// but this isn't enforced, so this field isn't guaranteed to be in snake case,
+    /// but 99% of the time it will be.
+    ident: syn::Ident,
 
     /// Doc comments for the setter methods are copied from the doc comments placed
     /// on top of individual arguments in the original function. Yes, doc comments
@@ -548,7 +548,7 @@ struct Field {
 
     /// Type of the function argument that corresponds to this field. This is the
     /// resulting type that the builder should generate setters for.
-    fn_arg_type: Box<syn::Type>,
+    ty: Box<syn::Type>,
 
     /// The name of the associated type in the builder state trait that corresponds
     /// to this field.
@@ -576,22 +576,27 @@ impl Field {
 
         Ok(Self {
             state_assoc_type_ident: pat.ident.to_pascal_case(),
-            fn_arg_ident: pat.ident.clone(),
-            fn_arg_type: arg.ty.clone(),
+            ident: pat.ident.clone(),
+            ty: arg.ty.clone(),
             docs,
         })
     }
 
     fn unset_state_type(&self) -> TokenStream2 {
-        let ty = &self.fn_arg_type;
-        ty.option_type_param()
-            .map(|ty| quote!(bon::Optional<#ty>))
-            .unwrap_or_else(|| quote!(bon::Required<#ty>))
+        let ty = &self.ty;
+
+        let state = if ty.is_option() || ty.is_bool() {
+            quote!(Optional)
+        } else {
+            quote!(Required)
+        };
+
+        quote!(bon::private::#state<#ty>)
     }
 
     fn set_state_type(&self) -> TokenStream2 {
-        let ty = &self.fn_arg_type;
-        quote!(bon::Set<#ty>)
+        let ty = &self.ty;
+        quote!(bon::private::Set<#ty>)
     }
 }
 

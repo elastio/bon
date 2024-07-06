@@ -6,7 +6,7 @@ use quote::{quote, ToTokens};
 impl MacroCtx<'_> {
     pub(crate) fn setter_methods_impls_for_field(&self, field: &Field) -> TokenStream2 {
         let output_fields_states = self.fields.iter().map(|other_field| {
-            if other_field.fn_arg_ident == field.fn_arg_ident {
+            if other_field.ident == field.ident {
                 return field.set_state_type().to_token_stream();
             }
 
@@ -101,8 +101,19 @@ struct FieldSettersCtx<'a> {
 
 impl FieldSettersCtx<'_> {
     fn setter_methods(&self, field: &Field) -> TokenStream2 {
-        let field_type = field.fn_arg_type.as_ref();
-        let field_ident = &field.fn_arg_ident;
+        let field_type = field.ty.as_ref();
+
+        let field_ident = &field.ident.to_string();
+        let norm_field_ident = field_ident
+            // Remove the leading underscore from the field name since it's used
+            // to denote unused symbols in Rust. That doesn't mean the builder
+            // API should expose that knowledge to the caller.
+            .strip_prefix('_')
+            .unwrap_or(field_ident);
+
+        // Preserve the original identifier span to make IDE go to definition correctly
+        // and make error messages point to the correct place.
+        let norm_field_ident = syn::Ident::new(norm_field_ident, field.ident.span());
 
         if let Some(inner_type) = field_type.option_type_param() {
             let syn::Type::Path(mut option_path) = field_type.clone() else {
@@ -115,14 +126,14 @@ impl FieldSettersCtx<'_> {
                 segment.arguments = syn::PathArguments::None;
             }
 
-            let optionless_method_ident = field_ident.clone();
+            let optionless_method_ident = norm_field_ident.clone();
 
             let methods = [
                 FieldSetterMethod {
-                    method_name: quote::format_ident!("maybe_{field_ident}"),
+                    method_name: quote::format_ident!("maybe_{norm_field_ident}"),
                     field,
                     fn_params: quote!(value: #option_path<#inner_type>),
-                    field_init: quote!(bon::Set::new(value)),
+                    field_init: quote!(bon::private::Set::new(value)),
                     overwrite_docs: Some(format!(
                         "Same as [`Self::{optionless_method_ident}`], but accepts \
                         an `Option` as input. See that method's documentation for \
@@ -139,7 +150,7 @@ impl FieldSettersCtx<'_> {
                     method_name: optionless_method_ident,
                     field,
                     fn_params: quote!(value: #inner_type),
-                    field_init: quote!(bon::Set::new(Some(value))),
+                    field_init: quote!(bon::private::Set::new(Some(value))),
                     overwrite_docs: None,
                 },
             ];
@@ -151,10 +162,10 @@ impl FieldSettersCtx<'_> {
         }
 
         self.setter_method(FieldSetterMethod {
-            method_name: field_ident.clone(),
+            method_name: norm_field_ident.clone(),
             field,
             fn_params: quote!(value: #field_type),
-            field_init: quote!(bon::Set::new(value)),
+            field_init: quote!(bon::private::Set::new(value)),
             overwrite_docs: None,
         })
     }
@@ -188,11 +199,11 @@ impl FieldSettersCtx<'_> {
             .map(|_| quote!(receiver: self.__private_impl.receiver,));
 
         let field_exprs = self.macro_ctx.fields.iter().map(|other_field| {
-            if other_field.fn_arg_ident == field.fn_arg_ident {
+            if other_field.ident == field.ident {
                 return field_init.clone();
             }
 
-            let ident = &other_field.fn_arg_ident;
+            let ident = &other_field.ident;
             quote!(self.__private_impl.#ident)
         });
 

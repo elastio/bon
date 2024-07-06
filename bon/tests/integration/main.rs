@@ -48,13 +48,35 @@ fn smoke() {
 }
 
 #[test]
+fn bool_is_optional() {
+    #[builder]
+    fn sut(arg: bool) -> bool {
+        arg
+    }
+
+    assert!(!sut().call());
+    assert!(!sut().arg(false).call());
+    assert!(sut().arg(true).call());
+}
+
+#[test]
+fn leading_underscore_is_stripped() {
+    #[builder]
+    fn sut(_arg1: bool, _arg2: Option<()>) {}
+
+    sut().arg1(true).call();
+    sut().arg2(()).call();
+    sut().maybe_arg2(Some(())).call();
+}
+
+#[test]
 fn lifetime_elision() {
     #[builder]
     fn sut(arg: &str, _arg2: usize) -> (&str, &str, [&str; 1]) {
         (arg, arg, [arg])
     }
 
-    let actual = sut().arg("blackjack")._arg2(32).call();
+    let actual = sut().arg("blackjack").arg2(32).call();
     assert_eq!(actual, ("blackjack", "blackjack", ["blackjack"]));
 }
 
