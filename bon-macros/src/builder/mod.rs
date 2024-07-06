@@ -57,11 +57,15 @@ impl<'a> MacroCtx<'a> {
             .and_then(|impl_block| match &impl_block.self_ty {
                 syn::Type::Path(path) => Some(path.path.segments.last()?.ident.to_string()),
                 _ => None,
-            })
-            .unwrap_or_default();
+            });
+
+        let self_ty_prefix = self_ty_prefix.as_deref();
 
         let pascal_case_func = AsPascalCase(norm_func.sig.ident.to_string());
-        let builder_ident = quote::format_ident!("{self_ty_prefix}{pascal_case_func}Builder");
+        let builder_ident = quote::format_ident!(
+            "{}{pascal_case_func}Builder",
+            self_ty_prefix.unwrap_or_default()
+        );
         let builder_private_impl_ident = quote::format_ident!("__{builder_ident}PrivateImpl");
         let builder_state_trait_ident = quote::format_ident!("__{builder_ident}State");
 
@@ -75,7 +79,7 @@ impl<'a> MacroCtx<'a> {
 
         let ctx = MacroCtx {
             impl_ctx: impl_block,
-            adapted_func: adapt_orig_func(orig_func),
+            adapted_func: adapt_orig_func(self_ty_prefix, orig_func),
             norm_func,
             setters,
             builder_ident,
@@ -572,15 +576,9 @@ impl<'a> MacroCtx<'a> {
                 // A case where there is just one setter is special, because the type alias would
                 // receive a generic `__State` parameter that it wouldn't use, so we create it
                 // only if there are 2 or more fields.
-                let (
-                    output_builder_alias_state_var_decl,
-                    output_builder_alias_state_arg
-                ) = (self.setters.len() > 1).then(||
-                    (
-                        quote!(__State: #builder_state_trait_ident),
-                        quote!(__State)
-                    )
-                )
+                let (output_builder_alias_state_var_decl, output_builder_alias_state_arg) =
+                    (self.setters.len() > 1)
+                        .then(|| (quote!(__State: #builder_state_trait_ident), quote!(__State)))
                         .unzip();
 
                 quote! {
@@ -629,7 +627,8 @@ impl<'a> MacroCtx<'a> {
                     #where_clause
                     {
                         #(#docs)*
-                        #vis fn #setter_ident(self, value: #setter_type) -> #output_builder_alias_ident<
+                        #vis fn #setter_ident(self, value: #setter_type)
+                        -> #output_builder_alias_ident<
                             #(#generic_args,)*
                             #output_builder_alias_state_arg
                         >
@@ -714,9 +713,9 @@ impl Setter {
     }
 }
 
-fn adapt_orig_func(mut orig: syn::ItemFn) -> syn::ItemFn {
-    let ident = &orig.sig.ident;
-    orig.sig.ident = quote::format_ident!("__orig_{}", ident.to_string());
+fn adapt_orig_func(self_ty_prefix: Option<&str>, mut orig: syn::ItemFn) -> syn::ItemFn {
+    let orig_ident = orig.sig.ident.clone();
+    orig.sig.ident = quote::format_ident!("__orig_{}", orig_ident.to_string());
 
     // Change to an implementation function's visibility to private inside of a
     // child module to avoid exposing it to the surrounding code. The surrounding
@@ -724,6 +723,25 @@ fn adapt_orig_func(mut orig: syn::ItemFn) -> syn::ItemFn {
     orig.vis = syn::Visibility::Inherited;
 
     strip_doc_comments_from_args(&mut orig.sig);
+
+    // Remove all doc comments from the function itself to avoid docs duplication
+    // which may lead to duplicating doc tests, which in turn implies repeated doc
+    // tests execution, which means worse tests performance.
+    orig.attrs.retain(|attr| !attr.is_doc());
+
+    let builder_entry_fn_link = format!(
+        "{}{orig_ident}",
+        self_ty_prefix
+            .map(|self_ty_prefix| { format!("{self_ty_prefix}::") })
+            .unwrap_or_default(),
+    );
+
+    let doc = format!(
+        "Positional function equivalent of [`{builder_entry_fn_link}()`].\n\
+        See its docs for details.",
+    );
+
+    orig.attrs.push(syn::parse_quote!(#[doc = #doc]));
 
     // It's fine if there are too many positional arguments in the function
     // because the whole purpose of this macro is to fight with this problem

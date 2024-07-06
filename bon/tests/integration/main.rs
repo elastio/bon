@@ -2,6 +2,8 @@ use bon::{bon, builder};
 
 #[test]
 fn smoke() {
+    /// Function-level docs
+    /// multiline.
     #[builder]
     fn sut(
         /// ### Documentation
@@ -131,6 +133,8 @@ fn receiver() {
 
     #[bon]
     impl Counter {
+        /// Docs on the method.
+        /// Multiline
         #[builder]
         fn increment(&self, disabled: bool) -> Self {
             if disabled {
