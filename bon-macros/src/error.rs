@@ -24,7 +24,9 @@ pub(crate) fn error_into_token_stream(err: prox::Error, item: TokenStream2) -> T
 ///
 /// This utility does very low-level parsing to strips doc comments from the
 /// input. This is to avoid the IDE from showing errors that "doc comments
-/// aren't allowed on function arguments".
+/// aren't allowed on function arguments". It also removes `#[builder(...)]`
+/// attributes that need to be processed by this macro to avoid the IDE from
+/// reporting those as well.
 struct Fallback {
     output: TokenStream2,
 }
@@ -66,7 +68,9 @@ impl Parse for Fallback {
             input
                 .call(syn::Attribute::parse_outer)?
                 .into_iter()
-                .filter(|attr| !attr.is_doc())
+                .filter(|attr| {
+                    !attr.is_doc() && !attr.path().is_ident("builder")
+                })
                 .for_each(|attr| attr.to_tokens(&mut output));
         }
     }

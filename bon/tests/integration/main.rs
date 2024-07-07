@@ -1,4 +1,6 @@
 use bon::{bon, builder};
+use std::collections::BTreeSet;
+use std::num::NonZeroU32;
 
 #[test]
 fn smoke() {
@@ -38,13 +40,74 @@ fn smoke() {
     let actual = sut()
         .arg1(true)
         .arg2("arg2")
-        .arg3("arg3".to_owned())
+        .arg3("arg3")
         .arg4(1)
         .arg7(vec!["arg7".to_owned()])
         .arg8((1, &[true]))
         .call();
 
     assert_eq!(actual, "arg3");
+}
+
+#[test]
+fn default_attr() {
+    #[builder]
+    fn sut(
+        #[builder(default = 42)] arg1: u32,
+        #[builder(default = "default".to_owned())] arg2: String,
+        #[builder(default = Some(42))] arg3: Option<u32>,
+        #[builder(default = vec![42])] arg4: Vec<u32>,
+    ) -> (u32, String, Option<u32>, Vec<u32>) {
+        (arg1, arg2, arg3, arg4)
+    }
+}
+
+#[test]
+fn into_attr() {
+    #[builder]
+    fn sut(
+        #[builder(into)] str_ref: &str,
+
+        /// Some docs
+        #[builder(into)]
+        u32: u32,
+
+        #[builder(into)] set: Option<BTreeSet<u32>>,
+        #[builder(into = false)] disabled_into: String,
+    ) -> String {
+        format!("{str_ref}:{u32}:{set:?}:{disabled_into}")
+    }
+
+    struct IntoStrRef<'a>(&'a str);
+
+    impl<'a> From<IntoStrRef<'a>> for &'a str {
+        fn from(val: IntoStrRef<'a>) -> Self {
+            val.0
+        }
+    }
+
+    let actual = sut()
+        .str_ref(IntoStrRef("vinyl-scratch"))
+        .u32(NonZeroU32::new(32).unwrap())
+        .set([32, 43])
+        .disabled_into("disabled".to_owned())
+        .call();
+
+    assert_eq!(actual, "vinyl-scratch:32:Some({32, 43}):disabled");
+}
+
+#[test]
+fn into_string() {
+    #[builder]
+    fn sut(arg1: String, arg2: Option<String>) -> String {
+        format!("{arg1}:{arg2:?}")
+    }
+
+    let actual = sut().arg1("blackjack").arg2("bruh").call();
+    assert_eq!(actual, "blackjack:Some(\"bruh\")");
+
+    let actual = sut().arg1("blackjack").maybe_arg2(Some("bruh2")).call();
+    assert_eq!(actual, "blackjack:Some(\"bruh2\")");
 }
 
 #[test]

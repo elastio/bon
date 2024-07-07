@@ -1,9 +1,12 @@
+mod field;
 mod free_fn_item;
 mod impl_block;
 mod setter_methods;
 
 pub(crate) use free_fn_item::*;
 pub(crate) use impl_block::*;
+
+use field::*;
 
 use crate::normalization::NormalizeSelfTy;
 use heck::AsPascalCase;
@@ -229,6 +232,8 @@ impl<'a> MacroCtx<'a> {
             }
         });
 
+        let field_exprs = self.fields.iter().map(Field::unset_state_init_expr);
+
         let func = quote! {
             #(#docs)*
             #current_mod_vis fn #entry_func_ident<#(#generics_decl),*>(
@@ -243,9 +248,7 @@ impl<'a> MacroCtx<'a> {
                     __private_impl: #builder_private_impl_ident {
                         #phantom_field_init
                         #receiver_field_init
-                        #(
-                            #field_idents: ::core::default::Default::default(),
-                        )*
+                        #( #field_idents: #field_exprs, )*
                     }
                 }
             }
@@ -532,74 +535,6 @@ impl<'a> MacroCtx<'a> {
     }
 }
 
-struct Field {
-    /// Original name of the field is used as the name of the builder field and
-    /// in its setter methods. Field names conventionally use snake_case in Rust,
-    /// but this isn't enforced, so this field isn't guaranteed to be in snake case,
-    /// but 99% of the time it will be.
-    ident: syn::Ident,
-
-    /// Doc comments for the setter methods are copied from the doc comments placed
-    /// on top of individual arguments in the original function. Yes, doc comments
-    /// are not valid on function arguments in regular Rust, but they are valid if
-    /// a proc macro like this one pre-processes them and removes them from the
-    /// expanded code.
-    docs: Vec<syn::Attribute>,
-
-    /// Type of the function argument that corresponds to this field. This is the
-    /// resulting type that the builder should generate setters for.
-    ty: Box<syn::Type>,
-
-    /// The name of the associated type in the builder state trait that corresponds
-    /// to this field.
-    state_assoc_type_ident: syn::Ident,
-}
-
-impl Field {
-    fn from_typed_fn_arg(arg: &syn::PatType) -> Result<Self> {
-        let syn::Pat::Ident(pat) = arg.pat.as_ref() else {
-            // We may allow setting a name for the builder method in parameter
-            // attributes and relax this requirement
-            prox::bail!(
-                &arg.pat,
-                "Only simple identifiers in function arguments supported \
-                to infer the name of builder methods"
-            );
-        };
-
-        let docs = arg
-            .attrs
-            .iter()
-            .filter(|attr| attr.is_doc())
-            .cloned()
-            .collect();
-
-        Ok(Self {
-            state_assoc_type_ident: pat.ident.to_pascal_case(),
-            ident: pat.ident.clone(),
-            ty: arg.ty.clone(),
-            docs,
-        })
-    }
-
-    fn unset_state_type(&self) -> TokenStream2 {
-        let ty = &self.ty;
-
-        let state = if ty.is_option() || ty.is_bool() {
-            quote!(Optional)
-        } else {
-            quote!(Required)
-        };
-
-        quote!(bon::private::#state<#ty>)
-    }
-
-    fn set_state_type(&self) -> TokenStream2 {
-        let ty = &self.ty;
-        quote!(bon::private::Set<#ty>)
-    }
-}
-
 fn adapt_orig_func(self_ty_prefix: Option<&str>, mut orig: syn::ItemFn) -> syn::ItemFn {
     let orig_ident = orig.sig.ident.clone();
     orig.sig.ident = quote::format_ident!("__orig_{}", orig_ident.to_string());
@@ -609,7 +544,7 @@ fn adapt_orig_func(self_ty_prefix: Option<&str>, mut orig: syn::ItemFn) -> syn::
     // code is supposed to use this function through the builder only.
     orig.vis = syn::Visibility::Inherited;
 
-    strip_doc_comments_from_args(&mut orig.sig);
+    strip_known_attrs_from_args(&mut orig.sig);
 
     // Remove all doc comments from the function itself to avoid docs duplication
     // which may lead to duplicating doc tests, which in turn implies repeated doc
@@ -646,9 +581,13 @@ fn adapt_orig_func(self_ty_prefix: Option<&str>, mut orig: syn::ItemFn) -> syn::
 /// are still valid syntactically when a proc macro like this one pre-processes
 /// them and removes them from the expanded code. We use the doc comments to put
 /// them on the generated setter methods.
-fn strip_doc_comments_from_args(sig: &mut syn::Signature) {
+///
+/// We also strip all `builder(...)` attributes because this macro processes them
+/// and they aren't needed in the output.
+fn strip_known_attrs_from_args(sig: &mut syn::Signature) {
     for arg in &mut sig.inputs {
-        arg.attrs_mut().retain(|attr| !attr.is_doc());
+        arg.attrs_mut()
+            .retain(|attr| !attr.is_doc() && !attr.path().is_ident("builder"));
     }
 }
 
