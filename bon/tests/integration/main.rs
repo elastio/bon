@@ -53,13 +53,17 @@ fn smoke() {
 fn default_attr() {
     #[builder]
     fn sut(
-        #[builder(default = 42)] arg1: u32,
-        #[builder(default = "default".to_owned())] arg2: String,
-        #[builder(default = Some(42))] arg3: Option<u32>,
+        #[builder(default)] arg1: u32,
+        #[builder(default = 42)] arg2: u32,
+        #[builder(default = "default".to_owned())] arg3: String,
         #[builder(default = vec![42])] arg4: Vec<u32>,
-    ) -> (u32, String, Option<u32>, Vec<u32>) {
+    ) -> (u32, u32, String, Vec<u32>) {
         (arg1, arg2, arg3, arg4)
     }
+
+    let actual = sut().call();
+
+    assert_eq!(actual, (0, 42, "default".to_owned(), vec![42]));
 }
 
 #[test]

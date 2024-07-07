@@ -11,7 +11,7 @@ impl<T> Default for Unset<T> {
     }
 }
 
-pub struct Required<T>(Unset<T>);
+pub struct Required<T>(Unset<Option<T>>);
 
 impl<T> Default for Required<T> {
     fn default() -> Self {
@@ -19,19 +19,17 @@ impl<T> Default for Required<T> {
     }
 }
 
-pub struct Optional<T> {
-    default: fn() -> T,
-}
+pub struct Optional<T>(Unset<T>);
 
-impl<T> Optional<T> {
-    pub fn new(default: fn() -> T) -> Self {
-        Self { default }
+impl<T> Default for Optional<T> {
+    fn default() -> Self {
+        Self(Unset::default())
     }
 }
 
-impl<T: Default> From<Optional<T>> for Set<T> {
-    fn from(input: Optional<T>) -> Self {
-        Set::new((input.default)())
+impl<T: Default> From<Optional<T>> for Set<Option<T>> {
+    fn from(_: Optional<T>) -> Self {
+        Set::new(None)
     }
 }
 

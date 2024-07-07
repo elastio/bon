@@ -128,8 +128,8 @@ impl<'a> FieldSettersCtx<'a> {
     fn setter_methods(&self) -> TokenStream2 {
         let field_type = self.field.ty.as_ref();
 
-        if let Some(inner_type) = field_type.option_type_param() {
-            return self.setters_for_option_field(inner_type);
+        if let Some(inner_type) = self.field.as_optional() {
+            return self.setters_for_optional_field(inner_type);
         }
 
         let (fn_param_type, maybe_into_call) = if self.qualifies_for_into(&self.field.ty) {
@@ -146,9 +146,7 @@ impl<'a> FieldSettersCtx<'a> {
         })
     }
 
-    fn setters_for_option_field(&self, inner_type: &syn::Type) -> TokenStream2 {
-        let field_type = self.field.ty.as_ref();
-
+    fn setters_for_optional_field(&self, inner_type: &syn::Type) -> TokenStream2 {
         let (inner_type, maybe_conv_call, maybe_map_conv_call) =
             if self.qualifies_for_into(inner_type) {
                 (
@@ -160,23 +158,12 @@ impl<'a> FieldSettersCtx<'a> {
                 (quote!(#inner_type), quote!(), quote!())
             };
 
-        let syn::Type::Path(mut option_path) = field_type.clone() else {
-            unreachable!(
-                "BUG: option_type_param returned Some for a non-Path type: \
-                {field_type:#?}",
-            )
-        };
-
-        if let Some(segment) = option_path.path.segments.last_mut() {
-            segment.arguments = syn::PathArguments::None;
-        }
-
         let norm_field_ident = &self.norm_field_ident;
 
         let methods = [
             FieldSetterMethod {
                 method_name: quote::format_ident!("maybe_{norm_field_ident}"),
-                fn_params: quote!(value: #option_path<#inner_type>),
+                fn_params: quote!(value: Option<#inner_type>),
                 field_init: quote!(bon::private::Set::new(value #maybe_map_conv_call)),
                 overwrite_docs: Some(format!(
                     "Same as [`Self::{norm_field_ident}`], but accepts \

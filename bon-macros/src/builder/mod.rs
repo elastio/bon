@@ -232,8 +232,6 @@ impl<'a> MacroCtx<'a> {
             }
         });
 
-        let field_exprs = self.fields.iter().map(Field::unset_state_init_expr);
-
         let func = quote! {
             #(#docs)*
             #current_mod_vis fn #entry_func_ident<#(#generics_decl),*>(
@@ -248,7 +246,7 @@ impl<'a> MacroCtx<'a> {
                     __private_impl: #builder_private_impl_ident {
                         #phantom_field_init
                         #receiver_field_init
-                        #( #field_idents: #field_exprs, )*
+                        #( #field_idents: ::std::default::Default::default(), )*
                     }
                 }
             }
@@ -446,7 +444,6 @@ impl<'a> MacroCtx<'a> {
         let maybe_await = asyncness.is_some().then(|| quote!(.await));
 
         let adapted_func_ident = &self.adapted_func.sig.ident;
-        let field_idents = self.field_idents();
         let unsafety = &self.norm_func.sig.unsafety;
         let vis = &self.norm_func.vis;
         let builder_ident = &self.builder_ident;
@@ -502,6 +499,33 @@ impl<'a> MacroCtx<'a> {
 
         let output_type = &self.norm_func.sig.output;
 
+        let arg_exprs = self.fields.iter().map(|field| {
+            let maybe_default = field
+                .as_optional()
+                // For `Option` fields we don't need any `unwrap_or_[else/default]`.
+                // We pass them directly to the function unchanged.
+                .filter(|_| !field.ty.is_option())
+                .map(|_| {
+                    field
+                        .params
+                        .default
+                        .as_ref()
+                        .and_then(|val| val.as_ref().as_ref())
+                        .map(|default| quote! { .unwrap_or_else(|| #default) })
+                        .unwrap_or_else(|| quote! { .unwrap_or_default() })
+                });
+
+            let field_ident = &field.ident;
+
+            quote! {
+                self.__private_impl
+                    .#field_ident
+                    .into()
+                    .into_inner()
+                    #maybe_default
+            }
+        });
+
         quote! {
             impl<
                 #(#generics_decl,)*
@@ -517,9 +541,7 @@ impl<'a> MacroCtx<'a> {
             {
                 #vis #asyncness #unsafety fn #exit_fn_ident(self) #output_type {
                     #prefix #adapted_func_ident::<#(#generic_adapted_fn_args,)*>(
-                        #(
-                            self.__private_impl.#field_idents.into().into_inner()
-                        ),*
+                        #( #arg_exprs ),*
                     )
                     #maybe_await
                 }

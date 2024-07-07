@@ -1,7 +1,8 @@
-use darling::util::parse_expr::preserve_str_literal;
+use darling::util::{Flag, SpannedValue};
 use darling::FromAttributes;
 use prox::prelude::*;
 use quote::quote;
+use syn::spanned::Spanned;
 
 pub(crate) struct Field {
     /// Original name of the field is used as the name of the builder field and
@@ -35,14 +36,20 @@ pub(crate) struct FieldParams {
     /// Overrides the decision to use `Into` for the setter method.
     pub(crate) into: Option<bool>,
 
-    #[darling(with = "preserve_str_literal", map = "map_optional_expr")]
-    pub(crate) default: Option<Option<syn::Expr>>,
+    #[darling(with = "parse_optional_expression", map = "Some")]
+    pub(crate) default: Option<SpannedValue<Option<syn::Expr>>>,
+
+    /// Makes the field required no matter what default treatment for such field
+    /// is applied.
+    pub(crate) required: Option<Flag>,
 }
 
-// Wrapping is intentional and basically the purpose of this function
-#[allow(clippy::unnecessary_wraps)]
-fn map_optional_expr(meta: syn::Expr) -> Option<Option<syn::Expr>> {
-    Some(Some(meta))
+fn parse_optional_expression(meta: &syn::Meta) -> Result<SpannedValue<Option<syn::Expr>>> {
+    match meta {
+        syn::Meta::Path(_) => Ok(SpannedValue::new(None, meta.span())),
+        syn::Meta::List(_) => Err(Error::unsupported_format("list").with_span(meta)),
+        syn::Meta::NameValue(nv) => Ok(SpannedValue::new(Some(nv.value.clone()), nv.span())),
+    }
 }
 
 impl Field {
@@ -66,48 +73,56 @@ impl Field {
 
         let params = FieldParams::from_attributes(&arg.attrs)?;
 
-        Ok(Self {
+        let me = Self {
             state_assoc_type_ident: pat.ident.to_pascal_case(),
             ident: pat.ident.clone(),
             ty: arg.ty.clone(),
             params,
             docs,
-        })
+        };
+
+        me.validate()?;
+
+        Ok(me)
     }
 
-    fn is_optional(&self) -> bool {
-        self.ty.is_option() || self.ty.is_bool() || self.params.default.is_some()
+    fn validate(&self) -> Result<()> {
+        if let Some(default) = &self.params.default {
+            if self.ty.is_option() {
+                prox::bail!(
+                    &default.span(),
+                    "`Option` and #[builder(default)] attributes are mutually exclusive"
+                );
+            }
+        }
+
+        Ok(())
+    }
+
+    pub(crate) fn as_optional(&self) -> Option<&syn::Type> {
+        self.ty
+            .option_type_param()
+            .or_else(|| (self.ty.is_bool() || self.params.default.is_some()).then_some(&self.ty))
     }
 
     pub(crate) fn unset_state_type(&self) -> TokenStream2 {
         let ty = &self.ty;
 
-        let state = if self.is_optional() {
-            quote!(Optional)
+        if let Some(inner_type) = self.as_optional() {
+            quote!(bon::private::Optional<#inner_type>)
         } else {
-            quote!(Required)
-        };
-
-        quote!(bon::private::#state<#ty>)
-    }
-
-    pub(crate) fn unset_state_init_expr(&self) -> TokenStream2 {
-        if !self.is_optional() {
-            return quote!(bon::private::Required::default());
+            quote!(bon::private::Required<#ty>)
         }
-
-        let default_fn = self
-            .params
-            .default
-            .as_ref()
-            .map(|default| quote! { || #default })
-            .unwrap_or_else(|| quote! { Default::default });
-
-        quote!(bon::private::Optional::new(#default_fn))
     }
 
     pub(crate) fn set_state_type(&self) -> TokenStream2 {
         let ty = &self.ty;
+
+        let ty = self
+            .as_optional()
+            .map(|ty| quote!(Option<#ty>))
+            .unwrap_or_else(|| quote!(#ty));
+
         quote!(bon::private::Set<#ty>)
     }
 }
