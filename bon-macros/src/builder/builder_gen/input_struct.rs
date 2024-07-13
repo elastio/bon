@@ -65,6 +65,10 @@ impl StructInputCtx {
         // no longer needed in the output code
         orig.attrs.retain(|attr| !attr.path().is_ident("builder"));
 
+        for field in &mut orig.fields {
+            field.attrs.retain(|attr| !attr.path().is_ident("builder"));
+        }
+
         orig
     }
 
