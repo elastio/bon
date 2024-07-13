@@ -1,7 +1,10 @@
 mod field;
 mod setter_methods;
 
-pub(crate) use field::*;
+pub(crate) mod input_func;
+pub(crate) mod input_struct;
+
+use field::*;
 
 use darling::ast::GenericParamExt;
 use itertools::Itertools;
@@ -39,12 +42,22 @@ pub(crate) struct FinishFunc {
 pub(crate) struct StartFunc {
     pub(crate) ident: syn::Ident,
     pub(crate) attrs: Vec<syn::Attribute>,
-    pub(crate) generics: Generics,
+
+    /// Overrides the common generics
+    pub(crate) generics: Option<Generics>,
+
+    /// If present overrides the automatic visibility
+    pub(crate) vis: Option<syn::Visibility>,
 }
 
 pub(crate) trait FinishFuncBody {
     /// Generate `finish` function body from ready-made field expressions.
-    fn gen(&self, field_exprs: &[TokenStream2]) -> TokenStream2;
+    fn gen(&self, field_exprs: &[FieldExpr<'_>]) -> TokenStream2;
+}
+
+struct FieldExpr<'a> {
+    field: &'a Field,
+    expr: TokenStream2,
 }
 
 pub(crate) struct Generics {
@@ -96,11 +109,15 @@ impl BuilderGenCtx {
         }
     }
 
+    fn start_func_generics(&self) -> &Generics {
+        self.start_func.generics.as_ref().unwrap_or(&self.generics)
+    }
+
     fn start_func(&self) -> syn::ItemFn {
         let builder_ident = &self.builder_ident;
 
         let docs = &self.start_func.attrs;
-        let vis = &self.vis;
+        let vis = self.start_func.vis.as_ref().unwrap_or(&self.vis);
 
         let builder_private_impl_ident = &self.builder_private_impl_ident;
         let start_func_ident = &self.start_func.ident;
@@ -112,8 +129,10 @@ impl BuilderGenCtx {
         // in the where clause. Research `darling`'s lifetime tracking API and
         // maybe implement this in the future
 
-        let generics_decl = &self.start_func.generics.params;
-        let where_clause = &self.start_func.generics.where_clause;
+        let generics = self.start_func_generics();
+
+        let generics_decl = &generics.params;
+        let where_clause = &generics.where_clause;
         let generic_args = self.generic_args();
 
         let field_idents = self.field_idents();
@@ -156,7 +175,7 @@ impl BuilderGenCtx {
     }
 
     fn phantom_data(&self) -> Option<TokenStream2> {
-        let start_func_generic_params = &self.start_func.generics.params;
+        let start_func_generic_params = &self.start_func_generics().params;
 
         let generic_lifetimes = start_func_generic_params
             .iter()
@@ -367,11 +386,13 @@ impl BuilderGenCtx {
 
             let field_ident = &field.ident;
 
-            quote! {
+            let expr = quote! {
                 bon::private::IntoSet::into_set(self.__private_impl.#field_ident)
                     .into_inner()
                     #maybe_default
-            }
+            };
+
+            FieldExpr { field, expr }
         });
 
         let body = &self.finish_func.body.gen(&field_exprs.collect_vec());

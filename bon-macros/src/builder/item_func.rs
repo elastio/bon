@@ -1,19 +1,10 @@
 use super::builder_gen::MacroOutput;
-use super::func_input::{FuncInputCtx, FuncInputParams};
+use super::builder_gen::input_func::{FuncInputCtx, FuncInputParams};
 use prox::prelude::*;
 use quote::quote;
 use syn::visit_mut::VisitMut;
 
-pub(crate) fn generate(params: FuncInputParams, item: syn::Item) -> Result<TokenStream2> {
-    let orig_func = match item {
-        syn::Item::Fn(orig_func) => orig_func,
-        _ => prox::bail!(
-            &item,
-            "The attribute is expected to be placed on an `fn` \
-            item, but it was placed on other syntax instead"
-        ),
-    };
-
+pub(crate) fn generate(params: FuncInputParams, orig_func: syn::ItemFn) -> Result<TokenStream2> {
     let mut norm_func = orig_func.clone();
 
     crate::normalization::NormalizeLifetimes.visit_item_fn_mut(&mut norm_func);

@@ -8,7 +8,7 @@ pub(crate) struct BuilderParams {
     pub(crate) builder_type: Option<syn::Ident>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub(crate) struct ItemParams {
     pub(crate) name: Option<syn::Ident>,
     pub(crate) vis: Option<syn::Visibility>,

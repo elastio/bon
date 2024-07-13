@@ -1,6 +1,7 @@
-use super::builder_gen::ReceiverCtx;
+use super::ReceiverCtx;
 use crate::builder::builder_gen::{
-    generic_param_to_arg, BuilderGenCtx, Field, FinishFunc, FinishFuncBody, Generics, StartFunc,
+    generic_param_to_arg, BuilderGenCtx, Field, FieldExpr, FinishFunc, FinishFuncBody, Generics,
+    StartFunc,
 };
 use crate::builder::params::{BuilderParams, ItemParams};
 use crate::normalization::NormalizeSelfTy;
@@ -207,8 +208,6 @@ impl FuncInputCtx {
                 "call"
             };
 
-            // Bind the span of the original function to call such that "Go to definition"
-            // invoked on it in IDEs leads to the start function.
             syn::Ident::new(name, start_func_ident.span())
         });
 
@@ -223,6 +222,10 @@ impl FuncInputCtx {
         let start_func = StartFunc {
             ident: start_func_ident,
 
+            // No override for visibility for the start fn is povided here.
+            // It's supposed to be the same as the original function's visibility.
+            vis: None,
+
             attrs: self
                 .norm_func
                 .attrs
@@ -230,10 +233,10 @@ impl FuncInputCtx {
                 .filter(|attr| attr.is_doc())
                 .collect(),
 
-            generics: Generics {
+            generics: Some(Generics {
                 params: Vec::from_iter(self.norm_func.sig.generics.params),
                 where_clause: self.norm_func.sig.generics.where_clause,
-            },
+            }),
         };
 
         let ctx = BuilderGenCtx {
@@ -260,7 +263,7 @@ struct FnCallBody {
 }
 
 impl FinishFuncBody for FnCallBody {
-    fn gen(&self, field_exprs: &[TokenStream2]) -> TokenStream2 {
+    fn gen(&self, field_exprs: &[FieldExpr<'_>]) -> TokenStream2 {
         let asyncness = &self.func.sig.asyncness;
         let maybe_await = asyncness.is_some().then(|| quote!(.await));
 
@@ -292,6 +295,8 @@ impl FinishFuncBody for FnCallBody {
             });
 
         let func_ident = &self.func.sig.ident;
+
+        let field_exprs = field_exprs.iter().map(|field| &field.expr);
 
         quote! {
             #prefix #func_ident::<#(#generic_args,)*>(
@@ -335,4 +340,20 @@ fn merge_generic_params(
     let mut generic_params = left_lifetimes.chain(right_lifetimes).cloned().collect_vec();
     generic_params.extend(left.chain(right).cloned());
     generic_params
+}
+
+impl Field {
+    pub(crate) fn from_typed_fn_arg(arg: &syn::PatType) -> Result<Self> {
+        let syn::Pat::Ident(pat) = arg.pat.as_ref() else {
+            // We may allow setting a name for the builder method in parameter
+            // attributes and relax this requirement
+            prox::bail!(
+                &arg.pat,
+                "Only simple identifiers in function arguments supported \
+                to infer the name of builder methods"
+            );
+        };
+
+        Field::new(&pat.attrs, pat.ident.clone(), arg.ty.clone())
+    }
 }

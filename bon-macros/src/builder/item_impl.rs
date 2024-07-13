@@ -1,4 +1,4 @@
-use super::func_input::{FuncInputCtx, FuncInputParams, ImplCtx};
+use super::builder_gen::input_func::{FuncInputCtx, FuncInputParams, ImplCtx};
 use darling::ast::NestedMeta;
 use darling::FromMeta;
 use itertools::{Either, Itertools};
@@ -7,7 +7,7 @@ use quote::quote;
 use std::rc::Rc;
 use syn::visit_mut::VisitMut;
 
-pub(crate) fn generate_for_impl_block(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream2> {
+pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream2> {
     if let Some((_, trait_path, _)) = &orig_impl_block.trait_ {
         bail!(trait_path, "Impls of traits are not supported yet");
     }

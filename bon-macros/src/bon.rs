@@ -9,11 +9,11 @@ pub(crate) struct BonParams {
 
 pub(crate) fn generate(_: BonParams, item: syn::Item) -> Result<TokenStream2> {
     match item {
-        syn::Item::Impl(impl_item) => builder::generate_for_impl_block(impl_item),
+        syn::Item::Impl(item_impl) => builder::item_impl::generate(item_impl),
         _ => bail!(
             &item,
-            "The attribute is expected to be placed on an `fn` \
-            item, but it was placed on other syntax instead"
+            "`#[bon]` attribute is expected to be placed on an `impl` block \
+             but it was placed on other syntax instead"
         ),
     }
 }

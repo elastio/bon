@@ -53,30 +53,19 @@ fn parse_optional_expression(meta: &syn::Meta) -> Result<SpannedValue<Option<syn
 }
 
 impl Field {
-    pub(crate) fn from_typed_fn_arg(arg: &syn::PatType) -> Result<Self> {
-        let syn::Pat::Ident(pat) = arg.pat.as_ref() else {
-            // We may allow setting a name for the builder method in parameter
-            // attributes and relax this requirement
-            prox::bail!(
-                &arg.pat,
-                "Only simple identifiers in function arguments supported \
-                to infer the name of builder methods"
-            );
-        };
+    pub(crate) fn new(
+        attrs: &[syn::Attribute],
+        ident: syn::Ident,
+        ty: Box<syn::Type>,
+    ) -> Result<Self> {
+        let docs = attrs.iter().filter(|attr| attr.is_doc()).cloned().collect();
 
-        let docs = arg
-            .attrs
-            .iter()
-            .filter(|attr| attr.is_doc())
-            .cloned()
-            .collect();
-
-        let params = FieldParams::from_attributes(&arg.attrs)?;
+        let params = FieldParams::from_attributes(&attrs)?;
 
         let me = Self {
-            state_assoc_type_ident: pat.ident.to_pascal_case(),
-            ident: pat.ident.clone(),
-            ty: arg.ty.clone(),
+            state_assoc_type_ident: ident.to_pascal_case(),
+            ident,
+            ty,
             params,
             docs,
         };
@@ -86,7 +75,7 @@ impl Field {
         Ok(me)
     }
 
-    fn validate(&self) -> Result<()> {
+    fn validate(&self) -> Result {
         if let Some(default) = &self.params.default {
             if self.ty.is_option() {
                 prox::bail!(
