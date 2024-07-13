@@ -212,7 +212,7 @@ fn constructor() {
 
     #[bon]
     impl Counter {
-        #[builder]
+        #[builder(expose_positional_fn = new)]
         fn builder(initial: Option<u32>) -> Self {
             Self {
                 val: initial.unwrap_or_default(),
@@ -246,7 +246,7 @@ fn receiver() {
     }
 
     let counter = Counter { val: 0 };
-    let counter = counter.increment().disabled(false).call();
+    let counter = counter.increment().call();
 
     assert_eq!(counter.val, 1);
 }

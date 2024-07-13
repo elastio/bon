@@ -1,6 +1,6 @@
-use darling::ast::NestedMeta;
 use darling::FromMeta;
 use prox::prelude::*;
+use quote::quote;
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct BuilderParams {
@@ -15,25 +15,27 @@ pub(crate) struct ItemParams {
 }
 
 impl FromMeta for ItemParams {
-    fn from_nested_meta(item: &NestedMeta) -> Result<Self> {
-        let me = match item {
-            NestedMeta::Lit(lit) => Self {
-                name: Some(syn::Ident::from_value(lit)?),
-                vis: None,
-            },
-            NestedMeta::Meta(ref mi) => {
-                #[derive(Debug, FromMeta)]
-                struct Full {
-                    name: Option<syn::Ident>,
-                    vis: Option<syn::Visibility>,
-                }
+    fn from_meta(meta: &syn::Meta) -> Result<Self> {
+        if let syn::Meta::NameValue(meta) = meta {
+            let val = &meta.value;
+            let ident = syn::parse2(quote!(#val))?;
 
-                let full = Full::from_meta(mi)?;
-                Self {
-                    name: full.name,
-                    vis: full.vis,
-                }
-            }
+            return Ok(Self {
+                name: Some(ident),
+                vis: None,
+            });
+        }
+
+        #[derive(Debug, FromMeta)]
+        struct Full {
+            name: Option<syn::Ident>,
+            vis: Option<syn::Visibility>,
+        }
+
+        let full = Full::from_meta(meta)?;
+        let me = Self {
+            name: full.name,
+            vis: full.vis,
         };
 
         Ok(me)

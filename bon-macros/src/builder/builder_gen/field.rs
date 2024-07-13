@@ -78,10 +78,19 @@ impl Field {
 
     fn validate(&self) -> Result {
         if let Some(default) = &self.params.default {
-            if self.ty.is_option() {
+            let ty = if self.ty.is_option() {
+                Some("Option")
+            } else if self.ty.is_bool() {
+                Some("bool")
+            } else {
+                None
+            };
+
+            if let Some(ty) = ty {
                 prox::bail!(
                     &default.span(),
-                    "`Option` and #[builder(default)] attributes are mutually exclusive"
+                    "type `{ty}` already implies #[builder(default)] \
+                    so explicit #[builder(default)] is redundant",
                 );
             }
         }

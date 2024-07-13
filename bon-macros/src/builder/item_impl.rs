@@ -18,6 +18,7 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
                 return Either::Left(item);
             };
 
+            // TODO: fix, there may be many `#[builder]` attributes
             let builder_attr_index = fn_item
                 .attrs
                 .iter()
