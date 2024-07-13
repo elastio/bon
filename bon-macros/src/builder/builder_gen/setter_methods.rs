@@ -1,10 +1,11 @@
-use super::{field::Field, MacroCtx};
+use super::{field::Field, BuilderGenCtx};
+use darling::ast::GenericParamExt;
 use itertools::Itertools;
 use prox::prelude::*;
 use quote::{quote, ToTokens};
 use std::collections::BTreeSet;
 
-impl MacroCtx<'_> {
+impl BuilderGenCtx {
     pub(crate) fn setter_methods_impls_for_field(&self, field: &Field) -> TokenStream2 {
         let output_fields_states = self.fields.iter().map(|other_field| {
             if other_field.ident == field.ident {
@@ -15,12 +16,12 @@ impl MacroCtx<'_> {
             quote!(__State::#state_assoc_type_ident)
         });
 
-        let generic_args = self.impl_and_norm_func_generic_args().collect_vec();
         let state_assoc_type_ident = &field.state_assoc_type_ident;
         let builder_ident = &self.builder_ident;
         let builder_state_trait_ident = &self.builder_state_trait_ident;
-        let generics_decl = self.impl_and_norm_func_generics_decl();
-        let where_clause = self.impl_and_norm_func_where_clause();
+        let generics_decl = &self.generics.params;
+        let generic_args = self.generic_args().collect_vec();
+        let where_clause = &self.generics.where_clause;
         let unset_state_type = field.unset_state_type();
         let output_builder_alias_ident =
             quote::format_ident!("__{builder_ident}Set{state_assoc_type_ident}");
@@ -97,14 +98,14 @@ impl MacroCtx<'_> {
 }
 
 struct FieldSettersCtx<'a> {
-    macro_ctx: &'a MacroCtx<'a>,
+    builder_gen: &'a BuilderGenCtx,
     field: &'a Field,
     return_type: TokenStream2,
     norm_field_ident: syn::Ident,
 }
 
 impl<'a> FieldSettersCtx<'a> {
-    fn new(macro_ctx: &'a MacroCtx<'a>, field: &'a Field, return_type: TokenStream2) -> Self {
+    fn new(macro_ctx: &'a BuilderGenCtx, field: &'a Field, return_type: TokenStream2) -> Self {
         let field_ident = &field.ident.to_string();
         let norm_field_ident = field_ident
             // Remove the leading underscore from the field name since it's used
@@ -118,7 +119,7 @@ impl<'a> FieldSettersCtx<'a> {
         let norm_field_ident = syn::Ident::new(norm_field_ident, field.ident.span());
 
         Self {
-            macro_ctx,
+            builder_gen: macro_ctx,
             field,
             return_type,
             norm_field_ident,
@@ -205,20 +206,19 @@ impl<'a> FieldSettersCtx<'a> {
             None => self.field.docs.as_slice(),
         };
 
-        let vis = &self.macro_ctx.norm_func.vis;
+        let vis = &self.builder_gen.vis;
 
-        let builder_ident = &self.macro_ctx.builder_ident;
-        let builder_private_impl_ident = &self.macro_ctx.builder_private_impl_ident;
-        let maybe_phantom_field = self.macro_ctx.phantom_field_init();
-        let field_idents = self.macro_ctx.field_idents();
+        let builder_ident = &self.builder_gen.builder_ident;
+        let builder_private_impl_ident = &self.builder_gen.builder_private_impl_ident;
+        let maybe_phantom_field = self.builder_gen.phantom_field_init();
+        let field_idents = self.builder_gen.field_idents();
         let maybe_receiver_field = self
-            .macro_ctx
-            .norm_func
-            .sig
-            .receiver()
-            .map(|_| quote!(receiver: self.__private_impl.receiver,));
+            .builder_gen
+            .receiver
+            .is_some()
+            .then(|| quote!(receiver: self.__private_impl.receiver,));
 
-        let field_exprs = self.macro_ctx.fields.iter().map(|other_field| {
+        let field_exprs = self.builder_gen.fields.iter().map(|other_field| {
             if other_field.ident == self.field.ident {
                 return field_init.clone();
             }
@@ -257,7 +257,7 @@ impl<'a> FieldSettersCtx<'a> {
             return false;
         }
 
-        // Generic type parameters in the target type are not allowed
+        // Types with generic parameters don't qualify
         let has_generic_params = path
             .path
             .segments
@@ -268,16 +268,14 @@ impl<'a> FieldSettersCtx<'a> {
             return false;
         }
 
-        // Bare reference to the type parameter in scope is not allowed
+        // Bare reference to the type parameter in scope doesn't qualify
         if let Some(ident) = path.path.get_ident() {
             let type_params: BTreeSet<_> = self
-                .macro_ctx
-                .impl_and_norm_func_generics_decl()
-                .into_iter()
-                .filter_map(|param| match param {
-                    syn::GenericParam::Type(param) => Some(&param.ident),
-                    _ => None,
-                })
+                .builder_gen
+                .generics
+                .params
+                .iter()
+                .filter_map(|param| Some(&param.as_type_param()?.ident))
                 .collect();
 
             if type_params.contains(ident) {

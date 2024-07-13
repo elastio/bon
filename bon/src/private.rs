@@ -27,8 +27,8 @@ impl<T> Default for Optional<T> {
     }
 }
 
-impl<T: Default> From<Optional<T>> for Set<Option<T>> {
-    fn from(_: Optional<T>) -> Self {
+impl<T: Default> IntoSet<Option<T>> for Optional<T> {
+    fn into_set(self) -> Set<Option<T>> {
         Set::new(None)
     }
 }
@@ -44,4 +44,14 @@ impl<T> Set<T> {
     pub fn into_inner(self) -> T {
         self.0
     }
+}
+
+impl<T> IntoSet<T> for Set<T> {
+    fn into_set(self) -> Self {
+        self
+    }
+}
+
+pub trait IntoSet<T> {
+    fn into_set(self) -> Set<T>;
 }

@@ -96,10 +96,32 @@ impl Field {
             }
         }
 
+        if let Some(required) = &self.params.required {
+            if self.ty.is_option() {
+                prox::bail!(
+                    &required.span(),
+                    "`Option` and #[builder(required)] attributes are mutually exclusive"
+                );
+            }
+
+            if self.params.default.is_some() {
+                prox::bail!(
+                    &required.span(),
+                    "The #[builder(required)] and #[builder(default)] attributes \
+                   are mutually exclusive"
+                );
+            }
+        }
+
         Ok(())
     }
 
     pub(crate) fn as_optional(&self) -> Option<&syn::Type> {
+        // User override takes the wheel entirely
+        if self.params.required.is_some() {
+            return None;
+        }
+
         self.ty
             .option_type_param()
             .or_else(|| (self.ty.is_bool() || self.params.default.is_some()).then_some(&self.ty))
@@ -115,13 +137,16 @@ impl Field {
         }
     }
 
-    pub(crate) fn set_state_type(&self) -> TokenStream2 {
+    pub(crate) fn set_state_type_param(&self) -> TokenStream2 {
         let ty = &self.ty;
 
-        let ty = self
-            .as_optional()
+        self.as_optional()
             .map(|ty| quote!(Option<#ty>))
-            .unwrap_or_else(|| quote!(#ty));
+            .unwrap_or_else(|| quote!(#ty))
+    }
+
+    pub(crate) fn set_state_type(&self) -> TokenStream2 {
+        let ty = self.set_state_type_param();
 
         quote!(bon::private::Set<#ty>)
     }

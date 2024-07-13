@@ -1,7 +1,10 @@
-use super::{ImplCtx, MacroCtx};
+use super::func_input::{FuncInputCtx, FuncInputParams, ImplCtx};
+use darling::ast::NestedMeta;
+use darling::FromMeta;
 use itertools::{Either, Itertools};
 use prox::prelude::*;
 use quote::quote;
+use std::rc::Rc;
 use syn::visit_mut::VisitMut;
 
 pub(crate) fn generate_for_impl_block(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream2> {
@@ -63,6 +66,11 @@ pub(crate) fn generate_for_impl_block(mut orig_impl_block: syn::ItemImpl) -> Res
     }
     .visit_item_impl_mut(&mut norm_impl_block);
 
+    let impl_ctx = Rc::new(ImplCtx {
+        self_ty: norm_impl_block.self_ty,
+        generics: norm_impl_block.generics,
+    });
+
     let outputs: Vec<_> = std::iter::zip(orig_impl_block.items, norm_impl_block.items)
         .map(|(orig_item, norm_item)| {
             let syn::ImplItem::Fn(norm_func) = norm_item else {
@@ -75,20 +83,32 @@ pub(crate) fn generate_for_impl_block(mut orig_impl_block: syn::ItemImpl) -> Res
             let norm_func = impl_item_fn_into_fn_item(norm_func)?;
             let orig_func = impl_item_fn_into_fn_item(orig_func)?;
 
-            let impl_ctx = ImplCtx {
-                self_ty: &norm_impl_block.self_ty,
-                generics: &norm_impl_block.generics,
+            let meta = orig_func
+                .attrs
+                .iter()
+                .filter(|attr| attr.path().is_ident("builder"))
+                .map(|attr| {
+                    let meta_list = darling::util::parse_attribute_to_meta_list(attr)?;
+                    NestedMeta::parse_meta_list(meta_list.tokens).map_err(Into::into)
+                })
+                .flatten_ok()
+                .collect::<Result<Vec<_>>>()?;
+
+            let params = FuncInputParams::from_list(&meta)?;
+
+            let ctx = FuncInputCtx {
+                orig_func,
+                norm_func,
+                impl_ctx: Some(impl_ctx.clone()),
+                params,
             };
 
-            let ctx = MacroCtx::new(orig_func, norm_func, Some(impl_ctx))?;
-
-            Result::<_>::Ok(ctx.output())
+            Result::<_>::Ok((ctx.adapted_func(), ctx.into_builder_gen_ctx()?.output()))
         })
         .try_collect()?;
 
-    let new_impl_items = outputs.iter().flat_map(|output| {
-        let entry_func = &output.entry_func;
-        let adapted_func = &output.adapted_func;
+    let new_impl_items = outputs.iter().flat_map(|(adapted_func, output)| {
+        let entry_func = &output.start_func;
         [
             syn::parse_quote!(#entry_func),
             syn::parse_quote!(#adapted_func),
@@ -98,7 +118,7 @@ pub(crate) fn generate_for_impl_block(mut orig_impl_block: syn::ItemImpl) -> Res
     norm_selfful_impl_block.items = other_items;
     norm_selfful_impl_block.items.extend(new_impl_items);
 
-    let other_items = outputs.iter().map(|output| &output.other_items);
+    let other_items = outputs.iter().map(|(_, output)| &output.other_items);
 
     Ok(quote! {
         #(#other_items)*

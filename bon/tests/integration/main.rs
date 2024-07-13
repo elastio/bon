@@ -50,6 +50,16 @@ fn smoke() {
 }
 
 #[test]
+fn required_attr() {
+    #[builder]
+    fn sut(#[builder(required)] bool: bool, _option: Option<String>) -> bool {
+        bool
+    }
+
+    assert!(sut().bool(true).call());
+}
+
+#[test]
 fn default_attr() {
     #[builder]
     fn sut(
