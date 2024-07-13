@@ -50,6 +50,27 @@ fn smoke() {
 }
 
 #[test]
+fn expose_positional_fn_with_nested_params() {
+    #[builder(expose_positional_fn(name = positional))]
+    fn sut(arg1: bool, arg2: u32) -> (bool, u32) {
+        (arg1, arg2)
+    }
+
+    let actual = positional(true, 42);
+    assert_eq!(actual, (true, 42));
+}
+
+#[test]
+fn expose_positional_fn_simple() {
+    #[builder(expose_positional_fn = positional)]
+    fn sut(arg1: String) -> String {
+        arg1
+    }
+
+    assert_eq!(positional("arg1".to_owned()), "arg1");
+}
+
+#[test]
 fn required_attr() {
     #[builder]
     fn sut(#[builder(required)] bool: bool, _option: Option<String>) -> bool {
@@ -223,6 +244,10 @@ fn constructor() {
     let counter = Counter::builder().initial(3).build();
 
     assert_eq!(counter.val, 3);
+
+    let counter = Counter::new(Some(32));
+
+    assert_eq!(counter.val, 32);
 }
 
 #[test]

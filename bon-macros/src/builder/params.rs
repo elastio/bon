@@ -18,10 +18,10 @@ impl FromMeta for ItemParams {
     fn from_meta(meta: &syn::Meta) -> Result<Self> {
         if let syn::Meta::NameValue(meta) = meta {
             let val = &meta.value;
-            let ident = syn::parse2(quote!(#val))?;
+            let name = syn::parse2(quote!(#val))?;
 
             return Ok(Self {
-                name: Some(ident),
+                name: Some(name),
                 vis: None,
             });
         }
@@ -33,6 +33,7 @@ impl FromMeta for ItemParams {
         }
 
         let full = Full::from_meta(meta)?;
+
         let me = Self {
             name: full.name,
             vis: full.vis,

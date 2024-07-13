@@ -14,23 +14,20 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
 
     let (other_items, builder_funcs): (Vec<_>, Vec<_>) =
         orig_impl_block.items.into_iter().partition_map(|item| {
-            let syn::ImplItem::Fn(mut fn_item) = item else {
+            let syn::ImplItem::Fn(fn_item) = item else {
                 return Either::Left(item);
             };
 
-            // TODO: fix, there may be many `#[builder]` attributes
-            let builder_attr_index = fn_item
+            let has_builder_attr = fn_item
                 .attrs
                 .iter()
-                .position(|attr| attr.path().is_ident("builder"));
+                .any(|attr| attr.path().is_ident("builder"));
 
-            let Some(builder_attr_index) = builder_attr_index else {
-                return Either::Left(syn::ImplItem::Fn(fn_item));
-            };
-
-            fn_item.attrs.remove(builder_attr_index);
-
-            Either::Right(syn::ImplItem::Fn(fn_item))
+            if has_builder_attr {
+                Either::Right(syn::ImplItem::Fn(fn_item))
+            } else {
+                Either::Left(syn::ImplItem::Fn(fn_item))
+            }
         });
 
     if builder_funcs.is_empty() {
@@ -109,9 +106,9 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
         .try_collect()?;
 
     let new_impl_items = outputs.iter().flat_map(|(adapted_func, output)| {
-        let entry_func = &output.start_func;
+        let start_func = &output.start_func;
         [
-            syn::parse_quote!(#entry_func),
+            syn::parse_quote!(#start_func),
             syn::parse_quote!(#adapted_func),
         ]
     });

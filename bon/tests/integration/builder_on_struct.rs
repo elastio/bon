@@ -14,6 +14,7 @@ fn smoke() {
         bool: bool,
 
         str_ref: &'a str,
+
         string: String,
 
         #[builder(default)]
@@ -43,7 +44,7 @@ fn smoke() {
             bool: true,
             str_ref: "str_ref",
             string: "string",
-            u32: 42,
+            u32: 0,
             option_u32: Some(
                 42,
             ),
