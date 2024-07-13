@@ -4,6 +4,7 @@ use prox::prelude::*;
 use quote::quote;
 use syn::spanned::Spanned;
 
+#[derive(Debug)]
 pub(crate) struct Field {
     /// Original name of the field is used as the name of the builder field and
     /// in its setter methods. Field names conventionally use snake_case in Rust,
@@ -30,7 +31,7 @@ pub(crate) struct Field {
     pub(crate) params: FieldParams,
 }
 
-#[derive(darling::FromAttributes)]
+#[derive(Debug, darling::FromAttributes)]
 #[darling(attributes(builder))]
 pub(crate) struct FieldParams {
     /// Overrides the decision to use `Into` for the setter method.
@@ -60,7 +61,7 @@ impl Field {
     ) -> Result<Self> {
         let docs = attrs.iter().filter(|attr| attr.is_doc()).cloned().collect();
 
-        let params = FieldParams::from_attributes(&attrs)?;
+        let params = FieldParams::from_attributes(attrs)?;
 
         let me = Self {
             state_assoc_type_ident: ident.to_pascal_case(),

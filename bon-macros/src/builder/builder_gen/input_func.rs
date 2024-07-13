@@ -354,6 +354,6 @@ impl Field {
             );
         };
 
-        Field::new(&pat.attrs, pat.ident.clone(), arg.ty.clone())
+        Field::new(&arg.attrs, pat.ident.clone(), arg.ty.clone())
     }
 }

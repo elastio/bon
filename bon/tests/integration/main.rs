@@ -62,7 +62,7 @@ fn required_attr() {
 #[test]
 fn default_attr() {
     #[builder]
-    fn sut(
+    fn sut_default_test(
         #[builder(default)] arg1: u32,
         #[builder(default = 42)] arg2: u32,
         #[builder(default = "default".to_owned())] arg3: String,
@@ -71,7 +71,7 @@ fn default_attr() {
         (arg1, arg2, arg3, arg4)
     }
 
-    let actual = sut().call();
+    let actual = sut_default_test().call();
 
     assert_eq!(actual, (0, 42, "default".to_owned(), vec![42]));
 }

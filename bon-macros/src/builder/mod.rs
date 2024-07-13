@@ -10,7 +10,7 @@ use darling::FromMeta;
 use prox::prelude::*;
 
 pub(crate) fn generate_for_item(params: TokenStream2, item: syn::Item) -> Result<TokenStream2> {
-    let params = &darling::ast::NestedMeta::parse_meta_list(params.into())?;
+    let params = &darling::ast::NestedMeta::parse_meta_list(params)?;
 
     match item {
         syn::Item::Fn(item) => item_func::generate(FromMeta::from_list(params)?, item),

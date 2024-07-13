@@ -2,15 +2,14 @@ use super::builder_gen::input_struct::{StructInputCtx, StructInputParams};
 use super::builder_gen::MacroOutput;
 use prox::prelude::*;
 use quote::quote;
-use syn::visit_mut::VisitMut;
 
 pub(crate) fn generate(
     params: StructInputParams,
     orig_struct: syn::ItemStruct,
 ) -> Result<TokenStream2> {
-    let ctx = StructInputCtx::new {
-        params,
-    };
+    let ctx = StructInputCtx::new(params, orig_struct);
+
+    let adapted_struct = ctx.adapted_struct();
 
     let MacroOutput {
         start_func,
@@ -20,6 +19,6 @@ pub(crate) fn generate(
     Ok(quote! {
         #start_func
         #other_items
-        #orig_struct
+        #adapted_struct
     })
 }

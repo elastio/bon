@@ -55,9 +55,9 @@ pub(crate) trait FinishFuncBody {
     fn gen(&self, field_exprs: &[FieldExpr<'_>]) -> TokenStream2;
 }
 
-struct FieldExpr<'a> {
-    field: &'a Field,
-    expr: TokenStream2,
+pub(crate) struct FieldExpr<'a> {
+    pub(crate) field: &'a Field,
+    pub(crate) expr: TokenStream2,
 }
 
 pub(crate) struct Generics {
