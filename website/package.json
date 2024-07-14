@@ -1,14 +1,15 @@
 {
   "name": "bon-website",
   "private": true,
-  "description": "Website for bon's documentation, blog posts and anything else",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "docs:dev": "vitepress dev",
-    "docs:build": "vitepress build",
-    "docs:preview": "vitepress preview"
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
   },
   "devDependencies": {
+    "gray-matter": "^4.0.3",
+    "remove-markdown": "^0.5.0",
     "vitepress": "^1.3.1"
   }
 }
