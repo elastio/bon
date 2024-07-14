@@ -143,7 +143,14 @@ impl FuncInputCtx {
         let params = self.params.expose_positional_fn.as_ref();
 
         orig.vis = params
-            .and_then(|params| params.vis.clone())
+            .map(|params| {
+                params
+                    .vis
+                    .clone()
+                    // If exposing of positional fn is enabled without an explicit
+                    // visibility, then just use the visibility of the original function.
+                    .unwrap_or_else(|| self.norm_func.vis.clone())
+            })
             // By default we change the positional function's visibility to private
             // to avoid exposing it to the surrounding code. The surrounding code is
             // supposed to use this function through the builder only.
