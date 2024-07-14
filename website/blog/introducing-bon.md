@@ -1,8 +1,4 @@
 ---
-sidebar: false
-prev: false
-next: false
-
 title: 'Introducing bon'
 date: 2024-07-14
 author: Veetaha

@@ -10,15 +10,15 @@ hero:
     src: /bon-logo-medium.png
   actions:
     - theme: brand
-      text: API docs
-      link: /api-dics
+      text: Docs
+      link: /docs/guide/overview
     - theme: alt
       text: Blog
       link: /blog
 
 features:
   - title: Great ergonomics
-    details: Focused on good IDE experience, simple and readable macro-generated code.
+    details: Focused on good IDE experience, simple and readable macro-generated method signatures.
   - title: Zero boilerlate
     details: No configuration is needed most of the time. Default behaviors match 99% of use cases.
   - title: Customizable

@@ -1,4 +1,4 @@
-import { defineConfig, useData } from "vitepress";
+import { defineConfig } from "vitepress";
 
 const base = "/bon/";
 
@@ -7,7 +7,9 @@ export default defineConfig({
   title: "Bon",
   description:
     "Batteries-included tools for building and reshaping Rust data structures",
+
   cleanUrls: true,
+
   markdown: {
     theme: {
       dark: "dark-plus",
@@ -28,17 +30,32 @@ export default defineConfig({
 
     // https://vitepress.dev/reference/default-theme-config
     nav: [
-      { text: "API docs", link: "/api-docs/" },
-      { text: "Blog", link: "/blog/" },
+      { text: "Docs", link: "/docs/guide/overview" },
+      { text: "Blog", link: "/blog" },
     ],
 
-    sidebar: [
-      {
-        text: "API docs",
-        items: [
-        ],
-      },
-    ],
+    sidebar: {
+      "/docs": [
+        {
+          text: "Guide",
+          items: [
+            {
+              text: "Overview",
+              link: "/docs/guide/overview"
+            }
+          ]
+        },
+        {
+          text: "Reference",
+          items: [
+            {
+              text: "#[builder] macro",
+              link: "/docs/reference/builder",
+            },
+          ],
+        },
+      ],
+    },
 
     socialLinks: [{ icon: "github", link: "https://github.com/elastio/bon" }],
   },
