@@ -369,3 +369,11 @@ fn generics_with_lifetimes() {
 
     sut().arg(&&&&&&&&&&42).call();
 }
+
+#[test]
+fn const_function() {
+    #[builder]
+    const fn foo(arg: u32) {}
+
+    foo().arg(42).call();
+}

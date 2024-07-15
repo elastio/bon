@@ -247,6 +247,8 @@ impl<'a> FieldSettersCtx<'a> {
         }
     }
 
+    // XXX: this behavior is heavily documented in `into-conversions.md`. Please
+    // keep the docs and the implementation in sync.
     fn qualifies_for_into(&self, ty: &syn::Type) -> bool {
         // User override takes the wheel entirely
         if let Some(user_override) = self.field.params.into {

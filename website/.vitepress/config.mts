@@ -9,6 +9,7 @@ export default defineConfig({
     "Batteries-included tools for building and reshaping Rust data structures",
 
   cleanUrls: true,
+  lastUpdated: true,
 
   markdown: {
     theme: {
@@ -26,6 +27,14 @@ export default defineConfig({
 
     outline: 'deep',
 
+    lastUpdated: {
+      formatOptions: {
+        dateStyle: "long",
+        timeStyle: undefined,
+        forceLocale: false,
+      }
+    },
+
     search: {
       provider: "local",
     },
@@ -34,6 +43,10 @@ export default defineConfig({
     nav: [
       { text: "Docs", link: "/docs/guide/overview" },
       { text: "Blog", link: "/blog" },
+    ],
+
+    socialLinks: [
+      { icon: "github", link: "https://github.com/elastio/bon" }
     ],
 
     sidebar: {
@@ -46,13 +59,17 @@ export default defineConfig({
               link: "/docs/guide/overview"
             },
             {
+              text: "Into conversions",
+              link: "/docs/guide/into-conversions"
+            },
+            {
               text: "Limitations",
               link: "/docs/guide/limitations"
             },
             {
               text: "Alternatives",
               link: "/docs/guide/alternatives"
-            }
+            },
           ]
         },
         {
@@ -61,12 +78,25 @@ export default defineConfig({
             {
               text: "#[builder]",
               link: "/docs/reference/builder",
+              collapsed: false,
+              items: [
+                {
+                  text: "Attributes applicability",
+                  link: "/docs/reference/builder#attributes-applicability"
+                },
+                {
+                  text: "finish_fn",
+                  link: "/docs/reference/builder#finish-fn"
+                },
+                {
+                  text: "into",
+                  link: "/docs/reference/builder#into"
+                }
+              ]
             },
           ],
         },
       ],
     },
-
-    socialLinks: [{ icon: "github", link: "https://github.com/elastio/bon" }],
   },
 });

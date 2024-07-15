@@ -1,12 +1,12 @@
 # Limitations
 
-Every tool has its constraints, and `bon` is not an exception. The limitations described below shouldn't generally occur in your day-to-day code, and if they do, there are ways to work around them. If you feel that some of the limitations are unacceptable, feel free to open an [issue](https://github.com/elastio/bon/issues) so we consider relaxing some of them.
+Every tool has its constraints, and `bon` is not an exception. The limitations described below shouldn't generally occur in your day-to-day code, and if they do, there are ways to work around them. If you feel that some of the limitations are unacceptable, feel free to [open an issue] so we consider relaxing some of them.
 
 ## `#[builder]`
 
 ### Destructuring patterns
 
-Function parameters must be simple identifiers that will be turned into setter methods. Destructuring in function parameters position complicates this logic and thus is rejected by `#[builder]` macro.
+Function parameters must be simple identifiers that will be turned into setter methods. Destructuring in function parameters position complicates this logic and thus is rejected by the `#[builder]` macro.
 
 For example, this generates a compile error:
 
@@ -27,7 +27,7 @@ fn foo(point: (u32, u32)) { // [!code highlight]
 }
 ```
 
-This limitation may be relaxed in the future by adding a new argument-level attribute that lets developers override a name for the setter method.
+This limitation may be relaxed in the future by adding a new argument-level attribute that lets developers override the name for the setter method.
 
 
 ### Intra-doc links to `Self` on setter methods
@@ -53,3 +53,11 @@ impl Foo {
     ) {}
 }
 ```
+
+### `const` functions
+
+It's possible to place `#[builder]` on top of a `const fn`, but the generated builder methods won't be marked `const`. Under [some conditions](into-conversions#types-that-qualify-for-an-automatic-into-conversion), the generated setter methods make use of the `Into::into` method, which isn't `const`. Except for that, the generated code should be `const`-compatible.
+
+If you have a strong use case that requires full support for `const`, feel free to [open an issue]. We'll figure something out for sure 🐱.
+
+[open an issue]: https://github.com/elastio/bon/issues
