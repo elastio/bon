@@ -24,6 +24,8 @@ export default defineConfig({
   themeConfig: {
     logo: "/bon-logo-thumb.png",
 
+    outline: 'deep',
+
     search: {
       provider: "local",
     },

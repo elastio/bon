@@ -1,3 +1,5 @@
+mod expose_positional_fn;
+
 use bon::{bon, builder};
 use std::collections::BTreeSet;
 use std::num::NonZeroU32;
@@ -47,27 +49,6 @@ fn smoke() {
         .call();
 
     assert_eq!(actual, "arg3");
-}
-
-#[test]
-fn expose_positional_fn_with_nested_params() {
-    #[builder(expose_positional_fn(name = positional))]
-    fn sut(arg1: bool, arg2: u32) -> (bool, u32) {
-        (arg1, arg2)
-    }
-
-    let actual = positional(true, 42);
-    assert_eq!(actual, (true, 42));
-}
-
-#[test]
-fn expose_positional_fn_simple() {
-    #[builder(expose_positional_fn = positional)]
-    fn sut(arg1: String) -> String {
-        arg1
-    }
-
-    assert_eq!(positional("arg1".to_owned()), "arg1");
 }
 
 #[test]
@@ -234,7 +215,7 @@ fn constructor() {
     #[bon]
     impl Counter {
         #[builder(expose_positional_fn = new)]
-        fn builder(initial: Option<u32>) -> Self {
+        fn new(initial: Option<u32>) -> Self {
             Self {
                 val: initial.unwrap_or_default(),
             }

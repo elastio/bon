@@ -200,7 +200,7 @@ impl BuilderGenCtx {
         // generic type parameter to the builder type at all if it has no fields, but
         // to keep code simpler we just do this one small crutch here for a really
         // unlikely case of a builder with zero fields.
-        let state = self.fields.is_empty().then(|| quote! { __State });
+        let state = self.fields.is_empty().then(|| quote! { __State, });
 
         Some(quote! {
             ::core::marker::PhantomData<(

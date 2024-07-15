@@ -17,7 +17,7 @@ pub(crate) fn generate(params: FuncInputParams, orig_func: syn::ItemFn) -> Resul
         params,
     };
 
-    let adapted_func = ctx.adapted_func();
+    let adapted_func = ctx.adapted_func()?;
 
     let MacroOutput {
         start_func,

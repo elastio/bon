@@ -5,41 +5,50 @@ use crate::builder::builder_gen::{
 };
 use crate::builder::params::BuilderParams;
 use crate::normalization::NormalizeSelfTy;
+use darling::util::SpannedValue;
 use darling::FromMeta;
 use heck::AsPascalCase;
 use itertools::Itertools;
+use proc_macro2::Span;
 use prox::prelude::*;
 use quote::quote;
 use std::rc::Rc;
 use syn::punctuated::Punctuated;
+use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct FuncInputParams {
-    expose_positional_fn: Option<ExposePositionalFnParams>,
+    expose_positional_fn: Option<SpannedValue<ExposePositionalFnParams>>,
 
     #[darling(flatten)]
     base: BuilderParams,
 }
 
-#[derive(Debug)]
-pub(crate) struct ExposePositionalFnParams {
-    pub(crate) name: syn::Ident,
-    pub(crate) vis: Option<syn::Visibility>,
+#[derive(Debug, Default)]
+struct ExposePositionalFnParams {
+    name: Option<syn::Ident>,
+    vis: Option<syn::Visibility>,
 }
 
 impl FromMeta for ExposePositionalFnParams {
     fn from_meta(meta: &syn::Meta) -> Result<Self> {
-        if let syn::Meta::NameValue(meta) = meta {
-            let val = &meta.value;
-            let name = syn::parse2(quote!(#val))?;
+        match meta {
+            syn::Meta::Path(_) => {
+                return Ok(Self::default());
+            }
+            syn::Meta::NameValue(meta) => {
+                let val = &meta.value;
+                let name = syn::parse2(quote!(#val))?;
 
-            return Ok(Self { name, vis: None });
+                return Ok(Self { name, vis: None });
+            }
+            syn::Meta::List(_) => {}
         }
 
         #[derive(Debug, FromMeta)]
         struct Full {
-            name: syn::Ident,
+            name: Option<syn::Ident>,
             vis: Option<syn::Visibility>,
         }
 
@@ -137,7 +146,7 @@ impl FuncInputCtx {
         )
     }
 
-    pub(crate) fn adapted_func(&self) -> syn::ItemFn {
+    pub(crate) fn adapted_func(&self) -> Result<syn::ItemFn> {
         let mut orig = self.orig_func.clone();
 
         let params = self.params.expose_positional_fn.as_ref();
@@ -160,8 +169,30 @@ impl FuncInputCtx {
             .unwrap_or(syn::Visibility::Inherited);
 
         let orig_ident = orig.sig.ident.clone();
+
+        if let Some(params) = params {
+            let has_no_value = matches!(
+                params.as_ref(),
+                ExposePositionalFnParams {
+                    name: None,
+                    vis: None,
+                }
+            );
+
+            if has_no_value && !self.is_method_new() {
+                prox::bail!(
+                    &params.span(),
+                    "Positional function identifier is required. It must be \
+                    specified with `#[builder(expose_positional_fn = function_name_here)]`"
+                )
+            }
+        }
+
         orig.sig.ident = params
-            .map(|params| params.name.clone())
+            .and_then(|params| params.name.clone())
+            // We treat `new` method specially. In this case we already know the best
+            // default name for the positional function, which is `new` itself.
+            .or_else(|| self.is_method_new().then_some(orig.sig.ident))
             // By default we don't want to expose the positional function, so we
             // hide it under a generated name to avoid name conflicts.
             .unwrap_or_else(|| quote::format_ident!("__orig_{}", orig_ident.to_string()));
@@ -198,20 +229,37 @@ impl FuncInputCtx {
         orig.attrs
             .push(syn::parse_quote!(#[allow(clippy::too_many_arguments)]));
 
-        orig
+        Ok(orig)
+    }
+
+    fn is_method_new(&self) -> bool {
+        self.impl_ctx.is_some() && self.norm_func.sig.ident == "new"
     }
 
     pub(crate) fn into_builder_gen_ctx(self) -> Result<BuilderGenCtx> {
         let receiver = self.receiver_ctx();
-        if let Some(receiver) = &receiver {
-            if self.impl_ctx.is_none() {
+
+        if self.impl_ctx.is_none() {
+            let explanation = "\
+                but #[bon] attribute \
+                is absent on top of the impl block. This additional #[bon] \
+                attribute on the impl block is required for the macro to see \
+                the type of `Self` and properly generate the builder struct \
+                definition adjacently to the impl block.";
+
+            if let Some(receiver) = &self.orig_func.sig.receiver() {
                 prox::bail!(
-                    &receiver.with_self_ty.self_token,
-                    "Function contains a `self` parameter, but #[bon] attribute \
-                    is absent on top of the impl block. This additional #[bon] \
-                    attribute on the impl block is required for the macro to see \
-                    the type of `Self` and properly generate the builder struct \
-                    definition adjacently to the impl block."
+                    &receiver.self_token,
+                    "Function contains a `self` parameter {explanation}"
+                );
+            }
+
+            let mut ctx = FindSelfReference::default();
+            ctx.visit_item_fn(&self.orig_func);
+            if let Some(self_span) = ctx.self_span {
+                prox::bail!(
+                    &self_span,
+                    "Function contains a `Self` type reference {explanation}"
                 );
             }
         }
@@ -232,20 +280,23 @@ impl FuncInputCtx {
         let generics = self.generics();
 
         let finish_func_body = FnCallBody {
-            func: self.adapted_func(),
+            func: self.adapted_func()?,
             impl_ctx: self.impl_ctx.clone(),
         };
 
-        let start_func_ident = self.norm_func.sig.ident;
+        let is_method_new = self.is_method_new();
+
+        // Special case for `new` methods. We rename them to `builder`
+        // since this is the name that is used in the builder pattern
+        let start_func_ident = if is_method_new {
+            syn::Ident::new("builder", self.norm_func.sig.ident.span())
+        } else {
+            self.norm_func.sig.ident.clone()
+        };
 
         let finish_func_ident = self.params.base.finish_fn.unwrap_or_else(|| {
-            let name = if self.impl_ctx.is_some() && receiver.is_none() {
-                // Associated methods of an impl block without the receiver likely create an instance of
-                // `Self` so we have a bit different convention for default exit function name in this case.
-                "build"
-            } else {
-                "call"
-            };
+            // For `new` methods the `build` finisher is more conventional
+            let name = if is_method_new { "build" } else { "call" };
 
             syn::Ident::new(name, start_func_ident.span())
         });
@@ -388,11 +439,40 @@ impl Field {
             // attributes and relax this requirement
             prox::bail!(
                 &arg.pat,
-                "Only simple identifiers in function arguments supported \
-                to infer the name of builder methods"
+                "Only simple identifiers in function arguments are supported. \
+                Parameter names influence the setter method names. If you need \
+                to destructure a function parameter, then do it inside of \
+                the function body."
             );
         };
 
         Field::new(&arg.attrs, pat.ident.clone(), arg.ty.clone())
+    }
+}
+
+#[derive(Default)]
+struct FindSelfReference {
+    self_span: Option<Span>,
+}
+
+impl Visit<'_> for FindSelfReference {
+    fn visit_item(&mut self, _: &syn::Item) {
+        // Don't recurse into nested items. We are interested in the reference
+        // to `Self` on the current item level
+    }
+
+    fn visit_path(&mut self, path: &syn::Path) {
+        if self.self_span.is_some() {
+            return;
+        }
+        syn::visit::visit_path(self, path);
+
+        let Some(first_segment) = path.segments.first() else {
+            return;
+        };
+
+        if first_segment.ident == "Self" {
+            self.self_span = Some(first_segment.ident.span());
+        }
     }
 }

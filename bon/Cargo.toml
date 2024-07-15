@@ -15,3 +15,4 @@ bon-macros = { workspace = true }
 [dev-dependencies]
 expect-test = "1.5"
 tokio       = { version = "1.0", features = ["macros", "rt-multi-thread"] }
+trybuild    = "1.0"
