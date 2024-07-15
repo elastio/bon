@@ -35,6 +35,11 @@ export default defineConfig({
       }
     },
 
+    editLink: {
+      pattern: "https://github.com/elastio/bon/edit/master/website/:path",
+      text: "Edit this page on GitHub",
+    },
+
     search: {
       provider: "local",
     },
