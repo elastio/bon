@@ -1,0 +1,20 @@
+[package]
+name = "sandbox"
+
+publish = false
+
+description = """
+    A sandbox for manual testing the `bon` crate. For example it's used to check
+    the quality of the documentation produced by `cargo doc` for the macro-generated
+    APIs.
+"""
+
+edition = { workspace = true }
+version = { workspace = true }
+
+
+[lints]
+workspace = true
+
+[dependencies]
+bon = { workspace = true }

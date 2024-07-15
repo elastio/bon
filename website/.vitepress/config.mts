@@ -44,6 +44,14 @@ export default defineConfig({
             {
               text: "Overview",
               link: "/docs/guide/overview"
+            },
+            {
+              text: "Limitations",
+              link: "/docs/guide/limitations"
+            },
+            {
+              text: "Alternatives",
+              link: "/docs/guide/alternatives"
             }
           ]
         },
@@ -51,7 +59,7 @@ export default defineConfig({
           text: "Reference",
           items: [
             {
-              text: "#[builder] macro",
+              text: "#[builder]",
               link: "/docs/reference/builder",
             },
           ],

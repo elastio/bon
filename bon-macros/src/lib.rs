@@ -3,7 +3,7 @@
 //! unstable, and your code may break if you do. Instead use the proc macros from here
 //! via the reexports in the [`bon`] crate.
 //!
-//! [`bon``]: https://docs.rs/bon
+//! [`bon`]: https://docs.rs/bon
 
 mod bon;
 mod builder;

@@ -77,6 +77,8 @@ impl Field {
     }
 
     fn validate(&self) -> Result {
+        super::reject_self_references_in_docs(&self.docs)?;
+
         if let Some(default) = &self.params.default {
             let ty = if self.ty.is_option() {
                 Some("Option")

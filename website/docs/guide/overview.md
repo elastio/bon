@@ -72,7 +72,7 @@ assert_eq!(counter.val, 6);
 
 There are a couple of technical reasons.
 
-First of all, it's the lack of surrounding context given to a proc macro in Rust. A proc macro sees only the syntax it is placed on top of. For example, the `#[builder]` macro inside of the `impl` block can't see the `for Counter` part of the impl block above it. However, it needs that information.
+First of all, it's the lack of surrounding context given to a proc macro in Rust. A proc macro sees only the syntax it is placed on top of. For example, the `#[builder]` macro inside of the `impl` block can't see the `impl Counter` part of the impl block above it. However, it needs that information to tell the actual type of `Self`.
 
 Second, `#[builder]` proc macro generates new items such as the builder struct type definition, which it needs to output **adjecently** to the `impl` block itself. However, proc macros in Rust can only modify the part of the syntax they are placed on and generate new items on the same level of nesting. The `#[builder]` macro inside of the impl block can't just break out of it.
 
@@ -145,29 +145,6 @@ All of the following is supported.
       fn bar() {}
   }
   ```
-
-### Limitations
-
-Function parameters must be simple identifiers that will be turned into setter methods. Destructuring in function parameters position complicates this logic and thus is rejected by `#[builder]` macro.
-
-For example, this generates a compile error:
-
-```rust
-#[builder]
-fn foo((x, y): (u32, u32)) { // [!code error]
-    // ...
-}
-```
-
-If you need to destructure your arguments, then do it separately inside of the function body.
-
-```rust
-#[builder]
-fn foo(point: (u32, u32)) { // [!code highlight]
-    let (x, y) = point;               // [!code highlight]
-    // ...
-}
-```
 
 ## References
 

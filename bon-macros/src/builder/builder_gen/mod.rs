@@ -138,8 +138,6 @@ impl BuilderGenCtx {
         let field_idents = self.field_idents();
         let phantom_field_init = self.phantom_field_init();
 
-        let unset_state_types = self.unset_state_types();
-
         let receiver = self
             .receiver
             .as_ref()
@@ -157,7 +155,6 @@ impl BuilderGenCtx {
                 #receiver
             ) -> #builder_ident<
                 #(#generic_args,)*
-                (#(#unset_state_types,)*)
             >
             #where_clause
             {
@@ -265,6 +262,7 @@ impl BuilderGenCtx {
         let generics_decl = &self.generics.params;
         let where_clause = &self.generics.where_clause;
         let generic_args = self.generic_args();
+        let unset_state_types = self.unset_state_types();
 
         let phantom_field = self.phantom_data().map(|phantom_data| {
             quote! {
@@ -282,15 +280,7 @@ impl BuilderGenCtx {
         quote! {
             #vis struct #builder_ident<
                 #(#generics_decl,)*
-
-                // We could set default values for `fields_states_vars` here
-                // to their initial unset states, but we don't do that and
-                // pass these generic params explicitly to workaround the following
-                // bug in rust-analyzer where it stops providing completions for
-                // builder methods completely if we rely on default generic type
-                // params values. See the issue in rust-analyzer for details:
-                // https://github.com/rust-lang/rust-analyzer/issues/17515
-                __State: #builder_state_trait_ident,
+                __State: #builder_state_trait_ident = (#(#unset_state_types,)*),
             >
             #where_clause
             {
@@ -460,4 +450,32 @@ pub(crate) fn generic_param_to_arg(param: &syn::GenericParam) -> syn::GenericArg
             syn::GenericArgument::Const(syn::parse_quote!(#ident))
         }
     }
+}
+
+fn reject_self_references_in_docs(docs: &[syn::Attribute]) -> Result {
+    for doc in docs {
+        let Some(doc) = &doc.as_doc() else { continue };
+
+        let syn::Expr::Lit(doc) = &doc else { continue };
+
+        let syn::Lit::Str(doc) = &doc.lit else {
+            continue;
+        };
+
+        let self_references = ["[`Self`]", "[Self]"];
+
+        if self_references
+            .iter()
+            .any(|self_ref| doc.value().contains(self_ref))
+        {
+            prox::bail!(
+                &doc.span(),
+                "The documentation for the field should not reference `Self` \
+                because it will be moved to the builder struct context where \
+                `Self` changes meaning. Use explicit type names instead.",
+            );
+        }
+    }
+
+    Ok(())
 }
