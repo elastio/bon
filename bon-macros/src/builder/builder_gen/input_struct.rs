@@ -1,5 +1,5 @@
-use crate::builder::builder_gen::{
-    BuilderGenCtx, Field, FieldExpr, FinishFunc, FinishFuncBody, Generics, StartFunc,
+use super::{
+    BuilderGenCtx, Field, FieldExpr, FieldOrigin, FinishFunc, FinishFuncBody, Generics, StartFunc,
 };
 use crate::builder::params::{BuilderParams, ItemParams};
 use darling::FromMeta;
@@ -188,6 +188,11 @@ impl Field {
             )
         })?;
 
-        Field::new(&field.attrs, ident, Box::new(field.ty.clone()))
+        Field::new(
+            FieldOrigin::StructField,
+            &field.attrs,
+            ident,
+            Box::new(field.ty.clone()),
+        )
     }
 }

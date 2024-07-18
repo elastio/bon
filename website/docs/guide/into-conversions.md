@@ -22,7 +22,7 @@ let user = User::new("Bon".to_owned());
 
 That `.to_owned()` call is just boilerplate that we'd like to avoid. A common workaround for this problem is to let the function accept `impl Into<String>`.
 
-```rust
+```rust ignore
 struct User {
     name: String,
 }
@@ -90,7 +90,7 @@ fn make_user(name: String) -> User {
 
 let user = make_user()
     .name("Bon") // [!code highlight]
-    .build();
+    .call();
 ```
 
 :::
@@ -113,12 +113,12 @@ The following list describes the types that don't qualify for an automatic `Into
 
     First, it's because `impl Into` breaks type inference for numeric literal values. For example, the following code doesn't compile.
 
-    ```rust
+    ```rust compile_fail
     fn half(x: impl Into<u32>) -> u32 {
         x.into() / 2
     }
 
-    half(10);
+    half(10); // [!code error]
     ```
 
     The compile error is the following ([Rust playground link](https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=6b1b38e0de6f7747dc1ea3975fcffc06)):

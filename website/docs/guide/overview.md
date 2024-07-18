@@ -56,7 +56,7 @@ impl Counter {
     }
 }
 
-let counter = Counter::builder()
+let mut counter = Counter::builder()
     .initial(3)
     .build();
 

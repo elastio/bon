@@ -1,5 +1,5 @@
 [workspace]
-members  = ["bon", "bon-macros", "sandbox"]
+members  = ["bon", "bon-macros", "e2e-tests"]
 resolver = "2"
 
 [workspace.package]

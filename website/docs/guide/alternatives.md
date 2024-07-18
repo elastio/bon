@@ -4,7 +4,7 @@ There are several other existing alternative crates that generate builders. `bon
 
 TODO: convert the following experiments into a documentation
 
-```rust
+```ignore_for_now
 use typed_builder::TypedBuilder;
 
 #[derive(TypedBuilder, Clone, Debug)]

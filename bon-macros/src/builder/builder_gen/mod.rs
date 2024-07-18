@@ -89,12 +89,12 @@ impl BuilderGenCtx {
         self.generics.params.iter().map(generic_param_to_arg)
     }
 
-    pub(crate) fn output(self) -> MacroOutput {
+    pub(crate) fn output(self) -> Result<MacroOutput> {
         let start_func = self.start_func();
         let builder_state_trait_decl = self.builder_state_trait_decl();
         let builder_decl = self.builder_decl();
-        let call_method_impl = self.finish_method_impl();
-        let setter_methods_impls = self.setter_methods_impls();
+        let call_method_impl = self.finish_method_impl()?;
+        let setter_methods_impls = self.setter_methods_impls()?;
 
         let other_items = quote! {
             #builder_state_trait_decl
@@ -103,10 +103,10 @@ impl BuilderGenCtx {
             #setter_methods_impls
         };
 
-        MacroOutput {
+        Ok(MacroOutput {
             start_func,
             other_items,
-        }
+        })
     }
 
     fn start_func_generics(&self) -> &Generics {
@@ -240,9 +240,11 @@ impl BuilderGenCtx {
     fn builder_state_trait_decl(&self) -> TokenStream2 {
         let trait_ident = &self.builder_state_trait_ident;
         let assoc_types_idents = self.field_assoc_type_idents().collect_vec();
+        let vis = &self.vis;
 
         quote! {
-            trait #trait_ident {
+            #[doc(hidden)]
+            #vis trait #trait_ident {
                 #( type #assoc_types_idents; )*
             }
 
@@ -357,35 +359,51 @@ impl BuilderGenCtx {
         }
     }
 
-    fn finish_method_impl(&self) -> TokenStream2 {
-        let field_exprs = self.fields.iter().map(|field| {
-            let maybe_default = field
-                .as_optional()
-                // For `Option` fields we don't need any `unwrap_or_[else/default]`.
-                // We pass them directly to the function unchanged.
-                .filter(|_| !field.ty.is_option())
-                .map(|_| {
-                    field
-                        .params
-                        .default
-                        .as_ref()
-                        .and_then(|val| val.as_ref().as_ref())
-                        .map(|default| quote! { .unwrap_or_else(|| #default) })
-                        .unwrap_or_else(|| quote! { .unwrap_or_default() })
-                });
+    fn field_expr<'f>(&self, field: &'f Field) -> Result<FieldExpr<'f>> {
+        let maybe_default = field
+            .as_optional()
+            // For `Option` fields we don't need any `unwrap_or_[else/default]`.
+            // We pass them directly to the function unchanged.
+            .filter(|_| !field.ty.is_option())
+            .map(|_| {
+                field
+                    .params
+                    .default
+                    .as_ref()
+                    .and_then(|val| val.as_ref().as_ref())
+                    .map(|default| {
+                        let qualified_for_into = self.field_qualifies_for_into(field, &field.ty)?;
+                        let default = if qualified_for_into {
+                            quote! { std::convert::Into::into((|| #default)()) }
+                        } else {
+                            quote! { #default }
+                        };
 
-            let field_ident = &field.ident;
+                        Result::<_>::Ok(quote! { .unwrap_or_else(|| #default) })
+                    })
+                    .unwrap_or_else(|| Ok(quote! { .unwrap_or_default() }))
+            })
+            .transpose()?;
 
-            let expr = quote! {
-                bon::private::IntoSet::into_set(self.__private_impl.#field_ident)
-                    .into_inner()
-                    #maybe_default
-            };
+        let field_ident = &field.ident;
 
-            FieldExpr { field, expr }
-        });
+        let expr = quote! {
+            bon::private::IntoSet::into_set(self.__private_impl.#field_ident)
+                .into_inner()
+                #maybe_default
+        };
 
-        let body = &self.finish_func.body.gen(&field_exprs.collect_vec());
+        Ok(FieldExpr { field, expr })
+    }
+
+    fn finish_method_impl(&self) -> Result<TokenStream2> {
+        let field_exprs: Vec<_> = self
+            .fields
+            .iter()
+            .map(|field| self.field_expr(field))
+            .try_collect()?;
+
+        let body = &self.finish_func.body.gen(&field_exprs);
         let asyncness = &self.finish_func.asyncness;
         let unsafety = &self.finish_func.unsafety;
         let vis = &self.vis;
@@ -404,7 +422,7 @@ impl BuilderGenCtx {
             .into_iter()
             .flat_map(|where_clause| &where_clause.predicates);
 
-        quote! {
+        Ok(quote! {
             impl<
                 #(#generics_decl,)*
                 __State: #builder_state_trait_ident
@@ -425,10 +443,10 @@ impl BuilderGenCtx {
                     #body
                 }
             }
-        }
+        })
     }
 
-    fn setter_methods_impls(&self) -> TokenStream2 {
+    fn setter_methods_impls(&self) -> Result<TokenStream2> {
         self.fields
             .iter()
             .map(|field| self.setter_methods_impls_for_field(field))

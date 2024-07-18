@@ -1,0 +1,27 @@
+[package]
+name = "e2e-tests"
+
+publish = false
+
+description = """
+    Crate for manual end-to-end testing the `bon` crate. For example it's used to check
+    the quality of the documentation produced by `cargo doc` for the macro-generated
+    APIs.
+
+    We also use this crate to test the code examples in the documentation in the `website`.
+"""
+
+edition = { workspace = true }
+version = { workspace = true }
+
+
+[lints]
+workspace = true
+
+[dependencies]
+bon = { workspace = true }
+
+[build-dependencies]
+heck      = { workspace = true }
+itertools = { workspace = true }
+walkdir   = "2.5"

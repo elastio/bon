@@ -22,7 +22,7 @@ pub(crate) fn generate(params: FuncInputParams, orig_func: syn::ItemFn) -> Resul
     let MacroOutput {
         start_func,
         other_items,
-    } = ctx.into_builder_gen_ctx()?.output();
+    } = ctx.into_builder_gen_ctx()?.output()?;
 
     Ok(quote! {
         #start_func

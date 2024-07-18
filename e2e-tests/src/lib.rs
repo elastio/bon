@@ -1,5 +1,10 @@
 use bon::{bon, builder};
 
+#[cfg(doctest)]
+mod website_doctests {
+    include!(concat!(env!("OUT_DIR"), "/website_doctests.rs"));
+}
+
 #[builder]
 pub struct Greeter {
     _name: String,
@@ -62,12 +67,12 @@ pub fn greet(
     ///
     /// **Example:**
     /// ```
-    /// greet().name("John");
+    /// e2e_tests::greet().name("John");
     /// ```
     name: &str,
 
     /// Age expressed in full years passed since the birth date.
-    age: u32
+    age: u32,
 ) -> String {
     format!("Hello {name} with age {age}!")
 }

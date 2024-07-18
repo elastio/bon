@@ -1,7 +1,6 @@
-use super::ReceiverCtx;
-use crate::builder::builder_gen::{
-    generic_param_to_arg, BuilderGenCtx, Field, FieldExpr, FinishFunc, FinishFuncBody, Generics,
-    StartFunc,
+use super::{
+    generic_param_to_arg, BuilderGenCtx, Field, FieldExpr, FieldOrigin, FinishFunc, FinishFuncBody,
+    Generics, ReceiverCtx, StartFunc,
 };
 use crate::builder::params::BuilderParams;
 use crate::normalization::NormalizeSelfTy;
@@ -439,14 +438,19 @@ impl Field {
             // attributes and relax this requirement
             prox::bail!(
                 &arg.pat,
-                "Only simple identifiers in function arguments are supported. \
-                Parameter names influence the setter method names. If you need \
-                to destructure a function parameter, then do it inside of \
+                "Only simple identifiers in function arguments are supported, \
+                because parameter names influence the setter method names. If you \
+                need to destructure a function parameter, then do it inside of \
                 the function body."
             );
         };
 
-        Field::new(&arg.attrs, pat.ident.clone(), arg.ty.clone())
+        Field::new(
+            FieldOrigin::FnArg,
+            &arg.attrs,
+            pat.ident.clone(),
+            arg.ty.clone(),
+        )
     }
 }
 

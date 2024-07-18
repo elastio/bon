@@ -1,11 +1,30 @@
 use darling::util::{Flag, SpannedValue};
-use darling::FromAttributes;
+use darling::{FromAttributes, FromMeta};
 use prox::prelude::*;
 use quote::quote;
+use std::fmt;
 use syn::spanned::Spanned;
 
 #[derive(Debug)]
+pub(crate) enum FieldOrigin {
+    FnArg,
+    StructField,
+}
+
+impl fmt::Display for FieldOrigin {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::FnArg => write!(f, "function argument"),
+            Self::StructField => write!(f, "struct field"),
+        }
+    }
+}
+
+#[derive(Debug)]
 pub(crate) struct Field {
+    /// Specifies what syntax the field comes from.
+    pub(crate) origin: FieldOrigin,
+
     /// Original name of the field is used as the name of the builder field and
     /// in its setter methods. Field names conventionally use snake_case in Rust,
     /// but this isn't enforced, so this field isn't guaranteed to be in snake case,
@@ -35,7 +54,7 @@ pub(crate) struct Field {
 #[darling(attributes(builder))]
 pub(crate) struct FieldParams {
     /// Overrides the decision to use `Into` for the setter method.
-    pub(crate) into: Option<bool>,
+    pub(crate) into: Option<SpannedValue<StrictBool>>,
 
     #[darling(with = "parse_optional_expression", map = "Some")]
     pub(crate) default: Option<SpannedValue<Option<syn::Expr>>>,
@@ -43,6 +62,33 @@ pub(crate) struct FieldParams {
     /// Makes the field required no matter what default treatment for such field
     /// is applied.
     pub(crate) required: Option<Flag>,
+}
+
+/// This primitive represents the syntax that accepts only two states:
+/// a word e.g. `#[attr(field)]` represents true, and an expression with
+/// `false` e.g. `#[attr(field = false)]` represents false. No other syntax
+/// is accepted. That's why it's called a "strict" bool.
+#[derive(Debug)]
+pub(crate) struct StrictBool {
+    pub(crate) value: bool,
+}
+
+impl FromMeta for StrictBool {
+    fn from_word() -> Result<Self> {
+        Ok(Self { value: true })
+    }
+
+    fn from_bool(value: bool) -> Result<Self> {
+        if !value {
+            return Ok(Self { value: false });
+        }
+
+        // Error span is set by default trait impl in the caller
+        Err(prox::Error::custom(format_args!(
+            "No need to write `= true`. Just mentioning the attribute is enough \
+            to set it to `true`, so remove the `= true` part.",
+        )))
+    }
 }
 
 fn parse_optional_expression(meta: &syn::Meta) -> Result<SpannedValue<Option<syn::Expr>>> {
@@ -55,6 +101,7 @@ fn parse_optional_expression(meta: &syn::Meta) -> Result<SpannedValue<Option<syn
 
 impl Field {
     pub(crate) fn new(
+        origin: FieldOrigin,
         attrs: &[syn::Attribute],
         ident: syn::Ident,
         ty: Box<syn::Type>,
@@ -64,6 +111,7 @@ impl Field {
         let params = FieldParams::from_attributes(attrs)?;
 
         let me = Self {
+            origin,
             state_assoc_type_ident: ident.to_pascal_case(),
             ident,
             ty,

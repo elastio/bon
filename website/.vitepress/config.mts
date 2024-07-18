@@ -25,14 +25,14 @@ export default defineConfig({
   themeConfig: {
     logo: "/bon-logo-thumb.png",
 
-    outline: 'deep',
+    outline: "deep",
 
     lastUpdated: {
       formatOptions: {
         dateStyle: "long",
         timeStyle: undefined,
         forceLocale: false,
-      }
+      },
     },
 
     editLink: {
@@ -50,9 +50,7 @@ export default defineConfig({
       { text: "Blog", link: "/blog" },
     ],
 
-    socialLinks: [
-      { icon: "github", link: "https://github.com/elastio/bon" }
-    ],
+    socialLinks: [{ icon: "github", link: "https://github.com/elastio/bon" }],
 
     sidebar: {
       "/docs": [
@@ -61,21 +59,21 @@ export default defineConfig({
           items: [
             {
               text: "Overview",
-              link: "/docs/guide/overview"
+              link: "/docs/guide/overview",
             },
             {
               text: "Into conversions",
-              link: "/docs/guide/into-conversions"
+              link: "/docs/guide/into-conversions",
             },
             {
               text: "Limitations",
-              link: "/docs/guide/limitations"
+              link: "/docs/guide/limitations",
             },
             {
               text: "Alternatives",
-              link: "/docs/guide/alternatives"
+              link: "/docs/guide/alternatives",
             },
-          ]
+          ],
         },
         {
           text: "Reference",
@@ -87,17 +85,21 @@ export default defineConfig({
               items: [
                 {
                   text: "Attributes applicability",
-                  link: "/docs/reference/builder#attributes-applicability"
+                  link: "/docs/reference/builder#attributes-applicability",
                 },
                 {
                   text: "finish_fn",
-                  link: "/docs/reference/builder#finish-fn"
+                  link: "/docs/reference/builder#finish-fn",
+                },
+                {
+                  text: "default",
+                  link: "/docs/reference/builder#default",
                 },
                 {
                   text: "into",
-                  link: "/docs/reference/builder#into"
-                }
-              ]
+                  link: "/docs/reference/builder#into",
+                },
+              ],
             },
           ],
         },

@@ -10,7 +10,9 @@ Function parameters must be simple identifiers that will be turned into setter m
 
 For example, this generates a compile error:
 
-```rust
+```rust compile_fail
+use bon::builder;
+
 #[builder]
 fn foo((x, y): (u32, u32)) { // [!code error]
     // ...
@@ -20,6 +22,8 @@ fn foo((x, y): (u32, u32)) { // [!code error]
 If you need to destructure your arguments, then do it separately inside of the function body.
 
 ```rust
+use bon::builder;
+
 #[builder]
 fn foo(point: (u32, u32)) { // [!code highlight]
     let (x, y) = point;     // [!code highlight]
@@ -38,7 +42,7 @@ Documentation placed on the original function arguments or struct fields is copi
 
 The following example doesn't compile with the reference to ``[`Self`]``. The fix is to replace that reference with the actual name of the struct ``[`Foo`]``.
 
-```rust
+```rust compile_fail
 use bon::bon;
 
 struct Foo;
@@ -48,7 +52,7 @@ impl Foo {
     #[builder]
     fn promote(
         /// Promotes [`Self`] to the level specified in this argument // [!code --]
-        /// Promotes [`Foo`] to the level specified in this argument // [!code ++]
+        /// Promotes [`Foo`] to the level specified in this argument  // [!code ++]
         new_level: String
     ) {}
 }

@@ -6,7 +6,7 @@ use quote::{quote, ToTokens};
 use std::collections::BTreeSet;
 
 impl BuilderGenCtx {
-    pub(crate) fn setter_methods_impls_for_field(&self, field: &Field) -> TokenStream2 {
+    pub(crate) fn setter_methods_impls_for_field(&self, field: &Field) -> Result<TokenStream2> {
         let output_fields_states = self.fields.iter().map(|other_field| {
             if other_field.ident == field.ident {
                 return field.set_state_type().to_token_stream();
@@ -44,11 +44,11 @@ impl BuilderGenCtx {
                 >
             },
         )
-        .setter_methods();
+        .setter_methods()?;
 
         let vis = &self.vis;
 
-        quote! {
+        Ok(quote! {
             // This lint is ignored, because bounds in type aliases are still useful
             // to make the following example usage compile:
             // ```
@@ -99,7 +99,88 @@ impl BuilderGenCtx {
             {
                 #setter_methods
             }
+        })
+    }
+
+    // XXX: this behavior is heavily documented in `into-conversions.md`. Please
+    // keep the docs and the implementation in sync.
+    pub(crate) fn field_qualifies_for_into(&self, field: &Field, ty: &syn::Type) -> Result<bool> {
+        // User override takes the wheel entirely
+        let Some(user_override) = &field.params.into else {
+            return Ok(self.type_qualifies_for_into(ty));
+        };
+
+        let override_value = user_override.as_ref().value;
+        let default_value = self.type_qualifies_for_into(ty);
+
+        if default_value != override_value {
+            // Override makes sense since it changes the default behavior
+            return Ok(override_value);
         }
+
+        let maybe_qualifies = if default_value {
+            "qualifies"
+        } else {
+            "doesn't qualify"
+        };
+
+        let field_origin = &field.origin;
+
+        prox::bail!(
+            &user_override.span(),
+            "This attribute is redundant and can be removed. By default the \
+            the type of this {field_origin} already {maybe_qualifies} for `impl Into`.",
+        );
+    }
+
+    fn type_qualifies_for_into(&self, ty: &syn::Type) -> bool {
+        // Only simple type paths qualify for `impl Into`
+        let Some(path) = ty.as_path() else {
+            return false;
+        };
+
+        // <Ty as Trait>::Path projection is too complex
+        if path.qself.is_some() {
+            return false;
+        }
+
+        // Types with generic parameters don't qualify
+        let has_generic_params = path
+            .path
+            .segments
+            .iter()
+            .any(|segment| !segment.arguments.is_empty());
+
+        if has_generic_params {
+            return false;
+        }
+
+        // Bare reference to the type parameter in scope doesn't qualify
+        if let Some(ident) = path.path.get_ident() {
+            let type_params: BTreeSet<_> = self
+                .generics
+                .params
+                .iter()
+                .filter_map(|param| Some(&param.as_type_param()?.ident))
+                .collect();
+
+            if type_params.contains(ident) {
+                return false;
+            }
+        };
+
+        // Do the check for primitive types as the last step to handle the case
+        // when a generic type param was named exactly as one of the primitive types
+        let primitive_types = [
+            "bool", "char", "f32", "f64", "i8", "i16", "i32", "i64", "i128", "isize", "u8", "u16",
+            "u32", "u64", "u128", "usize",
+        ];
+
+        primitive_types.iter().all(|primitive| {
+            // We check for the last segment name because primitive types may also be referenced
+            // via `std::primitive::{name}` path.
+            !path.path.ends_with_segment(primitive)
+        })
     }
 }
 
@@ -132,38 +213,45 @@ impl<'a> FieldSettersCtx<'a> {
         }
     }
 
-    fn setter_methods(&self) -> TokenStream2 {
+    fn setter_methods(&self) -> Result<TokenStream2> {
         let field_type = self.field.ty.as_ref();
 
         if let Some(inner_type) = self.field.as_optional() {
             return self.setters_for_optional_field(inner_type);
         }
 
-        let (fn_param_type, maybe_into_call) = if self.qualifies_for_into(&self.field.ty) {
+        let qualified_for_into = self
+            .builder_gen
+            .field_qualifies_for_into(self.field, &self.field.ty)?;
+
+        let (fn_param_type, maybe_into_call) = if qualified_for_into {
             (quote!(impl Into<#field_type>), quote!(.into()))
         } else {
             (quote!(#field_type), quote!())
         };
 
-        self.setter_method(FieldSetterMethod {
+        Ok(self.setter_method(FieldSetterMethod {
             method_name: self.norm_field_ident.clone(),
             fn_params: quote!(value: #fn_param_type),
             field_init: quote!(bon::private::Set::new(value #maybe_into_call)),
             overwrite_docs: None,
-        })
+        }))
     }
 
-    fn setters_for_optional_field(&self, inner_type: &syn::Type) -> TokenStream2 {
-        let (inner_type, maybe_conv_call, maybe_map_conv_call) =
-            if self.qualifies_for_into(inner_type) {
-                (
-                    quote!(impl Into<#inner_type>),
-                    quote!(.into()),
-                    quote!(.map(Into::into)),
-                )
-            } else {
-                (quote!(#inner_type), quote!(), quote!())
-            };
+    fn setters_for_optional_field(&self, inner_type: &syn::Type) -> Result<TokenStream2> {
+        let qualified_for_into = self
+            .builder_gen
+            .field_qualifies_for_into(self.field, inner_type)?;
+
+        let (inner_type, maybe_conv_call, maybe_map_conv_call) = if qualified_for_into {
+            (
+                quote!(impl Into<#inner_type>),
+                quote!(.into()),
+                quote!(.map(Into::into)),
+            )
+        } else {
+            (quote!(#inner_type), quote!(), quote!())
+        };
 
         let norm_field_ident = &self.norm_field_ident;
 
@@ -192,10 +280,12 @@ impl<'a> FieldSettersCtx<'a> {
             },
         ];
 
-        methods
+        let setters = methods
             .into_iter()
             .map(|method| self.setter_method(method))
-            .concat()
+            .concat();
+
+        Ok(setters)
     }
 
     fn setter_method(&self, method: FieldSetterMethod) -> TokenStream2 {
@@ -245,64 +335,6 @@ impl<'a> FieldSettersCtx<'a> {
                 }
             }
         }
-    }
-
-    // XXX: this behavior is heavily documented in `into-conversions.md`. Please
-    // keep the docs and the implementation in sync.
-    fn qualifies_for_into(&self, ty: &syn::Type) -> bool {
-        // User override takes the wheel entirely
-        if let Some(user_override) = self.field.params.into {
-            return user_override;
-        }
-
-        // Only simple type paths qualify for `impl Into`
-        let Some(path) = ty.as_path() else {
-            return false;
-        };
-
-        // <Ty as Trait>::Path projection is too complex
-        if path.qself.is_some() {
-            return false;
-        }
-
-        // Types with generic parameters don't qualify
-        let has_generic_params = path
-            .path
-            .segments
-            .iter()
-            .any(|segment| !segment.arguments.is_empty());
-
-        if has_generic_params {
-            return false;
-        }
-
-        // Bare reference to the type parameter in scope doesn't qualify
-        if let Some(ident) = path.path.get_ident() {
-            let type_params: BTreeSet<_> = self
-                .builder_gen
-                .generics
-                .params
-                .iter()
-                .filter_map(|param| Some(&param.as_type_param()?.ident))
-                .collect();
-
-            if type_params.contains(ident) {
-                return false;
-            }
-        };
-
-        // Do the check for primitive types as the last step to handle the case
-        // when a generic type param was named exactly as one of the primitive types
-        let primitive_types = [
-            "bool", "char", "f32", "f64", "i8", "i16", "i32", "i64", "i128", "isize", "u8", "u16",
-            "u32", "u64", "u128", "usize",
-        ];
-
-        primitive_types.iter().all(|primitive| {
-            // We check for the last segment name because primitive types may also be referenced
-            // via `std::primitive::{name}` path.
-            !path.path.ends_with_segment(primitive)
-        })
     }
 }
 

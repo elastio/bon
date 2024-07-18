@@ -67,7 +67,7 @@ fn default_attr() {
     fn sut(
         #[builder(default)] arg1: u32,
         #[builder(default = 42)] arg2: u32,
-        #[builder(default = "default".to_owned())] arg3: String,
+        #[builder(default = "default")] arg3: String,
         #[builder(default = vec![42])] arg4: Vec<u32>,
     ) -> (u32, u32, String, Vec<u32>) {
         (arg1, arg2, arg3, arg4)
@@ -373,7 +373,7 @@ fn generics_with_lifetimes() {
 #[test]
 fn const_function() {
     #[builder]
-    const fn foo(arg: u32) {}
+    const fn foo(_arg: u32) {}
 
     foo().arg(42).call();
 }

@@ -1,0 +1,23 @@
+error: Only simple identifiers in function arguments are supported, because parameter names influence the setter method names. If you need to destructure a function parameter, then do it inside of the function body.
+ --> tests/integration/ui/compile_fail/misc.rs:4:18
+  |
+4 | fn destructuring((x, y): (u32, u32)) {
+  |                  ^^^^^^
+
+error: No need to write `= true`. Just mentioning the attribute is enough to set it to `true`, so remove the `= true` part.
+  --> tests/integration/ui/compile_fail/misc.rs:10:47
+   |
+10 | fn explicit_into_equals_true(#[builder(into = true)] _x: u32) {}
+   |                                               ^^^^
+
+error: This attribute is redundant and can be removed. By default the the type of this function argument already qualifies for `impl Into`.
+  --> tests/integration/ui/compile_fail/misc.rs:13:45
+   |
+13 | fn unnecessary_into_override_true(#[builder(into)] _x: String) {}
+   |                                             ^^^^
+
+error: This attribute is redundant and can be removed. By default the the type of this function argument already doesn't qualify for `impl Into`.
+  --> tests/integration/ui/compile_fail/misc.rs:16:53
+   |
+16 | fn unnecessary_into_override_false(#[builder(into = false)] _x: u32) {}
+   |                                                     ^^^^^

@@ -1,5 +1,0 @@
-error: Only simple identifiers in function arguments are supported. Parameter names influence the setter method names. If you need to destructure a function parameter, then do it inside of the function body.
- --> tests/integration/ui/compile_fail/destructuring.rs:2:18
-  |
-2 | fn destructuring((x, y): (u32, u32)) {
-  |                  ^^^^^^
