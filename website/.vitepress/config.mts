@@ -60,8 +60,16 @@ export default defineConfig({
               link: "/docs/guide/overview",
             },
             {
+              text: "Compatibility",
+              link: "/docs/guide/compatibility",
+            },
+            {
               text: "Into conversions",
               link: "/docs/guide/into-conversions",
+            },
+            {
+              text: "Documenting builders",
+              link: "/docs/guide/documenting-builders",
             },
             {
               text: "Limitations",

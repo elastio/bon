@@ -112,47 +112,11 @@ assert_eq!(user.id, 1);
 assert_eq!(user.name, "Bon");
 ```
 
-### Compatibility with `#[builder]` on `new()` method
+::: tip
 
-This syntax is fully compatible with defining a `new()` method annotated with the `#[builder]` attribute. The APIs generated in both cases are equivalent.
+`#[builder]` on a struct generates builder API that is fully compatible with placing `#[builder]` on the `new()` method with the signature similar to struct's fields. See [compatibility](./compatibility#moving-builder-from-the-struct-the-new-method) page for details.
 
-This means, for example, it's preferable to place the `#[builder]` attribute on top of your struct in most cases because it's convenient. However, if you need to have some custom logic during the construction of your type, you may simply create a `new()` method annotated with `#[builder]` where you can do anything you want to create an instance of your type.
-
-To keep type's public API compatible with the time when `#[builder]` was on the struct directly, the `new()` method must accept the same parameters as there were fields on the struct.
-
-**Example:**
-
-```rust
-use bon::bon;
-
-struct User {
-    // Suppose we decided to change the internal representation // [!code highlight]
-    // of the `id` field of the struct to use `String`          // [!code highlight]
-    id: String,                                                 // [!code highlight]
-    name: String,
-}
-
-#[bon] // [!code highlight]
-impl User {
-    #[builder] // [!code highlight]
-    fn new(id: u32, name: String) -> Self {
-        Self {
-            id: format!("u-{id}"),
-            name: String,
-        }
-    }
-}
-
-// This code still compiles since the API of the builder didn't change // [!code highlight]
-let user = User::builder()
-    // `id` is still accepted as a `u32` here
-    .id(1)
-    .name("Bon")
-    .build();
-
-assert_eq!(user.id, "u-1");
-assert_eq!(user.name, "Bon");
-```
+:::
 
 ## Type safe. No panics
 
@@ -182,51 +146,12 @@ All of the following is supported.
   }
   ```
 
-## Documentation for setters
-
-In regular Rust, it's not possible to place doc comments on function arguments. But with `#[builder]` it is. Documentation written on the arguments will be placed on the generated setter methods.
-
-**Example:**
-
-```rust
-use bon::builder;
-
-/// Function that returns a greeting special-tailored for a given person
-#[builder]
-fn greet(
-    /// Name of the person to greet.
-    ///
-    /// **Example:**
-    /// ```
-    /// greet().name("John");
-    /// ```
-    name: &str,
-
-    /// Age expressed in full years passed since the birth date.
-    age: u32
-) -> String {
-    format!("Hello {name} with age {age}!")
-}
-```
-
-::: details How does this work? 🤔
-
-This works because Rust compiler checks for invalid placement of `#[doc = ...]` attributes only after the macro expansion stage. `#[builder]` makes sure to remove the docs from the function's arguments in the expanded code, and instead moves them to the docs on setter methods.
-
-:::
-
-When `#[builder]` is placed on top of a struct, then documentation from the struct fields will be copied to the docs on the setter methods.
-
-## Adding `#[builder]` to existing code
-
-If your existing code defines functions with positional parameters in its public API that you'd like to change to use builder syntax, but you want to keep the old code compatible with the positional functions API, then you may use `#[builder(expose_positional_fn)]` attribute to keep both syntaxes available. See [this attribute's docs](../reference/builder#expose-positional-fn) for details.
-
 ## What's next?
 
-If you made it to here you might consider reading the rest of the `Guide` section to harness the full power of `bon` and understand the decisions it makes. However, feel free to skip the docs and just use the `#[builder]` macro in your code. It's designed to be intuitive, so it'll probably do the thing you want it to do already.
+You may consider reading the rest of the `Guide` section to harness the full power of `bon` and understand the decisions it makes. However, feel free to skip the docs and just use the `#[builder]` macro in your code. It's designed to be intuitive, so it'll probably do the thing you want it to do already.
 
-If you find something unexpected, then consult the docs and maybe use that search :mag: `Search` thing at the top to navigate.
+If you find something unexpected or you don't know something, then consult the docs and maybe use that search :mag: `Search` thing at the top to navigate.
 
-## References
+## Acknowledgments
 
-The design of the generated builders was heavily inspired by such awesome crates as [`buildstructor`](https://docs.rs/buildstructor) and [`typed-builder`](https://docs.rs/typed-builder). This crate was designed as an evolution of both of these with many lessons learned and a bunch more batteries provided.
+The design of the generated builders was heavily inspired by such awesome crates as [`buildstructor`](https://docs.rs/buildstructor), [`typed-builder`](https://docs.rs/typed-builder) and [`derive-builder`](https://docs.rs/derive-builder). This crate was designed as an evolution of both of these with many lessons learned and a bunch more batteries provided.
