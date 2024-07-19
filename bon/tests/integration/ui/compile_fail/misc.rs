@@ -15,4 +15,13 @@ fn unnecessary_into_override_true(#[builder(into)] _x: String) {}
 #[builder]
 fn unnecessary_into_override_false(#[builder(into = false)] _x: u32) {}
 
+#[builder]
+fn required_bool(#[builder(required)] _x: u32) {}
+
+#[builder]
+fn required_option(#[builder(required)] _x: Option<u32>) {}
+
+#[builder(start_fn())]
+struct EmptyStartFn {}
+
 fn main() {}

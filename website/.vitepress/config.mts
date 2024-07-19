@@ -81,23 +81,46 @@ export default defineConfig({
             {
               text: "#[builder]",
               link: "/docs/reference/builder",
-              collapsed: false,
               items: [
                 {
-                  text: "Attributes applicability",
-                  link: "/docs/reference/builder#attributes-applicability",
+                  text: "Top-level attributes",
+                  link: "/docs/reference/builder#top-level-attributes",
+                  items: [
+                    {
+                      text: "builder_type",
+                      link: "/docs/reference/builder#builder-type",
+                    },
+                    {
+                      text: "expose_positional_fn",
+                      link: "/docs/reference/builder#expose-positional-fn",
+                    },
+                    {
+                      text: "finish_fn",
+                      link: "/docs/reference/builder#finish-fn",
+                    },
+                    {
+                      text: "start_fn",
+                      link: "/docs/reference/builder#start-fn",
+                    },
+                  ],
                 },
                 {
-                  text: "finish_fn",
-                  link: "/docs/reference/builder#finish-fn",
-                },
-                {
-                  text: "default",
-                  link: "/docs/reference/builder#default",
-                },
-                {
-                  text: "into",
-                  link: "/docs/reference/builder#into",
+                  text: "Setter-level attributes",
+                  link: "/docs/reference/builder#setter-level-attributes",
+                  items: [
+                    {
+                      text: "default",
+                      link: "/docs/reference/builder#default",
+                    },
+                    {
+                      text: "into",
+                      link: "/docs/reference/builder#into",
+                    },
+                    {
+                      text: "required",
+                      link: "/docs/reference/builder#required",
+                    },
+                  ],
                 },
               ],
             },

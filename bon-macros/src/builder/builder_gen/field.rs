@@ -149,7 +149,16 @@ impl Field {
             if self.ty.is_option() {
                 prox::bail!(
                     &required.span(),
-                    "`Option` and #[builder(required)] attributes are mutually exclusive"
+                    "`Option` and #[builder(required)] attributes are mutually exclusive. \
+                    `Option`s are optional by definition and this can't be changed",
+                );
+            }
+
+            if !self.ty.is_bool() {
+                prox::bail!(
+                    &required.span(),
+                    "#[builder(required)] can only be applied to `bool`. All other \
+                    types except for `Option<T>` are required by default already",
                 );
             }
 

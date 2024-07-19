@@ -297,7 +297,7 @@ impl BuilderGenCtx {
                 /// can't do that because this breaks support for fn items
                 /// declared inside of other fn items like this:
                 ///
-                /// ```ignore
+                /// ```rustdoc_hidden
                 /// use bon::builder;
                 ///
                 /// fn foo() {
@@ -314,7 +314,7 @@ impl BuilderGenCtx {
                 /// in that child module would lose access to the symbol `Foo`
                 /// in the parent module. The following code doesn't compile.
                 ///
-                /// ```ignore
+                /// ```rustdoc_hidden
                 /// fn foo() {
                 ///     struct Foo;
                 ///

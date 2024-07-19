@@ -66,30 +66,3 @@ fn smoke() {
 
     expected.assert_debug_eq(&actual);
 }
-
-
-#[test]
-fn default_attr() {
-    #[builder]
-    struct User {
-        #[builder(default)] // [!code highlight]
-        level: u32,
-
-        // The default value expression of type `&'static str` is // [!code highlight]
-        // automatically converted to `String` here via `Into`.   // [!code highlight]
-        #[builder(default = "anon")]                              // [!code highlight]
-        name: String,
-
-        #[builder(default = bon::vec!["read"])]
-        permissions: Vec<String>,
-    }
-
-    let user = User::builder().build();
-
-    assert_eq!(user.name, "anon");
-
-    // `<u32 as Default>::default()` is zero
-    assert_eq!(user.level, 0);
-
-    assert_eq!(user.permissions, ["read"]);
-}

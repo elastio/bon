@@ -34,6 +34,18 @@ impl FromMeta for ItemParams {
 
         let full = Full::from_meta(meta)?;
 
+        let is_empty = matches!(
+            full,
+            Full {
+                name: None,
+                vis: None,
+            }
+        );
+
+        if is_empty {
+            prox::bail!(meta, "expected at least one parameter in parentheses");
+        }
+
         let me = Self {
             name: full.name,
             vis: full.vis,
