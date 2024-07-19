@@ -59,7 +59,7 @@ use bon::builder;
 #[builder]
 fn example(filter: Option<String>) {}
 
-example.maybe_filter(Some("filter")).call();
+example().maybe_filter(Some("filter")).call();
 ```
 
 This code can be changed to use `#[builder(default)]` and the call site still compiles:
