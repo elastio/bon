@@ -25,8 +25,6 @@ export default defineConfig({
   themeConfig: {
     logo: "/bon-logo-thumb.png",
 
-    outline: "deep",
-
     lastUpdated: {
       formatOptions: {
         dateStyle: "long",

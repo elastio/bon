@@ -171,7 +171,7 @@ Example::new(1, 2);                                      // [!code highlight]
 Example::builder()
     .x(1)
     .y(2)
-    .build()
+    .build();
 ```
 
 This makes it possible to add builder syntax to your existing types that have the `new` method without breaking compatibility with old code. Old code can still use `T::new()` syntax, while new code can benefit from `T::builder()` syntax.
