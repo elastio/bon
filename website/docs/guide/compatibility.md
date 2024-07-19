@@ -1,5 +1,83 @@
 # Compatibility
 
+## Changing required setter to optional
+
+It's totally fine to change a required setter to an optional one by changing the type from `T` to `Option<T>` or by adding [`#[builder(default)]`](../reference/builder.md#default) to it.
+
+This is because the generated setter will still accept `T` in its parameter. The only change to the public API is that a `maybe_`-prefixed setter is added to the builder.
+
+**Example:**
+
+Suppose you had a function with required parameters.
+
+```rust
+use bon::builder;
+
+#[builder]
+fn get_page(password: String) -> String {
+    format!("Secret knowledge")
+}
+
+let page = get_page()
+    .password("I know the password!")
+    .call();
+assert_eq!(page, "Secret knowledge");
+```
+
+Then you changed this function to take an `Option<T>`. This is totally fine, the old code that sets that parameter to `T` still compiles:
+
+```rust
+use bon::builder;
+
+#[builder]
+fn get_page(password: Option<String>) -> String { // [!code highlight]
+    format!("Secret knowledge")
+}
+
+let page = get_page()
+    .password("I know the password!")
+    .call();
+assert_eq!(page, "Secret knowledge");
+
+// Now this code can also pass `Option<T>`, including `None` to the function
+let password = Some("password");
+
+get_page()
+    .maybe_password(password)
+    .call();
+```
+
+## Switching between `Option<T>` and `#[builder(default)]`
+
+Switching between `Option<T>` for the struct field or function argument type and `#[builder(default)]` on `T` is fully compatible. Nothing changes in the builder API when this happens.
+
+**Example:**
+
+```rust
+use bon::builder;
+
+#[builder]
+fn example(filter: Option<String>) {}
+
+example.maybe_filter(Some("filter")).call();
+```
+
+This code can be changed to use `#[builder(default)]` and the call site still compiles:
+
+```rust ignore
+use bon::builder;
+
+#[builder]
+fn example(
+    #[builder(default)]    // [!code ++]
+    filter: Option<String> // [!code --]
+    filter: String         // [!code ++]
+) {}
+
+example.maybe_filter(Some("filter")).call();
+```
+
+
 ## Moving `#[builder]` from the struct the `new()` method
 
 `#[builder]` on a struct generates builder API that is fully compatible with placing `#[builder]` on the `new()` method with the signature similar to struct's fields
@@ -26,7 +104,7 @@ impl User {
     fn new(id: u32, name: String) -> Self {
         Self {
             id: format!("u-{id}"),
-            name: String,
+            name,
         }
     }
 }

@@ -60,6 +60,10 @@ export default defineConfig({
               link: "/docs/guide/overview",
             },
             {
+              text: "Optional setters",
+              link: "/docs/guide/optional-setters",
+            },
+            {
               text: "Compatibility",
               link: "/docs/guide/compatibility",
             },
