@@ -1,29 +1,35 @@
-error: Only simple identifiers in function arguments are supported, because parameter names influence the setter method names. If you need to destructure a function parameter, then do it inside of the function body.
- --> tests/integration/ui/compile_fail/misc.rs:4:18
+error: Only structs with named fields are supported
+ --> tests/integration/ui/compile_fail/misc.rs:4:1
   |
-4 | fn destructuring((x, y): (u32, u32)) {
-  |                  ^^^^^^
+4 | struct TupleStruct(u32, u32);
+  | ^^^^^^
+
+error: can't infer the name to use for this function argument; please use a simple `identifier: type` syntax for the function argument, or add `#[builder(name = explicit_name)]` to specify the name explicitly
+ --> tests/integration/ui/compile_fail/misc.rs:7:26
+  |
+7 | fn destructuring((x, y): (u32, u32)) {
+  |                          ^^^^^^^^^^
 
 error: No need to write `= true`. Just mentioning the attribute is enough to set it to `true`, so remove the `= true` part.
-  --> tests/integration/ui/compile_fail/misc.rs:10:47
+  --> tests/integration/ui/compile_fail/misc.rs:13:47
    |
-10 | fn explicit_into_equals_true(#[builder(into = true)] _x: u32) {}
+13 | fn explicit_into_equals_true(#[builder(into = true)] _x: u32) {}
    |                                               ^^^^
 
 error: This attribute is redundant and can be removed. By default the the type of this function argument already qualifies for `impl Into`.
-  --> tests/integration/ui/compile_fail/misc.rs:13:45
+  --> tests/integration/ui/compile_fail/misc.rs:16:45
    |
-13 | fn unnecessary_into_override_true(#[builder(into)] _x: String) {}
+16 | fn unnecessary_into_override_true(#[builder(into)] _x: String) {}
    |                                             ^^^^
 
 error: This attribute is redundant and can be removed. By default the the type of this function argument already doesn't qualify for `impl Into`.
-  --> tests/integration/ui/compile_fail/misc.rs:16:53
+  --> tests/integration/ui/compile_fail/misc.rs:19:53
    |
-16 | fn unnecessary_into_override_false(#[builder(into = false)] _x: u32) {}
+19 | fn unnecessary_into_override_false(#[builder(into = false)] _x: u32) {}
    |                                                     ^^^^^
 
 error: expected at least one parameter in parentheses
-  --> tests/integration/ui/compile_fail/misc.rs:18:11
+  --> tests/integration/ui/compile_fail/misc.rs:21:11
    |
-18 | #[builder(start_fn())]
+21 | #[builder(start_fn())]
    |           ^^^^^^^^

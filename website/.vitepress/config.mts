@@ -132,6 +132,10 @@ export default defineConfig({
                       text: "into",
                       link: "/docs/reference/builder#into",
                     },
+                    {
+                      text: "name",
+                      link: "/docs/reference/builder#name",
+                    }
                   ],
                 },
               ],

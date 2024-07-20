@@ -163,8 +163,8 @@ impl FinishFuncBody for StructLiteralBody {
     fn gen(&self, member_exprs: &[MemberExpr<'_>]) -> TokenStream2 {
         let Self { struct_ident } = self;
 
-        let member_exprs = member_exprs.iter().map(|MemberExpr { member: field, expr }| {
-            let ident = &field.ident;
+        let member_exprs = member_exprs.iter().map(|MemberExpr { member, expr }| {
+            let ident = &member.ident;
             quote! {
                 #ident: #expr
             }
@@ -180,18 +180,10 @@ impl FinishFuncBody for StructLiteralBody {
 
 impl Member {
     pub(crate) fn from_syn_field(field: &syn::Field) -> Result<Self> {
-        let ident = field.ident.clone().ok_or_else(|| {
-            prox::err!(
-                &field,
-                "Only structs with named fields are supported. \
-                Please name all fields of the struct"
-            )
-        })?;
-
         Member::new(
             MemberOrigin::StructField,
             &field.attrs,
-            ident,
+            field.ident.clone(),
             Box::new(field.ty.clone()),
         )
     }

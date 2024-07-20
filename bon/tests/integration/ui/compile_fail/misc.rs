@@ -1,6 +1,9 @@
 use bon::builder;
 
 #[builder]
+struct TupleStruct(u32, u32);
+
+#[builder]
 fn destructuring((x, y): (u32, u32)) {
     let _ = x;
     let _ = y;

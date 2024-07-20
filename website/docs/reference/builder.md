@@ -26,7 +26,7 @@ The attribute expects the desired builder type identifier as its input.
 
 ::: code-group
 
-```rust [<Badge text="structs"/>]
+```rust [Struct]
 use bon::builder;
 
 #[builder(builder_type = MyBuilder)] // [!code highlight]
@@ -35,7 +35,7 @@ struct Brush {}
 let builder: MyBuilder = Brush::builder();
 ```
 
-```rust [<Badge text="free functions"/>]
+```rust [Free function]
 use bon::builder;
 
 #[builder(builder_type = MyBuilder)] // [!code highlight]
@@ -44,7 +44,7 @@ fn brush() {}
 let builder: MyBuilder = brush();
 ```
 
-```rust [<Badge text="associated methods"/>]
+```rust [Associated method]
 use bon::bon;
 
 struct Brush;
@@ -117,7 +117,7 @@ If `vis` parameter is not specified, then the visibility of the exposed position
 
 ::: code-group
 
-```rust [<Badge text="free functions"/>]
+```rust [Free function]
 use bon::builder;
 
 #[builder(expose_positional_fn = example_positional)] // [!code highlight]
@@ -133,7 +133,7 @@ example()
     .call();
 ```
 
-```rust [<Badge text="associated methods"/>]
+```rust [Associated method]
 use bon::bon;
 
 struct Example;
@@ -204,7 +204,7 @@ This attribute allows overriding the name of the generated builder's method that
 
 ::: code-group
 
-```rust [<Badge text="structs"/>]
+```rust [Struct]
 use bon::builder;
 
 #[builder(finish_fn = assemble)] // [!code highlight]
@@ -219,7 +219,7 @@ let article = Article::builder()
 assert_eq!(article.id, 42);
 ```
 
-```rust [<Badge text="free functions"/>]
+```rust [Free function]
 use bon::builder;
 
 #[builder(finish_fn = send)] // [!code highlight]
@@ -234,7 +234,7 @@ let response = get_article()
 assert_eq!(response, "Some article with id 42");
 ```
 
-```rust [<Badge text="associated methods"/>]
+```rust [Associated method]
 use bon::bon;
 
 struct ArticlesClient;
@@ -328,7 +328,7 @@ The default value will be lazily computed *only if needed* inside of the [finish
 
 ::: code-group
 
-```rust [<Badge type="warning" text="struct fields"/>]
+```rust [Struct field]
 use bon::builder;
 
 #[builder]
@@ -353,7 +353,7 @@ assert_eq!(user.level, 0);
 assert_eq!(user.permissions, ["read"]);
 ```
 
-```rust [<Badge type="warning" text="free function arguments"/>]
+```rust [Free function argument]
 use bon::builder;
 
 #[builder]
@@ -378,7 +378,7 @@ let greeting = greet_user().call();
 assert_eq!(greeting, "Hello anon! Your level is 0, permissions: [\"read\"]");
 ```
 
-```rust [<Badge type="warning" text="associated method arguments"/>]
+```rust [Associated method argument]
 use bon::bon;
 
 struct User {
@@ -424,7 +424,7 @@ This attribute is incompatible with members of `Option` type, since `Option` alr
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
 
-This attribute forces an `impl Into` conversion to be enabled or disabled in the generated setter methods. Use this to force-override the decision made by [automatic `Into` conversion qualification rules].
+Forces an `impl Into` conversion to be enabled or disabled in the generated setter methods. Use this to force-override the decision made by [automatic `Into` conversion qualification rules].
 
 This parameter can be specified in one of the following ways:
 
@@ -437,7 +437,7 @@ This parameter can be specified in one of the following ways:
 
 ::: code-group
 
-```rust [<Badge type="warning" text="struct fields"/>]
+```rust [Struct field]
 use bon::builder;
 use std::num::NonZeroU32;
 
@@ -464,7 +464,7 @@ Example::builder()
     .build();
 ```
 
-```rust [<Badge type="warning" text="free function arguments"/>]
+```rust [Free function argument]
 use bon::builder;
 use std::num::NonZeroU32;
 
@@ -491,7 +491,7 @@ example()
     .call();
 ```
 
-```rust [<Badge type="warning" text="associated method arguments"/>]
+```rust [Associated method argument]
 use bon::bon;
 use std::num::NonZeroU32;
 
@@ -540,6 +540,103 @@ struct Example {
     #[builder(into)] // [!code error]
     string: String
 }
+```
+
+### `name`
+
+**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
+
+Overrdies the name for the setters generated for the member. This is most useful when `#[builder]` is placed on a struct where you'd like to use a different name for the field internally. For functions this attribute makes less sense since it's easy to just create a variable named differently `let new_name = param_name;`. However, this attribute is still supported for functions.
+
+**Example:**
+
+::: code-group
+
+```rust [Struct field]
+use bon::builder;
+
+#[builder]
+struct Player {
+    #[builder(name = rank)] // [!code highlight]
+    level: u32
+}
+
+Player::builder()
+    .rank(10) // [!code highlight]
+    .build();
+```
+
+```rust [Free function argument]
+use bon::builder;
+
+#[builder]
+fn player(
+    #[builder(name = rank)] // [!code highlight]
+    level: u32
+) {}
+
+player()
+    .rank(10) // [!code highlight]
+    .call();
+```
+
+```rust [Associated method argument]
+use bon::bon;
+
+struct Player {
+    level: u32,
+}
+
+#[bon]
+impl Player {
+    #[builder]
+    fn new(
+        #[builder(name = rank)] // [!code highlight]
+        level: u32
+    ) -> Self {
+        Self { level }
+    }
+}
+
+Player::builder()
+    .rank(10) // [!code highlight]
+    .build();
+```
+
+:::
+
+This can be used to give a name for the function arguments that use destructuring patterns,
+although it's simpler to just destructure inside of the function body, which should be preferred over using this attribute.
+
+**Example:**
+
+::: code-group
+
+```rust [Preferred destructuring in function body]
+use bon::builder;
+
+#[builder]
+fn example(point: (u32, u32)) {
+    let (x, y) = point;
+}
+
+example()
+    .point((1, 2))
+    .call();
+```
+
+```rust [Discouraged using name attribute in destructuring]
+use bon::builder;
+
+#[builder]
+fn example(
+    #[builder(name = point)]
+    (x, y): (u32, u32)
+) {}
+
+example()
+    .point((1, 2))
+    .call();
 ```
 
 [automatic `Into` conversion qualification rules]: ../guide/into-conversions#types-that-qualify-for-an-automatic-into-conversion

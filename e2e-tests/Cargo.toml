@@ -20,6 +20,7 @@ workspace = true
 
 [dependencies]
 bon = { workspace = true }
+buildstructor = "0.5"
 
 [build-dependencies]
 heck      = { workspace = true }

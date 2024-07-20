@@ -6,7 +6,6 @@ pub(crate) mod input_struct;
 
 use member::*;
 
-use darling::ast::GenericParamExt;
 use itertools::Itertools;
 use prox::prelude::*;
 use quote::quote;
@@ -136,7 +135,6 @@ impl BuilderGenCtx {
         let generic_args = self.generic_args();
 
         let member_idents = self.member_idents();
-        let phantom_field_init = self.phantom_field_init();
 
         let receiver = self
             .receiver
@@ -160,7 +158,7 @@ impl BuilderGenCtx {
             {
                 #builder_ident {
                     __private_impl: #builder_private_impl_ident {
-                        #phantom_field_init
+                        _phantom: ::core::marker::PhantomData,
                         #receiver_field_init
                         #( #member_idents: ::std::default::Default::default(), )*
                     }
@@ -171,35 +169,10 @@ impl BuilderGenCtx {
         syn::parse_quote!(#func)
     }
 
-    fn phantom_data(&self) -> Option<TokenStream2> {
-        let start_func_generic_params = &self.start_func_generics().params;
-
-        let generic_lifetimes = start_func_generic_params
-            .iter()
-            .filter_map(<_>::as_lifetime_param)
-            .collect_vec();
-
-        let generic_type_params = start_func_generic_params
-            .iter()
-            .filter_map(<_>::as_type_param)
-            .collect_vec();
-
-        if generic_type_params.is_empty() && generic_lifetimes.is_empty() && !self.members.is_empty()
-        {
-            return None;
-        }
-
+    fn phantom_data(&self) -> TokenStream2 {
         let member_types = self.members.iter().map(|member| &member.ty);
 
-        // A special case of zero members requires storing `__State` in phantom data
-        // otherwise it would be reported as an unused type parameter. Another way we
-        // could solve it is by special-casing the codegen by not adding the __State
-        // generic type parameter to the builder type at all if it has no fields, but
-        // to keep code simpler we just do this one small crutch here for a really
-        // unlikely case of a builder with zero fields.
-        let state = self.members.is_empty().then(|| quote! { __State, });
-
-        Some(quote! {
+        quote! {
             ::core::marker::PhantomData<(
                 // There is an interesting quirk with lifetimes in Rust, which is the
                 // reason why we thoughtlessly store all the function parameter types
@@ -224,17 +197,11 @@ impl BuilderGenCtx {
                 // explanation for it, I just didn't care to research it yet ¯\_(ツ)_/¯.
                 #(#member_types,)*
 
-                #state
+                // A special case of zero members requires storing `__State` in phantom data
+                // otherwise it would be reported as an unused type parameter.
+                __State,
             )>
-        })
-    }
-
-    fn phantom_field_init(&self) -> Option<TokenStream2> {
-        self.phantom_data().map(|_| {
-            quote! {
-                _phantom: ::core::marker::PhantomData,
-            }
-        })
+        }
     }
 
     fn builder_state_trait_decl(&self) -> TokenStream2 {
@@ -259,23 +226,24 @@ impl BuilderGenCtx {
         let builder_ident = &self.builder_ident;
         let builder_private_impl_ident = &self.builder_private_impl_ident;
         let builder_state_trait_ident = &self.builder_state_trait_ident;
-        let member_idents = self.member_idents();
-        let member_assoc_type_idents = self.member_assoc_type_idents().collect_vec();
         let generics_decl = &self.generics.params;
         let where_clause = &self.generics.where_clause;
         let generic_args = self.generic_args();
         let unset_state_types = self.unset_state_types();
-
-        let phantom_field = self.phantom_data().map(|phantom_data| {
-            quote! {
-                _phantom: #phantom_data,
-            }
-        });
+        let phantom_data = self.phantom_data();
 
         let receiver_field = self.receiver.as_ref().map(|receiver| {
             let ty = &receiver.without_self_ty;
             quote! {
                 receiver: #ty,
+            }
+        });
+
+        let members = self.members.iter().map(|member| {
+            let ident = &member.ident;
+            let assoc_type_ident = &member.state_assoc_type_ident;
+            quote! {
+                #ident: __State::#assoc_type_ident,
             }
         });
 
@@ -352,9 +320,9 @@ impl BuilderGenCtx {
             >
             #where_clause
             {
-                #phantom_field
+                _phantom: #phantom_data,
                 #receiver_field
-                #( #member_idents: __State::#member_assoc_type_idents, )*
+                #(#members)*
             }
         }
     }
@@ -372,7 +340,8 @@ impl BuilderGenCtx {
                     .as_ref()
                     .and_then(|val| val.as_ref().as_ref())
                     .map(|default| {
-                        let qualified_for_into = self.member_qualifies_for_into(member, &member.ty)?;
+                        let qualified_for_into =
+                            self.member_qualifies_for_into(member, &member.ty)?;
                         let default = if qualified_for_into {
                             quote! { std::convert::Into::into((|| #default)()) }
                         } else {
@@ -409,8 +378,6 @@ impl BuilderGenCtx {
         let vis = &self.vis;
         let builder_ident = &self.builder_ident;
         let builder_state_trait_ident = &self.builder_state_trait_ident;
-        let member_assoc_type_idents = self.member_assoc_type_idents().collect_vec();
-        let set_state_type_params = self.members.iter().map(Member::set_state_type_param);
         let finish_func_ident = &self.finish_func.ident;
         let output = &self.finish_func.output;
         let generics_decl = &self.generics.params;
@@ -421,6 +388,15 @@ impl BuilderGenCtx {
             .as_ref()
             .into_iter()
             .flat_map(|where_clause| &where_clause.predicates);
+
+        let state_where_predicates = self.members.iter().map(|member| {
+            let member_assoc_type_ident = &member.state_assoc_type_ident;
+            let set_state_type_param = member.set_state_type_param();
+            quote! {
+                __State::#member_assoc_type_ident:
+                    bon::private::IntoSet<#set_state_type_param>
+            }
+        });
 
         Ok(quote! {
             impl<
@@ -433,10 +409,7 @@ impl BuilderGenCtx {
             >
             where
                 #( #where_clause_predicates, )*
-                #(
-                    __State::#member_assoc_type_idents:
-                        bon::private::IntoSet<#set_state_type_params>,
-                )*
+                #( #state_where_predicates, )*
             {
                 /// Finishes building and performs the requested action.
                 #vis #asyncness #unsafety fn #finish_func_ident(self) #output {

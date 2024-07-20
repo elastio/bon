@@ -1,6 +1,6 @@
 use super::{
-    generic_param_to_arg, BuilderGenCtx, Member, MemberExpr, MemberOrigin, FinishFunc, FinishFuncBody,
-    Generics, ReceiverCtx, StartFunc,
+    generic_param_to_arg, BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberExpr,
+    MemberOrigin, ReceiverCtx, StartFunc,
 };
 use crate::builder::params::BuilderParams;
 use crate::normalization::NormalizeSelfTy;
@@ -433,22 +433,15 @@ fn merge_generic_params(
 
 impl Member {
     pub(crate) fn from_typed_fn_arg(arg: &syn::PatType) -> Result<Self> {
-        let syn::Pat::Ident(pat) = arg.pat.as_ref() else {
-            // We may allow setting a name for the builder method in parameter
-            // attributes and relax this requirement
-            prox::bail!(
-                &arg.pat,
-                "Only simple identifiers in function arguments are supported, \
-                because parameter names influence the setter method names. If you \
-                need to destructure a function parameter, then do it inside of \
-                the function body."
-            );
+        let ident = match arg.pat.as_ref() {
+            syn::Pat::Ident(pat) => Some(&pat.ident),
+            _ => None,
         };
 
         Member::new(
             MemberOrigin::FnArg,
             &arg.attrs,
-            pat.ident.clone(),
+            ident.cloned(),
             arg.ty.clone(),
         )
     }

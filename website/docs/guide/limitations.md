@@ -2,36 +2,6 @@
 
 Every tool has its constraints, and `bon` is not an exception. The limitations described below shouldn't generally occur in your day-to-day code, and if they do, there are ways to work around them. If you feel that some of the limitations are unacceptable, feel free to [open an issue] to ask for relaxing some of them.
 
-## Destructuring patterns
-
-Function parameters must be simple identifiers that will be turned into setter methods. Destructuring in function parameters position complicates this logic and thus is rejected by the `#[builder]` macro.
-
-For example, this generates a compile error:
-
-```rust compile_fail
-use bon::builder;
-
-#[builder]
-fn foo((x, y): (u32, u32)) { // [!code error]
-    // ...
-}
-```
-
-If you need to destructure your arguments, then do it separately inside of the function body.
-
-```rust
-use bon::builder;
-
-#[builder]
-fn foo(point: (u32, u32)) { // [!code highlight]
-    let (x, y) = point;     // [!code highlight]
-    // ...
-}
-```
-
-This limitation may be relaxed in the future by adding a new argument-level attribute that lets developers override the name for the setter method.
-
-
 ## Intra-doc links to `Self` on setter methods
 
 Documentation placed on the original function arguments or struct fields is copied verbatim to the documentation on the generated setter methods of the builder struct. The shortcoming of this approach is that references to `Self` break when moved into the `impl` block of the generated builder struct.
@@ -62,4 +32,12 @@ It's possible to place `#[builder]` on top of a `const fn`, but the generated bu
 
 If you have a strong use case that requires full support for `const`, feel free to [open an issue]. We'll figure something out for sure 🐱.
 
+## Conditional compilation
+
+Conditionally-compiled members aren't support yet. The blocker for this feature is a lack of support for attributes in `where` bounds in the language. See [rust-lang/rust/#115590](https://github.com/rust-lang/rust/issues/115590) for details.
+
 [open an issue]: https://github.com/elastio/bon/issues
+
+*[Member]: Struct field or a function argument
+*[member]: Struct field or a function argument
+*[members]: Struct fields or function arguments

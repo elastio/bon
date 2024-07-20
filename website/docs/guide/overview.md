@@ -187,7 +187,7 @@ If you can't firgure something out, then consult the docs and maybe use that sea
 
 ## Acknowledgments
 
-This project was heavily inspired by such awesome crates as [`buildstructor`](https://docs.rs/buildstructor), [`typed-builder`](https://docs.rs/typed-builder) and [`derive-builder`](https://docs.rs/derive-builder). This crate was designed as an evolution of these with many lessons learned and a bunch more batteries provided.
+This project was heavily inspired by such awesome crates as [`buildstructor`](https://docs.rs/buildstructor), [`typed-builder`](https://docs.rs/typed-builder) and [`derive_builder`](https://docs.rs/derive_builder). This crate was designed as an evolution of these with many lessons learned and a bunch more batteries provided.
 
 See [alternatives](./alternatives) for comparison.
 

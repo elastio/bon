@@ -54,6 +54,9 @@ pub(crate) struct MemberParams {
 
     #[darling(with = "parse_optional_expression", map = "Some")]
     pub(crate) default: Option<SpannedValue<Option<syn::Expr>>>,
+
+    /// Rename the name exposed in the builder API.
+    pub(crate) name: Option<syn::Ident>,
 }
 
 /// This primitive represents the syntax that accepts only two states:
@@ -95,12 +98,21 @@ impl Member {
     pub(crate) fn new(
         origin: MemberOrigin,
         attrs: &[syn::Attribute],
-        ident: syn::Ident,
+        ident: Option<syn::Ident>,
         ty: Box<syn::Type>,
     ) -> Result<Self> {
         let docs = attrs.iter().filter(|attr| attr.is_doc()).cloned().collect();
 
         let params = MemberParams::from_attributes(attrs)?;
+
+        let ident = ident.or_else(|| params.name.clone()).ok_or_else(|| {
+            prox::err!(
+                &ty,
+                "can't infer the name to use for this {origin}; please use a simple \
+                `identifier: type` syntax for the {origin}, or add \
+                `#[builder(name = explicit_name)]` to specify the name explicitly",
+            )
+        })?;
 
         let me = Self {
             origin,
@@ -108,7 +120,7 @@ impl Member {
             ident,
             ty,
             params,
-            docs,
+            docs
         };
 
         me.validate()?;

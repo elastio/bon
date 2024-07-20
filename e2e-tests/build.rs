@@ -4,7 +4,11 @@ use std::path::PathBuf;
 use walkdir::DirEntry;
 
 fn main() {
-    let doc_tests = walkdir::WalkDir::new("../website")
+    let website = "../website";
+
+    println!("cargo::rerun-if-changed={website}");
+
+    let doc_tests = walkdir::WalkDir::new(website)
         .into_iter()
         .filter_entry(|entry| !is_hidden(entry))
         .map(|entry| {
@@ -18,8 +22,6 @@ fn main() {
         .map(|entry| entry.into_path().into_os_string().into_string().unwrap())
         .sorted_unstable()
         .map(|path| {
-            println!("cargo::rerun-if-changed={path}");
-
             let test_name = path.to_snake_case();
             let test_name = test_name.strip_prefix("website_").unwrap();
 

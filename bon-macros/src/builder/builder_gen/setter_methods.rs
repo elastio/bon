@@ -217,6 +217,14 @@ impl<'a> MemberSettersCtx<'a> {
         }
     }
 
+    fn setter_method_name(&self) -> syn::Ident {
+        self.member
+            .params
+            .name
+            .clone()
+            .unwrap_or_else(|| self.norm_member_ident.clone())
+    }
+
     fn setter_methods(&self) -> Result<TokenStream2> {
         let member_type = self.member.ty.as_ref();
 
@@ -235,7 +243,7 @@ impl<'a> MemberSettersCtx<'a> {
         };
 
         Ok(self.setter_method(MemberSetterMethod {
-            method_name: self.norm_member_ident.clone(),
+            method_name: self.setter_method_name(),
             fn_params: quote!(value: #fn_param_type),
             member_init: quote!(bon::private::Set::new(value #maybe_into_call)),
             overwrite_docs: None,
@@ -257,15 +265,15 @@ impl<'a> MemberSettersCtx<'a> {
             (quote!(#inner_type), quote!(), quote!())
         };
 
-        let norm_member_ident = &self.norm_member_ident;
+        let setter_method_name = self.setter_method_name();
 
         let methods = [
             MemberSetterMethod {
-                method_name: quote::format_ident!("maybe_{norm_member_ident}"),
+                method_name: quote::format_ident!("maybe_{setter_method_name}"),
                 fn_params: quote!(value: Option<#inner_type>),
                 member_init: quote!(bon::private::Set::new(value #maybe_map_conv_call)),
                 overwrite_docs: Some(format!(
-                    "Same as [`Self::{norm_member_ident}`], but accepts \
+                    "Same as [`Self::{setter_method_name}`], but accepts \
                     an `Option` as input. See that method's documentation for \
                     more details.",
                 )),
@@ -277,7 +285,7 @@ impl<'a> MemberSettersCtx<'a> {
             // To be able to explicitly pass an `Option` value to the setter method
             // users need to use the `maybe_{member_ident}` method.
             MemberSetterMethod {
-                method_name: norm_member_ident.clone(),
+                method_name: setter_method_name,
                 fn_params: quote!(value: #inner_type),
                 member_init: quote!(bon::private::Set::new(Some(value #maybe_conv_call))),
                 overwrite_docs: None,
@@ -310,7 +318,6 @@ impl<'a> MemberSettersCtx<'a> {
 
         let builder_ident = &self.builder_gen.builder_ident;
         let builder_private_impl_ident = &self.builder_gen.builder_private_impl_ident;
-        let maybe_phantom_field = self.builder_gen.phantom_field_init();
         let member_idents = self.builder_gen.member_idents();
         let maybe_receiver_field = self
             .builder_gen
@@ -332,7 +339,7 @@ impl<'a> MemberSettersCtx<'a> {
             #vis fn #method_name(self, #fn_params) -> #return_type {
                 #builder_ident {
                     __private_impl: #builder_private_impl_ident {
-                        #maybe_phantom_field
+                        _phantom: ::core::marker::PhantomData,
                         #maybe_receiver_field
                         #( #member_idents: #member_exprs, )*
                     }
