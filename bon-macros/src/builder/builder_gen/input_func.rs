@@ -1,5 +1,5 @@
 use super::{
-    generic_param_to_arg, BuilderGenCtx, Field, FieldExpr, FieldOrigin, FinishFunc, FinishFuncBody,
+    generic_param_to_arg, BuilderGenCtx, Member, MemberExpr, MemberOrigin, FinishFunc, FinishFuncBody,
     Generics, ReceiverCtx, StartFunc,
 };
 use crate::builder::params::BuilderParams;
@@ -267,13 +267,13 @@ impl FuncInputCtx {
         let builder_private_impl_ident = quote::format_ident!("__{builder_ident}PrivateImpl");
         let builder_state_trait_ident = quote::format_ident!("__{builder_ident}State");
 
-        let fields: Vec<_> = self
+        let members: Vec<_> = self
             .norm_func
             .sig
             .inputs
             .iter()
             .filter_map(syn::FnArg::as_typed)
-            .map(Field::from_typed_fn_arg)
+            .map(Member::from_typed_fn_arg)
             .try_collect()?;
 
         let generics = self.generics();
@@ -329,7 +329,7 @@ impl FuncInputCtx {
         };
 
         let ctx = BuilderGenCtx {
-            fields,
+            members,
             builder_ident,
             builder_private_impl_ident,
             builder_state_trait_ident,
@@ -352,7 +352,7 @@ struct FnCallBody {
 }
 
 impl FinishFuncBody for FnCallBody {
-    fn gen(&self, field_exprs: &[FieldExpr<'_>]) -> TokenStream2 {
+    fn gen(&self, member_exprs: &[MemberExpr<'_>]) -> TokenStream2 {
         let asyncness = &self.func.sig.asyncness;
         let maybe_await = asyncness.is_some().then(|| quote!(.await));
 
@@ -385,11 +385,11 @@ impl FinishFuncBody for FnCallBody {
 
         let func_ident = &self.func.sig.ident;
 
-        let field_exprs = field_exprs.iter().map(|field| &field.expr);
+        let member_exprs = member_exprs.iter().map(|member| &member.expr);
 
         quote! {
             #prefix #func_ident::<#(#generic_args,)*>(
-                #( #field_exprs ),*
+                #( #member_exprs ),*
             )
             #maybe_await
         }
@@ -431,7 +431,7 @@ fn merge_generic_params(
     generic_params
 }
 
-impl Field {
+impl Member {
     pub(crate) fn from_typed_fn_arg(arg: &syn::PatType) -> Result<Self> {
         let syn::Pat::Ident(pat) = arg.pat.as_ref() else {
             // We may allow setting a name for the builder method in parameter
@@ -445,8 +445,8 @@ impl Field {
             );
         };
 
-        Field::new(
-            FieldOrigin::FnArg,
+        Member::new(
+            MemberOrigin::FnArg,
             &arg.attrs,
             pat.ident.clone(),
             arg.ty.clone(),

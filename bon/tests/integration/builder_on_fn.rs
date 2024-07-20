@@ -52,16 +52,6 @@ fn smoke() {
 }
 
 #[test]
-fn required_attr() {
-    #[builder]
-    fn sut(#[builder(required)] bool: bool, _option: Option<String>) -> bool {
-        bool
-    }
-
-    assert!(sut().bool(true).call());
-}
-
-#[test]
 fn default_attr() {
     #[builder]
     fn sut(
@@ -127,21 +117,9 @@ fn into_string() {
 }
 
 #[test]
-fn bool_is_optional() {
-    #[builder]
-    fn sut(arg: bool) -> bool {
-        arg
-    }
-
-    assert!(!sut().call());
-    assert!(!sut().arg(false).call());
-    assert!(sut().arg(true).call());
-}
-
-#[test]
 fn leading_underscore_is_stripped() {
     #[builder]
-    fn sut(_arg1: bool, _arg2: Option<()>) {}
+    fn sut(#[builder(default)] _arg1: bool, _arg2: Option<()>) {}
 
     sut().arg1(true).call();
     sut().arg2(()).call();
@@ -243,7 +221,7 @@ fn receiver() {
         /// Docs on the method.
         /// Multiline
         #[builder]
-        fn increment(&self, disabled: bool) -> Self {
+        fn increment(&self, #[builder(default)] disabled: bool) -> Self {
             if disabled {
                 return self.clone();
             }

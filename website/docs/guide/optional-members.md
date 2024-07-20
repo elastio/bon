@@ -1,6 +1,6 @@
-# Optional setters
+# Optional members
 
-Setters generated for function arguments or struct fields of `Option<T>` type are themselves optional to call. If they aren't invoked, then `None` will be used as the default.
+Setters generated for members of `Option<T>` type are themselves optional to call. If they aren't invoked, then `None` will be used as the default.
 
 **Example:**
 
@@ -14,15 +14,15 @@ fn example(level: Option<u32>) {}
 example().call();
 ```
 
-The setters API generated for this is the following (simplified):
+The setters generated in the example above are the following (simplified):
 
 ```rust ignore
 impl ExampleBuilder {
     // Accepts the underlying value. Wraps it in `Some()` internally
-    fn level(value: u32) -> Self { /* */ }
+    fn level(value: u32) -> NextBuilderState { /* */ }
 
     // Accepts the `Option` directly.
-    fn maybe_level(value: Option<u32>) -> Self { /* */ }
+    fn maybe_level(value: Option<u32>) -> NextBuilderState { /* */ }
 }
 ```
 
@@ -34,10 +34,10 @@ If you need to pass a simple literal value, then the syntax is very short
 example().level(42).call();
 ```
 
-If you have an `Option` variable somewhere or you need to dynamically decide if the value should be `Some` or `None`, then you can use the `maybe_` variant of the setter.
+If you already have an `Option` variable somewhere or you need to dynamically decide if the value should be `Some` or `None`, then you can use the `maybe_` variant of the setter.
 
 ```rust ignore
-let value = if 1 + 1 == 2 {
+let value = if some_condition {
     Some(42)
 } else {
     None
@@ -52,7 +52,15 @@ To make a non-`Option` function argument or struct field optional you may add `#
 
 ## Interaction with `Into` conversions
 
-The inner type `T` of the `Option<T>` is subject to [`Into` conversions](./into-conversions). For example, if `T` by default qualifies for an automatic `Into` conversion or `#[builder(into)]` was used to force it, then the generated builder API will use `impl Into<T>`.
+The inner type `T` of the `Option<T>` is subject to [`Into` conversion](./into-conversions). For example, if `T` by default qualifies for an automatic `Into` conversion or `#[builder(into)]` was used to force it, then the generated builder API will provide the following two setters:
+
+```rust ignore
+impl Builder {
+    fn member(self, value: impl Into<T>) -> NextBuilderState { /* */ }
+    fn maybe_member(self, value: Option<impl Into<T>>) -> NextBuilderState { /* */ }
+}
+```
+
 
 **Example:**
 
@@ -74,3 +82,7 @@ example()
     .call();
 
 ```
+
+*[Member]: Struct field or a function argument
+*[member]: Struct field or a function argument
+*[members]: Struct fields or function arguments

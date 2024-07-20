@@ -2,9 +2,48 @@
 
 There are several other existing alternative crates that generate builders. `bon` was designed as a logical evolution of all those crates. Here we'll review them and discuss how `bon` does some things better or some things differently than other implementations.
 
-TODO: convert the following experiments into a documentation
+## [`derive-builder`](https://docs.rs/derive_builder)
 
-```ignore_for_now
+### Feature coverage
+
+- 🟢 Builder for structs
+- 🔴 Builder for free functions
+- 🔴 Builder for associated methods
+
+### Panic safety
+
+The main problem of the `derive-builder` crate is that it generates panic-unsafe builders that may panic at runtime if the developer doesn't fill a required field, for example.
+
+The [first code example](https://github.com/colin-kiegel/rust-derive-builder#how-it-works) in the repo that you see features a `.build().unwrap()`. This design makes it prone to hard-to-detect bugs where the builder is used in cold code paths (such as error handling) which aren't covered by tests.
+
+### Ergonomics
+
+`Option` fields aren't optional by default. You need to add `#[builder(default)]` for them explicitly.
+
+There are no automatic `Into` conversions. You need to add `#[builder(setter(into))]` to each field explicitly.
+
+There is no `T::builder()` method generated. To create a builder the caller need to use `Builder::default()` instead.
+
+By default generates a builder that passes `self` via `&mut` reference through the setters. The `build()` method takes `&self` and requires all fields to be `Clone`. This doesn't look like a good choice by default because there is a default requirement of `Clone` for all fields. Plus, this may have a performance impact, although [the docs](https://docs.rs/derive_builder/latest/derive_builder/#-performance-considerations) assure that compiler can optimize all the clones.
+
+There is a way to make the builder take `self` by value and avoid cloning, but it's opt-in via `#[builder(pattern = "owned")]`.
+
+### Compatibility
+
+Changing field from required to optional is not backwards compatible in
+the setter signature. There is just one setter generated for every field, so when you make a required field optional, the setter changes its parameter type from `T` to `Option<T>`, which is breaking API change.
+
+### Advantages
+
+The generated builder is **very** simple. It's just a struct equivalent to the input struct but with all fields wrapped in `Option`. There are no additional typestate generics attached to the builder struct.
+
+This design makes it possible to add own custom methods to the generated builder struct by writing an `impl Builder {}` block, or even defining custom setters on the builder that override the default generated ones.
+
+
+The fact that setters don't change the type of the builder allows for using `&mut self` to set the values without consuming the builder.
+
+
+```rust
 use typed_builder::TypedBuilder;
 
 #[derive(TypedBuilder, Clone, Debug)]

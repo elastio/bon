@@ -1,14 +1,66 @@
 # Compatibility
 
-## Changing required setter to optional
+## Marking member as unused with a leading `_`
 
-It's totally fine to change a required setter to an optional one by changing the type from `T` to `Option<T>` or by adding [`#[builder(default)]`](../reference/builder.md#default) to it.
-
-This is because the generated setter will still accept `T` in its parameter. The only change to the public API is that a `maybe_`-prefixed setter is added to the builder.
+You may add `_` prefix to the member name to mark it as unused for the time being. The builder API won't change if you do that. Leading underscores are stripped from the setter names automatically.
 
 **Example:**
 
-Suppose you had a function with required parameters.
+::: code-group
+
+```rust [Struct]
+use bon::builder;
+
+#[builder]
+struct Example {
+    _name: String
+}
+
+Example::builder()
+    .name("The setter is still called `name`")
+    .build();
+```
+
+```rust [Free function]
+use bon::builder;
+
+#[builder]
+fn example(
+    _name: String
+) {}
+
+example()
+    .name("The setter is still called `name`")
+    .call();
+```
+
+```rust [Associated method]
+use bon::{bon, builder};
+
+struct Example;
+
+#[bon]
+impl Example {
+    #[builder]
+    fn example(_name: String) {}
+}
+
+Example::example()
+    .name("The setter is still called `name`")
+    .call();
+```
+
+:::
+
+## Making a required member optional
+
+It's totally fine to make a required member optional by changing the type from `T` to `Option<T>` or by adding [`#[builder(default)]`](../reference/builder.md#default) to it.
+
+This is because both required and optional members have a setter that accepts `T` (not wrapped in an `Option`). The only change to the public API when making the required member optional is that a `maybe_`-prefixed setter is added to the builder. That new method accepts an `Option<T>`.
+
+**Example:**
+
+Suppose you have a function with a required argument, and there is existing code that sets that required argument using builder syntax.
 
 ```rust
 use bon::builder;
@@ -18,13 +70,14 @@ fn get_page(password: String) -> String {
     format!("Secret knowledge")
 }
 
+// Existing code that uses the builder API
 let page = get_page()
     .password("I know the password!")
     .call();
 assert_eq!(page, "Secret knowledge");
 ```
 
-Then you changed this function to take an `Option<T>`. This is totally fine, the old code that sets that parameter to `T` still compiles:
+Then you change this function to take an `Option<T>`. This is totally fine, the old code that sets that parameter to `T` still compiles:
 
 ```rust
 use bon::builder;
@@ -34,22 +87,22 @@ fn get_page(password: Option<String>) -> String { // [!code highlight]
     format!("Secret knowledge")
 }
 
+// Existing code that uses the builder API (unchanged, still compiles)
 let page = get_page()
     .password("I know the password!")
     .call();
 assert_eq!(page, "Secret knowledge");
 
 // Now this code can also pass `Option<T>`, including `None` to the function
-let password = Some("password");
-
+// using the new `maybe_password` method.
 get_page()
-    .maybe_password(password)
+    .maybe_password(Some("password"))
     .call();
 ```
 
 ## Switching between `Option<T>` and `#[builder(default)]`
 
-Switching between `Option<T>` for the struct field or function argument type and `#[builder(default)]` on `T` is fully compatible. Nothing changes in the builder API when this happens.
+Switching between `Option<T>` for the member type and `#[builder(default)]` on `T` is fully compatible. Nothing changes in the builder API when this happens.
 
 **Example:**
 
@@ -62,7 +115,7 @@ fn example(filter: Option<String>) {}
 example().maybe_filter(Some("filter")).call();
 ```
 
-This code can be changed to use `#[builder(default)]` and the call site still compiles:
+This code can be changed to use `#[builder(default)]` and the call site will still compile:
 
 ```rust ignore
 use bon::builder;
@@ -78,48 +131,54 @@ example.maybe_filter(Some("filter")).call();
 ```
 
 
-## Moving `#[builder]` from the struct the `new()` method
+## Moving `#[builder]` from the struct to the `new()` method
 
-`#[builder]` on a struct generates builder API that is fully compatible with placing `#[builder]` on the `new()` method with the signature similar to struct's fields
+`#[builder]` on a struct generates builder API that is fully compatible with placing `#[builder]` on the `new()` method with the signature similar to struct's fields.
 
 This means, for example, it's preferable to place the `#[builder]` attribute on top of your struct in most cases because it's convenient. However, if you need to have some custom logic during the construction of your type, you may simply create a `new()` method annotated with `#[builder]` where you can do anything you want to create an instance of your type.
 
-To keep type's public API compatible with the time when `#[builder]` was on the struct directly, the `new()` method must accept the same parameters as there were fields on the struct.
+To keep your struct's public API compatible with the time when `#[builder]` was on the struct directly, the `new()` method must accept the same parameters as there were fields in the struct.
 
 **Example:**
 
-```rust
+```rust ignore
 use bon::bon;
 
+// Previously we used `#[builder]` on the struct
+#[builder] // [!code --]
 struct User {
-    // Suppose we decided to change the internal representation // [!code highlight]
-    // of the `id` field of the struct to use `String`          // [!code highlight]
-    id: String,                                                 // [!code highlight]
+    // But then we decided to change the internal representation
+    // of the `id` field to use `String` instead of `u32`
+    id: u32,                                                     // [!code --]
+    id: String,                                                  // [!code ++]
     name: String,
 }
 
-#[bon] // [!code highlight]
-impl User {
-    #[builder] // [!code highlight]
-    fn new(id: u32, name: String) -> Self {
-        Self {
-            id: format!("u-{id}"),
-            name,
-        }
-    }
-}
+// To preserve compatibility we need to define a `new()` method with `#[builder]`
+// that still accepts `u32` for `id` member.
+#[bon]                                      // [!code ++]
+impl User {                                 // [!code ++]
+    #[builder]                              // [!code ++]
+    fn new(id: u32, name: String) -> Self { // [!code ++]
+        Self {                              // [!code ++]
+            id: format!("u-{id}"),          // [!code ++]
+            name,                           // [!code ++]
+        }                                   // [!code ++]
+    }                                       // [!code ++]
+}                                           // [!code ++]
 
-// This code still compiles since the API of the builder didn't change // [!code highlight]
+// The caller's code didn't change. It still uses `u32` for `id` member.
 let user = User::builder()
     // `id` is still accepted as a `u32` here
     .id(1)
     .name("Bon")
     .build();
-
-assert_eq!(user.id, "u-1");
-assert_eq!(user.name, "Bon");
 ```
 
 ## Adding #[builder] to existing code
 
 If your existing code defines functions with positional parameters in its public API that you'd like to change to use builder syntax, but you want to keep the old code compatible with the positional functions API, then you may use `#[builder(expose_positional_fn)]` attribute to keep both syntaxes available. See [this attribute's docs](../reference/builder#expose-positional-fn) for details.
+
+*[Member]: Struct field or a function argument
+*[member]: Struct field or a function argument
+*[members]: Struct fields or function arguments

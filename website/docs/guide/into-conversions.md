@@ -43,7 +43,7 @@ This makes it possible for the caller to pass a `&str`. However, the signature o
 
 ## How `bon` solves this problem
 
-The `#[builder]` macro automatically adds `impl Into` in the setter methods and invokes the `into()` conversion when finishing the building process.
+The `#[builder]` macro automatically adds `impl Into` in the setter methods and invokes the `into()` conversion internally.
 
 **Example:**
 
@@ -54,9 +54,9 @@ struct User {
     name: String,
 }
 
-#[bon]
+#[bon] // [!code highlight]
 impl User {
-    #[builder]
+    #[builder] // [!code highlight]
     fn new(name: String) -> Self { // [!code highlight]
         Self { name }
     }
@@ -71,24 +71,30 @@ let user = User::builder()
 
 **Example:**
 
-```rust
+::: code-group
+
+```rust [Struct]
 use bon::builder;
 
 #[builder] // [!code highlight]
 struct User {
-    name: String
+    name: String // [!code highlight]
 }
 
 let user = User::builder()
     .name("Bon") // [!code highlight]
     .build();
+```
+
+```rust [Function]
+use bon::builder;
 
 #[builder] // [!code highlight]
-fn make_user(name: String) -> User {
-    User { name }
-}
+fn accept_string(
+    name: String // [!code highlight]
+) {}
 
-let user = make_user()
+let user = accept_string()
     .name("Bon") // [!code highlight]
     .call();
 ```
@@ -100,7 +106,7 @@ We didn't need to add any more attributes for `bon` to figure out that the sette
 
 ## Types that qualify for an automatic `Into` conversion
 
-An automatic `Into` conversion in setter methods applies only for types that are represented by a simple path (e.g. `crate::foo::Bar`) or a simple identifier (e.g. `Bar`, `String`) with the exception of primitive types.
+An automatic `Into` conversion in setter methods applies only to types that are represented by a simple path (e.g. `crate::foo::Bar`) or a simple identifier (e.g. `Bar`, `String`) with the exception of primitive types.
 
 The following list describes the types that don't qualify for an automatic `Into` conversion with the explanation of the reason.
 
@@ -187,12 +193,12 @@ The following list describes the types that don't qualify for an automatic `Into
 
     The goal of the automatic `Into` conversions is to spare the caller from converting the types at the call site if an `Into` conversion exists. There aren't many types that implement `Into` conversions to complex type expressions involving references, tuples, arrays, function pointers etc.
 
-    There is probably a subset of simple type expressions for which `bon` may provide an automatic `Into` conversion. If you have a use case that needs such conversions to be automatic, please [open an issue] or see [below](#override-the-default-behavior).
+    Anyhow, there is likely a subset of simple type expressions for which `bon` may provide an automatic `Into` conversion. If you have a use case that needs such conversions to be automatic, you may [override the default behavior](#override-the-default-behavior) and consider to [open an issue].
     :::
 
 ## Override the default behavior
 
-Suppose automatic `Into` conversion qualification rules don't satisfy your use case. For example, you want the setter method to accept an `Into<(u32, u32)>` then you can use an explicit `#[builder(into)]` to override the default behavior. See [its docs](../reference/builder#into) for details.
+Suppose automatic `Into` conversion qualification rules don't satisfy your use case. For example, you want the setter method to accept an `Into<(u32, u32)>` then you can use an explicit `#[builder(into)]` to override the default behavior. See [this attribute's docs](../reference/builder#into) for details.
 
 
 

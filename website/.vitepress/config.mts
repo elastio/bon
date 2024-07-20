@@ -1,4 +1,5 @@
 import { defineConfig } from "vitepress";
+import { abbr } from "@mdit/plugin-abbr";
 
 const base = "/bon/";
 
@@ -16,6 +17,11 @@ export default defineConfig({
       dark: "dark-plus",
       light: "light-plus",
     },
+
+    config: (md) => {
+      // use more markdown-it plugins!
+      md.use(abbr);
+    }
   },
 
   base,
@@ -60,8 +66,8 @@ export default defineConfig({
               link: "/docs/guide/overview",
             },
             {
-              text: "Optional setters",
-              link: "/docs/guide/optional-setters",
+              text: "Optional members",
+              link: "/docs/guide/optional-members",
             },
             {
               text: "Compatibility",
@@ -115,8 +121,8 @@ export default defineConfig({
                   ],
                 },
                 {
-                  text: "Setter-level attributes",
-                  link: "/docs/reference/builder#setter-level-attributes",
+                  text: "Member-level attributes",
+                  link: "/docs/reference/builder#member-level-attributes",
                   items: [
                     {
                       text: "default",
@@ -125,10 +131,6 @@ export default defineConfig({
                     {
                       text: "into",
                       link: "/docs/reference/builder#into",
-                    },
-                    {
-                      text: "required",
-                      link: "/docs/reference/builder#required",
                     },
                   ],
                 },

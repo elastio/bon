@@ -22,20 +22,8 @@ error: This attribute is redundant and can be removed. By default the the type o
 16 | fn unnecessary_into_override_false(#[builder(into = false)] _x: u32) {}
    |                                                     ^^^^^
 
-error: #[builder(required)] can only be applied to `bool`. All other types except for `Option<T>` are required by default already
-  --> tests/integration/ui/compile_fail/misc.rs:19:28
-   |
-19 | fn required_bool(#[builder(required)] _x: u32) {}
-   |                            ^^^^^^^^
-
-error: `Option` and #[builder(required)] attributes are mutually exclusive. `Option`s are optional by definition and this can't be changed
-  --> tests/integration/ui/compile_fail/misc.rs:22:30
-   |
-22 | fn required_option(#[builder(required)] _x: Option<u32>) {}
-   |                              ^^^^^^^^
-
 error: expected at least one parameter in parentheses
-  --> tests/integration/ui/compile_fail/misc.rs:24:11
+  --> tests/integration/ui/compile_fail/misc.rs:18:11
    |
-24 | #[builder(start_fn())]
+18 | #[builder(start_fn())]
    |           ^^^^^^^^

@@ -1,10 +1,10 @@
-mod field;
+mod member;
 mod setter_methods;
 
 pub(crate) mod input_func;
 pub(crate) mod input_struct;
 
-use field::*;
+use member::*;
 
 use darling::ast::GenericParamExt;
 use itertools::Itertools;
@@ -17,7 +17,7 @@ pub(crate) struct ReceiverCtx {
 }
 
 pub(crate) struct BuilderGenCtx {
-    pub(crate) fields: Vec<Field>,
+    pub(crate) members: Vec<Member>,
 
     pub(crate) generics: Generics,
     pub(crate) vis: syn::Visibility,
@@ -51,12 +51,12 @@ pub(crate) struct StartFunc {
 }
 
 pub(crate) trait FinishFuncBody {
-    /// Generate `finish` function body from ready-made field expressions.
-    fn gen(&self, field_exprs: &[FieldExpr<'_>]) -> TokenStream2;
+    /// Generate `finish` function body from ready-made expressions.
+    fn gen(&self, member_exprs: &[MemberExpr<'_>]) -> TokenStream2;
 }
 
-pub(crate) struct FieldExpr<'a> {
-    pub(crate) field: &'a Field,
+pub(crate) struct MemberExpr<'a> {
+    pub(crate) member: &'a Member,
     pub(crate) expr: TokenStream2,
 }
 
@@ -71,18 +71,18 @@ pub(crate) struct MacroOutput {
 }
 
 impl BuilderGenCtx {
-    fn field_idents(&self) -> impl Iterator<Item = syn::Ident> + '_ {
-        self.fields.iter().map(|field| field.ident.clone())
+    fn member_idents(&self) -> impl Iterator<Item = syn::Ident> + '_ {
+        self.members.iter().map(|member| member.ident.clone())
     }
 
-    fn field_assoc_type_idents(&self) -> impl Iterator<Item = &syn::Ident> {
-        self.fields
+    fn member_assoc_type_idents(&self) -> impl Iterator<Item = &syn::Ident> {
+        self.members
             .iter()
-            .map(|field| &field.state_assoc_type_ident)
+            .map(|member| &member.state_assoc_type_ident)
     }
 
     fn unset_state_types(&self) -> impl Iterator<Item = TokenStream2> + '_ {
-        self.fields.iter().map(|arg| arg.unset_state_type())
+        self.members.iter().map(|arg| arg.unset_state_type())
     }
 
     fn generic_args(&self) -> impl Iterator<Item = syn::GenericArgument> + '_ {
@@ -135,7 +135,7 @@ impl BuilderGenCtx {
         let where_clause = &generics.where_clause;
         let generic_args = self.generic_args();
 
-        let field_idents = self.field_idents();
+        let member_idents = self.member_idents();
         let phantom_field_init = self.phantom_field_init();
 
         let receiver = self
@@ -162,7 +162,7 @@ impl BuilderGenCtx {
                     __private_impl: #builder_private_impl_ident {
                         #phantom_field_init
                         #receiver_field_init
-                        #( #field_idents: ::std::default::Default::default(), )*
+                        #( #member_idents: ::std::default::Default::default(), )*
                     }
                 }
             }
@@ -184,20 +184,20 @@ impl BuilderGenCtx {
             .filter_map(<_>::as_type_param)
             .collect_vec();
 
-        if generic_type_params.is_empty() && generic_lifetimes.is_empty() && !self.fields.is_empty()
+        if generic_type_params.is_empty() && generic_lifetimes.is_empty() && !self.members.is_empty()
         {
             return None;
         }
 
-        let field_types = self.fields.iter().map(|field| &field.ty);
+        let member_types = self.members.iter().map(|member| &member.ty);
 
-        // A special case of zero fields requires storing `__State` in phantom data
+        // A special case of zero members requires storing `__State` in phantom data
         // otherwise it would be reported as an unused type parameter. Another way we
         // could solve it is by special-casing the codegen by not adding the __State
         // generic type parameter to the builder type at all if it has no fields, but
         // to keep code simpler we just do this one small crutch here for a really
         // unlikely case of a builder with zero fields.
-        let state = self.fields.is_empty().then(|| quote! { __State, });
+        let state = self.members.is_empty().then(|| quote! { __State, });
 
         Some(quote! {
             ::core::marker::PhantomData<(
@@ -222,7 +222,7 @@ impl BuilderGenCtx {
                 //
                 // That's a weird implicit behavior in Rust, I suppose there is a reasonable
                 // explanation for it, I just didn't care to research it yet ¯\_(ツ)_/¯.
-                #(#field_types,)*
+                #(#member_types,)*
 
                 #state
             )>
@@ -239,7 +239,7 @@ impl BuilderGenCtx {
 
     fn builder_state_trait_decl(&self) -> TokenStream2 {
         let trait_ident = &self.builder_state_trait_ident;
-        let assoc_types_idents = self.field_assoc_type_idents().collect_vec();
+        let assoc_types_idents = self.member_assoc_type_idents().collect_vec();
         let vis = &self.vis;
 
         quote! {
@@ -259,8 +259,8 @@ impl BuilderGenCtx {
         let builder_ident = &self.builder_ident;
         let builder_private_impl_ident = &self.builder_private_impl_ident;
         let builder_state_trait_ident = &self.builder_state_trait_ident;
-        let field_idents = self.field_idents();
-        let fields_assoc_type_idents = self.field_assoc_type_idents().collect_vec();
+        let member_idents = self.member_idents();
+        let member_assoc_type_idents = self.member_assoc_type_idents().collect_vec();
         let generics_decl = &self.generics.params;
         let where_clause = &self.generics.where_clause;
         let generic_args = self.generic_args();
@@ -354,25 +354,25 @@ impl BuilderGenCtx {
             {
                 #phantom_field
                 #receiver_field
-                #( #field_idents: __State::#fields_assoc_type_idents, )*
+                #( #member_idents: __State::#member_assoc_type_idents, )*
             }
         }
     }
 
-    fn field_expr<'f>(&self, field: &'f Field) -> Result<FieldExpr<'f>> {
-        let maybe_default = field
+    fn member_expr<'f>(&self, member: &'f Member) -> Result<MemberExpr<'f>> {
+        let maybe_default = member
             .as_optional()
-            // For `Option` fields we don't need any `unwrap_or_[else/default]`.
+            // For `Option` members we don't need any `unwrap_or_[else/default]`.
             // We pass them directly to the function unchanged.
-            .filter(|_| !field.ty.is_option())
+            .filter(|_| !member.ty.is_option())
             .map(|_| {
-                field
+                member
                     .params
                     .default
                     .as_ref()
                     .and_then(|val| val.as_ref().as_ref())
                     .map(|default| {
-                        let qualified_for_into = self.field_qualifies_for_into(field, &field.ty)?;
+                        let qualified_for_into = self.member_qualifies_for_into(member, &member.ty)?;
                         let default = if qualified_for_into {
                             quote! { std::convert::Into::into((|| #default)()) }
                         } else {
@@ -385,32 +385,32 @@ impl BuilderGenCtx {
             })
             .transpose()?;
 
-        let field_ident = &field.ident;
+        let member_ident = &member.ident;
 
         let expr = quote! {
-            bon::private::IntoSet::into_set(self.__private_impl.#field_ident)
+            bon::private::IntoSet::into_set(self.__private_impl.#member_ident)
                 .into_inner()
                 #maybe_default
         };
 
-        Ok(FieldExpr { field, expr })
+        Ok(MemberExpr { member, expr })
     }
 
     fn finish_method_impl(&self) -> Result<TokenStream2> {
-        let field_exprs: Vec<_> = self
-            .fields
+        let member_exprs: Vec<_> = self
+            .members
             .iter()
-            .map(|field| self.field_expr(field))
+            .map(|member| self.member_expr(member))
             .try_collect()?;
 
-        let body = &self.finish_func.body.gen(&field_exprs);
+        let body = &self.finish_func.body.gen(&member_exprs);
         let asyncness = &self.finish_func.asyncness;
         let unsafety = &self.finish_func.unsafety;
         let vis = &self.vis;
         let builder_ident = &self.builder_ident;
         let builder_state_trait_ident = &self.builder_state_trait_ident;
-        let fields_assoc_type_idents = self.field_assoc_type_idents().collect_vec();
-        let set_state_type_params = self.fields.iter().map(Field::set_state_type_param);
+        let member_assoc_type_idents = self.member_assoc_type_idents().collect_vec();
+        let set_state_type_params = self.members.iter().map(Member::set_state_type_param);
         let finish_func_ident = &self.finish_func.ident;
         let output = &self.finish_func.output;
         let generics_decl = &self.generics.params;
@@ -434,7 +434,7 @@ impl BuilderGenCtx {
             where
                 #( #where_clause_predicates, )*
                 #(
-                    __State::#fields_assoc_type_idents:
+                    __State::#member_assoc_type_idents:
                         bon::private::IntoSet<#set_state_type_params>,
                 )*
             {
@@ -447,9 +447,9 @@ impl BuilderGenCtx {
     }
 
     fn setter_methods_impls(&self) -> Result<TokenStream2> {
-        self.fields
+        self.members
             .iter()
-            .map(|field| self.setter_methods_impls_for_field(field))
+            .map(|member| self.setter_methods_impls_for_member(member))
             .collect()
     }
 }
@@ -488,7 +488,7 @@ fn reject_self_references_in_docs(docs: &[syn::Attribute]) -> Result {
         {
             prox::bail!(
                 &doc.span(),
-                "The documentation for the field should not reference `Self` \
+                "The documentation for the member should not reference `Self` \
                 because it will be moved to the builder struct context where \
                 `Self` changes meaning. Use explicit type names instead.",
             );

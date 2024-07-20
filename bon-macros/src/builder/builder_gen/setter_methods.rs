@@ -1,4 +1,4 @@
-use super::{field::Field, BuilderGenCtx};
+use super::{member::Member, BuilderGenCtx};
 use darling::ast::GenericParamExt;
 use itertools::Itertools;
 use prox::prelude::*;
@@ -6,37 +6,37 @@ use quote::{quote, ToTokens};
 use std::collections::BTreeSet;
 
 impl BuilderGenCtx {
-    pub(crate) fn setter_methods_impls_for_field(&self, field: &Field) -> Result<TokenStream2> {
-        let output_fields_states = self.fields.iter().map(|other_field| {
-            if other_field.ident == field.ident {
-                return field.set_state_type().to_token_stream();
+    pub(crate) fn setter_methods_impls_for_member(&self, member: &Member) -> Result<TokenStream2> {
+        let output_members_states = self.members.iter().map(|other_member| {
+            if other_member.ident == member.ident {
+                return member.set_state_type().to_token_stream();
             }
 
-            let state_assoc_type_ident = &other_field.state_assoc_type_ident;
+            let state_assoc_type_ident = &other_member.state_assoc_type_ident;
             quote!(__State::#state_assoc_type_ident)
         });
 
-        let state_assoc_type_ident = &field.state_assoc_type_ident;
+        let state_assoc_type_ident = &member.state_assoc_type_ident;
         let builder_ident = &self.builder_ident;
         let builder_state_trait_ident = &self.builder_state_trait_ident;
         let generics_decl = &self.generics.params;
         let generic_args = self.generic_args().collect_vec();
         let where_clause = &self.generics.where_clause;
-        let unset_state_type = field.unset_state_type();
+        let unset_state_type = member.unset_state_type();
         let output_builder_alias_ident =
             quote::format_ident!("__{builder_ident}Set{state_assoc_type_ident}");
 
-        // A case where there is just one field is special, because the type alias would
+        // A case where there is just one member is special, because the type alias would
         // receive a generic `__State` parameter that it wouldn't use, so we create it
-        // only if there are 2 or more fields.
+        // only if there are 2 or more members.
         let (output_builder_alias_state_var_decl, output_builder_alias_state_arg) =
-            (self.fields.len() > 1)
+            (self.members.len() > 1)
                 .then(|| (quote!(__State: #builder_state_trait_ident), quote!(__State)))
                 .unzip();
 
-        let setter_methods = FieldSettersCtx::new(
+        let setter_methods = MemberSettersCtx::new(
             self,
-            field,
+            member,
             quote! {
                 #output_builder_alias_ident<
                     #(#generic_args,)*
@@ -82,7 +82,7 @@ impl BuilderGenCtx {
             #where_clause
             = #builder_ident<
                 #(#generic_args,)*
-                ( #(#output_fields_states,)* )
+                ( #(#output_members_states,)* )
             >;
 
             impl<
@@ -104,9 +104,13 @@ impl BuilderGenCtx {
 
     // XXX: this behavior is heavily documented in `into-conversions.md`. Please
     // keep the docs and the implementation in sync.
-    pub(crate) fn field_qualifies_for_into(&self, field: &Field, ty: &syn::Type) -> Result<bool> {
+    pub(crate) fn member_qualifies_for_into(
+        &self,
+        member: &Member,
+        ty: &syn::Type,
+    ) -> Result<bool> {
         // User override takes the wheel entirely
-        let Some(user_override) = &field.params.into else {
+        let Some(user_override) = &member.params.into else {
             return Ok(self.type_qualifies_for_into(ty));
         };
 
@@ -124,12 +128,12 @@ impl BuilderGenCtx {
             "doesn't qualify"
         };
 
-        let field_origin = &field.origin;
+        let member_origin = &member.origin;
 
         prox::bail!(
             &user_override.span(),
             "This attribute is redundant and can be removed. By default the \
-            the type of this {field_origin} already {maybe_qualifies} for `impl Into`.",
+            the type of this {member_origin} already {maybe_qualifies} for `impl Into`.",
         );
     }
 
@@ -184,64 +188,64 @@ impl BuilderGenCtx {
     }
 }
 
-struct FieldSettersCtx<'a> {
+struct MemberSettersCtx<'a> {
     builder_gen: &'a BuilderGenCtx,
-    field: &'a Field,
+    member: &'a Member,
     return_type: TokenStream2,
-    norm_field_ident: syn::Ident,
+    norm_member_ident: syn::Ident,
 }
 
-impl<'a> FieldSettersCtx<'a> {
-    fn new(macro_ctx: &'a BuilderGenCtx, field: &'a Field, return_type: TokenStream2) -> Self {
-        let field_ident = &field.ident.to_string();
-        let norm_field_ident = field_ident
-            // Remove the leading underscore from the field name since it's used
+impl<'a> MemberSettersCtx<'a> {
+    fn new(builder_gen: &'a BuilderGenCtx, member: &'a Member, return_type: TokenStream2) -> Self {
+        let member_ident = &member.ident.to_string();
+        let norm_member_ident = member_ident
+            // Remove the leading underscore from the member name since it's used
             // to denote unused symbols in Rust. That doesn't mean the builder
             // API should expose that knowledge to the caller.
             .strip_prefix('_')
-            .unwrap_or(field_ident);
+            .unwrap_or(member_ident);
 
         // Preserve the original identifier span to make IDE go to definition correctly
         // and make error messages point to the correct place.
-        let norm_field_ident = syn::Ident::new(norm_field_ident, field.ident.span());
+        let norm_member_ident = syn::Ident::new(norm_member_ident, member.ident.span());
 
         Self {
-            builder_gen: macro_ctx,
-            field,
+            builder_gen,
+            member,
             return_type,
-            norm_field_ident,
+            norm_member_ident,
         }
     }
 
     fn setter_methods(&self) -> Result<TokenStream2> {
-        let field_type = self.field.ty.as_ref();
+        let member_type = self.member.ty.as_ref();
 
-        if let Some(inner_type) = self.field.as_optional() {
-            return self.setters_for_optional_field(inner_type);
+        if let Some(inner_type) = self.member.as_optional() {
+            return self.setters_for_optional_member(inner_type);
         }
 
         let qualified_for_into = self
             .builder_gen
-            .field_qualifies_for_into(self.field, &self.field.ty)?;
+            .member_qualifies_for_into(self.member, &self.member.ty)?;
 
         let (fn_param_type, maybe_into_call) = if qualified_for_into {
-            (quote!(impl Into<#field_type>), quote!(.into()))
+            (quote!(impl Into<#member_type>), quote!(.into()))
         } else {
-            (quote!(#field_type), quote!())
+            (quote!(#member_type), quote!())
         };
 
-        Ok(self.setter_method(FieldSetterMethod {
-            method_name: self.norm_field_ident.clone(),
+        Ok(self.setter_method(MemberSetterMethod {
+            method_name: self.norm_member_ident.clone(),
             fn_params: quote!(value: #fn_param_type),
-            field_init: quote!(bon::private::Set::new(value #maybe_into_call)),
+            member_init: quote!(bon::private::Set::new(value #maybe_into_call)),
             overwrite_docs: None,
         }))
     }
 
-    fn setters_for_optional_field(&self, inner_type: &syn::Type) -> Result<TokenStream2> {
+    fn setters_for_optional_member(&self, inner_type: &syn::Type) -> Result<TokenStream2> {
         let qualified_for_into = self
             .builder_gen
-            .field_qualifies_for_into(self.field, inner_type)?;
+            .member_qualifies_for_into(self.member, inner_type)?;
 
         let (inner_type, maybe_conv_call, maybe_map_conv_call) = if qualified_for_into {
             (
@@ -253,29 +257,29 @@ impl<'a> FieldSettersCtx<'a> {
             (quote!(#inner_type), quote!(), quote!())
         };
 
-        let norm_field_ident = &self.norm_field_ident;
+        let norm_member_ident = &self.norm_member_ident;
 
         let methods = [
-            FieldSetterMethod {
-                method_name: quote::format_ident!("maybe_{norm_field_ident}"),
+            MemberSetterMethod {
+                method_name: quote::format_ident!("maybe_{norm_member_ident}"),
                 fn_params: quote!(value: Option<#inner_type>),
-                field_init: quote!(bon::private::Set::new(value #maybe_map_conv_call)),
+                member_init: quote!(bon::private::Set::new(value #maybe_map_conv_call)),
                 overwrite_docs: Some(format!(
-                    "Same as [`Self::{norm_field_ident}`], but accepts \
+                    "Same as [`Self::{norm_member_ident}`], but accepts \
                     an `Option` as input. See that method's documentation for \
                     more details.",
                 )),
             },
             // We intentionally keep the name and signature of the setter method
-            // for an optional field that accepts the value under the option the
-            // same as the setter method for the required field to keep the API
-            // of the builder compatible when a required input field becomes
-            // optional. To be able to explicitly pass an `Option` value to the
-            // setter method users need to use the `maybe_{field_ident}` method.
-            FieldSetterMethod {
-                method_name: norm_field_ident.clone(),
+            // for an optional member that accepts the value under the option the
+            // same as the setter method for the required member to keep the API
+            // of the builder compatible when a required member becomes optional.
+            // To be able to explicitly pass an `Option` value to the setter method
+            // users need to use the `maybe_{member_ident}` method.
+            MemberSetterMethod {
+                method_name: norm_member_ident.clone(),
                 fn_params: quote!(value: #inner_type),
-                field_init: quote!(bon::private::Set::new(Some(value #maybe_conv_call))),
+                member_init: quote!(bon::private::Set::new(Some(value #maybe_conv_call))),
                 overwrite_docs: None,
             },
         ];
@@ -288,18 +292,18 @@ impl<'a> FieldSettersCtx<'a> {
         Ok(setters)
     }
 
-    fn setter_method(&self, method: FieldSetterMethod) -> TokenStream2 {
+    fn setter_method(&self, method: MemberSetterMethod) -> TokenStream2 {
         let return_type = &self.return_type;
-        let FieldSetterMethod {
+        let MemberSetterMethod {
             method_name,
             fn_params,
-            field_init,
+            member_init,
             overwrite_docs,
         } = method;
 
         let docs = match overwrite_docs {
             Some(docs) => &[syn::parse_quote!(#[doc = #docs])],
-            None => self.field.docs.as_slice(),
+            None => self.member.docs.as_slice(),
         };
 
         let vis = &self.builder_gen.vis;
@@ -307,19 +311,19 @@ impl<'a> FieldSettersCtx<'a> {
         let builder_ident = &self.builder_gen.builder_ident;
         let builder_private_impl_ident = &self.builder_gen.builder_private_impl_ident;
         let maybe_phantom_field = self.builder_gen.phantom_field_init();
-        let field_idents = self.builder_gen.field_idents();
+        let member_idents = self.builder_gen.member_idents();
         let maybe_receiver_field = self
             .builder_gen
             .receiver
             .is_some()
             .then(|| quote!(receiver: self.__private_impl.receiver,));
 
-        let field_exprs = self.builder_gen.fields.iter().map(|other_field| {
-            if other_field.ident == self.field.ident {
-                return field_init.clone();
+        let member_exprs = self.builder_gen.members.iter().map(|other_member| {
+            if other_member.ident == self.member.ident {
+                return member_init.clone();
             }
 
-            let ident = &other_field.ident;
+            let ident = &other_member.ident;
             quote!(self.__private_impl.#ident)
         });
 
@@ -330,7 +334,7 @@ impl<'a> FieldSettersCtx<'a> {
                     __private_impl: #builder_private_impl_ident {
                         #maybe_phantom_field
                         #maybe_receiver_field
-                        #( #field_idents: #field_exprs, )*
+                        #( #member_idents: #member_exprs, )*
                     }
                 }
             }
@@ -338,9 +342,9 @@ impl<'a> FieldSettersCtx<'a> {
     }
 }
 
-struct FieldSetterMethod {
+struct MemberSetterMethod {
     method_name: syn::Ident,
     fn_params: TokenStream2,
-    field_init: TokenStream2,
+    member_init: TokenStream2,
     overwrite_docs: Option<String>,
 }

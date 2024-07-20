@@ -12,7 +12,7 @@ outline: [2, 3]
 
 Overrides the name of the generated builder struct.
 
-The default naming pattern is the following.
+The default naming pattern is the following:
 
 | Type of item `#[builder]` is placed on | Naming pattern                                |
 | -------------------------------------- | --------------------------------------------- |
@@ -20,7 +20,7 @@ The default naming pattern is the following.
 | Free function                          | `{PascalCaseFunctionName}Builder`             |
 | Associated method                      | `{SelfTypeName}{PascalCaseMethodName}Builder` |
 
-The attribute expects the new builder type identifier as its input.
+The attribute expects the desired builder type identifier as its input.
 
 **Example:**
 
@@ -64,7 +64,9 @@ let builder: MyBuilder = Brush::builder();
 
 You'll usually want to override the builder type name when you already have such a name in scope. For example, if you have a struct and a function with the same name annotated with `#[builder]`:
 
-```rust compile_fail
+::: code-group
+
+```rust compile_fail [Errored]
 use bon::builder;
 
 #[builder] // [!code error]
@@ -78,6 +80,22 @@ fn brush() {}
 let builder: BrushBuilder = Brush::builder();
 let builder: BrushBuilder = brush();
 ```
+
+```rust [Fixed]
+use bon::builder;
+
+#[builder(builder_type = MyBuilder)] // [!code highlight]
+struct Brush {}
+
+#[builder]
+fn brush() {}
+
+// Now builder types are named differently
+let builder: MyBuilder = Brush::builder();
+let builder: BrushBuilder = brush();
+```
+
+:::
 
 ### `expose_positional_fn`
 
@@ -287,18 +305,24 @@ User::init() // [!code highlight]
 
 :::
 
-## Setter-level attributes
+## Member-level attributes
 
 ### `default`
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
 
-Makes the struct field or function argument optional. If the caller doesn't specify a value for this parameter via the setter methods, then the default value will be computed based on the form of this attribute:
+Makes the member optional. This means setters will be generated as if the type of the member was wrapped in an `Option`. In fact, this property is guaranteed. See [API compatibility](../guide/compatibility#switching-between-option-t-and-builder-default) for details.
 
-- `#[builder(default)]` - default value will be computed using the `Default` trait
-- `#[builder(default = expression)]` - default value will be computed using the provided `expression`.
+If no setter for the member is called or `None` is passed, then the default value will be computed based on the form of this attribute:
+
+Form                               | How default value is computed
+-----------------------------------|----------------------------------------------------------------
+`#[builder(default)]`              | `Default::default()`
+`#[builder(default = expression)]` | `expression`
 
 The result of the `expression` will automatically be converted into the target type if `Into` conversion is enabled for this setter i.e. the type satisfies [automatic `Into` conversion qualification rules], or there is a [`#[builder(into)]`](#into) override.
+
+The default value will be lazily computed *only if needed* inside of the [finishing function](#finish_fn) (i.e. `build()` or `call()`).
 
 **Example:**
 
@@ -394,17 +418,13 @@ assert_eq!(user.permissions, ["read"]);
 
 #### Compile errors
 
-This attribute is incompatible with struct fields or function arguments of `Option` type, since `Option` already implies the default value of `None`.
-
-#### API compatibility
-
-Specifying this attribute is equivalent to wrapping its type with `Option<...>`. The same setter methods as for `Option<...>` fields will be generated. This means you can freely switch between using `#[builder(default)]` and manually wrapping the struct field or function argument type with an `Option<...>`.
+This attribute is incompatible with members of `Option` type, since `Option` already implies the default value of `None`.
 
 ### `into`
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
 
-This attribute forces an `impl Into` conversion to be enabled or disabled in the generated setter method. Use this to force-override the decision made by [automatic `Into` conversion qualification rules].
+This attribute forces an `impl Into` conversion to be enabled or disabled in the generated setter methods. Use this to force-override the decision made by [automatic `Into` conversion qualification rules].
 
 This parameter can be specified in one of the following ways:
 
@@ -522,68 +542,8 @@ struct Example {
 }
 ```
 
-### `required`
-
-**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
-
-Makes a `bool` field or function argument required.
-
-This attribute can only be placed on `bool` struct fields and function arguments. All other types except for `Option<T>` are required by default already. Also, `Option`s are optional by definition and this can't be changed even with this attribute.
-
-**Example:**
-
-::: code-group
-
-```rust [<Badge type="warning" text="struct fields"/>]
-use bon::builder;
-
-#[builder]
-struct Example {
-    #[builder(required)] // [!code highlight]
-    is_admin: bool,
-}
-
-Example::builder()
-    // Code won't compile if `is_admin()` setter isn't called // [!code highlight]
-    .is_admin(false) // [!code highlight]
-    .build();
-```
-
-```rust [<Badge type="warning" text="free function arguments"/>]
-use bon::builder;
-
-#[builder]
-fn example(
-    #[builder(required)] // [!code highlight]
-    is_admin: bool,
-) {}
-
-example()
-    // Code won't compile if `is_admin()` setter isn't called // [!code highlight]
-    .is_admin(false) // [!code highlight]
-    .call();
-```
-
-```rust [<Badge type="warning" text="associated method arguments"/>]
-use bon::bon;
-
-struct Example;
-
-#[bon]
-impl Example {
-    #[builder]
-    fn example(
-        #[builder(required)] // [!code highlight]
-        is_admin: bool,
-    ) {}
-}
-
-Example::example()
-    // Code won't compile if `is_admin()` setter isn't called // [!code highlight]
-    .is_admin(false) // [!code highlight]
-    .call();
-```
-
-:::
-
 [automatic `Into` conversion qualification rules]: ../guide/into-conversions#types-that-qualify-for-an-automatic-into-conversion
+
+*[Member]: Struct field or a function argument
+*[member]: Struct field or a function argument
+*[members]: Struct fields or function arguments

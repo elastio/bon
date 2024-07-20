@@ -32,7 +32,7 @@ Many things are customizable with additional attributes. See the [`#[builder]` m
 
 ## Builder for an associated method
 
-You can also generate a builder for associated methods.
+You can also generate a builder for associated methods. For this to work you need to add `#[bon]` macro on top of the `impl` block additionally.
 
 **Example:**
 
@@ -80,6 +80,16 @@ Second, `#[builder]` proc macro generates new items such as the builder struct t
 
 :::
 
+::: details Why does it compile without an import of `bon::builder`? 🤔
+
+This is because there is no separate `#[builder]` proc macro running in this case. Only the `#[bon]` macro handles code generation, it's an active attribute, while `#[builder]` is a dumb inert data attribute.
+
+It wouldn't harm if `bon::builder` was imported. It won't shadow the inert `#[builder]` attribute, but the import of that macro will be reported as unused by the compiler.
+
+See [the Rust Reference](https://doc.rust-lang.org/reference/attributes.html#active-and-inert-attributes) for details about active and inert attributes.
+
+:::
+
 
 To follow usual Rust's builder naming conventions `bon` treats the `new` method specially.
 
@@ -114,7 +124,7 @@ assert_eq!(user.name, "Bon");
 
 ::: tip
 
-`#[builder]` on a struct generates builder API that is fully compatible with placing `#[builder]` on the `new()` method with the signature similar to struct's fields. See [compatibility](./compatibility#moving-builder-from-the-struct-the-new-method) page for details.
+`#[builder]` on a struct generates builder API that is fully compatible with placing `#[builder]` on the `new()` method with the signature similar to struct's fields. See [compatibility](./compatibility#moving-builder-from-the-struct-to-the-new-method) page for details.
 
 :::
 
@@ -128,9 +138,11 @@ The generated builders provide ergonomic API by default. You usually won't need 
 
 ### `Option<T>` makes the setter optional
 
-If your function argument or struct field is of type `Option<T>`, then the generated builder will not enforce the caller to invoke the setter for this function argument or struct field. It also generates two setters: one that accepts `T` and the other accepts `Option<T>` to avoid wrapping values with `Some()` on the call site, but still be able to pass `Option<T>` value directly.
+If your function argument or struct field (or member for short) is of type `Option<T>`, then the generated builder will not enforce the caller to invoke the setter for this member, defaulting to `None`.
 
-See [optional setters](./optional-setters) page for details.
+It also generates two setters: one that accepts `T` and the other accepts `Option<T>` to avoid wrapping values with `Some()` on the call site, but still be able to pass `Option<T>` value directly.
+
+See [optional members](./optional-members) page for details.
 
 ### Automatic `Into` conversions
 
@@ -163,10 +175,22 @@ All of the following is supported.
 
 ## What's next?
 
+::: tip
+
+If you like the idea of this crate, and want to say "thank you" or "keep up doing this" consider giving it a [star on Github](https://github.com/elastio/bon). Any support and contribution is appreciated 🐱!
+
+:::
+
 You may consider reading the rest of the `Guide` section to harness the full power of `bon` and understand the decisions it makes. However, feel free to skip the docs and just use the `#[builder]` macro in your code. It's designed to be intuitive, so it'll probably do the thing you want it to do already.
 
-If you find something unexpected or you don't know something, then consult the docs and maybe use that search :mag: `Search` thing at the top to navigate.
+If you can't firgure something out, then consult the docs and maybe use that search :mag: `Search` thing at the top to navigate. You may also create an issue in the [Github repository](https://github.com/elastio/bon) for help.
 
 ## Acknowledgments
 
-The design of the generated builders was heavily inspired by such awesome crates as [`buildstructor`](https://docs.rs/buildstructor), [`typed-builder`](https://docs.rs/typed-builder) and [`derive-builder`](https://docs.rs/derive-builder). This crate was designed as an evolution of both of these with many lessons learned and a bunch more batteries provided.
+This project was heavily inspired by such awesome crates as [`buildstructor`](https://docs.rs/buildstructor), [`typed-builder`](https://docs.rs/typed-builder) and [`derive-builder`](https://docs.rs/derive-builder). This crate was designed as an evolution of these with many lessons learned and a bunch more batteries provided.
+
+See [alternatives](./alternatives) for comparison.
+
+*[Member]: Struct field or a function argument
+*[member]: Struct field or a function argument
+*[members]: Struct fields or function arguments

@@ -1,5 +1,5 @@
 use super::{
-    BuilderGenCtx, Field, FieldExpr, FieldOrigin, FinishFunc, FinishFuncBody, Generics, StartFunc,
+    BuilderGenCtx, Member, MemberExpr, MemberOrigin, FinishFunc, FinishFuncBody, Generics, StartFunc,
 };
 use crate::builder::params::{BuilderParams, ItemParams};
 use darling::FromMeta;
@@ -87,10 +87,10 @@ impl StructInputCtx {
             }
         };
 
-        let fields: Vec<_> = fields
+        let members: Vec<_> = fields
             .named
             .iter()
-            .map(Field::from_syn_field)
+            .map(Member::from_syn_field)
             .try_collect()?;
 
         let generics = Generics {
@@ -138,7 +138,7 @@ impl StructInputCtx {
         };
 
         let ctx = BuilderGenCtx {
-            fields,
+            members,
             builder_ident,
             builder_private_impl_ident,
             builder_state_trait_ident,
@@ -160,10 +160,10 @@ struct StructLiteralBody {
 }
 
 impl FinishFuncBody for StructLiteralBody {
-    fn gen(&self, field_exprs: &[FieldExpr<'_>]) -> TokenStream2 {
+    fn gen(&self, member_exprs: &[MemberExpr<'_>]) -> TokenStream2 {
         let Self { struct_ident } = self;
 
-        let field_exprs = field_exprs.iter().map(|FieldExpr { field, expr }| {
+        let member_exprs = member_exprs.iter().map(|MemberExpr { member: field, expr }| {
             let ident = &field.ident;
             quote! {
                 #ident: #expr
@@ -172,13 +172,13 @@ impl FinishFuncBody for StructLiteralBody {
 
         quote! {
             #struct_ident {
-                #(#field_exprs,)*
+                #(#member_exprs,)*
             }
         }
     }
 }
 
-impl Field {
+impl Member {
     pub(crate) fn from_syn_field(field: &syn::Field) -> Result<Self> {
         let ident = field.ident.clone().ok_or_else(|| {
             prox::err!(
@@ -188,8 +188,8 @@ impl Field {
             )
         })?;
 
-        Field::new(
-            FieldOrigin::StructField,
+        Member::new(
+            MemberOrigin::StructField,
             &field.attrs,
             ident,
             Box::new(field.ty.clone()),

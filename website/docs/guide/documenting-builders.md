@@ -31,4 +31,4 @@ This works because Rust compiler checks for invalid placement of `#[doc = ...]` 
 
 :::
 
-When `#[builder]` is placed on top of a struct, then documentation from the struct fields will be copied to the docs on the setter methods.
+When `#[builder]` is placed on top of a struct, then documentation on the struct fields will be copied to the docs on the setter methods.
