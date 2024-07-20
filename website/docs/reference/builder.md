@@ -625,7 +625,7 @@ example()
     .call();
 ```
 
-```rust [Discouraged using name attribute in destructuring]
+```rust [Discouraged name attribute in destructuring]
 use bon::builder;
 
 #[builder]
