@@ -106,8 +106,8 @@ When generating builder code for functions the `#[builder]` macro hides the orig
 Usually you'd want the underlying positional function to be hidden to provide only the builder syntax to the callers. However, in some situations you may want to keep the positional function exposed along with the builder syntax for compatibility with old code that still uses the old positional function call syntax.
 
 This attribute can take several forms.
-- Simple form `#[builder(expose_positional_fn = identifier)]`. Sets only the name of the positional function.
-- Verbose form `#[builder(expose_positional_fn(name = identifier, vis = "visibility"))]`.
+- Simple: `#[builder(expose_positional_fn = identifier)]`. Sets only the name of the positional function.
+- Verbose: `#[builder(expose_positional_fn(name = identifier, vis = "visibility"))]`.
   Allows setting both the name and the visibility of the positional function.
   Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
 
@@ -266,8 +266,8 @@ Overrides the name and visibility of the associated method that starts the build
 The default name for this method is `builder`, and the default visibility is the same as the visibility of the struct itself.
 
 This attribute can take several forms.
-- Simple form `#[builder(start_fn = identifier)]`. Overrides only the name of the "start" method.
-- Verbose form `#[builder(start_fn(name = identifier, vis = "visibility"))]`.
+- Simple: `#[builder(start_fn = identifier)]`. Overrides only the name of the "start" method.
+- Verbose: `#[builder(start_fn(name = identifier, vis = "visibility"))]`.
   Allows overriding both the name and the visibility of the "start" method.
   Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
 

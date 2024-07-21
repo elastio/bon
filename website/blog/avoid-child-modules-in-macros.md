@@ -165,7 +165,12 @@ fn example() {
 
 Does this compile? Surely, it should compile, because the child module becomes child of the anonymous function scope, so it should have access to symbols defined in the function, right?... Wrong 🐱!
 
-It still doesn't compile with the error ``unresolved import `super::User`; no `User` in the root``. This is because `super` doesn't refer to the parent function scope, instead it refers to the top-level module (called `root` by the compiler in the error message) that defines the `example()` function. For example, this code compiles:
+It still doesn't compile with the error:
+```txt
+unresolved import `super::User`; no `User` in the root
+```
+
+This is because `super` doesn't refer to the parent function scope, instead it refers to the top-level module (called `root` by the compiler in the error message) that defines the `example()` function. For example, this code compiles:
 
 ```rust ignore
 struct TopLevelStruct;

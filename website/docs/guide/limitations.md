@@ -26,6 +26,22 @@ impl Foo {
 }
 ```
 
+## Implicit generic lifetimes
+
+The following code doesn't compile.
+// TODO: explain why it doesn't compile
+
+```rust
+use bon::builder;
+
+struct User<'a> {
+    name: &'a str
+}
+
+#[builder]
+fn example(value: User) {}
+```
+
 ## `const` functions
 
 It's possible to place `#[builder]` on top of a `const fn`, but the generated builder methods won't be marked `const`. Under [some conditions](into-conversions#types-that-qualify-for-an-automatic-into-conversion), the generated setter methods make use of the `Into::into` method, which isn't `const`. Except for that, the generated code should be `const`-compatible.

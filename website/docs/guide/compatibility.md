@@ -1,57 +1,5 @@
 # Compatibility
 
-## Marking member as unused with a leading `_`
-
-You may add `_` prefix to the member name to mark it as unused for the time being. The builder API won't change if you do that. Leading underscores are stripped from the setter names automatically.
-
-**Example:**
-
-::: code-group
-
-```rust [Struct]
-use bon::builder;
-
-#[builder]
-struct Example {
-    _name: String
-}
-
-Example::builder()
-    .name("The setter is still called `name`")
-    .build();
-```
-
-```rust [Free function]
-use bon::builder;
-
-#[builder]
-fn example(
-    _name: String
-) {}
-
-example()
-    .name("The setter is still called `name`")
-    .call();
-```
-
-```rust [Associated method]
-use bon::{bon, builder};
-
-struct Example;
-
-#[bon]
-impl Example {
-    #[builder]
-    fn example(_name: String) {}
-}
-
-Example::example()
-    .name("The setter is still called `name`")
-    .call();
-```
-
-:::
-
 ## Making a required member optional
 
 It's totally fine to make a required member optional by changing the type from `T` to `Option<T>` or by adding [`#[builder(default)]`](../reference/builder.md#default) to it.
@@ -130,6 +78,57 @@ fn example(
 example.maybe_filter(Some("filter")).call();
 ```
 
+## Marking member as unused with a leading `_`
+
+You may add `_` prefix to the member name to mark it as unused for the time being. The builder API won't change if you do that. Leading underscores are stripped from the setter names automatically.
+
+**Example:**
+
+::: code-group
+
+```rust [Struct]
+use bon::builder;
+
+#[builder]
+struct Example {
+    _name: String
+}
+
+Example::builder()
+    .name("The setter is still called `name`")
+    .build();
+```
+
+```rust [Free function]
+use bon::builder;
+
+#[builder]
+fn example(
+    _name: String
+) {}
+
+example()
+    .name("The setter is still called `name`")
+    .call();
+```
+
+```rust [Associated method]
+use bon::{bon, builder};
+
+struct Example;
+
+#[bon]
+impl Example {
+    #[builder]
+    fn example(_name: String) {}
+}
+
+Example::example()
+    .name("The setter is still called `name`")
+    .call();
+```
+
+:::
 
 ## Moving `#[builder]` from the struct to the `new()` method
 
@@ -177,7 +176,9 @@ let user = User::builder()
 
 ## Adding #[builder] to existing code
 
-If your existing code defines functions with positional parameters in its public API that you'd like to change to use builder syntax, but you want to keep the old code compatible with the positional functions API, then you may use `#[builder(expose_positional_fn)]` attribute to keep both syntaxes available. See [this attribute's docs](../reference/builder#expose-positional-fn) for details.
+If your existing code defines functions with positional parameters in its public API that you'd like to change to use builder syntax, but you want to keep the old code compatible with the positional functions API, then you may use `#[builder(expose_positional_fn)]` attribute to keep both syntaxes available.
+
+See [this attribute's docs](../reference/builder#expose-positional-fn) for details.
 
 *[Member]: Struct field or a function argument
 *[member]: Struct field or a function argument
