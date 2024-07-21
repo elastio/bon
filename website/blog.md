@@ -1,6 +1,8 @@
 ---
 title: Blog
 sidebar: false
+editLink: false
+lastUpdated: false
 ---
 
 <script setup>

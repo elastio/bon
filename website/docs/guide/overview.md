@@ -70,7 +70,7 @@ counter
 assert_eq!(counter.val, 6);
 ```
 
-::: details Why is that `#[bon]` macro on top of the `impl` block required? 🤔
+::: details Why is that `#[bon]` macro on top of the `impl` block required? 🤔 (feel free to skip)
 
 There are a couple of technical reasons.
 
@@ -80,7 +80,7 @@ Second, `#[builder]` proc macro generates new items such as the builder struct t
 
 :::
 
-::: details Why does it compile without an import of `bon::builder`? 🤔
+::: details Why does it compile without an import of `bon::builder`? 🤔 (feel free to skip)
 
 This is because there is no separate `#[builder]` proc macro running in this case. Only the `#[bon]` macro handles code generation, it's an active attribute, while `#[builder]` is a dumb inert data attribute.
 

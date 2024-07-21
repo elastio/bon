@@ -19,7 +19,7 @@ export default defineConfig({
     },
 
     config: (md) => {
-      // use more markdown-it plugins!
+      // use more markdown-it plugins
       md.use(abbr);
     }
   },
@@ -140,6 +140,10 @@ export default defineConfig({
                 },
               ],
             },
+            {
+              text: "Other items on docs.rs",
+              link: "https://docs.rs/bon/latest/bon/",
+            }
           ],
         },
       ],

@@ -15,6 +15,8 @@ import formatDate from '../utils/formatDate';
 
 const { frontmatter } = useData();
 
+console.log("Setup header", frontmatter);
+
 
 </script>
 

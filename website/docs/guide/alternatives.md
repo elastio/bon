@@ -4,7 +4,7 @@ aside: false
 
 # Alternatives
 
-There are several other existing alternative crates that generate builders. `bon` was designed as a logical evolution of all those crates. Here is a table that compares them with some additional explanations below.
+There are several other existing alternative crates that generate builders. `bon` was designed based on lessons learned from all of them. Here is a table that compares the builder crates with some additional explanations below.
 
 <!-- If you want to edit the table below make sure to reduce the font size in editor or turn off word wrap to easier view the table -->
 
@@ -18,17 +18,17 @@ Member of `Option` type is optional by default           | :white_check_mark: | 
 Making required member optional is compatible by default | :white_check_mark: | :white_check_mark: | opt-in `#[builder(setter(strip_option))]` | opt-in `#[builder(setter(strip_option))]`
 Generates `T::builder()` method                          | :white_check_mark: | :white_check_mark: | :white_check_mark:                        | only `Builder::default()`
 Automatic `Into` conversion in setters                   | :white_check_mark: | :white_check_mark: |                                           |
- `impl Trait` supported in input function                | :white_check_mark: |                    |                                           |
-Anonymous lifetimes supported in input function          | :white_check_mark: |                    |                                           |
-`Self` references in function/struct are supported       | :white_check_mark: |                    |                                           |
+ `impl Trait` supported for functions                    | :white_check_mark: |                    |                                           |
+Anonymous lifetimes supported for functions              | :white_check_mark: |                    |                                           |
+`Self` mentions in functions/structs are supported       | :white_check_mark: |                    |                                           |
 Positional function is hidden by default                 | :white_check_mark: |                    |                                           |
-Special setter methods for collections                   | [(see below)][r1] | :white_check_mark: |                                           | :white_check_mark:
-Custom methods can be added to the builder type          |                    |                    | :white_check_mark: ([mutators]) | :white_check_mark:
+Special setter methods for collections                   | [(see below)][r1]  | :white_check_mark: |                                           | :white_check_mark:
+Custom methods can be added to the builder type          |                    |                    | :white_check_mark: ([mutators])           | :white_check_mark:
 Builder may be configured to use &self/&mut self         |                    |                    |                                           | :white_check_mark:
 
 ## Function builder fallback paradigm
 
-The builder crates `typed-builder` and `derive_builder` have a bunch of attributes to allow users insert custom behavior during the building process of the struct. However, `bon` and `buildstructor` avoid the complexity of additional config attributes for advanced use cases by proposing the user to fallback to defining a custom function with the `#[builder]` attached to it where it's possible to do anything you want.
+The builder crates `typed-builder` and `derive_builder` have a bunch of attributes that allow users to insert custom behavior into the building process of the struct. However, `bon` and `buildstructor` avoid the complexity of additional config attributes for advanced use cases by proposing the user to fallback to defining a custom function with the `#[builder]` attached to it where it's possible to do anything you want.
 
 However, `bon` still provides some simple attributes for common use cases to configure the behavior without falling back to a more verbose syntax.
 
@@ -53,6 +53,33 @@ fn main() {
 }
 ```
 
+::: details Why is there an explicit `main()` function in this code snippet? 🤔 (feel free to skip)
+
+
+
+
+
+It generates a child module where all the generated symbols are output. This is done to ensure additional privacy of the implementation. The generated code looks like this (simplified):
+
+```rust ignore
+mod user_new_builder {
+    use super::*;
+
+    pub(super) struct UserBuilder<TypeStateGenerics> {
+        // .. some fields
+    }
+
+    impl UserBuilder<TypeStateGenerics> {
+        fn build() -> User { /* */ }
+    }
+
+    // Other impl blocks...
+}
+```
+
+
+:::
+
 However, `#[bon::builder]` doesn't do that. Also a setter that pushes an element into a collection like that may confuse the reader in case if only one element is pushed. This may hide the fact that there is a `friends` field which is actually a collection.
 
 Constructing a collection is a bit different problem to solve, so `bon` provides a separate solution. `bon` provides a `bon::vec![]` macro that includes automatic `Into` conversion for every argument. So in `bon` syntax it would look like this:
@@ -76,8 +103,8 @@ User::builder()
 
 Also, fields of collection types are considered required by default, which isn't the case in `buildstructor`.
 
-[`buildstructor`]: https://docs.rs/buildstructor
-[`typed-builder`]: https://docs.rs/typed-builder
-[`derive_builder`]: https://docs.rs/derive_builder
+[`buildstructor`]: https://docs.rs/buildstructor/latest/buildstructor/
+[`typed-builder`]: https://docs.rs/typed-builder/latest/typed_builder/
+[`derive_builder`]: https://docs.rs/derive_builder/latest/derive_builder/
 [mutators]: https://docs.rs/typed-builder/latest/typed_builder/derive.TypedBuilder.html#mutators
 [r1]: #special-setter-methods-for-collections
