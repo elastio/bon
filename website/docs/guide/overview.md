@@ -1,10 +1,22 @@
+<script setup>
+import { data as version } from '/data/version.data'
+const [_, versionWildcard] = version.match(/(\d+.\d+).\d+/);
+</script>
+
 # Overview
 
 `bon` is a Rust crate for generating type-safe builders for functions and structs.
 
+Add this to your `Cargo.toml` to use it:
+
+```toml-vue
+[dependencies]
+bon = "{{ versionWildcard }}"
+```
+
 ## Builder for a function
 
-`bon` can turn a function with positional parameters into a function with "named" parameters via a builder. It's as easy as placing the `#[builder]` macro on top of your function.
+`bon` can turn a function with positional parameters into a function with "named" parameters via a builder. It's as easy as placing the `#[builder]` macro on top of it.
 
 **Example:**
 
