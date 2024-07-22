@@ -6,7 +6,7 @@ Every tool has its constraints, and `bon` is not an exception. The limitations d
 
 Documentation placed on the original function arguments or struct fields is copied verbatim to the documentation on the generated setter methods of the builder struct. The shortcoming of this approach is that references to `Self` break when moved into the `impl` block of the generated builder struct.
 
-`bon` checks for presence of ``[`Self`]`` and `[Self]` in the documentation on the function arguments and struct fields. If there are any, then a compile error suggesting to use full type name will be generated.
+`bon` checks for the presence of ``[`Self`]`` and `[Self]` in the documentation on the function arguments and struct fields. If there are any, then a compile error suggesting to use full type name will be generated.
 
 The following example doesn't compile with the reference to ``[`Self`]``. The fix is to replace that reference with the actual name of the struct ``[`Foo`]``.
 
@@ -28,10 +28,11 @@ impl Foo {
 
 ## Implicit generic lifetimes
 
-The following code doesn't compile.
-// TODO: explain why it doesn't compile
+Rust allows omitting generic lifetime parameters of a type in function parameters.
 
-```rust
+**Example:**
+
+```rust compile_fail
 use bon::builder;
 
 struct User<'a> {
@@ -39,7 +40,25 @@ struct User<'a> {
 }
 
 #[builder]
+fn example(value: User) {} // [!code error]
+```
+
+In this example, the type `User` is referenced in the function argument without lifetime parameters. This breaks the logic of the `#[builder]` macro. It must know **all** the lifetime parameters involved in the function signature to properly generate lifetime parameters for the builder struct.
+
+Unfortunately, macros in Rust don't have access to semantic information. All that macros see is just a sequence of syntax tokens. All that the `#[builder]` macro sees in the example above is just this:
+
+```rust ignore
 fn example(value: User) {}
+```
+
+This means `#[builder]` macro thinks as if there are no lifetime parameters in the `User` type, and thus it generates the wrong code that doesn't compile.
+
+To fix this, we need to make it clear to the `#[builder]` macro that `User` expects some lifetime parameters. This can be done like this:
+
+```rust
+#[builder]
+fn example(value: User) {}    // [!code --]
+fn example(value: User<'_>) {} // [!code ++]
 ```
 
 ## `const` functions
@@ -50,7 +69,7 @@ If you have a strong use case that requires full support for `const`, feel free 
 
 ## Conditional compilation
 
-Conditionally-compiled members aren't support yet. The blocker for this feature is a lack of support for attributes in `where` bounds in the language. See [rust-lang/rust/#115590](https://github.com/rust-lang/rust/issues/115590) for details.
+Conditionally-compiled members aren't supported yet. The blocker for this feature is a lack of support for attributes in `where` bounds in the language. See [rust-lang/rust/#115590](https://github.com/rust-lang/rust/issues/115590) for details.
 
 [open an issue]: https://github.com/elastio/bon/issues
 

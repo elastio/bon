@@ -11,15 +11,14 @@ description = """
     We also use this crate to test the code examples in the documentation in the `website`.
 """
 
-edition = { workspace = true }
-version = { workspace = true }
-
+edition    = { workspace = true }
+version    = { workspace = true }
 
 [lints]
 workspace = true
 
 [dependencies]
-bon = { workspace = true }
+bon           = { workspace = true }
 buildstructor = "0.5"
 
 [build-dependencies]

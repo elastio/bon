@@ -11,7 +11,8 @@ import { data as posts } from '/data/posts.data'
 import formatDate from '/.vitepress/theme/utils/formatDate';
 import getSorted from '/.vitepress/theme/utils/getSorted';
 
-const sortedPosts = getSorted( posts );
+const filteredPosts = posts.filter(post => !post.frontmatter.hidden);
+const sortedPosts = getSorted(filteredPosts);
 </script>
 
 <ul>

@@ -34,9 +34,7 @@ However, `bon` still provides some simple attributes for common use cases to con
 
 ## Special setter methods for collections
 
-Other builder crates provide a way to generate methods to build collections one element at a time.
-
-For example, `buildstructor` even generates such methods by default:
+Other builder crates provide a way to generate methods to build collections one element at a time. For example, `buildstructor` even generates such methods by default:
 
 ```rust
 #[derive(buildstructor::Builder)]
@@ -55,7 +53,7 @@ fn main() {
 
 ::: tip
 
-Why is there an explicit `main()` function in this code snippet 🤔? It's a long story explained in a [blog post](../../blog/avoid-child-modules-in-macros). (feel free to skip)
+Why is there an explicit `main()` function in this code snippet 🤔? It's a long story explained in a [blog post](../../blog/avoid-child-modules-in-macros) (feel free to skip).
 
 :::
 

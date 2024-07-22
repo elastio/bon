@@ -2,3 +2,7 @@
 code, .nobr {
     white-space: nowrap;
 }
+
+abbr {
+    cursor: help;
+}

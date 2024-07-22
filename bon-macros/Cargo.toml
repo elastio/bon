@@ -1,8 +1,9 @@
 [package]
 name = "bon-macros"
 
-edition = { workspace = true }
-version = { workspace = true }
+edition    = { workspace = true }
+repository = { workspace = true }
+version    = { workspace = true }
 
 [lints]
 workspace = true
