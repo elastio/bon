@@ -1,14 +1,13 @@
 [package]
 name = "bon"
 
-homepage = "TODO"
-
-description = "Batteries-included tools for building and reshaping Rust data structures"
+description = "Generate builders for everything!"
 
 categories = ["rust-patterns", "data-structures", "asynchronous"]
 keywords   = ["builder", "macro", "derive", "constructor", "setter"]
 
 edition    = { workspace = true }
+homepage   = { workspace = true }
 repository = { workspace = true }
 version    = { workspace = true }
 

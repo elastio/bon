@@ -5,7 +5,7 @@ layout: home
 hero:
   name: Bon
   text: Builder generator
-  tagline: Batteries-included tools for building and reshaping Rust data structures
+  tagline: Generate builders for everything!
   image:
     src: /bon-logo-medium.png
   actions:
