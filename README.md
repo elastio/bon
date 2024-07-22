@@ -9,7 +9,6 @@
 />
 </a>
 
-
 🐱 **Generate builders for everything!** 🐱
 
 `bon` is a Rust crate for generating type-safe builders for functions and structs.
