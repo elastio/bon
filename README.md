@@ -1,11 +1,13 @@
 # `bon`
 
+<a href="https://elastio.github.io/bon/">
 <img
     src="https://elastio.github.io/bon/bon-logo-thumb.png"
     alt="bon logo"
     width="150px"
     align="right"
 />
+</a>
 
 
 🐱 **Generate builders for everything!** 🐱
