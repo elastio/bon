@@ -3,7 +3,7 @@
 <img
     src="https://elastio.github.io/bon/bon-logo-thumb.png"
     alt="bon logo"
-    height="100px"
+    width="150px"
     align="right"
 />
 
