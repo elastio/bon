@@ -9,7 +9,7 @@ outline: deep
 
 I've been working on a crate [`bon`](/) that generates builders for structs and functions. I designed it based on lessons learned from using [`buildstructor`](https://docs.rs/buildstructor/latest/buildstructor/).
 
-When writing some examples for the [alternatives](../docs/guide/alternatives#special-setter-methods-for-collections) section that compares `bon` with `buildstructor` I stumbled with a doc test build failure for the following really simple example of code:
+When writing some examples for the [alternatives](../docs/guide/alternatives#special-setter-methods-for-collections) section that compares `bon` with `buildstructor` I stumbled upon a doc test build failure for the following really simple example of code:
 
 ```rust compile_fail
 #[derive(buildstructor::Builder)]
@@ -30,7 +30,7 @@ cannot find type `User` in this scope
   |        ^^^^ not found in this scope
 ```
 
-And then I started digging, which lead me to a discovery of how using child modules can break doc tests and some other things...
+And then I started digging, which led me to a discovery of how using child modules can break doc tests and some other things...
 
 
 ## So what's the problem with child modules in macros?
@@ -39,7 +39,7 @@ To explain the problem, first, let's build an understanding of how name resoluti
 
 ### Name resolution for local items
 
-It's possible to define an item such as a `struct`, `impl` block or `fn` inside of any block expression in Rust. For example, this code defines a "local" anonymous struct inside of a function block:
+It's possible to define an item such as a `struct`, `impl` block or `fn` inside any block expression in Rust. For example, this code defines a "local" anonymous struct inside of a function block:
 
 ```rust
 fn example() {
@@ -49,7 +49,7 @@ fn example() {
 }
 ```
 
-Here, the `User` struct is only accessible inside of the scope of the function block. We can't reference it outside of this function:
+Here, the `User` struct is only accessible inside of the function block's scope. We can't reference it outside of this function:
 
 ```rust ignore
 fn example() {
@@ -87,7 +87,7 @@ This outputs the following:
 crate_name::example::User
 ```
 
-So, the function name becomes part of the path as it was just a simple module. However, this isn't true, or at least this behavior isn't exposed in the language. If we try to reference the `User` from the surrounding scope using that syntax, we are still out of luck:
+So, the function name becomes part of the path as it was just a simple module. However, this isn't true, or at least this behaviour isn't exposed in the language. If we try to reference the `User` from the surrounding scope using that syntax, we are still out of luck:
 
 ```rust ignore
 fn example() {
@@ -108,19 +108,19 @@ error[E0433]: failed to resolve: function `example` is not a crate or module
 
 So there is just no way to refer to the `User` struct outside of the function scope, right?... Wrong 🐱! There is a way to do this, but it's so complicated that let's just assume we can't do that in production code.
 
-If your are curious, first, try to solve this yourself:
+If you are curious, first, try to solve this yourself:
 
 ```rust
 fn example() {
     struct User;
 }
 
-type Foo = /* how can we get the `User` type from `example` function here? */
+type Foo = /* how can we get the `User` type from the `example` function here? */
 ```
 
 and then take a look at the solution below:
 
-::: details Solution for referring to a local item outside of the function body.
+::: details Solution for referring to a local item outside the function body.
 
 The idea is to implement a trait for the local type and then use that trait in the outside scope to get the local type.
 
@@ -134,9 +134,8 @@ struct GetUserType;
 fn example() {
     struct User;
 
-    // We can implement a trait from the surroudning scope
-    // that uses the local item in it.
-    // Local item's visibility is still full-module scoped.
+    // We can implement a trait from the surrounding scope
+    // that uses the local item.
     impl TypeChannel for GetUserType {
         type Type = User;
     }
@@ -163,7 +162,7 @@ fn example() {
 }
 ```
 
-Does this compile? Surely, it should compile, because the child module becomes child of the anonymous function scope, so it should have access to symbols defined in the function, right?... Wrong 🐱!
+Does this compile? Surely, it should compile, because the child module becomes a child of the anonymous function scope, so it should have access to symbols defined in the function, right?... Wrong 🐱!
 
 It still doesn't compile with the error:
 ```txt
@@ -191,7 +190,7 @@ So.. this brings us to the following dilemma.
 
 ### How does this affect macros?
 
-Macros generate code, and that code must not always be fully accessible to the scope where the macro was invoked. For example, macro that generates a builder struct would like to restrict access to the private fields of the generated builder struct for the surrounding module.
+Macros generate code, and that code must not always be fully accessible to the scope where the macro was invoked. For example, a macro that generates a builder struct would like to restrict access to the private fields of the generated builder struct for the surrounding module.
 
 I'll use `bon`'s macros syntax to showcase this.
 
@@ -204,7 +203,7 @@ struct User {
 }
 ```
 
-Let's see how the generated code for this example may look like (very simplified).
+Let's see what the generated code for this example may look like (very simplified).
 
 ```rust
 struct User {
@@ -221,12 +220,12 @@ struct UserBuilder {
 fn example() {
     let builder = UserBuilder::default();
 
-    // oops, we can access builder's internal fields here // [!code highlight]
-    let _ = builder.name;                                 // [!code highlight]
+    // oops, we can access the builder's internal fields here // [!code highlight]
+    let _ = builder.name;                                     // [!code highlight]
 }
 ```
 
-The problem with this approach is that `UserBuilder` is defined in the same module scope as the `User` struct. It means all fields of `UserBuilder` are accessible by this module. This is how visibility of private fields works in Rust - the entire module where the struct is defined has access to the private fields of that struct.
+The problem with this approach is that `UserBuilder` is defined in the same module scope as the `User` struct. It means all fields of `UserBuilder` are accessible by this module. This is how the visibility of private fields works in Rust - the entire module where the struct is defined has access to the private fields of that struct.
 
 The way to avoid this problem is to define the builder in a nested child module, such that private fields of the builder struct will be accessible only within that child module.
 
@@ -248,8 +247,8 @@ mod user_builder { // [!code highlight]
 fn example() {
     let builder = UserBuilder::default();
 
-    // Nope, we can't access builder's fields now. // [!code highlight]
-    // let _ = builder.name;                       // [!code highlight]
+    // Nope, we can't access the builder's fields now. // [!code highlight]
+    // let _ = builder.name;                           // [!code highlight]
 }
 ```
 
@@ -297,17 +296,17 @@ password: Option<Password>,
                  ^^^^^^^^ not found in this scope
 ```
 
-Why is that? As we discussed higher child modules defined inside of function blocks can't access symbols from the function's scope. The `use super::*` imports items from the surrounding top-level module instead of the function scope.
+Why is that? As we discussed higher child modules defined inside function blocks can't access symbols from the function's scope. The `use super::*` imports items from the surrounding top-level module instead of the function scope.
 
-It means, that if we want to support local items in our macro we just can't use a child module if code inside of that child module needs to reference types (or any items) from the surrounding scope.
+It means, that if we want to support local items in our macro we just can't use a child module if the code inside of that child module needs to reference types (or any items) from the surrounding scope.
 
 The core problem is the conflict:
-- We want to make builder's fields private, so we need to define the builder struct inside of a child module.
-- We want to reference types from the surrounding scope in the builder's fields, including local items, so we can't define the builder struct inside of the child module.
+- We want to make the builder's fields private, so we need to define the builder struct inside of a child module.
+- We want to reference types from the surrounding scope in the builder's fields, including local items, so we can't define the builder struct inside the child module.
 
-This is the problem that I found in `buildstructor`. The only way to solve this is to do a compromise, which I did when implementing `#[bon::builder]`. The compromise is not to use a child module, obfuscate the private fields of the builder struct with leading `__` and `#[doc(hidden)]` attributes to make it hard for the user to access them (even though not physically impossible).
+This is the problem that I found in `buildstructor`. The only way to solve this is to make a compromise, which I did when implementing `#[bon::builder]`. The compromise is not to use a child module, and obfuscate the private fields of the builder struct with leading `__` and `#[doc(hidden)]` attributes to make it hard for the user to access them (even though not physically impossible).
 
-But then... Defining types inside of functions is rather a niche use case. How do child modules in macro-generated code break the doc test mentioned in beginning of this article?
+But then... Defining types inside of functions is rather a niche use case. How do child modules in macro-generated code break the doc test mentioned at the beginning of this article?
 
 ### How does this break doc tests?
 
@@ -382,4 +381,4 @@ fn main() {
 
 ## Summary
 
-Does this mean generating child modules for privacy in macros is generally a bad idea? I'd say *mostly*, the main thing is not to reference items from the surrounding scope in the child module. For example, if you need to add `use super::*` in your macro-generated code, then this is already a bad call. You should think of local items and doc test when you do this.
+Does this mean generating child modules for privacy in macros is generally a bad idea? I'd say *mostly*, the main thing is not to reference items from the surrounding scope in the child module. For example, if you need to add `use super::*` in your macro-generated code, then this is already a bad call. You should think of local items and doc tests when you do this.
