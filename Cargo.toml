@@ -7,6 +7,7 @@ authors    = ["Vitalii Kryvenko <vkryvenko@elastio.com>"]
 edition    = "2021"
 license    = "MIT OR Apache-2.0"
 repository = "https://github.com/elastio/bon"
+homepage   = "https://elastio.github.io/bon/"
 version    = "0.1.0"
 
 [workspace.dependencies]

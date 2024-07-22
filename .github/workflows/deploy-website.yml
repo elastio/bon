@@ -34,7 +34,6 @@ jobs:
       - uses: actions/configure-pages@v5
 
       - run: npm ci
-
       - run: npm run build
 
       - name: Upload artifact

@@ -26,7 +26,10 @@ export default defineConfig({
 
   base,
 
-  head: [["link", { rel: "icon", href: `${base}bon-logo-thumb.png` }]],
+  head: [
+    ["link", { rel: "icon", href: `${base}bon-logo-thumb.png` }],
+    ["meta", { property: "og:image", content: `${base}bon-logo-thumb.png` }],
+  ],
 
   themeConfig: {
     logo: "/bon-logo-thumb.png",
