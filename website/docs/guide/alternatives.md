@@ -4,7 +4,7 @@ aside: false
 
 # Alternatives
 
-There are several other existing alternative crates that generate builders. `bon` was designed with many lessons learned from of them. Here is a table that compares the builder crates with some additional explanations below.
+There are several other existing alternative crates that generate builders. `bon` was designed with many lessons learned from them. Here is a table that compares the builder crates with some additional explanations below.
 
 <!-- If you want to edit the table below make sure to reduce the font size in editor or turn off word wrap to easier view the table -->
 
