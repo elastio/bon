@@ -55,7 +55,7 @@ This means `#[builder]` macro thinks as if there are no lifetime parameters in t
 
 To fix this, we need to make it clear to the `#[builder]` macro that `User` expects some lifetime parameters. This can be done like this:
 
-```rust
+```rust compile_fail
 #[builder]
 fn example(value: User) {}    // [!code --]
 fn example(value: User<'_>) {} // [!code ++]

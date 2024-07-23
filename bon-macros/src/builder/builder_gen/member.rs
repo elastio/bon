@@ -1,6 +1,6 @@
+use crate::util::prelude::*;
 use darling::util::SpannedValue;
 use darling::{FromAttributes, FromMeta};
-use crate::util::prelude::*;
 use quote::quote;
 use std::fmt;
 use syn::spanned::Spanned;
@@ -120,7 +120,7 @@ impl Member {
             ident,
             ty,
             params,
-            docs
+            docs,
         };
 
         me.validate()?;

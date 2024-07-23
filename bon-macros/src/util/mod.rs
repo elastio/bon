@@ -1,8 +1,8 @@
+mod attrs;
 mod fn_arg;
 mod ident;
-mod attrs;
-mod ty;
 mod path;
+mod ty;
 
 use prelude::*;
 use proc_macro::TokenStream;
@@ -21,14 +21,13 @@ pub(crate) mod prelude {
 
     pub(crate) type Result<T = (), E = darling::Error> = std::result::Result<T, E>;
 
-    pub(crate) use super::{bail, err};
-    pub(crate) use super::fn_arg::FnArgExt;
     pub(crate) use super::attrs::AttributeExt;
+    pub(crate) use super::fn_arg::FnArgExt;
     pub(crate) use super::ident::IdentExt;
-    pub(crate) use super::ty::TypeExt;
     pub(crate) use super::path::PathExt;
+    pub(crate) use super::ty::TypeExt;
+    pub(crate) use super::{bail, err};
 }
-
 
 /// Parse a pair of [`proc_macro::TokenStream`] that an attribute macro accepts
 /// into a structured input.

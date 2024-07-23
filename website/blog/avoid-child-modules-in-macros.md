@@ -111,12 +111,12 @@ So there is just no way to refer to the `User` struct outside of the function sc
 
 If you are curious, first, try to solve this yourself:
 
-```rust
+```rust ignore
 fn example() {
     struct User;
 }
 
-type Foo = /* how can we get the `User` type from the `example` function here? */
+type Foo = /* how can we get the `User` type from the `example` function here? */;
 ```
 
 and then take a look at the solution below:
@@ -240,6 +240,7 @@ use user_builder::UserBuilder;
 mod user_builder { // [!code highlight]
     use super::*;
 
+    #[derive(Default)]
     pub(super) struct UserBuilder {
         name: Option<String>,
     }
@@ -272,7 +273,7 @@ fn example() {
 
 If `#[builder]` creates a child module, then we have a problem. Let's see the generated code:
 
-```rust
+```rust compile_fail
 fn example() {
     struct Password(String);
 

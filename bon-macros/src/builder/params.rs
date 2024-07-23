@@ -1,5 +1,5 @@
-use darling::FromMeta;
 use crate::util::prelude::*;
+use darling::FromMeta;
 use quote::quote;
 
 #[derive(Debug, FromMeta)]

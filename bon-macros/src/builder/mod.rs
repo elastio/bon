@@ -6,8 +6,8 @@ pub(crate) mod item_impl;
 mod item_func;
 mod item_struct;
 
-use darling::FromMeta;
 use crate::util::prelude::*;
+use darling::FromMeta;
 
 pub(crate) fn generate_for_item(params: TokenStream2, item: syn::Item) -> Result<TokenStream2> {
     let params = &darling::ast::NestedMeta::parse_meta_list(params)?;

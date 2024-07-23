@@ -6,8 +6,8 @@ pub(crate) mod input_struct;
 
 use member::*;
 
-use itertools::Itertools;
 use crate::util::prelude::*;
+use itertools::Itertools;
 use quote::quote;
 
 pub(crate) struct ReceiverCtx {

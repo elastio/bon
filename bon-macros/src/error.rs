@@ -1,5 +1,5 @@
-use proc_macro2::{TokenStream as TokenStream2, TokenTree};
 use crate::util::prelude::*;
+use proc_macro2::{TokenStream as TokenStream2, TokenTree};
 use quote::{quote, ToTokens};
 use syn::parse::Parse;
 

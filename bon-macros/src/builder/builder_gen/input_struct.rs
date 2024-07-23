@@ -1,10 +1,11 @@
 use super::{
-    BuilderGenCtx, Member, MemberExpr, MemberOrigin, FinishFunc, FinishFuncBody, Generics, StartFunc,
+    BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberExpr, MemberOrigin,
+    StartFunc,
 };
 use crate::builder::params::{BuilderParams, ItemParams};
+use crate::util::prelude::*;
 use darling::FromMeta;
 use itertools::Itertools;
-use crate::util::prelude::*;
 use quote::quote;
 use syn::visit_mut::VisitMut;
 

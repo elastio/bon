@@ -1,7 +1,7 @@
 use super::{member::Member, BuilderGenCtx};
+use crate::util::prelude::*;
 use darling::ast::GenericParamExt;
 use itertools::Itertools;
-use crate::util::prelude::*;
 use quote::{quote, ToTokens};
 use std::collections::BTreeSet;
 

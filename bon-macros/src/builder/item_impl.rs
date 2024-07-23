@@ -1,8 +1,8 @@
 use super::builder_gen::input_func::{FuncInputCtx, FuncInputParams, ImplCtx};
+use crate::util::prelude::*;
 use darling::ast::NestedMeta;
 use darling::FromMeta;
 use itertools::{Either, Itertools};
-use crate::util::prelude::*;
 use quote::quote;
 use std::rc::Rc;
 use syn::visit_mut::VisitMut;

@@ -4,12 +4,12 @@ use super::{
 };
 use crate::builder::params::BuilderParams;
 use crate::normalization::NormalizeSelfTy;
+use crate::util::prelude::*;
 use darling::util::SpannedValue;
 use darling::FromMeta;
 use heck::AsPascalCase;
 use itertools::Itertools;
 use proc_macro2::Span;
-use crate::util::prelude::*;
 use quote::quote;
 use std::rc::Rc;
 use syn::punctuated::Punctuated;
