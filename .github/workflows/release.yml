@@ -3,6 +3,8 @@ name: release
 permissions:
   pull-requests: write
   contents: write
+  pages: write
+  id-token: write
 
 on:
   workflow_dispatch:
