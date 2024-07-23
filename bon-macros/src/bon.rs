@@ -1,6 +1,6 @@
 use crate::builder;
 use darling::FromMeta;
-use prox::prelude::*;
+use crate::util::prelude::*;
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct BonParams {

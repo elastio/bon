@@ -1,4 +1,4 @@
-use prox::prelude::*;
+use crate::util::prelude::*;
 use syn::visit_mut::VisitMut;
 
 pub(crate) struct NormalizeImplTraits;

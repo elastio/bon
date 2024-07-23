@@ -1,6 +1,6 @@
 use super::builder_gen::input_struct::{StructInputCtx, StructInputParams};
 use super::builder_gen::MacroOutput;
-use prox::prelude::*;
+use crate::util::prelude::*;
 use quote::quote;
 
 pub(crate) fn generate(

@@ -13,7 +13,6 @@ version    = "0.1.0"
 [workspace.dependencies]
 bon        = { path = "bon" }
 bon-macros = { path = "bon-macros" }
-prox       = { path = "../prox" }
 
 darling      = "0.20"
 easy-ext     = "1.0"

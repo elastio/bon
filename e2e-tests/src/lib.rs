@@ -76,14 +76,3 @@ pub fn greet(
 ) -> String {
     format!("Hello {name} with age {age}!")
 }
-
-/// ```
-/// #[derive(buildstructor::Builder)]
-/// struct User {
-///     name: String,
-/// }
-///
-/// User::builder().name("Foo").build();
-/// ```
-///
-fn foo() {}

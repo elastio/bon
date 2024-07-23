@@ -1,6 +1,6 @@
 use darling::util::SpannedValue;
 use darling::{FromAttributes, FromMeta};
-use prox::prelude::*;
+use crate::util::prelude::*;
 use quote::quote;
 use std::fmt;
 use syn::spanned::Spanned;
@@ -79,7 +79,7 @@ impl FromMeta for StrictBool {
         }
 
         // Error span is set by default trait impl in the caller
-        Err(prox::Error::custom(format_args!(
+        Err(Error::custom(format_args!(
             "No need to write `= true`. Just mentioning the attribute is enough \
             to set it to `true`, so remove the `= true` part.",
         )))
@@ -106,7 +106,7 @@ impl Member {
         let params = MemberParams::from_attributes(attrs)?;
 
         let ident = ident.or_else(|| params.name.clone()).ok_or_else(|| {
-            prox::err!(
+            err!(
                 &ty,
                 "can't infer the name to use for this {origin}; please use a simple \
                 `identifier: type` syntax for the {origin}, or add \
@@ -133,7 +133,7 @@ impl Member {
 
         if let Some(default) = &self.params.default {
             if self.ty.is_option() {
-                prox::bail!(
+                bail!(
                     &default.span(),
                     "`Option<_>` already implies a default of `None`, \
                     so explicit #[builder(default)] is redundant",

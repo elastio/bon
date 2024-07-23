@@ -1,4 +1,4 @@
-use prox::prelude::PathExt;
+use crate::util::prelude::*;
 use syn::spanned::Spanned;
 use syn::visit_mut::VisitMut;
 

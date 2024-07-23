@@ -1,7 +1,7 @@
 use super::{member::Member, BuilderGenCtx};
 use darling::ast::GenericParamExt;
 use itertools::Itertools;
-use prox::prelude::*;
+use crate::util::prelude::*;
 use quote::{quote, ToTokens};
 use std::collections::BTreeSet;
 
@@ -130,7 +130,7 @@ impl BuilderGenCtx {
 
         let member_origin = &member.origin;
 
-        prox::bail!(
+        bail!(
             &user_override.span(),
             "This attribute is redundant and can be removed. By default the \
             the type of this {member_origin} already {maybe_qualifies} for `impl Into`.",

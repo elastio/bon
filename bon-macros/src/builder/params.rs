@@ -1,5 +1,5 @@
 use darling::FromMeta;
-use prox::prelude::*;
+use crate::util::prelude::*;
 use quote::quote;
 
 #[derive(Debug, FromMeta)]
@@ -43,7 +43,7 @@ impl FromMeta for ItemParams {
         );
 
         if is_empty {
-            prox::bail!(meta, "expected at least one parameter in parentheses");
+            bail!(meta, "expected at least one parameter in parentheses");
         }
 
         let me = Self {

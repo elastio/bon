@@ -1,12 +1,12 @@
 use proc_macro2::{TokenStream as TokenStream2, TokenTree};
-use prox::prelude::*;
+use crate::util::prelude::*;
 use quote::{quote, ToTokens};
 use syn::parse::Parse;
 
 /// Handle the error returned from the macro logic. This may be either a syntax
 /// error or a logic error. In either case, we want to return a [`TokenStream2`]
 /// that still provides good IDE experience. See [`Fallback`] for details.
-pub(crate) fn error_into_token_stream(err: prox::Error, item: TokenStream2) -> TokenStream2 {
+pub(crate) fn error_into_token_stream(err: Error, item: TokenStream2) -> TokenStream2 {
     let compile_error = err.write_errors();
 
     syn::parse2::<Fallback>(item)

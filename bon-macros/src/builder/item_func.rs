@@ -1,6 +1,6 @@
 use super::builder_gen::input_func::{FuncInputCtx, FuncInputParams};
 use super::builder_gen::MacroOutput;
-use prox::prelude::*;
+use crate::util::prelude::*;
 use quote::quote;
 use syn::visit_mut::VisitMut;
 

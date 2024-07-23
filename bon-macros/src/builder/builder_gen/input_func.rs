@@ -9,7 +9,7 @@ use darling::FromMeta;
 use heck::AsPascalCase;
 use itertools::Itertools;
 use proc_macro2::Span;
-use prox::prelude::*;
+use crate::util::prelude::*;
 use quote::quote;
 use std::rc::Rc;
 use syn::punctuated::Punctuated;
@@ -179,7 +179,7 @@ impl FuncInputCtx {
             );
 
             if has_no_value && !self.is_method_new() {
-                prox::bail!(
+                bail!(
                     &params.span(),
                     "Positional function identifier is required. It must be \
                     specified with `#[builder(expose_positional_fn = function_name_here)]`"
@@ -247,7 +247,7 @@ impl FuncInputCtx {
                 definition adjacently to the impl block.";
 
             if let Some(receiver) = &self.orig_func.sig.receiver() {
-                prox::bail!(
+                bail!(
                     &receiver.self_token,
                     "Function contains a `self` parameter {explanation}"
                 );
@@ -256,7 +256,7 @@ impl FuncInputCtx {
             let mut ctx = FindSelfReference::default();
             ctx.visit_item_fn(&self.orig_func);
             if let Some(self_span) = ctx.self_span {
-                prox::bail!(
+                bail!(
                     &self_span,
                     "Function contains a `Self` type reference {explanation}"
                 );

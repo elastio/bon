@@ -1,4 +1,4 @@
-use prox::prelude::FnArgExt;
+use crate::util::prelude::*;
 use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
 

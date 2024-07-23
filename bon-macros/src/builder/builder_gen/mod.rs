@@ -7,7 +7,7 @@ pub(crate) mod input_struct;
 use member::*;
 
 use itertools::Itertools;
-use prox::prelude::*;
+use crate::util::prelude::*;
 use quote::quote;
 
 pub(crate) struct ReceiverCtx {
@@ -459,7 +459,7 @@ fn reject_self_references_in_docs(docs: &[syn::Attribute]) -> Result {
             .iter()
             .any(|self_ref| doc.value().contains(self_ref))
         {
-            prox::bail!(
+            bail!(
                 &doc.span(),
                 "The documentation for the member should not reference `Self` \
                 because it will be moved to the builder struct context where \

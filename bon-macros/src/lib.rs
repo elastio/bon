@@ -1,9 +1,10 @@
-!#[doc = include_str!("../README.md")]
+#![doc = include_str!("../README.md")]
 
 mod bon;
 mod builder;
 mod error;
 mod normalization;
+mod util;
 
 use proc_macro::TokenStream;
 
@@ -18,7 +19,7 @@ pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
 
 #[proc_macro_attribute]
 pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
-    prox::parse_attr_macro_input(params, item.clone())
+    crate::util::parse_attr_macro_input(params, item.clone())
         .and_then(|(opts, item)| bon::generate(opts, item))
         .unwrap_or_else(|err| error::error_into_token_stream(err, item.into()))
         .into()

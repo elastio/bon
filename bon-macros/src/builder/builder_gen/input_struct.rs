@@ -4,7 +4,7 @@ use super::{
 use crate::builder::params::{BuilderParams, ItemParams};
 use darling::FromMeta;
 use itertools::Itertools;
-use prox::prelude::*;
+use crate::util::prelude::*;
 use quote::quote;
 use syn::visit_mut::VisitMut;
 
@@ -80,7 +80,7 @@ impl StructInputCtx {
         let fields = match self.norm_struct.fields {
             syn::Fields::Named(fields) => fields,
             _ => {
-                prox::bail!(
+                bail!(
                     &self.norm_struct,
                     "Only structs with named fields are supported"
                 )
