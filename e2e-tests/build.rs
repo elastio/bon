@@ -26,7 +26,7 @@ fn main() {
             let test_name = test_name.strip_prefix("website_").unwrap();
 
             let canonical_path = std::fs::canonicalize(path).unwrap();
-            let canonical_path = canonical_path.to_string_lossy();
+            let canonical_path = canonical_path.to_string_lossy().replace('\\', "\\\\");
 
             format!(
                 "#[doc = include_str!(\"{canonical_path}\")] \
