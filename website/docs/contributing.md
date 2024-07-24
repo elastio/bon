@@ -19,7 +19,7 @@ Click the ["Fork" button](https://github.com/elastio/bon/fork) to create your ow
 
 Then clone the forked repository:
 
-```
+```bash
 git clone https://github.com/{yourname}/bon
 ```
 
