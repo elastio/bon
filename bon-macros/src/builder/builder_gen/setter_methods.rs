@@ -245,7 +245,7 @@ impl<'a> MemberSettersCtx<'a> {
         Ok(self.setter_method(MemberSetterMethod {
             method_name: self.setter_method_name(),
             fn_params: quote!(value: #fn_param_type),
-            member_init: quote!(bon::private::Set::new(value #maybe_into_call)),
+            member_init: quote!(::bon::private::Set::new(value #maybe_into_call)),
             overwrite_docs: None,
         }))
     }
@@ -271,7 +271,7 @@ impl<'a> MemberSettersCtx<'a> {
             MemberSetterMethod {
                 method_name: quote::format_ident!("maybe_{setter_method_name}"),
                 fn_params: quote!(value: Option<#inner_type>),
-                member_init: quote!(bon::private::Set::new(value #maybe_map_conv_call)),
+                member_init: quote!(::bon::private::Set::new(value #maybe_map_conv_call)),
                 overwrite_docs: Some(format!(
                     "Same as [`Self::{setter_method_name}`], but accepts \
                     an `Option` as input. See that method's documentation for \
@@ -287,7 +287,7 @@ impl<'a> MemberSettersCtx<'a> {
             MemberSetterMethod {
                 method_name: setter_method_name,
                 fn_params: quote!(value: #inner_type),
-                member_init: quote!(bon::private::Set::new(Some(value #maybe_conv_call))),
+                member_init: quote!(::bon::private::Set::new(Some(value #maybe_conv_call))),
                 overwrite_docs: None,
             },
         ];

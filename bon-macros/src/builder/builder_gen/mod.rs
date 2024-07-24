@@ -357,7 +357,7 @@ impl BuilderGenCtx {
         let member_ident = &member.ident;
 
         let expr = quote! {
-            bon::private::IntoSet::into_set(self.__private_impl.#member_ident)
+            ::bon::private::IntoSet::into_set(self.__private_impl.#member_ident)
                 .into_inner()
                 #maybe_default
         };

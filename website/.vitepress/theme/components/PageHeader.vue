@@ -4,7 +4,7 @@
             {{ frontmatter.title }}
         </h1>
         <h3 v-if="frontmatter.date">
-            {{ formatDate( frontmatter.date ) }}
+            {{ formatDate(frontmatter.date) }}
         </h3>
     </header>
 </template>
@@ -26,7 +26,7 @@ header {
 }
 
 header h3 {
-    color: var( --vp-c-text-3 );
+    color: var(--vp-c-text-3);
     font-family: var(--vp-font-family-mono);
     font-weight: normal;
     margin-top: 0.25rem;

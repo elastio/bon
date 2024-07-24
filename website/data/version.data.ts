@@ -1,6 +1,5 @@
 import toml from "smol-toml";
 import fs from "node:fs/promises";
-import path from "node:path";
 
 export default {
     watch: ['../../Cargo.toml'],
