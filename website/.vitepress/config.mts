@@ -6,8 +6,7 @@ const base = "/bon/";
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
     title: "Bon",
-    description:
-        "Batteries-included tools for building and reshaping Rust data structures",
+    description: "Generate builders for everything!",
 
     cleanUrls: true,
     lastUpdated: true,
