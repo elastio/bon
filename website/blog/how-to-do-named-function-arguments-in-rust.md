@@ -1,5 +1,5 @@
 ---
-title: 'How to do named function arguments in Rust'
+title: How to do named function arguments in Rust
 date: 2024-07-27
 author: Veetaha
 ---

@@ -1,5 +1,5 @@
 ---
-title: 'Avoid child modules in macros'
+title: Avoid child modules in macros
 date: 2024-07-21
 author: Veetaha
 outline: deep

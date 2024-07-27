@@ -37,12 +37,10 @@ jobs:
       - run: npm ci
       - run: npm run build
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: website/.vitepress/dist
 
-  # Deployment job
   deploy:
     needs: build
     runs-on: ubuntu-latest
