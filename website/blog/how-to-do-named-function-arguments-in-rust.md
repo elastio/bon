@@ -155,7 +155,7 @@ So.. you can use just one `#[builder]` solution consistently for everything. Bui
 
 If you'd like to know more about `bon` and use it in your code, then visit the [guide page with the full overview](../docs/guide/overview).
 
-[`bon`] is fully open-source, and available on [Github](https://github.com/elastio/bon). Consider giving it a star ⭐ if you liked the idea and the implementation.
+[`bon`] is fully open-source, and [available on crates.io](https://crates.io/crates/bon). Its code is public on [Github](https://github.com/elastio/bon). Consider giving it a star ⭐ if you liked the idea and the implementation.
 
 
 ## Acknowledgements
