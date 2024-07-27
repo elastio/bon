@@ -1,6 +1,10 @@
 <a href="https://elastio.github.io/bon/docs/guide/overview">
+<!--
+We use an absolute link to the image here because this README is hosted on crates.io
+where this image won't be available through the relative link.
+-->
 <img
-    src="./website/public/bon-home.png"
+    src="https://elastio.github.io/bon/bon-home.png"
     alt="bon logo"
 />
 </a>
