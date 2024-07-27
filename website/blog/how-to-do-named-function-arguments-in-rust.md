@@ -4,7 +4,7 @@ date: 2024-07-27
 author: Veetaha
 ---
 
-A lot of modern languages have a builtin feature called "named function arguments". This is how it looks in Python, for example:
+Many modern languages have a built-in feature called "named function arguments". This is how it looks in Python, for example:
 
 ```py
 def greet(name: str, age: int) -> str:
@@ -47,9 +47,9 @@ greet(GreetParams {
 });
 ```
 
-This situation becomes worse if you have more references in your parameters or your parameters need to be generic over some type. In this case you need to duplicate the generic parameters both in your function and in the parameters struct declaration. Also, the convenient function's `impl Trait` syntax is not available with this approach.
+This situation becomes worse if you have more references in your parameters or if your parameters need to be generic over some type. In this case, you need to duplicate the generic parameters both in your function and in the parameters struct declaration. Also, the convenient function's `impl Trait` syntax is unavailable with this approach.
 
-The other caveat is that the struct literal syntax, doesn't entirely solve the problem of omitting optional parameters. There is a clunky way to have optional parameters by requiring the caller to spread the `Default` parameters struct instance in the struct literal.
+The other caveat is that the struct literal syntax doesn't entirely solve the problem of omitting optional parameters. There is a clunky way to have optional parameters by requiring the caller to spread the `Default` parameters struct instance in the struct literal.
 
 ```rust ignore compile_error
 struct GreetParams<'a> {
@@ -61,10 +61,10 @@ struct GreetParams<'a> {
 }
 
 GreetParams {
-    name: "bon",
+    name: "Bon",
     age: 24,
 
-    // but.. this only works if your whole `GreetParams` struct
+    // But.. this only works if your whole `GreetParams` struct
     // can implement the `Default` trait, which it can't in this
     // case because `name` and `age` are required
     ..GreetParams::default() // [!code error]
@@ -75,7 +75,7 @@ This situation can be slightly improved if you derive a builder for this struct 
 
 ## Better Rust solution
 
-I've been working on a crate called [`bon`] that solves this problem. It allows you to have almost the same syntax for named function argumentes in Rust as you'd have in Python. [`bon`] generates a builder directly from your function:
+I've been working on a crate called [`bon`] that solves this problem. It allows you to have almost the same syntax for named function arguments in Rust as you'd have in Python. [`bon`] generates a builder directly from your function:
 
 :::code-group
 
@@ -127,7 +127,7 @@ It supports almost any function syntax. It works fine with:
 
 It also never panics. All errors are compile-time errors ✔️.
 
-[`bon`] allows you to *easily* switch your regular function into a function "with named parameters" that returns a builder. Just adding `#[builder]` on top of your function is enough even in advanced use cases.
+[`bon`] allows you to *easily* switch your regular function into a function "with named parameters" that returns a builder. Just adding `#[builder]` to your function is enough even in advanced use cases.
 
 ## One `#[builder]` to rule them all
 
@@ -148,7 +148,7 @@ User::builder()
     .build();
 ```
 
-So.. you can use just one `#[builder]` solution consistently for everything. Builders for functions and structs both share the same API design, which allows you, for example, to switch between a `#[builder]` on a struct and a `#[builder]` on a method that creates a struct. This won't be an API breaking change for you consumers ([details](../docs/guide/compatibility#moving-builder-from-the-struct-to-the-new-method)).
+So.. you can use just one `#[builder]` solution consistently for everything. Builders for functions and structs both share the same API design, which allows you, for example, to switch between a `#[builder]` on a struct and a `#[builder]` on a method that creates a struct. This won't be an API-breaking change for you consumers ([details](../docs/guide/compatibility#moving-builder-from-the-struct-to-the-new-method)).
 
 
 ## Summary
