@@ -1,5 +1,3 @@
-# `bon`
-
 <a href="https://elastio.github.io/bon/">
 <img
     src="./website/public/bon-home.png"
