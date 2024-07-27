@@ -5,7 +5,7 @@ const [_, versionWildcard] = version.match(/(\d+.\d+).\d+/);
 
 # Overview
 
-`bon` is a Rust crate for generating type-safe builders for functions and structs.
+`bon` is a Rust crate for generating compile-time-checked builders for functions and structs.
 
 Add this to your `Cargo.toml` to use it:
 

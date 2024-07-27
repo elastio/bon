@@ -1,4 +1,4 @@
-# Documenting builders
+# Documenting
 
 In regular Rust, it's not possible to place doc comments on function arguments. But with `#[builder]` it is. Documentation written on the arguments will be placed on the generated setter methods.
 

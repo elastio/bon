@@ -2,16 +2,13 @@
 
 <a href="https://elastio.github.io/bon/">
 <img
-    src="https://elastio.github.io/bon/bon-logo-thumb.png"
+    src="./website/public/bon-home.png"
     alt="bon logo"
-    width="150px"
-    align="right"
 />
 </a>
 
-🐱 **Generate builders for everything!** 🐱
 
-`bon` is a Rust crate for generating type-safe builders for functions and structs.
+`bon` is a Rust crate for generating compile-time-checked builders for functions and structs.
 
 Visit the [guide for a complete overview of the crate](https://elastio.github.io/bon/docs/guide/overview).
 

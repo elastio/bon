@@ -8,9 +8,7 @@ hidden: true
 
 ## Context
 
-I've been working on a crate [`bon`](/) that generates builders for structs and functions. I designed it based on lessons learned from using [`buildstructor`](https://docs.rs/buildstructor/latest/buildstructor/).
-
-When writing some examples for the [alternatives](../docs/guide/alternatives#special-setter-methods-for-collections) section that compares `bon` with `buildstructor` I stumbled upon a doc test build failure for the following really simple example of code:
+Recently, I was writing documentation for my proc-macro crate that generates builders for functions and structs called [`bon`](/).  I wrote the following simple example of code to compare [`bon`](/) with the alternative crate [`buildstructor`](https://docs.rs/buildstructor/latest/buildstructor/).
 
 ```rust compile_fail
 #[derive(buildstructor::Builder)]
@@ -21,7 +19,7 @@ struct User {
 User::builder().name("Foo").build();
 ```
 
-which produces the following compile error:
+This example code was part of the doc comment, which I tested by running `cargo test --doc`. However, it didn't compile:
 
 ```log
 cannot find type `User` in this scope
@@ -31,14 +29,11 @@ cannot find type `User` in this scope
   |        ^^^^ not found in this scope
 ```
 
-And then I started digging, which led me to a discovery of how using child modules can break doc tests and some other things...
-
-
-## So what's the problem with child modules in macros?
+So, I started digging, which led me to a discovery of how using child modules can break doc tests and some other things...
 
 To explain the problem, first, let's build an understanding of how name resolution works for "local" items.
 
-### Name resolution for local items
+## Name resolution for local items
 
 It's possible to define an item such as a `struct`, `impl` block or `fn` inside any block expression in Rust. For example, this code defines a "local" anonymous struct inside of a function block:
 
@@ -189,7 +184,7 @@ As you can see we took `TopLevelStruct` from `super`, so it means `super` refers
 
 So.. this brings us to the following dilemma.
 
-### How does this affect macros?
+## How does this affect macros?
 
 Macros generate code, and that code must not always be fully accessible to the scope where the macro was invoked. For example, a macro that generates a builder struct would like to restrict access to the private fields of the generated builder struct for the surrounding module.
 
@@ -310,7 +305,7 @@ This is the problem that I found in `buildstructor`. The only way to solve this 
 
 But then... Defining types inside of functions is rather a niche use case. How do child modules in macro-generated code break the doc test mentioned at the beginning of this article?
 
-### How does this break doc tests?
+## How does this break doc tests?
 
 Doc tests are usually code snippets that run some code defined on the top level. They don't typically contain an explicit `main()` function.
 

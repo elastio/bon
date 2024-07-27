@@ -87,8 +87,8 @@ export default defineConfig({
                             link: "/docs/guide/into-conversions",
                         },
                         {
-                            text: "Documenting builders",
-                            link: "/docs/guide/documenting-builders",
+                            text: "Documenting",
+                            link: "/docs/guide/documenting",
                         },
                         {
                             text: "Limitations",
