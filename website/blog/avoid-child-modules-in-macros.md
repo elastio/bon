@@ -8,7 +8,7 @@ hidden: true
 
 ## Context
 
-Recently, I was writing documentation for my proc-macro crate that generates builders for functions and structs called [`bon`](/).  I wrote the following simple example of code to compare [`bon`](/) with the alternative crate [`buildstructor`](https://docs.rs/buildstructor/latest/buildstructor/).
+Recently, I was writing documentation for my proc-macro crate that generates builders for functions and structs called [`bon`](../docs/guide/overview). I wrote the following simple example of code to compare [`bon`](../docs/guide/overview) with the alternative crate [`buildstructor`](https://docs.rs/buildstructor/latest/buildstructor/).
 
 ```rust compile_fail
 #[derive(buildstructor::Builder)]

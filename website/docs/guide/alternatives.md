@@ -57,9 +57,11 @@ Why is there an explicit `main()` function in this code snippet 🤔? It's a lon
 
 :::
 
-However, `#[bon::builder]` doesn't do that. Also a setter that pushes an element into a collection like that may confuse the reader in case if only one element is pushed. This may hide the fact that there is a `friends` field which is actually a collection.
+This feature isn't available today in `bon`, but it's planned for the future. However, it won't be enabled by default, but rather be opt-in like it is in `derive-builder`.
 
-Constructing a collection is a bit different problem to solve, so `bon` provides a separate solution. `bon` exposes a `bon::vec![]` macro (macros for other collections types are planned for future updates!) that includes automatic `Into` conversion for every argument. So in `bon` syntax it would look like this:
+The problem of this feature is that a setter that pushes an element into a collection like that may confuse the reader in case if only one element is pushed. This may hide the fact that the member is actually is actually a collection called `friends` in plural. However, this feature is still useful to provide backwards-compatibility when changing the type of a member from `T` or `Option<T>` to `Collection<T>`.
+
+Alternatively, `bon` provides a separate solution. `bon` exposes a `bon::vec![]` macro (macros for other collections types are planned for future updates!) that includes automatic `Into` conversion for every item. So in `bon` syntax it would look like this:
 
 ```rust
 use bon::builder;
@@ -78,7 +80,7 @@ User::builder()
     .build();
 ```
 
-Also, fields of collection types are considered required by default, which isn't the case in `buildstructor`.
+Another difference is that fields of collection types are considered required by default, which isn't the case in `buildstructor`.
 
 [`buildstructor`]: https://docs.rs/buildstructor/latest/buildstructor/
 [`typed-builder`]: https://docs.rs/typed-builder/latest/typed_builder/

@@ -1,10 +1,9 @@
-<a href="https://elastio.github.io/bon/">
+<a href="https://elastio.github.io/bon/docs/guide/overview">
 <img
     src="./website/public/bon-home.png"
     alt="bon logo"
 />
 </a>
-
 
 `bon` is a Rust crate for generating compile-time-checked builders for functions and structs.
 
