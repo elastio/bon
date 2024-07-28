@@ -14,3 +14,4 @@ name              = "bon"
 git_release_enable = true
 git_tag_enable     = true
 git_tag_name       = "v{{ version }}"
+git_release_name   = "v{{ version }}"
