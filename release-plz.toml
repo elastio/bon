@@ -1,0 +1,10 @@
+[[package]]
+name = "bon"
+changelog_path = "website/changelog.md"
+
+[[package]]
+name = "bon-macros"
+
+# We don't need changelog for `bon-macros`. It's an internal crate.
+# All changes are documented in a single changelog for the `bon` crate.
+changelog_update = false
