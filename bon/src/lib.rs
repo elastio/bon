@@ -38,12 +38,14 @@ macro_rules! vec {
     ($($x:expr),+ $(,)?) => (::std::vec![$(::core::convert::Into::into($x)),* ]);
 }
 
-/// Creates a fixed-size array literal where each element is converted with [`Into::into()`].
+/// Creates a fixed-size array literal where each element is converted with [`Into::into()`]
+/// into the target type. You'll probably need a hint for the target type of items
+/// in the array if the compiler can't infer it from its usage.
 ///
-/// This is similar in spirit to the [`crate::vec!`] macro, but it's for arrays.
-/// See [`crate::vec!`] docs for details.
+/// This is similar in spirit to the [`bon::vec!`] macro, but it's for arrays.
+/// See [`bon::vec!`] docs for details.
 ///
-/// Same example as in [`crate::vec!`], but using this macro. It works with array
+/// Same example as in [`bon::vec!`], but using this macro. It works with array
 /// as well because [`Command::args`] accepts any value that implements [`IntoIterator`]:
 ///
 /// ```
@@ -65,6 +67,7 @@ macro_rules! vec {
 /// just write `[expr.into(); N]` instead.
 ///
 /// [`Command::args`]: std::process::Command::args
+/// [`bon::vec!`]: crate::vec
 #[macro_export]
 macro_rules! arr {
     () => ([]);

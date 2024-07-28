@@ -157,6 +157,10 @@ export default defineConfig({
                             ],
                         },
                         {
+                            text: "#[bon]",
+                            link: "/docs/reference/bon",
+                        },
+                        {
                             text: "Other items on docs.rs",
                             link: "https://docs.rs/bon/latest/bon/",
                         },

@@ -8,6 +8,7 @@ keywords   = ["builder", "macro", "derive", "constructor", "setter"]
 
 edition    = { workspace = true }
 homepage   = { workspace = true }
+license    = { workspace = true }
 repository = { workspace = true }
 version    = { workspace = true }
 
