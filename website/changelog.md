@@ -6,6 +6,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1](https://github.com/elastio/bon/compare/v1.0.0...v1.0.1) - 2024-07-28
+
+### Other
+- Add description to `bon-macros` manifest
+- Fix doc tests
+- Add more lints
+- Better docs
+- Add contribution guidelines
+- Fix CI
+- Remove unnecessary cross-repo dependency
+- Add license files
+- Upd docs
+- More improvements, deploy-website workflow
+- Docs for alternatives plus `#[builder(name = ...)]` for members
+- Rename `field -> member`
+- Add more docs
+- Add doctests, more docs
+- More docs
+- More docs
+- More docs and better decisions
+- Fix visibility for expose_positional_fn
+- Fix builder attrs not being removed correctly
+- Next iteration
+- Test struct input
+- Start testing struct input
+- Start adding support for structs input
+- Refactor in preparation for struct input for macro
+- Make `#[default]` compatible with `Option`
+- Add `default` and `into` attrs
+- Make bool optional, strip `_` prefix
+- Add special casing for `Option` setters
+- Better doc comments
+- Use trait-based builder state
+- Improve nested refs handling
+- Cleanup
+- Fix a bunch of papercuts with codegen
+- Finish implementing support for associated functions
+- Start adding support for associated functions
+- Add some docs
+- Rebranding buildy -> prox (buildy crate name is already taken on crates.io)
+
 ## [1.0.0](https://github.com/elastio/bon/tree/v1.0.0) - 2024-07-28
 
 ### Added
