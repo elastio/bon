@@ -1,10 +1,16 @@
-[[package]]
-name = "bon"
-changelog_path = "website/changelog.md"
+[workspace]
+git_release_enable = false
+git_tag_enable     = false
 
-[[package]]
-name = "bon-macros"
-
-# We don't need changelog for `bon-macros`. It's an internal crate.
 # All changes are documented in a single changelog for the `bon` crate.
 changelog_update = false
+
+[[package]]
+changelog_include = ["bon-macros"]
+changelog_path    = "website/changelog.md"
+changelog_update  = true
+name              = "bon"
+
+git_release_enable = true
+git_tag_enable     = true
+git_tag_name       = "v{{ version }}"
