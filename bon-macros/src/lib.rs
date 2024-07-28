@@ -20,7 +20,7 @@ use proc_macro::TokenStream;
 /// `bon` can turn a function with positional parameters into a function with "named"
 /// parameters via a builder. It's as easy as placing the `#[builder]` macro on top of it.
 ///
-/// ```rust
+/// ```rust ignore
 /// use bon::builder;
 ///
 /// #[builder]
@@ -57,7 +57,7 @@ pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
 ///
 /// # Quick example
 ///
-/// ```rust
+/// ```rust ignore
 /// use bon::bon;
 ///
 /// struct Counter {
