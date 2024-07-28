@@ -19,7 +19,7 @@ pub(crate) mod prelude {
     /// the anyhow-like error handling experience.
     pub(crate) use darling::Error;
 
-    pub(crate) type Result<T = (), E = darling::Error> = std::result::Result<T, E>;
+    pub(crate) type Result<T = (), E = Error> = std::result::Result<T, E>;
 
     pub(crate) use super::attrs::AttributeExt;
     pub(crate) use super::fn_arg::FnArgExt;

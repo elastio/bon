@@ -35,7 +35,7 @@ pub mod private;
 #[macro_export]
 macro_rules! vec {
     () => (::std::vec::Vec::new());
-    ($($x:expr),+ $(,)?) => (::std::vec![$(::core::convert::Into::into($x)),* ]);
+    ($($item:expr),+ $(,)?) => (::std::vec![$(::core::convert::Into::into($item)),+ ]);
 }
 
 /// Creates a fixed-size array literal where each element is converted with [`Into::into()`]
@@ -71,7 +71,7 @@ macro_rules! vec {
 #[macro_export]
 macro_rules! arr {
     () => ([]);
-    ($($x:expr),+ $(,)?) => ([$(::core::convert::Into::into($x)),*]);
+    ($($item:expr),+ $(,)?) => ([$(::core::convert::Into::into($item)),+]);
 }
 
 #[cfg(test)]

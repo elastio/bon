@@ -57,9 +57,17 @@ To fix this, we need to make it clear to the `#[builder]` macro that `User` expe
 
 ```rust compile_fail
 #[builder]
-fn example(value: User) {}    // [!code --]
+fn example(value: User) {}     // [!code --]
 fn example(value: User<'_>) {} // [!code ++]
 ```
+
+If you want to make sure your code doesn't accidentally omit a generic lifetime parameter you may enable the `rustc` lint called [`elided_lifetimes_in_paths`](https://doc.rust-lang.org/rustc/lints/listing/allowed-by-default.html). This lint is `allow` by default, you can enable it in your `Cargo.toml` like this:
+
+```toml
+[package.lints.rust]
+elided_lifetimes_in_paths = "warn"
+```
+
 
 ## `const` functions
 

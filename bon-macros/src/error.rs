@@ -32,7 +32,7 @@ struct Fallback {
 }
 
 impl Parse for Fallback {
-    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+    fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
         let mut output = TokenStream2::new();
 
         loop {

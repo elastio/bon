@@ -8,7 +8,7 @@ fn smoke() {
     #[builder]
     #[allow(dead_code)]
     #[derive(Debug)]
-    pub struct Sut<'a> {
+    pub(crate) struct Sut<'a> {
         /// Docs on bool field.
         /// Multiline.
         bool: bool,

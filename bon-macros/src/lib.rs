@@ -52,13 +52,49 @@ pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
 /// the necessary context to the [`builder`] macros on top of the functions
 /// inside of the `impl` block. You'll get compile errors without that context.
 ///
-/// For the examples of the usage of this macro and the reason why it's needed
-/// see this paragraph in the [overview](https://elastio.github.io/bon/docs/guide/overview#builder-for-an-associated-method).
+/// For details on this macro including the reason why it's needed see this
+/// paragraph in the [overview](https://elastio.github.io/bon/docs/guide/overview#builder-for-an-associated-method).
+///
+/// # Quick example
+///
+/// ```rust
+/// use bon::bon;
+///
+/// struct Counter {
+///     val: u32,
+/// }
+///
+/// #[bon] // <- this macro is required on the impl block
+/// impl Counter {
+///     #[builder]
+///     fn new(initial: Option<u32>) -> Self {
+///         Self {
+///             val: initial.unwrap_or_default(),
+///         }
+///     }
+///
+///     #[builder]
+///     fn increment(&mut self, diff: u32) {
+///         self.val += diff;
+///     }
+/// }
+///
+/// let mut counter = Counter::builder()
+///     .initial(3)
+///     .build();
+///
+/// counter
+///     .increment()
+///     .diff(3)
+///     .call();
+///
+/// assert_eq!(counter.val, 6);
+/// ```
 ///
 /// [`builder`]: macro@builder
 #[proc_macro_attribute]
 pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
-    crate::util::parse_attr_macro_input(params, item.clone())
+    util::parse_attr_macro_input(params, item.clone())
         .and_then(|(opts, item)| bon::generate(opts, item))
         .unwrap_or_else(|err| error::error_into_token_stream(err, item.into()))
         .into()

@@ -3,6 +3,7 @@ use std::mem::MaybeUninit;
 /// [`MaybeUninit`] is used to make the memory layout of this struct be equal
 /// to `T` such that the compiler may optimize away moving data between it and
 /// [`Set<T>`].
+#[derive(Debug)]
 struct Unset<T>(MaybeUninit<T>);
 
 impl<T> Default for Unset<T> {
@@ -11,6 +12,7 @@ impl<T> Default for Unset<T> {
     }
 }
 
+#[derive(Debug)]
 pub struct Required<T>(Unset<Option<T>>);
 
 impl<T> Default for Required<T> {
@@ -19,6 +21,7 @@ impl<T> Default for Required<T> {
     }
 }
 
+#[derive(Debug)]
 pub struct Optional<T>(Unset<T>);
 
 impl<T> Default for Optional<T> {
@@ -34,6 +37,7 @@ impl<T: Default> IntoSet<Option<T>> for Optional<T> {
 }
 
 #[repr(transparent)]
+#[derive(Debug)]
 pub struct Set<T>(T);
 
 impl<T> Set<T> {

@@ -35,7 +35,7 @@ fn smoke() {
         arg7: Vec<String>,
         arg8: (u32, &[bool]),
     ) -> String {
-        let _ = (arg1, arg2, arg4, arg5, arg6, arg7, arg8);
+        drop((arg1, arg2, arg4, arg5, arg6, arg7, arg8));
         arg3
     }
 
@@ -149,6 +149,7 @@ async fn async_func() {
 }
 
 #[test]
+#[allow(unsafe_code)]
 fn unsafe_func() {
     #[builder]
     unsafe fn sut(arg: bool) {

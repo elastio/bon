@@ -6,7 +6,7 @@ pub(crate) struct NormalizeSelfTy<'a> {
     pub(crate) self_ty: &'a syn::Type,
 }
 
-impl<'a> VisitMut for NormalizeSelfTy<'a> {
+impl VisitMut for NormalizeSelfTy<'_> {
     fn visit_item_mut(&mut self, _item: &mut syn::Item) {
         // Don't recurse into nested items because `Self` isn't available there.
     }

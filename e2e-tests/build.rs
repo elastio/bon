@@ -1,3 +1,7 @@
+//! This script generates a module for each markdown file in the `website` directory
+//! and attaches the content of the file as a doc attribute to the module so that
+//! the we can test the rust example snippets in the website with `cargo test --doc`.
+
 use heck::ToSnakeCase;
 use itertools::Itertools;
 use std::path::PathBuf;

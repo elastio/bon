@@ -33,7 +33,7 @@ impl<'a> AssignTypeParams<'a> {
     }
 }
 
-impl<'a> VisitMut for AssignTypeParams<'a> {
+impl VisitMut for AssignTypeParams<'_> {
     fn visit_item_mut(&mut self, _item: &mut syn::Item) {
         // Don't recurse into nested items because `impl Trait` isn't available there.
     }
