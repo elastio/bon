@@ -13,8 +13,7 @@ homepage   = "https://elastio.github.io/bon/"
 repository = "https://github.com/elastio/bon"
 
 [workspace.dependencies]
-bon        = { path = "bon" }
-bon-macros = { path = "bon-macros", version = "=1.0.0" }
+bon = { path = "bon" }
 
 darling      = "0.20"
 easy-ext     = "1.0"
