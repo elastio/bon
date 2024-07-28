@@ -154,5 +154,11 @@ If you'd like to know more about `bon` and use it in your code, then visit the [
 
 This project was heavily inspired by such awesome crates as [`buildstructor`](https://docs.rs/buildstructor), [`typed-builder`](https://docs.rs/typed-builder) and [`derive_builder`](https://docs.rs/derive_builder). [`bon`] crate was designed with many lessons learned from them.
 
+::: tip
+
+You can leave comments for this post [on Reddit](https://www.reddit.com/r/rust/comments/1eeem92/how_to_do_named_function_arguments_in_rust/).
+
+:::
+
 
 [`bon`]: ../docs/guide/overview
