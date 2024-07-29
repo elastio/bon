@@ -10,7 +10,7 @@ where this image won't be available through the relative link.
 </a>
 
 [![crates.io](https://img.shields.io/crates/v/bon.svg?labelColor=orange&color=darkkhaki)](https://crates.io/crates/bon)
-[![Rust Documentation](https://img.shields.io/badge/docs.rs-blue.svg)](https://docs.rs/bon/1.0.0/bon/)
+[![Rust Documentation](https://img.shields.io/badge/docs.rs-blue.svg)](https://docs.rs/bon/latest/bon/)
 
 `bon` is a Rust crate for generating compile-time-checked builders for functions and structs.
 

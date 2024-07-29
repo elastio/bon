@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.1](https://github.com/elastio/bon/compare/v1.0.0...v1.0.1) - 2024-07-29
 
-### Fix
+### Fixed
 - Fix handling of raw identifiers ([#9](https://github.com/elastio/bon/pull/9))
 
 ### Other
