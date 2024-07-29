@@ -313,8 +313,8 @@ impl<'a> MemberSettersCtx<'a> {
         } = method;
 
         let docs = match overwrite_docs {
-            Some(docs) => &[syn::parse_quote!(#[doc = #docs])],
-            None => self.member.docs.as_slice(),
+            Some(docs) => vec![syn::parse_quote!(#[doc = #docs])],
+            None => self.member.docs.clone(),
         };
 
         let vis = &self.builder_gen.vis;
