@@ -96,7 +96,7 @@ fn types_not_implementing_default() {
     struct DoesNotImplementDefault;
 
     #[builder]
-    fn test(test_type: Option<DoesNotImplementDefault>) {}
+    fn test(_value: Option<DoesNotImplementDefault>) {}
 
     test().call();
 }
