@@ -30,7 +30,7 @@ impl<T> Default for Optional<T> {
     }
 }
 
-impl<T: Default> IntoSet<Option<T>> for Optional<T> {
+impl<T> IntoSet<Option<T>> for Optional<T> {
     fn into_set(self) -> Set<Option<T>> {
         Set::new(None)
     }

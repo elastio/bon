@@ -48,8 +48,9 @@ pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 /// Companion macro for [`builder`]. You should place it on top of the `impl` block
-/// where you want to define methods with the [`builder`] macro. It provides
-/// the necessary context to the [`builder`] macros on top of the functions
+/// where you want to define methods with the [`builder`] macro.
+///
+/// It provides the necessary context to the [`builder`] macros on top of the functions
 /// inside of the `impl` block. You'll get compile errors without that context.
 ///
 /// For details on this macro including the reason why it's needed see this

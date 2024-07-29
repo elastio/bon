@@ -89,3 +89,14 @@ fn raw_identifiers() {
 
     let _: r#type = Sut::builder();
 }
+
+// This is based on the issue https://github.com/elastio/bon/issues/12
+#[test]
+fn types_not_implementing_default() {
+    struct DoesNotImplementDefault;
+
+    #[builder]
+    fn test(test_type: Option<DoesNotImplementDefault>) {}
+
+    test().call();
+}
