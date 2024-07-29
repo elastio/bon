@@ -19,8 +19,11 @@ pub(crate) impl syn::Ident {
     /// produced identifier won't influence the syntax highlighting of the original
     /// identifier.
     fn to_pascal_case(&self) -> Self {
-        // There are no pascal case raw identifiers, so no need to handle raw
-        // identifiers here.
+        // There are no pascal case keywords in Rust except for `Self`, which
+        // is anyway not allowed even as a raw identifier:
+        // https://internals.rust-lang.org/t/raw-identifiers-dont-work-for-all-identifiers/9094
+        //
+        // So no need to handle raw identifiers here.
         syn::Ident::new(&self.raw_name().to_pascal_case(), Span::call_site())
     }
 

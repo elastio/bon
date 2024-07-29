@@ -39,8 +39,10 @@ macro_rules! vec {
 }
 
 /// Creates a fixed-size array literal where each element is converted with [`Into::into()`]
-/// into the target type. You'll probably need a hint for the target type of items
-/// in the array if the compiler can't infer it from its usage.
+/// into the target type.
+///
+/// You'll probably need a hint for the target type of items in the array if the
+/// compiler can't infer it from its usage.
 ///
 /// This is similar in spirit to the [`bon::vec!`] macro, but it's for arrays.
 /// See [`bon::vec!`] docs for details.
