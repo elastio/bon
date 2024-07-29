@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1](https://github.com/elastio/bon/compare/v1.0.0...v1.0.1) - 2024-07-29
+
+### Other
+- Fix handling of raw identifiers ([#9](https://github.com/elastio/bon/pull/9))
+- Add example snippet for "adding builder to existing code" ([#7](https://github.com/elastio/bon/pull/7))
+
 ## [1.0.0](https://github.com/elastio/bon/tree/v1.0.0) - 2024-07-28
 
 ### Added
