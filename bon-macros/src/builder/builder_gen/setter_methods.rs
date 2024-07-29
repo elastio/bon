@@ -23,8 +23,11 @@ impl BuilderGenCtx {
         let generic_args = self.generic_args().collect_vec();
         let where_clause = &self.generics.where_clause;
         let unset_state_type = member.unset_state_type();
-        let output_builder_alias_ident =
-            quote::format_ident!("__{builder_ident}Set{state_assoc_type_ident}");
+        let output_builder_alias_ident = quote::format_ident!(
+            "__{}Set{}",
+            builder_ident.raw_name(),
+            state_assoc_type_ident.raw_name()
+        );
 
         // A case where there is just one member is special, because the type alias would
         // receive a generic `__State` parameter that it wouldn't use, so we create it
@@ -207,7 +210,7 @@ impl<'a> MemberSettersCtx<'a> {
 
         // Preserve the original identifier span to make IDE go to definition correctly
         // and make error messages point to the correct place.
-        let norm_member_ident = syn::Ident::new(norm_member_ident, member.ident.span());
+        let norm_member_ident = syn::Ident::new_maybe_raw(norm_member_ident, member.ident.span());
 
         Self {
             builder_gen,
@@ -269,7 +272,7 @@ impl<'a> MemberSettersCtx<'a> {
 
         let methods = [
             MemberSetterMethod {
-                method_name: quote::format_ident!("maybe_{setter_method_name}"),
+                method_name: quote::format_ident!("maybe_{}", setter_method_name.raw_name()),
                 fn_params: quote!(value: Option<#inner_type>),
                 member_init: quote!(::bon::private::Set::new(value #maybe_map_conv_call)),
                 overwrite_docs: Some(format!(
@@ -310,8 +313,8 @@ impl<'a> MemberSettersCtx<'a> {
         } = method;
 
         let docs = match overwrite_docs {
-            Some(docs) => &[syn::parse_quote!(#[doc = #docs])],
-            None => self.member.docs.as_slice(),
+            Some(docs) => vec![syn::parse_quote!(#[doc = #docs])],
+            None => self.member.docs.clone(),
         };
 
         let vis = &self.builder_gen.vis;

@@ -1,5 +1,6 @@
 use easy_ext::ext;
 use heck::ToPascalCase;
+use proc_macro2::Span;
 
 #[ext(IdentExt)]
 pub(crate) impl syn::Ident {
@@ -18,6 +19,28 @@ pub(crate) impl syn::Ident {
     /// produced identifier won't influence the syntax highlighting of the original
     /// identifier.
     fn to_pascal_case(&self) -> Self {
-        quote::format_ident!("{}", self.to_string().to_pascal_case())
+        // There are no pascal case raw identifiers, so no need to handle raw
+        // identifiers here.
+        syn::Ident::new(&self.raw_name().to_pascal_case(), Span::call_site())
+    }
+
+    /// Creates a new ident with the given name and span. If the name starts with
+    /// `r#` then automatically creates a raw ident.
+    fn new_maybe_raw(name: &str, span: Span) -> Self {
+        if let Some(name) = name.strip_prefix("r#") {
+            syn::Ident::new_raw(name, span)
+        } else {
+            syn::Ident::new(name, span)
+        }
+    }
+
+    /// Returns the name of the identifier stripping the `r#` prefix if it exists.
+    fn raw_name(&self) -> String {
+        let name = self.to_string();
+        if let Some(raw) = name.strip_prefix("r#") {
+            raw.to_owned()
+        } else {
+            name
+        }
     }
 }
