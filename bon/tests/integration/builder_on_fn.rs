@@ -356,3 +356,20 @@ fn const_function() {
 
     foo().arg(42).call();
 }
+
+// This is based on the issue https://github.com/elastio/bon/issues/8
+#[test]
+#[allow(non_camel_case_types)]
+fn raw_identifiers() {
+    #[builder]
+    fn r#type(r#type: String, #[builder(name = r#while)] other: String) {
+        drop((r#type, other));
+    }
+
+    r#type().r#type("value").r#while("value2").call();
+
+    #[builder(builder_type = r#type)]
+    fn sut() {}
+
+    let _: r#type = sut();
+}

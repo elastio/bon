@@ -66,3 +66,26 @@ fn smoke() {
 
     expected.assert_debug_eq(&actual);
 }
+
+// This is based on the issue https://github.com/elastio/bon/issues/8
+#[test]
+#[allow(non_camel_case_types)]
+fn raw_identifiers() {
+    #[builder]
+    struct r#Type {
+        r#type: String,
+
+        #[builder(name = r#while)]
+        other: String,
+    }
+
+    let actual = r#Type::builder().r#type("value").r#while("value2").build();
+
+    assert_eq!(actual.r#type, "value");
+    assert_eq!(actual.other, "value2");
+
+    #[builder(builder_type = r#type)]
+    struct Sut {}
+
+    let _: r#type = Sut::builder();
+}

@@ -7,7 +7,6 @@ use crate::normalization::NormalizeSelfTy;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
 use darling::FromMeta;
-use heck::AsPascalCase;
 use itertools::Itertools;
 use proc_macro2::Span;
 use quote::quote;
@@ -121,10 +120,6 @@ impl FuncInputCtx {
             .reduce(|mut combined, clause| {
                 combined.predicates.extend(clause.predicates);
                 combined
-            })
-            .map(|clause| syn::WhereClause {
-                where_token: clause.where_token,
-                predicates: clause.predicates,
             });
 
         Generics {
@@ -138,7 +133,7 @@ impl FuncInputCtx {
             return builder_type.clone();
         }
 
-        let pascal_case_func = AsPascalCase(self.norm_func.sig.ident.to_string());
+        let pascal_case_func = self.norm_func.sig.ident.to_pascal_case();
         quote::format_ident!(
             "{}{pascal_case_func}Builder",
             self.self_ty_prefix().unwrap_or_default()
@@ -194,7 +189,7 @@ impl FuncInputCtx {
             .or_else(|| self.is_method_new().then_some(orig.sig.ident))
             // By default we don't want to expose the positional function, so we
             // hide it under a generated name to avoid name conflicts.
-            .unwrap_or_else(|| quote::format_ident!("__orig_{}", orig_ident.to_string()));
+            .unwrap_or_else(|| quote::format_ident!("__orig_{}", orig_ident.raw_name()));
 
         strip_known_attrs_from_args(&mut orig.sig);
 
@@ -264,8 +259,9 @@ impl FuncInputCtx {
         }
 
         let builder_ident = self.builder_ident();
-        let builder_private_impl_ident = quote::format_ident!("__{builder_ident}PrivateImpl");
-        let builder_state_trait_ident = quote::format_ident!("__{builder_ident}State");
+        let builder_private_impl_ident =
+            quote::format_ident!("__{}PrivateImpl", builder_ident.raw_name());
+        let builder_state_trait_ident = quote::format_ident!("__{}State", builder_ident.raw_name());
 
         let members: Vec<_> = self
             .norm_func

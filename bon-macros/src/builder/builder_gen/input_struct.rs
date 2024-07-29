@@ -55,7 +55,7 @@ impl StructInputCtx {
             return builder_type.clone();
         }
 
-        quote::format_ident!("{}Builder", self.norm_struct.ident)
+        quote::format_ident!("{}Builder", self.norm_struct.ident.raw_name())
     }
 
     pub(crate) fn adapted_struct(&self) -> syn::ItemStruct {
@@ -75,8 +75,10 @@ impl StructInputCtx {
 
     pub(crate) fn into_builder_gen_ctx(self) -> Result<BuilderGenCtx> {
         let builder_ident = self.builder_ident();
-        let builder_private_impl_ident = quote::format_ident!("__{builder_ident}PrivateImpl");
-        let builder_state_trait_ident = quote::format_ident!("__{builder_ident}State");
+        let builder_private_impl_ident =
+            quote::format_ident!("__{}PrivateImpl", builder_ident.raw_name());
+
+        let builder_state_trait_ident = quote::format_ident!("__{}State", builder_ident.raw_name());
 
         let fields = match self.norm_struct.fields {
             syn::Fields::Named(fields) => fields,
