@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.2](https://github.com/elastio/bon/compare/v1.0.1...v1.0.2) - 2024-07-29
+
+### Other
+- Fix a bug of `Default` trait requirement for types under an `Option` ([#13](https://github.com/elastio/bon/pull/13))
+- Fix the link to docs to use the latest version ([#11](https://github.com/elastio/bon/pull/11))
+
 ## [1.0.1](https://github.com/elastio/bon/compare/v1.0.0...v1.0.1) - 2024-07-29
 
 ### Fixed
