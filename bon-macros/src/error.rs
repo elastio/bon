@@ -22,8 +22,8 @@ pub(crate) fn error_into_token_stream(err: Error, item: TokenStream2) -> TokenSt
 /// type analysis, completions and other hints features working even if macro
 /// fails to parse some syntax or finds some other logic errors.
 ///
-/// This utility does very low-level parsing to strips doc comments from the
-/// input. This is to avoid the IDE from showing errors that "doc comments
+/// This utility does very low-level parsing to strip doc comments from the
+/// input. This is to prevent the IDE from showing errors that "doc comments
 /// aren't allowed on function arguments". It also removes `#[builder(...)]`
 /// attributes that need to be processed by this macro to avoid the IDE from
 /// reporting those as well.
