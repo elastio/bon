@@ -180,6 +180,27 @@ If your existing code defines functions with positional parameters in its public
 
 See [this attribute's docs](../reference/builder#expose-positional-fn) for details.
 
+**Example**:
+
+```rust ignore
+use bon::builder;
+
+// The previous name of the positional function needs to be specified
+// as the value for `expose_positional_fn`.
+#[builder(expose_positional_fn = example)] // [!code ++]
+fn example(x: u32, y: u32) {}              // [!code --]
+fn example_builder(x: u32, y: u32) {}      // [!code ++]
+
+// The positional function is now available under the specified (old) name
+example(1, 2);
+
+// The builder syntax is also available under the new function name
+example_builder()
+    .x(1)
+    .y(2)
+    .call();
+```
+
 *[Member]: Struct field or a function argument
 *[member]: Struct field or a function argument
 *[members]: Struct fields or function arguments

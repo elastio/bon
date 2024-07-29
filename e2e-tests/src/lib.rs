@@ -1,5 +1,5 @@
 //! This crate is used only for testing of the public interface of the `bon` crate.
-//! We don't need all the aggressive lintsthat we use for public crates.
+//! We don't need all the aggressive lints that we use for public crates.
 #![allow(missing_debug_implementations)]
 #![allow(missing_docs)]
 
