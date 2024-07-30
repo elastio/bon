@@ -231,6 +231,10 @@ impl FuncInputCtx {
 
         orig.attrs.push(syn::parse_quote!(#[doc = #doc]));
 
+        if self.params.expose_positional_fn.is_none() {
+            orig.attrs.push(syn::parse_quote!(#[doc(hidden)]));
+        }
+
         // It's fine if there are too many positional arguments in the function
         // because the whole purpose of this macro is to fight with this problem
         // at the call site by generating a builder, while keeping the fn definition
