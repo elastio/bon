@@ -12,7 +12,7 @@ use syn::visit_mut::VisitMut;
 #[derive(Debug, FromMeta, Clone)]
 pub(crate) struct StructInputParams {
     #[darling(flatten)]
-    base: BuilderParams,
+    pub(crate) base: BuilderParams,
     pub(crate) start_fn: Option<ItemParams>,
 }
 

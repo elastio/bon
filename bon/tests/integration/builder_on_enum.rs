@@ -7,16 +7,15 @@ fn basic() {
         None,
         Binary { 
             operation : char,
-            left : Box<Expression>,
-            right : Box<Expression>
+            left : u32,
+            right : u32
         }
     }
 
-
     let expression = Expression::binary()
         .operation('+')
-        .left(Box::new(Expression::None))
-        .right(Box::new(Expression::None))
+        .left(6u32)
+        .right(5u32)
         .build();
 
 }

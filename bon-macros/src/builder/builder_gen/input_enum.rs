@@ -48,7 +48,15 @@ impl<'a> NamedVariantInputCtx<'a> {
         let mut token_stream = self.generated_struct.to_token_stream();
 
         let params = &NestedMeta::parse_meta_list(self.variant.to_token_stream())?;
-        let input_struct: StructInputParams = FromMeta::from_list(params)?;
+
+        // TODO; parse from thing
+        let input_struct: StructInputParams = StructInputParams {
+            base : crate::builder::params::BuilderParams {
+                finish_fn : None,
+                builder_type : None
+            },
+            start_fn : None
+        };//FromMeta::from_list(params)?;
 
         // Generate builder and alter the finsih_fn to return enum 
         token_stream.extend(self.generate_builder(input_struct.clone())?);
@@ -114,20 +122,19 @@ impl<'a> NamedVariantInputCtx<'a> {
             let ident = &self.variant.ident;
             let variant_span = ident.span();
             let variant_ident = ident.raw_name().to_case(Case::Snake);
-
-            eprintln!("variant_ident={variant_ident}");
             
             Ident::new_maybe_raw(&variant_ident,variant_span.span())
         });
 
-        let return_type = &self.generated_struct.ident;
+        let struct_ident = &self.generated_struct.ident;
+        let return_type = format_ident!("{}Builder",&struct_ident);
         let inner_start_fn = name.unwrap_or_else(|| Ident::new("builder",Span::call_site()));
 
         quote! {
             // TODO: Use enum generics here but only add variant bounds
             impl #orig_ident {
                 #vis fn #ident () -> #return_type {
-                    #return_type :: #inner_start_fn ()
+                    #struct_ident :: #inner_start_fn ()
                 }
             }
         }
@@ -147,9 +154,9 @@ impl FinishFuncBody for NamedVariantFinishFuncBody {
             .zip(member_exprs.iter())
             .map(|(field,MemberExpr { member, .. })|{
                 let value_ident = field.ident.as_ref();
-                let struct_value_ident = &member.ident;
+                let field_ident = &member.ident;
                 quote! {
-                    #value_ident : #struct_value_ident . #struct_value_ident
+                    #value_ident : #struct_value_ident . #field_ident
                 }
             });
 
