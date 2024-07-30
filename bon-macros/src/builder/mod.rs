@@ -5,6 +5,7 @@ pub(crate) mod item_impl;
 
 mod item_func;
 mod item_struct;
+mod item_enum;
 
 use crate::util::prelude::*;
 use darling::FromMeta;
@@ -15,6 +16,7 @@ pub(crate) fn generate_for_item(params: TokenStream2, item: syn::Item) -> Result
     match item {
         syn::Item::Fn(item) => item_func::generate(FromMeta::from_list(params)?, item),
         syn::Item::Struct(item) => item_struct::generate(FromMeta::from_list(params)?, item),
+        syn::Item::Enum(item) => item_enum::generate(item),
         _ => {
             bail!(
                 &item,
