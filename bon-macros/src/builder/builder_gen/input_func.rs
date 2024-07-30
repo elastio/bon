@@ -1,6 +1,7 @@
 use super::{
-    generic_param_to_arg, BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberExpr,
-    MemberOrigin, ReceiverCtx, StartFunc,
+    generic_param_to_arg, AssocFreeMethodCtx, AssocMethodCtx, AssocMethodReceiverCtx,
+    BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberExpr, MemberOrigin,
+    StartFunc,
 };
 use crate::builder::params::BuilderParams;
 use crate::normalization::NormalizeSelfTy;
@@ -89,17 +90,23 @@ impl FuncInputCtx {
         Some(prefix)
     }
 
-    fn receiver_ctx(&self) -> Option<ReceiverCtx> {
-        let receiver = self.norm_func.sig.receiver()?;
-        let mut without_self_ty = receiver.ty.clone();
+    fn assoc_method_ctx(&self) -> Option<AssocMethodCtx> {
         let self_ty = &self.impl_ctx.as_deref()?.self_ty;
+
+        let Some(receiver) = self.norm_func.sig.receiver() else {
+            return Some(AssocMethodCtx::Free(AssocFreeMethodCtx {
+                self_ty: self_ty.clone(),
+            }));
+        };
+
+        let mut without_self_ty = receiver.ty.clone();
 
         NormalizeSelfTy { self_ty }.visit_type_mut(&mut without_self_ty);
 
-        Some(ReceiverCtx {
-            with_self_ty: receiver.clone(),
-            without_self_ty,
-        })
+        Some(AssocMethodCtx::Receiver(AssocMethodReceiverCtx {
+            with_self_keyword: receiver.clone(),
+            without_self_keyword: without_self_ty,
+        }))
     }
 
     fn generics(&self) -> Generics {
@@ -231,7 +238,7 @@ impl FuncInputCtx {
     }
 
     pub(crate) fn into_builder_gen_ctx(self) -> Result<BuilderGenCtx> {
-        let receiver = self.receiver_ctx();
+        let receiver = self.assoc_method_ctx();
 
         if self.impl_ctx.is_none() {
             let explanation = "\
@@ -330,7 +337,7 @@ impl FuncInputCtx {
             builder_private_impl_ident,
             builder_state_trait_ident,
 
-            receiver,
+            assoc_method_ctx: receiver,
             generics,
             vis: self.norm_func.vis,
 

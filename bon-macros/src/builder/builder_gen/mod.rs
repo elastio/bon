@@ -10,9 +10,35 @@ use crate::util::prelude::*;
 use itertools::Itertools;
 use quote::quote;
 
-pub(crate) struct ReceiverCtx {
-    pub(crate) with_self_ty: syn::Receiver,
-    pub(crate) without_self_ty: Box<syn::Type>,
+pub(crate) struct AssocMethodReceiverCtx {
+    pub(crate) with_self_keyword: syn::Receiver,
+    pub(crate) without_self_keyword: Box<syn::Type>,
+}
+pub(crate) struct AssocFreeMethodCtx {
+    /// The `Self` type of the impl block. It doesn't contain any nested
+    /// `Self` keywords in it. This is prohibited by Rust's syntax itself.
+    pub(crate) self_ty: Box<syn::Type>,
+}
+
+pub(crate) enum AssocMethodCtx {
+    Receiver(AssocMethodReceiverCtx),
+    Free(AssocFreeMethodCtx),
+}
+
+impl AssocMethodCtx {
+    fn as_receiver(&self) -> Option<&AssocMethodReceiverCtx> {
+        match self {
+            AssocMethodCtx::Receiver(receiver) => Some(receiver),
+            AssocMethodCtx::Free(_) => None,
+        }
+    }
+
+    fn ty_without_self_keyword(&self) -> &syn::Type {
+        match self {
+            AssocMethodCtx::Receiver(receiver) => &receiver.without_self_keyword,
+            AssocMethodCtx::Free(parent) => &parent.self_ty,
+        }
+    }
 }
 
 pub(crate) struct BuilderGenCtx {
@@ -20,7 +46,7 @@ pub(crate) struct BuilderGenCtx {
 
     pub(crate) generics: Generics,
     pub(crate) vis: syn::Visibility,
-    pub(crate) receiver: Option<ReceiverCtx>,
+    pub(crate) assoc_method_ctx: Option<AssocMethodCtx>,
 
     pub(crate) start_func: StartFunc,
     pub(crate) finish_func: FinishFunc,
@@ -137,15 +163,18 @@ impl BuilderGenCtx {
         let member_idents = self.member_idents();
 
         let receiver = self
-            .receiver
+            .assoc_method_ctx
             .as_ref()
-            .map(|receiver| &receiver.with_self_ty);
-        let receiver_field_init = self.receiver.as_ref().map(|receiver| {
-            let self_token = &receiver.with_self_ty.self_token;
+            .and_then(AssocMethodCtx::as_receiver);
+
+        let receiver_field_init = receiver.map(|receiver| {
+            let self_token = &receiver.with_self_keyword.self_token;
             quote! {
                 receiver: #self_token,
             }
         });
+
+        let receiver = receiver.map(|receiver| &receiver.with_self_keyword);
 
         let func = quote! {
             #(#docs)*
@@ -170,7 +199,13 @@ impl BuilderGenCtx {
     }
 
     fn phantom_data(&self) -> TokenStream2 {
-        let member_types = self.members.iter().map(|member| &member.ty);
+        let member_types = self.members.iter().map(|member| member.ty.as_ref());
+        let receiver_ty = self
+            .assoc_method_ctx
+            .as_ref()
+            .map(AssocMethodCtx::ty_without_self_keyword);
+
+        let types = receiver_ty.into_iter().chain(member_types);
 
         quote! {
             ::core::marker::PhantomData<(
@@ -179,7 +214,7 @@ impl BuilderGenCtx {
                 // in phantom data here.
                 //
                 // Suppose a function was defined with an argument of type `&'a T`
-                // and we then generate the an impl block (simplified):
+                // and we then generate an impl block (simplified):
                 //
                 // ```
                 // impl<'a, T, U> for Foo<U>
@@ -195,7 +230,7 @@ impl BuilderGenCtx {
                 //
                 // That's a weird implicit behavior in Rust, I suppose there is a reasonable
                 // explanation for it, I just didn't care to research it yet ¯\_(ツ)_/¯.
-                #(#member_types,)*
+                #(#types,)*
 
                 // A special case of zero members requires storing `__State` in phantom data
                 // otherwise it would be reported as an unused type parameter.
@@ -232,11 +267,11 @@ impl BuilderGenCtx {
         let unset_state_types = self.unset_state_types();
         let phantom_data = self.phantom_data();
 
-        let receiver_field = self.receiver.as_ref().map(|receiver| {
-            let ty = &receiver.without_self_ty;
-            quote! {
+        let receiver_field = self.assoc_method_ctx.as_ref().and_then(|receiver| {
+            let ty = &receiver.as_receiver()?.without_self_keyword;
+            Some(quote! {
                 receiver: #ty,
-            }
+            })
         });
 
         let members = self.members.iter().map(|member| {

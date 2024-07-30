@@ -60,7 +60,7 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
     let mut norm_selfful_impl_block = norm_impl_block.clone();
 
     crate::normalization::NormalizeSelfTy {
-        self_ty: &orig_impl_block.self_ty,
+        self_ty: &norm_impl_block.self_ty.clone(),
     }
     .visit_item_impl_mut(&mut norm_impl_block);
 

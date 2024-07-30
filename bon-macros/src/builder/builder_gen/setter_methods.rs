@@ -1,4 +1,5 @@
 use super::{member::Member, BuilderGenCtx};
+use crate::builder::builder_gen::AssocMethodCtx;
 use crate::util::prelude::*;
 use darling::ast::GenericParamExt;
 use itertools::Itertools;
@@ -324,7 +325,9 @@ impl<'a> MemberSettersCtx<'a> {
         let member_idents = self.builder_gen.member_idents();
         let maybe_receiver_field = self
             .builder_gen
-            .receiver
+            .assoc_method_ctx
+            .as_ref()
+            .and_then(AssocMethodCtx::as_receiver)
             .is_some()
             .then(|| quote!(receiver: self.__private_impl.receiver,));
 
