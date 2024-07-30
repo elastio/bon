@@ -198,7 +198,8 @@ impl FuncInputCtx {
             .and_then(|params| {
                 params
                     .name
-                    .clone() // We treat `new` method specially. In this case we already know the best
+                    .clone()
+                    // We treat `new` method specially. In this case we already know the best
                     // default name for the positional function, which is `new` itself.
                     .or_else(|| self.is_method_new().then_some(orig.sig.ident))
             })
