@@ -3,6 +3,7 @@ mod setter_methods;
 
 pub(crate) mod input_func;
 pub(crate) mod input_struct;
+pub(crate) mod input_enum;
 
 use member::*;
 

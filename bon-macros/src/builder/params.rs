@@ -2,13 +2,13 @@ use crate::util::prelude::*;
 use darling::FromMeta;
 use quote::quote;
 
-#[derive(Debug, FromMeta)]
+#[derive(Debug, FromMeta, Clone)]
 pub(crate) struct BuilderParams {
     pub(crate) finish_fn: Option<syn::Ident>,
     pub(crate) builder_type: Option<syn::Ident>,
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default,Clone)]
 pub(crate) struct ItemParams {
     pub(crate) name: Option<syn::Ident>,
     pub(crate) vis: Option<syn::Visibility>,

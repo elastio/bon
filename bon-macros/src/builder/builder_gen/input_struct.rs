@@ -9,16 +9,16 @@ use itertools::Itertools;
 use quote::quote;
 use syn::visit_mut::VisitMut;
 
-#[derive(Debug, FromMeta)]
+#[derive(Debug, FromMeta, Clone)]
 pub(crate) struct StructInputParams {
     #[darling(flatten)]
     base: BuilderParams,
-    start_fn: Option<ItemParams>,
+    pub(crate) start_fn: Option<ItemParams>,
 }
 
 pub(crate) struct StructInputCtx {
     orig_struct: syn::ItemStruct,
-    norm_struct: syn::ItemStruct,
+    pub(crate) norm_struct: syn::ItemStruct,
     params: StructInputParams,
     struct_ty: syn::Type,
 }
@@ -73,7 +73,7 @@ impl StructInputCtx {
         orig
     }
 
-    pub(crate) fn into_builder_gen_ctx(self) -> Result<BuilderGenCtx> {
+    pub(crate) fn into_builder_gen_ctx<T>(self,override_finish_fn : Option<(&syn::Type,T)>) -> Result<BuilderGenCtx> where T : FinishFuncBody + 'static {
         let builder_ident = self.builder_ident();
         let builder_private_impl_ident =
             quote::format_ident!("__{}PrivateImpl", builder_ident.raw_name());
@@ -101,10 +101,6 @@ impl StructInputCtx {
             where_clause: self.norm_struct.generics.where_clause.clone(),
         };
 
-        let finish_func_body = StructLiteralBody {
-            struct_ident: self.norm_struct.ident.clone(),
-        };
-
         let ItemParams {
             name: start_func_ident,
             vis: start_func_vis,
@@ -113,19 +109,33 @@ impl StructInputCtx {
         let start_func_ident = start_func_ident
             .unwrap_or_else(|| syn::Ident::new("builder", self.norm_struct.ident.span()));
 
+        
+        let (finish_func_output,finish_func_body) : (_,Box<dyn FinishFuncBody>) = match override_finish_fn{
+            Some((output,body)) => (
+                output,
+                Box::new(body)
+            ),
+            None => (
+                &self.struct_ty,
+                Box::new(
+                    StructLiteralBody::new(self.norm_struct.ident.clone())
+                )
+            )
+        };
+  
         let finish_func_ident = self
             .params
             .base
             .finish_fn
             .unwrap_or_else(|| syn::Ident::new("build", start_func_ident.span()));
 
-        let struct_ty = &self.struct_ty;
+
         let finish_func = FinishFunc {
             ident: finish_func_ident,
             unsafety: None,
             asyncness: None,
-            body: Box::new(finish_func_body),
-            output: syn::parse_quote!(-> #struct_ty),
+            body: finish_func_body,
+            output: syn::parse_quote!(-> #finish_func_output),
         };
 
         let start_func_docs = format!(
@@ -158,8 +168,14 @@ impl StructInputCtx {
     }
 }
 
-struct StructLiteralBody {
+pub(crate) struct StructLiteralBody {
     struct_ident: syn::Ident,
+}
+
+impl StructLiteralBody {
+    pub(crate) fn new(struct_ident: syn::Ident) -> Self {
+        Self { struct_ident }
+    }
 }
 
 impl FinishFuncBody for StructLiteralBody {

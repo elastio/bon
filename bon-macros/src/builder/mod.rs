@@ -6,6 +6,7 @@ pub(crate) mod item_impl;
 mod item_func;
 mod item_struct;
 mod item_enum;
+mod shared;
 
 use crate::util::prelude::*;
 use darling::FromMeta;
