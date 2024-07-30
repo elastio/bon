@@ -95,7 +95,7 @@ impl FuncInputCtx {
 
         let Some(receiver) = self.norm_func.sig.receiver() else {
             return Some(AssocMethodCtx::Free(AssocFreeMethodCtx {
-                without_self_keyword: self_ty.clone(),
+                self_ty: self_ty.clone(),
             }));
         };
 

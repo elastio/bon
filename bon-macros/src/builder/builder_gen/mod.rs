@@ -15,7 +15,9 @@ pub(crate) struct AssocMethodReceiverCtx {
     pub(crate) without_self_keyword: Box<syn::Type>,
 }
 pub(crate) struct AssocFreeMethodCtx {
-    pub(crate) without_self_keyword: Box<syn::Type>,
+    /// The `Self` type of the impl block. It doesn't contain any nested
+    /// `Self` keywords in it. This is prohibited by Rust's syntax itself.
+    pub(crate) self_ty: Box<syn::Type>,
 }
 
 pub(crate) enum AssocMethodCtx {
@@ -34,7 +36,7 @@ impl AssocMethodCtx {
     fn ty_without_self_keyword(&self) -> &syn::Type {
         match self {
             AssocMethodCtx::Receiver(receiver) => &receiver.without_self_keyword,
-            AssocMethodCtx::Free(parent) => &parent.without_self_keyword,
+            AssocMethodCtx::Free(parent) => &parent.self_ty,
         }
     }
 }
