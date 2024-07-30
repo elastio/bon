@@ -146,7 +146,7 @@ impl StructInputCtx {
             builder_private_impl_ident,
             builder_state_trait_ident,
 
-            receiver: None,
+            assoc_method_ctx: None,
             generics,
             vis: self.norm_struct.vis,
 

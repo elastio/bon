@@ -373,3 +373,36 @@ fn raw_identifiers() {
 
     let _: r#type = sut();
 }
+
+// This is based on the issue https://github.com/elastio/bon/issues/16
+#[test]
+fn self_only_generic_param() {
+    struct Sut<'a, 'b: 'a, T, U> {
+        buf: Vec<T>,
+        bar: Option<U>,
+        str: &'a str,
+        other_ref: &'b (),
+    }
+
+    #[bon::bon]
+    impl<T, U> Sut<'_, '_, T, U> {
+        #[builder]
+        fn new() -> Self {
+            Self {
+                buf: vec![],
+                bar: None,
+                str: "littlepip",
+                other_ref: &(),
+            }
+        }
+    }
+
+    let actual = Sut::<u32, std::convert::Infallible>::builder().build();
+
+    let empty: [u32; 0] = [];
+
+    assert_eq!(actual.buf, empty);
+    assert!(actual.bar.is_none());
+    assert_eq!(actual.str, "littlepip");
+    let () = actual.other_ref;
+}
