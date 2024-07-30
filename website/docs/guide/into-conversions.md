@@ -198,7 +198,11 @@ The following list describes the types that don't qualify for an automatic `Into
 
 ## Override the default behavior
 
-Suppose automatic `Into` conversion qualification rules don't satisfy your use case. For example, you want the setter method to accept an `Into<(u32, u32)>` then you can use an explicit `#[builder(into)]` to override the default behavior. See [this attribute's docs](../reference/builder#into) for details.
+Suppose automatic `Into` conversion qualification rules don't satisfy your use case. For example, you want the setter method to accept an `Into<(u32, u32)>` then you can use an explicit `#[builder(into)]` to override the default behavior.
+
+Use `#[builder(into = false)]` if you want to disable the automatic into conversion.
+
+See [this attribute's docs](../reference/builder#into) for details.
 
 
 
