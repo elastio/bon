@@ -140,7 +140,12 @@ impl FuncInputCtx {
             return builder_type.clone();
         }
 
+        if self.is_method_new() {
+            return quote::format_ident!("{}Builder", self.self_ty_prefix().unwrap_or_default());
+        }
+
         let pascal_case_func = self.norm_func.sig.ident.to_pascal_case();
+
         quote::format_ident!(
             "{}{pascal_case_func}Builder",
             self.self_ty_prefix().unwrap_or_default()
@@ -190,10 +195,13 @@ impl FuncInputCtx {
         }
 
         orig.sig.ident = params
-            .and_then(|params| params.name.clone())
-            // We treat `new` method specially. In this case we already know the best
-            // default name for the positional function, which is `new` itself.
-            .or_else(|| self.is_method_new().then_some(orig.sig.ident))
+            .and_then(|params| {
+                params
+                    .name
+                    .clone() // We treat `new` method specially. In this case we already know the best
+                    // default name for the positional function, which is `new` itself.
+                    .or_else(|| self.is_method_new().then_some(orig.sig.ident))
+            })
             // By default we don't want to expose the positional function, so we
             // hide it under a generated name to avoid name conflicts.
             .unwrap_or_else(|| quote::format_ident!("__orig_{}", orig_ident.raw_name()));
