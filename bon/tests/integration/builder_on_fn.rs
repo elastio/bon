@@ -397,6 +397,13 @@ fn self_only_generic_param() {
         }
     }
 
+    // Make sure `new` method is hidden
+    Sut::<u32, std::convert::Infallible>::__orig_new();
+
+    // Make sure the builder type name matches the type of builder when
+    // `#[builder]` is placed on top of a struct
+    let _: SutBuilder<'_, '_, u32, std::convert::Infallible> = Sut::builder();
+
     let actual = Sut::<u32, std::convert::Infallible>::builder().build();
 
     let empty: [u32; 0] = [];
