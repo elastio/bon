@@ -113,9 +113,9 @@ If `#[builder]` is placed on the method called `new`, then the generated functio
 
 For any other methods not called `new` and for any free function the naming is a bit different:
 
-| Start function              | Finish function
-|-----------------------------|---------------------
-| `{fn_name}() -> {T}Builder` | `call(self) -> T`
+| Start function                                | Finish function
+|-----------------------------------------------|---------------------
+| `{fn_name}() -> {T}{PascalCaseFnName}Builder` | `call(self) -> T`
 
 ## Builder for a struct
 

@@ -413,3 +413,28 @@ fn self_only_generic_param() {
     assert_eq!(actual.str, "littlepip");
     let () = actual.other_ref;
 }
+
+#[test]
+fn mut_fn_params() {
+    #[builder]
+    fn sut(mut arg1: u32, mut arg2: u32) -> (u32, u32) {
+        arg1 += 1;
+        arg2 += 2;
+
+        (arg1, arg2)
+    }
+
+    let actual = sut().arg1(1).arg2(2).call();
+    assert_eq!(actual, (2, 4));
+}
+
+// This is based on the issue https://github.com/elastio/bon/issues/12
+#[test]
+fn types_not_implementing_default() {
+    struct DoesNotImplementDefault;
+
+    #[builder]
+    fn test(_value: Option<DoesNotImplementDefault>) {}
+
+    test().call();
+}
