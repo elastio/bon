@@ -282,7 +282,13 @@ impl BuilderGenCtx {
             }
         });
 
+        let must_use_message = format!(
+            "the builder does nothing until you call `{}()` on it to finish building",
+            self.finish_func.ident
+        );
+
         quote! {
+            #[must_use = #must_use_message]
             #vis struct #builder_ident<
                 #(#generics_decl,)*
                 __State: #builder_state_trait_ident = (#(#unset_state_types,)*),
@@ -429,7 +435,7 @@ impl BuilderGenCtx {
             let set_state_type_param = member.set_state_type_param();
             quote! {
                 __State::#member_assoc_type_ident:
-                    bon::private::IntoSet<#set_state_type_param>
+                    ::bon::private::IntoSet<#set_state_type_param>
             }
         });
 
