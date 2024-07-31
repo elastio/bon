@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.5](https://github.com/elastio/bon/compare/v1.0.4...v1.0.5) - 2024-07-31
+
+### Other
+- Add `#[must_use]` to the builder and other small improvements ([#26](https://github.com/elastio/bon/pull/26))
+
 ## [1.0.4](https://github.com/elastio/bon/compare/v1.0.3...v1.0.4) - 2024-07-30
 
 ### Fixed
