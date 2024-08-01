@@ -17,7 +17,7 @@ bon = { path = "bon" }
 
 # Patch version 0.20.7 of darling added `flatten` feature. We use it, so we
 # need to specify an explicit patch version requirement
-darling      = "0.20.10"
+darling = "0.20.10"
 
 easy-ext     = "1.0"
 heck         = "0.5"
