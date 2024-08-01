@@ -6,6 +6,10 @@ mod ty;
 
 use prelude::*;
 use proc_macro::TokenStream;
+use syn::parse::ParseStream;
+use syn::punctuated::Punctuated;
+use syn::Expr;
+use syn::Token;
 
 pub(crate) mod prelude {
     /// A handly alias for [`proc_macro2::TokenStream`].
@@ -43,6 +47,20 @@ where
     let params = Params::from_list(&meta)?;
     let item = syn::parse(item)?;
     Ok((params, item))
+}
+
+pub(crate) fn parse_map_macro_input(
+    input: ParseStream<'_>,
+) -> Result<Punctuated<(Expr, Expr), Token![,]>, syn::Error> {
+    Punctuated::parse_terminated_with(input, parse_map_pair)
+}
+
+fn parse_map_pair(pair: ParseStream<'_>) -> Result<(Expr, Expr), syn::Error> {
+    let key = pair.parse().map_err(|_| pair.error(pair.to_string()))?;
+    let _: Token![:] = pair.parse()?;
+    let value = pair.parse()?;
+
+    Ok((key, value))
 }
 
 /// Inspired by `anyhow::bail`, but returns a [`Result`] with [`darling::Error`].

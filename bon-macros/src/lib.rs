@@ -3,6 +3,7 @@
 mod bon;
 mod builder;
 mod error;
+mod map;
 mod normalization;
 mod util;
 
@@ -99,4 +100,11 @@ pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
         .and_then(|(opts, item)| bon::generate(opts, item))
         .unwrap_or_else(|err| error::error_into_token_stream(err, item.into()))
         .into()
+}
+
+#[proc_macro]
+pub fn map(input: TokenStream) -> TokenStream {
+    let entries = syn::parse_macro_input!(input with util::parse_map_macro_input);
+
+    map::generate(entries).into()
 }
