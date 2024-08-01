@@ -94,6 +94,10 @@ export default defineConfig({
                             link: "/docs/guide/limitations",
                         },
                         {
+                            text: "Benchmarks",
+                            link: "/docs/guide/benchmarks",
+                        },
+                        {
                             text: "Alternatives",
                             link: "/docs/guide/alternatives",
                         },

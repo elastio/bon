@@ -14,5 +14,8 @@
     "remove-markdown": "^0.5.0",
     "smol-toml": "^1.3.0",
     "vitepress": "^1.3.1"
+  },
+  "dependencies": {
+    "vue": "^3.4.35"
   }
 }
