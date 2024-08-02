@@ -109,9 +109,6 @@ pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
 /// There are no separate variants for [`HashMap`] and [`BTreeMap`] since the macro works with any
 /// type that implements [`FromIterator<(K, V)>`].
 ///
-/// The macro also performs rudimentary uniqueness checking on keys: syntactically equal keys are
-/// rejected with a compile error.
-///
 /// A good example of the use case for this macro is when you want to create a
 /// `HashMap<String, String>` where part of the keys or values are hardcoded string literals of type `&str`
 /// and the other part is made of dynamic [`String`] values.
@@ -123,7 +120,20 @@ pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
 ///     "jd@example.org": "John Doe",
 ///     format!("{}@{}.{}", "jane.doe", "exmaple", "com"): "Jane Doe",
 ///     "roger@example.org": format!("Roger {}", "Simpson"),
-///     // "jd@example.org": "Jane Doe", // compile error
+/// };
+/// ```
+///
+/// The macro also performs rudimentary uniqueness checking on keys: syntactically equal keys are
+/// rejected with a compile error.
+///
+/// ```rust compile_fail
+/// # use bon_macros as bon;
+/// # use std::collections::HashMap;
+/// let address_book: HashMap<String, String> = bon::map! {
+///     "jd@example.org": "John Doe",
+///     format!("{}@{}.{}", "jane.doe", "exmaple", "com"): "Jane Doe",
+///     "roger@example.org": format!("Roger {}", "Simpson"),
+///     "jd@example.org": "Jane Doe", // compile error
 /// };
 /// ```
 ///
@@ -146,9 +156,6 @@ pub fn map(input: TokenStream) -> TokenStream {
 /// There are no separate variants for [`HashSet`] and [`BTreeSet`] since the macro works with any
 /// type that implements [`FromIterator<T>`].
 ///
-/// The macro also performs rudimentary uniqueness checking on keys: syntactically equal elements are
-/// rejected with a compile error.
-///
 /// A good example of the use case for this macro is when you want to create a `Hashset<String>` where part of
 /// the values are hardcoded string literals of type `&str` and the other part is made of dynamic [`String`]
 /// values.
@@ -160,7 +167,20 @@ pub fn map(input: TokenStream) -> TokenStream {
 ///         "apples",
 ///         format!("b{0}n{0}n{0}s", 'a'),
 ///         format!("or{:x}ng{:x}s", 10, 14),
-///         // "apples", // compile error
+/// ];
+/// ```
+///
+/// The macro also performs rudimentary uniqueness checking on keys: syntactically equal elements are
+/// rejected with a compile error.
+///
+/// ```rust compile_fail
+/// # use bon_macros as bon;
+/// # use std::collections::HashSet;
+/// let fruit_basket: HashSet<String> = bon::set! [
+///         "apples",
+///         format!("b{0}n{0}n{0}s", 'a'),
+///         format!("or{:x}ng{:x}s", 10, 14),
+///         "apples", // compile error
 /// ];
 /// ```
 ///
