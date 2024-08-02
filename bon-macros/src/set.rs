@@ -8,10 +8,7 @@ use syn::Token;
 pub(crate) fn generate(entries: Punctuated<Expr, Token![,]>) -> Result<TokenStream2> {
     util::ensure_unique(entries.iter())?;
 
-    let items = entries.into_iter().map(|value| {
-        let value = quote!(::core::convert::Into::into(#value));
-        value
-    });
+    let entries = entries.into_iter();
 
     Ok(quote! {
         ::core::iter::FromIterator::from_iter([
