@@ -90,6 +90,7 @@ fn is_pure(expr: &Expr) -> bool {
         Expr::Binary(binary) => is_pure(&binary.left) && is_pure(&binary.right),
         Expr::Lit(_) => true,
         Expr::Paren(paren) => is_pure(&paren.expr),
+        Expr::Unary(unary) => is_pure(&unary.expr),
         _ => false,
     }
 }
