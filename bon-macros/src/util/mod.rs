@@ -88,6 +88,7 @@ where
 fn is_pure(expr: &Expr) -> bool {
     match expr {
         Expr::Binary(binary) => is_pure(&binary.left) && is_pure(&binary.right),
+        Expr::Group(group) => is_pure(&group.expr),
         Expr::Lit(_) => true,
         Expr::Paren(paren) => is_pure(&paren.expr),
         Expr::Unary(unary) => is_pure(&unary.expr),
