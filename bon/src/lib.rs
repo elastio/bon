@@ -78,6 +78,7 @@ macro_rules! arr {
 
 #[cfg(test)]
 mod tests {
+
     #[test]
     fn arr_smoke() {
         let actual: [String; 3] = crate::arr!["foo", "bar", "baz"];
@@ -94,5 +95,53 @@ mod tests {
 
         let actual: Vec<String> = crate::vec![];
         assert!(actual.is_empty());
+    }
+
+    #[test]
+    fn map_smoke() {
+        use std::collections::BTreeMap;
+        use std::collections::HashMap;
+
+        let hash_strings: HashMap<String, String> = crate::map! {
+            "Hello": "World",
+            "Goodbye": "Mars",
+        };
+
+        assert_eq!(hash_strings["Hello"], "World");
+        assert_eq!(hash_strings["Goodbye"], "Mars");
+
+        let tree_strings: BTreeMap<String, String> = crate::map! {
+            "Hello": "World",
+            "Goodbye": "Mars",
+        };
+
+        assert_eq!(tree_strings["Hello"], "World");
+        assert_eq!(tree_strings["Goodbye"], "Mars");
+    }
+
+    #[test]
+    fn set_smoke() {
+        use std::collections::BTreeSet;
+        use std::collections::HashSet;
+
+        let hash_strings: HashSet<String> = crate::set! {
+            "Hello", "World",
+            "Goodbye", "Mars",
+        };
+
+        assert!(hash_strings.contains("Hello"));
+        assert!(hash_strings.contains("World"));
+        assert!(hash_strings.contains("Goodbye"));
+        assert!(hash_strings.contains("Mars"));
+
+        let tree_strings: BTreeSet<String> = crate::set! {
+            "Hello", "World",
+            "Goodbye", "Mars",
+        };
+
+        assert!(tree_strings.contains("Hello"));
+        assert!(tree_strings.contains("World"));
+        assert!(tree_strings.contains("Goodbye"));
+        assert!(tree_strings.contains("Mars"));
     }
 }

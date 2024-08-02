@@ -1,0 +1,11 @@
+error: duplicate map key
+ --> tests/integration/ui/compile_fail/set_macro.rs:7:9
+  |
+7 |         async { 2u64 + 1 }.await,
+  |         ^^^^^
+
+error: duplicate map key
+  --> tests/integration/ui/compile_fail/set_macro.rs:14:9
+   |
+14 |         "Hello", "Mars",
+   |         ^^^^^^^

@@ -5,6 +5,7 @@ mod builder;
 mod error;
 mod map;
 mod normalization;
+mod set;
 mod util;
 
 use proc_macro::TokenStream;
@@ -143,6 +144,51 @@ pub fn map(input: TokenStream) -> TokenStream {
     let entries = syn::parse_macro_input!(input with util::parse_map_macro_input);
 
     map::generate(entries)
+        .unwrap_or_else(|err| err.write_errors())
+        .into()
+}
+
+/// Similar to [`maplit::hashset!`]/[`maplit::btreeset!`] but converts each key and value with
+/// [`Into::into()`].
+///
+/// There are no separate variants for [`HashSet`] and [`BTreeSet`] since the macro works with any
+/// type that implements [`FromIterator<T>`].
+///
+/// The macro also performs rudimentary uniqueness checking on keys: Syntactically equal keys are
+/// rejected with a compile error.
+///
+/// A good example of the use case for this macro is when you want to create a
+/// `Hashset<String, String>` where part of the keys or values are hardcoded string literals of type `&str`
+/// and the other part is made of dynamic [`String`] values.
+///
+/// ```rust
+/// # use bon_macros as bon;
+/// # use std::collections::HashSet;
+/// fn convert_media(input_extension: &str, output_extension: &str) -> std::io::Result<()> {
+///     let ffmpeg_args: HashSet<String> = bon::set!{
+///         "-i",
+///         format!("input.{input_extension}"),
+///         "-y",
+///         format!("output.{output_extension}"),
+///     };
+///
+///     std::process::Command::new("ffmpeg").args(ffmpeg_args).output()?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// [`BTreeSet`]: std::collections::BTreeSet
+/// [`HashSet`]: std::collections::HashSet
+/// [`maplit::hashset!`]: https://docs.rs/maplit/latest/maplit/macro.hashset.html
+/// [`maplit::btreeset!`]: https://docs.rs/maplit/latest/maplit/macro.btreeset.html
+#[proc_macro]
+pub fn set(input: TokenStream) -> TokenStream {
+    use syn::punctuated::Punctuated;
+
+    let entries = syn::parse_macro_input!(input with Punctuated::parse_terminated);
+
+    set::generate(entries)
         .unwrap_or_else(|err| err.write_errors())
         .into()
 }

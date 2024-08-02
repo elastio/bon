@@ -5,13 +5,12 @@ use syn::punctuated::Punctuated;
 use syn::Expr;
 use syn::Token;
 
-pub(crate) fn generate(entries: Punctuated<(Expr, Expr), Token![,]>) -> Result<TokenStream2> {
-    util::ensure_unique(entries.iter().map(|(k, _)| k))?;
+pub(crate) fn generate(entries: Punctuated<Expr, Token![,]>) -> Result<TokenStream2> {
+    util::ensure_unique(entries.iter())?;
 
-    let items = entries.into_iter().map(|(key, value)| {
-        let key = quote!(::core::convert::Into::into(#key));
+    let items = entries.into_iter().map(|value| {
         let value = quote!(::core::convert::Into::into(#value));
-        quote!((#key, #value))
+        value
     });
 
     Ok(quote! {

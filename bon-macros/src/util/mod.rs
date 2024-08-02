@@ -63,6 +63,25 @@ fn parse_map_pair(pair: ParseStream<'_>) -> Result<(Expr, Expr), syn::Error> {
     Ok((key, value))
 }
 
+pub(crate) fn ensure_unique<'k, I>(keys: I) -> Result<()>
+where
+    I: IntoIterator<Item = &'k Expr>,
+{
+    let mut errors = Error::accumulator();
+
+    let mut exprs = std::collections::HashSet::new();
+
+    keys.into_iter().for_each(|key| {
+        if !exprs.insert(key.clone()) {
+            errors.push(err!(key, "duplicate map key"));
+        }
+    });
+
+    errors.finish()?;
+
+    Ok(())
+}
+
 /// Inspired by `anyhow::bail`, but returns a [`Result`] with [`darling::Error`].
 /// It accepts the value that implements [`syn::spanned::Spanned`] to attach the
 /// span to the error.
