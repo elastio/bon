@@ -3,7 +3,9 @@
 mod bon;
 mod builder;
 mod error;
+mod map;
 mod normalization;
+mod set;
 mod util;
 
 use proc_macro::TokenStream;
@@ -98,5 +100,101 @@ pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
     util::parse_attr_macro_input(params, item.clone())
         .and_then(|(opts, item)| bon::generate(opts, item))
         .unwrap_or_else(|err| error::error_into_token_stream(err, item.into()))
+        .into()
+}
+
+/// Similar to [`maplit::hashmap!`]/[`maplit::btreemap!`] but converts each key and value with
+/// [`Into::into()`].
+///
+/// There are no separate variants for [`HashMap`] and [`BTreeMap`] since the macro works with any
+/// type that implements [`FromIterator<(K, V)>`].
+///
+/// A good example of the use case for this macro is when you want to create a
+/// `HashMap<String, String>` where part of the keys or values are hardcoded string literals of type `&str`
+/// and the other part is made of dynamic [`String`] values.
+///
+/// ```rust
+/// # use bon_macros as bon;
+/// # use std::collections::HashMap;
+/// let address_book: HashMap<String, String> = bon::map! {
+///     "jd@example.org": "John Doe",
+///     format!("{}@{}.{}", "jane.doe", "example", "com"): "Jane Doe",
+///     "roger@example.org": format!("Roger {}", "Simpson"),
+/// };
+/// ```
+///
+/// The macro also performs rudimentary uniqueness checking on keys: syntactically equal keys are
+/// rejected with a compile error.
+///
+/// ```rust compile_fail
+/// # use bon_macros as bon;
+/// # use std::collections::HashMap;
+/// let address_book: HashMap<String, String> = bon::map! {
+///     "jd@example.org": "John Doe",
+///     format!("{}@{}.{}", "jane.doe", "example", "com"): "Jane Doe",
+///     "roger@example.org": format!("Roger {}", "Simpson"),
+///     "jd@example.org": "Jane Doe", // compile error
+/// };
+/// ```
+///
+/// [`BTreeMap`]: std::collections::BTreeMap
+/// [`HashMap`]: std::collections::HashMap
+/// [`maplit::hashmap!`]: https://docs.rs/maplit/latest/maplit/macro.hashmap.html
+/// [`maplit::btreemap!`]: https://docs.rs/maplit/latest/maplit/macro.btreemap.html
+#[proc_macro]
+pub fn map(input: TokenStream) -> TokenStream {
+    let entries = syn::parse_macro_input!(input with util::parse_map_macro_input);
+
+    map::generate(entries)
+        .unwrap_or_else(|err| err.write_errors())
+        .into()
+}
+
+/// Similar to [`maplit::hashset!`]/[`maplit::btreeset!`] but converts each key and value with
+/// [`Into::into()`].
+///
+/// There are no separate variants for [`HashSet`] and [`BTreeSet`] since the macro works with any
+/// type that implements [`FromIterator<T>`].
+///
+/// A good example of the use case for this macro is when you want to create a `Hashset<String>` where part of
+/// the values are hardcoded string literals of type `&str` and the other part is made of dynamic [`String`]
+/// values.
+///
+/// ```rust
+/// # use bon_macros as bon;
+/// # use std::collections::HashSet;
+/// let fruit_basket: HashSet<String> = bon::set! [
+///         "apples",
+///         format!("b{0}n{0}n{0}s", 'a'),
+///         format!("or{:x}ng{:x}s", 10, 14),
+/// ];
+/// ```
+///
+/// The macro also performs rudimentary uniqueness checking on keys: syntactically equal elements are
+/// rejected with a compile error.
+///
+/// ```rust compile_fail
+/// # use bon_macros as bon;
+/// # use std::collections::HashSet;
+/// let fruit_basket: HashSet<String> = bon::set! [
+///         "apples",
+///         format!("b{0}n{0}n{0}s", 'a'),
+///         format!("or{:x}ng{:x}s", 10, 14),
+///         "apples", // compile error
+/// ];
+/// ```
+///
+/// [`BTreeSet`]: std::collections::BTreeSet
+/// [`HashSet`]: std::collections::HashSet
+/// [`maplit::hashset!`]: https://docs.rs/maplit/latest/maplit/macro.hashset.html
+/// [`maplit::btreeset!`]: https://docs.rs/maplit/latest/maplit/macro.btreeset.html
+#[proc_macro]
+pub fn set(input: TokenStream) -> TokenStream {
+    use syn::punctuated::Punctuated;
+
+    let entries = syn::parse_macro_input!(input with Punctuated::parse_terminated);
+
+    set::generate(entries)
+        .unwrap_or_else(|err| err.write_errors())
         .into()
 }
