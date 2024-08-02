@@ -104,7 +104,12 @@ pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
 
 #[proc_macro]
 pub fn map(input: TokenStream) -> TokenStream {
-    let entries = syn::parse_macro_input!(input with util::parse_map_macro_input);
+    let entries = {
+        let input = input.clone();
+        syn::parse_macro_input!(input with util::parse_map_macro_input)
+    };
 
-    map::generate(entries).into()
+    map::generate(entries)
+        .unwrap_or_else(|err| err.write_errors())
+        .into()
 }
