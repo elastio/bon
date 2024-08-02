@@ -12,7 +12,7 @@ pub(crate) fn generate(entries: Punctuated<Expr, Token![,]>) -> Result<TokenStre
 
     Ok(quote! {
         ::core::iter::FromIterator::from_iter([
-            #(#items),*
+            #(::core::convert::Into::into(#entries)),*
         ])
     })
 }
