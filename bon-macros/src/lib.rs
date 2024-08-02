@@ -119,20 +119,12 @@ pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
 /// ```rust
 /// # use bon_macros as bon;
 /// # use std::collections::HashMap;
-/// fn convert_media(input_extension: &str, output_extension: &str) -> std::io::Result<()> {
-///     let ffmpeg_args: HashMap<String, String> = bon::map!{
-///         "-i": format!("input.{input_extension}"),
-///         "-y": format!("output.{output_extension}"),
-///     };
-///
-///     let mut command = std::process::Command::new("ffmpeg");
-///     for (flag, value) in ffmpeg_args {
-///         command.arg(flag).arg(value);
-///     }
-///     command.output()?;
-///
-///     Ok(())
-/// }
+/// let address_book: HashMap<String, String> = bon::map! {
+///     "jd@example.org": "John Doe",
+///     format!("{}@{}.{}", "jane.doe", "exmaple", "com"): "Jane Doe",
+///     "roger@example.org": format!("Roger {}", "Simpson"),
+///     // "jd@example.org": "Jane Doe", // compile error
+/// };
 /// ```
 ///
 /// [`BTreeMap`]: std::collections::BTreeMap
