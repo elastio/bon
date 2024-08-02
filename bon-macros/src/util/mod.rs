@@ -71,11 +71,13 @@ where
 
     let mut exprs = std::collections::HashSet::new();
 
-    keys.into_iter().for_each(|key| {
-        if !exprs.insert(key.clone()) {
-            errors.push(err!(key, "duplicate map key"));
-        }
-    });
+    keys.into_iter()
+        .filter(|item| is_pure(item))
+        .for_each(|key| {
+            if !exprs.insert(key.clone()) {
+                errors.push(err!(key, "duplicate map key"));
+            }
+        });
 
     errors.finish()?;
 
