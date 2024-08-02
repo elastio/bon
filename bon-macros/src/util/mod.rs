@@ -84,6 +84,15 @@ where
     Ok(())
 }
 
+fn is_pure(item: &Expr) -> bool {
+    match item {
+        Expr::Binary(binary) => is_pure(&binary.left) && is_pure(&binary.right),
+        Expr::Lit(_) => true,
+        Expr::Paren(paren) => is_pure(&paren.expr),
+        _ => false,
+    }
+}
+
 /// Inspired by `anyhow::bail`, but returns a [`Result`] with [`darling::Error`].
 /// It accepts the value that implements [`syn::spanned::Spanned`] to attach the
 /// span to the error.
