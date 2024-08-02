@@ -154,7 +154,7 @@ pub fn map(input: TokenStream) -> TokenStream {
 /// There are no separate variants for [`HashSet`] and [`BTreeSet`] since the macro works with any
 /// type that implements [`FromIterator<T>`].
 ///
-/// The macro also performs rudimentary uniqueness checking on keys: Syntactically equal keys are
+/// The macro also performs rudimentary uniqueness checking on keys: syntactically equal elements are
 /// rejected with a compile error.
 ///
 /// A good example of the use case for this macro is when you want to create a
