@@ -162,14 +162,6 @@ pub fn map(input: TokenStream) -> TokenStream {
 ///         format!("or{:x}ng{:x}s", 10, 14),
 ///         // "apples", // compile error
 /// };
-///         "-y",
-///         format!("output.{output_extension}"),
-///     };
-///
-///     std::process::Command::new("ffmpeg").args(ffmpeg_args).output()?;
-///
-///     Ok(())
-/// }
 /// ```
 ///
 /// [`BTreeSet`]: std::collections::BTreeSet
