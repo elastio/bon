@@ -148,6 +148,14 @@ pub fn map(input: TokenStream) -> TokenStream {
 ///
 /// The macro also performs rudimentary uniqueness checking on keys: syntactically equal elements are
 /// rejected with a compile error.
+///
+/// A good example of the use case for this macro is when you want to create a
+/// `Hashset<String, String>` where part of the keys or values are hardcoded string literals of type `&str`
+/// and the other part is made of dynamic [`String`] values.
+///
+/// ```rust
+/// # use bon_macros as bon;
+/// # use std::collections::HashSet;
 /// let fruit_basket: HashSet<String> = bon::set! {
 ///         "apples",
 ///         format!("b{0}n{0}n{0}s", 'a'),
