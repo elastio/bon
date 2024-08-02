@@ -109,7 +109,7 @@ pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
 /// There are no separate variants for [`HashMap`] and [`BTreeMap`] since the macro works with any
 /// type that implements [`FromIterator<(K, V)>`].
 ///
-/// The macro also performs rudimentary uniqueness checking on keys: Syntactically equal keys are
+/// The macro also performs rudimentary uniqueness checking on keys: syntactically equal keys are
 /// rejected with a compile error.
 ///
 /// A good example of the use case for this macro is when you want to create a
