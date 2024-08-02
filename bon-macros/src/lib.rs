@@ -156,18 +156,12 @@ pub fn map(input: TokenStream) -> TokenStream {
 ///
 /// The macro also performs rudimentary uniqueness checking on keys: syntactically equal elements are
 /// rejected with a compile error.
-///
-/// A good example of the use case for this macro is when you want to create a
-/// `Hashset<String, String>` where part of the keys or values are hardcoded string literals of type `&str`
-/// and the other part is made of dynamic [`String`] values.
-///
-/// ```rust
-/// # use bon_macros as bon;
-/// # use std::collections::HashSet;
-/// fn convert_media(input_extension: &str, output_extension: &str) -> std::io::Result<()> {
-///     let ffmpeg_args: HashSet<String> = bon::set!{
-///         "-i",
-///         format!("input.{input_extension}"),
+/// let fruit_basket: HashSet<String> = bon::set! {
+///         "apples",
+///         format!("b{0}n{0}n{0}s", 'a'),
+///         format!("or{:x}ng{:x}s", 10, 14),
+///         // "apples", // compile error
+/// };
 ///         "-y",
 ///         format!("output.{output_extension}"),
 ///     };
