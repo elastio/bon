@@ -85,7 +85,6 @@ where
     Ok(())
 }
 
-fn is_pure(item: &Expr) -> bool {
 fn is_pure(expr: &Expr) -> bool {
     match expr {
         Expr::Lit(_) => true,
