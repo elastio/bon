@@ -139,6 +139,7 @@ wildcard_dependencies             = "warn"
 zero_sized_map_values             = "warn"
 
 [workspace.lints.rustdoc]
+broken_intra_doc_links   = "warn"
 missing_crate_level_docs = "warn"
 unescaped_backticks      = "warn"
 

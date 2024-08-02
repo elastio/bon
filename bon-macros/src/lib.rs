@@ -102,12 +102,45 @@ pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
         .into()
 }
 
+/// Similar to [`maplit::hashmap!`]/[`maplit::btreemap!`] but converts each key and value with
+/// [`Into::into()`].
+///
+/// There are no separate variants for [`HashMap`] and [`BTreeMap`] since the macro works with any
+/// type that implements [`FromIterator<(K, V)>`].
+///
+/// The macro also performs rudimentary uniqueness checking on keys: Syntactically equal keys are
+/// rejected with a compile error.
+///
+/// A good example of the use case for this macro is when you want to create a
+/// `HashMap<String, String>` where part of the keys or values are hardcoded string literals of type `&str`
+/// and the other part is made of dynamic [`String`] values.
+///
+/// ```rust
+/// # use bon_macros as bon;
+/// # use std::collections::HashMap;
+/// fn convert_media(input_extension: &str, output_extension: &str) -> std::io::Result<()> {
+///     let ffmpeg_args: HashMap<String, String> = bon::map!{
+///         "-i": format!("input.{input_extension}"),
+///         "-y": format!("output.{output_extension}"),
+///     };
+///
+///     let mut command = std::process::Command::new("ffmpeg");
+///     for (flag, value) in ffmpeg_args {
+///         command.arg(flag).arg(value);
+///     }
+///     command.output()?;
+///
+///     Ok(())
+/// }
+/// ```
+///
+/// [`BTreeMap`]: std::collections::BTreeMap
+/// [`HashMap`]: std::collections::HashMap
+/// [`maplit::hashmap!`]: https://docs.rs/maplit/latest/maplit/macro.hashmap.html
+/// [`maplit::btreemap!`]: https://docs.rs/maplit/latest/maplit/macro.btreemap.html
 #[proc_macro]
 pub fn map(input: TokenStream) -> TokenStream {
-    let entries = {
-        let input = input.clone();
-        syn::parse_macro_input!(input with util::parse_map_macro_input)
-    };
+    let entries = syn::parse_macro_input!(input with util::parse_map_macro_input);
 
     map::generate(entries)
         .unwrap_or_else(|err| err.write_errors())
