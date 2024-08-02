@@ -161,7 +161,7 @@ pub fn map(input: TokenStream) -> TokenStream {
 ///         format!("b{0}n{0}n{0}s", 'a'),
 ///         format!("or{:x}ng{:x}s", 10, 14),
 ///         // "apples", // compile error
-/// };
+/// ];
 /// ```
 ///
 /// [`BTreeSet`]: std::collections::BTreeSet
