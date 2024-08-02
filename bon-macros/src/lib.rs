@@ -156,7 +156,7 @@ pub fn map(input: TokenStream) -> TokenStream {
 /// ```rust
 /// # use bon_macros as bon;
 /// # use std::collections::HashSet;
-/// let fruit_basket: HashSet<String> = bon::set! {
+/// let fruit_basket: HashSet<String> = bon::set! [
 ///         "apples",
 ///         format!("b{0}n{0}n{0}s", 'a'),
 ///         format!("or{:x}ng{:x}s", 10, 14),
