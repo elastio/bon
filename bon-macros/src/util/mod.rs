@@ -63,7 +63,7 @@ fn parse_map_pair(pair: ParseStream<'_>) -> Result<(Expr, Expr), syn::Error> {
     Ok((key, value))
 }
 
-pub(crate) fn ensure_unique<'k, I>(keys: I) -> Result<()>
+pub(crate) fn ensure_unique<'k, I>(items: I) -> Result<()>
 where
     I: IntoIterator<Item = &'k Expr>,
 {
