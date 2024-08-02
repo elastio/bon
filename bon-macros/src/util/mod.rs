@@ -85,8 +85,8 @@ where
 }
 
 fn is_pure(item: &Expr) -> bool {
-    match item {
-        Expr::Binary(binary) => is_pure(&binary.left) && is_pure(&binary.right),
+fn is_pure(expr: &Expr) -> bool {
+    match expr {
         Expr::Lit(_) => true,
         Expr::Paren(paren) => is_pure(&paren.expr),
         _ => false,
