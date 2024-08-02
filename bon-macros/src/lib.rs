@@ -131,7 +131,7 @@ pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
 /// # use std::collections::HashMap;
 /// let address_book: HashMap<String, String> = bon::map! {
 ///     "jd@example.org": "John Doe",
-///     format!("{}@{}.{}", "jane.doe", "exmaple", "com"): "Jane Doe",
+///     format!("{}@{}.{}", "jane.doe", "example", "com"): "Jane Doe",
 ///     "roger@example.org": format!("Roger {}", "Simpson"),
 ///     "jd@example.org": "Jane Doe", // compile error
 /// };
