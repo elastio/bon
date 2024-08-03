@@ -234,7 +234,6 @@ impl FuncInputCtx {
         if self.params.expose_positional_fn.is_none() {
             orig.attrs.extend([
                 syn::parse_quote!(#[doc(hidden)]),
-                syn::parse_quote!(#[inline(always)]),
             ]);
         }
 

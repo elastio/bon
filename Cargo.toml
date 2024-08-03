@@ -1,5 +1,5 @@
 [workspace]
-members  = ["bon", "bon-macros", "e2e-tests"]
+members  = ["benchmarks", "bon", "bon-macros", "e2e-tests"]
 resolver = "2"
 
 [workspace.package]
@@ -27,9 +27,10 @@ proc-macro2  = "1.0"
 quote        = "1.0"
 syn          = "2.0"
 
+# This config is used for the benchmarks
 [profile.release]
+debug     = 0
 opt-level = 3
-debug = 0
 
 [workspace.lints.clippy]
 # Turn on lints that are allow by default in `clippy`.

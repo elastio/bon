@@ -60,6 +60,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "benchmarks"
+version = "1.0.5"
+dependencies = [
+ "bon",
+ "criterion",
+ "iai",
+]
+
+[[package]]
 name = "bon"
 version = "1.0.6"
 dependencies = [
@@ -287,9 +296,7 @@ version = "1.0.6"
 dependencies = [
  "bon",
  "buildstructor",
- "criterion",
  "heck",
- "iai",
  "itertools 0.13.0",
  "walkdir",
 ]

@@ -3,3 +3,4 @@
 **/.vitepress/cache/
 **/.vitepress/dist/
 articles.json
+*.dbg.s

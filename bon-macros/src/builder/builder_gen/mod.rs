@@ -160,8 +160,6 @@ impl BuilderGenCtx {
         let where_clause = &generics.where_clause;
         let generic_args = self.generic_args();
 
-        let member_idents = self.member_idents();
-
         let receiver = self
             .assoc_method_ctx
             .as_ref()
@@ -175,6 +173,14 @@ impl BuilderGenCtx {
         });
 
         let receiver = receiver.map(|receiver| &receiver.with_self_keyword);
+
+        let member_inits = self.members.iter().map(|member| {
+            let expr = member.init_expr();
+            let ident = &member.ident;
+            quote! {
+                #ident: #expr
+            }
+        });
 
         let func = quote! {
             #(#docs)*
@@ -190,7 +196,7 @@ impl BuilderGenCtx {
                     __private_impl: #builder_private_impl_ident {
                         _phantom: ::std::marker::PhantomData,
                         #receiver_field_init
-                        #( #member_idents: ::std::default::Default::default(), )*
+                        #( #member_inits, )*
                     }
                 }
             }
@@ -399,8 +405,8 @@ impl BuilderGenCtx {
         let member_ident = &member.ident;
 
         let expr = quote! {
-            bon::private::IntoSet::into_set(self.__private_impl.#member_ident)
-                .into_inner()
+            ::std::convert::Into::<bon::private::Set<_>>::into(self.__private_impl.#member_ident)
+                .0
                 #maybe_default
         };
 
@@ -436,7 +442,7 @@ impl BuilderGenCtx {
             let set_state_type_param = member.set_state_type_param();
             quote! {
                 __State::#member_assoc_type_ident:
-                    bon::private::IntoSet<#set_state_type_param>
+                    ::std::convert::Into<bon::private::Set<#set_state_type_param>>
             }
         });
 
@@ -454,6 +460,7 @@ impl BuilderGenCtx {
                 #( #state_where_predicates, )*
             {
                 /// Finishes building and performs the requested action.
+                #[inline(always)]
                 #vis #asyncness #unsafety fn #finish_func_ident(self) #output {
                     #body
                 }

@@ -150,6 +150,12 @@ impl Member {
             .or_else(|| (self.params.default.is_some()).then_some(&self.ty))
     }
 
+    pub(crate) fn init_expr(&self) -> TokenStream2 {
+        self.as_optional()
+            .map(|_| quote!(bon::private::Optional(::std::marker::PhantomData)))
+            .unwrap_or_else(|| quote!(bon::private::Required(::std::marker::PhantomData)))
+    }
+
     pub(crate) fn unset_state_type(&self) -> TokenStream2 {
         let ty = &self.ty;
 
