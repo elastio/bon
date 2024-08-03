@@ -178,6 +178,7 @@ impl BuilderGenCtx {
 
         let func = quote! {
             #(#docs)*
+            #[inline(always)]
             #vis fn #start_func_ident<#(#generics_decl),*>(
                 #receiver
             ) -> #builder_ident<
@@ -187,7 +188,7 @@ impl BuilderGenCtx {
             {
                 #builder_ident {
                     __private_impl: #builder_private_impl_ident {
-                        _phantom: ::core::marker::PhantomData,
+                        _phantom: ::std::marker::PhantomData,
                         #receiver_field_init
                         #( #member_idents: ::std::default::Default::default(), )*
                     }
@@ -208,7 +209,7 @@ impl BuilderGenCtx {
         let types = receiver_ty.into_iter().chain(member_types);
 
         quote! {
-            ::core::marker::PhantomData<(
+            ::std::marker::PhantomData<(
                 // There is an interesting quirk with lifetimes in Rust, which is the
                 // reason why we thoughtlessly store all the function parameter types
                 // in phantom data here.
@@ -398,7 +399,7 @@ impl BuilderGenCtx {
         let member_ident = &member.ident;
 
         let expr = quote! {
-            ::bon::private::IntoSet::into_set(self.__private_impl.#member_ident)
+            bon::private::IntoSet::into_set(self.__private_impl.#member_ident)
                 .into_inner()
                 #maybe_default
         };
@@ -435,7 +436,7 @@ impl BuilderGenCtx {
             let set_state_type_param = member.set_state_type_param();
             quote! {
                 __State::#member_assoc_type_ident:
-                    ::bon::private::IntoSet<#set_state_type_param>
+                    bon::private::IntoSet<#set_state_type_param>
             }
         });
 

@@ -17,11 +17,21 @@ version = { workspace = true }
 [lints]
 workspace = true
 
+[[bench]]
+harness = false
+name    = "criterion"
+
+[[bench]]
+harness = false
+name    = "iai"
+
 [dependencies]
 bon = { workspace = true }
 
 [dev-dependencies]
 buildstructor = "0.5"
+criterion     = "0.5"
+iai = "0.1"
 
 [build-dependencies]
 heck      = { workspace = true }

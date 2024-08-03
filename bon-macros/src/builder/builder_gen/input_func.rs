@@ -232,7 +232,10 @@ impl FuncInputCtx {
         orig.attrs.push(syn::parse_quote!(#[doc = #doc]));
 
         if self.params.expose_positional_fn.is_none() {
-            orig.attrs.push(syn::parse_quote!(#[doc(hidden)]));
+            orig.attrs.extend([
+                syn::parse_quote!(#[doc(hidden)]),
+                syn::parse_quote!(#[inline(always)]),
+            ]);
         }
 
         // It's fine if there are too many positional arguments in the function

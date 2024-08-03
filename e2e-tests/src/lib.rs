@@ -3,6 +3,8 @@
 #![allow(missing_debug_implementations)]
 #![allow(missing_docs)]
 
+pub mod benchmark;
+
 use bon::{bon, builder};
 
 #[cfg(doctest)]
