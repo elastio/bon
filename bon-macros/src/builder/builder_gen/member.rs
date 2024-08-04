@@ -152,17 +152,17 @@ impl Member {
 
     pub(crate) fn init_expr(&self) -> TokenStream2 {
         self.as_optional()
-            .map(|_| quote!(bon::private::Optional(::std::marker::PhantomData)))
-            .unwrap_or_else(|| quote!(bon::private::Required(::std::marker::PhantomData)))
+            .map(|_| quote!(::bon::private::Optional(::std::marker::PhantomData)))
+            .unwrap_or_else(|| quote!(::bon::private::Required(::std::marker::PhantomData)))
     }
 
     pub(crate) fn unset_state_type(&self) -> TokenStream2 {
         let ty = &self.ty;
 
         if let Some(inner_type) = self.as_optional() {
-            quote!(bon::private::Optional<#inner_type>)
+            quote!(::bon::private::Optional<#inner_type>)
         } else {
-            quote!(bon::private::Required<#ty>)
+            quote!(::bon::private::Required<#ty>)
         }
     }
 
@@ -177,6 +177,6 @@ impl Member {
     pub(crate) fn set_state_type(&self) -> TokenStream2 {
         let ty = self.set_state_type_param();
 
-        quote!(bon::private::Set<#ty>)
+        quote!(::bon::private::Set<#ty>)
     }
 }

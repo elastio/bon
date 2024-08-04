@@ -64,6 +64,7 @@ name = "benchmarks"
 version = "1.0.5"
 dependencies = [
  "bon",
+ "cfg-if",
  "criterion",
  "iai",
 ]

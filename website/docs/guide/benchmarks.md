@@ -31,3 +31,7 @@ These statistics were collected by [`criterion`](https://github.com/bheisler/cri
 These statistics were collected by [`iai`](https://github.com/bheisler/iai)
 
 :::
+
+---
+
+The source code of the benchmarks is [available here](https://github.com/elastio/bon/tree/master/benchmarks).
