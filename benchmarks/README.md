@@ -22,7 +22,7 @@ sudo apt-get install -y valgrind gnuplot
 Once you have all the [dependencies](#dependencies) installed you can run the select benchmark the following way:
 
 ```bash
-./benchmarks/run.sh benchmark_name
+./benchmarks/run.sh args_{N}
 ```
 
-The name of the benchmark corresponds to the modules in this crate.
+The name of the benchmark corresponds to the modules in this crate and the number `{N}` represents the number of arguments that are passed to the function.
