@@ -1,7 +1,7 @@
 use bon::builder;
 use std::hint::black_box;
 
-// #[inline(never)]
+#[inline(never)]
 pub fn regular_bench() -> u32 {
     let (arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) = black_box((
         "4",
@@ -19,7 +19,7 @@ pub fn regular_bench() -> u32 {
     regular(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10)
 }
 
-// #[inline(never)]
+#[inline(never)]
 pub fn builder_bench() -> u32 {
     let (arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) = black_box((
         "4",
@@ -49,7 +49,7 @@ pub fn builder_bench() -> u32 {
 }
 
 #[builder(expose_positional_fn = regular)]
-// #[inline(always)]
+#[inline(always)]
 fn builder(
     arg1: &str,
     arg2: u32,

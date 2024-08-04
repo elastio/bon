@@ -15,6 +15,13 @@ pub mod args_10;
 #[cfg(feature = "args_10")]
 use args_10 as bench;
 
+
+#[cfg(feature = "args_5")]
+pub mod args_5;
+
+#[cfg(feature = "args_5")]
+use args_5 as bench;
+
 #[cfg(feature = "args_10_inline")]
 pub mod args_10_inline;
 

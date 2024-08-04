@@ -24,9 +24,10 @@ name    = "criterion"
 [features]
 args_10        = []
 args_10_inline = []
+args_5         = []
 
 [dependencies]
-bon       = { workspace = true }
+bon = { workspace = true }
 
 [dev-dependencies]
 criterion = "0.5"

@@ -32,7 +32,7 @@ pub fn builder_bench() -> u32 {
         "16".to_string().into_boxed_str(),
     ));
 
-    builder()
+    let this = builder()
         .arg1(arg1)
         .arg2(arg2)
         .arg3(arg3)
@@ -42,8 +42,9 @@ pub fn builder_bench() -> u32 {
         .arg7(arg7)
         .arg8(arg8)
         .arg9(arg9)
-        .arg10(arg10)
-        .call()
+        .arg10(arg10);
+
+    this.call()
 }
 
 #[builder(expose_positional_fn = regular)]
