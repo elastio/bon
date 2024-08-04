@@ -22,12 +22,14 @@ harness = false
 name    = "criterion"
 
 [features]
-args_3 = []
-args_5 = []
+args_3       = []
+args_5       = []
+args_5_alloc = []
 
-args_10 = []
-args_20 = []
-args_40 = []
+args_10         = []
+args_10_alloc   = []
+args_10_structs = []
+args_20         = []
 
 [dependencies]
 bon = { workspace = true }

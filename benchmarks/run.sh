@@ -2,16 +2,18 @@
 
 set -euxo pipefail
 
-bench=${1:-args_10}
+bench=${1:-args_10_structs}
 
 export CARGO_INCREMENTAL=0
+
+cargo clean
 
 cargo build --features "$bench" --release -p benchmarks
 
 cd benchmarks
 
-cargo asm --features "$bench" --no-color "benchmarks::$bench::builder_bench" > builder.dbg.s
-cargo asm --features "$bench" --no-color "benchmarks::$bench::regular_bench" > regular.dbg.s
+cargo asm --features "$bench" --no-color "benchmarks::$bench::builder_bench" > builder.dbg.s || true
+cargo asm --features "$bench" --no-color "benchmarks::$bench::regular_bench" > regular.dbg.s || true
 
 # If vscode is present, show diff:
  if command -v code; then

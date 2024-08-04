@@ -2,7 +2,7 @@ use bon::builder;
 use std::hint::black_box;
 
 pub fn regular_bench() -> u32 {
-    let (arg1, arg2, arg3, arg4, arg5) = black_box(("4", 24, true, Some("5".to_string()), Some(6)));
+    let (arg1, arg2, arg3, arg4, arg5) = black_box(("4", 24, true, Some("5"), Some(6)));
 
     regular(arg1, arg2, arg3, arg4, arg5)
 }
