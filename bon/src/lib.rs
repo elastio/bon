@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 pub use bon_macros::*;
 
@@ -19,9 +20,9 @@ pub mod private;
 /// fn convert_media(input_extension: &str, output_extension: &str) -> std::io::Result<()> {
 ///     let ffmpeg_args: Vec<String> = bon::vec![
 ///         "-i",
-///         format!("input.{input_extension}"),
+///         alloc::format!("input.{input_extension}"),
 ///         "-y",
-///         format!("output.{output_extension}"),
+///         alloc::format!("output.{output_extension}"),
 ///     ];
 ///
 ///     std::process::Command::new("ffmpeg").args(ffmpeg_args).output()?;
@@ -33,9 +34,10 @@ pub mod private;
 /// This macro doesn't support `vec![expr; N]` syntax, since it's simpler to
 /// just write `vec![expr.into(); N]` using [`std::vec!`] instead.
 #[macro_export]
+#[cfg(feature = "alloc")]
 macro_rules! vec {
-    () => (::std::vec::Vec::new());
-    ($($item:expr),+ $(,)?) => (::std::vec![$(::core::convert::Into::into($item)),+ ]);
+    () => ($crate::private::alloc::vec::Vec::new());
+    ($($item:expr),+ $(,)?) => ($crate::private::alloc::vec![$(::core::convert::Into::into($item)),+ ]);
 }
 
 /// Creates a fixed-size array literal where each element is converted with [`Into::into()`]
