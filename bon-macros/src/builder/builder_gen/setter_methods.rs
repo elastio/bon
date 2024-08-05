@@ -271,9 +271,15 @@ impl<'a> MemberSettersCtx<'a> {
 
         let setter_method_name = self.setter_method_name();
 
+        // Preserve the original identifier span to make IDE go to definition correctly
+        let option_method_name = syn::Ident::new(
+            &format!("maybe_{}", setter_method_name.raw_name()),
+            setter_method_name.span(),
+        );
+
         let methods = [
             MemberSetterMethod {
-                method_name: quote::format_ident!("maybe_{}", setter_method_name.raw_name()),
+                method_name: option_method_name,
                 fn_params: quote!(value: Option<#inner_type>),
                 member_init: quote!(::bon::private::Set(value #maybe_map_conv_call)),
                 overwrite_docs: Some(format!(
