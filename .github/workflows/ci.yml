@@ -30,12 +30,21 @@ jobs:
   # Sanity-check that benchmarks work
   benchmarks:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        benchmark:
+          - args_3
+          - args_5
+          - args_10_alloc
+          - args_10_structs
+          - args_10
+          - args_20
 
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
       - run: sudo apt-get install -y valgrind
-      - run: ./benchmarks/run.sh args_10
+      - run: ./benchmarks/run.sh ${{ matrix.benchmark }}
 
   cargo-lock:
     runs-on: ubuntu-latest
