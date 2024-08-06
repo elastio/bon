@@ -6,7 +6,8 @@
     missing_docs,
     clippy::too_many_arguments,
     clippy::boxed_local,
-    clippy::let_and_return
+    clippy::let_and_return,
+    rustdoc::missing_crate_level_docs
 )]
 
 cfg_if::cfg_if! {
