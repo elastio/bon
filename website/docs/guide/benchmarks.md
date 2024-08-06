@@ -10,8 +10,6 @@ Don't take these microbenchmarks for granted. Do your own performance measuremen
 
 :::
 
-The source code of the benchmarks is [available here](https://github.com/elastio/bon/tree/master/benchmarks)
-
 ## Wallclock statistics
 
 | Benchmark         | Description                                   | Assembly output                                      | Run time
@@ -34,10 +32,18 @@ The source code of the benchmarks is [available here](https://github.com/elastio
 | `args_10_alloc`   | regular:&nbsp;`2025`<br/>builder:&nbsp;`2026`| regular:&nbsp;`2823`<br/>builder:&nbsp;`2823` | regular:&nbsp;`3`<br/>builder:&nbsp;`2` | regular:&nbsp;`35`<br/>builder:&nbsp;`35`
 | `args_20`         | regular:&nbsp;`554`<br/>builder:&nbsp;`554`  | regular:&nbsp;`768`<br/>builder:&nbsp;`769`   | regular:&nbsp;`3`<br/>builder:&nbsp;`3` | regular:&nbsp;`34`<br/>builder:&nbsp;`33`
 
-## Hardware
+## Conditions
+
+The code was compiled with `opt-level = 3` and `debug = 0`.
+
+### Hardware
 
 The benchmarks were run on a dedicated root server `AX51-NVMe` on [Hetzner](https://www.hetzner.com/).
 
 - OS: Ubuntu 22.04.4 (Linux 5.15.0-76-generic)
 - CPU: AMD Ryzen 7 3700X 8-Core Processor (x86_64)
 - RAM: 62.8 GiB
+
+## References
+
+The source code of the benchmarks is [available here](https://github.com/elastio/bon/tree/master/benchmarks).
