@@ -13,12 +13,12 @@ If you are on Ubuntu or Debian, just run the following commands to install the d
 
 ```bash
 cargo install cargo-asm
-sudo apt-get install -y valgrind
+sudo apt install valgrind
 ```
 
 ## Running the benchmarks
 
-Once you have all the [dependencies](#dependencies) installed you can run the select benchmark the following way:
+Once you have all the [dependencies](#dependencies) installed you can run the selected benchmark like this:
 
 ```bash
 ./benchmarks/run.sh {benchmark_name}
