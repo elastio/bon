@@ -33,6 +33,9 @@ pub mod private;
 ///
 /// This macro doesn't support `vec![expr; N]` syntax, since it's simpler to
 /// just write `vec![expr.into(); N]` using [`std::vec!`] instead.
+///
+/// This macro is only available if the `std` or the `alloc` feature is enabled. The
+/// `std` feature is enabled by default.
 #[macro_export]
 #[cfg(feature = "alloc")]
 macro_rules! vec {
