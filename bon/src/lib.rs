@@ -20,9 +20,9 @@ pub mod private;
 /// fn convert_media(input_extension: &str, output_extension: &str) -> std::io::Result<()> {
 ///     let ffmpeg_args: Vec<String> = bon::vec![
 ///         "-i",
-///         alloc::format!("input.{input_extension}"),
+///         format!("input.{input_extension}"),
 ///         "-y",
-///         alloc::format!("output.{output_extension}"),
+///         format!("output.{output_extension}"),
 ///     ];
 ///
 ///     std::process::Command::new("ffmpeg").args(ffmpeg_args).output()?;
@@ -79,7 +79,9 @@ macro_rules! arr {
 }
 
 #[cfg(test)]
+#[cfg(feature = "alloc")]
 mod tests {
+    use crate::private::alloc::{string::String, vec::Vec};
 
     #[test]
     fn arr_smoke() {
@@ -99,6 +101,7 @@ mod tests {
         assert!(actual.is_empty());
     }
 
+    #[cfg(feature = "std")]
     #[test]
     fn map_smoke() {
         use std::collections::BTreeMap;
@@ -121,6 +124,7 @@ mod tests {
         assert_eq!(tree_strings["Goodbye"], "Mars");
     }
 
+    #[cfg(feature = "std")]
     #[test]
     fn set_smoke() {
         use std::collections::BTreeSet;

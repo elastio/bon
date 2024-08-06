@@ -1,9 +1,13 @@
 mod expose_positional_fn;
 
 use bon::{bon, builder};
-use std::collections::BTreeSet;
-use std::num::NonZeroU32;
+#[cfg(feature = "alloc")]
+use {
+    alloc::borrow::ToOwned, alloc::collections::BTreeSet, alloc::format, alloc::string::String,
+    alloc::vec, alloc::vec::Vec, core::num::NonZeroU32,
+};
 
+#[cfg(feature = "alloc")]
 #[test]
 fn smoke() {
     /// Function-level docs
@@ -51,6 +55,7 @@ fn smoke() {
     assert_eq!(actual, "arg3");
 }
 
+#[cfg(feature = "alloc")]
 #[test]
 fn default_attr() {
     #[builder]
@@ -68,6 +73,7 @@ fn default_attr() {
     assert_eq!(actual, (0, 42, "default".to_owned(), vec![42]));
 }
 
+#[cfg(feature = "alloc")]
 #[test]
 fn into_attr() {
     #[builder]
@@ -102,6 +108,7 @@ fn into_attr() {
     assert_eq!(actual, "vinyl-scratch:32:Some({32, 43}):disabled");
 }
 
+#[cfg(feature = "alloc")]
 #[test]
 fn into_string() {
     #[builder]
@@ -137,6 +144,7 @@ fn lifetime_elision() {
     assert_eq!(actual, ("blackjack", "blackjack", ["blackjack"]));
 }
 
+#[cfg(feature = "std")]
 #[tokio::test]
 async fn async_func() {
     #[builder]
@@ -162,13 +170,14 @@ fn unsafe_func() {
     unsafe { builder.call() };
 }
 
+#[cfg(feature = "alloc")]
 #[test]
 fn impl_traits() {
     #[builder]
     fn sut(
         /// Some documentation
         iterable: impl IntoIterator<Item = impl Into<u32>>,
-        showable: impl std::fmt::Display + std::fmt::Debug,
+        showable: impl core::fmt::Display + core::fmt::Debug,
     ) -> (String, Vec<u32>) {
         let str = format!("{showable} + {showable:#?}");
         let vec = iterable.into_iter().map(Into::into).collect();
@@ -246,15 +255,15 @@ fn receiver_with_lifetimes() {
     #[bon]
     impl Sut<'_, '_> {
         #[builder]
-        fn method(&self, c: &str) -> String {
+        fn method(&self, c: &str) -> usize {
             let Self { a, b } = self;
 
-            format!("{a}{b}{c}")
+            a.len() + b.len() + c.len()
         }
     }
 
     let actual = Sut { a: "a", b: "b" }.method().c("c").call();
-    assert_eq!(actual, "abc");
+    assert_eq!(actual, 3);
 }
 
 #[test]
@@ -281,22 +290,20 @@ fn self_in_a_bunch_of_places() {
 #[test]
 fn receiver_is_non_default() {
     struct Sut {
-        str: String,
+        val: u32,
     }
 
     #[bon]
     impl Sut {
         #[builder]
-        fn method(self: &Sut) -> &str {
-            &self.str
+        fn method(self: &Sut) -> u32 {
+            self.val
         }
     }
 
-    let sut = Sut {
-        str: "blackjack".to_owned(),
-    };
+    let sut = Sut { val: 42 };
 
-    assert_eq!(sut.method().call(), "blackjack");
+    assert_eq!(sut.method().call(), 42);
 }
 
 #[test]
@@ -362,11 +369,11 @@ fn const_function() {
 #[allow(non_camel_case_types)]
 fn raw_identifiers() {
     #[builder]
-    fn r#type(r#type: String, #[builder(name = r#while)] other: String) {
-        drop((r#type, other));
+    fn r#type(r#type: u32, #[builder(name = r#while)] other: u32) {
+        let _ = (r#type, other);
     }
 
-    r#type().r#type("value").r#while("value2").call();
+    r#type().r#type(42).r#while(100).call();
 
     #[builder(builder_type = r#type)]
     fn sut() {}
@@ -377,19 +384,17 @@ fn raw_identifiers() {
 // This is based on the issue https://github.com/elastio/bon/issues/16
 #[test]
 fn self_only_generic_param() {
-    struct Sut<'a, 'b: 'a, T, U> {
-        buf: Vec<T>,
-        bar: Option<U>,
+    struct Sut<'a, 'b: 'a, T> {
+        bar: Option<T>,
         str: &'a str,
         other_ref: &'b (),
     }
 
     #[bon]
-    impl<T, U> Sut<'_, '_, T, U> {
+    impl<T> Sut<'_, '_, T> {
         #[builder]
         fn new() -> Self {
             Self {
-                buf: vec![],
                 bar: None,
                 str: "littlepip",
                 other_ref: &(),
@@ -398,17 +403,14 @@ fn self_only_generic_param() {
     }
 
     // Make sure `new` method is hidden
-    Sut::<u32, std::convert::Infallible>::__orig_new();
+    Sut::<core::convert::Infallible>::__orig_new();
 
     // Make sure the builder type name matches the type of builder when
     // `#[builder]` is placed on top of a struct
-    let _: SutBuilder<'_, '_, u32, std::convert::Infallible> = Sut::builder();
+    let _: SutBuilder<'_, '_, core::convert::Infallible> = Sut::builder();
 
-    let actual = Sut::<u32, std::convert::Infallible>::builder().build();
+    let actual = Sut::<core::convert::Infallible>::builder().build();
 
-    let empty: [u32; 0] = [];
-
-    assert_eq!(actual.buf, empty);
     assert!(actual.bar.is_none());
     assert_eq!(actual.str, "littlepip");
     let () = actual.other_ref;
