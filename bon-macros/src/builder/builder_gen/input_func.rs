@@ -232,16 +232,20 @@ impl FuncInputCtx {
         orig.attrs.push(syn::parse_quote!(#[doc = #doc]));
 
         if self.params.expose_positional_fn.is_none() {
-            orig.attrs.push(syn::parse_quote!(#[doc(hidden)]));
+            orig.attrs.extend([syn::parse_quote!(#[doc(hidden)])]);
         }
+        orig.attrs.push(syn::parse_quote!(#[allow(
+            // It's fine if there are too many positional arguments in the function
+            // because the whole purpose of this macro is to fight with this problem
+            // at the call site by generating a builder, while keeping the fn definition
+            // site the same with tons of positional arguments which don't harm readability
+            // there because their names are explicitly specified at the definition site.
+            clippy::too_many_arguments,
 
-        // It's fine if there are too many positional arguments in the function
-        // because the whole purpose of this macro is to fight with this problem
-        // at the call site by generating a builder, while keeping the fn definition
-        // site the same with tons of positional arguments which don't harm readability
-        // there because their names are explicitly specified at the definition site.
-        orig.attrs
-            .push(syn::parse_quote!(#[allow(clippy::too_many_arguments)]));
+            // It's fine to use many bool arguments in the function signature because
+            // all of the will be named at the call site
+            clippy::fn_params_excessive_bools,
+        )]));
 
         Ok(orig)
     }

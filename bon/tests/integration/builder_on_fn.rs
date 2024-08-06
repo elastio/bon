@@ -384,7 +384,7 @@ fn self_only_generic_param() {
         other_ref: &'b (),
     }
 
-    #[bon::bon]
+    #[bon]
     impl<T, U> Sut<'_, '_, T, U> {
         #[builder]
         fn new() -> Self {

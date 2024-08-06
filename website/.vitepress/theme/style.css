@@ -6,3 +6,16 @@ code, .nobr {
 abbr {
     cursor: help;
 }
+
+/*
+God bless this kind person for sharing the code snippet that adds the
+ability to zoom images.
+https://github.com/vuejs/vitepress/issues/854#issuecomment-1232938474
+*/
+.medium-zoom-overlay {
+    z-index: 1000000;
+}
+
+.medium-zoom-image {
+    z-index: 1000001;
+}

@@ -27,6 +27,46 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Sanity-check that benchmarks work
+  benchmarks:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        benchmark:
+          - args_3
+          - args_5
+          - args_10_alloc
+          - args_10_structs
+          - args_10
+          - args_20
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: sudo apt-get install -y valgrind
+      - run: ./benchmarks/run.sh ${{ matrix.benchmark }}
+
+  cargo-lock:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # There is a pre-installed cargo in the Github Managed runner image
+      # which is totally fine for simple `cargo fetch` usage.
+      - run: cargo +stable fetch
+
+      # Manually validate that Cargo.lock is not changed by cargo fetch
+      # We do this manually because `cargo fetch --locked` doesn't show
+      # the diff that it wants to apply to Cargo.lock and so it may not
+      # be obvious what's going on. For example, there may be a tricky
+      # scenario when `Cargo.lock` is up-to-date on the current branch,
+      # but when rebased on `master` it is out-of-date because.
+      - name: Validate Cargo.lock is up-to-date
+        run: >-
+          git diff --exit-code --color=always || ( echo "Cargo.lock is
+          out-of-date. See the diff above. Try rebasing on master" && exit 1 )
+
   cargo-test:
     runs-on: ${{ matrix.os }}-latest
 
