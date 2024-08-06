@@ -2,9 +2,17 @@
 
 `#[builder]` generates code that is easily optimizable by the compiler. This has been tested by the benchmarks below. The benchmarks compare regular positional function call syntax and builder syntax for functions annotated with `#[builder]`.
 
-In many cases `rustc` generates the same assembly code for the builder syntax as it would for a regular function call. Even when there are differences in the generated assembly, they don't influence the performance (perf. is within measurement error margin).
+In many cases `rustc` generates the same assembly code for the builder syntax as it would for a regular function call. Even when generated assembly differs, the performance differences are negligible.
 
-## Summary
+::: tip TIP
+
+Don't take these microbenchmarks for granted. Do your own performance measurements in your application in real conditions. Feel free to [open an issue](https://github.com/elastio/bon/issues) if you find performance problems in `bon`.
+
+:::
+
+The source code of the benchmarks is [available here](https://github.com/elastio/bon/tree/master/benchmarks)
+
+## Wallclock statistics
 
 | Benchmark         | Description                                   | Assembly output                                      | Run time
 | --                | --                                            | --                                                   | --
@@ -15,9 +23,7 @@ In many cases `rustc` generates the same assembly code for the builder syntax as
 | `args_10_alloc`   | 10 args of primitive and heap-allocated types | [Instructions diff](https://godbolt.org/z/bzEbqrvPW) | regular:&nbsp;`86.090ns`<br/>builder:&nbsp;`86.790ns`
 | `args_20`         | 20 args of primitive types                    | [Ordering diff](https://godbolt.org/z/GqP44GxnW)     | regular:&nbsp;`37.381ns`<br/>builder:&nbsp;`37.623ns`
 
-These statistics were collected by [`criterion`](https://github.com/bheisler/criterion.rs)
-
-::: details Detailed statistics
+## High-precision statistics
 
 | Benchmark         | Instructions count                           | L1&nbsp;accesses                                   | L2&nbsp;accesses                             | RAM&nbsp;accesses
 | --                | --                                           | --                                            | --                                      | --
@@ -28,10 +34,9 @@ These statistics were collected by [`criterion`](https://github.com/bheisler/cri
 | `args_10_alloc`   | regular:&nbsp;`2025`<br/>builder:&nbsp;`2026`| regular:&nbsp;`2823`<br/>builder:&nbsp;`2823` | regular:&nbsp;`3`<br/>builder:&nbsp;`2` | regular:&nbsp;`35`<br/>builder:&nbsp;`35`
 | `args_20`         | regular:&nbsp;`554`<br/>builder:&nbsp;`554`  | regular:&nbsp;`768`<br/>builder:&nbsp;`769`   | regular:&nbsp;`3`<br/>builder:&nbsp;`3` | regular:&nbsp;`34`<br/>builder:&nbsp;`33`
 
-These statistics were collected by [`iai`](https://github.com/bheisler/iai)
+## Hardware
 
-:::
+The benchmarks were run on a dedicated root server `AX51-NVMe` on [Hetzner](https://www.hetzner.com/).
 
----
-
-The source code of the benchmarks is [available here](https://github.com/elastio/bon/tree/master/benchmarks).
+- CPU: AMD Ryzen 7 3700X 8-Core Processor (x86_64)
+- RAM: 62.8 GiB
