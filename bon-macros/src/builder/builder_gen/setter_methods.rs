@@ -352,7 +352,7 @@ impl<'a> MemberSettersCtx<'a> {
             #vis fn #method_name(self, #fn_params) -> #return_type {
                 #builder_ident {
                     __private_impl: #builder_private_impl_ident {
-                        _phantom: ::std::marker::PhantomData,
+                        _phantom: ::core::marker::PhantomData,
                         #maybe_receiver_field
                         #( #member_idents: #member_exprs, )*
                     }
