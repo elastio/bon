@@ -61,7 +61,7 @@ dependencies = [
 
 [[package]]
 name = "benchmarks"
-version = "1.0.5"
+version = "1.0.6"
 dependencies = [
  "bon",
  "cfg-if",
