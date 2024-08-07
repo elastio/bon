@@ -1,10 +1,11 @@
 mod expose_positional_fn;
 
 use bon::{bon, builder};
+use core::num::NonZeroU32;
 #[cfg(feature = "alloc")]
 use {
     alloc::borrow::ToOwned, alloc::collections::BTreeSet, alloc::format, alloc::string::String,
-    alloc::vec, alloc::vec::Vec, core::num::NonZeroU32,
+    alloc::vec, alloc::vec::Vec,
 };
 
 #[cfg(feature = "alloc")]
@@ -57,25 +58,53 @@ fn smoke() {
 
 #[cfg(feature = "alloc")]
 #[test]
-fn default_attr() {
+fn default_attr_alloc() {
     #[builder]
     fn sut(
-        #[builder(default)] arg1: u32,
-        #[builder(default = 42)] arg2: u32,
         #[builder(default = "default")] arg3: String,
         #[builder(default = vec![42])] arg4: Vec<u32>,
-    ) -> (u32, u32, String, Vec<u32>) {
-        (arg1, arg2, arg3, arg4)
+    ) -> (String, Vec<u32>) {
+        (arg3, arg4)
     }
 
     let actual = sut().call();
 
-    assert_eq!(actual, (0, 42, "default".to_owned(), vec![42]));
+    assert_eq!(actual, ("default".to_owned(), vec![42]));
+}
+
+#[test]
+fn default_attr_no_std() {
+    #[builder]
+    fn sut(#[builder(default)] arg1: u32, #[builder(default = 42)] arg2: u32) -> (u32, u32) {
+        (arg1, arg2)
+    }
+
+    let actual = sut().call();
+
+    assert_eq!(actual, (0, 42));
 }
 
 #[cfg(feature = "alloc")]
 #[test]
-fn into_attr() {
+fn into_attr_alloc() {
+    #[builder]
+    fn sut(
+        #[builder(into)] set: Option<BTreeSet<u32>>,
+        #[builder(into = false)] disabled_into: String,
+    ) -> String {
+        format!("{set:?}:{disabled_into}")
+    }
+
+    let actual = sut()
+        .set([32, 43])
+        .disabled_into("disabled".to_owned())
+        .call();
+
+    assert_eq!(actual, "Some({32, 43}):disabled");
+}
+
+#[test]
+fn into_attr_no_std() {
     #[builder]
     fn sut(
         #[builder(into)] str_ref: &str,
@@ -83,11 +112,8 @@ fn into_attr() {
         /// Some docs
         #[builder(into)]
         u32: u32,
-
-        #[builder(into)] set: Option<BTreeSet<u32>>,
-        #[builder(into = false)] disabled_into: String,
-    ) -> String {
-        format!("{str_ref}:{u32}:{set:?}:{disabled_into}")
+    ) -> (&str, u32) {
+        (str_ref, u32)
     }
 
     struct IntoStrRef<'a>(&'a str);
@@ -101,11 +127,9 @@ fn into_attr() {
     let actual = sut()
         .str_ref(IntoStrRef("vinyl-scratch"))
         .u32(NonZeroU32::new(32).unwrap())
-        .set([32, 43])
-        .disabled_into("disabled".to_owned())
         .call();
 
-    assert_eq!(actual, "vinyl-scratch:32:Some({32, 43}):disabled");
+    assert_eq!(actual, ("vinyl-scratch", 32));
 }
 
 #[cfg(feature = "alloc")]
@@ -170,28 +194,21 @@ fn unsafe_func() {
     unsafe { builder.call() };
 }
 
-#[cfg(feature = "alloc")]
 #[test]
 fn impl_traits() {
     #[builder]
+    #[allow(dropping_copy_types)]
     fn sut(
         /// Some documentation
         iterable: impl IntoIterator<Item = impl Into<u32>>,
-        showable: impl core::fmt::Display + core::fmt::Debug,
-    ) -> (String, Vec<u32>) {
-        let str = format!("{showable} + {showable:#?}");
-        let vec = iterable.into_iter().map(Into::into).collect();
-
-        (str, vec)
+        multi_bounds: impl Send + Copy,
+    ) {
+        drop(iterable.into_iter().map(Into::into));
+        drop(multi_bounds);
+        drop(multi_bounds);
     }
 
-    let (str, vec) = sut()
-        .iterable(vec![1_u32, 2, 3])
-        .showable("showable")
-        .call();
-
-    assert_eq!(str, "showable + \"showable\"");
-    assert_eq!(vec, [1, 2, 3]);
+    sut().iterable([1_u16, 2, 3]).multi_bounds("multi").call();
 }
 
 #[test]

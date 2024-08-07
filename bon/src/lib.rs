@@ -1,13 +1,15 @@
 #![doc = include_str!("../README.md")]
 #![cfg_attr(not(feature = "std"), no_std)]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 pub use bon_macros::*;
 
 /// Symbols used by macros. They are not stable and are considered an implementation detail.
+/// Don't use them!
 #[doc(hidden)]
 pub mod private;
 
-/// Same as [`std::vec!`] but converts each element with [`Into::into()`].
+/// Same as [`std::vec!`] but converts each element with [`Into`].
 ///
 /// **WARNING:** it's not recommended to import this macro into scope. Reference it
 /// using the full path (`bon::vec![]`) to avoid confusion with the [`std::vec!`] macro.
@@ -33,18 +35,15 @@ pub mod private;
 ///
 /// This macro doesn't support `vec![expr; N]` syntax, since it's simpler to
 /// just write `vec![expr.into(); N]` using [`std::vec!`] instead.
-///
-/// This macro is only available if the `std` or the `alloc` feature is enabled. The
-/// `std` feature is enabled by default.
 #[macro_export]
 #[cfg(feature = "alloc")]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "std", feature = "alloc"))))]
 macro_rules! vec {
     () => ($crate::private::alloc::vec::Vec::new());
     ($($item:expr),+ $(,)?) => ($crate::private::alloc::vec![$(::core::convert::Into::into($item)),+ ]);
 }
 
-/// Creates a fixed-size array literal where each element is converted with [`Into::into()`]
-/// into the target type.
+/// Creates a fixed-size array literal with each element converted with [`Into`].
 ///
 /// You'll probably need a hint for the target type of items in the array if the
 /// compiler can't infer it from its usage.
@@ -82,12 +81,14 @@ macro_rules! arr {
 }
 
 #[cfg(test)]
-#[cfg(feature = "alloc")]
 mod tests {
+    #[cfg(feature = "alloc")]
     use crate::private::alloc::{string::String, vec::Vec};
+    use core::num::NonZeroU8;
 
+    #[cfg(feature = "alloc")]
     #[test]
-    fn arr_smoke() {
+    fn arr_of_strings() {
         let actual: [String; 3] = crate::arr!["foo", "bar", "baz"];
         assert_eq!(actual, ["foo", "bar", "baz"]);
 
@@ -95,6 +96,16 @@ mod tests {
         assert!(actual.is_empty());
     }
 
+    #[test]
+    fn arr_of_numbers() {
+        let actual: [u8; 2] = crate::arr![NonZeroU8::new(1).unwrap(), NonZeroU8::new(2).unwrap()];
+        assert_eq!(actual, [1, 2]);
+
+        let actual: [u8; 0] = crate::arr![];
+        assert!(actual.is_empty());
+    }
+
+    #[cfg(feature = "alloc")]
     #[test]
     fn vec_smoke() {
         let actual: Vec<String> = crate::vec!["foo", "bar", "baz"];
@@ -107,8 +118,7 @@ mod tests {
     #[cfg(feature = "std")]
     #[test]
     fn map_smoke() {
-        use std::collections::BTreeMap;
-        use std::collections::HashMap;
+        use std::collections::{BTreeMap, HashMap};
 
         let hash_strings: HashMap<String, String> = crate::map! {
             "Hello": "World",
@@ -133,20 +143,14 @@ mod tests {
         use std::collections::BTreeSet;
         use std::collections::HashSet;
 
-        let hash_strings: HashSet<String> = crate::set! {
-            "Hello", "World",
-            "Goodbye", "Mars",
-        };
+        let hash_strings: HashSet<String> = crate::set!["Hello", "World", "Goodbye", "Mars"];
 
         assert!(hash_strings.contains("Hello"));
         assert!(hash_strings.contains("World"));
         assert!(hash_strings.contains("Goodbye"));
         assert!(hash_strings.contains("Mars"));
 
-        let tree_strings: BTreeSet<String> = crate::set! {
-            "Hello", "World",
-            "Goodbye", "Mars",
-        };
+        let tree_strings: BTreeSet<String> = crate::set!["Hello", "World", "Goodbye", "Mars"];
 
         assert!(tree_strings.contains("Hello"));
         assert!(tree_strings.contains("World"));

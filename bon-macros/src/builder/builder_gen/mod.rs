@@ -294,8 +294,15 @@ impl BuilderGenCtx {
             self.finish_func.ident
         );
 
+        let docs = format!(
+            "Use builder syntax to set the required parameters and finish \
+            by calling the method [`Self::{}`].",
+            self.finish_func.ident
+        );
+
         quote! {
             #[must_use = #must_use_message]
+            #[doc = #docs]
             #vis struct #builder_ident<
                 #(#generics_decl,)*
                 __State: #builder_state_trait_ident = (#(#unset_state_types,)*),

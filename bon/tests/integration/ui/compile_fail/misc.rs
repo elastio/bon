@@ -1,4 +1,5 @@
 use bon::builder;
+use std::collections::{BTreeMap, BTreeSet};
 
 #[builder]
 struct TupleStruct(u32, u32);
@@ -21,4 +22,11 @@ fn unnecessary_into_override_false(#[builder(into = false)] _x: u32) {}
 #[builder(start_fn())]
 struct EmptyStartFn {}
 
-fn main() {}
+fn main() {
+    let map: BTreeMap<String, String> = bon::map! {
+        "Hello": "Blackjack",
+        "Hello": "Littlepip",
+    };
+
+    let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
+}
