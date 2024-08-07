@@ -16,19 +16,7 @@ bon = "{{ versionWildcard }}"
 
 ::: tip
 
-`bon` is compatible with `no_std` projects by disabling the default feature `std`. Add this to your `Cargo.toml` if you are in a `no_std` environment:
-
-```toml-vue
-[dependencies]
-bon = { version = "{{ versionWildcard }}", default-features = false }
-```
-
-If you do have `alloc` available, you can enable the `bon::vec` macro by setting the `alloc` feature:
-
-```toml-vue
-[dependencies]
-bon = { version = "{{ versionWildcard }}", default-features = false, features = ["alloc"] }
-```
+You can opt out of `std` and `alloc` cargo features with `default-features = false` for `no_std` environments.
 
 :::
 

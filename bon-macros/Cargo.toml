@@ -12,6 +12,16 @@ license    = { workspace = true }
 repository = { workspace = true }
 version    = { workspace = true }
 
+[package.metadata.docs.rs]
+all-features = true
+
+# Generate clickable links in the source code view in the docs
+rustdoc-args = ["--generate-link-to-definition"]
+
+# We don't need the docs to be built for every first-tier target.
+# This crate is not platform-specific.
+targets      = ["x86_64-unknown-linux-gnu"]
+
 [lints]
 workspace = true
 

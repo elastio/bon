@@ -6,6 +6,7 @@ mod ty;
 
 use prelude::*;
 use proc_macro::TokenStream;
+use std::collections::HashSet;
 use syn::parse::ParseStream;
 use syn::punctuated::Punctuated;
 use syn::Expr;
@@ -56,33 +57,35 @@ pub(crate) fn parse_map_macro_input(
 }
 
 fn parse_map_pair(pair: ParseStream<'_>) -> Result<(Expr, Expr), syn::Error> {
-    let key = pair.parse().map_err(|_| pair.error(pair.to_string()))?;
+    let key = pair.parse().map_err(|_| pair.error(pair))?;
     let _: Token![:] = pair.parse()?;
     let value = pair.parse()?;
 
     Ok((key, value))
 }
 
-pub(crate) fn ensure_unique<'k, I>(items: I) -> Result<()>
+pub(crate) fn validate_expressions_are_unique<'k, I>(err_label: &str, items: I) -> Option<Error>
 where
     I: IntoIterator<Item = &'k Expr>,
 {
     let mut errors = Error::accumulator();
 
-    let mut exprs = std::collections::HashSet::new();
+    let mut exprs = HashSet::new();
 
     items
         .into_iter()
         .filter(|item| is_pure(item))
-        .for_each(|key| {
-            if !exprs.insert(key.clone()) {
-                errors.push(err!(key, "duplicate map key"));
-            }
+        .for_each(|new_item| {
+            let Some(existing) = exprs.replace(new_item) else {
+                return;
+            };
+            errors.extend([
+                err!(existing, "duplicate {err_label}"),
+                err!(new_item, "duplicate {err_label}"),
+            ]);
         });
 
-    errors.finish()?;
-
-    Ok(())
+    errors.finish().err()
 }
 
 fn is_pure(expr: &Expr) -> bool {

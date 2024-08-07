@@ -59,9 +59,9 @@ Why is there an explicit `main()` function in this code snippet 🤔? It's a lon
 
 This feature isn't available today in `bon`, but it's planned for the future. However, it won't be enabled by default, but rather be opt-in like it is in `derive-builder`.
 
-The problem of this feature is that a setter that pushes an element into a collection like that may confuse the reader in case if only one element is pushed. This may hide the fact that the member is actually is actually a collection called `friends` in plural. However, this feature is still useful to provide backwards-compatibility when changing the type of a member from `T` or `Option<T>` to `Collection<T>`.
+The problem of this feature is that a setter that pushes an element into a collection like that may confuse the reader in case if only one element is pushed. This may hide the fact that the member is actually a collection called `friends` in plural. However, this feature is still useful to provide backwards-compatibility when changing the type of a member from `T` or `Option<T>` to `Collection<T>`.
 
-Alternatively, `bon` provides a separate solution. `bon` exposes a `bon::vec![]`, `bon::map!{}`, and `bon::set!` macros that include automatic `Into` conversion for every item. So in `bon` syntax it would look like this:
+Alternatively, `bon` provides a separate solution. `bon` exposes `bon::vec![]`, `bon::map!{}`, and `bon::set![]` macros that include automatic `Into` conversion for every item. So in `bon` syntax it would look like this:
 
 ```rust
 use bon::builder;

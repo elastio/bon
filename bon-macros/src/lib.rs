@@ -103,98 +103,96 @@ pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
         .into()
 }
 
-/// Similar to [`maplit::hashmap!`]/[`maplit::btreemap!`] but converts each key and value with
-/// [`Into::into()`].
+/// Creates any map-like collection that implements [`FromIterator<(K, V)>`].
 ///
-/// There are no separate variants for [`HashMap`] and [`BTreeMap`] since the macro works with any
-/// type that implements [`FromIterator<(K, V)>`].
-///
-/// A good example of the use case for this macro is when you want to create a
-/// `HashMap<String, String>` where part of the keys or values are hardcoded string literals of type `&str`
-/// and the other part is made of dynamic [`String`] values.
+/// It automatically converts each key and value to the target type using [`Into`].
+/// This way you can write a map of `String`s without the need to call `.to_owned()`
+/// or `.to_string()` on every string literal:
 ///
 /// ```rust
 /// # use bon_macros as bon;
 /// # use std::collections::HashMap;
-/// let address_book: HashMap<String, String> = bon::map! {
-///     "jd@example.org": "John Doe",
-///     format!("{}@{}.{}", "jane.doe", "example", "com"): "Jane Doe",
-///     "roger@example.org": format!("Roger {}", "Simpson"),
+/// let map: HashMap<String, String> = bon::map! {
+///     "key1": "value1",
+///     format!("key{}", 2): "value2",
+///     "key3": format!("value{}", 3),
 /// };
 /// ```
 ///
-/// The macro also performs rudimentary uniqueness checking on keys: syntactically equal keys are
-/// rejected with a compile error.
+/// There is no separate variant for [`BTreeMap`] and [`HashMap`]. Instead, you
+/// should annotate the return type of this macro with the desired type or make
+/// sure the compiler can infer the collection type from other context.
+///
+/// # Compile errors
+///
+/// The macro conservatively rejects duplicate keys in the map with a compile error.
+/// This check works for very simple expressions that involve only literal values.
 ///
 /// ```rust compile_fail
 /// # use bon_macros as bon;
 /// # use std::collections::HashMap;
-/// let address_book: HashMap<String, String> = bon::map! {
-///     "jd@example.org": "John Doe",
-///     format!("{}@{}.{}", "jane.doe", "example", "com"): "Jane Doe",
-///     "roger@example.org": format!("Roger {}", "Simpson"),
-///     "jd@example.org": "Jane Doe", // compile error
+/// let map: HashMap<String, String> = bon::map! {
+///     "key1": "value1",
+///     "key2": "value2"
+///     "key1": "value3", // compile error: `duplicate key in the map`
 /// };
 /// ```
 ///
-/// [`BTreeMap`]: std::collections::BTreeMap
-/// [`HashMap`]: std::collections::HashMap
-/// [`maplit::hashmap!`]: https://docs.rs/maplit/latest/maplit/macro.hashmap.html
-/// [`maplit::btreemap!`]: https://docs.rs/maplit/latest/maplit/macro.btreemap.html
+/// [`FromIterator<(K, V)>`]: https://doc.rust-lang.org/stable/std/iter/trait.FromIterator.html
+/// [`Into`]: https://doc.rust-lang.org/stable/std/convert/trait.Into.html
+/// [`BTreeMap`]: https://doc.rust-lang.org/stable/std/collections/struct.BTreeMap.html
+/// [`HashMap`]: https://doc.rust-lang.org/stable/std/collections/struct.HashMap.html
 #[proc_macro]
 pub fn map(input: TokenStream) -> TokenStream {
     let entries = syn::parse_macro_input!(input with util::parse_map_macro_input);
 
-    map::generate(entries)
-        .unwrap_or_else(|err| err.write_errors())
-        .into()
+    map::generate(entries).into()
 }
 
-/// Similar to [`maplit::hashset!`]/[`maplit::btreeset!`] but converts each key and value with
-/// [`Into::into()`].
+/// Creates any set-like collection that implements [`FromIterator<T>`].
 ///
-/// There are no separate variants for [`HashSet`] and [`BTreeSet`] since the macro works with any
-/// type that implements [`FromIterator<T>`].
-///
-/// A good example of the use case for this macro is when you want to create a `Hashset<String>` where part of
-/// the values are hardcoded string literals of type `&str` and the other part is made of dynamic [`String`]
-/// values.
+/// It automatically converts each value to the target type using [`Into`].
+/// This way you can write a set of `String`s without the need to call `.to_owned()`
+/// or `.to_string()` on every string literal:
 ///
 /// ```rust
 /// # use bon_macros as bon;
 /// # use std::collections::HashSet;
-/// let fruit_basket: HashSet<String> = bon::set! [
-///         "apples",
-///         format!("b{0}n{0}n{0}s", 'a'),
-///         format!("or{:x}ng{:x}s", 10, 14),
+/// let set: HashSet<String> = bon::set![
+///     "value1",
+///     format!("value{}", 2),
+///     "value3",
 /// ];
 /// ```
 ///
-/// The macro also performs rudimentary uniqueness checking on keys: syntactically equal elements are
-/// rejected with a compile error.
+/// There is no separate variant for [`BTreeSet`] and [`HashSet`]. Instead, you
+/// should annotate the return type of this macro with the desired type or make
+/// sure the compiler can infer the collection type from other context.
+///
+/// # Compile errors
+///
+/// The macro conservatively rejects duplicate values in the set with a compile error.
+/// This check works for very simple expressions that involve only literal values.
 ///
 /// ```rust compile_fail
 /// # use bon_macros as bon;
 /// # use std::collections::HashSet;
-/// let fruit_basket: HashSet<String> = bon::set! [
-///         "apples",
-///         format!("b{0}n{0}n{0}s", 'a'),
-///         format!("or{:x}ng{:x}s", 10, 14),
-///         "apples", // compile error
+/// let set: HashSet<String> = bon::set![
+///     "value1",
+///     "value2"
+///     "value1", // compile error: `duplicate value in the set`
 /// ];
 /// ```
 ///
-/// [`BTreeSet`]: std::collections::BTreeSet
-/// [`HashSet`]: std::collections::HashSet
-/// [`maplit::hashset!`]: https://docs.rs/maplit/latest/maplit/macro.hashset.html
-/// [`maplit::btreeset!`]: https://docs.rs/maplit/latest/maplit/macro.btreeset.html
+/// [`FromIterator<T>`]: https://doc.rust-lang.org/stable/std/iter/trait.FromIterator.html
+/// [`Into`]: https://doc.rust-lang.org/stable/std/convert/trait.Into.html
+/// [`BTreeSet`]: https://doc.rust-lang.org/stable/std/collections/struct.BTreeSet.html
+/// [`HashSet`]: https://doc.rust-lang.org/stable/std/collections/struct.HashSet.html
 #[proc_macro]
 pub fn set(input: TokenStream) -> TokenStream {
     use syn::punctuated::Punctuated;
 
     let entries = syn::parse_macro_input!(input with Punctuated::parse_terminated);
 
-    set::generate(entries)
-        .unwrap_or_else(|err| err.write_errors())
-        .into()
+    set::generate(entries).into()
 }
