@@ -20,7 +20,7 @@ rustdoc-args = ["--generate-link-to-definition"]
 
 # We don't need the docs to be built for every first-tier target.
 # This crate is not platform-specific.
-targets      = ["x86_64-unknown-linux-gnu"]
+targets = ["x86_64-unknown-linux-gnu"]
 
 [lints]
 workspace = true

@@ -82,12 +82,9 @@ macro_rules! arr {
 
 #[cfg(test)]
 mod tests {
-    use core::num::NonZeroU8;
     #[cfg(feature = "alloc")]
-    use crate::private::alloc::{
-        string::String,
-        vec::Vec,
-    };
+    use crate::private::alloc::{string::String, vec::Vec};
+    use core::num::NonZeroU8;
 
     #[cfg(feature = "alloc")]
     #[test]

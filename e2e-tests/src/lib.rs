@@ -86,7 +86,7 @@ pub fn greet(
     format!("Hello {name} with age {age}!")
 }
 
-/// This is based on the issue https://github.com/elastio/bon/issues/38
+/// This is based on the issue <https://github.com/elastio/bon/issues/38>
 pub mod missing_docs_lint {
     #![warn(missing_docs)]
 
