@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.7](https://github.com/elastio/bon/compare/v1.0.6...v1.0.7) - 2024-08-07
+
+### Other
+- Clean up tests and docs, fix missing_docs lint. Prepare a 1.1 release ([#39](https://github.com/elastio/bon/pull/39))
+- add no_std support ([#36](https://github.com/elastio/bon/pull/36))
+- Add asm comparison and benchmarks ([#29](https://github.com/elastio/bon/pull/29))
+- Macros for maps and sets ([#33](https://github.com/elastio/bon/pull/33))
+
 ## [1.0.6](https://github.com/elastio/bon/compare/v1.0.5...v1.0.6) - 2024-08-01
 
 ### Fixed
