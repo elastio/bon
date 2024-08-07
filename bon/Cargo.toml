@@ -3,8 +3,14 @@ name = "bon"
 
 description = "Generate builders for everything!"
 
-categories = ["rust-patterns", "data-structures", "asynchronous"]
-keywords   = ["builder", "macro", "derive", "constructor", "setter"]
+categories = [
+  "rust-patterns",
+  "data-structures",
+  "asynchronous",
+  "no-std",
+  "no-std::no-alloc",
+]
+keywords = ["builder", "macro", "derive", "constructor", "setter"]
 
 edition    = { workspace = true }
 homepage   = { workspace = true }
@@ -25,3 +31,8 @@ bon-macros = { path = "../bon-macros", version = "=1.0.6" }
 expect-test = "1.5"
 tokio       = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 trybuild    = "1.0"
+
+[features]
+alloc   = []
+default = ["std"]
+std     = ["alloc"]

@@ -15,8 +15,6 @@ fn smoke() {
 
         str_ref: &'a str,
 
-        string: String,
-
         #[builder(default)]
         u32: u32,
 
@@ -25,17 +23,14 @@ fn smoke() {
         option_u32: Option<u32>,
 
         option_str_ref: Option<&'a str>,
-        vec_string: Vec<String>,
         tuple: (u32, &'a [bool]),
     }
 
     let actual = Sut::builder()
         .bool(true)
         .str_ref("str_ref")
-        .string("string")
         .maybe_option_u32(Some(42))
         .option_str_ref("value")
-        .vec_string(vec!["String".to_owned()])
         .tuple((42, &[true, false]))
         .build();
 
@@ -43,7 +38,6 @@ fn smoke() {
         Sut {
             bool: true,
             str_ref: "str_ref",
-            string: "string",
             u32: 0,
             option_u32: Some(
                 42,
@@ -51,9 +45,6 @@ fn smoke() {
             option_str_ref: Some(
                 "value",
             ),
-            vec_string: [
-                "String",
-            ],
             tuple: (
                 42,
                 [
@@ -73,16 +64,16 @@ fn smoke() {
 fn raw_identifiers() {
     #[builder]
     struct r#Type {
-        r#type: String,
+        r#type: u32,
 
         #[builder(name = r#while)]
-        other: String,
+        other: u32,
     }
 
-    let actual = r#Type::builder().r#type("value").r#while("value2").build();
+    let actual = r#Type::builder().r#type(42).r#while(100).build();
 
-    assert_eq!(actual.r#type, "value");
-    assert_eq!(actual.other, "value2");
+    assert_eq!(actual.r#type, 42);
+    assert_eq!(actual.other, 100);
 
     #[builder(builder_type = r#type)]
     struct Sut {}

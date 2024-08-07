@@ -391,7 +391,7 @@ impl BuilderGenCtx {
                         let qualified_for_into =
                             self.member_qualifies_for_into(member, &member.ty)?;
                         let default = if qualified_for_into {
-                            quote! { std::convert::Into::into((|| #default)()) }
+                            quote! { ::core::convert::Into::into((|| #default)()) }
                         } else {
                             quote! { #default }
                         };

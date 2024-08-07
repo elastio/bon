@@ -1,4 +1,5 @@
 #![doc = include_str!("../README.md")]
+#![cfg_attr(not(feature = "std"), no_std)]
 
 pub use bon_macros::*;
 
@@ -32,10 +33,14 @@ pub mod private;
 ///
 /// This macro doesn't support `vec![expr; N]` syntax, since it's simpler to
 /// just write `vec![expr.into(); N]` using [`std::vec!`] instead.
+///
+/// This macro is only available if the `std` or the `alloc` feature is enabled. The
+/// `std` feature is enabled by default.
 #[macro_export]
+#[cfg(feature = "alloc")]
 macro_rules! vec {
-    () => (::std::vec::Vec::new());
-    ($($item:expr),+ $(,)?) => (::std::vec![$(::core::convert::Into::into($item)),+ ]);
+    () => ($crate::private::alloc::vec::Vec::new());
+    ($($item:expr),+ $(,)?) => ($crate::private::alloc::vec![$(::core::convert::Into::into($item)),+ ]);
 }
 
 /// Creates a fixed-size array literal where each element is converted with [`Into::into()`]
@@ -77,7 +82,9 @@ macro_rules! arr {
 }
 
 #[cfg(test)]
+#[cfg(feature = "alloc")]
 mod tests {
+    use crate::private::alloc::{string::String, vec::Vec};
 
     #[test]
     fn arr_smoke() {
@@ -97,6 +104,7 @@ mod tests {
         assert!(actual.is_empty());
     }
 
+    #[cfg(feature = "std")]
     #[test]
     fn map_smoke() {
         use std::collections::BTreeMap;
@@ -119,6 +127,7 @@ mod tests {
         assert_eq!(tree_strings["Goodbye"], "Mars");
     }
 
+    #[cfg(feature = "std")]
     #[test]
     fn set_smoke() {
         use std::collections::BTreeSet;

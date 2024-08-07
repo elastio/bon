@@ -1,8 +1,12 @@
-#[derive(Debug)]
-pub struct Required<T>(pub std::marker::PhantomData<T>);
+/// Used to implement the `alloc` feature.
+#[cfg(feature = "alloc")]
+pub extern crate alloc;
 
 #[derive(Debug)]
-pub struct Optional<T>(pub std::marker::PhantomData<Option<T>>);
+pub struct Required<T>(pub core::marker::PhantomData<T>);
+
+#[derive(Debug)]
+pub struct Optional<T>(pub core::marker::PhantomData<Option<T>>);
 
 impl<T> From<Optional<T>> for Set<Option<T>> {
     #[inline(always)]

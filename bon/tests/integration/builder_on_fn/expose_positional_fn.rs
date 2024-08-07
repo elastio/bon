@@ -43,9 +43,9 @@ fn with_nested_params() {
 #[test]
 fn simple() {
     #[builder(expose_positional_fn = positional)]
-    fn sut(arg1: String) -> String {
+    fn sut(arg1: u32) -> u32 {
         arg1
     }
 
-    assert_eq!(positional("arg1".to_owned()), "arg1");
+    assert_eq!(positional(42), 42);
 }
