@@ -208,10 +208,7 @@ fn impl_traits() {
         drop(multi_bounds);
     }
 
-    sut()
-        .iterable([1_u16, 2, 3])
-        .multi_bounds("multi")
-        .call();
+    sut().iterable([1_u16, 2, 3]).multi_bounds("multi").call();
 }
 
 #[test]
