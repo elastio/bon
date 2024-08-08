@@ -8,7 +8,6 @@ use crate::normalization::NormalizeSelfTy;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
 use darling::FromMeta;
-use itertools::Itertools;
 use proc_macro2::Span;
 use quote::quote;
 use std::rc::Rc;
@@ -144,7 +143,7 @@ impl FuncInputCtx {
             return quote::format_ident!("{}Builder", self.self_ty_prefix().unwrap_or_default());
         }
 
-        let pascal_case_func = self.norm_func.sig.ident.to_pascal_case();
+        let pascal_case_func = self.norm_func.sig.ident.snake_to_pascal_case();
 
         quote::format_ident!(
             "{}{pascal_case_func}Builder",
@@ -437,18 +436,18 @@ fn merge_generic_params(
     left: &Punctuated<syn::GenericParam, syn::Token![,]>,
     right: &Punctuated<syn::GenericParam, syn::Token![,]>,
 ) -> Vec<syn::GenericParam> {
-    // False-positive. Peek is used inside of `peeking_take_while`
-    #[allow(clippy::unused_peekable)]
-    let (mut left, mut right) = (left.iter().peekable(), right.iter().peekable());
-
     let is_lifetime = |param: &&_| matches!(param, &&syn::GenericParam::Lifetime(_));
 
-    let left_lifetimes = left.peeking_take_while(is_lifetime);
-    let right_lifetimes = right.peeking_take_while(is_lifetime);
+    let (left_lifetimes, left_rest): (Vec<_>, Vec<_>) = left.iter().partition(is_lifetime);
+    let (right_lifetimes, right_rest): (Vec<_>, Vec<_>) = right.iter().partition(is_lifetime);
 
-    let mut generic_params = left_lifetimes.chain(right_lifetimes).cloned().collect_vec();
-    generic_params.extend(left.chain(right).cloned());
-    generic_params
+    left_lifetimes
+        .into_iter()
+        .chain(right_lifetimes)
+        .chain(left_rest)
+        .chain(right_rest)
+        .cloned()
+        .collect()
 }
 
 impl Member {

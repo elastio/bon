@@ -2,7 +2,6 @@ use super::builder_gen::input_func::{FuncInputCtx, FuncInputParams, ImplCtx};
 use crate::util::prelude::*;
 use darling::ast::NestedMeta;
 use darling::FromMeta;
-use itertools::{Either, Itertools};
 use quote::quote;
 use std::rc::Rc;
 use syn::visit_mut::VisitMut;
@@ -12,22 +11,16 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
         bail!(trait_path, "Impls of traits are not supported yet");
     }
 
-    let (other_items, builder_funcs): (Vec<_>, Vec<_>) =
-        orig_impl_block.items.into_iter().partition_map(|item| {
+    let (builder_funcs, other_items): (Vec<_>, Vec<_>) =
+        orig_impl_block.items.into_iter().partition(|item| {
             let syn::ImplItem::Fn(fn_item) = item else {
-                return Either::Left(item);
+                return false;
             };
 
-            let has_builder_attr = fn_item
+            fn_item
                 .attrs
                 .iter()
-                .any(|attr| attr.path().is_ident("builder"));
-
-            if has_builder_attr {
-                Either::Right(syn::ImplItem::Fn(fn_item))
-            } else {
-                Either::Left(syn::ImplItem::Fn(fn_item))
-            }
+                .any(|attr| attr.path().is_ident("builder"))
         });
 
     if builder_funcs.is_empty() {
@@ -89,8 +82,10 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
                     let meta_list = darling::util::parse_attribute_to_meta_list(attr)?;
                     NestedMeta::parse_meta_list(meta_list.tokens).map_err(Into::into)
                 })
-                .flatten_ok()
-                .collect::<Result<Vec<_>>>()?;
+                .collect::<Result<Vec<_>>>()?
+                .into_iter()
+                .flatten()
+                .collect::<Vec<_>>();
 
             let params = FuncInputParams::from_list(&meta)?;
 

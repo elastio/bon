@@ -18,12 +18,11 @@ version = { workspace = true }
 workspace = true
 
 [dependencies]
-bon = { workspace = true }
+bon = { path = "../bon" }
 
 [dev-dependencies]
 buildstructor = "0.5"
 
 [build-dependencies]
-heck      = { workspace = true }
-itertools = { workspace = true }
-walkdir   = "2.5"
+itertools  = "0.13"
+walkdir    = "2.5"

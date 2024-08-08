@@ -1,7 +1,11 @@
-use easy_ext::ext;
+pub(crate) trait FnArgExt {
+    fn attrs_mut(&mut self) -> &mut Vec<syn::Attribute>;
+    fn ty_mut(&mut self) -> &mut syn::Type;
+    fn as_receiver(&self) -> Option<&syn::Receiver>;
+    fn as_typed(&self) -> Option<&syn::PatType>;
+}
 
-#[ext(FnArgExt)]
-pub(crate) impl syn::FnArg {
+impl FnArgExt for syn::FnArg {
     fn attrs_mut(&mut self) -> &mut Vec<syn::Attribute> {
         match self {
             syn::FnArg::Receiver(arg) => &mut arg.attrs,

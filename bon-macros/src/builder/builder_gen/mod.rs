@@ -7,7 +7,6 @@ pub(crate) mod input_struct;
 use member::*;
 
 use crate::util::prelude::*;
-use itertools::Itertools;
 use quote::quote;
 
 pub(crate) struct AssocMethodReceiverCtx {
@@ -248,7 +247,7 @@ impl BuilderGenCtx {
 
     fn builder_state_trait_decl(&self) -> TokenStream2 {
         let trait_ident = &self.builder_state_trait_ident;
-        let assoc_types_idents = self.member_assoc_type_idents().collect_vec();
+        let assoc_types_idents: Vec<_> = self.member_assoc_type_idents().collect();
         let vis = &self.vis;
 
         quote! {

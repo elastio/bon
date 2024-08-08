@@ -5,7 +5,6 @@ use super::{
 use crate::builder::params::{BuilderParams, ItemParams};
 use crate::util::prelude::*;
 use darling::FromMeta;
-use itertools::Itertools;
 use quote::quote;
 use syn::visit_mut::VisitMut;
 

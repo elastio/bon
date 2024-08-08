@@ -116,7 +116,7 @@ impl Member {
 
         let me = Self {
             origin,
-            state_assoc_type_ident: ident.to_pascal_case(),
+            state_assoc_type_ident: ident.snake_to_pascal_case(),
             ident,
             ty,
             params,
