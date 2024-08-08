@@ -1,3 +1,4 @@
+mod auto_into;
 mod member;
 mod setter_methods;
 
@@ -95,18 +96,8 @@ pub(crate) struct MacroOutput {
 }
 
 impl BuilderGenCtx {
-    fn member_idents(&self) -> impl Iterator<Item = syn::Ident> + '_ {
-        self.members.iter().map(|member| member.ident.clone())
-    }
-
-    fn member_assoc_type_idents(&self) -> impl Iterator<Item = &syn::Ident> {
-        self.members
-            .iter()
-            .map(|member| &member.state_assoc_type_ident)
-    }
-
-    fn unset_state_types(&self) -> impl Iterator<Item = TokenStream2> + '_ {
-        self.members.iter().map(|arg| arg.unset_state_type())
+    fn regular_members(&self) -> impl Iterator<Item = &RegularMember> {
+        self.members.iter().filter_map(Member::as_regular)
     }
 
     fn generic_args(&self) -> impl Iterator<Item = syn::GenericArgument> + '_ {
@@ -173,7 +164,7 @@ impl BuilderGenCtx {
 
         let receiver = receiver.map(|receiver| &receiver.with_self_keyword);
 
-        let member_inits = self.members.iter().map(|member| {
+        let member_inits = self.regular_members().map(|member| {
             let expr = member.init_expr();
             let ident = &member.ident;
             quote! {
@@ -205,7 +196,7 @@ impl BuilderGenCtx {
     }
 
     fn phantom_data(&self) -> TokenStream2 {
-        let member_types = self.members.iter().map(|member| member.ty.as_ref());
+        let member_types = self.members.iter().map(Member::ty);
         let receiver_ty = self
             .assoc_method_ctx
             .as_ref()
@@ -247,7 +238,11 @@ impl BuilderGenCtx {
 
     fn builder_state_trait_decl(&self) -> TokenStream2 {
         let trait_ident = &self.builder_state_trait_ident;
-        let assoc_types_idents: Vec<_> = self.member_assoc_type_idents().collect();
+        let assoc_types_idents: Vec<_> = self
+            .regular_members()
+            .map(|member| &member.state_assoc_type_ident)
+            .collect();
+
         let vis = &self.vis;
 
         quote! {
@@ -270,7 +265,7 @@ impl BuilderGenCtx {
         let generics_decl = &self.generics.params;
         let where_clause = &self.generics.where_clause;
         let generic_args = self.generic_args();
-        let unset_state_types = self.unset_state_types();
+        let unset_state_types = self.regular_members().map(|arg| arg.unset_state_type());
         let phantom_data = self.phantom_data();
 
         let receiver_field = self.assoc_method_ctx.as_ref().and_then(|receiver| {
@@ -280,7 +275,7 @@ impl BuilderGenCtx {
             })
         });
 
-        let members = self.members.iter().map(|member| {
+        let members = self.regular_members().map(|member| {
             let ident = &member.ident;
             let assoc_type_ident = &member.state_assoc_type_ident;
             quote! {
@@ -382,20 +377,41 @@ impl BuilderGenCtx {
     }
 
     fn member_expr<'f>(&self, member: &'f Member) -> Result<MemberExpr<'f>> {
-        let maybe_default = member
+        let regular = match member {
+            Member::Regular(regular) => regular,
+            Member::Skipped(skipped) => {
+                let expr = skipped
+                    .value
+                    .as_ref()
+                    .as_ref()
+                    .map(|value| {
+                        let qualified_for_into = self.type_qualifies_for_into(&skipped.ty);
+                        if qualified_for_into {
+                            quote! { ::core::convert::Into::into((|| #value)()) }
+                        } else {
+                            quote! { #value }
+                        }
+                    })
+                    .unwrap_or_else(|| quote! { ::core::default::Default::default() });
+
+                return Ok(MemberExpr { member, expr });
+            }
+        };
+
+        let maybe_default = regular
             .as_optional()
             // For `Option` members we don't need any `unwrap_or_[else/default]`.
             // We pass them directly to the function unchanged.
-            .filter(|_| !member.ty.is_option())
+            .filter(|_| !regular.ty.is_option())
             .map(|_| {
-                member
+                regular
                     .params
                     .default
                     .as_ref()
                     .and_then(|val| val.as_ref().as_ref())
                     .map(|default| {
                         let qualified_for_into =
-                            self.member_qualifies_for_into(member, &member.ty)?;
+                            self.member_qualifies_for_into(regular, &regular.ty)?;
                         let default = if qualified_for_into {
                             quote! { ::core::convert::Into::into((|| #default)()) }
                         } else {
@@ -408,7 +424,7 @@ impl BuilderGenCtx {
             })
             .transpose()?;
 
-        let member_ident = &member.ident;
+        let member_ident = &regular.ident;
 
         let expr = quote! {
             ::core::convert::Into::<::bon::private::Set<_>>::into(self.__private_impl.#member_ident)
@@ -443,7 +459,7 @@ impl BuilderGenCtx {
             .into_iter()
             .flat_map(|where_clause| &where_clause.predicates);
 
-        let state_where_predicates = self.members.iter().map(|member| {
+        let state_where_predicates = self.regular_members().map(|member| {
             let member_assoc_type_ident = &member.state_assoc_type_ident;
             let set_state_type_param = member.set_state_type_param();
             quote! {
@@ -475,8 +491,7 @@ impl BuilderGenCtx {
     }
 
     fn setter_methods_impls(&self) -> Result<TokenStream2> {
-        self.members
-            .iter()
+        self.regular_members()
             .map(|member| self.setter_methods_impls_for_member(member))
             .collect()
     }

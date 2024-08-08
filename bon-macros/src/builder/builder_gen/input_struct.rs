@@ -166,7 +166,9 @@ impl FinishFuncBody for StructLiteralBody {
         let Self { struct_ident } = self;
 
         let member_exprs = member_exprs.iter().map(|MemberExpr { member, expr }| {
-            let ident = &member.ident;
+            let ident = &member.ident().unwrap_or_else(|| {
+                panic!("All struct members must be named, but got: {member:#?}:\n{expr}")
+            });
             quote! {
                 #ident: #expr
             }

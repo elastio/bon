@@ -4,7 +4,42 @@
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
-mod builder_on_fn;
-mod builder_on_struct;
+mod prelude {
+    #[cfg(feature = "alloc")]
+    pub(crate) use {
+        alloc::borrow::ToOwned, alloc::collections::BTreeSet, alloc::format, alloc::string::String,
+        alloc::vec, alloc::vec::Vec,
+    };
 
+    pub(crate) use super::assert_debug_eq;
+    pub(crate) use expect_test::expect;
+}
+
+mod builder;
 mod ui;
+
+use expect_test::Expect;
+
+/// Approximate number of characters that can fit on a single screen
+const COMMON_SCREEN_CHARS_WIDTH: usize = 60;
+
+#[track_caller]
+fn assert_debug_eq(actual: impl core::fmt::Debug, expected: Expect) {
+    extern crate alloc;
+
+    let snapshot = 'snap: {
+        let terse = alloc::format!("{actual:?}");
+
+        let Some(width) = terse.lines().map(|line| line.len()).max() else {
+            break 'snap terse;
+        };
+
+        if width < COMMON_SCREEN_CHARS_WIDTH {
+            break 'snap terse;
+        }
+
+        alloc::format!("{actual:#?}")
+    };
+
+    expected.assert_eq(&snapshot);
+}

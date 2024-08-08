@@ -1,0 +1,104 @@
+use crate::prelude::*;
+use bon::builder;
+use expect_test::expect;
+
+#[cfg(feature = "alloc")]
+#[test]
+fn fn_alloc() {
+    #[builder]
+    fn sut(
+        #[builder(skip = "skip")] arg1: String,
+        #[builder(skip = vec![42])] arg2: Vec<u32>,
+    ) -> (String, Vec<u32>) {
+        (arg1, arg2)
+    }
+
+    assert_debug_eq(sut().call(), expect![[r#"("skip", [42])"#]]);
+}
+
+#[cfg(feature = "alloc")]
+#[test]
+fn struct_alloc() {
+    use bon::bon;
+    use expect_test::expect;
+
+    #[builder]
+    #[derive(Debug)]
+    struct Sut {
+        #[builder(skip = "skip")]
+        arg1: String,
+
+        #[builder(skip = vec![42])]
+        arg2: Vec<u32>,
+    }
+
+    assert_debug_eq(
+        Sut::builder().build(),
+        expect![[r#"Sut { arg1: "skip", arg2: [42] }"#]],
+    );
+
+    #[bon]
+    impl Sut {
+        #[builder]
+        fn assoc(
+            self,
+            #[builder(skip = "assoc")] arg1: String,
+            #[builder(skip = vec![43])] arg2: Vec<u32>,
+        ) -> Self {
+            Self {
+                arg1: format!("{}+{arg1}", self.arg1),
+                arg2: self.arg2.into_iter().chain(arg2).collect(),
+            }
+        }
+    }
+
+    let sut = || Sut::builder().build();
+
+    assert_debug_eq(
+        sut().assoc().call(),
+        expect![[r#"Sut { arg1: "skip+assoc", arg2: [42, 43] }"#]],
+    );
+}
+
+#[test]
+fn fn_no_std() {
+    #[builder]
+    fn sut(#[builder(skip)] arg1: u32, #[builder(skip = 42)] arg2: u32) -> (u32, u32) {
+        (arg1, arg2)
+    }
+
+    assert_debug_eq(sut().call(), expect!["(0, 42)"]);
+}
+
+#[test]
+fn struct_no_std() {
+    use bon::bon;
+
+    #[builder]
+    #[derive(Debug)]
+    struct Sut {
+        #[builder(skip)]
+        arg1: u32,
+
+        #[builder(skip = 42)]
+        arg2: u32,
+    }
+
+    assert_debug_eq(Sut::builder().build(), expect!["Sut { arg1: 0, arg2: 42 }"]);
+
+    #[bon]
+    impl Sut {
+        #[builder]
+        fn assoc(self, #[builder(skip)] arg1: u32, #[builder(skip = 43)] arg2: u32) -> Self {
+            Self {
+                arg1: self.arg1 + arg1,
+                arg2: self.arg2 + arg2,
+            }
+        }
+    }
+
+    assert_debug_eq(
+        Sut::builder().build().assoc().call(),
+        expect!["Sut { arg1: 0, arg2: 85 }"],
+    );
+}
