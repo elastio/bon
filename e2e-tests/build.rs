@@ -22,11 +22,20 @@ fn main() {
         .filter(|entry| {
             entry.file_type().is_file() && entry.path().extension() == Some("md".as_ref())
         })
-        .map(|entry| entry.into_path().into_os_string().into_string().unwrap())
+        .map(DirEntry::into_path)
         .sorted_unstable()
         .map(|path| {
-            let test_name = path.replace("/", "_");
-            let test_name = test_name.strip_prefix(".._website_").unwrap();
+            let test_name = path
+                .iter()
+                .skip(1)
+                .map(|component| {
+                    component
+                        .to_str()
+                        .unwrap()
+                        .replace(['.', '-'], "_")
+                        .to_lowercase()
+                })
+                .join("_");
 
             let canonical_path = std::fs::canonicalize(path).unwrap();
             let canonical_path = canonical_path.to_string_lossy().replace('\\', "\\\\");

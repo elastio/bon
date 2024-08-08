@@ -1,4 +1,3 @@
-
 pub(crate) trait PathExt {
     /// Check if the path ends with the given segment.
     fn ends_with_segment(&self, desired_segment: &str) -> bool;
