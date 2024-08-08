@@ -31,7 +31,7 @@ args_10_structs = []
 args_20         = []
 
 [dependencies]
-bon    = { workspace = true }
+bon    = { path = "../bon" }
 cfg-if = "1.0"
 
 [dev-dependencies]

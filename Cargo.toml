@@ -12,21 +12,6 @@ license = "MIT OR Apache-2.0"
 homepage   = "https://elastio.github.io/bon/"
 repository = "https://github.com/elastio/bon"
 
-[workspace.dependencies]
-bon = { path = "bon" }
-
-# Patch version 0.20.7 of darling added `flatten` feature. We use it, so we
-# need to specify an explicit patch version requirement
-darling = "0.20.10"
-
-easy-ext     = "1.0"
-heck         = "0.5"
-itertools    = "0.13"
-prettyplease = "0.2"
-proc-macro2  = "1.0"
-quote        = "1.0"
-syn          = "2.0"
-
 # This config is used for the benchmarks
 [profile.release]
 debug     = 0

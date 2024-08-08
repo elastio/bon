@@ -1,14 +1,13 @@
-use easy_ext::ext;
+pub(crate) trait AttributeExt {
+    fn is_doc(&self) -> bool;
+    fn as_doc(&self) -> Option<&syn::Expr>;
+}
 
-#[ext(AttributeExt)]
-pub(crate) impl syn::Attribute {
-    /// Returns `true` if the attribute represents a `#[doc = ...]` attribute.
+impl AttributeExt for syn::Attribute {
     fn is_doc(&self) -> bool {
         self.as_doc().is_some()
     }
 
-    /// Checks if the attribute represents a `#[doc = ...]` attribute. If so,
-    /// returns the expression that represents the documentation value.
     fn as_doc(&self) -> Option<&syn::Expr> {
         let syn::Meta::NameValue(attr) = &self.meta else {
             return None;

@@ -2,7 +2,6 @@ use super::{member::Member, BuilderGenCtx};
 use crate::builder::builder_gen::AssocMethodCtx;
 use crate::util::prelude::*;
 use darling::ast::GenericParamExt;
-use itertools::Itertools;
 use quote::{quote, ToTokens};
 use std::collections::BTreeSet;
 
@@ -21,7 +20,7 @@ impl BuilderGenCtx {
         let builder_ident = &self.builder_ident;
         let builder_state_trait_ident = &self.builder_state_trait_ident;
         let generics_decl = &self.generics.params;
-        let generic_args = self.generic_args().collect_vec();
+        let generic_args: Vec<_> = self.generic_args().collect();
         let where_clause = &self.generics.where_clause;
         let unset_state_type = member.unset_state_type();
         let output_builder_alias_ident = quote::format_ident!(
@@ -305,7 +304,7 @@ impl<'a> MemberSettersCtx<'a> {
         let setters = methods
             .into_iter()
             .map(|method| self.setter_method(method))
-            .concat();
+            .collect();
 
         Ok(setters)
     }
