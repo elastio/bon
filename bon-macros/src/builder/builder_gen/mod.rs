@@ -14,31 +14,15 @@ pub(crate) struct AssocMethodReceiverCtx {
     pub(crate) with_self_keyword: syn::Receiver,
     pub(crate) without_self_keyword: Box<syn::Type>,
 }
-pub(crate) struct AssocFreeMethodCtx {
+
+pub(crate) struct AssocMethodCtx {
     /// The `Self` type of the impl block. It doesn't contain any nested
     /// `Self` keywords in it. This is prohibited by Rust's syntax itself.
     pub(crate) self_ty: Box<syn::Type>,
-}
 
-pub(crate) enum AssocMethodCtx {
-    Receiver(AssocMethodReceiverCtx),
-    Free(AssocFreeMethodCtx),
-}
-
-impl AssocMethodCtx {
-    fn as_receiver(&self) -> Option<&AssocMethodReceiverCtx> {
-        match self {
-            AssocMethodCtx::Receiver(receiver) => Some(receiver),
-            AssocMethodCtx::Free(_) => None,
-        }
-    }
-
-    fn ty_without_self_keyword(&self) -> &syn::Type {
-        match self {
-            AssocMethodCtx::Receiver(receiver) => &receiver.without_self_keyword,
-            AssocMethodCtx::Free(parent) => &parent.self_ty,
-        }
-    }
+    /// Present only if the method has a receiver, i.e. `self` or `&self` or
+    /// `&mut self` or `self: ExplicitType`.
+    pub(crate) receiver: Option<AssocMethodReceiverCtx>,
 }
 
 pub(crate) struct BuilderGenCtx {
@@ -175,7 +159,7 @@ impl BuilderGenCtx {
         let receiver = self
             .assoc_method_ctx
             .as_ref()
-            .and_then(AssocMethodCtx::as_receiver);
+            .and_then(|ctx| ctx.receiver.as_ref());
 
         let receiver_field_init = receiver.map(|receiver| {
             let self_token = &receiver.with_self_keyword.self_token;
@@ -222,7 +206,7 @@ impl BuilderGenCtx {
         let receiver_ty = self
             .assoc_method_ctx
             .as_ref()
-            .map(AssocMethodCtx::ty_without_self_keyword);
+            .map(|ctx| ctx.self_ty.as_ref());
 
         let types = receiver_ty.into_iter().chain(member_types);
 
@@ -291,7 +275,7 @@ impl BuilderGenCtx {
         let phantom_data = self.phantom_data();
 
         let receiver_field = self.assoc_method_ctx.as_ref().and_then(|receiver| {
-            let ty = &receiver.as_receiver()?.without_self_keyword;
+            let ty = &receiver.receiver.as_ref()?.without_self_keyword;
             Some(quote! {
                 receiver: #ty,
             })

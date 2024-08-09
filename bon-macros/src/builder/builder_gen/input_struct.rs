@@ -1,6 +1,6 @@
 use super::{
-    AssocFreeMethodCtx, AssocMethodCtx, BuilderGenCtx, FinishFunc, FinishFuncBody, Generics,
-    Member, MemberExpr, MemberOrigin, StartFunc,
+    AssocMethodCtx, BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberExpr,
+    MemberOrigin, StartFunc,
 };
 use crate::builder::params::{BuilderParams, ItemParams};
 use crate::util::prelude::*;
@@ -140,9 +140,10 @@ impl StructInputCtx {
             generics: None,
         };
 
-        let assoc_method_ctx = Some(AssocMethodCtx::Free(AssocFreeMethodCtx {
+        let assoc_method_ctx = Some(AssocMethodCtx {
             self_ty: self.struct_ty.into(),
-        }));
+            receiver: None,
+        });
 
         let ctx = BuilderGenCtx {
             members,

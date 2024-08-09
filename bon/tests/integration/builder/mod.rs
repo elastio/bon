@@ -2,6 +2,7 @@ mod attr_default;
 mod attr_expose_positional_fn;
 mod attr_into;
 mod attr_skip;
+mod generics;
 mod lints;
 mod raw_idents;
 mod smoke;
@@ -200,81 +201,11 @@ fn impl_block_ty_contains_a_reference() {
 }
 
 #[test]
-fn impl_block_with_self_in_const_generics() {
-    #[derive(Default)]
-    struct Sut<const N: usize>;
-
-    impl<const N: usize> Sut<N> {
-        const fn val(&self) -> usize {
-            42
-        }
-    }
-
-    #[bon]
-    impl Sut<{ Sut::<3>.val() }>
-    where
-        Self:,
-    {
-        #[builder]
-        fn method(self) -> usize {
-            self.val()
-        }
-    }
-
-    assert_eq!(Sut::<42>.method().call(), 42);
-}
-
-#[test]
-fn generics_with_lifetimes() {
-    #[builder]
-    fn sut<T>(arg: &&&&&T) {
-        let _ = arg;
-    }
-
-    sut().arg(&&&&&&&&&&42).call();
-}
-
-#[test]
 fn const_function() {
     #[builder]
     const fn foo(_arg: u32) {}
 
     foo().arg(42).call();
-}
-
-// This is based on the issue https://github.com/elastio/bon/issues/16
-#[test]
-fn self_only_generic_param() {
-    struct Sut<'a, 'b: 'a, T> {
-        bar: Option<T>,
-        str: &'a str,
-        other_ref: &'b (),
-    }
-
-    #[bon]
-    impl<T> Sut<'_, '_, T> {
-        #[builder]
-        fn new() -> Self {
-            Self {
-                bar: None,
-                str: "littlepip",
-                other_ref: &(),
-            }
-        }
-    }
-
-    // Make sure `new` method is hidden
-    Sut::<core::convert::Infallible>::__orig_new();
-
-    // Make sure the builder type name matches the type of builder when
-    // `#[builder]` is placed on top of a struct
-    let _: SutBuilder<'_, '_, core::convert::Infallible> = Sut::builder();
-
-    let actual = Sut::<core::convert::Infallible>::builder().build();
-
-    assert!(actual.bar.is_none());
-    assert_eq!(actual.str, "littlepip");
-    let () = actual.other_ref;
 }
 
 #[test]

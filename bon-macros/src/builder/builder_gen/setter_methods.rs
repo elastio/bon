@@ -1,5 +1,4 @@
 use super::{BuilderGenCtx, RegularMember};
-use crate::builder::builder_gen::AssocMethodCtx;
 use crate::util::prelude::*;
 use quote::{quote, ToTokens};
 
@@ -261,8 +260,7 @@ impl<'a> MemberSettersCtx<'a> {
             .builder_gen
             .assoc_method_ctx
             .as_ref()
-            .and_then(AssocMethodCtx::as_receiver)
-            .is_some()
+            .is_some_and(|ctx| ctx.receiver.is_some())
             .then(|| quote!(receiver: self.__private_impl.receiver,));
 
         let member_exprs = self.builder_gen.regular_members().map(|other_member| {
@@ -302,7 +300,7 @@ impl<'a> MemberSettersCtx<'a> {
             .assoc_method_ctx
             .as_ref()
             .map(|assoc_ctx| {
-                let ty = assoc_ctx.ty_without_self_keyword().peel();
+                let ty = assoc_ctx.self_ty.peel();
                 let syn::Type::Path(ty_path) = ty else {
                     // The type is quite complex. It's hard to generate a workable
                     // intra-doc link for it. So in order to avoid the broken
