@@ -327,6 +327,7 @@ impl FuncInputCtx {
             asyncness: self.norm_func.sig.asyncness,
             body: Box::new(finish_func_body),
             output: self.norm_func.sig.output,
+            docs: "Finishes building and performs the requested action.".to_owned(),
         };
 
         let start_func = StartFunc {

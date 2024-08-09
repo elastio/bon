@@ -62,6 +62,7 @@ pub(crate) struct FinishFunc {
     pub(crate) asyncness: Option<syn::Token![async]>,
     pub(crate) body: Box<dyn FinishFuncBody>,
     pub(crate) output: syn::ReturnType,
+    pub(crate) docs: String,
 }
 
 pub(crate) struct StartFunc {
@@ -311,7 +312,7 @@ impl BuilderGenCtx {
 
         let docs = format!(
             "Use builder syntax to set the required parameters and finish \
-            by calling the method [`Self::{}`].",
+            by calling the method [`Self::{}()`].",
             self.finish_func.ident
         );
 
@@ -472,6 +473,7 @@ impl BuilderGenCtx {
         let body = &self.finish_func.body.gen(&member_exprs);
         let asyncness = &self.finish_func.asyncness;
         let unsafety = &self.finish_func.unsafety;
+        let docs = &self.finish_func.docs;
         let vis = &self.vis;
         let builder_ident = &self.builder_ident;
         let builder_state_trait_ident = &self.builder_state_trait_ident;
@@ -511,7 +513,7 @@ impl BuilderGenCtx {
                 #( #where_clause_predicates, )*
                 #( #state_where_predicates, )*
             {
-                /// Finishes building and performs the requested action.
+                #[doc = #docs]
                 #[inline(always)]
                 #vis #asyncness #unsafety fn #finish_func_ident(self) #output {
                     #body

@@ -3,6 +3,8 @@
 #![allow(missing_debug_implementations)]
 #![allow(missing_docs)]
 
+pub mod missing_docs_test;
+
 use bon::{bon, builder};
 
 #[cfg(doctest)]
@@ -84,21 +86,4 @@ pub fn greet(
     age: u32,
 ) -> String {
     format!("Hello {name} with age {age}!")
-}
-
-/// This is based on the issue <https://github.com/elastio/bon/issues/38>
-pub mod missing_docs_lint {
-    #![warn(missing_docs)]
-
-    /// Docs
-    pub struct MyStruct;
-
-    #[bon::bon]
-    impl MyStruct {
-        /// Docs
-        #[builder]
-        pub fn new() -> Self {
-            Self
-        }
-    }
 }
