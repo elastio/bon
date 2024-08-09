@@ -1,6 +1,6 @@
 use super::{
-    BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberExpr, MemberOrigin,
-    StartFunc,
+    AssocMethodCtx, BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberExpr,
+    MemberOrigin, StartFunc,
 };
 use crate::builder::params::{BuilderParams, ItemParams};
 use crate::util::prelude::*;
@@ -125,6 +125,7 @@ impl StructInputCtx {
             asyncness: None,
             body: Box::new(finish_func_body),
             output: syn::parse_quote!(-> #struct_ty),
+            docs: "Finishes building an returns the requested object.".to_owned(),
         };
 
         let start_func_docs = format!(
@@ -139,13 +140,18 @@ impl StructInputCtx {
             generics: None,
         };
 
+        let assoc_method_ctx = Some(AssocMethodCtx {
+            self_ty: self.struct_ty.into(),
+            receiver: None,
+        });
+
         let ctx = BuilderGenCtx {
             members,
             builder_ident,
             builder_private_impl_ident,
             builder_state_trait_ident,
 
-            assoc_method_ctx: None,
+            assoc_method_ctx,
             generics,
             vis: self.norm_struct.vis,
 

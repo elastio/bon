@@ -1,7 +1,6 @@
 use super::{
-    generic_param_to_arg, AssocFreeMethodCtx, AssocMethodCtx, AssocMethodReceiverCtx,
-    BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberExpr, MemberOrigin,
-    StartFunc,
+    generic_param_to_arg, AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFunc,
+    FinishFuncBody, Generics, Member, MemberExpr, MemberOrigin, StartFunc,
 };
 use crate::builder::params::BuilderParams;
 use crate::normalization::NormalizeSelfTy;
@@ -90,22 +89,24 @@ impl FuncInputCtx {
     }
 
     fn assoc_method_ctx(&self) -> Option<AssocMethodCtx> {
+        Some(AssocMethodCtx {
+            self_ty: self.impl_ctx.as_deref()?.self_ty.clone(),
+            receiver: self.assoc_method_receiver_ctx(),
+        })
+    }
+
+    fn assoc_method_receiver_ctx(&self) -> Option<AssocMethodReceiverCtx> {
+        let receiver = self.norm_func.sig.receiver()?;
         let self_ty = &self.impl_ctx.as_deref()?.self_ty;
 
-        let Some(receiver) = self.norm_func.sig.receiver() else {
-            return Some(AssocMethodCtx::Free(AssocFreeMethodCtx {
-                self_ty: self_ty.clone(),
-            }));
-        };
+        let mut without_self_keyword = receiver.ty.clone();
 
-        let mut without_self_ty = receiver.ty.clone();
+        NormalizeSelfTy { self_ty }.visit_type_mut(&mut without_self_keyword);
 
-        NormalizeSelfTy { self_ty }.visit_type_mut(&mut without_self_ty);
-
-        Some(AssocMethodCtx::Receiver(AssocMethodReceiverCtx {
+        Some(AssocMethodReceiverCtx {
             with_self_keyword: receiver.clone(),
-            without_self_keyword: without_self_ty,
-        }))
+            without_self_keyword,
+        })
     }
 
     fn generics(&self) -> Generics {
@@ -327,6 +328,7 @@ impl FuncInputCtx {
             asyncness: self.norm_func.sig.asyncness,
             body: Box::new(finish_func_body),
             output: self.norm_func.sig.output,
+            docs: "Finishes building and performs the requested action.".to_owned(),
         };
 
         let start_func = StartFunc {

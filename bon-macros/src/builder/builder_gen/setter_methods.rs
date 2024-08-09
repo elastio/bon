@@ -1,5 +1,4 @@
 use super::{BuilderGenCtx, RegularMember};
-use crate::builder::builder_gen::AssocMethodCtx;
 use crate::util::prelude::*;
 use quote::{quote, ToTokens};
 
@@ -144,7 +143,7 @@ impl<'a> MemberSettersCtx<'a> {
         }
     }
 
-    fn setter_method_name(&self) -> syn::Ident {
+    fn setter_method_core_name(&self) -> syn::Ident {
         self.member
             .params
             .name
@@ -170,7 +169,7 @@ impl<'a> MemberSettersCtx<'a> {
         };
 
         Ok(self.setter_method(MemberSetterMethod {
-            method_name: self.setter_method_name(),
+            method_name: self.setter_method_core_name(),
             fn_params: quote!(value: #fn_param_type),
             member_init: quote!(::bon::private::Set(value #maybe_into_call)),
             overwrite_docs: None,
@@ -192,7 +191,7 @@ impl<'a> MemberSettersCtx<'a> {
             (quote!(#inner_type), quote!(), quote!())
         };
 
-        let setter_method_name = self.setter_method_name();
+        let setter_method_name = self.setter_method_core_name();
 
         // Preserve the original identifier span to make IDE go to definition correctly
         let option_method_name = syn::Ident::new(
@@ -244,7 +243,8 @@ impl<'a> MemberSettersCtx<'a> {
 
         let docs = match overwrite_docs {
             Some(docs) => vec![syn::parse_quote!(#[doc = #docs])],
-            None => self.member.docs.clone(),
+            None if !self.member.docs.is_empty() => self.member.docs.clone(),
+            None => self.generate_docs_for_setter(),
         };
 
         let vis = &self.builder_gen.vis;
@@ -260,8 +260,7 @@ impl<'a> MemberSettersCtx<'a> {
             .builder_gen
             .assoc_method_ctx
             .as_ref()
-            .and_then(AssocMethodCtx::as_receiver)
-            .is_some()
+            .is_some_and(|ctx| ctx.receiver.is_some())
             .then(|| quote!(receiver: self.__private_impl.receiver,));
 
         let member_exprs = self.builder_gen.regular_members().map(|other_member| {
@@ -286,6 +285,37 @@ impl<'a> MemberSettersCtx<'a> {
                 }
             }
         }
+    }
+
+    fn generate_docs_for_setter(&self) -> Vec<syn::Attribute> {
+        let member_ident = &self.setter_method_core_name();
+        let start_fn_ident = &self.builder_gen.start_func.ident;
+
+        let more = |start_fn_path: &std::fmt::Arguments<'_>| {
+            format!(" See {start_fn_path} for more info.")
+        };
+
+        let suffix = self
+            .builder_gen
+            .assoc_method_ctx
+            .as_ref()
+            .map(|assoc_ctx| {
+                let ty = assoc_ctx.self_ty.peel();
+                let syn::Type::Path(ty_path) = ty else {
+                    // The type is quite complex. It's hard to generate a workable
+                    // intra-doc link for it. So in order to avoid the broken
+                    // intra-doc links lint we'll just skip adding more info.
+                    return "".to_owned();
+                };
+
+                let prefix = darling::util::path_to_string(&ty_path.path);
+                more(&format_args!("[`{prefix}::{start_fn_ident}()`]"))
+            })
+            .unwrap_or_else(|| more(&format_args!("[`{start_fn_ident}()`]")));
+
+        let docs = format!("Sets the value of `{member_ident}`.{suffix}");
+
+        vec![syn::parse_quote!(#[doc = #docs])]
     }
 }
 
