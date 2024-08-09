@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use bon::builder;
 
 #[cfg(feature = "alloc")]
 #[test]
@@ -149,4 +148,18 @@ fn struct_no_std() {
         sut().assoc().maybe_arg1(None::<u32>).call(),
         expect!["Sut { arg1: 0, arg2: 85 }"],
     );
+}
+
+#[test]
+fn fn_generic_default() {
+    #[builder]
+    fn sut(
+        #[builder(default)] arg1: impl Clone + Default,
+        #[builder(default = <_>::default())] arg2: impl Clone + Default,
+    ) {
+        drop(arg1);
+        drop(arg2);
+    }
+
+    sut::<(), ()>().call()
 }

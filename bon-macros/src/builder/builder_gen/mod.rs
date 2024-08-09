@@ -85,6 +85,27 @@ pub(crate) struct MemberExpr<'a> {
     pub(crate) expr: TokenStream2,
 }
 
+impl<'a> MemberExpr<'a> {
+    /// Creates a member expression by wrapping the given expression with
+    /// a type hint to the member's type. This is necessary in some cases
+    /// to assist the compiler in type inference.
+    ///
+    /// For example, if the expression is passed to a function that accepts
+    /// an impl Trait such as `impl Default`, and the expression itself looks
+    /// like `Default::default()`. In this case nothing hints to the compiler
+    /// the resulting type of the expression, so we add a type hint via an
+    /// intermediate variable here.
+    fn with_type_hint(member: &'a Member, expr: TokenStream2) -> Self {
+        let ty = member.ty();
+        let expr = quote! {{
+            let value: #ty = #expr;
+            value
+        }};
+
+        Self { member, expr }
+    }
+}
+
 pub(crate) struct Generics {
     pub(crate) params: Vec<syn::GenericParam>,
     pub(crate) where_clause: Option<syn::WhereClause>,
@@ -294,9 +315,12 @@ impl BuilderGenCtx {
             self.finish_func.ident
         );
 
+        let allows = allow_warnings_on_member_types();
+
         quote! {
             #[must_use = #must_use_message]
             #[doc = #docs]
+            #allows
             #vis struct #builder_ident<
                 #(#generics_decl,)*
                 __State: #builder_state_trait_ident = (#(#unset_state_types,)*),
@@ -363,6 +387,7 @@ impl BuilderGenCtx {
             /// the private fields in it leaving the builder type higher with
             /// just a single field of this type that documents the fact that
             /// the developers shouldn't touch it.
+            #allows
             struct #builder_private_impl_ident<
                 #(#generics_decl,)*
                 __State: #builder_state_trait_ident
@@ -392,9 +417,11 @@ impl BuilderGenCtx {
                             quote! { #value }
                         }
                     })
-                    .unwrap_or_else(|| quote! { ::core::default::Default::default() });
+                    .unwrap_or_else(|| {
+                        quote! { ::core::default::Default::default() }
+                    });
 
-                return Ok(MemberExpr { member, expr });
+                return Ok(MemberExpr::with_type_hint(member, expr));
             }
         };
 
@@ -432,7 +459,7 @@ impl BuilderGenCtx {
                 #maybe_default
         };
 
-        Ok(MemberExpr { member, expr })
+        Ok(MemberExpr::with_type_hint(member, expr))
     }
 
     fn finish_method_impl(&self) -> Result<TokenStream2> {
@@ -468,7 +495,10 @@ impl BuilderGenCtx {
             }
         });
 
+        let allows = allow_warnings_on_member_types();
+
         Ok(quote! {
+            #allows
             impl<
                 #(#generics_decl,)*
                 __State: #builder_state_trait_ident
@@ -539,4 +569,21 @@ fn reject_self_references_in_docs(docs: &[syn::Attribute]) -> Result {
     }
 
     Ok(())
+}
+
+fn allow_warnings_on_member_types() -> TokenStream2 {
+    quote! {
+        // This warning may occur when the original unnormalized syntax was
+        // using parens around an `impl Trait` like that:
+        // ```
+        // &(impl Clone + Default)
+        // ```
+        // in which case the normalized version will be:
+        // ```
+        // &(T)
+        // ```
+        //
+        // And it triggers the warning. We just suppress it here.
+        #[allow(unused_parens)]
+    }
 }

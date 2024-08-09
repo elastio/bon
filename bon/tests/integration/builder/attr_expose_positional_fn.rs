@@ -1,4 +1,4 @@
-use bon::{bon, builder};
+use crate::prelude::*;
 
 #[test]
 fn method_new_doesnt_require_a_value_for_name() {
@@ -36,8 +36,7 @@ fn with_nested_params() {
         (arg1, arg2)
     }
 
-    let actual = positional(true, 42);
-    assert_eq!(actual, (true, 42));
+    assert_debug_eq(positional(true, 42), expect!["(true, 42)"]);
 }
 
 #[test]
@@ -47,5 +46,5 @@ fn simple() {
         arg1
     }
 
-    assert_eq!(positional(42), 42);
+    assert_debug_eq(positional(42), expect!["42"]);
 }

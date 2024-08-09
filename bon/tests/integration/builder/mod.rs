@@ -1,75 +1,12 @@
 mod attr_default;
 mod attr_expose_positional_fn;
+mod attr_into;
 mod attr_skip;
+mod lints;
 mod raw_idents;
 mod smoke;
 
-use bon::{bon, builder};
-use core::num::NonZeroU32;
 use crate::prelude::*;
-
-#[cfg(feature = "alloc")]
-#[test]
-fn into_attr_alloc() {
-    #[builder]
-    fn sut(
-        #[builder(into)] set: Option<BTreeSet<u32>>,
-        #[builder(into = false)] disabled_into: String,
-    ) -> String {
-        format!("{set:?}:{disabled_into}")
-    }
-
-    let actual = sut()
-        .set([32, 43])
-        .disabled_into("disabled".to_owned())
-        .call();
-
-    assert_eq!(actual, "Some({32, 43}):disabled");
-}
-
-#[test]
-fn into_attr_no_std() {
-    #[builder]
-    fn sut(
-        #[builder(into)] str_ref: &str,
-
-        /// Some docs
-        #[builder(into)]
-        u32: u32,
-    ) -> (&str, u32) {
-        (str_ref, u32)
-    }
-
-    struct IntoStrRef<'a>(&'a str);
-
-    impl<'a> From<IntoStrRef<'a>> for &'a str {
-        fn from(val: IntoStrRef<'a>) -> Self {
-            val.0
-        }
-    }
-
-    let actual = sut()
-        .str_ref(IntoStrRef("vinyl-scratch"))
-        .u32(NonZeroU32::new(32).unwrap())
-        .call();
-
-    assert_eq!(actual, ("vinyl-scratch", 32));
-}
-
-#[cfg(feature = "alloc")]
-#[test]
-fn into_string() {
-    #[builder]
-    fn sut(arg1: String, arg2: Option<String>) -> String {
-        format!("{arg1}:{arg2:?}")
-    }
-
-    let actual = sut().arg1("blackjack").arg2("bruh").call();
-    assert_eq!(actual, "blackjack:Some(\"bruh\")");
-
-    let actual = sut().arg1("blackjack").maybe_arg2(Some("bruh2")).call();
-    assert_eq!(actual, "blackjack:Some(\"bruh2\")");
-}
 
 #[test]
 fn leading_underscore_is_stripped() {
