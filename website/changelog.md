@@ -9,10 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.2.0](https://github.com/elastio/bon/compare/v1.1.0...v1.2.0) - 2024-08-09
 
 ### Added
-- add `#[builder(skip)]` attribute to skip generating setters ([#44](https://github.com/elastio/bon/pull/44))
-
-### Fixed
-- add automatic docs for setters ([#45](https://github.com/elastio/bon/pull/45))
+- Add `#[builder(skip)]` attribute to skip generating setters ([#44](https://github.com/elastio/bon/pull/44))
+- Add automatic docs for setters ([#45](https://github.com/elastio/bon/pull/45))
 
 ### Other
 - Remove dependencies on `easy-ext`, `heck` and `itertools` ([#42](https://github.com/elastio/bon/pull/42))
