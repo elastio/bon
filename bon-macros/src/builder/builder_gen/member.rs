@@ -175,11 +175,7 @@ impl Member {
         params.validate()?;
 
         if let Some(value) = params.skip {
-            return Ok(Self::Skipped(SkippedMember {
-                ident,
-                ty,
-                value,
-            }));
+            return Ok(Self::Skipped(SkippedMember { ident, ty, value }));
         }
 
         let ident = ident.or_else(|| params.name.clone()).ok_or_else(|| {
