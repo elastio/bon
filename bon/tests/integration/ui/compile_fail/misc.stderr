@@ -34,26 +34,44 @@ error: expected at least one parameter in parentheses
 22 | #[builder(start_fn())]
    |           ^^^^^^^^
 
-error: duplicate key in the map
-  --> tests/integration/ui/compile_fail/misc.rs:27:9
+error: `skip` attribute can't be specified with other attributes like `into` because there will be no setter generated for this member to configure
+  --> tests/integration/ui/compile_fail/misc.rs:27:21
    |
-27 |         "Hello": "Blackjack",
+27 |     #[builder(skip, into)]
+   |                     ^^^^
+
+error: `skip` attribute can't be specified with other attributes like `name` because there will be no setter generated for this member to configure
+  --> tests/integration/ui/compile_fail/misc.rs:33:28
+   |
+33 |     #[builder(skip, name = bar)]
+   |                            ^^^
+
+error: `skip` attribute can't be specified with other attributes like `default` because there will be no setter generated for this member to configure. If you wanted to specify a value for the member, then use the following syntax instead `#[builder(skip = value)]`
+  --> tests/integration/ui/compile_fail/misc.rs:39:21
+   |
+39 |     #[builder(skip, default = 42)]
+   |                     ^^^^^^^
+
+error: duplicate key in the map
+  --> tests/integration/ui/compile_fail/misc.rs:45:9
+   |
+45 |         "Hello": "Blackjack",
    |         ^^^^^^^
 
 error: duplicate key in the map
-  --> tests/integration/ui/compile_fail/misc.rs:28:9
+  --> tests/integration/ui/compile_fail/misc.rs:46:9
    |
-28 |         "Hello": "Littlepip",
+46 |         "Hello": "Littlepip",
    |         ^^^^^^^
 
 error: duplicate value in the set
-  --> tests/integration/ui/compile_fail/misc.rs:31:43
+  --> tests/integration/ui/compile_fail/misc.rs:49:43
    |
-31 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
+49 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
    |                                           ^^^^^^^^^
 
 error: duplicate value in the set
-  --> tests/integration/ui/compile_fail/misc.rs:31:62
+  --> tests/integration/ui/compile_fail/misc.rs:49:62
    |
-31 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
+49 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
    |                                                              ^^^^^^^^^

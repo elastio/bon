@@ -307,16 +307,18 @@ impl FuncInputCtx {
         // Special case for `new` methods. We rename them to `builder`
         // since this is the name that is used in the builder pattern
         let start_func_ident = if is_method_new {
-            syn::Ident::new("builder", self.norm_func.sig.ident.span())
+            quote::format_ident!("builder")
         } else {
             self.norm_func.sig.ident.clone()
         };
 
         let finish_func_ident = self.params.base.finish_fn.unwrap_or_else(|| {
             // For `new` methods the `build` finisher is more conventional
-            let name = if is_method_new { "build" } else { "call" };
-
-            syn::Ident::new(name, start_func_ident.span())
+            if is_method_new {
+                quote::format_ident!("build")
+            } else {
+                quote::format_ident!("call")
+            }
         });
 
         let finish_func = FinishFunc {

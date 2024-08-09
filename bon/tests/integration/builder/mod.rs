@@ -1,151 +1,12 @@
-mod expose_positional_fn;
+mod attr_default;
+mod attr_expose_positional_fn;
+mod attr_into;
+mod attr_skip;
+mod lints;
+mod raw_idents;
+mod smoke;
 
-use bon::{bon, builder};
-use core::num::NonZeroU32;
-#[cfg(feature = "alloc")]
-use {
-    alloc::borrow::ToOwned, alloc::collections::BTreeSet, alloc::format, alloc::string::String,
-    alloc::vec, alloc::vec::Vec,
-};
-
-#[cfg(feature = "alloc")]
-#[test]
-fn smoke() {
-    /// Function-level docs
-    /// multiline.
-    #[builder]
-    fn sut(
-        /// ### Documentation
-        /// **Docs** for arg1.
-        ///
-        /// Multiline with `code` *examples* __even__!
-        ///
-        /// ```
-        /// let wow_such_code = true;
-        /// println!("Code is so lovely! {wow_such_code}");
-        /// ```
-        ///
-        /// - List item 1
-        /// - List item 2
-        arg1: bool,
-
-        /// Docs for arg2
-        arg2: &'_ str,
-        arg3: String,
-        arg4: u32,
-
-        /// Docs on optional parameter
-        arg5: Option<u32>,
-        arg6: Option<&str>,
-        arg7: Vec<String>,
-        arg8: (u32, &[bool]),
-    ) -> String {
-        drop((arg1, arg2, arg4, arg5, arg6, arg7, arg8));
-        arg3
-    }
-
-    let actual = sut()
-        .arg1(true)
-        .arg2("arg2")
-        .arg3("arg3")
-        .arg4(1)
-        .arg7(vec!["arg7".to_owned()])
-        .arg8((1, &[true]))
-        .call();
-
-    assert_eq!(actual, "arg3");
-}
-
-#[cfg(feature = "alloc")]
-#[test]
-fn default_attr_alloc() {
-    #[builder]
-    fn sut(
-        #[builder(default = "default")] arg3: String,
-        #[builder(default = vec![42])] arg4: Vec<u32>,
-    ) -> (String, Vec<u32>) {
-        (arg3, arg4)
-    }
-
-    let actual = sut().call();
-
-    assert_eq!(actual, ("default".to_owned(), vec![42]));
-}
-
-#[test]
-fn default_attr_no_std() {
-    #[builder]
-    fn sut(#[builder(default)] arg1: u32, #[builder(default = 42)] arg2: u32) -> (u32, u32) {
-        (arg1, arg2)
-    }
-
-    let actual = sut().call();
-
-    assert_eq!(actual, (0, 42));
-}
-
-#[cfg(feature = "alloc")]
-#[test]
-fn into_attr_alloc() {
-    #[builder]
-    fn sut(
-        #[builder(into)] set: Option<BTreeSet<u32>>,
-        #[builder(into = false)] disabled_into: String,
-    ) -> String {
-        format!("{set:?}:{disabled_into}")
-    }
-
-    let actual = sut()
-        .set([32, 43])
-        .disabled_into("disabled".to_owned())
-        .call();
-
-    assert_eq!(actual, "Some({32, 43}):disabled");
-}
-
-#[test]
-fn into_attr_no_std() {
-    #[builder]
-    fn sut(
-        #[builder(into)] str_ref: &str,
-
-        /// Some docs
-        #[builder(into)]
-        u32: u32,
-    ) -> (&str, u32) {
-        (str_ref, u32)
-    }
-
-    struct IntoStrRef<'a>(&'a str);
-
-    impl<'a> From<IntoStrRef<'a>> for &'a str {
-        fn from(val: IntoStrRef<'a>) -> Self {
-            val.0
-        }
-    }
-
-    let actual = sut()
-        .str_ref(IntoStrRef("vinyl-scratch"))
-        .u32(NonZeroU32::new(32).unwrap())
-        .call();
-
-    assert_eq!(actual, ("vinyl-scratch", 32));
-}
-
-#[cfg(feature = "alloc")]
-#[test]
-fn into_string() {
-    #[builder]
-    fn sut(arg1: String, arg2: Option<String>) -> String {
-        format!("{arg1}:{arg2:?}")
-    }
-
-    let actual = sut().arg1("blackjack").arg2("bruh").call();
-    assert_eq!(actual, "blackjack:Some(\"bruh\")");
-
-    let actual = sut().arg1("blackjack").maybe_arg2(Some("bruh2")).call();
-    assert_eq!(actual, "blackjack:Some(\"bruh2\")");
-}
+use crate::prelude::*;
 
 #[test]
 fn leading_underscore_is_stripped() {
@@ -379,23 +240,6 @@ fn const_function() {
     const fn foo(_arg: u32) {}
 
     foo().arg(42).call();
-}
-
-// This is based on the issue https://github.com/elastio/bon/issues/8
-#[test]
-#[allow(non_camel_case_types)]
-fn raw_identifiers() {
-    #[builder]
-    fn r#type(r#type: u32, #[builder(name = r#while)] other: u32) {
-        let _ = (r#type, other);
-    }
-
-    r#type().r#type(42).r#while(100).call();
-
-    #[builder(builder_type = r#type)]
-    fn sut() {}
-
-    let _: r#type = sut();
 }
 
 // This is based on the issue https://github.com/elastio/bon/issues/16

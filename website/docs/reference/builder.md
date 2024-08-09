@@ -336,8 +336,8 @@ struct User {
     #[builder(default)] // [!code highlight]
     level: u32,
 
-    // The default value expression of type `&'static str` is // [!code highlight]
-    // automatically converted to `String` here via `Into`.   // [!code highlight]
+    // The expression of type `&'static str` is automatically // [!code highlight]
+    // converted to `String` here via `Into`.                 // [!code highlight]
     #[builder(default = "anon")]                              // [!code highlight]
     name: String,
 
@@ -361,8 +361,8 @@ fn greet_user(
     #[builder(default)] // [!code highlight]
     level: u32,
 
-    // The default value expression of type `&'static str` is // [!code highlight]
-    // automatically converted to `String` here via `Into`.   // [!code highlight]
+    // The expression of type `&'static str` is automatically // [!code highlight]
+    // converted to `String` here via `Into`.                 // [!code highlight]
     #[builder(default = "anon")]                              // [!code highlight]
     name: String,
 
@@ -394,8 +394,8 @@ impl User {
         #[builder(default)] // [!code highlight]
         level: u32,
 
-        // The default value expression of type `&'static str` is // [!code highlight]
-        // automatically converted to `String` here via `Into`.   // [!code highlight]
+        // The expression of type `&'static str` is automatically // [!code highlight]
+        // converted to `String` here via `Into`.                 // [!code highlight]
         #[builder(default = "anon")]                              // [!code highlight]
         name: String,
 
@@ -638,6 +638,119 @@ example()
     .point((1, 2))
     .call();
 ```
+
+### `skip`
+
+**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
+
+Skips generating setters for the member. This hides the member from the generated builder API, so the caller can't set it's value.
+
+The value for the member will be computed based on the form of the attribute specified below.
+
+Form                            | How value for the member is computed
+--------------------------------|----------------------------------------------------------------
+`#[builder(skip)]`              | `Default::default()`
+`#[builder(skip = expression)]` | `expression`
+
+The result of the `expression` will automatically be converted into the target type if the type satisfies [automatic `Into` conversion qualification rules].
+
+**Example:**
+
+::: code-group
+
+```rust [Struct field]
+use bon::builder;
+
+#[builder]
+struct User {
+    #[builder(skip)] // [!code highlight]
+    level: u32,
+
+    // The expression of type `&'static str` is automatically // [!code highlight]
+    // converted to `String` here via `Into`.                 // [!code highlight]
+    #[builder(skip = "anon")]                                 // [!code highlight]
+    name: String,
+
+    // Any complex expression is accepted // [!code highlight]
+    #[builder(skip = bon::vec!["read"])]  // [!code highlight]
+    permissions: Vec<String>,
+}
+
+let user = User::builder()
+    // There are no `level`, `name`, and `permissions` setters generated // [!code highlight]
+    .build();
+
+assert_eq!(user.name, "anon");
+assert_eq!(user.level, 0);
+assert_eq!(user.permissions, ["read"]);
+```
+
+```rust [Free function argument]
+use bon::builder;
+
+#[builder]
+fn greet_user(
+    #[builder(skip)] // [!code highlight]
+    level: u32,
+
+    // The expression of type `&'static str` is automatically // [!code highlight]
+    // converted to `String` here via `Into`.                 // [!code highlight]
+    #[builder(skip = "anon")]                                 // [!code highlight]
+    name: String,
+
+    // Any complex expression is accepted // [!code highlight]
+    #[builder(skip = bon::vec!["read"])]  // [!code highlight]
+    permissions: Vec<String>,
+) -> String {
+    format!("Hello {name}! Your level is {level}, permissions: {permissions:?}")
+}
+
+let greeting = greet_user()
+    // There are no `level`, `name`, and `permissions` setters generated // [!code highlight]
+    .call();
+
+assert_eq!(greeting, "Hello anon! Your level is 0, permissions: [\"read\"]");
+```
+
+```rust [Associated method argument]
+use bon::bon;
+
+struct User {
+    level: u32,
+    name: String,
+    permissions: Vec<String>,
+}
+
+#[bon]
+impl User {
+    #[builder]
+    fn new(
+        #[builder(skip)] // [!code highlight]
+        level: u32,
+
+        // The expression of type `&'static str` is automatically // [!code highlight]
+        // converted to `String` here via `Into`.                 // [!code highlight]
+        #[builder(skip = "anon")]                                 // [!code highlight]
+        name: String,
+
+        // Any complex expression is accepted // [!code highlight]
+        #[builder(skip = bon::vec!["read"])]  // [!code highlight]
+        permissions: Vec<String>,
+    ) -> Self {
+        Self { level, name, permissions }
+    }
+}
+
+let user = User::builder()
+    // There are no `level`, `name`, and `permissions` setters generated // [!code highlight]
+    .build();
+
+assert_eq!(user.name, "anon");
+assert_eq!(user.level, 0);
+assert_eq!(user.permissions, ["read"]);
+```
+
+:::
 
 [automatic `Into` conversion qualification rules]: ../guide/into-conversions#types-that-qualify-for-an-automatic-into-conversion
 
