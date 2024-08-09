@@ -108,7 +108,7 @@ impl MemberParams {
 
             if let Some((attr_name, span)) = other_attr {
                 let default_hint = if default.as_ref().is_some_and(|expr| expr.is_some()) {
-                    ". If you wanted to specify a value for the member, then use
+                    ". If you wanted to specify a value for the member, then use \
                     the following syntax instead `#[builder(skip = value)]`"
                 } else {
                     ""
@@ -117,7 +117,7 @@ impl MemberParams {
                 bail!(
                     &span,
                     "`skip` attribute can't be specified with other attributes like `{}` \
-                    because will be no setter generated for this member to configure{default_hint}",
+                    because there will be no setter generated for this member to configure{default_hint}",
                     attr_name,
                 );
             }

@@ -22,6 +22,24 @@ fn unnecessary_into_override_false(#[builder(into = false)] _x: u32) {}
 #[builder(start_fn())]
 struct EmptyStartFn {}
 
+#[builder]
+struct ConflictingAttrs {
+    #[builder(skip, into)]
+    x: u32,
+}
+
+#[builder]
+struct ConflictingAttrs2 {
+    #[builder(skip, name = bar)]
+    x: u32,
+}
+
+#[builder]
+struct ConflictingAttrs3 {
+    #[builder(skip, default = 42)]
+    z: u32,
+}
+
 fn main() {
     let map: BTreeMap<String, String> = bon::map! {
         "Hello": "Blackjack",
