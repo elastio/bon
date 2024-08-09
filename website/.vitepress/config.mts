@@ -156,6 +156,10 @@ export default defineConfig({
                                             text: "name",
                                             link: "/docs/reference/builder#name",
                                         },
+                                        {
+                                            text: "skip",
+                                            link: "/docs/reference/builder#skip",
+                                        },
                                     ],
                                 },
                             ],
