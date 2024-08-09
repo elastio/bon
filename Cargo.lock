@@ -61,7 +61,7 @@ dependencies = [
 
 [[package]]
 name = "benchmarks"
-version = "1.1.0"
+version = "1.2.0"
 dependencies = [
  "bon",
  "cfg-if",
@@ -71,7 +71,7 @@ dependencies = [
 
 [[package]]
 name = "bon"
-version = "1.1.0"
+version = "1.2.0"
 dependencies = [
  "bon-macros",
  "expect-test",
@@ -81,7 +81,7 @@ dependencies = [
 
 [[package]]
 name = "bon-macros"
-version = "1.1.0"
+version = "1.2.0"
 dependencies = [
  "darling",
  "ident_case",
@@ -291,7 +291,7 @@ checksum = "59f8e79d1fbf76bdfbde321e902714bf6c49df88a7dda6fc682fc2979226962d"
 
 [[package]]
 name = "e2e-tests"
-version = "1.1.0"
+version = "1.2.0"
 dependencies = [
  "bon",
  "buildstructor",
