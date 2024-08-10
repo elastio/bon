@@ -371,7 +371,9 @@ fn main() {
         name: String
     }
 
-    User::builder().name("Foo").build();
+    User::builder()
+        .name("Foo")
+        .build();
 }
 ```
 
