@@ -149,7 +149,7 @@ fn main() {
         name: "Bon".to_owned()
     };
 
-    println!("Here is {}!" user.name);
+    println!("Here is {}!", user.name);
 }
 ```
 
