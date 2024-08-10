@@ -53,7 +53,7 @@ fn main() {
 
 ::: tip
 
-Why is there an explicit `main()` function in this code snippet 🤔? It's a long story explained in a [blog post](../../blog/avoid-child-modules-in-macros) (feel free to skip).
+Why is there an explicit `main()` function in this code snippet 🤔? It's a long story explained in a [blog post](../../blog/the-weird-of-function-local-types-in-rust) (feel free to skip).
 
 :::
 
