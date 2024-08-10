@@ -404,4 +404,10 @@ fn main() {
 
 Does this mean generating child modules for privacy in macros is generally a bad idea? It depends... The main thing is not to reference items from the surrounding scope in the child module. For example, if you need to add `use super::*` in your macro-generated code, then this is already a bad call. You should think of local items and doc tests when you do this.
 
-If you liked this article check out my previous blog post [*'How to do named function arguments in Rust'*](./how-to-do-named-function-arguments-in-rust) (it's available [on Reddit](https://www.reddit.com/r/rust/comments/1eeem92/how_to_do_named_function_arguments_in_rust/)). Also, check out the [`bon` crate on GitHub](https://github.com/elastio/bon). Consider giving it a star ⭐ if you like it.
+If you liked this article check out my previous blog post [*'How to do named function arguments in Rust'*](./how-to-do-named-function-arguments-in-rust) (it's also available [on Reddit](https://www.reddit.com/r/rust/comments/1eeem92/how_to_do_named_function_arguments_in_rust/)). Also, check out the [`bon` crate on GitHub](https://github.com/elastio/bon). Consider giving it a star ⭐ if you like it.
+
+::: tip
+
+You can leave comments for this post [on Reddit](https://www.reddit.com/r/rust/comments/1eowtoi/the_weird_of_functionlocal_types_in_rust/).
+
+:::
