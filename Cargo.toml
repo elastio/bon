@@ -166,6 +166,8 @@ unused_macro_rules             = "warn"
 unused_qualifications          = "warn"
 variant_size_differences       = "warn"
 
+rust_2024_compatibility = { level = "warn", priority = 1 }
+
 # Unstable but desirable lints.
 # [workspace.lints.rust]
 # must_not_suspend           = "warn"
