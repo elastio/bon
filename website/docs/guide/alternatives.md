@@ -57,7 +57,7 @@ Why is there an explicit `main()` function in this code snippet 🤔? It's a lon
 
 :::
 
-This feature isn't available today in `bon`, but it's planned for the future. However, it won't be enabled by default, but rather be opt-in like it is in `derive-builder`.
+This feature isn't available today in `bon`, but it's planned for the future. However, it won't be enabled by default, but rather be opt-in like it is in `derive_builder`.
 
 The problem of this feature is that a setter that pushes an element into a collection like that may confuse the reader in case if only one element is pushed. This may hide the fact that the member is actually a collection called `friends` in plural. However, this feature is still useful to provide backwards-compatibility when changing the type of a member from `T` or `Option<T>` to `Collection<T>`.
 

@@ -168,7 +168,7 @@ struct StructLiteralBody {
 }
 
 impl FinishFuncBody for StructLiteralBody {
-    fn gen(&self, member_exprs: &[MemberExpr<'_>]) -> TokenStream2 {
+    fn generate(&self, member_exprs: &[MemberExpr<'_>]) -> TokenStream2 {
         let Self { struct_ident } = self;
 
         let member_exprs = member_exprs.iter().map(|MemberExpr { member, expr }| {

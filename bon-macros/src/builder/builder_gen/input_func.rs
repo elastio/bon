@@ -375,7 +375,7 @@ struct FnCallBody {
 }
 
 impl FinishFuncBody for FnCallBody {
-    fn gen(&self, member_exprs: &[MemberExpr<'_>]) -> TokenStream2 {
+    fn generate(&self, member_exprs: &[MemberExpr<'_>]) -> TokenStream2 {
         let asyncness = &self.func.sig.asyncness;
         let maybe_await = asyncness.is_some().then(|| quote!(.await));
 

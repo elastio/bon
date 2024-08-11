@@ -62,7 +62,7 @@ pub(crate) struct StartFunc {
 
 pub(crate) trait FinishFuncBody {
     /// Generate `finish` function body from ready-made expressions.
-    fn gen(&self, member_exprs: &[MemberExpr<'_>]) -> TokenStream2;
+    fn generate(&self, member_exprs: &[MemberExpr<'_>]) -> TokenStream2;
 }
 
 pub(crate) struct MemberExpr<'a> {
@@ -454,7 +454,7 @@ impl BuilderGenCtx {
             .map(|member| self.member_expr(member))
             .try_collect()?;
 
-        let body = &self.finish_func.body.gen(&member_exprs);
+        let body = &self.finish_func.body.generate(&member_exprs);
         let asyncness = &self.finish_func.asyncness;
         let unsafety = &self.finish_func.unsafety;
         let docs = &self.finish_func.docs;
