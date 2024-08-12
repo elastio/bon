@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.1](https://github.com/elastio/bon/compare/v1.2.0...v1.2.1) - 2024-08-12
+
+### Other
+- Remove unnecessary const block ([#52](https://github.com/elastio/bon/pull/52))
+- Small cleanup ([#51](https://github.com/elastio/bon/pull/51))
+
 ## [1.2.0](https://github.com/elastio/bon/compare/v1.1.0...v1.2.0) - 2024-08-09
 
 ### Added
