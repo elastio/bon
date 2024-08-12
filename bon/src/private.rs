@@ -11,7 +11,7 @@ pub struct Optional<T>(pub core::marker::PhantomData<Option<T>>);
 impl<T> From<Optional<T>> for Set<Option<T>> {
     #[inline(always)]
     fn from(_: Optional<T>) -> Set<Option<T>> {
-        const { Set(None) }
+        Set(None)
     }
 }
 
