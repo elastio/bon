@@ -1,6 +1,7 @@
+use crate::builder::params::SettersParams;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
-use darling::{FromAttributes, FromMeta};
+use darling::FromAttributes;
 use quote::quote;
 use std::fmt;
 use syn::spanned::Spanned;
@@ -30,6 +31,9 @@ pub(crate) enum Member {
 #[derive(Debug, Clone)]
 pub(crate) struct RegularMember {
     /// Specifies what syntax the member comes from.
+    // It was previously used to provide better error messages, but now it's
+    // not used anymore. It's kept here for future use.
+    #[allow(dead_code)]
     pub(crate) origin: MemberOrigin,
 
     /// Original name of the member is used as the name of the builder field and
@@ -67,21 +71,21 @@ pub(crate) struct SkippedMember {
 #[derive(Debug, Clone, darling::FromAttributes)]
 #[darling(attributes(builder))]
 pub(crate) struct MemberParams {
-    /// Overrides the decision to use `Into` for the setter method.
-    pub(crate) into: Option<SpannedValue<StrictBool>>,
+    /// Enables an `Into` conversion for the setter method.
+    pub(crate) into: darling::util::Flag,
 
     /// Assign a default value to the member it it's not specified.
     ///
     /// An optional expression can be provided to set the value for the member,
     /// otherwise its  [`Default`] trait impl will be used.
-    #[darling(with = "parse_optional_expression", map = "Some")]
+    #[darling(with = parse_optional_expression, map = Some)]
     pub(crate) default: Option<SpannedValue<Option<syn::Expr>>>,
 
     /// Skip generating a setter method for this member.
     ///
     /// An optional expression can be provided to set the value for the member,
     /// otherwise its  [`Default`] trait impl will be used.
-    #[darling(with = "parse_optional_expression", map = "Some")]
+    #[darling(with = parse_optional_expression, map = Some)]
     pub(crate) skip: Option<SpannedValue<Option<syn::Expr>>>,
 
     /// Rename the name exposed in the builder API.
@@ -100,7 +104,7 @@ impl MemberParams {
             let other_attr = [
                 default.as_ref().map(|attr| ("default", attr.span())),
                 name.as_ref().map(|attr| ("name", attr.span())),
-                into.as_ref().map(|attr| ("into", attr.span())),
+                into.is_present().then(|| ("into", into.span())),
             ]
             .into_iter()
             .flatten()
@@ -124,33 +128,6 @@ impl MemberParams {
         }
 
         Ok(())
-    }
-}
-
-/// This primitive represents the syntax that accepts only two states:
-/// a word e.g. `#[attr(field)]` represents true, and an expression with
-/// `false` e.g. `#[attr(field = false)]` represents false. No other syntax
-/// is accepted. That's why it's called a "strict" bool.
-#[derive(Debug, Clone)]
-pub(crate) struct StrictBool {
-    pub(crate) value: bool,
-}
-
-impl FromMeta for StrictBool {
-    fn from_word() -> Result<Self> {
-        Ok(Self { value: true })
-    }
-
-    fn from_bool(value: bool) -> Result<Self> {
-        if !value {
-            return Ok(Self { value: false });
-        }
-
-        // Error span is set by default trait impl in the caller
-        Err(Error::custom(format_args!(
-            "No need to write `= true`. Just mentioning the attribute is enough \
-            to set it to `true`, so remove the `= true` part.",
-        )))
     }
 }
 
@@ -276,5 +253,21 @@ impl RegularMember {
         let ty = self.set_state_type_param();
 
         quote!(::bon::private::Set<#ty>)
+    }
+
+    pub(crate) fn has_into(&self, setters_params: &[SettersParams]) -> bool {
+        if self.params.into.is_present() {
+            return true;
+        }
+
+        setters_params
+            .iter()
+            .filter(|params| {
+                let Some(filter) = &params.filter else {
+                    return true;
+                };
+                filter.iter().any(|filter| self.ty.matches(filter))
+            })
+            .any(|params| params.into.is_present())
     }
 }

@@ -14,7 +14,7 @@ pub(crate) fn generate(
     let MacroOutput {
         mut start_func,
         other_items,
-    } = ctx.into_builder_gen_ctx()?.output()?;
+    } = ctx.into_builder_gen_ctx()?.output();
 
     let impl_generics = std::mem::take(&mut start_func.sig.generics);
 

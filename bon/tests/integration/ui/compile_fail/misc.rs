@@ -19,6 +19,12 @@ fn unnecessary_into_override_true(#[builder(into)] _x: String) {}
 #[builder]
 fn unnecessary_into_override_false(#[builder(into = false)] _x: u32) {}
 
+#[builder(setters())]
+fn empty_setters() {}
+
+#[builder(setters(into, filter(fn(#[attr] a: u32))))]
+fn attrs_in_setters() {}
+
 #[builder(start_fn())]
 struct EmptyStartFn {}
 

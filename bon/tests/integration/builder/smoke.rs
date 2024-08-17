@@ -41,7 +41,7 @@ fn smoke_fn() {
     let actual = sut()
         .arg1(true)
         .arg2("arg2")
-        .arg3("arg3")
+        .arg3("arg3".to_owned())
         .arg4(1)
         .arg7(vec!["arg7".to_owned()])
         .arg8((1, &[true]))

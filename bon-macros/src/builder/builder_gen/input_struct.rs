@@ -147,6 +147,9 @@ impl StructInputCtx {
 
         let ctx = BuilderGenCtx {
             members,
+
+            setters_params: self.params.base.setters,
+
             builder_ident,
             builder_private_impl_ident,
             builder_state_trait_ident,

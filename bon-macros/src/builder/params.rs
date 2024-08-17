@@ -1,11 +1,75 @@
+use crate::util::parse_terminated;
 use crate::util::prelude::*;
 use darling::FromMeta;
+use proc_macro2::Span;
 use quote::quote;
+use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
+use syn::visit::Visit;
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct BuilderParams {
     pub(crate) finish_fn: Option<syn::Ident>,
     pub(crate) builder_type: Option<syn::Ident>,
+
+    #[darling(multiple)]
+    pub(crate) setters: Vec<SettersParams>,
+}
+
+pub(crate) type MembersFilter = Option<Punctuated<syn::Type, syn::Token![,]>>;
+
+#[derive(Debug)]
+pub(crate) struct SettersParams {
+    pub(crate) filter: MembersFilter,
+    pub(crate) into: darling::util::Flag,
+}
+
+impl FromMeta for SettersParams {
+    fn from_meta(meta: &syn::Meta) -> Result<Self> {
+        #[derive(FromMeta)]
+        struct Parsed {
+            #[darling(default, with = parse_terminated, map = Some)]
+            filter: MembersFilter,
+            into: darling::util::Flag,
+        }
+
+        let Parsed { filter, into } = Parsed::from_meta(meta)?;
+
+        if !into.is_present() {
+            bail!(
+                meta,
+                "this #[builder(setters(...))] contains no options to override \
+                the default behavior for the selected setters like `into`, so it \
+                does nothing"
+            );
+        }
+
+        struct FindAttr {
+            attr: Option<Span>,
+        }
+
+        impl Visit<'_> for FindAttr {
+            fn visit_attribute(&mut self, attr: &'_ syn::Attribute) {
+                self.attr = Some(attr.span());
+            }
+        }
+
+        let attr_in_type_pattern = filter.iter().flatten().find_map(|ty| {
+            let mut find_attr = FindAttr { attr: None };
+            find_attr.visit_type(ty);
+            find_attr.attr
+        });
+
+        if let Some(attr) = attr_in_type_pattern {
+            bail!(
+                &attr,
+                "nested attributes are not allowed in the type pattern of \
+                #[builder(setters(filter(...)))]"
+            );
+        }
+
+        Ok(Self { filter, into })
+    }
 }
 
 #[derive(Debug, Default)]

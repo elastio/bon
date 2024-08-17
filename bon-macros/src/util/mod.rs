@@ -8,10 +8,9 @@ mod ty;
 use prelude::*;
 use proc_macro::TokenStream;
 use std::collections::HashSet;
-use syn::parse::ParseStream;
+use syn::parse::Parser;
 use syn::punctuated::Punctuated;
 use syn::Expr;
-use syn::Token;
 
 pub(crate) mod prelude {
     /// A handly alias for [`proc_macro2::TokenStream`].
@@ -52,18 +51,38 @@ where
     Ok((params, item))
 }
 
-pub(crate) fn parse_map_macro_input(
-    input: ParseStream<'_>,
-) -> Result<Punctuated<(Expr, Expr), Token![,]>, syn::Error> {
-    Punctuated::parse_terminated_with(input, parse_map_pair)
-}
+/// Utility for parsing with `#[darling(with = ...)]` attribute that allows to
+/// parse an arbitrary sequence of items inside of parentheses. For example
+/// `foo(a, b, c)`, where `a`, `b`, and `c` are of type `T` and `,` is represented
+/// by the token type `P`.
+pub(crate) fn parse_terminated<T, P>(meta: &syn::Meta) -> Result<Punctuated<T, P>>
+where
+    T: syn::parse::Parse,
+    P: syn::parse::Parse,
+{
+    let item = std::any::type_name::<T>();
+    let punct = std::any::type_name::<P>();
 
-fn parse_map_pair(pair: ParseStream<'_>) -> Result<(Expr, Expr), syn::Error> {
-    let key = pair.parse().map_err(|_| pair.error(pair))?;
-    let _: Token![:] = pair.parse()?;
-    let value = pair.parse()?;
+    let name = |val: &str| {
+        format!(
+            "'{}'",
+            val.rsplit("::").next().unwrap_or(val).to_lowercase()
+        )
+    };
 
-    Ok((key, value))
+    let tokens = match meta {
+        syn::Meta::List(meta) => &meta.tokens,
+        _ => bail!(
+            &meta,
+            "expected a list of {} separated by {}",
+            name(item),
+            name(punct),
+        ),
+    };
+
+    let punctuated = Punctuated::parse_terminated.parse2(tokens.clone())?;
+
+    Ok(punctuated)
 }
 
 pub(crate) fn validate_expressions_are_unique<'k, I>(err_label: &str, items: I) -> Option<Error>

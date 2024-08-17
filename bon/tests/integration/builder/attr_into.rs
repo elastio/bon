@@ -7,16 +7,13 @@ fn into_attr_alloc() {
     #[builder]
     fn sut(
         #[builder(into)] set: Option<BTreeSet<u32>>,
-        #[builder(into = false)] disabled_into: String,
+        no_into: String,
     ) -> (Option<BTreeSet<u32>>, String) {
-        (set, disabled_into)
+        (set, no_into)
     }
 
     assert_debug_eq(
-        sut()
-            .set([32, 43])
-            .disabled_into("disabled".to_owned())
-            .call(),
+        sut().set([32, 43]).no_into("disabled".into()).call(),
         expect![[r#"(Some({32, 43}), "disabled")"#]],
     );
 }
@@ -54,7 +51,7 @@ fn into_attr_no_std() {
 #[cfg(feature = "alloc")]
 #[test]
 fn into_string() {
-    #[builder]
+    #[builder(setters(into))]
     fn sut(arg1: String, arg2: Option<String>) -> (String, Option<String>) {
         (arg1, arg2)
     }

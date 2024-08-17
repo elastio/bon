@@ -5,7 +5,7 @@ use crate::prelude::*;
 fn fn_alloc() {
     #[builder]
     fn sut(
-        #[builder(default = "default")] arg1: String,
+        #[builder(default = "default".to_owned())] arg1: String,
         #[builder(default = vec![42])] arg2: Vec<u32>,
     ) -> (String, Vec<u32>) {
         (arg1, arg2)
@@ -33,7 +33,7 @@ fn struct_alloc() {
     #[builder]
     #[derive(Debug)]
     struct Sut {
-        #[builder(default = "default")]
+        #[builder(default = "default".to_owned())]
         arg1: String,
 
         #[builder(default = vec![42])]
@@ -60,7 +60,7 @@ fn struct_alloc() {
         #[builder]
         fn assoc(
             self,
-            #[builder(default = "default")] arg1: String,
+            #[builder(default = "default".to_owned())] arg1: String,
             #[builder(default = vec![43])] arg2: Vec<u32>,
         ) -> Self {
             Self {

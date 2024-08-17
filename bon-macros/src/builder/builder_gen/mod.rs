@@ -1,4 +1,3 @@
-mod auto_into;
 mod member;
 mod setter_methods;
 
@@ -7,6 +6,7 @@ pub(crate) mod input_struct;
 
 use member::*;
 
+use super::params::SettersParams;
 use crate::util::prelude::*;
 use quote::quote;
 
@@ -27,6 +27,8 @@ pub(crate) struct AssocMethodCtx {
 
 pub(crate) struct BuilderGenCtx {
     pub(crate) members: Vec<Member>,
+
+    pub(crate) setters_params: Vec<SettersParams>,
 
     pub(crate) generics: Generics,
     pub(crate) vis: syn::Visibility,
@@ -110,28 +112,65 @@ impl BuilderGenCtx {
         self.generics.params.iter().map(generic_param_to_arg)
     }
 
-    pub(crate) fn output(self) -> Result<MacroOutput> {
+    pub(crate) fn output(self) -> MacroOutput {
         let start_func = self.start_func();
         let builder_state_trait_decl = self.builder_state_trait_decl();
         let builder_decl = self.builder_decl();
-        let call_method_impl = self.finish_method_impl()?;
-        let setter_methods_impls = self.setter_methods_impls()?;
+        let call_method_impl = self.finish_method_impl();
+        let setter_methods_impls = self.setter_methods_impls();
+        let ide_hints = self.ide_hints();
 
         let other_items = quote! {
             #builder_state_trait_decl
             #builder_decl
             #call_method_impl
             #setter_methods_impls
+            #ide_hints
         };
 
-        Ok(MacroOutput {
+        MacroOutput {
             start_func,
             other_items,
-        })
+        }
     }
 
     fn start_func_generics(&self) -> &Generics {
         self.start_func.generics.as_ref().unwrap_or(&self.generics)
+    }
+
+    /// Generates code that has no meaning to the compiler, but it helps
+    /// IDEs to provide better code highlighting, completions and other
+    /// hints.
+    fn ide_hints(&self) -> TokenStream2 {
+        let type_patterns = self
+            .setters_params
+            .iter()
+            .flat_map(|params| &params.filter)
+            .flatten()
+            .collect::<Vec<_>>();
+
+        if type_patterns.is_empty() {
+            return quote! {};
+        }
+
+        quote! {
+            // This is wrapped in a cfg that is always false to prevent this
+            // code from being compiled. IDEs and language servers, like rust-analyzer,
+            // should be able to use the syntax provided inside of the block to
+            // figure out the semantic meaning of the tokens passed to the attribute.
+            #[cfg(any())]
+            const _: () = {
+                // Let IDEs know that these are type patterns like the ones that
+                // could be written in a type annotation for a variable. Note that
+                // we don't initialize the variable with any value because we don't
+                // have any meaningful value to assign to this variable, especially
+                // because its type may contain wildcard patterns like `_`. This is
+                // used only to signal the IDEs that these tokens are meant to be
+                // type patterns by placing them in the context where type patterns
+                // are expected.
+                let _: (#(#type_patterns,)*);
+            };
+        }
     }
 
     fn start_func(&self) -> syn::ItemFn {
@@ -386,7 +425,7 @@ impl BuilderGenCtx {
         }
     }
 
-    fn member_expr<'f>(&self, member: &'f Member) -> Result<MemberExpr<'f>> {
+    fn member_expr<'f>(&self, member: &'f Member) -> MemberExpr<'f> {
         let regular = match member {
             Member::Regular(regular) => regular,
             Member::Skipped(skipped) => {
@@ -394,19 +433,10 @@ impl BuilderGenCtx {
                     .value
                     .as_ref()
                     .as_ref()
-                    .map(|value| {
-                        let qualified_for_into = self.type_qualifies_for_into(&skipped.ty);
-                        if qualified_for_into {
-                            quote! { ::core::convert::Into::into((|| #value)()) }
-                        } else {
-                            quote! { #value }
-                        }
-                    })
-                    .unwrap_or_else(|| {
-                        quote! { ::core::default::Default::default() }
-                    });
+                    .map(|value| quote! { #value })
+                    .unwrap_or_else(|| quote! { ::core::default::Default::default() });
 
-                return Ok(MemberExpr::with_type_hint(member, expr));
+                return MemberExpr::with_type_hint(member, expr);
             }
         };
 
@@ -416,43 +446,37 @@ impl BuilderGenCtx {
             // We pass them directly to the function unchanged.
             .filter(|_| !regular.ty.is_option())
             .map(|_| {
-                regular
+                let default = regular
                     .params
                     .default
+                    .as_ref()?
                     .as_ref()
-                    .and_then(|val| val.as_ref().as_ref())
-                    .map(|default| {
-                        let qualified_for_into =
-                            self.member_qualifies_for_into(regular, &regular.ty)?;
-                        let default = if qualified_for_into {
-                            quote! { ::core::convert::Into::into((|| #default)()) }
-                        } else {
-                            quote! { #default }
-                        };
+                    .as_ref()
+                    .map(|default| quote! { .unwrap_or_else(|| #default) })
+                    .unwrap_or_else(|| quote! { .unwrap_or_default() });
 
-                        Result::<_>::Ok(quote! { .unwrap_or_else(|| #default) })
-                    })
-                    .unwrap_or_else(|| Ok(quote! { .unwrap_or_default() }))
-            })
-            .transpose()?;
+                Some(default)
+            });
 
         let member_ident = &regular.ident;
 
         let expr = quote! {
-            ::core::convert::Into::<::bon::private::Set<_>>::into(self.__private_impl.#member_ident)
-                .0
-                #maybe_default
+            ::core::convert::Into::<::bon::private::Set<_>>::into(
+                self.__private_impl.#member_ident
+            )
+            .0
+            #maybe_default
         };
 
-        Ok(MemberExpr::with_type_hint(member, expr))
+        MemberExpr::with_type_hint(member, expr)
     }
 
-    fn finish_method_impl(&self) -> Result<TokenStream2> {
+    fn finish_method_impl(&self) -> TokenStream2 {
         let member_exprs: Vec<_> = self
             .members
             .iter()
             .map(|member| self.member_expr(member))
-            .try_collect()?;
+            .collect();
 
         let body = &self.finish_func.body.generate(&member_exprs);
         let asyncness = &self.finish_func.asyncness;
@@ -483,7 +507,7 @@ impl BuilderGenCtx {
 
         let allows = allow_warnings_on_member_types();
 
-        Ok(quote! {
+        quote! {
             #allows
             impl<
                 #(#generics_decl,)*
@@ -503,10 +527,10 @@ impl BuilderGenCtx {
                     #body
                 }
             }
-        })
+        }
     }
 
-    fn setter_methods_impls(&self) -> Result<TokenStream2> {
+    fn setter_methods_impls(&self) -> TokenStream2 {
         self.regular_members()
             .map(|member| self.setter_methods_impls_for_member(member))
             .collect()

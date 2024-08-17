@@ -98,6 +98,25 @@ jobs:
 
       - run: cargo clippy --all-features --all-targets --locked
 
+  cargo-clippy-unstable:
+    runs-on: ubuntu-latest
+
+    # This job is optional to pass. It notifies us about the potential breakages
+    # in the future Rust toolchain versions.
+    continue-on-error: true
+
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [beta, nightly]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+      - run: cargo +${{ matrix.toolchain }} clippy --all-features --all-targets --locked
+
   cargo-doc:
     runs-on: ${{ matrix.os }}-latest
 
