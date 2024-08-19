@@ -38,6 +38,6 @@ darling = "0.20.10"
 # conversions to share the same dependency.
 ident_case = "1.0"
 
-proc-macro2 = "1.0"
-quote       = "1.0"
-syn         = { version = "2.0", features = ["full", "visit-mut", "visit"] }
+proc-macro2  = "1.0"
+quote        = "1.0"
+syn          = { version = "2.0", features = ["full", "visit-mut", "visit"] }

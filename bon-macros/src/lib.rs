@@ -9,6 +9,7 @@ mod set;
 mod util;
 
 use proc_macro::TokenStream;
+use syn::parse::Parser;
 
 /// Can be placed on top of a free function or an associated method or a struct
 /// declaration. Generates a builder for the item beneath it.
@@ -42,11 +43,22 @@ use proc_macro::TokenStream;
 /// rest of the docs about associated methods, structs, and more.
 #[proc_macro_attribute]
 pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
-    syn::parse(item.clone())
+    let meta = util::ide::parse_comma_separated_meta
+        .parse2(params.clone().into())
+        .unwrap_or_default();
+
+    let completions = util::ide::generate_completions(meta);
+
+    let main = syn::parse(item.clone())
         .map_err(Into::into)
         .and_then(|item| builder::generate_for_item(params.into(), item))
-        .unwrap_or_else(|err| error::error_into_token_stream(err, item.into()))
-        .into()
+        .unwrap_or_else(|err| error::error_into_token_stream(err, item.into()));
+
+    quote::quote! {
+        #completions
+        #main
+    }
+    .into()
 }
 
 /// Companion macro for [`builder`]. You should place it on top of the `impl` block
