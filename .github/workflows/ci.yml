@@ -115,6 +115,8 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           toolchain: ${{ matrix.toolchain }}
+          components: clippy
+
       - run: cargo +${{ matrix.toolchain }} clippy --all-features --all-targets --locked
 
   cargo-doc:
