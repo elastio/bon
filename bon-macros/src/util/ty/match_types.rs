@@ -84,12 +84,35 @@ fn match_generic_args(
 ) -> Result<bool> {
     use syn::GenericArgument::*;
 
-    let verdict = match (scrutinee, pattern) {
-        (Lifetime(scrutinee), Lifetime(pattern)) => scrutinee == pattern,
-        (Type(scrutinee), Type(pattern)) => match_types(scrutinee, pattern)?,
-        (Constraint(scrutinee), Constraint(pattern)) => scrutinee == pattern,
-        (Const(scrutinee), Const(pattern)) => match_exprs(scrutinee, pattern),
-        (AssocType(scrutinee), AssocType(pattern)) => {
+    let verdict = match pattern {
+        Lifetime(pattern) => {
+            if pattern.ident != "_" {
+                return Err(unsupported_syntax_error(
+                    pattern,
+                    "Lifetimes are ignored during type pattern matching. \
+                    Use an anonymous lifetime (`'_`) in this position instead. \
+                    Named lifetime syntax in generic parameters",
+                ));
+            }
+
+            matches!(scrutinee, Lifetime(_))
+        }
+        Type(pattern) => {
+            let Type(scrutinee) = scrutinee else {
+                return Ok(false);
+            };
+            match_types(scrutinee, pattern)?
+        }
+        Const(pattern) => {
+            let Const(scrutinee) = scrutinee else {
+                return Ok(false);
+            };
+            match_exprs(scrutinee, pattern)
+        }
+        AssocType(pattern) => {
+            let AssocType(scrutinee) = scrutinee else {
+                return Ok(false);
+            };
             scrutinee.ident == pattern.ident
                 && match_types(&scrutinee.ty, &pattern.ty)?
                 && match_option(
@@ -98,7 +121,11 @@ fn match_generic_args(
                     match_angle_bracketed_generic_args,
                 )?
         }
-        (AssocConst(scrutinee), AssocConst(pattern)) => {
+        AssocConst(pattern) => {
+            let AssocConst(scrutinee) = scrutinee else {
+                return Ok(false);
+            };
+
             scrutinee.ident == pattern.ident
                 && match_option(
                     &scrutinee.generics,
@@ -107,7 +134,8 @@ fn match_generic_args(
                 )?
                 && match_exprs(&scrutinee.value, &pattern.value)
         }
-        _ => false,
+
+        _ => return Err(unsupported_syntax_error(&pattern, "This syntax")),
     };
 
     Ok(verdict)
@@ -235,7 +263,7 @@ mod tests {
     }
 
     #[test]
-    fn arrays() {
+    fn array() {
         assert_match_types(pq!([u8; 4]), pq!([u8; 4]));
         assert_match_types(pq!([u8; 4]), pq!([_; 4]));
         assert_match_types(pq!([u8; 4]), pq!([_; _]));
@@ -252,7 +280,7 @@ mod tests {
     }
 
     #[test]
-    fn paths() {
+    fn path() {
         assert_match_types(pq!(bool), pq!(bool));
         assert_match_types(pq!(foo::Bar), pq!(foo::Bar));
         assert_match_types(pq!(crate::foo::Bar), pq!(crate::foo::Bar));
@@ -277,6 +305,82 @@ mod tests {
     }
 
     #[test]
+    fn ptr() {
+        assert_match_types(pq!(*const u8), pq!(*const u8));
+        assert_match_types(pq!(*const u8), pq!(*const _));
+        assert_match_types(pq!(*mut u8), pq!(*mut u8));
+        assert_match_types(pq!(*mut u8), pq!(*mut _));
+
+        assert_not_match_types(pq!(*const u8), pq!(*mut u8));
+        assert_not_match_types(pq!(*const u8), pq!(*mut _));
+        assert_not_match_types(pq!(*mut u8), pq!(*const u8));
+        assert_not_match_types(pq!(*mut u8), pq!(*const _));
+    }
+
+    #[test]
+    fn reference() {
+        assert_match_types(pq!(&u8), pq!(&u8));
+        assert_match_types(pq!(&u8), pq!(&_));
+        assert_match_types(pq!(&mut u8), pq!(&mut u8));
+        assert_match_types(pq!(&mut u8), pq!(&mut _));
+
+        assert_match_types(pq!(&'a u8), pq!(&_));
+        assert_match_types(pq!(&'_ u8), pq!(&_));
+        assert_match_types(pq!(&'static u8), pq!(&_));
+        assert_match_types(pq!(&'a mut u8), pq!(&mut _));
+        assert_match_types(pq!(&'_ mut u8), pq!(&mut _));
+        assert_match_types(pq!(&'static mut u8), pq!(&mut _));
+
+        assert_match_types(pq!(&'a u8), pq!(&u8));
+        assert_match_types(pq!(&'_ u8), pq!(&u8));
+        assert_match_types(pq!(&'static u8), pq!(&u8));
+        assert_match_types(pq!(&'a mut u8), pq!(&mut u8));
+        assert_match_types(pq!(&'_ mut u8), pq!(&mut u8));
+        assert_match_types(pq!(&'static mut u8), pq!(&mut u8));
+
+        assert_not_match_types(pq!(&u8), pq!(&mut u8));
+        assert_not_match_types(pq!(&u8), pq!(&mut _));
+        assert_not_match_types(pq!(&mut u8), pq!(&u8));
+        assert_not_match_types(pq!(&mut u8), pq!(&_));
+    }
+
+    #[test]
+    fn slice() {
+        assert_match_types(pq!([u8]), pq!([u8]));
+        assert_match_types(pq!([u8]), pq!([_]));
+        assert_match_types(pq!(&[u8]), pq!(&[u8]));
+        assert_match_types(pq!(&[u8]), pq!(&[_]));
+        assert_match_types(pq!(&[u8]), pq!(&_));
+
+        assert_not_match_types(pq!([u8]), pq!([u16]));
+        assert_not_match_types(pq!([u8]), pq!([u8; 4]));
+    }
+
+    #[test]
+    fn tuple() {
+        assert_match_types(pq!((u8, bool)), pq!((u8, bool)));
+        assert_match_types(pq!((u8, bool)), pq!((_, _)));
+        assert_match_types(pq!((u8, bool)), pq!((u8, _)));
+        assert_match_types(pq!((u8, bool)), pq!((_, bool)));
+
+        assert_match_types(pq!(()), pq!(()));
+        assert_match_types(pq!((u8,)), pq!((u8,)));
+        assert_match_types(pq!((u8,)), pq!((_,)));
+
+        assert_not_match_types(pq!((u8, bool)), pq!((bool, u8)));
+        assert_not_match_types(pq!((u8, bool)), pq!((u8, bool, u8)));
+
+        assert_not_match_types(pq!((u8,)), pq!(()));
+        assert_not_match_types(pq!(()), pq!((u8,)));
+    }
+
+    #[test]
+    fn never() {
+        assert_match_types(pq!(!), pq!(!));
+        assert_not_match_types(pq!(!), pq!(bool));
+    }
+
+    #[test]
     fn unsupported() {
         assert_unsupported(pq!(dyn Trait));
         assert_unsupported(pq!(dyn FnOnce()));
@@ -289,5 +393,10 @@ mod tests {
         assert_unsupported(pq!(&'a _));
         assert_unsupported(pq!(&'_ _));
         assert_unsupported(pq!(&'static _));
+
+        assert_unsupported(pq!(for<'a> Trait<'a>));
+        assert_unsupported(pq!(for<'a> fn()));
+
+        assert_unsupported(pq!(<T as Trait>::Foo));
     }
 }
