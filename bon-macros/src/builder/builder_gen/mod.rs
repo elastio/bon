@@ -6,7 +6,7 @@ pub(crate) mod input_struct;
 
 use member::*;
 
-use super::params::SettersParams;
+use super::params::ConditionalParams;
 use crate::util::prelude::*;
 use quote::quote;
 
@@ -28,7 +28,7 @@ pub(crate) struct AssocMethodCtx {
 pub(crate) struct BuilderGenCtx {
     pub(crate) members: Vec<Member>,
 
-    pub(crate) setters_params: Vec<SettersParams>,
+    pub(crate) conditional_params: Vec<ConditionalParams>,
 
     pub(crate) generics: Generics,
     pub(crate) vis: syn::Visibility,
@@ -83,7 +83,7 @@ impl<'a> MemberExpr<'a> {
     /// the resulting type of the expression, so we add a type hint via an
     /// intermediate variable here.
     fn with_type_hint(member: &'a Member, expr: TokenStream2) -> Self {
-        let ty = member.ty();
+        let ty = member.norm_ty();
         let expr = quote! {{
             let value: #ty = #expr;
             value
@@ -112,26 +112,24 @@ impl BuilderGenCtx {
         self.generics.params.iter().map(generic_param_to_arg)
     }
 
-    pub(crate) fn output(self) -> MacroOutput {
+    pub(crate) fn output(self) -> Result<MacroOutput> {
         let start_func = self.start_func();
         let builder_state_trait_decl = self.builder_state_trait_decl();
         let builder_decl = self.builder_decl();
-        let call_method_impl = self.finish_method_impl();
-        let setter_methods_impls = self.setter_methods_impls();
-        let ide_hints = self.ide_hints();
+        let call_method_impl = self.finish_method_impl()?;
+        let setter_methods_impls = self.setter_methods_impls()?;
 
         let other_items = quote! {
             #builder_state_trait_decl
             #builder_decl
             #call_method_impl
             #setter_methods_impls
-            #ide_hints
         };
 
-        MacroOutput {
+        Ok(MacroOutput {
             start_func,
             other_items,
-        }
+        })
     }
 
     fn start_func_generics(&self) -> &Generics {
@@ -143,10 +141,9 @@ impl BuilderGenCtx {
     /// hints.
     fn ide_hints(&self) -> TokenStream2 {
         let type_patterns = self
-            .setters_params
+            .conditional_params
             .iter()
-            .flat_map(|params| &params.filter)
-            .flatten()
+            .map(|params| &params.type_pattern)
             .collect::<Vec<_>>();
 
         if type_patterns.is_empty() {
@@ -158,8 +155,8 @@ impl BuilderGenCtx {
             // code from being compiled. IDEs and language servers, like rust-analyzer,
             // should be able to use the syntax provided inside of the block to
             // figure out the semantic meaning of the tokens passed to the attribute.
-            #[cfg(any())]
-            const _: () = {
+            #[cfg(rust_analyzer)]
+            {
                 // Let IDEs know that these are type patterns like the ones that
                 // could be written in a type annotation for a variable. Note that
                 // we don't initialize the variable with any value because we don't
@@ -169,7 +166,7 @@ impl BuilderGenCtx {
                 // type patterns by placing them in the context where type patterns
                 // are expected.
                 let _: (#(#type_patterns,)*);
-            };
+            }
         }
     }
 
@@ -217,6 +214,8 @@ impl BuilderGenCtx {
             }
         });
 
+        let ide_hints = self.ide_hints();
+
         let func = quote! {
             #(#docs)*
             #[inline(always)]
@@ -227,6 +226,8 @@ impl BuilderGenCtx {
             >
             #where_clause
             {
+                #ide_hints
+
                 #builder_ident {
                     __private_impl: #builder_private_impl_ident {
                         _phantom: ::core::marker::PhantomData,
@@ -241,7 +242,7 @@ impl BuilderGenCtx {
     }
 
     fn phantom_data(&self) -> TokenStream2 {
-        let member_types = self.members.iter().map(Member::ty);
+        let member_types = self.members.iter().map(Member::norm_ty);
         let receiver_ty = self
             .assoc_method_ctx
             .as_ref()
@@ -425,7 +426,7 @@ impl BuilderGenCtx {
         }
     }
 
-    fn member_expr<'f>(&self, member: &'f Member) -> MemberExpr<'f> {
+    fn member_expr<'f>(&self, member: &'f Member) -> Result<MemberExpr<'f>> {
         let regular = match member {
             Member::Regular(regular) => regular,
             Member::Skipped(skipped) => {
@@ -436,27 +437,34 @@ impl BuilderGenCtx {
                     .map(|value| quote! { #value })
                     .unwrap_or_else(|| quote! { ::core::default::Default::default() });
 
-                return MemberExpr::with_type_hint(member, expr);
+                return Ok(MemberExpr::with_type_hint(member, expr));
             }
         };
 
         let maybe_default = regular
-            .as_optional()
+            .as_optional_norm_ty()
             // For `Option` members we don't need any `unwrap_or_[else/default]`.
             // We pass them directly to the function unchanged.
-            .filter(|_| !regular.ty.is_option())
+            .filter(|_| !regular.norm_ty.is_option())
             .map(|_| {
-                let default = regular
+                regular
                     .params
                     .default
-                    .as_ref()?
                     .as_ref()
-                    .as_ref()
-                    .map(|default| quote! { .unwrap_or_else(|| #default) })
-                    .unwrap_or_else(|| quote! { .unwrap_or_default() });
+                    .and_then(|val| val.as_ref().as_ref())
+                    .map(|default| {
+                        let has_into = regular.has_into(&self.conditional_params)?;
+                        let default = if has_into {
+                            quote! { ::core::convert::Into::into((|| #default)()) }
+                        } else {
+                            quote! { #default }
+                        };
 
-                Some(default)
-            });
+                        Result::<_>::Ok(quote! { .unwrap_or_else(|| #default) })
+                    })
+                    .unwrap_or_else(|| Ok(quote! { .unwrap_or_default() }))
+            })
+            .transpose()?;
 
         let member_ident = &regular.ident;
 
@@ -468,15 +476,15 @@ impl BuilderGenCtx {
             #maybe_default
         };
 
-        MemberExpr::with_type_hint(member, expr)
+        Ok(MemberExpr::with_type_hint(member, expr))
     }
 
-    fn finish_method_impl(&self) -> TokenStream2 {
-        let member_exprs: Vec<_> = self
+    fn finish_method_impl(&self) -> Result<TokenStream2> {
+        let member_exprs = self
             .members
             .iter()
             .map(|member| self.member_expr(member))
-            .collect();
+            .collect::<Result<Vec<_>>>()?;
 
         let body = &self.finish_func.body.generate(&member_exprs);
         let asyncness = &self.finish_func.asyncness;
@@ -507,7 +515,7 @@ impl BuilderGenCtx {
 
         let allows = allow_warnings_on_member_types();
 
-        quote! {
+        Ok(quote! {
             #allows
             impl<
                 #(#generics_decl,)*
@@ -527,10 +535,10 @@ impl BuilderGenCtx {
                     #body
                 }
             }
-        }
+        })
     }
 
-    fn setter_methods_impls(&self) -> TokenStream2 {
+    fn setter_methods_impls(&self) -> Result<TokenStream2> {
         self.regular_members()
             .map(|member| self.setter_methods_impls_for_member(member))
             .collect()

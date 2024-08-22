@@ -11,73 +11,91 @@ error: can't infer the name to use for this function argument; please use a simp
   |                          ^^^^^^^^^^
 
 error: Unexpected type `bool`
-  --> tests/integration/ui/compile_fail/misc.rs:14:47
+  --> tests/integration/ui/compile_fail/misc.rs:14:44
    |
-14 | fn explicit_into_equals_true(#[builder(into = true)] _x: u32) {}
-   |                                               ^^^^
+14 | fn unnecessary_into_false(#[builder(into = false)] _x: u32) {}
+   |                                            ^^^^^
 
-error: Unexpected type `bool`
-  --> tests/integration/ui/compile_fail/misc.rs:20:53
+error: nested attributes are not allowed in the type pattern of #[builder(on(type_pattern, ...))]
+  --> tests/integration/ui/compile_fail/misc.rs:16:17
    |
-20 | fn unnecessary_into_override_false(#[builder(into = false)] _x: u32) {}
-   |                                                     ^^^^^
+16 | #[builder(on(fn(#[attr] a: u32), into))]
+   |                 ^
 
-error: this #[builder(setters(...))] contains no options to override the default behavior for the selected setters like `into`, so it does nothing
-  --> tests/integration/ui/compile_fail/misc.rs:22:11
+error: Expected an attribute of form `on(type_pattern, ...)`
+  --> tests/integration/ui/compile_fail/misc.rs:19:11
    |
-22 | #[builder(setters())]
-   |           ^^^^^^^
+19 | #[builder(on)]
+   |           ^^
 
-error: nested attributes are not allowed in the type pattern of #[builder(setters(filter(...)))]
-  --> tests/integration/ui/compile_fail/misc.rs:25:35
+error: unexpected end of input, expected one of: `for`, parentheses, `fn`, `unsafe`, `extern`, identifier, `::`, `<`, `dyn`, square brackets, `*`, `&`, `!`, `impl`, `_`, lifetime
+  --> tests/integration/ui/compile_fail/misc.rs:22:1
    |
-25 | #[builder(setters(into, filter(fn(#[attr] a: u32))))]
-   |                                   ^
+22 | #[builder(on())]
+   | ^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: expected `,`
+  --> tests/integration/ui/compile_fail/misc.rs:25:1
+   |
+25 | #[builder(on(_))]
+   | ^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: this #[builder(on(type_pattern, ...))] contains no options to override the default behavior for the selected setters like `into`, so it does nothing
+  --> tests/integration/ui/compile_fail/misc.rs:28:1
+   |
+28 | #[builder(on(_, ))]
+   | ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected at least one parameter in parentheses
-  --> tests/integration/ui/compile_fail/misc.rs:28:11
+  --> tests/integration/ui/compile_fail/misc.rs:31:11
    |
-28 | #[builder(start_fn())]
+31 | #[builder(start_fn())]
    |           ^^^^^^^^
 
 error: `skip` attribute can't be specified with other attributes like `into` because there will be no setter generated for this member to configure
-  --> tests/integration/ui/compile_fail/misc.rs:33:21
+  --> tests/integration/ui/compile_fail/misc.rs:36:21
    |
-33 |     #[builder(skip, into)]
+36 |     #[builder(skip, into)]
    |                     ^^^^
 
 error: `skip` attribute can't be specified with other attributes like `name` because there will be no setter generated for this member to configure
-  --> tests/integration/ui/compile_fail/misc.rs:39:28
+  --> tests/integration/ui/compile_fail/misc.rs:42:28
    |
-39 |     #[builder(skip, name = bar)]
+42 |     #[builder(skip, name = bar)]
    |                            ^^^
 
 error: `skip` attribute can't be specified with other attributes like `default` because there will be no setter generated for this member to configure. If you wanted to specify a value for the member, then use the following syntax instead `#[builder(skip = value)]`
-  --> tests/integration/ui/compile_fail/misc.rs:45:21
+  --> tests/integration/ui/compile_fail/misc.rs:48:21
    |
-45 |     #[builder(skip, default = 42)]
+48 |     #[builder(skip, default = 42)]
    |                     ^^^^^^^
 
 error: duplicate key in the map
-  --> tests/integration/ui/compile_fail/misc.rs:51:9
+  --> tests/integration/ui/compile_fail/misc.rs:54:9
    |
-51 |         "Hello": "Blackjack",
+54 |         "Hello": "Blackjack",
    |         ^^^^^^^
 
 error: duplicate key in the map
-  --> tests/integration/ui/compile_fail/misc.rs:52:9
+  --> tests/integration/ui/compile_fail/misc.rs:55:9
    |
-52 |         "Hello": "Littlepip",
+55 |         "Hello": "Littlepip",
    |         ^^^^^^^
 
 error: duplicate value in the set
-  --> tests/integration/ui/compile_fail/misc.rs:55:43
+  --> tests/integration/ui/compile_fail/misc.rs:58:43
    |
-55 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
+58 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
    |                                           ^^^^^^^^^
 
 error: duplicate value in the set
-  --> tests/integration/ui/compile_fail/misc.rs:55:62
+  --> tests/integration/ui/compile_fail/misc.rs:58:62
    |
-55 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
+58 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
    |                                                              ^^^^^^^^^

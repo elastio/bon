@@ -1,9 +1,8 @@
-use crate::util::parse_terminated;
 use crate::util::prelude::*;
 use darling::FromMeta;
 use proc_macro2::Span;
 use quote::quote;
-use syn::punctuated::Punctuated;
+use syn::parse::Parse;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
@@ -13,35 +12,36 @@ pub(crate) struct BuilderParams {
     pub(crate) builder_type: Option<syn::Ident>,
 
     #[darling(multiple)]
-    pub(crate) setters: Vec<SettersParams>,
+    pub(crate) on: Vec<ConditionalParams>,
 }
 
-pub(crate) type MembersFilter = Option<Punctuated<syn::Type, syn::Token![,]>>;
-
 #[derive(Debug)]
-pub(crate) struct SettersParams {
-    pub(crate) filter: MembersFilter,
+pub(crate) struct ConditionalParams {
+    pub(crate) type_pattern: syn::Type,
     pub(crate) into: darling::util::Flag,
 }
 
-impl FromMeta for SettersParams {
-    fn from_meta(meta: &syn::Meta) -> Result<Self> {
+impl Parse for ConditionalParams {
+    fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
+        let type_pattern = input.parse()?;
+
+        let _ = input.parse::<syn::Token![,]>()?;
+        let rest: TokenStream2 = input.parse()?;
+
         #[derive(FromMeta)]
         struct Parsed {
-            #[darling(default, with = parse_terminated, map = Some)]
-            filter: MembersFilter,
             into: darling::util::Flag,
         }
 
-        let Parsed { filter, into } = Parsed::from_meta(meta)?;
+        let Parsed { into } = Parsed::from_meta(&syn::parse_quote!(on(#rest)))?;
 
         if !into.is_present() {
-            bail!(
-                meta,
-                "this #[builder(setters(...))] contains no options to override \
+            return Err(syn::Error::new_spanned(
+                &rest,
+                "this #[builder(on(type_pattern, ...))] contains no options to override \
                 the default behavior for the selected setters like `into`, so it \
-                does nothing"
-            );
+                does nothing",
+            ));
         }
 
         struct FindAttr {
@@ -54,21 +54,34 @@ impl FromMeta for SettersParams {
             }
         }
 
-        let attr_in_type_pattern = filter.iter().flatten().find_map(|ty| {
-            let mut find_attr = FindAttr { attr: None };
-            find_attr.visit_type(ty);
-            find_attr.attr
-        });
+        let mut find_attr = FindAttr { attr: None };
+        find_attr.visit_type(&type_pattern);
+        let attr_in_type_pattern = find_attr.attr;
 
         if let Some(attr) = attr_in_type_pattern {
-            bail!(
-                &attr,
+            return Err(syn::Error::new(
+                attr,
                 "nested attributes are not allowed in the type pattern of \
-                #[builder(setters(filter(...)))]"
-            );
+                #[builder(on(type_pattern, ...))]",
+            ));
         }
 
-        Ok(Self { filter, into })
+        Ok(Self { type_pattern, into })
+    }
+}
+
+impl FromMeta for ConditionalParams {
+    fn from_meta(meta: &syn::Meta) -> Result<Self> {
+        let syn::Meta::List(meta) = meta else {
+            bail!(
+                meta,
+                "Expected an attribute of form `on(type_pattern, ...)`"
+            );
+        };
+
+        let me = syn::parse2(meta.tokens.clone())?;
+
+        Ok(me)
     }
 }
 

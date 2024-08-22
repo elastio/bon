@@ -1,6 +1,7 @@
 mod attr_default;
 mod attr_expose_positional_fn;
 mod attr_into;
+mod attr_on;
 mod attr_skip;
 mod generics;
 mod lints;

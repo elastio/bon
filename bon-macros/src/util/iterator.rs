@@ -1,3 +1,4 @@
+use crate::util::prelude::*;
 use std::fmt::Write;
 
 pub(crate) trait IteratorExt: Iterator + Sized {
@@ -36,7 +37,11 @@ pub(crate) trait IteratorExt: Iterator + Sized {
 impl<I: Iterator> IteratorExt for I {}
 
 pub(crate) trait IntoIteratorExt: IntoIterator + Sized {
-    fn equals_with<O>(self, other: O, compare: impl Fn(Self::Item, O::Item) -> bool) -> bool
+    fn try_equals_with<O>(
+        self,
+        other: O,
+        compare: impl Fn(Self::Item, O::Item) -> Result<bool>,
+    ) -> Result<bool>
     where
         O: IntoIterator,
         O::IntoIter: ExactSizeIterator,
@@ -46,10 +51,16 @@ pub(crate) trait IntoIteratorExt: IntoIterator + Sized {
         let other = other.into_iter();
 
         if me.len() != other.len() {
-            return false;
+            return Ok(false);
         }
 
-        me.zip(other).all(|(a, b)| compare(a, b))
+        for (a, b) in me.zip(other) {
+            if !compare(a, b)? {
+                return Ok(false);
+            }
+        }
+
+        Ok(true)
     }
 
     fn concat(self) -> Self::Item

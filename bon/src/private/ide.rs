@@ -37,6 +37,14 @@ pub mod builder_top_level {
         /// Docs for vis
         pub const vis: Option<VisibilityString> = None;
     }
+
+    /// Docs for `on`
+    pub mod on {
+        use super::*;
+
+        /// Docs for into
+        pub const into: Flag = Flag;
+    }
 }
 
 /// Visibility inside of a string literal. Empty string means private visibility.
@@ -52,3 +60,6 @@ pub struct VisibilityString;
 
 /// [Rust reference](https://doc.rust-lang.org/reference/identifiers.html)
 pub struct Identifier;
+
+/// The presence of this attribute enables the behavior. The attribute has no value.
+pub struct Flag;

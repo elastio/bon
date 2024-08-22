@@ -11,19 +11,22 @@ fn destructuring((x, y): (u32, u32)) {
 }
 
 #[builder]
-fn explicit_into_equals_true(#[builder(into = true)] _x: u32) {}
+fn unnecessary_into_false(#[builder(into = false)] _x: u32) {}
 
-#[builder]
-fn unnecessary_into_override_true(#[builder(into)] _x: String) {}
+#[builder(on(fn(#[attr] a: u32), into))]
+fn attrs_in_on_type_pattern() {}
 
-#[builder]
-fn unnecessary_into_override_false(#[builder(into = false)] _x: u32) {}
+#[builder(on)]
+fn incomplete_on() {}
 
-#[builder(setters())]
-fn empty_setters() {}
+#[builder(on())]
+fn incomplete_on2() {}
 
-#[builder(setters(into, filter(fn(#[attr] a: u32))))]
-fn attrs_in_setters() {}
+#[builder(on(_))]
+fn incomplete_on3() {}
+
+#[builder(on(_, ))]
+fn incomplete_on4() {}
 
 #[builder(start_fn())]
 struct EmptyStartFn {}

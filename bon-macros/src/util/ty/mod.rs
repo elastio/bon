@@ -1,5 +1,7 @@
 mod match_types;
 
+use crate::util::prelude::*;
+
 pub(crate) trait TypeExt {
     /// Try downcasting the type to [`syn::Type::Path`]
     fn as_path(&self) -> Option<&syn::TypePath>;
@@ -26,7 +28,7 @@ pub(crate) trait TypeExt {
     ///
     /// Any wildcards in `Self` will not be specially handled. Only wildcards in `pattern`
     /// have semantic meaning.
-    fn matches(&self, pattern: &syn::Type) -> bool;
+    fn matches(&self, pattern: &syn::Type) -> Result<bool>;
 }
 
 impl TypeExt for syn::Type {
@@ -90,7 +92,16 @@ impl TypeExt for syn::Type {
         }
     }
 
-    fn matches(&self, pattern: &syn::Type) -> bool {
+    fn matches(&self, pattern: &syn::Type) -> Result<bool> {
+        // Validate that the pattern is valid. The validation is
+        // done in the process of matching the types. To make sure
+        // that matching traverses the full pattern we match it with
+        // itself. This must also always return `true`.
+        assert!(
+            match_types::match_types(pattern, pattern)?,
+            "BUG: the type pattern does not match itself: {pattern:#?}"
+        );
+
         match_types::match_types(self, pattern)
     }
 }

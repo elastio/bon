@@ -51,7 +51,7 @@ fn into_attr_no_std() {
 #[cfg(feature = "alloc")]
 #[test]
 fn into_string() {
-    #[builder(setters(into))]
+    #[builder(on(String, into))]
     fn sut(arg1: String, arg2: Option<String>) -> (String, Option<String>) {
         (arg1, arg2)
     }

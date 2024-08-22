@@ -118,6 +118,11 @@ pub(crate) fn generate_completions(meta: Vec<Meta>) -> TokenStream2 {
         vec![
             CompletionsSchema::leaf("expose_positional_fn"),
             CompletionsSchema::leaf("start_fn"),
+            CompletionsSchema::leaf("on").set_custom_filter(|meta| {
+                if !meta.is_empty() {
+                    meta.remove(0);
+                }
+            }),
         ],
     );
 
@@ -134,6 +139,7 @@ pub(crate) fn generate_completions(meta: Vec<Meta>) -> TokenStream2 {
 struct CompletionsSchema {
     key: &'static str,
     children: Vec<CompletionsSchema>,
+    custom_filter: Option<fn(&mut Vec<Meta>)>,
 }
 
 impl CompletionsSchema {
@@ -141,18 +147,32 @@ impl CompletionsSchema {
         Self {
             key,
             children: vec![],
+            custom_filter: None,
         }
     }
 
     fn with_children(key: &'static str, children: Vec<CompletionsSchema>) -> Self {
-        Self { key, children }
+        Self {
+            key,
+            children,
+            custom_filter: None,
+        }
+    }
+
+    fn set_custom_filter(mut self, custom_filter: fn(&mut Vec<Meta>)) -> Self {
+        self.custom_filter = Some(custom_filter);
+        self
     }
 
     fn generate_completion_triggers(
         &self,
-        meta: Vec<Meta>,
+        mut meta: Vec<Meta>,
         module_prefix: &[&syn::Ident],
     ) -> TokenStream2 {
+        if let Some(custom_filter) = self.custom_filter {
+            custom_filter(&mut meta)
+        };
+
         let module_suffix = syn::Ident::new(self.key, Span::call_site());
         let module_name = module_prefix
             .iter()

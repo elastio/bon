@@ -96,7 +96,7 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
                 params,
             };
 
-            Result::<_>::Ok((ctx.adapted_func()?, ctx.into_builder_gen_ctx()?.output()))
+            Result::<_>::Ok((ctx.adapted_func()?, ctx.into_builder_gen_ctx()?.output()?))
         })
         .try_collect()?;
 

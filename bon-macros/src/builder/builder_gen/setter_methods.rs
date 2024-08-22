@@ -3,7 +3,10 @@ use crate::util::prelude::*;
 use quote::{quote, ToTokens};
 
 impl BuilderGenCtx {
-    pub(crate) fn setter_methods_impls_for_member(&self, member: &RegularMember) -> TokenStream2 {
+    pub(crate) fn setter_methods_impls_for_member(
+        &self,
+        member: &RegularMember,
+    ) -> Result<TokenStream2> {
         let output_members_states = self.regular_members().map(|other_member| {
             if other_member.ident == member.ident {
                 return member.set_state_type().to_token_stream();
@@ -44,13 +47,13 @@ impl BuilderGenCtx {
                 >
             },
         )
-        .setter_methods();
+        .setter_methods()?;
 
         let vis = &self.vis;
 
         let allows = super::allow_warnings_on_member_types();
 
-        quote! {
+        Ok(quote! {
             // This lint is ignored, because bounds in type aliases are still useful
             // to make the following example usage compile:
             // ```
@@ -103,7 +106,7 @@ impl BuilderGenCtx {
             {
                 #setter_methods
             }
-        }
+        })
     }
 }
 
@@ -148,14 +151,14 @@ impl<'a> MemberSettersCtx<'a> {
             .unwrap_or_else(|| self.norm_member_ident.clone())
     }
 
-    fn setter_methods(&self) -> TokenStream2 {
-        let member_type = self.member.ty.as_ref();
+    fn setter_methods(&self) -> Result<TokenStream2> {
+        let member_type = self.member.norm_ty.as_ref();
 
-        if let Some(inner_type) = self.member.as_optional() {
+        if let Some(inner_type) = self.member.as_optional_norm_ty() {
             return self.setters_for_optional_member(inner_type);
         }
 
-        let has_into = self.member.has_into(&self.builder_gen.setters_params);
+        let has_into = self.member.has_into(&self.builder_gen.conditional_params)?;
 
         let (fn_param_type, maybe_into_call) = if has_into {
             (quote!(impl Into<#member_type>), quote!(.into()))
@@ -163,16 +166,16 @@ impl<'a> MemberSettersCtx<'a> {
             (quote!(#member_type), quote!())
         };
 
-        self.setter_method(MemberSetterMethod {
+        Ok(self.setter_method(MemberSetterMethod {
             method_name: self.setter_method_core_name(),
             fn_params: quote!(value: #fn_param_type),
             member_init: quote!(::bon::private::Set(value #maybe_into_call)),
             overwrite_docs: None,
-        })
+        }))
     }
 
-    fn setters_for_optional_member(&self, inner_type: &syn::Type) -> TokenStream2 {
-        let has_into = self.member.has_into(&self.builder_gen.setters_params);
+    fn setters_for_optional_member(&self, inner_type: &syn::Type) -> Result<TokenStream2> {
+        let has_into = self.member.has_into(&self.builder_gen.conditional_params)?;
         let (inner_type, maybe_conv_call, maybe_map_conv_call) = if has_into {
             (
                 quote!(impl Into<#inner_type>),
@@ -216,10 +219,10 @@ impl<'a> MemberSettersCtx<'a> {
             },
         ];
 
-        methods
+        Ok(methods
             .into_iter()
             .map(|method| self.setter_method(method))
-            .collect()
+            .collect())
     }
 
     fn setter_method(&self, method: MemberSetterMethod) -> TokenStream2 {

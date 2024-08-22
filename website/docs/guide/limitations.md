@@ -6,7 +6,7 @@ Every tool has its constraints, and `bon` is not an exception. The limitations d
 
 Documentation placed on the original function arguments or struct fields is copied verbatim to the documentation on the generated setter methods of the builder struct. The shortcoming of this approach is that references to `Self` break when moved into the `impl` block of the generated builder struct.
 
-`bon` checks for the presence of ``[`Self`]`` and `[Self]` in the documentation on the function arguments and struct fields. If there are any, then a compile error suggesting to use full type name will be generated.
+`bon` checks for the presence of ``[`Self`]`` and `[Self]` in the documentation on the function arguments and struct fields. If there are any, then a compile error suggesting to use the full type name will be generated.
 
 The following example doesn't compile with the reference to ``[`Self`]``. The fix is to replace that reference with the actual name of the struct ``[`Foo`]``.
 
@@ -51,7 +51,7 @@ Unfortunately, macros in Rust don't have access to semantic information. All tha
 fn example(value: User) {}
 ```
 
-This means `#[builder]` macro thinks as if there are no lifetime parameters in the `User` type, and thus it generates the wrong code that doesn't compile.
+This means `#[builder]` macro thinks as if there are no lifetime parameters in the `User` type, and thus it generates the code that doesn't compile.
 
 To fix this, we need to make it clear to the `#[builder]` macro that `User` expects some lifetime parameters. This can be done like this:
 

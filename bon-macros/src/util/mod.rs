@@ -31,8 +31,8 @@ pub(crate) mod prelude {
     pub(crate) use super::attrs::AttributeExt;
     pub(crate) use super::fn_arg::FnArgExt;
     pub(crate) use super::ident::IdentExt;
-    pub(crate) use super::iterator::IteratorExt;
     pub(crate) use super::iterator::IntoIteratorExt;
+    pub(crate) use super::iterator::IteratorExt;
     pub(crate) use super::path::PathExt;
     pub(crate) use super::ty::TypeExt;
     pub(crate) use super::{bail, err};
@@ -58,6 +58,9 @@ where
 /// parse an arbitrary sequence of items inside of parentheses. For example
 /// `foo(a, b, c)`, where `a`, `b`, and `c` are of type `T` and `,` is represented
 /// by the token type `P`.
+// This function was used by earlier iterations of our code, but it's not used now
+// However, let's keep it here for future.
+#[allow(dead_code)]
 pub(crate) fn parse_terminated<T, P>(meta: &syn::Meta) -> Result<Punctuated<T, P>>
 where
     T: syn::parse::Parse,

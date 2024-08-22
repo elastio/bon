@@ -1,4 +1,4 @@
-use crate::builder::params::SettersParams;
+use crate::builder::params::ConditionalParams;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
 use darling::FromAttributes;
@@ -46,8 +46,11 @@ pub(crate) struct RegularMember {
     /// on top of the original member
     pub(crate) docs: Vec<syn::Attribute>,
 
-    /// Type of member that the builder should have setters for.
-    pub(crate) ty: Box<syn::Type>,
+    /// Normalized type of the member that the builder should have setters for.
+    pub(crate) norm_ty: Box<syn::Type>,
+
+    /// Original type of the member (not normalized)
+    pub(crate) orig_ty: Box<syn::Type>,
 
     /// The name of the associated type in the builder state trait that corresponds
     /// to this member.
@@ -62,7 +65,7 @@ pub(crate) struct RegularMember {
 pub(crate) struct SkippedMember {
     pub(crate) ident: Option<syn::Ident>,
 
-    pub(crate) ty: Box<syn::Type>,
+    pub(crate) norm_ty: Box<syn::Type>,
 
     /// Value to assign to the member
     pub(crate) value: SpannedValue<Option<syn::Expr>>,
@@ -144,7 +147,8 @@ impl Member {
         origin: MemberOrigin,
         attrs: &[syn::Attribute],
         ident: Option<syn::Ident>,
-        ty: Box<syn::Type>,
+        norm_ty: Box<syn::Type>,
+        orig_ty: Box<syn::Type>,
     ) -> Result<Self> {
         let docs = attrs.iter().filter(|attr| attr.is_doc()).cloned().collect();
 
@@ -152,12 +156,16 @@ impl Member {
         params.validate()?;
 
         if let Some(value) = params.skip {
-            return Ok(Self::Skipped(SkippedMember { ident, ty, value }));
+            return Ok(Self::Skipped(SkippedMember {
+                ident,
+                norm_ty,
+                value,
+            }));
         }
 
         let ident = ident.or_else(|| params.name.clone()).ok_or_else(|| {
             err!(
-                &ty,
+                &norm_ty,
                 "can't infer the name to use for this {origin}; please use a simple \
                 `identifier: type` syntax for the {origin}, or add \
                 `#[builder(name = explicit_name)]` to specify the name explicitly",
@@ -168,7 +176,8 @@ impl Member {
             origin,
             state_assoc_type_ident: ident.snake_to_pascal_case(),
             ident,
-            ty,
+            norm_ty,
+            orig_ty,
             params,
             docs,
         };
@@ -180,10 +189,10 @@ impl Member {
 }
 
 impl Member {
-    pub(crate) fn ty(&self) -> &syn::Type {
+    pub(crate) fn norm_ty(&self) -> &syn::Type {
         match self {
-            Self::Regular(me) => &me.ty,
-            Self::Skipped(me) => &me.ty,
+            Self::Regular(me) => &me.norm_ty,
+            Self::Skipped(me) => &me.norm_ty,
         }
     }
 
@@ -207,7 +216,7 @@ impl RegularMember {
         super::reject_self_references_in_docs(&self.docs)?;
 
         if let Some(default) = &self.params.default {
-            if self.ty.is_option() {
+            if self.norm_ty.is_option() {
                 bail!(
                     &default.span(),
                     "`Option<_>` already implies a default of `None`, \
@@ -219,22 +228,25 @@ impl RegularMember {
         Ok(())
     }
 
-    pub(crate) fn as_optional(&self) -> Option<&syn::Type> {
-        self.ty
-            .option_type_param()
-            .or_else(|| (self.params.default.is_some()).then_some(&self.ty))
+    fn as_optional_with_ty<'a>(&'a self, ty: &'a syn::Type) -> Option<&'a syn::Type> {
+        ty.option_type_param()
+            .or_else(|| (self.params.default.is_some()).then_some(ty))
+    }
+
+    pub(crate) fn as_optional_norm_ty(&self) -> Option<&syn::Type> {
+        Self::as_optional_with_ty(self, &self.norm_ty)
     }
 
     pub(crate) fn init_expr(&self) -> TokenStream2 {
-        self.as_optional()
+        self.as_optional_norm_ty()
             .map(|_| quote!(::bon::private::Optional(::core::marker::PhantomData)))
             .unwrap_or_else(|| quote!(::bon::private::Required(::core::marker::PhantomData)))
     }
 
     pub(crate) fn unset_state_type(&self) -> TokenStream2 {
-        let ty = &self.ty;
+        let ty = &self.norm_ty;
 
-        if let Some(inner_type) = self.as_optional() {
+        if let Some(inner_type) = self.as_optional_norm_ty() {
             quote!(::bon::private::Optional<#inner_type>)
         } else {
             quote!(::bon::private::Required<#ty>)
@@ -242,9 +254,9 @@ impl RegularMember {
     }
 
     pub(crate) fn set_state_type_param(&self) -> TokenStream2 {
-        let ty = &self.ty;
+        let ty = &self.norm_ty;
 
-        self.as_optional()
+        self.as_optional_norm_ty()
             .map(|ty| quote!(Option<#ty>))
             .unwrap_or_else(|| quote!(#ty))
     }
@@ -255,19 +267,23 @@ impl RegularMember {
         quote!(::bon::private::Set<#ty>)
     }
 
-    pub(crate) fn has_into(&self, setters_params: &[SettersParams]) -> bool {
+    pub(crate) fn has_into(&self, conditional_params: &[ConditionalParams]) -> Result<bool> {
         if self.params.into.is_present() {
-            return true;
+            return Ok(true);
         }
 
-        setters_params
+        let scrutinee = self
+            .as_optional_with_ty(&self.orig_ty)
+            .unwrap_or(&self.orig_ty);
+
+        let verdict = conditional_params
             .iter()
-            .filter(|params| {
-                let Some(filter) = &params.filter else {
-                    return true;
-                };
-                filter.iter().any(|filter| self.ty.matches(filter))
-            })
-            .any(|params| params.into.is_present())
+            .map(|params| Ok((params, scrutinee.matches(&params.type_pattern)?)))
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .filter(|(_, matched)| *matched)
+            .any(|(params, _)| params.into.is_present());
+
+        Ok(verdict)
     }
 }

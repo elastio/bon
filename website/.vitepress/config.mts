@@ -67,6 +67,20 @@ export default defineConfig({
         sidebar: {
             "/docs": [
                 {
+                    text: "Versions",
+                    collapsed: true,
+                    items: [
+                        {
+                            text: "v2 (latest)",
+                            link: "/docs/guide/overview",
+                        },
+                        {
+                            text: "v1",
+                            link: "/docs/guide/overview",
+                        },
+                    ],
+                },
+                {
                     text: "Guide",
                     items: [
                         {
