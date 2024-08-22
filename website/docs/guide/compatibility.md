@@ -14,7 +14,7 @@ Suppose you have a function with a required argument, and there is existing code
 use bon::builder;
 
 #[builder]
-fn get_page(password: String) -> String {
+fn get_page(password: &str) -> String {
     format!("Secret knowledge")
 }
 
@@ -31,7 +31,7 @@ Then you change this function to take an `Option<T>`. This is totally fine, the 
 use bon::builder;
 
 #[builder]
-fn get_page(password: Option<String>) -> String { // [!code highlight]
+fn get_page(password: Option<&str>) -> String { // [!code highlight]
     format!("Secret knowledge")
 }
 
@@ -60,7 +60,7 @@ use bon::builder;
 #[builder]
 fn example(filter: Option<String>) {}
 
-example().maybe_filter(Some("filter")).call();
+example().maybe_filter(Some("filter".to_owned())).call();
 ```
 
 This code can be changed to use `#[builder(default)]` and the call site will still compile:
@@ -75,7 +75,7 @@ fn example(
     filter: String         // [!code ++]
 ) {}
 
-example.maybe_filter(Some("filter")).call();
+example.maybe_filter(Some("filter".to_owned())).call();
 ```
 
 ## Marking member as unused with a leading `_`
@@ -95,7 +95,7 @@ struct Example {
 }
 
 Example::builder()
-    .name("The setter is still called `name`")
+    .name("The setter is still called `name`".to_owned())
     .build();
 ```
 
@@ -108,7 +108,7 @@ fn example(
 ) {}
 
 example()
-    .name("The setter is still called `name`")
+    .name("The setter is still called `name`".to_owned())
     .call();
 ```
 
@@ -124,7 +124,7 @@ impl Example {
 }
 
 Example::example()
-    .name("The setter is still called `name`")
+    .name("The setter is still called `name`".to_owned())
     .call();
 ```
 
@@ -170,7 +170,7 @@ impl User {                                 // [!code ++]
 let user = User::builder()
     // `id` is still accepted as a `u32` here
     .id(1)
-    .name("Bon")
+    .name("Bon".to_owned())
     .build();
 ```
 

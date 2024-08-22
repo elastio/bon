@@ -131,6 +131,11 @@ use bon::builder;
 #[builder]
 struct User {
     id: u32,
+
+    // This attribute makes the setter accept `impl Into<String>`
+    // which let's us pass an `&str` directly and it'll be automatically
+    // converted into `String`.
+    #[builder(into)]
     name: String,
 }
 

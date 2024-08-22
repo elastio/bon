@@ -1,6 +1,8 @@
 # Optional members
 
-Setters generated for members of `Option<T>` type are themselves optional to call. If they aren't invoked, then `None` will be used as the default.
+## `Option<T>`
+
+Setters generated for members of `Option<T>` type are optional to call. If they aren't invoked, then `None` will be used as the default.
 
 **Example:**
 
@@ -10,11 +12,11 @@ use bon::builder;
 #[builder]
 fn example(level: Option<u32>) {}
 
-// We can call it without specifying `level`
+// We can call it without specifying the `level`
 example().call();
 ```
 
-The setters generated in the example above are the following (simplified):
+The `#[builder]` attribute generates two setters for each optional member. One setter accepts `T` and the other accepts `Option<T>`. The following setters will be generated in the example above (simplified):
 
 ```rust ignore
 impl ExampleBuilder {
@@ -26,7 +28,13 @@ impl ExampleBuilder {
 }
 ```
 
-This allows for the following call patterns.
+::: tip
+
+Thanks to this design, changing the member from required to optional [preserves compatibility](./compatibility#making-a-required-member-optional).
+
+:::
+
+---
 
 If you need to pass a simple literal value, then the syntax is very short
 
@@ -46,21 +54,15 @@ let value = if some_condition {
 example().maybe_level(value).call();
 ```
 
----
+## `#[builder(default)]`
 
-To make a non-`Option` function argument or struct field optional you may add `#[builder(default)]` to it, which generates the equivalent builder API as if the type was `Option<T>`. See [`#[builder(default)]` docs](../reference/builder#default) for details.
+To make a member of non-`Option` type optional you may use the attribute [`#[builder(default)]`](../reference/builder#default). This attribute uses the [`Default`](https://doc.rust-lang.org/stable/std/default/trait.Default.html) trait or the provided expression to assign the default value for the member.
 
-## Interaction with `Into` conversions
+::: tip
 
-The inner type `T` of the `Option<T>` is subject to [`Into` conversion](./into-conversions). For example, if `T` by default qualifies for an automatic `Into` conversion or `#[builder(into)]` was used to force it, then the generated builder API will provide the following two setters:
+Switching between `#[builder(default)]` and `Option<T>` is [compatible](./compatibility#switching-between-optiont-and-builderdefault).
 
-```rust ignore
-impl Builder {
-    fn member(self, value: impl Into<T>) -> NextBuilderState { /* */ }
-    fn maybe_member(self, value: Option<impl Into<T>>) -> NextBuilderState { /* */ }
-}
-```
-
+:::
 
 **Example:**
 
@@ -68,19 +70,35 @@ impl Builder {
 use bon::builder;
 
 #[builder]
-fn example(level: Option<String>) {}
+fn example(
+    // This uses the `Default` trait // [!code highlight]
+    #[builder(default)]              // [!code highlight]
+    a: u32,
 
-example()
-    .level("Accepts `impl Into<String>`, which allows for passing `&str`")
+    // This uses the given custom default value // [!code highlight]
+    #[builder(default = 4)]                     // [!code highlight]
+    b: u32,
+) -> u32 {
+    a + b
+}
+
+// Here, the default values will be used `a = 0` and `b = 4` // [!code highlight]
+let result = example().call();
+assert_eq!(result, 4);
+
+// The same couple of setters `{member}(T)` and `maybe_{member}(Option<T>)` // [!code highlight]
+// are generated just like it works with members of `Option<T>` type        // [!code highlight]
+let result = example()
+    .a(3)
+    .b(5)
     .call();
+assert_eq!(result, 8);
 
-example()
-    .maybe_level(Some(
-        "Accepts `Option<impl Into<String>>`, \
-        which allows for passing `Option<&str>`"
-    ))
+let result = example()
+    .maybe_a(Some(3))
+    .maybe_b(Some(5))
     .call();
-
+assert_eq!(result, 8);
 ```
 
 *[Member]: Struct field or a function argument

@@ -67,20 +67,6 @@ export default defineConfig({
         sidebar: {
             "/docs": [
                 {
-                    text: "Versions",
-                    collapsed: true,
-                    items: [
-                        {
-                            text: "v2 (latest)",
-                            link: "/docs/guide/overview",
-                        },
-                        {
-                            text: "v1",
-                            link: "/docs/guide/overview",
-                        },
-                    ],
-                },
-                {
                     text: "Guide",
                     items: [
                         {
@@ -152,6 +138,10 @@ export default defineConfig({
                                             text: "start_fn",
                                             link: "/docs/reference/builder#start-fn",
                                         },
+                                        {
+                                            text: "on",
+                                            link: "/docs/reference/builder#on",
+                                        },
                                     ],
                                 },
                                 {
@@ -185,6 +175,20 @@ export default defineConfig({
                         {
                             text: "Other items on docs.rs",
                             link: "https://docs.rs/bon/latest/bon/",
+                        },
+                    ],
+                },
+                {
+                    text: "Versions",
+                    collapsed: true,
+                    items: [
+                        {
+                            text: "v2 (latest)",
+                            link: "/docs/guide/overview",
+                        },
+                        {
+                            text: "v1",
+                            link: "/docs/guide/overview",
                         },
                     ],
                 },

@@ -17,6 +17,7 @@ The default naming pattern is the following:
 | Type of item `#[builder]` is placed on | Naming pattern                                |
 | -------------------------------------- | --------------------------------------------- |
 | Struct                                 | `{StructName}Builder`                         |
+| `StructName::new()` method             | `{StructName}Builder`                         |
 | Free function                          | `{PascalCaseFunctionName}Builder`             |
 | Associated method                      | `{SelfTypeName}{PascalCaseMethodName}Builder` |
 
@@ -106,10 +107,11 @@ When generating builder code for functions the `#[builder]` macro hides the orig
 Usually you'd want the underlying positional function to be hidden to provide only the builder syntax to the callers. However, in some situations you may want to keep the positional function exposed along with the builder syntax for compatibility with old code that still uses the old positional function call syntax.
 
 This attribute can take several forms.
-- Simple: `#[builder(expose_positional_fn = identifier)]`. Sets only the name of the positional function.
-- Verbose: `#[builder(expose_positional_fn(name = identifier, vis = "visibility"))]`.
-  Allows setting both the name and the visibility of the positional function.
-  Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
+
+-   Simple: `#[builder(expose_positional_fn = identifier)]`. Sets only the name of the positional function.
+-   Verbose: `#[builder(expose_positional_fn(name = identifier, vis = "visibility"))]`.
+    Allows setting both the name and the visibility of the positional function.
+    Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
 
 If `vis` parameter is not specified, then the visibility of the exposed positional function will be the same as specified on the function that the `#[builder]` was applied to.
 
@@ -159,8 +161,9 @@ Example::example()
 #### `new` method special case
 
 There are two conventional names in Rust ecosystem for constructors and builders:
-- `new` is used for a constructor method that uses positional parameters
-- `builder` is used for a method that returns a builder for a type
+
+-   `new` is used for a constructor method that uses positional parameters
+-   `builder` is used for a method that returns a builder for a type
 
 So when `#[builder]` is placed on a method called `new`, it'll generate a method called `builder` that starts the building process. This means there is already a default obvious name for the positional function that `expose_positional_fn` may use in this case if you don't specify any value for this attribute.
 
@@ -266,10 +269,11 @@ Overrides the name and visibility of the associated method that starts the build
 The default name for this method is `builder`, and the default visibility is the same as the visibility of the struct itself.
 
 This attribute can take several forms.
-- Simple: `#[builder(start_fn = identifier)]`. Overrides only the name of the "start" method.
-- Verbose: `#[builder(start_fn(name = identifier, vis = "visibility"))]`.
-  Allows overriding both the name and the visibility of the "start" method.
-  Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
+
+-   Simple: `#[builder(start_fn = identifier)]`. Overrides only the name of the "start" method.
+-   Verbose: `#[builder(start_fn(name = identifier, vis = "visibility"))]`.
+    Allows overriding both the name and the visibility of the "start" method.
+    Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
 
 **Example:**
 
@@ -305,24 +309,167 @@ User::init() // [!code highlight]
 
 :::
 
+### `on`
+
+**Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
+
+Applies the given builder attributes to all members that match the selected type pattern. For example, you can automatically apply `#[builder(into)]` to all members of type `String` this way:
+
+::: code-group
+
+```rust [Struct]
+use bon::builder;
+
+#[builder(on(String, into))]
+struct Example {
+    id: String,
+    name: String,
+    level: u32,
+}
+
+Example::builder()
+    // `id` and `name` accept `impl Into<String>` because   // [!code highlight]
+    // `on` automatically added `#[builder(into)]` for them // [!code highlight]
+    .id("e-1111")
+    .name("Bon")
+    // `u32` doesn't match the `String` type pattern, // [!code highlight]
+    // so `#[builder(into)]` was not applied to it    // [!code highlight]
+    .level(100)
+    .build();
+```
+
+```rust [Free function]
+use bon::builder;
+
+#[builder(on(String, into))]
+fn example(
+    id: String,
+    name: String,
+    level: u32,
+) {}
+
+example()
+    // `id` and `name` accept `impl Into<String>` because   // [!code highlight]
+    // `on` automatically added `#[builder(into)]` for them // [!code highlight]
+    .id("e-1111")
+    .name("Bon")
+    // `u32` doesn't match the `String` type pattern, // [!code highlight]
+    // so `#[builder(into)]` was not applied to it    // [!code highlight]
+    .level(100)
+    .call();
+```
+
+```rust [Associated method]
+use bon::bon;
+
+struct Example;
+
+#[bon]
+impl Example {
+    #[builder(on(String, into))]
+    fn example(
+        id: String,
+        name: String,
+        level: u32,
+    ) {}
+}
+
+Example::example()
+    // `id` and `name` accept `impl Into<String>` because   // [!code highlight]
+    // `on` automatically added `#[builder(into)]` for them // [!code highlight]
+    .id("e-1111")
+    .name("Bon")
+    // `u32` doesn't match the `String` type pattern, // [!code highlight]
+    // so `#[builder(into)]` was not applied to it    // [!code highlight]
+    .level(100)
+    .call();
+```
+
+:::
+
+This attribute must be of form `on(type_pattern, attributes)`.
+
+- `type_pattern` - type that will be compared with the types of the members. The types are compared textually. For example, `String` doesn't match `std::string::String`. You can use `_` to mark parts of the type to ignore when matching. For example, `Vec<_>` matches `Vec<u32>` or `Vec<String>`. Lifetimes are ignored during matching.
+
+- `attributes` - for now, the only attribute supported in the `attributes` position is [`into`](#into). It sets `#[builder(into)]` for members that match the `type_pattern`.
+
+If you want to apply the `attributes` to all members, you can use the `_` type pattern that matches any type. For example, `#[builder(on(_, into))]`.
+
+For optional members the underlying type is matched ignoring the `Option` wrapper.
+
+**Example:**
+
+```rust
+use bon::builder;
+
+#[builder(on(String, into))]
+struct Example {
+    name: String,
+    description: Option<String>,
+
+    #[builder(default)]
+    alias: String
+}
+
+Example::builder()
+    .name("Bon")
+    // These members also matched the `String` type pattern,
+    // so `#[builder(into)]` was applied to it
+    .description("accepts an `impl Into<String>` here")
+    .alias("builder")
+    .build();
+```
+
+You can specify `on(...)` multiple times.
+
+**Example:**
+
+```rust
+use bon::builder;
+use std::path::PathBuf;
+
+#[builder(on(String, into), on(PathBuf, into))]
+struct Example {
+    name: String,
+    path: PathBuf,
+    level: u32,
+}
+
+Example::builder()
+    .name("accepts `impl Into<String>`")
+    .path("accepts/impl/into/PathBuf")
+    // This member doesn't match neither `String` nor `PathBuf`,
+    // and thus #[builder(into)] was not applied to it
+    .level(100)
+    .build();
+```
+
+
+
 ## Member-level attributes
 
 ### `default`
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
 
-Makes the member optional. This means setters will be generated as if the type of the member was wrapped in an `Option`. In fact, this property is guaranteed. See [API compatibility](../guide/compatibility#switching-between-option-t-and-builder-default) for details.
+Makes the member optional and assigns a default value to it. There will be two setter methods generated for the member just like for [members of type `Option<T>`](../guide/optional-members). One setter accepts a value of type `T` (type of the member) and the other (with the `maybe_` prefix) accepts an `Option<T>`.
 
-If no setter for the member is called or `None` is passed, then the default value will be computed based on the form of this attribute:
+::: tip
 
-Form                               | How default value is computed
------------------------------------|----------------------------------------------------------------
-`#[builder(default)]`              | `Default::default()`
-`#[builder(default = expression)]` | `expression`
+Switching between `#[builder(default)]` and `Option<T>` is [compatible](./compatibility#switching-between-optiont-and-builderdefault).
 
-The result of the `expression` will automatically be converted into the target type if `Into` conversion is enabled for this setter i.e. the type satisfies [automatic `Into` conversion qualification rules], or there is a [`#[builder(into)]`](#into) override.
+:::
 
-The default value will be lazily computed *only if needed* inside of the [finishing function](#finish_fn) (i.e. `build()` or `call()`).
+The default value will be lazily computed inside of the [finishing function](#finish_fn) (i.e. `build()` or `call()`). It is computed only if the setter for the member wasn't called or `None` was passed to the `maybe_{member}()` setter.
+
+The default value is computed based on the form of this attribute:
+
+| Form                               | How default value is computed |
+| ---------------------------------- | ----------------------------- |
+| `#[builder(default)]`              | `Default::default()`          |
+| `#[builder(default = expression)]` | `expression`                  |
+
+The result of the `expression` will be converted into the target type using [`Into::into`](https://doc.rust-lang.org/stable/std/convert/trait.Into.html) if [`#[builder(into)]`](#into) is enabled for the setter.
 
 **Example:**
 
@@ -336,9 +483,9 @@ struct User {
     #[builder(default)] // [!code highlight]
     level: u32,
 
-    // The expression of type `&'static str` is automatically // [!code highlight]
-    // converted to `String` here via `Into`.                 // [!code highlight]
-    #[builder(default = "anon")]                              // [!code highlight]
+    // The expression of type `&'static str` is automatically             // [!code highlight]
+    // converted to `String` here via `Into` thanks to `#[builder(into)]. // [!code highlight]
+    #[builder(into, default = "anon")]                                    // [!code highlight]
     name: String,
 
     // Any complex expression is accepted   // [!code highlight]
@@ -348,8 +495,8 @@ struct User {
 
 let user = User::builder().build();
 
-assert_eq!(user.name, "anon");
 assert_eq!(user.level, 0);
+assert_eq!(user.name, "anon");
 assert_eq!(user.permissions, ["read"]);
 ```
 
@@ -361,9 +508,9 @@ fn greet_user(
     #[builder(default)] // [!code highlight]
     level: u32,
 
-    // The expression of type `&'static str` is automatically // [!code highlight]
-    // converted to `String` here via `Into`.                 // [!code highlight]
-    #[builder(default = "anon")]                              // [!code highlight]
+    // The expression of type `&'static str` is automatically             // [!code highlight]
+    // converted to `String` here via `Into` thanks to `#[builder(into)]. // [!code highlight]
+    #[builder(into, default = "anon")]                                    // [!code highlight]
     name: String,
 
     // Any complex expression is accepted   // [!code highlight]
@@ -394,9 +541,9 @@ impl User {
         #[builder(default)] // [!code highlight]
         level: u32,
 
-        // The expression of type `&'static str` is automatically // [!code highlight]
-        // converted to `String` here via `Into`.                 // [!code highlight]
-        #[builder(default = "anon")]                              // [!code highlight]
+        // The expression of type `&'static str` is automatically             // [!code highlight]
+        // converted to `String` here via `Into` thanks to `#[builder(into)]. // [!code highlight]
+        #[builder(into, default = "anon")]                                    // [!code highlight]
         name: String,
 
         // Any complex expression is accepted   // [!code highlight]
@@ -424,14 +571,15 @@ This attribute is incompatible with members of `Option` type, since `Option` alr
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
 
-Forces an `impl Into` conversion to be enabled or disabled in the generated setter methods. Use this to force-override the decision made by [automatic `Into` conversion qualification rules].
+Changes the signature of the generated setters to accept [`impl Into<T>`](https://doc.rust-lang.org/stable/std/convert/trait.Into.html), where `T` is the type of the member.
 
-This parameter can be specified in one of the following ways:
+For [optional members](../guide/optional-members), the [`maybe_{member}()` setter method](../guide/optional-members#interaction-with-into-conversions) will accept an `Option<impl Into<T>>` type instead of just `Option<T>`.
 
-| Form                       | Behavior                                                 |
-| -------------------------- | -------------------------------------------------------- |
-| `#[builder(into)]`         | Forcefully **enables** `impl Into` in the setter method  |
-| `#[builder(into = false)]` | Forcefully **disables** `impl Into` in the setter method |
+For members that use `#[builder(default = expression)]`, the `expression` will be converted with `Into::into`.
+
+This parameter is often used with the `String` type, which allows you to pass `&str` into the setter without calling `.to_owned()` or `.to_string()` on it.
+
+See the ["Into conversions"](../guide/into-conversions) page with the guide about using into conversions, the advantages of using them and the drawbacks.
 
 **Example:**
 
@@ -439,108 +587,87 @@ This parameter can be specified in one of the following ways:
 
 ```rust [Struct field]
 use bon::builder;
-use std::num::NonZeroU32;
 
 #[builder]
 struct Example {
-    // `u32` isn't qualified for an `Into` conversion by default        // [!code highlight]
-    // because it's a primitive type. This attribute force-enables it.  // [!code highlight]
-    #[builder(into)]                                                    // [!code highlight]
-    force_enabled_into: u32,
+    #[builder(into)] // [!code highlight]
+    name: String,
 
-    // `String` is qualified for `Into` conversion by default              // [!code highlight]
-    // because it's a simple type path. This attribute force-disables it.  // [!code highlight]
-    #[builder(into = false)]                                               // [!code highlight]
-    force_disabled_into: String,
+    #[builder(into)] // [!code highlight]
+    description: Option<String>,
+
+    // The value passed to `default = ...` is converted with `into` as well // [!code highlight]
+    #[builder(into, default = "anon")]                                      // [!code highlight]
+    group: String
 }
 
-let non_zero_u32 = NonZeroU32::new(1).unwrap();
-
 Example::builder()
-    // setter accepts `impl Into<u32>`                        // [!code highlight]
-    .force_enabled_into(non_zero_u32)                         // [!code highlight]
-    // setter accepts `String` instead of `impl Into<String>` // [!code highlight]
-    .force_disabled_into("".to_owned())                       // [!code highlight]
+    // We can pass `&str` because the setters accept `impl Into<String>`      // [!code highlight]
+    .name("Bon")                                                              // [!code highlight]
+    .description("Awesome crate 🐱. Consider giving it a star on Github ⭐") // [!code highlight]
+    // We can pass `Option<&str>` to `maybe_` methods because they accept     // [!code highlight]
+    // `Option<impl Into<String>>`                                            // [!code highlight]
+    .maybe_group(Some("Favourites"))                                          // [!code highlight]
     .build();
 ```
 
 ```rust [Free function argument]
 use bon::builder;
-use std::num::NonZeroU32;
 
 #[builder]
 fn example(
-    // `u32` isn't qualified for an `Into` conversion by default        // [!code highlight]
-    // because it's a primitive type. This attribute force-enables it.  // [!code highlight]
-    #[builder(into)]                                                    // [!code highlight]
-    force_enabled_into: u32,
+    #[builder(into)] // [!code highlight]
+    name: String,
 
-    // `String` is qualified for `Into` conversion by default              // [!code highlight]
-    // because it's a simple type path. This attribute force-disables it.  // [!code highlight]
-    #[builder(into = false)]                                               // [!code highlight]
-    force_disabled_into: String,
+    #[builder(into)] // [!code highlight]
+    description: Option<String>,
+
+    // The value passed to `default = ...` is converted with `into` as well // [!code highlight]
+    #[builder(into, default = "anon")]                                      // [!code highlight]
+    group: String
 ) {}
 
-let non_zero_u32 = NonZeroU32::new(1).unwrap();
-
 example()
-    // setter accepts `impl Into<u32>`                        // [!code highlight]
-    .force_enabled_into(non_zero_u32)                         // [!code highlight]
-    // setter accepts `String` instead of `impl Into<String>` // [!code highlight]
-    .force_disabled_into("".to_owned())                       // [!code highlight]
+    // We can pass `&str` because the setters accept `impl Into<String>`      // [!code highlight]
+    .name("Bon")                                                              // [!code highlight]
+    .description("Awesome crate 🐱. Consider giving it a star on Github ⭐") // [!code highlight]
+    // We can pass `Option<&str>` to `maybe_` methods because they accept     // [!code highlight]
+    // `Option<impl Into<String>>`                                            // [!code highlight]
+    .maybe_group(Some("Favourites"))                                          // [!code highlight]
     .call();
 ```
 
 ```rust [Associated method argument]
 use bon::bon;
-use std::num::NonZeroU32;
 
 struct Example;
 
 #[bon]
 impl Example {
-    #[builder]
     fn example(
-        // `u32` isn't qualified for an `Into` conversion by default        // [!code highlight]
-        // because it's a primitive type. This attribute force-enables it.  // [!code highlight]
-        #[builder(into)]                                                    // [!code highlight]
-        force_enabled_into: u32,
+        #[builder(into)] // [!code highlight]
+        name: String,
 
-        // `String` is qualified for `Into` conversion by default              // [!code highlight]
-        // because it's a simple type path. This attribute force-disables it.  // [!code highlight]
-        #[builder(into = false)]                                               // [!code highlight]
-        force_disabled_into: String,
+        #[builder(into)] // [!code highlight]
+        description: Option<String>,
+
+        // The value passed to `default = ...` is converted with `into` as well // [!code highlight]
+        #[builder(into, default = "anon")]                                      // [!code highlight]
+        group: String
     ) {}
 }
 
-let non_zero_u32 = NonZeroU32::new(1).unwrap();
-
 Example::example()
-    // setter accepts `impl Into<u32>`                        // [!code highlight]
-    .force_enabled_into(non_zero_u32)                         // [!code highlight]
-    // setter accepts `String` instead of `impl Into<String>` // [!code highlight]
-    .force_disabled_into("".to_owned())                       // [!code highlight]
+    // We can pass `&str` because the setters accept `impl Into<String>`      // [!code highlight]
+    .name("Bon")                                                              // [!code highlight]
+    .description("Awesome crate 🐱. Consider giving it a star on Github ⭐") // [!code highlight]
+    // We can pass `Option<&str>` to `maybe_` methods because they accept     // [!code highlight]
+    // `Option<impl Into<String>>`                                            // [!code highlight]
+    .maybe_group(Some("Favourites"))                                          // [!code highlight]
     .call();
 ```
 
 :::
-
-#### Compile errors
-
-If the placement of this attribute wouldn't override the default behavior, a compile error will be generated requesting the removal of a redundant attribute.
-
-For example, in the following code `String` already qualifies for an `Into` conversion according to the [automatic `Into` conversion qualification rules].
-
-```rust compile_fail
-use bon::builder;
-
-#[builder]
-struct Example {
-    // Compile error: "This attribute is redundant and can be removed." // [!code error]
-    #[builder(into)] // [!code error]
-    string: String
-}
-```
 
 ### `name`
 
@@ -639,20 +766,20 @@ example()
     .call();
 ```
 
+:::
+
 ### `skip`
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
 
-Skips generating setters for the member. This hides the member from the generated builder API, so the caller can't set it's value.
+Skips generating setters for the member. This hides the member from the generated builder API, so the caller can't set its value.
 
-The value for the member will be computed based on the form of the attribute specified below.
+The value for the member will be computed based on the form of the attribute:
 
-Form                            | How value for the member is computed
---------------------------------|----------------------------------------------------------------
-`#[builder(skip)]`              | `Default::default()`
-`#[builder(skip = expression)]` | `expression`
-
-The result of the `expression` will automatically be converted into the target type if the type satisfies [automatic `Into` conversion qualification rules].
+| Form                            | How value for the member is computed |
+| ------------------------------- | ------------------------------------ |
+| `#[builder(skip)]`              | `Default::default()`                 |
+| `#[builder(skip = expression)]` | `expression`                         |
 
 **Example:**
 
@@ -666,23 +793,17 @@ struct User {
     #[builder(skip)] // [!code highlight]
     level: u32,
 
-    // The expression of type `&'static str` is automatically // [!code highlight]
-    // converted to `String` here via `Into`.                 // [!code highlight]
-    #[builder(skip = "anon")]                                 // [!code highlight]
-    name: String,
-
     // Any complex expression is accepted // [!code highlight]
-    #[builder(skip = bon::vec!["read"])]  // [!code highlight]
-    permissions: Vec<String>,
+    #[builder(skip = "anon".to_owned())]  // [!code highlight]
+    name: String,
 }
 
 let user = User::builder()
-    // There are no `level`, `name`, and `permissions` setters generated // [!code highlight]
+    // There are no `level`, and `name` setters generated // [!code highlight]
     .build();
 
-assert_eq!(user.name, "anon");
 assert_eq!(user.level, 0);
-assert_eq!(user.permissions, ["read"]);
+assert_eq!(user.name, "anon");
 ```
 
 ```rust [Free function argument]
@@ -693,23 +814,18 @@ fn greet_user(
     #[builder(skip)] // [!code highlight]
     level: u32,
 
-    // The expression of type `&'static str` is automatically // [!code highlight]
-    // converted to `String` here via `Into`.                 // [!code highlight]
-    #[builder(skip = "anon")]                                 // [!code highlight]
-    name: String,
-
     // Any complex expression is accepted // [!code highlight]
-    #[builder(skip = bon::vec!["read"])]  // [!code highlight]
-    permissions: Vec<String>,
+    #[builder(skip = "anon".to_owned())]  // [!code highlight]
+    name: String,
 ) -> String {
-    format!("Hello {name}! Your level is {level}, permissions: {permissions:?}")
+    format!("Hello {name}! Your level is {level}")
 }
 
 let greeting = greet_user()
-    // There are no `level`, `name`, and `permissions` setters generated // [!code highlight]
+    // There are no `level`, and `name` setters generated // [!code highlight]
     .call();
 
-assert_eq!(greeting, "Hello anon! Your level is 0, permissions: [\"read\"]");
+assert_eq!(greeting, "Hello anon! Your level is 0");
 ```
 
 ```rust [Associated method argument]
@@ -718,7 +834,6 @@ use bon::bon;
 struct User {
     level: u32,
     name: String,
-    permissions: Vec<String>,
 }
 
 #[bon]
@@ -728,31 +843,23 @@ impl User {
         #[builder(skip)] // [!code highlight]
         level: u32,
 
-        // The expression of type `&'static str` is automatically // [!code highlight]
-        // converted to `String` here via `Into`.                 // [!code highlight]
-        #[builder(skip = "anon")]                                 // [!code highlight]
-        name: String,
-
         // Any complex expression is accepted // [!code highlight]
-        #[builder(skip = bon::vec!["read"])]  // [!code highlight]
-        permissions: Vec<String>,
+        #[builder(skip = "anon".to_owned())]  // [!code highlight]
+        name: String,
     ) -> Self {
-        Self { level, name, permissions }
+        Self { level, name }
     }
 }
 
 let user = User::builder()
-    // There are no `level`, `name`, and `permissions` setters generated // [!code highlight]
+    // There are no `level`, and `name` setters generated // [!code highlight]
     .build();
 
-assert_eq!(user.name, "anon");
 assert_eq!(user.level, 0);
-assert_eq!(user.permissions, ["read"]);
+assert_eq!(user.name, "anon");
 ```
 
 :::
-
-[automatic `Into` conversion qualification rules]: ../guide/into-conversions#types-that-qualify-for-an-automatic-into-conversion
 
 *[Member]: Struct field or a function argument
 *[member]: Struct field or a function argument
