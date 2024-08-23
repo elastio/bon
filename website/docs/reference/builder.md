@@ -456,7 +456,7 @@ Makes the member optional and assigns a default value to it. There will be two s
 
 ::: tip
 
-Switching between `#[builder(default)]` and `Option<T>` is [compatible](./compatibility#switching-between-optiont-and-builderdefault).
+Switching between `#[builder(default)]` and `Option<T>` is [compatible](../guide/compatibility#switching-between-optiont-and-builderdefault).
 
 :::
 
