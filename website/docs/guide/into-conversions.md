@@ -1,4 +1,4 @@
-# `Into` conversions
+<!-- # `Into` conversions
 
 ## Problem statement
 
@@ -207,4 +207,4 @@ See [this attribute's docs](../reference/builder#into) for details.
 
 
 
-[open an issue]: https://github.com/elastio/bon/issues
+[open an issue]: https://github.com/elastio/bon/issues -->

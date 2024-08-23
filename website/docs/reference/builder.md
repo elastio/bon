@@ -644,6 +644,7 @@ struct Example;
 
 #[bon]
 impl Example {
+    #[builder]
     fn example(
         #[builder(into)] // [!code highlight]
         name: String,

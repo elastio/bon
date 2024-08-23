@@ -140,7 +140,7 @@ struct User {
 
 let user = User::builder()
     .id(1)
-    .name("Bon")
+    .name("Bon".to_owned())
     .build();
 
 assert_eq!(user.id, 1);
