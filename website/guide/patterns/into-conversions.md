@@ -1,6 +1,6 @@
 # `Into` conversions
 
-Here we'll discuss in more detail the cases when ["Into conversions" section](http://localhost:5173/bon/docs/guide/overview#into-conversions) on the general overview page.
+Here we'll discuss in more detail the cases when ["Into conversions" section](../overview#into-conversions) on the general overview page.
 
 ## How `bon` solves this problem
 
@@ -163,7 +163,7 @@ Suppose automatic `Into` conversion qualification rules don't satisfy your use c
 
 Use `#[builder(into = false)]` if you want to disable the automatic into conversion.
 
-See [this attribute's docs](../reference/builder#into) for details.
+See [this attribute's docs](../../reference/builder#into) for details.
 
 
 

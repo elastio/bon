@@ -573,13 +573,13 @@ This attribute is incompatible with members of `Option` type, since `Option` alr
 
 Changes the signature of the generated setters to accept [`impl Into<T>`](https://doc.rust-lang.org/stable/std/convert/trait.Into.html), where `T` is the type of the member.
 
-For [optional members](../guide/optional-members), the [`maybe_{member}()` setter method](../guide/optional-members#interaction-with-into-conversions) will accept an `Option<impl Into<T>>` type instead of just `Option<T>`.
+For [optional members](../guide/optional-members), the `maybe_{member}()` setter method will accept an `Option<impl Into<T>>` type instead of just `Option<T>`.
 
 For members that use `#[builder(default = expression)]`, the `expression` will be converted with `Into::into`.
 
 This parameter is often used with the `String` type, which allows you to pass `&str` into the setter without calling `.to_owned()` or `.to_string()` on it.
 
-See the ["Into conversions"](../guide/into-conversions) page with the guide about using into conversions, the advantages of using them and the drawbacks.
+See the ["Into conversions"](../guide/patterns/into-conversions) page that shows the common patterns and antipatterns of `impl Into<T>`.
 
 **Example:**
 

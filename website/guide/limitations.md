@@ -68,10 +68,9 @@ If you want to make sure your code doesn't accidentally omit a generic lifetime 
 elided_lifetimes_in_paths = "warn"
 ```
 
-
 ## `const` functions
 
-It's possible to place `#[builder]` on top of a `const fn`, but the generated builder methods won't be marked `const`. Under [some conditions](into-conversions#types-that-qualify-for-an-automatic-into-conversion), the generated setter methods make use of the `Into::into` method, which isn't `const`. Except for that, the generated code should be `const`-compatible.
+It's possible to place `#[builder]` on top of a `const fn`, but the generated builder methods won't be marked `const`. They use the non-const method `Into::into` to transition between type states. Except for that, the generated code should be `const`-compatible.
 
 If you have a strong use case that requires full support for `const`, feel free to [open an issue]. We'll figure something out for sure 🐱.
 
