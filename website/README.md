@@ -10,7 +10,7 @@ If you want to make changes to the website, you need to be able to preview the u
 
 First, make sure you have [NodeJS installed](https://nodejs.org/en/download/package-manager).
 
-Then install the dependencies of the website with the following command. This command needs to be run inside the `website` directory.
+Then install the dependencies of the website with the following command. This command must be run inside of the `website` directory.
 
 ```bash
 npm install
