@@ -4,7 +4,6 @@ import PageHeader from '../components/PageHeader.vue';
 import PageFooter from '../components/PageFooter.vue';
 import mediumZoom from 'medium-zoom';
 import { useRoute } from 'vitepress';
-import VPNavBarMenuGroup from 'vitepress/dist/client/theme-default/components/VPNavBarMenuGroup.vue';
 import { nextTick, onMounted, watch } from 'vue';
 
 const { Layout } = DefaultTheme;

@@ -1,5 +1,6 @@
 import { defineConfig } from "vitepress";
 import { abbr } from "@mdit/plugin-abbr";
+import { sidebarsByVersion, versionsSidebar } from "./versioning.mjs";
 
 const base = "/bon/";
 
@@ -66,6 +67,7 @@ export default defineConfig({
         ],
 
         sidebar: {
+            ...sidebarsByVersion,
             "/guide": [
                 {
                     text: "Guide",
@@ -109,17 +111,17 @@ export default defineConfig({
                     items: [
                         {
                             text: "Conditional building",
-                            link: "/guide/patterns/conditional-building"
+                            link: "/guide/patterns/conditional-building",
                         },
                         {
                             text: "Into conversions",
-                            link: "/guide/patterns/into-conversions"
+                            link: "/guide/patterns/into-conversions",
                         },
                         {
                             text: "Validating builders",
-                            link: "/guide/patterns/validating-builders"
-                        }
-                    ]
+                            link: "/guide/patterns/validating-builders",
+                        },
+                    ],
                 },
                 {
                     text: "Internal",
@@ -127,9 +129,10 @@ export default defineConfig({
                         {
                             text: "Contributing",
                             link: "/guide/internal/contributing",
-                        }
-                    ]
+                        },
+                    ],
                 },
+                versionsSidebar.guide,
             ],
             "/reference": [
                 {
@@ -199,7 +202,8 @@ export default defineConfig({
                         },
                     ],
                 },
-            ]
+                versionsSidebar.reference
+            ],
         },
     },
 });

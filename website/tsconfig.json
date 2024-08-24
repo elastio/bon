@@ -1,0 +1,8 @@
+{
+  "include": [
+    "**/*.ts",
+    "**/*.vue",
+    ".vitepress/**/*.ts",
+    ".vitepress/**/*.vue",
+  ]
+}
