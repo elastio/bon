@@ -1,45 +1,6 @@
-<!-- # `Into` conversions
+# `Into` conversions
 
-## Problem statement
-
-It's often annoying to have to do a type conversion manually when passing a value to a setter. For example, suppose you have a function that accepts a `String`. You want to pass a string slice such as `"Bon"` to that function. However, to do that you need to explicitly call `"Bon".to_owned()` or `"Bon".to_string()` to do a `&str -> String` conversion at the call site. This is inconvenient for APIs that are often invoked with hardcoded string values.
-
-**Example:**
-
-```rust
-struct User {
-    name: String,
-}
-
-impl User {
-    fn new(name: String) -> Self {
-        Self { name }
-    }
-}
-
-let user = User::new("Bon".to_owned());
-```
-
-That `.to_owned()` call is just boilerplate that we'd like to avoid. A common workaround for this problem is to let the function accept `impl Into<String>`.
-
-```rust ignore
-struct User {
-    name: String,
-}
-
-impl User {
-    fn new(name: String) -> Self {  // [!code --]
-        Self { name }               // [!code --]
-    fn new(name: impl Into<String>) -> Self {  // [!code ++]
-        Self { name: name.into() }             // [!code ++]
-    }
-}
-
-let user = User::new("Bon".to_owned()); // [!code --]
-let user = User::new("Bon");            // [!code ++]
-```
-
-This makes it possible for the caller to pass a `&str`. However, the signature of the function becomes a bit more complex and an `into()` conversion has to be invoked inside of the function implementation manually. So this approach just shifts the boilerplate from the caller to the callee.
+Here we'll discuss in more detail the cases when ["Into conversions" section](http://localhost:5173/bon/docs/guide/overview#into-conversions) on the general overview page.
 
 ## How `bon` solves this problem
 
@@ -207,4 +168,4 @@ See [this attribute's docs](../reference/builder#into) for details.
 
 
 
-[open an issue]: https://github.com/elastio/bon/issues -->
+[open an issue]: https://github.com/elastio/bon/issues

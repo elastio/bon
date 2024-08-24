@@ -18,6 +18,7 @@ const allPeople = [
         desc: "Creator of bon",
         links: [
             { icon: 'github', link: 'https://github.com/Veetaha' },
+            { icon: 'x', link: 'https://x.com/Veetaha' },
         ]
     },
 ]

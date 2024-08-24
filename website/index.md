@@ -10,8 +10,8 @@ hero:
     src: /bon-logo-medium.png
   actions:
     - theme: brand
-      text: Docs
-      link: /docs/guide/overview
+      text: Guide
+      link: /guide/overview
     - theme: alt
       text: Blog
       link: /blog

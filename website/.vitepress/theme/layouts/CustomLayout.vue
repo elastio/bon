@@ -26,14 +26,6 @@ watch(
 
 onMounted(initZoom);
 
-const versions = {
-    text: "Versions",
-    items: [
-        { link: '/docs/guide/overview', text: 'v1' },
-        { link: '/docs/guide/overview', text: 'v2' },
-    ]
-};
-
 </script>
 
 <template>

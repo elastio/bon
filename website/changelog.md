@@ -71,4 +71,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial release 🎉. See the [`bon` crate overview for details](https://elastio.github.io/bon/docs/guide/overview).
+- Initial release 🎉. See the [`bon` crate overview for details](https://elastio.github.io/bon/guide/overview).
