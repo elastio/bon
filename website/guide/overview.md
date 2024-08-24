@@ -203,6 +203,7 @@ If you have members of type `String`, or `PathBuf`, and you need to set them to 
 
 ```rust
 use bon::builder;
+use std::path::PathBuf;
 
 #[builder]               // [!code focus]
 struct Project {         // [!code focus]
@@ -211,7 +212,7 @@ struct Project {         // [!code focus]
     path: PathBuf,       // [!code focus]
 }                        // [!code focus]
 
-User::builder()
+Project::builder()
     .name("Bon".to_owned())                      // [!code focus]
     .description("Awesome crate 🐱".to_string()) // [!code focus]
     .path("/path/to/bon".into())                 // [!code focus]
