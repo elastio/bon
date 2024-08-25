@@ -4,7 +4,7 @@ outline: [2, 3]
 
 # `#[builder]`
 
-## Top-level attributes
+## Top-Level Attributes
 
 ### `builder_type`
 
@@ -446,7 +446,7 @@ Example::builder()
 
 
 
-## Member-level attributes
+## Member-Level Attributes
 
 ### `default`
 

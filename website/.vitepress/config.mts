@@ -77,7 +77,7 @@ export default defineConfig({
                             link: "/guide/overview",
                         },
                         {
-                            text: "Optional members",
+                            text: "Optional Members",
                             link: "/guide/optional-members",
                         },
                         {
@@ -110,16 +110,16 @@ export default defineConfig({
                     text: "Patterns",
                     items: [
                         {
-                            text: "Conditional building",
+                            text: "Conditional Building",
                             link: "/guide/patterns/conditional-building",
                         },
                         {
-                            text: "Into conversions",
-                            link: "/guide/patterns/into-conversions",
+                            text: "Validating Builders",
+                            link: "/guide/patterns/validating-builders",
                         },
                         {
-                            text: "Validating builders",
-                            link: "/guide/patterns/validating-builders",
+                            text: "Into Conversions In-Depth",
+                            link: "/guide/patterns/into-conversions-in-depth",
                         },
                     ],
                 },
@@ -142,7 +142,7 @@ export default defineConfig({
                             link: "/reference/builder",
                             items: [
                                 {
-                                    text: "Top-level attributes",
+                                    text: "Top-Level Attributes",
                                     link: "/reference/builder#top-level-attributes",
                                     items: [
                                         {
@@ -168,7 +168,7 @@ export default defineConfig({
                                     ],
                                 },
                                 {
-                                    text: "Member-level attributes",
+                                    text: "Member-Level Attributes",
                                     link: "/reference/builder#member-level-attributes",
                                     items: [
                                         {
