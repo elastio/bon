@@ -10,7 +10,7 @@ const router = useRouter();
 
 const versionedRoute = computed(() => parseRouteAsVersioned(router.route.path));
 const isLatestVersion = computed(() =>
-    versionedRoute == null || versionedRoute.value.selectedVersion === latestVersion
+    versionedRoute.value == null || versionedRoute.value.selectedVersion === latestVersion
 );
 
 

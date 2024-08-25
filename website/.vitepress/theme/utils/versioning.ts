@@ -27,8 +27,6 @@ export function parseRouteAsVersioned(route: string) {
         pathComponents.shift();
     }
 
-    console.log(pathComponents);
-
     const sectionRoot = sectionRoots[pathComponents[0]];
 
     if (sectionRoot == null) {
