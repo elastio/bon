@@ -2,6 +2,7 @@
 import DefaultTheme from 'vitepress/theme'
 import PageHeader from '../components/PageHeader.vue';
 import PageFooter from '../components/PageFooter.vue';
+import VersionSwitcher from '../components/VersionSwitcher.vue';
 import mediumZoom from 'medium-zoom';
 import { useRoute } from 'vitepress';
 import { nextTick, onMounted, watch } from 'vue';
@@ -34,6 +35,9 @@ onMounted(initZoom);
         </template>
         <template #doc-after>
             <PageFooter />
+        </template>
+        <template #sidebar-nav-before>
+            <VersionSwitcher />
         </template>
     </Layout>
 </template>

@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { useData } from 'vitepress';
-import { VPTeamMembers } from 'vitepress/theme'
+import { VPTeamMembers } from 'vitepress/theme';
 
 const { frontmatter } = useData();
 

@@ -1,6 +1,6 @@
 import { defineConfig } from "vitepress";
 import { abbr } from "@mdit/plugin-abbr";
-import { sidebarsByVersion, versionsSidebar } from "./versioning.mjs";
+import * as v1 from "../v1/config.mjs";
 
 const base = "/bon/";
 
@@ -67,7 +67,7 @@ export default defineConfig({
         ],
 
         sidebar: {
-            ...sidebarsByVersion,
+            ...v1.sidebars,
             "/guide": [
                 {
                     text: "Guide",
@@ -132,7 +132,6 @@ export default defineConfig({
                         },
                     ],
                 },
-                versionsSidebar.guide,
             ],
             "/reference": [
                 {
@@ -202,7 +201,6 @@ export default defineConfig({
                         },
                     ],
                 },
-                versionsSidebar.reference
             ],
         },
     },

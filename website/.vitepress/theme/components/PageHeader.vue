@@ -1,3 +1,21 @@
+<script setup lang="ts">
+import { useData, useRouter, withBase } from 'vitepress';
+import formatDate from '../utils/formatDate';
+import { computed } from 'vue';
+import { latestVersion, parseRouteAsVersioned } from '../utils/versioning';
+
+const { frontmatter } = useData();
+
+const router = useRouter();
+
+const versionedRoute = computed(() => parseRouteAsVersioned(router.route.path));
+const isLatestVersion = computed(() =>
+    versionedRoute == null || versionedRoute.value.selectedVersion === latestVersion
+);
+
+
+</script>
+
 <template>
     <header class="vp-doc">
         <h1 v-if="frontmatter.title">
@@ -6,16 +24,19 @@
         <h3 v-if="frontmatter.date">
             {{ formatDate(frontmatter.date) }}
         </h3>
+        <div v-if="!isLatestVersion" class="warning custom-block">
+            <div class="custom-block-title">WARNING</div>
+            <p>
+                You are viewing the docs for an older major version
+                of <code>bon</code> ({{ versionedRoute.selectedVersion }}).
+            </p>
+            <p>
+                <a :href="withBase(`/${versionedRoute.sectionRoot}`)">Click here</a>
+                to view the docs for the latest version ({{ latestVersion }}).
+            </p>
+        </div>
     </header>
 </template>
-
-<script setup lang="ts">
-import { useData } from 'vitepress';
-import formatDate from '../utils/formatDate';
-
-const { frontmatter } = useData();
-
-</script>
 
 <style scoped>
 header {

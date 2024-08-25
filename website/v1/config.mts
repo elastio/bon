@@ -1,7 +1,7 @@
 import { DefaultTheme } from "vitepress";
 
 export const sidebars = {
-    guide: [
+    "/v1/guide": [
         {
             text: "Guide",
             items: [
@@ -44,7 +44,7 @@ export const sidebars = {
             ],
         },
     ],
-    reference: [
+    "/v1/reference": [
         {
             text: "Reference",
             items: [

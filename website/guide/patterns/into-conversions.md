@@ -1,6 +1,6 @@
 # `Into` conversions
 
-Here we'll discuss in more detail the cases when ["Into conversions" section](../overview#into-conversions) on the general overview page.
+This is the continuation of the ["Into conversions" section](../overview#into-conversions) from the general overview page. We'll discuss the caveats of enabling the `Into` conversions.
 
 ## How `bon` solves this problem
 
