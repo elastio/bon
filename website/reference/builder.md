@@ -826,42 +826,6 @@ Player::builder()
 
 :::
 
-This can be used to give a name for the function arguments that use destructuring patterns,
-although it's simpler to just destructure inside of the function body, which should be preferred over using this attribute.
-
-**Example:**
-
-::: code-group
-
-```rust [Preferred destructuring in function body]
-use bon::builder;
-
-#[builder]
-fn example(point: (u32, u32)) {
-    let (x, y) = point;
-}
-
-example()
-    .point((1, 2))
-    .call();
-```
-
-```rust [Discouraged name attribute in destructuring]
-use bon::builder;
-
-#[builder]
-fn example(
-    #[builder(name = point)]
-    (x, y): (u32, u32)
-) {}
-
-example()
-    .point((1, 2))
-    .call();
-```
-
-:::
-
 ### `skip`
 
 **Applies to:** <Badge type="warning" text="struct fields"/>
