@@ -6,11 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [1.2.2](https://github.com/elastio/bon/compare/v1.2.1...v1.2.2) - 2024-08-26
+## [2.0.0](https://github.com/elastio/bon/compare/v1.2.1...v2.0.0) - 2024-08-26
 
-### Other
-- Provide access to other members in `default` and `skip` expressions ([#58](https://github.com/elastio/bon/pull/58))
-- `#[builder(on(type_pattern, attrs))]` ([#54](https://github.com/elastio/bon/pull/54))
+See the [blog post](https://elastio.github.io/bon/blog/bon-builder-generator-v2-release) for details.
 
 ## [1.2.1](https://github.com/elastio/bon/compare/v1.2.0...v1.2.1) - 2024-08-12
 
