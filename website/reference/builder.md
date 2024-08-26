@@ -563,6 +563,103 @@ assert_eq!(user.permissions, ["read"]);
 
 :::
 
+You can also use the values of other members by referencing their names in the `default` expression. All members are initialized in the order of their declaration. It means only those members that are declared earlier (higher) in the code are available to the `default` expression.
+
+**Example:**
+
+::: code-group
+
+```rust [Struct field]
+use bon::builder;
+
+#[builder]
+struct Example {
+    member_1: u32,
+
+    // Note that here we don't have access to `member_3`
+    // because it's declared (and thus initialized) later
+    #[builder(default = 2 * member_1)]
+    member_2: u32,
+
+    #[builder(default = member_2 + member_1)]
+    member_3: u32,
+}
+
+let example = Example::builder()
+    .member_1(3)
+    .build();
+
+assert_eq!(example.member_1, 3);
+assert_eq!(example.member_2, 6);
+assert_eq!(example.member_3, 9);
+```
+
+```rust [Free function argument]
+use bon::builder;
+
+#[builder]
+fn example(
+    member_1: u32,
+
+    // Note that here we don't have access to `member_3`
+    // because it's declared (and thus initialized) later
+    #[builder(default = 2 * member_1)]
+    member_2: u32,
+
+    #[builder(default = member_2 + member_1)]
+    member_3: u32,
+) -> (u32, u32, u32) {
+    (member_1, member_2, member_3)
+}
+
+let example = example()
+    .member_1(3)
+    .call();
+
+assert_eq!(example, (3, 6, 9));
+```
+
+
+```rust [Associated method argument]
+use bon::bon;
+
+struct Example;
+
+#[bon]
+impl Example {
+    #[builder]
+    fn example(
+        member_1: u32,
+
+        // Note that here we don't have access to `member_3`
+        // because it's declared (and thus initialized) later
+        #[builder(default = 2 * member_1)]
+        member_2: u32,
+
+        #[builder(default = member_2 + member_1)]
+        member_3: u32,
+    ) -> (u32, u32, u32) {
+        (member_1, member_2, member_3)
+    }
+}
+
+let example = Example::example()
+    .member_1(3)
+    .call();
+
+assert_eq!(example, (3, 6, 9));
+```
+
+:::
+
+#### Caveats
+
+Function parameters that use destructuring patterns won't be available in the scope for the `default` expression, because they don't have an explicit single identifier assigned to them.
+
+The `self` parameter in associated methods is not available to the `default` expression.
+
+If you need to refer to the parameter that uses destructuring or to the associated method's self, then set your member's type to `Option<T>` and handle the defaulting in the function's body manually.
+
 #### Compile errors
 
 This attribute is incompatible with members of `Option` type, since `Option` already implies the default value of `None`.
@@ -771,7 +868,7 @@ example()
 
 ### `skip`
 
-**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
+**Applies to:** <Badge type="warning" text="struct fields"/>
 
 Skips generating setters for the member. This hides the member from the generated builder API, so the caller can't set its value.
 
@@ -784,9 +881,7 @@ The value for the member will be computed based on the form of the attribute:
 
 **Example:**
 
-::: code-group
-
-```rust [Struct field]
+```rust
 use bon::builder;
 
 #[builder]
@@ -807,60 +902,36 @@ assert_eq!(user.level, 0);
 assert_eq!(user.name, "anon");
 ```
 
-```rust [Free function argument]
+You can also use the values of other members by referencing their names in the `skip` expression. All members are initialized in the order of their declaration. It means only those members that are declared earlier (higher) in the code are available to the `skip` expression.
+
+**Example:**
+
+```rust
 use bon::builder;
 
 #[builder]
-fn greet_user(
-    #[builder(skip)] // [!code highlight]
-    level: u32,
+struct Example {
+    member_1: u32,
 
-    // Any complex expression is accepted // [!code highlight]
-    #[builder(skip = "anon".to_owned())]  // [!code highlight]
-    name: String,
-) -> String {
-    format!("Hello {name}! Your level is {level}")
+    // Note that here we don't have access to `member_3`
+    // because it's declared (and thus initialized) later
+    #[builder(skip = 2 * member_1)]
+    member_2: u32,
+
+    #[builder(skip = member_2 + member_1)]
+    member_3: u32,
 }
 
-let greeting = greet_user()
-    // There are no `level`, and `name` setters generated // [!code highlight]
-    .call();
-
-assert_eq!(greeting, "Hello anon! Your level is 0");
-```
-
-```rust [Associated method argument]
-use bon::bon;
-
-struct User {
-    level: u32,
-    name: String,
-}
-
-#[bon]
-impl User {
-    #[builder]
-    fn new(
-        #[builder(skip)] // [!code highlight]
-        level: u32,
-
-        // Any complex expression is accepted // [!code highlight]
-        #[builder(skip = "anon".to_owned())]  // [!code highlight]
-        name: String,
-    ) -> Self {
-        Self { level, name }
-    }
-}
-
-let user = User::builder()
-    // There are no `level`, and `name` setters generated // [!code highlight]
+let example = Example::builder()
+    .member_1(3)
     .build();
 
-assert_eq!(user.level, 0);
-assert_eq!(user.name, "anon");
+assert_eq!(example.member_1, 3);
+assert_eq!(example.member_2, 6);
+assert_eq!(example.member_3, 9);
 ```
 
-:::
+This attribute is not supported with free function arguments or associated method arguments because it's simply unnecessary there and can easier be expressed with local variables.
 
 *[Member]: Struct field or a function argument
 *[member]: Struct field or a function argument

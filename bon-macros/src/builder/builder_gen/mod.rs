@@ -72,27 +72,6 @@ pub(crate) struct MemberExpr<'a> {
     pub(crate) expr: TokenStream2,
 }
 
-impl<'a> MemberExpr<'a> {
-    /// Creates a member expression by wrapping the given expression with
-    /// a type hint to the member's type. This is necessary in some cases
-    /// to assist the compiler in type inference.
-    ///
-    /// For example, if the expression is passed to a function that accepts
-    /// an impl Trait such as `impl Default`, and the expression itself looks
-    /// like `Default::default()`. In this case nothing hints to the compiler
-    /// the resulting type of the expression, so we add a type hint via an
-    /// intermediate variable here.
-    fn with_type_hint(member: &'a Member, expr: TokenStream2) -> Self {
-        let ty = member.norm_ty();
-        let expr = quote! {{
-            let value: #ty = #expr;
-            value
-        }};
-
-        Self { member, expr }
-    }
-}
-
 pub(crate) struct Generics {
     pub(crate) params: Vec<syn::GenericParam>,
     pub(crate) where_clause: Option<syn::WhereClause>,
@@ -427,7 +406,7 @@ impl BuilderGenCtx {
         }
     }
 
-    fn member_expr<'f>(&self, member: &'f Member) -> Result<MemberExpr<'f>> {
+    fn member_expr(&self, member: &Member) -> Result<TokenStream2> {
         let regular = match member {
             Member::Regular(regular) => regular,
             Member::Skipped(skipped) => {
@@ -438,7 +417,7 @@ impl BuilderGenCtx {
                     .map(|value| quote! { #value })
                     .unwrap_or_else(|| quote! { ::core::default::Default::default() });
 
-                return Ok(MemberExpr::with_type_hint(member, expr));
+                return Ok(expr);
             }
         };
 
@@ -449,12 +428,10 @@ impl BuilderGenCtx {
             .filter(|_| !regular.norm_ty.is_option())
             .map(|_| {
                 regular
-                    .params
-                    .default
-                    .as_ref()
-                    .and_then(|val| val.as_ref().as_ref())
+                    .param_default()
+                    .flatten()
                     .map(|default| {
-                        let has_into = regular.has_into(&self.conditional_params)?;
+                        let has_into = regular.param_into(&self.conditional_params)?;
                         let default = if has_into {
                             quote! { ::core::convert::Into::into((|| #default)()) }
                         } else {
@@ -477,15 +454,47 @@ impl BuilderGenCtx {
             #maybe_default
         };
 
-        Ok(MemberExpr::with_type_hint(member, expr))
+        Ok(expr)
     }
 
     fn finish_method_impl(&self) -> Result<TokenStream2> {
-        let member_exprs = self
+        let (members_vars_decls, member_exprs): (Vec<_>, Vec<_>) = self
             .members
             .iter()
-            .map(|member| self.member_expr(member))
-            .collect::<Result<Vec<_>>>()?;
+            .map(|member| Ok((member, self.member_expr(member)?)))
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .enumerate()
+            .map(|(i, (member, expr))| {
+                let var_ident = member
+                    .ident()
+                    .cloned()
+                    // The member can lack an ident only if it comes from function
+                    // syntax that uses a destructuring pattern in its parameters.
+                    .unwrap_or_else(|| quote::format_ident!("__member_{}", i));
+
+                // The type hint is necessary in some cases to assist the compiler
+                // in type inference.
+                //
+                // For example, if the expression is passed to a function that accepts
+                // an impl Trait such as `impl Default`, and the expression itself looks
+                // like `Default::default()`. In this case nothing hints to the compiler
+                // the resulting type of the expression, so we add a type hint via an
+                // intermediate variable here.
+                let ty = member.norm_ty();
+
+                let var_decl = quote! {
+                    let #var_ident: #ty = #expr;
+                };
+
+                let member_expr = MemberExpr {
+                    member,
+                    expr: quote! { #var_ident },
+                };
+
+                (var_decl, member_expr)
+            })
+            .unzip();
 
         let body = &self.finish_func.body.generate(&member_exprs);
         let asyncness = &self.finish_func.asyncness;
@@ -533,6 +542,7 @@ impl BuilderGenCtx {
                 #[doc = #docs]
                 #[inline(always)]
                 #vis #asyncness #unsafety fn #finish_func_ident(self) #output {
+                    #(#members_vars_decls)*
                     #body
                 }
             }

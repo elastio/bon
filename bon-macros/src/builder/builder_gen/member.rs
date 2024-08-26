@@ -102,14 +102,25 @@ pub(crate) struct MemberParams {
 }
 
 impl MemberParams {
-    fn validate(&self) -> Result {
+    fn validate(&self, origin: &MemberOrigin) -> Result {
         if let Self {
-            skip: Some(_),
+            skip: Some(skip),
             into,
             default,
             name,
         } = self
         {
+            match origin {
+                MemberOrigin::FnArg => {
+                    bail!(
+                        &skip.span(),
+                        "`skip` attribute is not supported on function arguments. \
+                        Use a local variable instead.",
+                    );
+                }
+                MemberOrigin::StructField => {}
+            }
+
             let other_attr = [
                 default.as_ref().map(|attr| ("default", attr.span())),
                 name.as_ref().map(|attr| ("name", attr.span())),
@@ -159,7 +170,7 @@ impl Member {
         let docs = attrs.iter().filter(|attr| attr.is_doc()).cloned().collect();
 
         let params = MemberParams::from_attributes(attrs)?;
-        params.validate()?;
+        params.validate(&origin)?;
 
         if let Some(value) = params.skip {
             return Ok(Self::Skipped(SkippedMember {
@@ -273,7 +284,14 @@ impl RegularMember {
         quote!(::bon::private::Set<#ty>)
     }
 
-    pub(crate) fn has_into(&self, conditional_params: &[ConditionalParams]) -> Result<bool> {
+    pub(crate) fn param_default(&self) -> Option<Option<&syn::Expr>> {
+        self.params
+            .default
+            .as_ref()
+            .map(|default| default.as_ref().as_ref())
+    }
+
+    pub(crate) fn param_into(&self, conditional_params: &[ConditionalParams]) -> Result<bool> {
         let scrutinee = self
             .as_optional_with_ty(&self.orig_ty)
             .unwrap_or(&self.orig_ty);

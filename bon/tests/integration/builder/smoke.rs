@@ -31,10 +31,8 @@ fn smoke_fn() {
         arg6: Option<&str>,
         arg7: Vec<String>,
         arg8: (u32, &[bool]),
-
-        #[builder(skip)] skipped: u32,
     ) -> String {
-        drop((arg1, arg2, arg4, arg5, arg6, arg7, arg8, skipped));
+        drop((arg1, arg2, arg4, arg5, arg6, arg7, arg8));
         arg3
     }
 

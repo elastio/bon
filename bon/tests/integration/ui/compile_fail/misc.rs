@@ -31,7 +31,7 @@ fn incomplete_on2() {}
 #[builder(on(_))]
 fn incomplete_on3() {}
 
-#[builder(on(_, ))]
+#[builder(on(_,))]
 fn incomplete_on4() {}
 
 #[builder(start_fn())]
@@ -53,6 +53,14 @@ struct ConflictingAttrs2 {
 struct ConflictingAttrs3 {
     #[builder(skip, default = 42)]
     z: u32,
+}
+
+#[builder]
+fn skip_on_fn_is_unsupporetd(
+    #[builder(skip)] _x: u32,
+    #[builder(skip = "skip".to_owned())] _y: String,
+    #[builder(skip = vec![42])] _z: Vec<u32>,
+) {
 }
 
 fn main() {
