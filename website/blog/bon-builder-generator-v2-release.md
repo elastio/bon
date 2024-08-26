@@ -217,3 +217,12 @@ This also plays better with the feature where [`skip` and `default` expressions 
 `bon` is only a month-old crate, and many we've learned many things since its [initial release](https://www.reddit.com/r/rust/comments/1eeem92/how_to_do_named_function_arguments_in_rust/) from your feedback. There were various extensions made to its API, however, there also were the breaking changes, that eventually led to a `2.0` release. I'm doing this major release earlier rather than later, while `bon`'s adoption is growing yet.
 
 Also, huge thank you for almost 500 ⭐ [on Github](https://github.com/elastio/bon)! Consider giving `bon` a star if you haven't already. Your support is a big motivation and together we can build a better builder 🐱!
+
+::: tip
+
+You can leave comments for this post on the platform of your choice:
+- [Reddit](https://www.reddit.com/r/rust/comments/1f1uzkw/bon_builder_generator_20_release/)
+- [X (Twitter)](https://x.com/veetaha/status/1828129748725440536)
+- [Hacker News](https://news.ycombinator.com/edit?id=41359893)
+
+:::
