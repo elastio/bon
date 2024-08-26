@@ -462,7 +462,7 @@ impl Member {
         let syn::Pat::Ident(pat) = norm_arg.pat.as_ref() else {
             bail!(
                 &orig_arg.pat,
-                "use a simple `identifier: type` syntax for the function argument;
+                "use a simple `identifier: type` syntax for the function argument; \
                 destructuring patterns in arguments aren't supported by the `#[builder]`",
             )
         };

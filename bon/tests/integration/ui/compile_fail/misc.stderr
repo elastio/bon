@@ -28,8 +28,7 @@ error: Only structs with named fields are supported
 14 | struct TupleStruct(u32, u32);
    | ^^^^^^
 
-error: use a simple `identifier: type` syntax for the function argument;
-                       destructuring patterns in arguments aren't supported by the `#[builder]`
+error: use a simple `identifier: type` syntax for the function argument; destructuring patterns in arguments aren't supported by the `#[builder]`
   --> tests/integration/ui/compile_fail/misc.rs:17:18
    |
 17 | fn destructuring((x, y): (u32, u32)) {
@@ -131,8 +130,7 @@ error: The attribute is expected to be placed only on an `fn` item or a `struct`
 79 | enum EnumsAreUnsupported {}
    | ^^^^
 
-error: use a simple `identifier: type` syntax for the function argument;
-                       destructuring patterns in arguments aren't supported by the `#[builder]`
+error: use a simple `identifier: type` syntax for the function argument; destructuring patterns in arguments aren't supported by the `#[builder]`
   --> tests/integration/ui/compile_fail/misc.rs:82:39
    |
 82 | fn destructuring_in_fn_is_unsupported((_, _): (u32, u32)) {}
