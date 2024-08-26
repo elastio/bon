@@ -4,45 +4,45 @@
 pub mod builder_top_level {
     use super::*;
 
-    /// Docs for start_fn
+    /// See the docs at https://elastio.github.io/bon/reference/builder#start-fn
     pub const start_fn: Option<Identifier> = None;
 
-    /// Docs for long-form start_fn
+    /// See the docs at https://elastio.github.io/bon/reference/builder#start-fn
     pub mod start_fn {
         use super::*;
 
-        /// Docs for name
+        /// See the docs at https://elastio.github.io/bon/reference/builder#start-fn
         pub const name: Identifier = Identifier;
 
-        /// Docs for vis
+        /// See the docs at https://elastio.github.io/bon/reference/builder#start-fn
         pub const vis: VisibilityString = VisibilityString;
     }
 
-    /// Docs for finish_fn
+    /// See the docs at https://elastio.github.io/bon/reference/builder#finish-fn
     pub const finish_fn: Option<Identifier> = None;
 
-    /// Docs for builder_type
+    /// See the docs at https://elastio.github.io/bon/reference/builder#builder-type
     pub const builder_type: Option<Identifier> = None;
 
-    /// Docs for expose_positional_fn
+    /// See the docs at https://elastio.github.io/bon/reference/builder#expose-positional-fn
     pub const expose_positional_fn: Option<Identifier> = None;
 
-    /// Docs for long-form expose_positional_fn
+    /// See the docs at https://elastio.github.io/bon/reference/builder#expose-positional-fn
     pub mod expose_positional_fn {
         use super::*;
 
-        /// Docs for name
+        /// See the docs at https://elastio.github.io/bon/reference/builder#expose-positional-fn
         pub const name: Identifier = Identifier;
 
-        /// Docs for vis
+        /// See the docs at https://elastio.github.io/bon/reference/builder#expose-positional-fn
         pub const vis: Option<VisibilityString> = None;
     }
 
-    /// Docs for `on`
+    /// See the docs at https://elastio.github.io/bon/reference/builder#on
     pub mod on {
         use super::*;
 
-        /// Docs for into
+        /// See the docs at https://elastio.github.io/bon/reference/builder#on
         pub const into: Flag = Flag;
     }
 }
