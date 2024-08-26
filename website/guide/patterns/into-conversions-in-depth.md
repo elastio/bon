@@ -188,7 +188,7 @@ If allocations can pose a bottleneck for you application and you need to see eve
 use bon::builder;
 
 #[builder]
-struct process_heavy_json(#[builder(into)] data: String) { /* */ }
+fn process_heavy_json(#[builder(into)] data: String) { /* */ }
 
 let json = String::from(
     r#"{
@@ -307,7 +307,6 @@ This is the drawback of using not only `impl Into`, but any generics at all.
 This quite subjective, but `impl Into<T>` is a bit harder to read than just `T`. It makes the signature of the setter slightly bigger and requires you to understand what the `impl Trait` does, and what its implications are.
 
 If you want to keep your code simpler and more accessible (especially for beginner rustaceans), just avoid the `Into` conversions.
-
 
 *[Member]: Struct field or a function argument
 *[member]: Struct field or a function argument

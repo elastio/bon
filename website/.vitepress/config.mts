@@ -114,8 +114,8 @@ export default defineConfig({
                             link: "/guide/patterns/conditional-building",
                         },
                         {
-                            text: "Validating Builders",
-                            link: "/guide/patterns/validating-builders",
+                            text: "Fallible Builders",
+                            link: "/guide/patterns/fallible-builders",
                         },
                         {
                             text: "Into Conversions In-Depth",

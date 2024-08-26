@@ -22,6 +22,7 @@ bon = { path = "../bon" }
 
 [dev-dependencies]
 buildstructor = "0.5"
+anyhow = "1.0"
 
 [build-dependencies]
 itertools = "0.13"
