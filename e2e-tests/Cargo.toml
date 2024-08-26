@@ -21,8 +21,8 @@ workspace = true
 bon = { path = "../bon" }
 
 [dev-dependencies]
+anyhow        = "1.0"
 buildstructor = "0.5"
-anyhow = "1.0"
 
 [build-dependencies]
 itertools = "0.13"

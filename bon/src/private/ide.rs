@@ -4,45 +4,45 @@
 pub mod builder_top_level {
     use super::*;
 
-    /// See the docs at https://elastio.github.io/bon/reference/builder#start-fn
+    /// See the docs at <https://elastio.github.io/bon/reference/builder#start-fn>
     pub const start_fn: Option<Identifier> = None;
 
-    /// See the docs at https://elastio.github.io/bon/reference/builder#start-fn
+    /// See the docs at <https://elastio.github.io/bon/reference/builder#start-fn>
     pub mod start_fn {
         use super::*;
 
-        /// See the docs at https://elastio.github.io/bon/reference/builder#start-fn
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#start-fn>
         pub const name: Identifier = Identifier;
 
-        /// See the docs at https://elastio.github.io/bon/reference/builder#start-fn
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#start-fn>
         pub const vis: VisibilityString = VisibilityString;
     }
 
-    /// See the docs at https://elastio.github.io/bon/reference/builder#finish-fn
+    /// See the docs at <https://elastio.github.io/bon/reference/builder#finish-fn>
     pub const finish_fn: Option<Identifier> = None;
 
-    /// See the docs at https://elastio.github.io/bon/reference/builder#builder-type
+    /// See the docs at <https://elastio.github.io/bon/reference/builder#builder-type>
     pub const builder_type: Option<Identifier> = None;
 
-    /// See the docs at https://elastio.github.io/bon/reference/builder#expose-positional-fn
+    /// See the docs at <https://elastio.github.io/bon/reference/builder#expose-positional-fn>
     pub const expose_positional_fn: Option<Identifier> = None;
 
-    /// See the docs at https://elastio.github.io/bon/reference/builder#expose-positional-fn
+    /// See the docs at <https://elastio.github.io/bon/reference/builder#expose-positional-fn>
     pub mod expose_positional_fn {
         use super::*;
 
-        /// See the docs at https://elastio.github.io/bon/reference/builder#expose-positional-fn
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#expose-positional-fn>
         pub const name: Identifier = Identifier;
 
-        /// See the docs at https://elastio.github.io/bon/reference/builder#expose-positional-fn
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#expose-positional-fn>
         pub const vis: Option<VisibilityString> = None;
     }
 
-    /// See the docs at https://elastio.github.io/bon/reference/builder#on
+    /// See the docs at <https://elastio.github.io/bon/reference/builder#on>
     pub mod on {
         use super::*;
 
-        /// See the docs at https://elastio.github.io/bon/reference/builder#on
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#on>
         pub const into: Flag = Flag;
     }
 }
