@@ -80,7 +80,7 @@ Let's review an example of a migration that you need to do when upgrading to `bo
 
 Suppose you had this code previously:
 
-```rust
+```rust compile_fail
 use bon::builder;
 
 #[builder]
@@ -120,7 +120,7 @@ Example::builder()
 
 If you need to enable `Into` conversions for multiple types, then you can specify multiple `on(...)` clauses. For example:
 
-```rust
+```rust ignore
 #[builder(on(String, into), on(PathBuf, into))]
 ```
 
@@ -151,7 +151,7 @@ Note that if you do this migration, then your builder API will still be the same
 
 With bon v1 you could write this:
 
-```rust
+```rust compile_fail
 use bon::builder;
 
 #[builder]
@@ -181,7 +181,7 @@ example().call();
 
 Previously, you could write the following code:
 
-```rust
+```rust compile_fail
 use bon::builder;
 
 #[builder]
