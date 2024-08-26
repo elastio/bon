@@ -1,4 +1,3 @@
-mod auto_into;
 mod member;
 mod setter_methods;
 
@@ -7,6 +6,7 @@ pub(crate) mod input_struct;
 
 use member::*;
 
+use super::params::ConditionalParams;
 use crate::util::prelude::*;
 use quote::quote;
 
@@ -27,6 +27,8 @@ pub(crate) struct AssocMethodCtx {
 
 pub(crate) struct BuilderGenCtx {
     pub(crate) members: Vec<Member>,
+
+    pub(crate) conditional_params: Vec<ConditionalParams>,
 
     pub(crate) generics: Generics,
     pub(crate) vis: syn::Visibility,
@@ -81,7 +83,7 @@ impl<'a> MemberExpr<'a> {
     /// the resulting type of the expression, so we add a type hint via an
     /// intermediate variable here.
     fn with_type_hint(member: &'a Member, expr: TokenStream2) -> Self {
-        let ty = member.ty();
+        let ty = member.norm_ty();
         let expr = quote! {{
             let value: #ty = #expr;
             value
@@ -134,6 +136,41 @@ impl BuilderGenCtx {
         self.start_func.generics.as_ref().unwrap_or(&self.generics)
     }
 
+    /// Generates code that has no meaning to the compiler, but it helps
+    /// IDEs to provide better code highlighting, completions and other
+    /// hints.
+    fn ide_hints(&self) -> TokenStream2 {
+        let type_patterns = self
+            .conditional_params
+            .iter()
+            .map(|params| &params.type_pattern)
+            .collect::<Vec<_>>();
+
+        if type_patterns.is_empty() {
+            return quote! {};
+        }
+
+        quote! {
+            // This is wrapped in a special cfg set by `rust-analyzer` to enable this
+            // code for rust-analyzer's analysis only, but prevent the code from being
+            // compiled by `rustc`. Rust Analyzer should be able to use the syntax
+            // provided inside of the block to figure out the semantic meaning of
+            // the tokens passed to the attribute.
+            #[cfg(rust_analyzer)]
+            {
+                // Let IDEs know that these are type patterns like the ones that
+                // could be written in a type annotation for a variable. Note that
+                // we don't initialize the variable with any value because we don't
+                // have any meaningful value to assign to this variable, especially
+                // because its type may contain wildcard patterns like `_`. This is
+                // used only to signal the IDEs that these tokens are meant to be
+                // type patterns by placing them in the context where type patterns
+                // are expected.
+                let _: (#(#type_patterns,)*);
+            }
+        }
+    }
+
     fn start_func(&self) -> syn::ItemFn {
         let builder_ident = &self.builder_ident;
 
@@ -178,6 +215,8 @@ impl BuilderGenCtx {
             }
         });
 
+        let ide_hints = self.ide_hints();
+
         let func = quote! {
             #(#docs)*
             #[inline(always)]
@@ -188,6 +227,8 @@ impl BuilderGenCtx {
             >
             #where_clause
             {
+                #ide_hints
+
                 #builder_ident {
                     __private_impl: #builder_private_impl_ident {
                         _phantom: ::core::marker::PhantomData,
@@ -202,7 +243,7 @@ impl BuilderGenCtx {
     }
 
     fn phantom_data(&self) -> TokenStream2 {
-        let member_types = self.members.iter().map(Member::ty);
+        let member_types = self.members.iter().map(Member::norm_ty);
         let receiver_ty = self
             .assoc_method_ctx
             .as_ref()
@@ -394,27 +435,18 @@ impl BuilderGenCtx {
                     .value
                     .as_ref()
                     .as_ref()
-                    .map(|value| {
-                        let qualified_for_into = self.type_qualifies_for_into(&skipped.ty);
-                        if qualified_for_into {
-                            quote! { ::core::convert::Into::into((|| #value)()) }
-                        } else {
-                            quote! { #value }
-                        }
-                    })
-                    .unwrap_or_else(|| {
-                        quote! { ::core::default::Default::default() }
-                    });
+                    .map(|value| quote! { #value })
+                    .unwrap_or_else(|| quote! { ::core::default::Default::default() });
 
                 return Ok(MemberExpr::with_type_hint(member, expr));
             }
         };
 
         let maybe_default = regular
-            .as_optional()
+            .as_optional_norm_ty()
             // For `Option` members we don't need any `unwrap_or_[else/default]`.
             // We pass them directly to the function unchanged.
-            .filter(|_| !regular.ty.is_option())
+            .filter(|_| !regular.norm_ty.is_option())
             .map(|_| {
                 regular
                     .params
@@ -422,9 +454,8 @@ impl BuilderGenCtx {
                     .as_ref()
                     .and_then(|val| val.as_ref().as_ref())
                     .map(|default| {
-                        let qualified_for_into =
-                            self.member_qualifies_for_into(regular, &regular.ty)?;
-                        let default = if qualified_for_into {
+                        let has_into = regular.has_into(&self.conditional_params)?;
+                        let default = if has_into {
                             quote! { ::core::convert::Into::into((|| #default)()) }
                         } else {
                             quote! { #default }
@@ -439,20 +470,22 @@ impl BuilderGenCtx {
         let member_ident = &regular.ident;
 
         let expr = quote! {
-            ::core::convert::Into::<::bon::private::Set<_>>::into(self.__private_impl.#member_ident)
-                .0
-                #maybe_default
+            ::core::convert::Into::<::bon::private::Set<_>>::into(
+                self.__private_impl.#member_ident
+            )
+            .0
+            #maybe_default
         };
 
         Ok(MemberExpr::with_type_hint(member, expr))
     }
 
     fn finish_method_impl(&self) -> Result<TokenStream2> {
-        let member_exprs: Vec<_> = self
+        let member_exprs = self
             .members
             .iter()
             .map(|member| self.member_expr(member))
-            .try_collect()?;
+            .collect::<Result<Vec<_>>>()?;
 
         let body = &self.finish_func.body.generate(&member_exprs);
         let asyncness = &self.finish_func.asyncness;

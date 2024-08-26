@@ -1,9 +1,24 @@
 use crate::util;
 use crate::util::prelude::*;
 use quote::quote;
+use syn::parse::ParseStream;
 use syn::punctuated::Punctuated;
 use syn::Expr;
 use syn::Token;
+
+pub(crate) fn parse_macro_input(
+    input: ParseStream<'_>,
+) -> Result<Punctuated<(Expr, Expr), Token![,]>, syn::Error> {
+    Punctuated::parse_terminated_with(input, parse_map_pair)
+}
+
+fn parse_map_pair(pair: ParseStream<'_>) -> Result<(Expr, Expr), syn::Error> {
+    let key = pair.parse().map_err(|_| pair.error(pair))?;
+    let _: Token![:] = pair.parse()?;
+    let value = pair.parse()?;
+
+    Ok((key, value))
+}
 
 pub(crate) fn generate(entries: Punctuated<(Expr, Expr), Token![,]>) -> TokenStream2 {
     let error =

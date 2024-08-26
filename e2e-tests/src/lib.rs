@@ -72,7 +72,7 @@ pub fn documented(
 }
 
 /// Function that returns a greeting special-tailored for a given person
-#[builder]
+#[builder(builder_type = Foo)]
 pub fn greet(
     /// Name of the person to greet.
     ///

@@ -5,22 +5,28 @@ use crate::prelude::*;
 fn fn_alloc() {
     #[builder]
     fn sut(
-        #[builder(default = "default")] arg1: String,
+        #[builder(default = "default".to_owned())] arg1: String,
         #[builder(default = vec![42])] arg2: Vec<u32>,
-    ) -> (String, Vec<u32>) {
-        (arg1, arg2)
+        #[builder(default = "foo", into)] arg3: String,
+    ) -> (String, Vec<u32>, String) {
+        (arg1, arg2, arg3)
     }
 
-    assert_debug_eq(sut().call(), expect![[r#"("default", [42])"#]]);
+    assert_debug_eq(sut().call(), expect![[r#"("default", [42], "foo")"#]]);
 
     assert_debug_eq(
         sut().arg1("arg1".to_owned()).call(),
-        expect![[r#"("arg1", [42])"#]],
+        expect![[r#"("arg1", [42], "foo")"#]],
     );
 
     assert_debug_eq(
-        sut().maybe_arg1(None::<String>).call(),
-        expect![[r#"("default", [42])"#]],
+        sut().maybe_arg1(None).call(),
+        expect![[r#"("default", [42], "foo")"#]],
+    );
+
+    assert_debug_eq(
+        sut().maybe_arg3(None::<String>).call(),
+        expect![[r#"("default", [42], "foo")"#]],
     );
 }
 
@@ -33,26 +39,29 @@ fn struct_alloc() {
     #[builder]
     #[derive(Debug)]
     struct Sut {
-        #[builder(default = "default")]
+        #[builder(default = "default".to_owned())]
         arg1: String,
 
         #[builder(default = vec![42])]
         arg2: Vec<u32>,
+
+        #[builder(default = "foo", into)]
+        arg3: String,
     }
 
     assert_debug_eq(
         Sut::builder().build(),
-        expect![[r#"Sut { arg1: "default", arg2: [42] }"#]],
+        expect![[r#"Sut { arg1: "default", arg2: [42], arg3: "foo" }"#]],
     );
 
     assert_debug_eq(
         Sut::builder().arg1("arg1".to_owned()).build(),
-        expect![[r#"Sut { arg1: "arg1", arg2: [42] }"#]],
+        expect![[r#"Sut { arg1: "arg1", arg2: [42], arg3: "foo" }"#]],
     );
 
     assert_debug_eq(
         Sut::builder().maybe_arg1(None::<String>).build(),
-        expect![[r#"Sut { arg1: "default", arg2: [42] }"#]],
+        expect![[r#"Sut { arg1: "default", arg2: [42], arg3: "foo" }"#]],
     );
 
     #[bon]
@@ -60,12 +69,14 @@ fn struct_alloc() {
         #[builder]
         fn assoc(
             self,
-            #[builder(default = "default")] arg1: String,
+            #[builder(default = "default".to_owned())] arg1: String,
             #[builder(default = vec![43])] arg2: Vec<u32>,
+            #[builder(default = "foo", into)] arg3: String,
         ) -> Self {
             Self {
                 arg1: format!("{}+{arg1}", self.arg1),
                 arg2: self.arg2.into_iter().chain(arg2).collect(),
+                arg3: format!("{}+{arg3}", self.arg3),
             }
         }
     }
@@ -74,17 +85,54 @@ fn struct_alloc() {
 
     assert_debug_eq(
         sut().assoc().call(),
-        expect![[r#"Sut { arg1: "default+default", arg2: [42, 43] }"#]],
+        expect![[r#"
+            Sut {
+                arg1: "default+default",
+                arg2: [
+                    42,
+                    43,
+                ],
+                arg3: "foo+foo",
+            }"#]],
     );
 
     assert_debug_eq(
         sut().assoc().arg1("arg1".to_owned()).call(),
-        expect![[r#"Sut { arg1: "default+arg1", arg2: [42, 43] }"#]],
+        expect![[r#"
+            Sut {
+                arg1: "default+arg1",
+                arg2: [
+                    42,
+                    43,
+                ],
+                arg3: "foo+foo",
+            }"#]],
     );
 
     assert_debug_eq(
-        sut().assoc().maybe_arg1(None::<String>).call(),
-        expect![[r#"Sut { arg1: "default+default", arg2: [42, 43] }"#]],
+        sut().assoc().maybe_arg1(None).call(),
+        expect![[r#"
+            Sut {
+                arg1: "default+default",
+                arg2: [
+                    42,
+                    43,
+                ],
+                arg3: "foo+foo",
+            }"#]],
+    );
+
+    assert_debug_eq(
+        sut().assoc().maybe_arg3(None::<String>).call(),
+        expect![[r#"
+            Sut {
+                arg1: "default+default",
+                arg2: [
+                    42,
+                    43,
+                ],
+                arg3: "foo+foo",
+            }"#]],
     );
 }
 

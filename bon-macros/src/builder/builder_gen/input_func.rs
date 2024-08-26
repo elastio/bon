@@ -287,12 +287,12 @@ impl FuncInputCtx {
             quote::format_ident!("__{}PrivateImpl", builder_ident.raw_name());
         let builder_state_trait_ident = quote::format_ident!("__{}State", builder_ident.raw_name());
 
-        let members: Vec<_> = self
-            .norm_func
-            .sig
-            .inputs
-            .iter()
-            .filter_map(syn::FnArg::as_typed)
+        fn typed_args(func: &syn::ItemFn) -> impl Iterator<Item = &syn::PatType> {
+            func.sig.inputs.iter().filter_map(syn::FnArg::as_typed)
+        }
+
+        let members: Vec<_> = typed_args(&self.norm_func)
+            .zip(typed_args(&self.orig_func))
             .map(Member::from_typed_fn_arg)
             .try_collect()?;
 
@@ -353,6 +353,9 @@ impl FuncInputCtx {
 
         let ctx = BuilderGenCtx {
             members,
+
+            conditional_params: self.params.base.on,
+
             builder_ident,
             builder_private_impl_ident,
             builder_state_trait_ident,
@@ -455,17 +458,18 @@ fn merge_generic_params(
 }
 
 impl Member {
-    pub(crate) fn from_typed_fn_arg(arg: &syn::PatType) -> Result<Self> {
-        let ident = match arg.pat.as_ref() {
+    fn from_typed_fn_arg((norm_arg, orig_arg): (&syn::PatType, &syn::PatType)) -> Result<Self> {
+        let ident = match norm_arg.pat.as_ref() {
             syn::Pat::Ident(pat) => Some(&pat.ident),
             _ => None,
         };
 
         Member::new(
             MemberOrigin::FnArg,
-            &arg.attrs,
+            &norm_arg.attrs,
             ident.cloned(),
-            arg.ty.clone(),
+            norm_arg.ty.clone(),
+            orig_arg.ty.clone(),
         )
     }
 }

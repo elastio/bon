@@ -11,13 +11,28 @@ fn destructuring((x, y): (u32, u32)) {
 }
 
 #[builder]
-fn explicit_into_equals_true(#[builder(into = true)] _x: u32) {}
+fn unnecessary_into_false(#[builder(into = false)] _x: u32) {}
 
-#[builder]
-fn unnecessary_into_override_true(#[builder(into)] _x: String) {}
+#[builder(on(String, into))]
+fn unnecessary_into(#[builder(into)] _x: String) {}
 
-#[builder]
-fn unnecessary_into_override_false(#[builder(into = false)] _x: u32) {}
+#[builder(on(&dyn std::fmt::Debug, into))]
+fn invalid_type_pattern() {}
+
+#[builder(on(fn(#[attr] a: u32), into))]
+fn attrs_in_on_type_pattern() {}
+
+#[builder(on)]
+fn incomplete_on() {}
+
+#[builder(on())]
+fn incomplete_on2() {}
+
+#[builder(on(_))]
+fn incomplete_on3() {}
+
+#[builder(on(_, ))]
+fn incomplete_on4() {}
 
 #[builder(start_fn())]
 struct EmptyStartFn {}

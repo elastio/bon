@@ -10,68 +10,104 @@ error: can't infer the name to use for this function argument; please use a simp
 8 | fn destructuring((x, y): (u32, u32)) {
   |                          ^^^^^^^^^^
 
-error: No need to write `= true`. Just mentioning the attribute is enough to set it to `true`, so remove the `= true` part.
-  --> tests/integration/ui/compile_fail/misc.rs:14:47
+error: Unexpected type `bool`
+  --> tests/integration/ui/compile_fail/misc.rs:14:44
    |
-14 | fn explicit_into_equals_true(#[builder(into = true)] _x: u32) {}
-   |                                               ^^^^
+14 | fn unnecessary_into_false(#[builder(into = false)] _x: u32) {}
+   |                                            ^^^^^
 
-error: This attribute is redundant and can be removed. By default the the type of this function argument already qualifies for `impl Into`.
-  --> tests/integration/ui/compile_fail/misc.rs:17:45
+error: this `#[builder(into)]` attribute is redundant, because `into` is already implied for this member via the `#[builder(on(...))]` at the top of the function
+  --> tests/integration/ui/compile_fail/misc.rs:17:31
    |
-17 | fn unnecessary_into_override_true(#[builder(into)] _x: String) {}
-   |                                             ^^^^
+17 | fn unnecessary_into(#[builder(into)] _x: String) {}
+   |                               ^^^^
 
-error: This attribute is redundant and can be removed. By default the the type of this function argument already doesn't qualify for `impl Into`.
-  --> tests/integration/ui/compile_fail/misc.rs:20:53
+error: This syntax is not supported in type patterns yet. If you have a use case for this, please open an issue at https://github.com/elastio/bon/issues.
+  --> tests/integration/ui/compile_fail/misc.rs:19:15
    |
-20 | fn unnecessary_into_override_false(#[builder(into = false)] _x: u32) {}
-   |                                                     ^^^^^
+19 | #[builder(on(&dyn std::fmt::Debug, into))]
+   |               ^^^
+
+error: nested attributes are not allowed in the type pattern of #[builder(on(type_pattern, ...))]
+  --> tests/integration/ui/compile_fail/misc.rs:22:17
+   |
+22 | #[builder(on(fn(#[attr] a: u32), into))]
+   |                 ^
+
+error: Expected an attribute of form `on(type_pattern, ...)`
+  --> tests/integration/ui/compile_fail/misc.rs:25:11
+   |
+25 | #[builder(on)]
+   |           ^^
+
+error: unexpected end of input, expected one of: `for`, parentheses, `fn`, `unsafe`, `extern`, identifier, `::`, `<`, `dyn`, square brackets, `*`, `&`, `!`, `impl`, `_`, lifetime
+  --> tests/integration/ui/compile_fail/misc.rs:28:1
+   |
+28 | #[builder(on())]
+   | ^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: expected `,`
+  --> tests/integration/ui/compile_fail/misc.rs:31:1
+   |
+31 | #[builder(on(_))]
+   | ^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: this #[builder(on(type_pattern, ...))] contains no options to override the default behavior for the selected setters like `into`, so it does nothing
+  --> tests/integration/ui/compile_fail/misc.rs:34:1
+   |
+34 | #[builder(on(_, ))]
+   | ^^^^^^^^^^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected at least one parameter in parentheses
-  --> tests/integration/ui/compile_fail/misc.rs:22:11
+  --> tests/integration/ui/compile_fail/misc.rs:37:11
    |
-22 | #[builder(start_fn())]
+37 | #[builder(start_fn())]
    |           ^^^^^^^^
 
 error: `skip` attribute can't be specified with other attributes like `into` because there will be no setter generated for this member to configure
-  --> tests/integration/ui/compile_fail/misc.rs:27:21
+  --> tests/integration/ui/compile_fail/misc.rs:42:21
    |
-27 |     #[builder(skip, into)]
+42 |     #[builder(skip, into)]
    |                     ^^^^
 
 error: `skip` attribute can't be specified with other attributes like `name` because there will be no setter generated for this member to configure
-  --> tests/integration/ui/compile_fail/misc.rs:33:28
+  --> tests/integration/ui/compile_fail/misc.rs:48:28
    |
-33 |     #[builder(skip, name = bar)]
+48 |     #[builder(skip, name = bar)]
    |                            ^^^
 
 error: `skip` attribute can't be specified with other attributes like `default` because there will be no setter generated for this member to configure. If you wanted to specify a value for the member, then use the following syntax instead `#[builder(skip = value)]`
-  --> tests/integration/ui/compile_fail/misc.rs:39:21
+  --> tests/integration/ui/compile_fail/misc.rs:54:21
    |
-39 |     #[builder(skip, default = 42)]
+54 |     #[builder(skip, default = 42)]
    |                     ^^^^^^^
 
 error: duplicate key in the map
-  --> tests/integration/ui/compile_fail/misc.rs:45:9
+  --> tests/integration/ui/compile_fail/misc.rs:60:9
    |
-45 |         "Hello": "Blackjack",
+60 |         "Hello": "Blackjack",
    |         ^^^^^^^
 
 error: duplicate key in the map
-  --> tests/integration/ui/compile_fail/misc.rs:46:9
+  --> tests/integration/ui/compile_fail/misc.rs:61:9
    |
-46 |         "Hello": "Littlepip",
+61 |         "Hello": "Littlepip",
    |         ^^^^^^^
 
 error: duplicate value in the set
-  --> tests/integration/ui/compile_fail/misc.rs:49:43
+  --> tests/integration/ui/compile_fail/misc.rs:64:43
    |
-49 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
+64 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
    |                                           ^^^^^^^^^
 
 error: duplicate value in the set
-  --> tests/integration/ui/compile_fail/misc.rs:49:62
+  --> tests/integration/ui/compile_fail/misc.rs:64:62
    |
-49 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
+64 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
    |                                                              ^^^^^^^^^

@@ -152,17 +152,15 @@ impl<'a> MemberSettersCtx<'a> {
     }
 
     fn setter_methods(&self) -> Result<TokenStream2> {
-        let member_type = self.member.ty.as_ref();
+        let member_type = self.member.norm_ty.as_ref();
 
-        if let Some(inner_type) = self.member.as_optional() {
+        if let Some(inner_type) = self.member.as_optional_norm_ty() {
             return self.setters_for_optional_member(inner_type);
         }
 
-        let qualified_for_into = self
-            .builder_gen
-            .member_qualifies_for_into(self.member, &self.member.ty)?;
+        let has_into = self.member.has_into(&self.builder_gen.conditional_params)?;
 
-        let (fn_param_type, maybe_into_call) = if qualified_for_into {
+        let (fn_param_type, maybe_into_call) = if has_into {
             (quote!(impl Into<#member_type>), quote!(.into()))
         } else {
             (quote!(#member_type), quote!())
@@ -177,11 +175,8 @@ impl<'a> MemberSettersCtx<'a> {
     }
 
     fn setters_for_optional_member(&self, inner_type: &syn::Type) -> Result<TokenStream2> {
-        let qualified_for_into = self
-            .builder_gen
-            .member_qualifies_for_into(self.member, inner_type)?;
-
-        let (inner_type, maybe_conv_call, maybe_map_conv_call) = if qualified_for_into {
+        let has_into = self.member.has_into(&self.builder_gen.conditional_params)?;
+        let (inner_type, maybe_conv_call, maybe_map_conv_call) = if has_into {
             (
                 quote!(impl Into<#inner_type>),
                 quote!(.into()),
@@ -224,12 +219,10 @@ impl<'a> MemberSettersCtx<'a> {
             },
         ];
 
-        let setters = methods
+        Ok(methods
             .into_iter()
             .map(|method| self.setter_method(method))
-            .collect();
-
-        Ok(setters)
+            .collect())
     }
 
     fn setter_method(&self, method: MemberSetterMethod) -> TokenStream2 {

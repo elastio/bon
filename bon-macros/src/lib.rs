@@ -9,13 +9,14 @@ mod set;
 mod util;
 
 use proc_macro::TokenStream;
+use syn::parse::Parser;
 
 /// Can be placed on top of a free function or an associated method or a struct
 /// declaration. Generates a builder for the item beneath it.
 ///
-/// There documentation for this macro is split into two parts:
-/// - [Overview page](https://elastio.github.io/bon/docs/guide/overview)
-/// - [Attributes reference](https://elastio.github.io/bon/docs/reference/builder)
+/// Docs for this macro are split into two parts:
+/// - [Guide](https://elastio.github.io/bon/guide/overview)
+/// - [Attributes reference](https://elastio.github.io/bon/reference/builder)
 ///
 /// # Quick example
 ///
@@ -38,15 +39,63 @@ use proc_macro::TokenStream;
 /// assert_eq!(greeting, "Hello Bon with age 24!");
 /// ```
 ///
-/// See the [overview](https://elastio.github.io/bon/docs/guide/overview) for the
-/// rest of the docs about associated methods, structs, and more.
+/// You can also use the `#[builder]` attribute with structs and associated methods:
+///
+/// ```rust ignore
+/// use bon::{bon, builder};
+///
+/// #[builder]
+/// struct User {
+///     id: u32,
+///     name: String,
+/// }
+///
+/// #[bon]
+/// impl User {
+///     #[builder]
+///     fn greet(&self, target: &str, level: Option<&str>) -> String {
+///         let level = level.unwrap_or("INFO");
+///         let name = &self.name;
+///
+///         format!("[{level}] {name} says hello to {target}")
+///     }
+/// }
+///
+/// let user = User::builder()
+///     .id(1)
+///     .name("Bon".to_owned())
+///     .build();
+///
+/// let greeting = user
+///     .greet()
+///     .target("the world")
+///     // `level` is optional, we can omit it here
+///     .call();
+///
+/// assert_eq!(user.id, 1);
+/// assert_eq!(user.name, "Bon");
+/// assert_eq!(greeting, "[INFO] Bon says hello to the world");
+/// ```
+///
+/// See [the guide](https://elastio.github.io/bon/guide/overview) for the rest.
 #[proc_macro_attribute]
 pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
-    syn::parse(item.clone())
+    let meta = util::ide::parse_comma_separated_meta
+        .parse2(params.clone().into())
+        .unwrap_or_default();
+
+    let completions = util::ide::generate_completions(meta);
+
+    let main = syn::parse(item.clone())
         .map_err(Into::into)
         .and_then(|item| builder::generate_for_item(params.into(), item))
-        .unwrap_or_else(|err| error::error_into_token_stream(err, item.into()))
-        .into()
+        .unwrap_or_else(|err| error::error_into_token_stream(err, item.into()));
+
+    quote::quote! {
+        #completions
+        #main
+    }
+    .into()
 }
 
 /// Companion macro for [`builder`]. You should place it on top of the `impl` block
@@ -56,7 +105,7 @@ pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
 /// inside of the `impl` block. You'll get compile errors without that context.
 ///
 /// For details on this macro including the reason why it's needed see this
-/// paragraph in the [overview](https://elastio.github.io/bon/docs/guide/overview#builder-for-an-associated-method).
+/// paragraph in the [overview](https://elastio.github.io/bon/guide/overview#builder-for-an-associated-method).
 ///
 /// # Quick example
 ///
@@ -144,7 +193,7 @@ pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
 /// [`HashMap`]: https://doc.rust-lang.org/stable/std/collections/struct.HashMap.html
 #[proc_macro]
 pub fn map(input: TokenStream) -> TokenStream {
-    let entries = syn::parse_macro_input!(input with util::parse_map_macro_input);
+    let entries = syn::parse_macro_input!(input with map::parse_macro_input);
 
     map::generate(entries).into()
 }

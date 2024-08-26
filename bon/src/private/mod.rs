@@ -1,3 +1,6 @@
+/// Used for providing better IDE hints (completions and syntax highlighting).
+pub mod ide;
+
 /// Used to implement the `alloc` feature.
 #[cfg(feature = "alloc")]
 pub extern crate alloc;

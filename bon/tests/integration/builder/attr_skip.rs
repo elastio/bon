@@ -6,7 +6,7 @@ use expect_test::expect;
 fn fn_alloc() {
     #[builder]
     fn sut(
-        #[builder(skip = "skip")] arg1: String,
+        #[builder(skip = "skip".to_owned())] arg1: String,
         #[builder(skip = vec![42])] arg2: Vec<u32>,
     ) -> (String, Vec<u32>) {
         (arg1, arg2)
@@ -24,7 +24,7 @@ fn struct_alloc() {
     #[builder]
     #[derive(Debug)]
     struct Sut {
-        #[builder(skip = "skip")]
+        #[builder(skip = "skip".to_owned())]
         arg1: String,
 
         #[builder(skip = vec![42])]
@@ -41,7 +41,7 @@ fn struct_alloc() {
         #[builder]
         fn assoc(
             self,
-            #[builder(skip = "assoc")] arg1: String,
+            #[builder(skip = "assoc".to_owned())] arg1: String,
             #[builder(skip = vec![43])] arg2: Vec<u32>,
         ) -> Self {
             Self {

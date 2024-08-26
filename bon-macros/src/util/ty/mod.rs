@@ -1,3 +1,7 @@
+mod match_types;
+
+use crate::util::prelude::*;
+
 pub(crate) trait TypeExt {
     /// Try downcasting the type to [`syn::Type::Path`]
     fn as_path(&self) -> Option<&syn::TypePath>;
@@ -17,6 +21,14 @@ pub(crate) trait TypeExt {
 
     /// Recursively strips the [`syn::Type::Group`] and [`syn::Type::Paren`] wrappers
     fn peel(&self) -> &Self;
+
+    /// Returns `true` if the given type matches the pattern. The types match only if
+    /// their tokens are equal or if they differ in the places where the pattern has
+    /// a wildcard [`syn::Type::Infer`] e.g. `Vec<i32>` matches the pattern `Vec<_>`.
+    ///
+    /// Any wildcards in `Self` will not be specially handled. Only wildcards in `pattern`
+    /// have semantic meaning.
+    fn matches(&self, pattern: &syn::Type) -> Result<bool>;
 }
 
 impl TypeExt for syn::Type {
@@ -78,5 +90,9 @@ impl TypeExt for syn::Type {
             Self::Paren(paren) => paren.elem.peel(),
             _ => self,
         }
+    }
+
+    fn matches(&self, pattern: &syn::Type) -> Result<bool> {
+        match_types::match_types(self, pattern)
     }
 }

@@ -1,5 +1,6 @@
 import { defineConfig } from "vitepress";
 import { abbr } from "@mdit/plugin-abbr";
+import * as v1 from "../v1/config.mjs";
 
 const base = "/bon/";
 
@@ -55,7 +56,8 @@ export default defineConfig({
 
         // https://vitepress.dev/reference/default-theme-config
         nav: [
-            { text: "Docs", link: "/docs/guide/overview" },
+            { text: "Guide", link: "/guide/overview" },
+            { text: "Reference", link: "/reference/builder" },
             { text: "Changelog", link: "/changelog" },
             { text: "Blog", link: "/blog" },
         ],
@@ -65,100 +67,125 @@ export default defineConfig({
         ],
 
         sidebar: {
-            "/docs": [
+            ...v1.sidebars,
+            "/guide": [
                 {
                     text: "Guide",
                     items: [
                         {
                             text: "Overview",
-                            link: "/docs/guide/overview",
+                            link: "/guide/overview",
                         },
                         {
-                            text: "Optional members",
-                            link: "/docs/guide/optional-members",
+                            text: "Optional Members",
+                            link: "/guide/optional-members",
                         },
                         {
                             text: "Compatibility",
-                            link: "/docs/guide/compatibility",
-                        },
-                        {
-                            text: "Into conversions",
-                            link: "/docs/guide/into-conversions",
+                            link: "/guide/compatibility",
                         },
                         {
                             text: "Documenting",
-                            link: "/docs/guide/documenting",
+                            link: "/guide/documenting",
                         },
                         {
                             text: "Limitations",
-                            link: "/docs/guide/limitations",
+                            link: "/guide/limitations",
                         },
                         {
                             text: "Benchmarks",
-                            link: "/docs/guide/benchmarks",
+                            link: "/guide/benchmarks",
                         },
                         {
                             text: "Alternatives",
-                            link: "/docs/guide/alternatives",
+                            link: "/guide/alternatives",
                         },
                         {
                             text: "Troubleshooting",
-                            link: "/docs/guide/troubleshooting",
+                            link: "/guide/troubleshooting",
                         },
                     ],
                 },
                 {
-                    text: "Contributing",
-                    link: "/docs/contributing",
+                    text: "Patterns",
+                    items: [
+                        {
+                            text: "Conditional Building",
+                            link: "/guide/patterns/conditional-building",
+                        },
+                        {
+                            text: "Fallible Builders",
+                            link: "/guide/patterns/fallible-builders",
+                        },
+                        {
+                            text: "Into Conversions In-Depth",
+                            link: "/guide/patterns/into-conversions-in-depth",
+                        },
+                    ],
                 },
+                {
+                    text: "Internal",
+                    items: [
+                        {
+                            text: "Contributing",
+                            link: "/guide/internal/contributing",
+                        },
+                    ],
+                },
+            ],
+            "/reference": [
                 {
                     text: "Reference",
                     items: [
                         {
                             text: "#[builder]",
-                            link: "/docs/reference/builder",
+                            link: "/reference/builder",
                             items: [
                                 {
-                                    text: "Top-level attributes",
-                                    link: "/docs/reference/builder#top-level-attributes",
+                                    text: "Top-Level Attributes",
+                                    link: "/reference/builder#top-level-attributes",
                                     items: [
                                         {
                                             text: "builder_type",
-                                            link: "/docs/reference/builder#builder-type",
+                                            link: "/reference/builder#builder-type",
                                         },
                                         {
                                             text: "expose_positional_fn",
-                                            link: "/docs/reference/builder#expose-positional-fn",
+                                            link: "/reference/builder#expose-positional-fn",
                                         },
                                         {
                                             text: "finish_fn",
-                                            link: "/docs/reference/builder#finish-fn",
+                                            link: "/reference/builder#finish-fn",
                                         },
                                         {
                                             text: "start_fn",
-                                            link: "/docs/reference/builder#start-fn",
+                                            link: "/reference/builder#start-fn",
+                                        },
+                                        {
+                                            text: "on",
+                                            link: "/reference/builder#on",
                                         },
                                     ],
                                 },
                                 {
-                                    text: "Member-level attributes",
-                                    link: "/docs/reference/builder#member-level-attributes",
+                                    text: "Member-Level Attributes",
+                                    link: "/reference/builder#member-level-attributes",
                                     items: [
                                         {
                                             text: "default",
-                                            link: "/docs/reference/builder#default",
+                                            link: "/reference/builder#default",
                                         },
                                         {
                                             text: "into",
-                                            link: "/docs/reference/builder#into",
+                                            link: "/reference/builder#into",
                                         },
                                         {
                                             text: "name",
-                                            link: "/docs/reference/builder#name",
+                                            link: "/reference/builder#name",
                                         },
                                         {
                                             text: "skip",
-                                            link: "/docs/reference/builder#skip",
+                                            link: "/reference/builder#skip",
                                         },
                                     ],
                                 },
@@ -166,7 +193,7 @@ export default defineConfig({
                         },
                         {
                             text: "#[bon]",
-                            link: "/docs/reference/bon",
+                            link: "/reference/bon",
                         },
                         {
                             text: "Other items on docs.rs",

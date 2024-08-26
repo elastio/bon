@@ -79,19 +79,22 @@ impl StructInputCtx {
 
         let builder_state_trait_ident = quote::format_ident!("__{}State", builder_ident.raw_name());
 
-        let fields = match self.norm_struct.fields {
-            syn::Fields::Named(fields) => fields,
-            _ => {
-                bail!(
-                    &self.norm_struct,
-                    "Only structs with named fields are supported"
-                )
+        fn fields(struct_item: &syn::ItemStruct) -> Result<&syn::FieldsNamed> {
+            match &struct_item.fields {
+                syn::Fields::Named(fields) => Ok(fields),
+                _ => {
+                    bail!(&struct_item, "Only structs with named fields are supported")
+                }
             }
-        };
+        }
 
-        let members: Vec<_> = fields
+        let norm_fields = fields(&self.norm_struct)?;
+        let orig_fields = fields(&self.orig_struct)?;
+
+        let members: Vec<_> = norm_fields
             .named
             .iter()
+            .zip(&orig_fields.named)
             .map(Member::from_syn_field)
             .try_collect()?;
 
@@ -147,6 +150,9 @@ impl StructInputCtx {
 
         let ctx = BuilderGenCtx {
             members,
+
+            conditional_params: self.params.base.on,
+
             builder_ident,
             builder_private_impl_ident,
             builder_state_trait_ident,
@@ -189,12 +195,13 @@ impl FinishFuncBody for StructLiteralBody {
 }
 
 impl Member {
-    pub(crate) fn from_syn_field(field: &syn::Field) -> Result<Self> {
+    fn from_syn_field((norm_field, orig_field): (&syn::Field, &syn::Field)) -> Result<Self> {
         Member::new(
             MemberOrigin::StructField,
-            &field.attrs,
-            field.ident.clone(),
-            Box::new(field.ty.clone()),
+            &norm_field.attrs,
+            norm_field.ident.clone(),
+            Box::new(norm_field.ty.clone()),
+            Box::new(orig_field.ty.clone()),
         )
     }
 }

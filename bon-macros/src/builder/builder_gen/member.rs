@@ -1,6 +1,7 @@
+use crate::builder::params::ConditionalParams;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
-use darling::{FromAttributes, FromMeta};
+use darling::FromAttributes;
 use quote::quote;
 use std::fmt;
 use syn::spanned::Spanned;
@@ -16,6 +17,15 @@ impl fmt::Display for MemberOrigin {
         match self {
             Self::FnArg => write!(f, "function argument"),
             Self::StructField => write!(f, "struct field"),
+        }
+    }
+}
+
+impl MemberOrigin {
+    fn parent_construct(&self) -> &'static str {
+        match self {
+            Self::FnArg => "function",
+            Self::StructField => "struct",
         }
     }
 }
@@ -42,8 +52,11 @@ pub(crate) struct RegularMember {
     /// on top of the original member
     pub(crate) docs: Vec<syn::Attribute>,
 
-    /// Type of member that the builder should have setters for.
-    pub(crate) ty: Box<syn::Type>,
+    /// Normalized type of the member that the builder should have setters for.
+    pub(crate) norm_ty: Box<syn::Type>,
+
+    /// Original type of the member (not normalized)
+    pub(crate) orig_ty: Box<syn::Type>,
 
     /// The name of the associated type in the builder state trait that corresponds
     /// to this member.
@@ -58,7 +71,7 @@ pub(crate) struct RegularMember {
 pub(crate) struct SkippedMember {
     pub(crate) ident: Option<syn::Ident>,
 
-    pub(crate) ty: Box<syn::Type>,
+    pub(crate) norm_ty: Box<syn::Type>,
 
     /// Value to assign to the member
     pub(crate) value: SpannedValue<Option<syn::Expr>>,
@@ -67,21 +80,21 @@ pub(crate) struct SkippedMember {
 #[derive(Debug, Clone, darling::FromAttributes)]
 #[darling(attributes(builder))]
 pub(crate) struct MemberParams {
-    /// Overrides the decision to use `Into` for the setter method.
-    pub(crate) into: Option<SpannedValue<StrictBool>>,
+    /// Enables an `Into` conversion for the setter method.
+    pub(crate) into: darling::util::Flag,
 
     /// Assign a default value to the member it it's not specified.
     ///
     /// An optional expression can be provided to set the value for the member,
     /// otherwise its  [`Default`] trait impl will be used.
-    #[darling(with = "parse_optional_expression", map = "Some")]
+    #[darling(with = parse_optional_expression, map = Some)]
     pub(crate) default: Option<SpannedValue<Option<syn::Expr>>>,
 
     /// Skip generating a setter method for this member.
     ///
     /// An optional expression can be provided to set the value for the member,
     /// otherwise its  [`Default`] trait impl will be used.
-    #[darling(with = "parse_optional_expression", map = "Some")]
+    #[darling(with = parse_optional_expression, map = Some)]
     pub(crate) skip: Option<SpannedValue<Option<syn::Expr>>>,
 
     /// Rename the name exposed in the builder API.
@@ -100,7 +113,7 @@ impl MemberParams {
             let other_attr = [
                 default.as_ref().map(|attr| ("default", attr.span())),
                 name.as_ref().map(|attr| ("name", attr.span())),
-                into.as_ref().map(|attr| ("into", attr.span())),
+                into.is_present().then(|| ("into", into.span())),
             ]
             .into_iter()
             .flatten()
@@ -127,33 +140,6 @@ impl MemberParams {
     }
 }
 
-/// This primitive represents the syntax that accepts only two states:
-/// a word e.g. `#[attr(field)]` represents true, and an expression with
-/// `false` e.g. `#[attr(field = false)]` represents false. No other syntax
-/// is accepted. That's why it's called a "strict" bool.
-#[derive(Debug, Clone)]
-pub(crate) struct StrictBool {
-    pub(crate) value: bool,
-}
-
-impl FromMeta for StrictBool {
-    fn from_word() -> Result<Self> {
-        Ok(Self { value: true })
-    }
-
-    fn from_bool(value: bool) -> Result<Self> {
-        if !value {
-            return Ok(Self { value: false });
-        }
-
-        // Error span is set by default trait impl in the caller
-        Err(Error::custom(format_args!(
-            "No need to write `= true`. Just mentioning the attribute is enough \
-            to set it to `true`, so remove the `= true` part.",
-        )))
-    }
-}
-
 fn parse_optional_expression(meta: &syn::Meta) -> Result<SpannedValue<Option<syn::Expr>>> {
     match meta {
         syn::Meta::Path(_) => Ok(SpannedValue::new(None, meta.span())),
@@ -167,7 +153,8 @@ impl Member {
         origin: MemberOrigin,
         attrs: &[syn::Attribute],
         ident: Option<syn::Ident>,
-        ty: Box<syn::Type>,
+        norm_ty: Box<syn::Type>,
+        orig_ty: Box<syn::Type>,
     ) -> Result<Self> {
         let docs = attrs.iter().filter(|attr| attr.is_doc()).cloned().collect();
 
@@ -175,12 +162,16 @@ impl Member {
         params.validate()?;
 
         if let Some(value) = params.skip {
-            return Ok(Self::Skipped(SkippedMember { ident, ty, value }));
+            return Ok(Self::Skipped(SkippedMember {
+                ident,
+                norm_ty,
+                value,
+            }));
         }
 
         let ident = ident.or_else(|| params.name.clone()).ok_or_else(|| {
             err!(
-                &ty,
+                &norm_ty,
                 "can't infer the name to use for this {origin}; please use a simple \
                 `identifier: type` syntax for the {origin}, or add \
                 `#[builder(name = explicit_name)]` to specify the name explicitly",
@@ -191,7 +182,8 @@ impl Member {
             origin,
             state_assoc_type_ident: ident.snake_to_pascal_case(),
             ident,
-            ty,
+            norm_ty,
+            orig_ty,
             params,
             docs,
         };
@@ -203,10 +195,10 @@ impl Member {
 }
 
 impl Member {
-    pub(crate) fn ty(&self) -> &syn::Type {
+    pub(crate) fn norm_ty(&self) -> &syn::Type {
         match self {
-            Self::Regular(me) => &me.ty,
-            Self::Skipped(me) => &me.ty,
+            Self::Regular(me) => &me.norm_ty,
+            Self::Skipped(me) => &me.norm_ty,
         }
     }
 
@@ -230,7 +222,7 @@ impl RegularMember {
         super::reject_self_references_in_docs(&self.docs)?;
 
         if let Some(default) = &self.params.default {
-            if self.ty.is_option() {
+            if self.norm_ty.is_option() {
                 bail!(
                     &default.span(),
                     "`Option<_>` already implies a default of `None`, \
@@ -242,22 +234,25 @@ impl RegularMember {
         Ok(())
     }
 
-    pub(crate) fn as_optional(&self) -> Option<&syn::Type> {
-        self.ty
-            .option_type_param()
-            .or_else(|| (self.params.default.is_some()).then_some(&self.ty))
+    fn as_optional_with_ty<'a>(&'a self, ty: &'a syn::Type) -> Option<&'a syn::Type> {
+        ty.option_type_param()
+            .or_else(|| (self.params.default.is_some()).then_some(ty))
+    }
+
+    pub(crate) fn as_optional_norm_ty(&self) -> Option<&syn::Type> {
+        Self::as_optional_with_ty(self, &self.norm_ty)
     }
 
     pub(crate) fn init_expr(&self) -> TokenStream2 {
-        self.as_optional()
+        self.as_optional_norm_ty()
             .map(|_| quote!(::bon::private::Optional(::core::marker::PhantomData)))
             .unwrap_or_else(|| quote!(::bon::private::Required(::core::marker::PhantomData)))
     }
 
     pub(crate) fn unset_state_type(&self) -> TokenStream2 {
-        let ty = &self.ty;
+        let ty = &self.norm_ty;
 
-        if let Some(inner_type) = self.as_optional() {
+        if let Some(inner_type) = self.as_optional_norm_ty() {
             quote!(::bon::private::Optional<#inner_type>)
         } else {
             quote!(::bon::private::Required<#ty>)
@@ -265,9 +260,9 @@ impl RegularMember {
     }
 
     pub(crate) fn set_state_type_param(&self) -> TokenStream2 {
-        let ty = &self.ty;
+        let ty = &self.norm_ty;
 
-        self.as_optional()
+        self.as_optional_norm_ty()
             .map(|ty| quote!(Option<#ty>))
             .unwrap_or_else(|| quote!(#ty))
     }
@@ -276,5 +271,33 @@ impl RegularMember {
         let ty = self.set_state_type_param();
 
         quote!(::bon::private::Set<#ty>)
+    }
+
+    pub(crate) fn has_into(&self, conditional_params: &[ConditionalParams]) -> Result<bool> {
+        let scrutinee = self
+            .as_optional_with_ty(&self.orig_ty)
+            .unwrap_or(&self.orig_ty);
+
+        let verdict_from_defaults = conditional_params
+            .iter()
+            .map(|params| Ok((params, scrutinee.matches(&params.type_pattern)?)))
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .filter(|(_, matched)| *matched)
+            .any(|(params, _)| params.into.is_present());
+
+        let verdict_from_override = self.params.into.is_present();
+
+        if verdict_from_defaults && verdict_from_override {
+            bail!(
+                &self.params.into.span(),
+                "this `#[builder(into)]` attribute is redundant, because `into` \
+                is already implied for this member via the `#[builder(on(...))]` \
+                at the top of the {}",
+                self.origin.parent_construct(),
+            );
+        }
+
+        Ok(verdict_from_override || verdict_from_defaults)
     }
 }

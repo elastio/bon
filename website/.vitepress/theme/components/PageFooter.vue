@@ -4,7 +4,7 @@
 
 <script setup lang="ts">
 import { useData } from 'vitepress';
-import { VPTeamMembers } from 'vitepress/theme'
+import { VPTeamMembers } from 'vitepress/theme';
 
 const { frontmatter } = useData();
 
@@ -18,6 +18,7 @@ const allPeople = [
         desc: "Creator of bon",
         links: [
             { icon: 'github', link: 'https://github.com/Veetaha' },
+            { icon: 'x', link: 'https://x.com/Veetaha' },
         ]
     },
 ]

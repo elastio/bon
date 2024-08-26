@@ -98,6 +98,32 @@ jobs:
 
       - run: cargo clippy --all-features --all-targets --locked
 
+  cargo-clippy-unstable:
+    runs-on: ubuntu-latest
+
+    # This job is optional to pass. It notifies us about the potential breakages
+    # in the future Rust toolchain versions.
+    continue-on-error: true
+
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [beta, nightly]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+          components: clippy
+
+      - run: cargo +${{ matrix.toolchain }} clippy --all-features --all-targets --locked
+        env:
+          # There is no need for us to stick with the edition 2021 meaning for
+          # the `expr` fragment in macro rules.
+          RUSTFLAGS: --deny warnings --allow edition-2024-expr-fragment-specifier
+
+
   cargo-doc:
     runs-on: ${{ matrix.os }}-latest
 
