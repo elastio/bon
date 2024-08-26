@@ -48,7 +48,7 @@ fn match_str_ref() {
     #[builder(on(&str, into))]
     fn sut(_arg1: bool, _arg2: Option<()>, _arg3: &str) {}
 
-    sut().arg1(true).arg2(()).arg3("foo").call();
+    sut().arg1(true).arg2(()).arg3(IntoStrRef("foo")).call();
 }
 
 #[test]

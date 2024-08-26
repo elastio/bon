@@ -151,10 +151,11 @@ impl BuilderGenCtx {
         }
 
         quote! {
-            // This is wrapped in a cfg that is always false to prevent this
-            // code from being compiled. IDEs and language servers, like rust-analyzer,
-            // should be able to use the syntax provided inside of the block to
-            // figure out the semantic meaning of the tokens passed to the attribute.
+            // This is wrapped in a special cfg set by `rust-analyzer` to enable this
+            // code for rust-analyzer's analysis only, but prevent the code from being
+            // compiled by `rustc`. Rust Analyzer should be able to use the syntax
+            // provided inside of the block to figure out the semantic meaning of
+            // the tokens passed to the attribute.
             #[cfg(rust_analyzer)]
             {
                 // Let IDEs know that these are type patterns like the ones that

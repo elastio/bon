@@ -1,3 +1,14 @@
+// We must make sure this code never panics. It must be able to handle all possible inputs.
+#![deny(
+    clippy::unwrap_used,
+    clippy::expect_used,
+    clippy::panic,
+    clippy::unreachable,
+    clippy::unimplemented,
+    clippy::todo,
+    clippy::exit,
+)]
+
 use crate::util::prelude::*;
 use proc_macro2::{Span, TokenTree};
 use quote::quote;
@@ -17,6 +28,8 @@ pub(crate) fn parse_comma_separated_meta(input: ParseStream<'_>) -> syn::Result<
                 input.parse::<Token![,]>()?;
                 break;
             }
+
+            // Skip the invalid token (comma is expected only).
             input.parse::<TokenTree>()?;
         }
     }
@@ -112,6 +125,16 @@ fn paths_from_meta(meta: Vec<Meta>) -> Vec<syn::Path> {
         .collect()
 }
 
+/// This is a highly experimental function that attempts to generate code that
+/// can be used by IDEs to provide hints and completions for attributes in macros.
+///
+/// The idea is that we parse a potentially incomplete syntax of the macro invocation
+/// and then we generate a set of modules that contain `use` statements with the
+/// identifiers passed to the macro.
+///
+/// By placing these input identifiers in the right places inside of `use` statements
+/// we can hint the IDEs to provide completions for the attributes based on what's
+/// available in the module the use statement references.
 pub(crate) fn generate_completions(meta: Vec<Meta>) -> TokenStream2 {
     let completions = CompletionsSchema::with_children(
         "builder_top_level",
@@ -129,6 +152,9 @@ pub(crate) fn generate_completions(meta: Vec<Meta>) -> TokenStream2 {
     let completion_triggers = completions.generate_completion_triggers(meta, &[]);
 
     quote! {
+        // The special `rust_analyzer` CFG is enabled only when Rust Analyzer is
+        // running its code analysis. This allows us to provide code that is
+        // useful only for Rust Analyzer for it to provide hints and completions.
         #[cfg(rust_analyzer)]
         const _: () = {
             #completion_triggers
@@ -210,7 +236,11 @@ impl CompletionsSchema {
 
         quote! {
             mod #module_name_snake_case {
-                // We separately import
+                // We separately import everything from the IDE hints module
+                // and then put the `paths` in the `use self::{ ... }` statement
+                // to avoid Rust Analyzer from providing completions for the
+                // `self` keyword in the `use` statement. It works because
+                // `use self::self` is not a valid syntax.
                 use ::bon::private::ide #(::#module_name)* ::*;
                 use self::{ #( #paths as _, )* };
             }

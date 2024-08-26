@@ -9,13 +9,13 @@ outline: deep
 
 This is the continuation of the ["Into conversions" section](../overview#into-conversions) from the general overview page. This page describes the important caveats of using `impl Into` that you should know before enabling them.
 
-Make sure you are familiar with the standard [`From`](https://doc.rust-lang.org/stable/std/convert/trait.From.html) and [`Into`](https://doc.rust-lang.org/stable/std/convert/trait.Into.html) traits before you proceed. Reading their docs is pretty much enough. For example, you should know that you can pass a value of type `T` directly with zero overhead to a function that accepts `impl Into<T>` thanks to [this blanket](https://github.com/rust-lang/rust/blob/1a94d839be8b248b972b9e022cb940d56de72fa1/library/core/src/convert/mod.rs#L763-L771) impl in `std`.
+Make sure you are familiar with the standard [`From`](https://doc.rust-lang.org/stable/std/convert/trait.From.html) and [`Into`](https://doc.rust-lang.org/stable/std/convert/trait.Into.html) traits before you proceed. Reading their docs is pretty much enough. For example, you should know that every type that implements `From<T>` automatically implements `Into<T>`. Also, you should know that you can pass a value of type `T` at no cost directly to a function that accepts `impl Into<T>` thanks to [this blanket](https://github.com/rust-lang/rust/blob/1a94d839be8b248b972b9e022cb940d56de72fa1/library/core/src/convert/mod.rs#L763-L771) impl in `std`.
 
 ::: warning
 
-This is genenerally a controversial topic 🐱. Some people like to be more explicit, but others prefer the shorter notation. This also depends on the kind of code you are writing.
+This is generally a controversial topic 🐱. Some people like to be more explicit, but others prefer the shorter notation. This also depends on the kind of code you are writing.
 
-If you prefer being explicit in code, feel free not to use `Into` conversions at all. They are fully opt-in. This article isn't prescriptive. The syntax savings are arguably small, so use your best judgement, and refer to this article if you can't decide.
+If you prefer being explicit in code, feel free not to use `Into` conversions at all. They are fully opt-in. This article isn't prescriptive. The syntax savings are arguably small, so use your best judgement, and refer to this page if you can't decide.
 
 :::
 
@@ -32,7 +32,7 @@ The main advantage of `impl Into` in setters is that it reduces the boilerplate 
 
 ::: tip The Rules of `Into`
 
-1. The code where the builder is supposed to be *used* is not performance sensitive.
+1. The code where the builder is supposed to be *used* is not performance-sensitive.
 2. The builder is going to be used with literal values a lot or require wrapping the values.
 
 :::
@@ -40,11 +40,11 @@ The main advantage of `impl Into` in setters is that it reduces the boilerplate 
 
 ### Shorter syntax for literals
 
-Here is an example that shows the *non-exhaustive* list of standard types where it's usually fine to enable into conversions.
+Here is an example that shows the *non-exhaustive* list of standard types where it's usually fine to enable `Into` conversions.
 
 ::: tip
 
-Use the tabs in the code snippets below to see how the code looks like with `Into Conversions` enabled and with the `Default` syntax.
+Switch between the UI tabs in the code snippets below to see how the code looks like with `Into Conversions` enabled and with the `Default` syntax.
 
 :::
 
@@ -178,9 +178,9 @@ As you can see, the difference isn't significant in this case. It makes more sen
 
 ## Avoid `Into` conversions
 
-### Performance sensitive code
+### Performance-sensitive code
 
-If allocations can pose a bottleneck for you application and you need to see every place in code where an allocation is performed, you should avoid using `impl Into` overall. It can lead to implicitly moving data to heap or cloning it.
+If allocations can pose a bottleneck for your application and you need to see every place in code where an allocation is performed, you should avoid using `impl Into` overall. It can lead to implicitly moving data to the heap or cloning it.
 
 **Example:**
 
@@ -197,7 +197,7 @@ let json = String::from(
 );
 
 process_heavy_json()
-    // Whooops, we passed a `&String`.             // [!code error]
+    // Whoops, we passed a `&String`.              // [!code error]
     // The builder will clone the data internally. // [!code error]
     .data(&json)                                   // [!code error]
     .call();
@@ -226,13 +226,13 @@ half(10);
 required by a bound introduced by this call
 ```
 
-The reason for this error is that `rustc` can't infer the type for the number literal `10`, because it could be one of the following types: `u8`, `u16`, `u32`, which all implement `Into<u32>`. There isn't a suffix like `10_u16` in this code to tell the compiler the type of the number literal `10`. When compiler can't infer the type of a numeric literal if falls back to assigning the type `i32` for an integer literal and `f64` for a floating point literal. In this case `i32` is inferred, which isn't convertible to `u32`.
+The reason for this error is that `rustc` can't infer the type for the numeric literal `10`, because it could be one of the following types: `u8`, `u16`, `u32`, which all implement `Into<u32>`. There isn't a suffix like `10_u16` in this code to tell the compiler the type of the numeric literal `10`. When the compiler can't infer the type of a numeric literal it falls back to assigning the type `i32` for an integer literal and `f64` for a floating point literal. In this case `i32` is inferred, which isn't convertible to `u32`.
 
 Requiring an explicit type suffix in numeric literals would be the opposite of good ergonomics that `impl Into` is trying to achieve in the first place.
 
-::: info
+::: info NOTE
 
-Type inference for primitive numeric types falls into the category of the [section below](#weakened-type-inference), but it's separated from it because this kind of type inference is generally much less obvious.
+Type inference for primitive numeric types falls into the category of the [section below](#weakened-type-inference), but it's separated from it because this kind of type inference is generally less known to fail, so people usually forget about it because it always works for them.
 
 :::
 
@@ -255,10 +255,9 @@ connect()
     .ip_addr(ip_addr)
     .call();
 ```
-Notice how we didn't add a type annotation for the variable `ip_addr`. The compiler can deduce (infer) the type of `ip_addr` because it sees that the variable is passed to the `connect()` function that expects
-the type `IpAddr`. It's a really simple exercise for the compiler in this case because all the context to solve it is there.
+Notice how we didn't add a type annotation for the variable `ip_addr`. The compiler can deduce (infer) the type of `ip_addr` because it sees that the variable is passed to the `ip_addr()` setter method that expects a parameter of type `IpAddr`. It's a really simple exercise for the compiler in this case because all the context to solve it is there.
 
-However, if use an `Into` conversion, not even Sherlock Holmes can answer the question "What type did you intend to parse?":
+However, if you use an `Into` conversion, not even Sherlock Holmes can answer the question "What type did you intend to parse?":
 
 ```rust ignore
 use bon::builder;
@@ -275,7 +274,7 @@ connect()
     .call();
 ```
 
-In this case there is a compile error:
+In this case, there is a compile error:
 
 ```log
 error[E0284]: type annotations needed                                    // [!code error]
@@ -296,7 +295,7 @@ This is because now the `ip_addr` setter looks like this:
 fn ip_addr(self, value: impl Into<IpAddr>) -> NextBuilderState { /* */ }
 ```
 
-This signature implies that `value` parameter can be of any type that implements `Into<IpAddr>`. There are several types that implement such a trait. Among them: [`Ipv4Addr`](https://doc.rust-lang.org/stable/std/net/struct.Ipv4Addr.html#impl-From%3CIpv4Addr%3E-for-IpAddr) and [`Ipv6Addr`](https://doc.rust-lang.org/stable/std/net/struct.Ipv6Addr.html#impl-From%3CIpv6Addr%3E-for-IpAddr), and, obviously, `IpAddr` itself (thanks to [this blanket impl](https://github.com/rust-lang/rust/blob/1a94d839be8b248b972b9e022cb940d56de72fa1/library/core/src/convert/mod.rs#L763-L771)).
+This signature implies that the `value` parameter can be of any type that implements `Into<IpAddr>`. There are several types that implement such a trait. Among them: [`Ipv4Addr`](https://doc.rust-lang.org/stable/std/net/struct.Ipv4Addr.html#impl-From%3CIpv4Addr%3E-for-IpAddr) and [`Ipv6Addr`](https://doc.rust-lang.org/stable/std/net/struct.Ipv6Addr.html#impl-From%3CIpv6Addr%3E-for-IpAddr), and, obviously, `IpAddr` itself (thanks to [this blanket impl](https://github.com/rust-lang/rust/blob/1a94d839be8b248b972b9e022cb940d56de72fa1/library/core/src/convert/mod.rs#L763-L771)).
 
 This means the setter for `ip_addr` can no longer hint the compiler a single type that it accepts. Thus the compiler can't decide which type to assign to the `ip_addr` variable in the original code, because *there can be many that make sense*. I.e. the code will compile if any of the `Ipv4Addr` or `Ipv6Addr` or `IpAddr` type annotations are added to the `ip_addr` variable, but the compiler has no right to decide which of them to use on your behalf.
 
@@ -304,7 +303,7 @@ This is the drawback of using not only `impl Into`, but any generics at all.
 
 ### Code complexity
 
-This quite subjective, but `impl Into<T>` is a bit harder to read than just `T`. It makes the signature of the setter slightly bigger and requires you to understand what the `impl Trait` does, and what its implications are.
+This is quite subjective, but `impl Into<T>` is a bit harder to read than just `T`. It makes the signature of the setter slightly bigger and requires you to understand what the `impl Trait` does, and what its implications are.
 
 If you want to keep your code simpler and more accessible (especially for beginner rustaceans), just avoid the `Into` conversions.
 

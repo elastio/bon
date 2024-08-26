@@ -2,9 +2,7 @@
 
 With `bon`, you can write a builder that validates its inputs and returns a `Result`. It's possible to do this only via the function or associated method syntax.
 
-If you need to build a struct, and do some validation, you won't be able to use the `#[builder]` annotation on the struct for that. You'll need to define your logic in the associated constructor method (e.g. `new`).
-
-Here is a simple example, where we bail on the first error. The [anyhow](https://docs.rs/anyhow/latest/anyhow/) crate is used for generating the error.
+If you need to build a struct and do some validation, you won't be able to use the `#[builder]` annotation on the struct for that. You'll *have to* define your logic in the associated constructor method (e.g. `new`).
 
 **Example:**
 
@@ -22,7 +20,7 @@ impl User {
     #[builder]
     fn new(id: u32, name: String) -> Result<Self, Error> {
         if name.is_empty() {
-            anyhow::bail!("Can't create a user with the empty name (id: {id})");
+            return Err(anyhow::anyhow!("Empty name is disallowed (user id: {id})"));
         }
 
         Ok(Self { id, name })
@@ -40,4 +38,4 @@ if let Err(error) = result {
 }
 ```
 
-If you'd like to have some convenience attributes to do automatic validations using the `#[builder]` macro with the struct syntax, then add a 👍 reaction to [this Github issue](https://github.com/elastio/bon/issues/34).
+If you have a use case for some convenience attributes to do automatic validations using the `#[builder]` macro with the struct syntax, then add a 👍 reaction to [this Github issue](https://github.com/elastio/bon/issues/34).

@@ -4,3 +4,4 @@
 **/.vitepress/dist/
 articles.json
 *.dbg.s
+.idea/

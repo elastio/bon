@@ -15,7 +15,7 @@ use syn::parse::Parser;
 /// declaration. Generates a builder for the item beneath it.
 ///
 /// Docs for this macro are split into two parts:
-/// - [Overview page](https://elastio.github.io/bon/guide/overview)
+/// - [Guide](https://elastio.github.io/bon/guide/overview)
 /// - [Attributes reference](https://elastio.github.io/bon/reference/builder)
 ///
 /// # Quick example

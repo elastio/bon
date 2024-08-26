@@ -50,7 +50,7 @@ impl Parse for ConditionalParams {
 
         impl Visit<'_> for FindAttr {
             fn visit_attribute(&mut self, attr: &'_ syn::Attribute) {
-                self.attr = Some(attr.span());
+                self.attr.get_or_insert(attr.span());
             }
         }
 
@@ -66,10 +66,9 @@ impl Parse for ConditionalParams {
             ));
         }
 
-        // Validate that the pattern is valid. The validation is
-        // done in the process of matching the types. To make sure
-        // that matching traverses the full pattern we match it with
-        // itself.
+        // Validate that the pattern. The validation is done in the process
+        // of matching the types. To make sure that matching traverses the
+        // full pattern we match it with itself.
         let type_pattern_matches_itself = type_pattern.matches(&type_pattern)?;
 
         assert!(
