@@ -66,6 +66,17 @@ impl Parse for ConditionalParams {
             ));
         }
 
+        // Validate that the pattern is valid. The validation is
+        // done in the process of matching the types. To make sure
+        // that matching traverses the full pattern we match it with
+        // itself.
+        let type_pattern_matches_itself = type_pattern.matches(&type_pattern)?;
+
+        assert!(
+            type_pattern_matches_itself,
+            "BUG: the type pattern does not match itself: {type_pattern:#?}"
+        );
+
         Ok(Self { type_pattern, into })
     }
 }

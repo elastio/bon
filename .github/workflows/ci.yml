@@ -121,7 +121,7 @@ jobs:
         env:
           # There is no need for us to stick with the edition 2021 meaning for
           # the `expr` fragment in macro rules.
-          RUSTFLAGS: --deny warnings -Aedition-2024-expr-fragment-specifier
+          RUSTFLAGS: --deny warnings --allow edition-2024-expr-fragment-specifier
 
 
   cargo-doc:

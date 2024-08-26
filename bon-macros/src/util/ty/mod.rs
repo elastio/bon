@@ -93,15 +93,6 @@ impl TypeExt for syn::Type {
     }
 
     fn matches(&self, pattern: &syn::Type) -> Result<bool> {
-        // Validate that the pattern is valid. The validation is
-        // done in the process of matching the types. To make sure
-        // that matching traverses the full pattern we match it with
-        // itself. This must also always return `true`.
-        assert!(
-            match_types::match_types(pattern, pattern)?,
-            "BUG: the type pattern does not match itself: {pattern:#?}"
-        );
-
         match_types::match_types(self, pattern)
     }
 }

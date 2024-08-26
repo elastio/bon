@@ -21,6 +21,15 @@ impl fmt::Display for MemberOrigin {
     }
 }
 
+impl MemberOrigin {
+    fn parent_construct(&self) -> &'static str {
+        match self {
+            Self::FnArg => "function",
+            Self::StructField => "struct",
+        }
+    }
+}
+
 #[derive(Debug)]
 pub(crate) enum Member {
     Regular(RegularMember),
@@ -31,9 +40,6 @@ pub(crate) enum Member {
 #[derive(Debug, Clone)]
 pub(crate) struct RegularMember {
     /// Specifies what syntax the member comes from.
-    // It was previously used to provide better error messages, but now it's
-    // not used anymore. It's kept here for future use.
-    #[allow(dead_code)]
     pub(crate) origin: MemberOrigin,
 
     /// Original name of the member is used as the name of the builder field and
@@ -268,15 +274,11 @@ impl RegularMember {
     }
 
     pub(crate) fn has_into(&self, conditional_params: &[ConditionalParams]) -> Result<bool> {
-        if self.params.into.is_present() {
-            return Ok(true);
-        }
-
         let scrutinee = self
             .as_optional_with_ty(&self.orig_ty)
             .unwrap_or(&self.orig_ty);
 
-        let verdict = conditional_params
+        let verdict_from_defaults = conditional_params
             .iter()
             .map(|params| Ok((params, scrutinee.matches(&params.type_pattern)?)))
             .collect::<Result<Vec<_>>>()?
@@ -284,6 +286,18 @@ impl RegularMember {
             .filter(|(_, matched)| *matched)
             .any(|(params, _)| params.into.is_present());
 
-        Ok(verdict)
+        let verdict_from_override = self.params.into.is_present();
+
+        if verdict_from_defaults && verdict_from_override {
+            bail!(
+                &self.params.into.span(),
+                "this `#[builder(into)]` attribute is redundant, because `into` \
+                is already implied for this member via the `#[builder(on(...))]` \
+                at the top of the {}",
+                self.origin.parent_construct(),
+            );
+        }
+
+        Ok(verdict_from_override || verdict_from_defaults)
     }
 }

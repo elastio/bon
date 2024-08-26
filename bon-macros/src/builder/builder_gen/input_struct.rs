@@ -195,7 +195,7 @@ impl FinishFuncBody for StructLiteralBody {
 }
 
 impl Member {
-    pub(crate) fn from_syn_field(
+    fn from_syn_field(
         (norm_field, orig_field): (&syn::Field, &syn::Field),
     ) -> Result<Self> {
         Member::new(
