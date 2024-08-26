@@ -458,9 +458,7 @@ fn merge_generic_params(
 }
 
 impl Member {
-    fn from_typed_fn_arg(
-        (norm_arg, orig_arg): (&syn::PatType, &syn::PatType),
-    ) -> Result<Self> {
+    fn from_typed_fn_arg((norm_arg, orig_arg): (&syn::PatType, &syn::PatType)) -> Result<Self> {
         let ident = match norm_arg.pat.as_ref() {
             syn::Pat::Ident(pat) => Some(&pat.ident),
             _ => None,

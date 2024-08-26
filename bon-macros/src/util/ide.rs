@@ -6,7 +6,7 @@
     clippy::unreachable,
     clippy::unimplemented,
     clippy::todo,
-    clippy::exit,
+    clippy::exit
 )]
 
 use crate::util::prelude::*;
