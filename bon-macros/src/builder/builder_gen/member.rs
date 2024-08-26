@@ -69,7 +69,7 @@ pub(crate) struct RegularMember {
 /// Member that was skipped by the user with `#[builder(skip)]`
 #[derive(Debug)]
 pub(crate) struct SkippedMember {
-    pub(crate) ident: Option<syn::Ident>,
+    pub(crate) ident: syn::Ident,
 
     pub(crate) norm_ty: Box<syn::Type>,
 
@@ -163,7 +163,7 @@ impl Member {
     pub(crate) fn new(
         origin: MemberOrigin,
         attrs: &[syn::Attribute],
-        ident: Option<syn::Ident>,
+        ident: syn::Ident,
         norm_ty: Box<syn::Type>,
         orig_ty: Box<syn::Type>,
     ) -> Result<Self> {
@@ -179,15 +179,6 @@ impl Member {
                 value,
             }));
         }
-
-        let ident = ident.or_else(|| params.name.clone()).ok_or_else(|| {
-            err!(
-                &norm_ty,
-                "can't infer the name to use for this {origin}; please use a simple \
-                `identifier: type` syntax for the {origin}, or add \
-                `#[builder(name = explicit_name)]` to specify the name explicitly",
-            )
-        })?;
 
         let me = RegularMember {
             origin,
@@ -213,10 +204,10 @@ impl Member {
         }
     }
 
-    pub(crate) fn ident(&self) -> Option<&syn::Ident> {
+    pub(crate) fn ident(&self) -> &syn::Ident {
         match self {
-            Self::Regular(me) => Some(&me.ident),
-            Self::Skipped(me) => me.ident.as_ref(),
+            Self::Regular(me) => &me.ident,
+            Self::Skipped(me) => &me.ident,
         }
     }
 

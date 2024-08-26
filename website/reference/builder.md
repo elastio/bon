@@ -654,11 +654,7 @@ assert_eq!(example, (3, 6, 9));
 
 #### Caveats
 
-Function parameters that use destructuring patterns won't be available in the scope for the `default` expression, because they don't have an explicit single identifier assigned to them.
-
-The `self` parameter in associated methods is not available to the `default` expression.
-
-If you need to refer to the parameter that uses destructuring or to the associated method's self, then set your member's type to `Option<T>` and handle the defaulting in the function's body manually.
+The `self` parameter in associated methods is not available to the `default` expression. If you need the `self` context for your defaulting logic, then set your member's type to `Option<T>` and handle the defaulting in the function's body manually.
 
 #### Compile errors
 

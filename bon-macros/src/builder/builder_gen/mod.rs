@@ -464,14 +464,8 @@ impl BuilderGenCtx {
             .map(|member| Ok((member, self.member_expr(member)?)))
             .collect::<Result<Vec<_>>>()?
             .into_iter()
-            .enumerate()
-            .map(|(i, (member, expr))| {
-                let var_ident = member
-                    .ident()
-                    .cloned()
-                    // The member can lack an ident only if it comes from function
-                    // syntax that uses a destructuring pattern in its parameters.
-                    .unwrap_or_else(|| quote::format_ident!("__member_{}", i));
+            .map(|(member, expr)| {
+                let var_ident = member.ident();
 
                 // The type hint is necessary in some cases to assist the compiler
                 // in type inference.

@@ -178,9 +178,7 @@ impl FinishFuncBody for StructLiteralBody {
         let Self { struct_ident } = self;
 
         let member_exprs = member_exprs.iter().map(|MemberExpr { member, expr }| {
-            let ident = &member.ident().unwrap_or_else(|| {
-                panic!("All struct members must be named, but got: {member:#?}:\n{expr}")
-            });
+            let ident = member.ident();
             quote! {
                 #ident: #expr
             }
@@ -196,10 +194,15 @@ impl FinishFuncBody for StructLiteralBody {
 
 impl Member {
     fn from_syn_field((norm_field, orig_field): (&syn::Field, &syn::Field)) -> Result<Self> {
+        let ident = norm_field
+            .ident
+            .clone()
+            .ok_or_else(|| err!(norm_field, "only structs with named fields are supported"))?;
+
         Member::new(
             MemberOrigin::StructField,
             &norm_field.attrs,
-            norm_field.ident.clone(),
+            ident,
             Box::new(norm_field.ty.clone()),
             Box::new(orig_field.ty.clone()),
         )

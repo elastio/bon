@@ -1,119 +1,139 @@
-error: Only structs with named fields are supported
- --> tests/integration/ui/compile_fail/misc.rs:5:1
+error: duplicate key in the map
+ --> tests/integration/ui/compile_fail/misc.rs:6:9
   |
-5 | struct TupleStruct(u32, u32);
-  | ^^^^^^
+6 |         "Hello": "Blackjack",
+  |         ^^^^^^^
 
-error: can't infer the name to use for this function argument; please use a simple `identifier: type` syntax for the function argument, or add `#[builder(name = explicit_name)]` to specify the name explicitly
- --> tests/integration/ui/compile_fail/misc.rs:8:26
+error: duplicate key in the map
+ --> tests/integration/ui/compile_fail/misc.rs:7:9
   |
-8 | fn destructuring((x, y): (u32, u32)) {
-  |                          ^^^^^^^^^^
+7 |         "Hello": "Littlepip",
+  |         ^^^^^^^
+
+error: duplicate value in the set
+  --> tests/integration/ui/compile_fail/misc.rs:10:43
+   |
+10 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
+   |                                           ^^^^^^^^^
+
+error: duplicate value in the set
+  --> tests/integration/ui/compile_fail/misc.rs:10:62
+   |
+10 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
+   |                                                              ^^^^^^^^^
+
+error: Only structs with named fields are supported
+  --> tests/integration/ui/compile_fail/misc.rs:14:1
+   |
+14 | struct TupleStruct(u32, u32);
+   | ^^^^^^
+
+error: use a simple `identifier: type` syntax for the function argument;
+                       destructuring patterns in arguments aren't supported by the `#[builder]`
+  --> tests/integration/ui/compile_fail/misc.rs:17:18
+   |
+17 | fn destructuring((x, y): (u32, u32)) {
+   |                  ^^^^^^
 
 error: Unexpected type `bool`
-  --> tests/integration/ui/compile_fail/misc.rs:14:44
+  --> tests/integration/ui/compile_fail/misc.rs:23:44
    |
-14 | fn unnecessary_into_false(#[builder(into = false)] _x: u32) {}
+23 | fn unnecessary_into_false(#[builder(into = false)] _x: u32) {}
    |                                            ^^^^^
 
 error: this `#[builder(into)]` attribute is redundant, because `into` is already implied for this member via the `#[builder(on(...))]` at the top of the function
-  --> tests/integration/ui/compile_fail/misc.rs:17:31
+  --> tests/integration/ui/compile_fail/misc.rs:26:31
    |
-17 | fn unnecessary_into(#[builder(into)] _x: String) {}
+26 | fn unnecessary_into(#[builder(into)] _x: String) {}
    |                               ^^^^
 
 error: This syntax is not supported in type patterns yet. If you have a use case for this, please open an issue at https://github.com/elastio/bon/issues.
-  --> tests/integration/ui/compile_fail/misc.rs:19:15
+  --> tests/integration/ui/compile_fail/misc.rs:28:15
    |
-19 | #[builder(on(&dyn std::fmt::Debug, into))]
+28 | #[builder(on(&dyn std::fmt::Debug, into))]
    |               ^^^
 
 error: nested attributes are not allowed in the type pattern of #[builder(on(type_pattern, ...))]
-  --> tests/integration/ui/compile_fail/misc.rs:22:17
+  --> tests/integration/ui/compile_fail/misc.rs:31:17
    |
-22 | #[builder(on(fn(#[attr] a: u32), into))]
+31 | #[builder(on(fn(#[attr] a: u32), into))]
    |                 ^
 
 error: Expected an attribute of form `on(type_pattern, ...)`
-  --> tests/integration/ui/compile_fail/misc.rs:25:11
+  --> tests/integration/ui/compile_fail/misc.rs:34:11
    |
-25 | #[builder(on)]
+34 | #[builder(on)]
    |           ^^
 
 error: unexpected end of input, expected one of: `for`, parentheses, `fn`, `unsafe`, `extern`, identifier, `::`, `<`, `dyn`, square brackets, `*`, `&`, `!`, `impl`, `_`, lifetime
-  --> tests/integration/ui/compile_fail/misc.rs:28:1
+  --> tests/integration/ui/compile_fail/misc.rs:37:1
    |
-28 | #[builder(on())]
+37 | #[builder(on())]
    | ^^^^^^^^^^^^^^^^
    |
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected `,`
-  --> tests/integration/ui/compile_fail/misc.rs:31:1
+  --> tests/integration/ui/compile_fail/misc.rs:40:1
    |
-31 | #[builder(on(_))]
+40 | #[builder(on(_))]
    | ^^^^^^^^^^^^^^^^^
    |
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: this #[builder(on(type_pattern, ...))] contains no options to override the default behavior for the selected setters like `into`, so it does nothing
-  --> tests/integration/ui/compile_fail/misc.rs:34:1
+  --> tests/integration/ui/compile_fail/misc.rs:43:1
    |
-34 | #[builder(on(_,))]
+43 | #[builder(on(_,))]
    | ^^^^^^^^^^^^^^^^^^
    |
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected at least one parameter in parentheses
-  --> tests/integration/ui/compile_fail/misc.rs:37:11
+  --> tests/integration/ui/compile_fail/misc.rs:46:11
    |
-37 | #[builder(start_fn())]
+46 | #[builder(start_fn())]
    |           ^^^^^^^^
 
 error: `skip` attribute can't be specified with other attributes like `into` because there will be no setter generated for this member to configure
-  --> tests/integration/ui/compile_fail/misc.rs:42:21
+  --> tests/integration/ui/compile_fail/misc.rs:51:21
    |
-42 |     #[builder(skip, into)]
+51 |     #[builder(skip, into)]
    |                     ^^^^
 
 error: `skip` attribute can't be specified with other attributes like `name` because there will be no setter generated for this member to configure
-  --> tests/integration/ui/compile_fail/misc.rs:48:28
+  --> tests/integration/ui/compile_fail/misc.rs:57:28
    |
-48 |     #[builder(skip, name = bar)]
+57 |     #[builder(skip, name = bar)]
    |                            ^^^
 
 error: `skip` attribute can't be specified with other attributes like `default` because there will be no setter generated for this member to configure. If you wanted to specify a value for the member, then use the following syntax instead `#[builder(skip = value)]`
-  --> tests/integration/ui/compile_fail/misc.rs:54:21
+  --> tests/integration/ui/compile_fail/misc.rs:63:21
    |
-54 |     #[builder(skip, default = 42)]
+63 |     #[builder(skip, default = 42)]
    |                     ^^^^^^^
 
 error: `skip` attribute is not supported on function arguments. Use a local variable instead.
-  --> tests/integration/ui/compile_fail/misc.rs:60:15
+  --> tests/integration/ui/compile_fail/misc.rs:69:15
    |
-60 |     #[builder(skip)] _x: u32,
+69 |     #[builder(skip)] _x: u32,
    |               ^^^^
 
-error: duplicate key in the map
-  --> tests/integration/ui/compile_fail/misc.rs:68:9
+error: Only structs with named fields are supported
+  --> tests/integration/ui/compile_fail/misc.rs:76:1
    |
-68 |         "Hello": "Blackjack",
-   |         ^^^^^^^
+76 | struct TupleStructsAreUnsupported(u32, u32);
+   | ^^^^^^
 
-error: duplicate key in the map
-  --> tests/integration/ui/compile_fail/misc.rs:69:9
+error: The attribute is expected to be placed only on an `fn` item or a `struct` declaration
+  --> tests/integration/ui/compile_fail/misc.rs:79:1
    |
-69 |         "Hello": "Littlepip",
-   |         ^^^^^^^
+79 | enum EnumsAreUnsupported {}
+   | ^^^^
 
-error: duplicate value in the set
-  --> tests/integration/ui/compile_fail/misc.rs:72:43
+error: use a simple `identifier: type` syntax for the function argument;
+                       destructuring patterns in arguments aren't supported by the `#[builder]`
+  --> tests/integration/ui/compile_fail/misc.rs:82:39
    |
-72 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
-   |                                           ^^^^^^^^^
-
-error: duplicate value in the set
-  --> tests/integration/ui/compile_fail/misc.rs:72:62
-   |
-72 |     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
-   |                                                              ^^^^^^^^^
+82 | fn destructuring_in_fn_is_unsupported((_, _): (u32, u32)) {}
+   |                                       ^^^^^^

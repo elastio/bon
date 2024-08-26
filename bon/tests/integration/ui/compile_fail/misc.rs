@@ -1,6 +1,15 @@
 use bon::builder;
 use std::collections::{BTreeMap, BTreeSet};
 
+fn main() {
+    let map: BTreeMap<String, String> = bon::map! {
+        "Hello": "Blackjack",
+        "Hello": "Littlepip",
+    };
+
+    let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
+}
+
 #[builder]
 struct TupleStruct(u32, u32);
 
@@ -63,11 +72,11 @@ fn skip_on_fn_is_unsupporetd(
 ) {
 }
 
-fn main() {
-    let map: BTreeMap<String, String> = bon::map! {
-        "Hello": "Blackjack",
-        "Hello": "Littlepip",
-    };
+#[builder]
+struct TupleStructsAreUnsupported(u32, u32);
 
-    let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
-}
+#[builder]
+enum EnumsAreUnsupported {}
+
+#[builder]
+fn destructuring_in_fn_is_unsupported((_, _): (u32, u32)) {}
