@@ -70,7 +70,7 @@ elided_lifetimes_in_paths = "warn"
 
 ## Destructuring patterns in function parameters
 
-When `#[builder]` is placed on a function (including associated methods), then parameters of that function must be simple identifiers. Destructuring patterns aren't supported because it's not obvious what identifier to assign to the member in this case. This identifier will appear in `#[builder(default = ...)]` expressions, for example.
+When `#[builder]` is placed on a function (including associated methods), then the parameters of that function must be simple identifiers. Destructuring patterns aren't supported because it's not obvious what identifier to assign to the member in this case. This identifier will appear in `#[builder(default = ...)]` expressions, for example.
 
 Instead, if you need to destructure your function parameter, just do that inside of the function's body.
 
