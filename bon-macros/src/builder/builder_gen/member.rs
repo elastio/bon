@@ -69,7 +69,7 @@ pub(crate) struct RegularMember {
 /// Member that was skipped by the user with `#[builder(skip)]`
 #[derive(Debug)]
 pub(crate) struct SkippedMember {
-    pub(crate) ident: Option<syn::Ident>,
+    pub(crate) ident: syn::Ident,
 
     pub(crate) norm_ty: Box<syn::Type>,
 
@@ -102,14 +102,25 @@ pub(crate) struct MemberParams {
 }
 
 impl MemberParams {
-    fn validate(&self) -> Result {
+    fn validate(&self, origin: &MemberOrigin) -> Result {
         if let Self {
-            skip: Some(_),
+            skip: Some(skip),
             into,
             default,
             name,
         } = self
         {
+            match origin {
+                MemberOrigin::FnArg => {
+                    bail!(
+                        &skip.span(),
+                        "`skip` attribute is not supported on function arguments. \
+                        Use a local variable instead.",
+                    );
+                }
+                MemberOrigin::StructField => {}
+            }
+
             let other_attr = [
                 default.as_ref().map(|attr| ("default", attr.span())),
                 name.as_ref().map(|attr| ("name", attr.span())),
@@ -152,14 +163,14 @@ impl Member {
     pub(crate) fn new(
         origin: MemberOrigin,
         attrs: &[syn::Attribute],
-        ident: Option<syn::Ident>,
+        ident: syn::Ident,
         norm_ty: Box<syn::Type>,
         orig_ty: Box<syn::Type>,
     ) -> Result<Self> {
         let docs = attrs.iter().filter(|attr| attr.is_doc()).cloned().collect();
 
         let params = MemberParams::from_attributes(attrs)?;
-        params.validate()?;
+        params.validate(&origin)?;
 
         if let Some(value) = params.skip {
             return Ok(Self::Skipped(SkippedMember {
@@ -168,15 +179,6 @@ impl Member {
                 value,
             }));
         }
-
-        let ident = ident.or_else(|| params.name.clone()).ok_or_else(|| {
-            err!(
-                &norm_ty,
-                "can't infer the name to use for this {origin}; please use a simple \
-                `identifier: type` syntax for the {origin}, or add \
-                `#[builder(name = explicit_name)]` to specify the name explicitly",
-            )
-        })?;
 
         let me = RegularMember {
             origin,
@@ -202,10 +204,10 @@ impl Member {
         }
     }
 
-    pub(crate) fn ident(&self) -> Option<&syn::Ident> {
+    pub(crate) fn ident(&self) -> &syn::Ident {
         match self {
-            Self::Regular(me) => Some(&me.ident),
-            Self::Skipped(me) => me.ident.as_ref(),
+            Self::Regular(me) => &me.ident,
+            Self::Skipped(me) => &me.ident,
         }
     }
 
@@ -273,7 +275,14 @@ impl RegularMember {
         quote!(::bon::private::Set<#ty>)
     }
 
-    pub(crate) fn has_into(&self, conditional_params: &[ConditionalParams]) -> Result<bool> {
+    pub(crate) fn param_default(&self) -> Option<Option<&syn::Expr>> {
+        self.params
+            .default
+            .as_ref()
+            .map(|default| default.as_ref().as_ref())
+    }
+
+    pub(crate) fn param_into(&self, conditional_params: &[ConditionalParams]) -> Result<bool> {
         let scrutinee = self
             .as_optional_with_ty(&self.orig_ty)
             .unwrap_or(&self.orig_ty);

@@ -68,6 +68,28 @@ If you want to make sure your code doesn't accidentally omit a generic lifetime 
 elided_lifetimes_in_paths = "warn"
 ```
 
+## Destructuring patterns in function parameters
+
+When `#[builder]` is placed on a function (including associated methods), then the parameters of that function must be simple identifiers. Destructuring patterns aren't supported because it's not obvious what identifier to assign to the member in this case. This identifier will appear in `#[builder(default = ...)]` expressions, for example.
+
+Instead, if you need to destructure your function parameter, just do that inside of the function's body.
+
+**Example:**
+
+```rust
+use bon::builder;
+
+#[builder]
+fn example(point: (u32, u32)) {
+    let (x, y) = point;
+}
+
+example()
+    .point((1, 2))
+    .call();
+```
+
+
 ## `const` functions
 
 It's possible to place `#[builder]` on top of a `const fn`, but the generated builder methods won't be marked `const`. They use the non-const method `Into::into` to transition between type states. Except for that, the generated code should be `const`-compatible.

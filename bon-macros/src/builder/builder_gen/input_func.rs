@@ -459,15 +459,18 @@ fn merge_generic_params(
 
 impl Member {
     fn from_typed_fn_arg((norm_arg, orig_arg): (&syn::PatType, &syn::PatType)) -> Result<Self> {
-        let ident = match norm_arg.pat.as_ref() {
-            syn::Pat::Ident(pat) => Some(&pat.ident),
-            _ => None,
+        let syn::Pat::Ident(pat) = norm_arg.pat.as_ref() else {
+            bail!(
+                &orig_arg.pat,
+                "use a simple `identifier: type` syntax for the function argument; \
+                destructuring patterns in arguments aren't supported by the `#[builder]`",
+            )
         };
 
         Member::new(
             MemberOrigin::FnArg,
             &norm_arg.attrs,
-            ident.cloned(),
+            pat.ident.clone(),
             norm_arg.ty.clone(),
             orig_arg.ty.clone(),
         )
