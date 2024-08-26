@@ -222,7 +222,7 @@ Also, huge thank you for 500 stars ⭐ [on Github](https://github.com/elastio/bo
 
 You can leave comments for this post on the platform of your choice:
 - [Reddit](https://www.reddit.com/r/rust/comments/1f1uzkw/bon_builder_generator_20_release/)
-- [X (Twitter)](https://x.com/veetaha/status/1828129748725440536)
+- [X (Twitter)](https://x.com/veetaha/status/1828210142514491658)
 - [Hacker News](https://news.ycombinator.com/item?id=41359892)
 
 :::
