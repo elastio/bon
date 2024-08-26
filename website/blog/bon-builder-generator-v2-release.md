@@ -216,7 +216,7 @@ This also plays better with the feature where [`skip` and `default` expressions 
 
 `bon` is only a month-old crate, and many we've learned many things since its [initial release](https://www.reddit.com/r/rust/comments/1eeem92/how_to_do_named_function_arguments_in_rust/) from your feedback. There were various extensions made to its API, however, there also were the breaking changes, that eventually led to a `2.0` release. I'm doing this major release earlier rather than later, while `bon`'s adoption is growing yet.
 
-Also, huge thank you for almost 500 ⭐ [on Github](https://github.com/elastio/bon)! Consider giving `bon` a star if you haven't already. Your support is a big motivation and together we can build a better builder 🐱!
+Also, huge thank you for 500 stars ⭐ [on Github](https://github.com/elastio/bon)! Consider giving `bon` a star if you haven't already. Your support is a big motivation and together we can build a better builder 🐱!
 
 ::: tip
 
