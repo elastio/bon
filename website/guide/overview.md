@@ -221,7 +221,7 @@ Project::builder()
 
 However, you can ask `bon` to generate setters that accept `impl Into<T>` to remove the need for manual conversion.
 
-This can be configured with [`#[builder(into)]`](../reference//builder#into) for a single member or with [`#[builder(on({type}, into))]`](../reference/builder#on) for a many members at once.
+This can be configured with [`#[builder(into)]`](../reference//builder#into) for a single member or with [`#[builder(on({type}, into))]`](../reference/builder#on) for many members at once.
 
 ```rust
 use bon::builder;
@@ -233,7 +233,7 @@ struct Project {
     name: String,
     description: String,
 
-    // The setter for this member only will accept `impl Into<PathBuf>`    // [!code highlight]
+    // The setter only for this member will accept `impl Into<PathBuf>`    // [!code highlight]
     #[builder(into)]                                                       // [!code highlight]
     path: PathBuf,
 }
