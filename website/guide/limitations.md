@@ -51,7 +51,7 @@ Unfortunately, macros in Rust don't have access to semantic information. All tha
 fn example(value: User) {}
 ```
 
-This means `#[builder]` macro thinks as if there are no lifetime parameters in the `User` type, and thus it generates the code that doesn't compile.
+This means the `#[builder]` macro thinks as if there are no lifetime parameters in the `User` type, and thus it generates the code that doesn't compile.
 
 To fix this, we need to make it clear to the `#[builder]` macro that `User` expects some lifetime parameters. This can be done like this:
 
@@ -89,6 +89,52 @@ example()
     .call();
 ```
 
+## Formatting of attributes on function arguments
+
+At the time of this writing, `rustfmt` does a fairly bad job of formatting attributes placed on function arguments. Here is an example of `rustfmt`-formatted code that uses `#[bon::builder]`:
+
+```rust
+#[bon::builder]
+fn example(
+    #[builder(default = 1)] foo: u32,
+    bar: u32,
+    fizz: u32,
+) {
+}
+```
+
+The attribute on the function's parameter was formatted on the same line with the parameter itself, even though the signature of the function already takes up multiple lines. It is harder to read the signature this way because the names of function parameters aren't aligned.
+
+As a workaround, you can place a dummy line comment right after the attribute to prevent `rustfmt` from placing the attribute on the same line with the function parameter:
+
+**Example:**
+
+```rust
+#[bon::builder]
+fn example(
+    #[builder(default = 1)] // // [!code highlight]
+    foo: u32,
+    bar: u32,
+    fizz: u32,
+) {
+}
+```
+
+Another workaround for this is to write a doc comment on top of the function argument:
+
+```rust
+#[bon::builder]
+fn example(
+    /// Doc comment fixes formatting // [!code highlight]
+    #[builder(default = 1)]
+    foo: u32,
+    bar: u32,
+    fizz: u32,
+) {
+}
+```
+
+Here is [the related issue](https://github.com/rust-lang/rustfmt/issues/6276) in `rustfmt` about this problem.
 
 ## `const` functions
 
