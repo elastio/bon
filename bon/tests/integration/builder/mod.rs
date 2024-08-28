@@ -4,6 +4,7 @@ mod attr_into;
 mod attr_on;
 mod attr_skip;
 mod generics;
+mod init_order;
 mod lints;
 mod raw_idents;
 mod smoke;

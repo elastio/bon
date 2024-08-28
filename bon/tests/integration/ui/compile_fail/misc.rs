@@ -8,6 +8,18 @@ fn main() {
     };
 
     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
+
+    #[builder]
+    struct SkipGeneratesNoSetter {
+        #[builder(skip)]
+        x: u32,
+
+        #[builder(skip = 4)]
+        y: u32,
+    }
+
+    SkipGeneratesNoSetter::builder().x(42).build();
+    SkipGeneratesNoSetter::builder().y(42).build();
 }
 
 #[builder]
