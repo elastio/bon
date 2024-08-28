@@ -21,6 +21,75 @@ fn generic_struct() {
     );
 }
 
+#[test]
+fn return_type_only_generic_param() {
+    #[builder]
+    fn sut<T: Default>() -> T {
+        T::default()
+    }
+
+    let _: i32 = sut().call();
+}
+
+#[test]
+fn unsized_generics_in_params() {
+    #[builder]
+    fn sut<T: ?Sized>(arg: &T) {
+        let _ = arg;
+    }
+
+    sut().arg(&42).call();
+}
+
+#[test]
+fn unsized_generics_in_return_type() {
+    #[builder]
+    fn sut<T: ?Sized>(arg: &T) {
+        let _ = arg;
+    }
+
+    sut().arg(&42).call();
+}
+
+// This is based on the issue https://github.com/rust-lang/rust/issues/129701
+#[test]
+fn assoc_types_work_in_params() {
+    trait Trait {
+        type Assoc;
+    }
+
+    #[builder]
+    fn sut<T: Trait>(_val: T::Assoc) {}
+
+    impl Trait for () {
+        type Assoc = ();
+    }
+
+    sut::<()>().val(()).call();
+}
+
+// This is based on the issue https://github.com/rust-lang/rust/issues/129701
+#[test]
+fn assoc_types_work_in_return_type() {
+    trait Trait {
+        type Assoc;
+    }
+
+    #[builder]
+    fn sut<T: Trait>() -> T::Assoc
+    where
+        T::Assoc: Default,
+    {
+        T::Assoc::default()
+    }
+
+    impl Trait for () {
+        type Assoc = ();
+    }
+
+    sut::<()>().call();
+}
+
 // This is based on the issue https://github.com/elastio/bon/issues/16
 #[test]
 fn self_only_generic_param() {
