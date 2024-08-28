@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1](https://github.com/elastio/bon/compare/v2.0.0...v2.0.1) - 2024-08-28
+
+### Other
+- Fix capturing of generic params that appear only in return types and fix support for associated types ([#72](https://github.com/elastio/bon/pull/72))
+- Followup docs improvements and more tests ([#70](https://github.com/elastio/bon/pull/70))
+
 ## [2.0.0](https://github.com/elastio/bon/compare/v1.2.1...v2.0.0) - 2024-08-26
 
 See the [blog post](https://elastio.github.io/bon/blog/bon-builder-generator-v2-release) for details.
