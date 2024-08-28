@@ -6,6 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.0.1](https://github.com/elastio/bon/compare/v2.0.0...v2.0.1) - 2024-08-28
+
+### Docs
+- Add a new section ["`None` literals inference"](https://elastio.github.io/bon/guide/patterns/into-conversions-in-depth#none-literals-inference) to docs for "Into Conversions In-Depth"
+- Fix the docs about the comparison of Into conversions on the ["Alternatives"](http://localhost:5173/bon/guide/alternatives) page that were not updated during the v2 release
+
+### Fix
+- Fix capturing of generic params that appear only in return types ([#72](https://github.com/elastio/bon/pull/72))
+- Fix support for associated types ([#72](https://github.com/elastio/bon/pull/72))
+
+### Internal
+- Add more tests for various edge cases ([#70](https://github.com/elastio/bon/pull/70))
+
 ## [2.0.0](https://github.com/elastio/bon/compare/v1.2.1...v2.0.0) - 2024-08-26
 
 See the [blog post](https://elastio.github.io/bon/blog/bon-builder-generator-v2-release) for details.
