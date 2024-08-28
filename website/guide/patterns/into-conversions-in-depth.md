@@ -226,17 +226,11 @@ half(10);
 required by a bound introduced by this call
 ```
 
-The reason for this error is that `rustc` can't infer the type for the numeric literal `10`, because it could be one of the following types: `u8`, `u16`, `u32`, which all implement `Into<u32>`. There isn't a suffix like `10_u16` in this code to tell the compiler the type of the numeric literal `10`. When the compiler can't infer the type of a numeric literal it falls back to assigning the type `i32` for an integer literal and `f64` for a floating point literal. In this case `i32` is inferred, which isn't convertible to `u32`.
+The reason for this error is that `rustc` can't infer the type for the numeric literal `10` because it could be one of the following types: `u8`, `u16`, `u32`, which all implement `Into<u32>`. There isn't a suffix like `10_u16` in this code to tell the compiler the type of the numeric literal `10`. When the compiler can't infer the type of a numeric literal it falls back to assigning the type `i32` for an integer literal and `f64` for a floating point literal. In this case `i32` is inferred, which isn't convertible to `u32`.
 
 Requiring an explicit type suffix in numeric literals would be the opposite of good ergonomics that `impl Into` is trying to achieve in the first place.
 
-::: info NOTE
-
-Type inference for primitive numeric types falls into the category of the [section below](#weakened-type-inference), but it's separated from it because this kind of type inference is generally less known to fail, so people usually forget about it because it always works for them.
-
-:::
-
-### Weakened type inference
+### Weakened generics inference
 
 If you have a function that returns a generic type, then the compiler needs to infer that generic type from usage unless it's specified explicitly. A classic example of such a function is [`str::parse()`](https://doc.rust-lang.org/stable/std/primitive.str.html#method.parse) or [`serde_json::from_str()`](https://docs.rs/serde_json/latest/serde_json/fn.from_str.html).
 
@@ -300,6 +294,79 @@ This signature implies that the `value` parameter can be of any type that implem
 This means the setter for `ip_addr` can no longer hint the compiler a single type that it accepts. Thus the compiler can't decide which type to assign to the `ip_addr` variable in the original code, because *there can be many that make sense*. I.e. the code will compile if any of the `Ipv4Addr` or `Ipv6Addr` or `IpAddr` type annotations are added to the `ip_addr` variable, but the compiler has no right to decide which of them to use on your behalf.
 
 This is the drawback of using not only `impl Into`, but any generics at all.
+
+
+### `None` literals inference
+
+`impl Into` breaks type inference for `None` literals. For example, this code doesn't use `Into` conversions and compiles fine:
+
+```rust
+use bon::builder;
+
+#[builder]
+struct Example {
+    member: Option<String>
+}
+
+Example::builder()
+    // Suppose we want to be explicit about omitting the `member`,
+    // so we intentionally invoke the `maybe_` setter and pass `None` to it
+    .maybe_member(None)
+    .build();
+```
+
+Now, let's enable an `Into` conversion for the `member`:
+
+```rust compile_fail
+use bon::builder;
+
+#[builder]
+struct Example {
+    #[builder(into)] // [!code ++]
+    member: Option<String>
+}
+
+Example::builder()
+    .maybe_member(None)
+    .build();
+```
+
+When we compile this code we get the following error:
+
+```log
+.maybe_member(None)                                            // [!code error]
+ ------------ ^^^^ cannot infer type of the type parameter `T` // [!code error]
+                   declared on the enum `Option`               // [!code error]
+```
+
+The problem here is that the compiler doesn't know the complete type of the `None` literal. It definitely knows that it's a value of type `Option<_>`, but it doesn't know what type to use in place of the `_`. There could be many potential candidates for the `_` inside of the `Option<_>`. This is because the signature of the `maybe_member()` setter changed:
+
+```rust ignore
+fn maybe_member(self, value: Option<String>) -> NextBuilderState            // [!code --]
+fn maybe_member(self, value: Option<impl Into<String>>) -> NextBuilderState // [!code ++]
+```
+
+Before we enabled `Into` conversions the signature provided a hint for the compiler because the setter expected a single concrete type `Option<String>`, so it was obvious that the `None` literal was of type `Option<String>`.
+
+However, after we enabled `Into` conversions, the signature no longer provides a single concrete type. It says that it accepts an `Option` of any type that implements `Into<String>`.
+
+It means that the `None` literal could be of types `Option<&str>` or `Option<String>`, for example, so the compiler can't decide which one you meant. And this matters, because `Option<&str>` and `Option<String>` are totally different types. Simplified, `Option<&str>` is 8 bytes in size and `Option<String>` is 24 bytes, even when they are `None`.
+
+To work around this problem the caller would need to explicitly specify the generic parameter for the `Option` type when passing the `None` literal:
+
+```rust
+use bon::builder;
+
+#[builder]
+struct Example {
+    #[builder(into)] // [!code ++]
+    member: Option<String>
+}
+
+Example::builder()
+    .maybe_member(None::<String>) // [!code focus]
+    .build();
+```
 
 ### Code complexity
 
