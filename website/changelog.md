@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Docs
 - Add a new section ["`None` literals inference"](https://elastio.github.io/bon/guide/patterns/into-conversions-in-depth#none-literals-inference) to docs for "Into Conversions In-Depth"
-- Fix the docs about comparison of Into conversions on the ["Alternatives"](http://localhost:5173/bon/guide/alternatives) page that were not updated during v2 release
+- Fix the docs about the comparison of Into conversions on the ["Alternatives"](http://localhost:5173/bon/guide/alternatives) page that were not updated during the v2 release
 
 ### Fix
 - Fix capturing of generic params that appear only in return types ([#72](https://github.com/elastio/bon/pull/72))
