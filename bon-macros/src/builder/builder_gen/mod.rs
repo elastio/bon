@@ -222,13 +222,34 @@ impl BuilderGenCtx {
     }
 
     fn phantom_data(&self) -> TokenStream2 {
+        self.phantom_data_with_state(true)
+    }
+
+    fn phantom_data_with_state(&self, state: bool) -> TokenStream2 {
         let member_types = self.members.iter().map(Member::norm_ty);
         let receiver_ty = self
             .assoc_method_ctx
             .as_ref()
             .map(|ctx| ctx.self_ty.as_ref());
 
-        let types = receiver_ty.into_iter().chain(member_types);
+        let generic_args: Vec<_> = self.generic_args().collect();
+        let generic_types = generic_args.iter().filter_map(|arg| match arg {
+            syn::GenericArgument::Type(ty) => Some(ty),
+            _ => None,
+        });
+
+        let types = receiver_ty
+            .into_iter()
+            .chain(member_types)
+            .chain(generic_types)
+            .map(|ty| {
+                // Wrap `ty` in another phantom data because it can be `?Sized`,
+                // and simply using it as a type of the tuple member would
+                // be wrong, because tuple's members must be sized
+                quote!(::core::marker::PhantomData<#ty>)
+            });
+
+        let state = state.then(|| quote!(::core::marker::PhantomData<__State>));
 
         quote! {
             ::core::marker::PhantomData<(
@@ -257,7 +278,7 @@ impl BuilderGenCtx {
 
                 // A special case of zero members requires storing `__State` in phantom data
                 // otherwise it would be reported as an unused type parameter.
-                __State,
+                #state
             )>
         }
     }
@@ -290,7 +311,7 @@ impl BuilderGenCtx {
         let builder_state_trait_ident = &self.builder_state_trait_ident;
         let generics_decl = &self.generics.params;
         let where_clause = &self.generics.where_clause;
-        let generic_args = self.generic_args();
+        let generic_args: Vec<_> = self.generic_args().collect();
         let unset_state_types = self.regular_members().map(|arg| arg.unset_state_type());
         let phantom_data = self.phantom_data();
 
@@ -322,13 +343,62 @@ impl BuilderGenCtx {
 
         let allows = allow_warnings_on_member_types();
 
+        // This is the workaround for the bug in rustc:
+        // https://github.com/rust-lang/rust/issues/87682
+        //
+        // The main purpose of this workaround is to avoid using associated
+        // types projections in the default value for the generic parameter.
+        //
+        // We can't control the user code, so we do a trick where we capture
+        // all the needed generic parameters in an intermediate structs (without
+        // the __State generic). Then we implement a trait for this struct where
+        // the assoc type of that trait is what we want to have in place of the
+        // default generic parameter for the builder.
+        //
+        // You don't even know how much I hate this workaround, and how hard it
+        // was for me to come up with it.
+        let initial_state_workaround_trait =
+            quote::format_ident!("__{}InitialState", builder_ident.raw_name());
+
+        let initial_state_workaround_trait_impl =
+            quote::format_ident!("__{}InitialStateImpl", builder_ident.raw_name());
+
+        let phantom_data_without_state = self.phantom_data_with_state(false);
+
         quote! {
+            /// Workaround for <https://github.com/rust-lang/rust/issues/87682>
+            #[doc(hidden)]
+            #vis trait #initial_state_workaround_trait {
+                type State;
+            }
+
+            /// Workaround for <https://github.com/rust-lang/rust/issues/87682>
+            #[doc(hidden)]
+            #allows
+            #vis struct #initial_state_workaround_trait_impl<#(#generics_decl,)*>
+            #where_clause
+            {
+                #receiver_field
+                _phantom: #phantom_data_without_state,
+            }
+
+            #allows
+            impl<#(#generics_decl,)*> #initial_state_workaround_trait for
+                #initial_state_workaround_trait_impl<#(#generic_args,)*>
+            #where_clause
+            {
+                type State = (#(#unset_state_types,)*);
+            }
+
             #[must_use = #must_use_message]
             #[doc = #docs]
             #allows
             #vis struct #builder_ident<
                 #(#generics_decl,)*
-                __State: #builder_state_trait_ident = (#(#unset_state_types,)*),
+                __State: #builder_state_trait_ident = <
+                    #initial_state_workaround_trait_impl<#(#generic_args,)*>
+                    as #initial_state_workaround_trait
+                >::State
             >
             #where_clause
             {
