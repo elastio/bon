@@ -413,8 +413,8 @@ struct Example {
 
 Example::builder()
     .name("Bon")
-    // These members also matched the `String` type pattern,
-    // so `#[builder(into)]` was applied to it
+    // These members also match the `String` type pattern,
+    // so `#[builder(into)]` was applied to them
     .description("accepts an `impl Into<String>` here")
     .alias("builder")
     .build();

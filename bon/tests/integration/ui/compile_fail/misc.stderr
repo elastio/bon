@@ -23,115 +23,133 @@ error: duplicate value in the set
    |                                                              ^^^^^^^^^
 
 error: Only structs with named fields are supported
-  --> tests/integration/ui/compile_fail/misc.rs:14:1
+  --> tests/integration/ui/compile_fail/misc.rs:26:1
    |
-14 | struct TupleStruct(u32, u32);
+26 | struct TupleStruct(u32, u32);
    | ^^^^^^
 
 error: use a simple `identifier: type` syntax for the function argument; destructuring patterns in arguments aren't supported by the `#[builder]`
-  --> tests/integration/ui/compile_fail/misc.rs:17:18
+  --> tests/integration/ui/compile_fail/misc.rs:29:18
    |
-17 | fn destructuring((x, y): (u32, u32)) {
+29 | fn destructuring((x, y): (u32, u32)) {
    |                  ^^^^^^
 
 error: Unexpected type `bool`
-  --> tests/integration/ui/compile_fail/misc.rs:23:44
+  --> tests/integration/ui/compile_fail/misc.rs:35:44
    |
-23 | fn unnecessary_into_false(#[builder(into = false)] _x: u32) {}
+35 | fn unnecessary_into_false(#[builder(into = false)] _x: u32) {}
    |                                            ^^^^^
 
 error: this `#[builder(into)]` attribute is redundant, because `into` is already implied for this member via the `#[builder(on(...))]` at the top of the function
-  --> tests/integration/ui/compile_fail/misc.rs:26:31
+  --> tests/integration/ui/compile_fail/misc.rs:38:31
    |
-26 | fn unnecessary_into(#[builder(into)] _x: String) {}
+38 | fn unnecessary_into(#[builder(into)] _x: String) {}
    |                               ^^^^
 
 error: This syntax is not supported in type patterns yet. If you have a use case for this, please open an issue at https://github.com/elastio/bon/issues.
-  --> tests/integration/ui/compile_fail/misc.rs:28:15
+  --> tests/integration/ui/compile_fail/misc.rs:40:15
    |
-28 | #[builder(on(&dyn std::fmt::Debug, into))]
+40 | #[builder(on(&dyn std::fmt::Debug, into))]
    |               ^^^
 
 error: nested attributes are not allowed in the type pattern of #[builder(on(type_pattern, ...))]
-  --> tests/integration/ui/compile_fail/misc.rs:31:17
+  --> tests/integration/ui/compile_fail/misc.rs:43:17
    |
-31 | #[builder(on(fn(#[attr] a: u32), into))]
+43 | #[builder(on(fn(#[attr] a: u32), into))]
    |                 ^
 
 error: Expected an attribute of form `on(type_pattern, ...)`
-  --> tests/integration/ui/compile_fail/misc.rs:34:11
+  --> tests/integration/ui/compile_fail/misc.rs:46:11
    |
-34 | #[builder(on)]
+46 | #[builder(on)]
    |           ^^
 
 error: unexpected end of input, expected one of: `for`, parentheses, `fn`, `unsafe`, `extern`, identifier, `::`, `<`, `dyn`, square brackets, `*`, `&`, `!`, `impl`, `_`, lifetime
-  --> tests/integration/ui/compile_fail/misc.rs:37:1
+  --> tests/integration/ui/compile_fail/misc.rs:49:1
    |
-37 | #[builder(on())]
+49 | #[builder(on())]
    | ^^^^^^^^^^^^^^^^
    |
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected `,`
-  --> tests/integration/ui/compile_fail/misc.rs:40:1
+  --> tests/integration/ui/compile_fail/misc.rs:52:1
    |
-40 | #[builder(on(_))]
+52 | #[builder(on(_))]
    | ^^^^^^^^^^^^^^^^^
    |
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: this #[builder(on(type_pattern, ...))] contains no options to override the default behavior for the selected setters like `into`, so it does nothing
-  --> tests/integration/ui/compile_fail/misc.rs:43:1
+  --> tests/integration/ui/compile_fail/misc.rs:55:1
    |
-43 | #[builder(on(_,))]
+55 | #[builder(on(_,))]
    | ^^^^^^^^^^^^^^^^^^
    |
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected at least one parameter in parentheses
-  --> tests/integration/ui/compile_fail/misc.rs:46:11
+  --> tests/integration/ui/compile_fail/misc.rs:58:11
    |
-46 | #[builder(start_fn())]
+58 | #[builder(start_fn())]
    |           ^^^^^^^^
 
 error: `skip` attribute can't be specified with other attributes like `into` because there will be no setter generated for this member to configure
-  --> tests/integration/ui/compile_fail/misc.rs:51:21
+  --> tests/integration/ui/compile_fail/misc.rs:63:21
    |
-51 |     #[builder(skip, into)]
+63 |     #[builder(skip, into)]
    |                     ^^^^
 
 error: `skip` attribute can't be specified with other attributes like `name` because there will be no setter generated for this member to configure
-  --> tests/integration/ui/compile_fail/misc.rs:57:28
+  --> tests/integration/ui/compile_fail/misc.rs:69:28
    |
-57 |     #[builder(skip, name = bar)]
+69 |     #[builder(skip, name = bar)]
    |                            ^^^
 
 error: `skip` attribute can't be specified with other attributes like `default` because there will be no setter generated for this member to configure. If you wanted to specify a value for the member, then use the following syntax instead `#[builder(skip = value)]`
-  --> tests/integration/ui/compile_fail/misc.rs:63:21
+  --> tests/integration/ui/compile_fail/misc.rs:75:21
    |
-63 |     #[builder(skip, default = 42)]
+75 |     #[builder(skip, default = 42)]
    |                     ^^^^^^^
 
 error: `skip` attribute is not supported on function arguments. Use a local variable instead.
-  --> tests/integration/ui/compile_fail/misc.rs:69:15
+  --> tests/integration/ui/compile_fail/misc.rs:81:15
    |
-69 |     #[builder(skip)] _x: u32,
+81 |     #[builder(skip)] _x: u32,
    |               ^^^^
 
 error: Only structs with named fields are supported
-  --> tests/integration/ui/compile_fail/misc.rs:76:1
+  --> tests/integration/ui/compile_fail/misc.rs:88:1
    |
-76 | struct TupleStructsAreUnsupported(u32, u32);
+88 | struct TupleStructsAreUnsupported(u32, u32);
    | ^^^^^^
 
 error: The attribute is expected to be placed only on an `fn` item or a `struct` declaration
-  --> tests/integration/ui/compile_fail/misc.rs:79:1
+  --> tests/integration/ui/compile_fail/misc.rs:91:1
    |
-79 | enum EnumsAreUnsupported {}
+91 | enum EnumsAreUnsupported {}
    | ^^^^
 
 error: use a simple `identifier: type` syntax for the function argument; destructuring patterns in arguments aren't supported by the `#[builder]`
-  --> tests/integration/ui/compile_fail/misc.rs:82:39
+  --> tests/integration/ui/compile_fail/misc.rs:94:39
    |
-82 | fn destructuring_in_fn_is_unsupported((_, _): (u32, u32)) {}
+94 | fn destructuring_in_fn_is_unsupported((_, _): (u32, u32)) {}
    |                                       ^^^^^^
+
+error[E0599]: no method named `x` found for struct `SkipGeneratesNoSetterBuilder` in the current scope
+  --> tests/integration/ui/compile_fail/misc.rs:21:38
+   |
+12 |     #[builder]
+   |     ---------- method `x` not found for this struct
+...
+21 |     SkipGeneratesNoSetter::builder().x(42).build();
+   |                                      ^ method not found in `SkipGeneratesNoSetterBuilder`
+
+error[E0599]: no method named `y` found for struct `SkipGeneratesNoSetterBuilder` in the current scope
+  --> tests/integration/ui/compile_fail/misc.rs:22:38
+   |
+12 |     #[builder]
+   |     ---------- method `y` not found for this struct
+...
+22 |     SkipGeneratesNoSetter::builder().y(42).build();
+   |                                      ^ method not found in `SkipGeneratesNoSetterBuilder`
