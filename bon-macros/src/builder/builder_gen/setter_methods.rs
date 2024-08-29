@@ -271,6 +271,7 @@ impl<'a> MemberSettersCtx<'a> {
 
         quote! {
             #( #docs )*
+            #[allow(clippy::impl_trait_in_params)]
             #[inline(always)]
             #vis fn #method_name(self, #fn_params) -> #return_type {
                 #builder_ident {
