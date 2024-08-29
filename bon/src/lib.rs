@@ -15,7 +15,7 @@ pub mod private;
 /// using the full path (`bon::vec![]`) to avoid confusion with the [`std::vec!`] macro.
 ///
 /// A good example of the use case for this macro is when you want to create a
-/// [`Vec<String>`] where part of the items are hardcoded string literals of type
+/// [`Vec<String>`] where part of the items are hard-coded string literals of type
 /// `&str` and the other part is made of dynamic [`String`] values.
 ///
 /// ```

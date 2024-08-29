@@ -409,7 +409,7 @@ impl BuilderGenCtx {
                 ///
                 /// The limitation is that we can't make the fields of the
                 /// generated struct private other than by placing its
-                /// declaration inside of a nested submodule. However, we
+                /// declaration inside of a nested sub-module. However, we
                 /// can't do that because this breaks support for fn items
                 /// declared inside of other fn items like this:
                 ///

@@ -43,7 +43,7 @@ pub(crate) struct RegularMember {
     pub(crate) origin: MemberOrigin,
 
     /// Original name of the member is used as the name of the builder field and
-    /// in its setter methods. Struct field/fn arg names conventionally use snake_case
+    /// in its setter methods. Struct field/fn arg names conventionally use `snake_case`
     /// in Rust, but this isn't enforced, so this member isn't guaranteed to be in
     /// snake case, but 99% of the time it will be.
     pub(crate) ident: syn::Ident,

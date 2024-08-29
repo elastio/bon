@@ -128,7 +128,7 @@ impl StructInputCtx {
             asyncness: None,
             body: Box::new(finish_func_body),
             output: syn::parse_quote!(-> #struct_ty),
-            docs: "Finishes building an returns the requested object.".to_owned(),
+            docs: "Finishes building and returns the requested object.".to_owned(),
         };
 
         let start_func_docs = format!(
