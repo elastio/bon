@@ -1,4 +1,4 @@
-//! This is based on the issue https://github.com/elastio/bon/issues/8
+//! This is based on the issue <https://github.com/elastio/bon/issues/8>
 use bon::builder;
 
 #[test]

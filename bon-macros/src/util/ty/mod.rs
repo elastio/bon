@@ -3,7 +3,7 @@ mod match_types;
 use crate::util::prelude::*;
 
 pub(crate) trait TypeExt {
-    /// Try downcasting the type to [`syn::Type::Path`]
+    /// Try down-casting the type to [`syn::Type::Path`]
     fn as_path(&self) -> Option<&syn::TypePath>;
 
     /// Returns `true` if the given type is p [`syn::Type::Path`] and its

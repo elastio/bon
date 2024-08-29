@@ -2,7 +2,7 @@ use ident_case::RenameRule;
 use proc_macro2::Span;
 
 pub(crate) trait IdentExt {
-    /// Converts the ident (assumed to be in snake case) to PascalCase without
+    /// Converts the ident (assumed to be in `snake_case`) to `PascalCase` without
     /// preserving its span.
     ///
     /// Span loss is intentional to work around the semantic token type assignment
