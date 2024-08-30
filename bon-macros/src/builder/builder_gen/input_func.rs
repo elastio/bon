@@ -326,7 +326,7 @@ impl FuncInputCtx {
             ident: finish_func_ident,
             unsafety: self.norm_func.sig.unsafety,
             asyncness: self.norm_func.sig.asyncness,
-            must_use: get_must_use_attribute(&self.norm_func.attrs),
+            must_use: get_must_use_attribute(&self.norm_func.attrs)?,
             body: Box::new(finish_func_body),
             output: self.norm_func.sig.output,
             docs: "Finishes building and performs the requested action.".to_owned(),
@@ -505,26 +505,16 @@ impl Visit<'_> for FindSelfReference {
     }
 }
 
-fn get_must_use_attribute(attrs: &[syn::Attribute]) -> Option<syn::Attribute> {
+fn get_must_use_attribute(attrs: &[syn::Attribute]) -> darling::Result<Option<syn::Attribute>> {
     let mut iter = attrs
         .iter()
-        .filter(|attr| !attr.is_doc() && matches!(attr.style, syn::AttrStyle::Outer))
-        .filter(|attr| {
-            let path = match &attr.meta {
-                syn::Meta::Path(path) => path,
-                syn::Meta::List(_) => return false,
-                syn::Meta::NameValue(name_value) => &name_value.path,
-            };
-            path.segments.len() == 1
-                && path
-                    .segments
-                    .iter()
-                    .any(|segment| segment.ident.raw_name() == "must_use")
-        });
+        .filter(|attr| attr.meta.path().is_ident("must_use"));
     let result = iter.next();
-    if iter.next().is_some() {
-        // Fishy: multiple must_use? panic here?
-        return None;
+    if let Some(second) = iter.next() {
+        bail!(
+            second,
+            "Found multiple #[must_use], but bon only works with exactly one (or less)."
+        );
     }
-    result.cloned()
+    Ok(result.cloned())
 }
