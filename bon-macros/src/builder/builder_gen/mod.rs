@@ -9,6 +9,7 @@ use member::*;
 use super::params::ConditionalParams;
 use crate::util::prelude::*;
 use quote::{quote, ToTokens};
+use setter_methods::{MemberSettersCtx, SettersReturnType};
 
 pub(crate) struct AssocMethodReceiverCtx {
     pub(crate) with_self_keyword: syn::Receiver,
@@ -483,9 +484,102 @@ impl BuilderGenCtx {
     }
 
     fn setter_methods_impls(&self) -> Result<TokenStream2> {
-        self.regular_members()
-            .map(|member| self.setter_methods_impls_for_member(member))
-            .collect()
+        let generics_decl = &self.generics.params;
+        let generic_builder_args = self.generic_args().collect::<Vec<_>>();
+        let builder_ident = &self.builder_ident;
+        let where_clause = &self.generics.where_clause;
+
+        let state_type_vars = self
+            .regular_members()
+            .map(|member| &member.generic_var_ident)
+            .collect::<Vec<_>>();
+
+        let allows = allow_warnings_on_member_types();
+
+        let next_state_trait_ident =
+            quote::format_ident!("__{}SetMember", builder_ident.raw_name());
+
+        let next_states_decls = self.regular_members().map(|member| {
+            let member_pascal = &member.ident_pascal;
+            quote! {
+                type #member_pascal;
+            }
+        });
+
+        let setters = self
+            .regular_members()
+            .map(|member| {
+                let state_types = self.regular_members().map(|other_member| {
+                    if other_member.ident == member.ident {
+                        member.set_state_type().to_token_stream()
+                    } else {
+                        other_member.generic_var_ident.to_token_stream()
+                    }
+                });
+
+                let member_pascal = &member.ident_pascal;
+
+                let next_state = quote! {
+                    #builder_ident<
+                        #(#generic_builder_args,)*
+                        (#(#state_types,)*)
+                    >
+                };
+
+                let return_type = SettersReturnType {
+                    doc_true: quote!(<Self as #next_state_trait_ident>::#member_pascal),
+                    doc_false: next_state.clone(),
+                };
+
+                let setter_methods =
+                    MemberSettersCtx::new(self, member, return_type).setter_methods()?;
+
+                let next_state = quote!(type #member_pascal = #next_state;);
+
+                Ok((setter_methods, next_state))
+            })
+            .collect::<Result<Vec<_>>>()?;
+
+        let setter_methods = setters.iter().map(|(setter_methods, _)| setter_methods);
+        let next_states_defs = setters.iter().map(|(_, next_state)| next_state);
+
+        Ok(quote! {
+            #[cfg(doc)]
+            trait #next_state_trait_ident {
+                #(#next_states_decls)*
+            }
+
+            #[cfg(doc)]
+            #allows
+            impl<
+                #(#generics_decl,)*
+                #(#state_type_vars,)*
+            >
+                #next_state_trait_ident
+            for
+                #builder_ident<
+                    #(#generic_builder_args,)*
+                    (#(#state_type_vars,)*)
+                >
+            #where_clause
+            {
+                #(#next_states_defs)*
+            }
+
+            #allows
+            impl<
+                #(#generics_decl,)*
+                #(#state_type_vars,)*
+            >
+            #builder_ident<
+                #(#generic_builder_args,)*
+                (#(#state_type_vars,)*)
+            >
+            #where_clause
+            {
+                #(#setter_methods)*
+            }
+        })
     }
 }
 

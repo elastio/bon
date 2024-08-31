@@ -1,89 +1,33 @@
 use super::{BuilderGenCtx, RegularMember};
 use crate::util::prelude::*;
-use quote::{quote, ToTokens};
+use quote::quote;
 
-impl BuilderGenCtx {
-    pub(crate) fn setter_methods_impls_for_member(
-        &self,
-        member: &RegularMember,
-    ) -> Result<TokenStream2> {
-        let output_members_states = self.regular_members().map(|other_member| {
-            if other_member.ident == member.ident {
-                member.set_state_type().to_token_stream()
-            } else {
-                other_member.generic_var_ident.to_token_stream()
-            }
-        });
-
-        let builder_ident = &self.builder_ident;
-        let generics_decl = &self.generics.params;
-        let generic_args: Vec<_> = self.generic_args().collect();
-        let where_clause_predicates: Vec<_> = self
-            .generics
-            .where_clause
-            .as_ref()
-            .into_iter()
-            .flat_map(|where_clause| &where_clause.predicates)
-            .collect();
-
-        let member_state_vars = self
-            .regular_members()
-            .filter(|other_member| other_member.ident != member.ident)
-            .map(|other_member| &other_member.generic_var_ident);
-
-        let input_member_states = self.regular_members().map(|other_member| {
-            if other_member.ident == member.ident {
-                quote!(::bon::private::Unset)
-            } else {
-                other_member.generic_var_ident.to_token_stream()
-            }
-        });
-
-        let setter_methods = MemberSettersCtx::new(
-            self,
-            member,
-            quote! {
-                #builder_ident<
-                    #(#generic_args,)*
-                    (#(#output_members_states,)*)
-                >
-            },
-        )
-        .setter_methods()?;
-
-        let allows = super::allow_warnings_on_member_types();
-
-        Ok(quote! {
-            #allows
-            impl<
-                #(#generics_decl,)*
-                #(#member_state_vars,)*
-            >
-            #builder_ident<
-                #(#generic_args,)*
-                (#(#input_member_states,)*)
-            >
-            where
-                #(#where_clause_predicates,)*
-            {
-                #setter_methods
-            }
-        })
-    }
+/// Specifies the return type of the setter method. It is conditioned by the
+/// `cfg(doc)`. If `cfg(doc)` is enabled, we want to generate a shorter type
+/// signature that doesn't clutter the docs.
+///
+/// However, such type signature uses an associated type of a trait which makes
+/// it much slower to compile when the code is built outside of `rustdoc`.
+///
+/// So the `doc_false` variant is used as an easier to compile alternative,
+/// but still the equivalent of the same return type.
+pub(crate) struct SettersReturnType {
+    pub(crate) doc_true: TokenStream2,
+    pub(crate) doc_false: TokenStream2,
 }
 
-struct MemberSettersCtx<'a> {
-    builder_gen: &'a BuilderGenCtx,
-    member: &'a RegularMember,
-    return_type: TokenStream2,
-    norm_member_ident: syn::Ident,
+pub(crate) struct MemberSettersCtx<'a> {
+    pub(crate) builder_gen: &'a BuilderGenCtx,
+    pub(crate) member: &'a RegularMember,
+    pub(crate) return_type: SettersReturnType,
+    pub(crate) norm_member_ident: syn::Ident,
 }
 
 impl<'a> MemberSettersCtx<'a> {
-    fn new(
+    pub(crate) fn new(
         builder_gen: &'a BuilderGenCtx,
         member: &'a RegularMember,
-        return_type: TokenStream2,
+        return_type: SettersReturnType,
     ) -> Self {
         let member_ident = &member.ident.to_string();
         let norm_member_ident = member_ident
@@ -113,7 +57,7 @@ impl<'a> MemberSettersCtx<'a> {
             .unwrap_or_else(|| self.norm_member_ident.clone())
     }
 
-    fn setter_methods(&self) -> Result<TokenStream2> {
+    pub(crate) fn setter_methods(&self) -> Result<TokenStream2> {
         let member_type = self.member.norm_ty.as_ref();
 
         if let Some(inner_type) = self.member.as_optional_norm_ty() {
@@ -197,7 +141,6 @@ impl<'a> MemberSettersCtx<'a> {
     }
 
     fn setter_method(&self, method: MemberSetterMethod) -> TokenStream2 {
-        let return_type = &self.return_type;
         let MemberSetterMethod {
             method_name,
             fn_params,
@@ -243,11 +186,24 @@ impl<'a> MemberSettersCtx<'a> {
             }
         };
 
+        let member_state_type = &self.member.generic_var_ident;
+        let SettersReturnType {
+            doc_false: ret_doc_false,
+            doc_true: ret_doc_true,
+        } = &self.return_type;
+
         quote! {
             #( #docs )*
             #[allow(clippy::impl_trait_in_params)]
             #[inline(always)]
-            #vis fn #method_name(self, #fn_params) -> #return_type {
+            // The `cfg_attr` condition is for `doc`, so we don't pay the price
+            // if invoking the `__return_type` macro in the usual case when the
+            // code is compiled outside of `rustdoc`.
+            #[cfg_attr(doc, bon::__return_type(#ret_doc_true))]
+            #vis fn #method_name(self, #fn_params) -> #ret_doc_false
+            where
+                #member_state_type: ::bon::private::IsUnset,
+            {
                 #body
             }
         }

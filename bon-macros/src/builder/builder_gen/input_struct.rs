@@ -144,7 +144,7 @@ impl StructInputCtx {
         };
 
         let start_func_docs = format!(
-            "Create an instance of [`{}`] using builder syntax",
+            "Create an instance of [`{}`] using the builder syntax",
             self.norm_struct.ident
         );
 

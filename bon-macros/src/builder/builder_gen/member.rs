@@ -51,6 +51,9 @@ pub(crate) struct RegularMember {
     /// snake case, but 99% of the time it will be.
     pub(crate) ident: syn::Ident,
 
+    /// `PascalCase` version of the member name.
+    pub(crate) ident_pascal: syn::Ident,
+
     /// Doc comments for the setter methods are copied from the doc comments placed
     /// on top of the original member
     pub(crate) docs: Vec<syn::Attribute>,
@@ -280,10 +283,13 @@ impl Member {
 
                 let docs = attrs.iter().filter(|attr| attr.is_doc()).cloned().collect();
 
+                let ident_pascal = ident.snake_to_pascal_case();
+
                 let me = RegularMember {
                     index: regular_members_count.into(),
                     origin,
-                    generic_var_ident: quote::format_ident!("__{}", ident.snake_to_pascal_case()),
+                    generic_var_ident: quote::format_ident!("__{}", ident_pascal),
+                    ident_pascal,
                     ident,
                     norm_ty,
                     orig_ty,
