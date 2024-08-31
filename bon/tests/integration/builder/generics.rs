@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use core::marker::PhantomData;
 
 #[test]
 fn generic_struct() {
@@ -41,12 +42,11 @@ fn unsized_generics_in_params() {
     sut().arg(&42).call();
 }
 
-#[cfg(feature = "alloc")]
 #[test]
 fn unsized_generics_in_return_type() {
     #[builder]
-    fn sut<T: ?Sized>() -> Option<Box<T>> {
-        None
+    fn sut<T: ?Sized>() -> PhantomData<T> {
+        PhantomData
     }
 
     sut::<u32>().call();
