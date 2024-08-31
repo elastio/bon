@@ -17,10 +17,10 @@ pub(crate) struct SettersReturnType {
 }
 
 pub(crate) struct MemberSettersCtx<'a> {
-    pub(crate) builder_gen: &'a BuilderGenCtx,
-    pub(crate) member: &'a RegularMember,
-    pub(crate) return_type: SettersReturnType,
-    pub(crate) norm_member_ident: syn::Ident,
+    builder_gen: &'a BuilderGenCtx,
+    member: &'a RegularMember,
+    return_type: SettersReturnType,
+    norm_member_ident: syn::Ident,
 }
 
 impl<'a> MemberSettersCtx<'a> {
@@ -188,8 +188,8 @@ impl<'a> MemberSettersCtx<'a> {
 
         let member_state_type = &self.member.generic_var_ident;
         let SettersReturnType {
-            doc_false: ret_doc_false,
             doc_true: ret_doc_true,
+            doc_false: ret_doc_false,
         } = &self.return_type;
 
         quote! {

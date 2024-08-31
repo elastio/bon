@@ -9,7 +9,9 @@ struct User;
 #[test]
 fn member_and_type_named_the_same_fn() {
     #[builder]
-    fn sut(_user: User) {}
+    fn sut(user: User) {
+        let _ = user;
+    }
 
     sut().user(User).call();
 }
@@ -18,13 +20,16 @@ fn member_and_type_named_the_same_fn() {
 fn member_and_type_named_the_same_struct() {
     #[builder]
     struct Sut {
-        _user: User,
+        #[allow(dead_code)]
+        user: User,
     }
 
     #[bon]
     impl Sut {
         #[builder]
-        fn sut(_user: User) {}
+        fn sut(user: User) {
+            let _ = user;
+        }
     }
 
     let _ = Sut::builder().user(User).build();

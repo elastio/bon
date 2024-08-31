@@ -422,7 +422,7 @@ impl FinishFuncBody for FnCallBody {
 
         let func_ident = &self.sig.ident;
 
-        // The variables with values of members in scope for this expression.
+        // The variables with values of members are in scope for this expression.
         let member_vars = members.iter().map(Member::ident);
 
         quote! {

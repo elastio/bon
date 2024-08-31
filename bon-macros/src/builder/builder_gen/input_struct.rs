@@ -187,7 +187,7 @@ impl FinishFuncBody for StructLiteralBody {
     fn generate(&self, member_exprs: &[Member]) -> TokenStream2 {
         let Self { struct_ident } = self;
 
-        // The variables with values of members in scope for this expression.
+        // The variables with values of members are in scope for this expression.
         let member_vars = member_exprs.iter().map(Member::ident);
 
         quote! {

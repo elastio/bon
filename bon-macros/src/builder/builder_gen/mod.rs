@@ -64,7 +64,7 @@ pub(crate) struct StartFunc {
 }
 
 pub(crate) trait FinishFuncBody {
-    /// Generate `finish` function body from ready-made variables.
+    /// Generate the `finish` function body from the ready-made variables.
     /// The generated function body may assume that there are variables
     /// named the same as the members in scope.
     fn generate(&self, members: &[Member]) -> TokenStream2;
@@ -257,9 +257,9 @@ impl BuilderGenCtx {
                 // explanation for it, I just didn't care to research it yet ¯\_(ツ)_/¯.
                 #(#types,)*
 
-                // A special case of zero members requires storing `_State` in phantom data
+                // A special case of zero members requires storing `___State` in phantom data
                 // otherwise it would be reported as an unused type parameter.
-                ::core::marker::PhantomData<_State>
+                ::core::marker::PhantomData<___State>
             )>
         }
     }
@@ -322,7 +322,7 @@ impl BuilderGenCtx {
             #allows
             #vis struct #builder_ident<
                 #(#generics_decl,)*
-                _State = #initial_state_type_alias_ident
+                ___State = #initial_state_type_alias_ident
             >
             #where_clause
             {
@@ -336,7 +336,7 @@ impl BuilderGenCtx {
                 #receiver_field
 
                 #[doc = #private_field_doc]
-                __private_members: _State
+                __private_members: ___State
             }
         }
     }
@@ -544,11 +544,15 @@ impl BuilderGenCtx {
         let next_states_defs = setters.iter().map(|(_, next_state)| next_state);
 
         Ok(quote! {
+            // This item is under `cfg(doc)` because it's used only to make the
+            // documentation less noisy (see `SettersReturnType` for more info).
             #[cfg(doc)]
             trait #next_state_trait_ident {
                 #(#next_states_decls)*
             }
 
+            // This item is under `cfg(doc)` because it's used only to make the
+            // documentation less noisy (see `SettersReturnType` for more info).
             #[cfg(doc)]
             #allows
             impl<
