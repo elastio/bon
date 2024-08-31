@@ -41,14 +41,15 @@ fn unsized_generics_in_params() {
     sut().arg(&42).call();
 }
 
+#[cfg(feature = "alloc")]
 #[test]
 fn unsized_generics_in_return_type() {
     #[builder]
-    fn sut<T: ?Sized>(arg: &T) {
-        let _ = arg;
+    fn sut<T: ?Sized + Default>() -> Box<T> {
+        Box::default()
     }
 
-    sut().arg(&42).call();
+    sut::<u32>().call();
 }
 
 // This is based on the issue https://github.com/rust-lang/rust/issues/129701

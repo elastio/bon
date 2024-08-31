@@ -6,7 +6,7 @@ use quote::quote;
 use std::fmt;
 use syn::spanned::Spanned;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Copy)]
 pub(crate) enum MemberOrigin {
     FnArg,
     StructField,
@@ -42,6 +42,9 @@ pub(crate) struct RegularMember {
     /// Specifies what syntax the member comes from.
     pub(crate) origin: MemberOrigin,
 
+    /// Index of the member relative to other regular members. The index is 0-based.
+    pub(crate) index: syn::Index,
+
     /// Original name of the member is used as the name of the builder field and
     /// in its setter methods. Struct field/fn arg names conventionally use `snake_case`
     /// in Rust, but this isn't enforced, so this member isn't guaranteed to be in
@@ -58,9 +61,9 @@ pub(crate) struct RegularMember {
     /// Original type of the member (not normalized)
     pub(crate) orig_ty: Box<syn::Type>,
 
-    /// The name of the associated type in the builder state trait that corresponds
-    /// to this member.
-    pub(crate) state_assoc_type_ident: syn::Ident,
+    /// The name of the type variable that can be used as the type of this
+    /// member in contexts where it should be generic.
+    pub(crate) generic_var_ident: syn::Ident,
 
     /// Parameters configured by the user explicitly via attributes
     pub(crate) params: MemberParams,
@@ -159,66 +162,6 @@ fn parse_optional_expression(meta: &syn::Meta) -> Result<SpannedValue<Option<syn
     }
 }
 
-impl Member {
-    pub(crate) fn new(
-        origin: MemberOrigin,
-        attrs: &[syn::Attribute],
-        ident: syn::Ident,
-        norm_ty: Box<syn::Type>,
-        orig_ty: Box<syn::Type>,
-    ) -> Result<Self> {
-        let docs = attrs.iter().filter(|attr| attr.is_doc()).cloned().collect();
-
-        let params = MemberParams::from_attributes(attrs)?;
-        params.validate(&origin)?;
-
-        if let Some(value) = params.skip {
-            return Ok(Self::Skipped(SkippedMember {
-                ident,
-                norm_ty,
-                value,
-            }));
-        }
-
-        let me = RegularMember {
-            origin,
-            state_assoc_type_ident: ident.snake_to_pascal_case(),
-            ident,
-            norm_ty,
-            orig_ty,
-            params,
-            docs,
-        };
-
-        me.validate()?;
-
-        Ok(Self::Regular(me))
-    }
-}
-
-impl Member {
-    pub(crate) fn norm_ty(&self) -> &syn::Type {
-        match self {
-            Self::Regular(me) => &me.norm_ty,
-            Self::Skipped(me) => &me.norm_ty,
-        }
-    }
-
-    pub(crate) fn ident(&self) -> &syn::Ident {
-        match self {
-            Self::Regular(me) => &me.ident,
-            Self::Skipped(me) => &me.ident,
-        }
-    }
-
-    pub(crate) fn as_regular(&self) -> Option<&RegularMember> {
-        match self {
-            Self::Regular(me) => Some(me),
-            Self::Skipped(_) => None,
-        }
-    }
-}
-
 impl RegularMember {
     fn validate(&self) -> Result {
         super::reject_self_references_in_docs(&self.docs)?;
@@ -245,32 +188,16 @@ impl RegularMember {
         Self::as_optional_with_ty(self, &self.norm_ty)
     }
 
-    pub(crate) fn init_expr(&self) -> TokenStream2 {
-        self.as_optional_norm_ty()
-            .map(|_| quote!(::bon::private::Optional(::core::marker::PhantomData)))
-            .unwrap_or_else(|| quote!(::bon::private::Required(::core::marker::PhantomData)))
-    }
-
-    pub(crate) fn unset_state_type(&self) -> TokenStream2 {
-        let ty = &self.norm_ty;
-
-        if let Some(inner_type) = self.as_optional_norm_ty() {
-            quote!(::bon::private::Optional<#inner_type>)
-        } else {
-            quote!(::bon::private::Required<#ty>)
-        }
-    }
-
-    pub(crate) fn set_state_type_param(&self) -> TokenStream2 {
-        let ty = &self.norm_ty;
-
-        self.as_optional_norm_ty()
-            .map(|ty| quote!(Option<#ty>))
-            .unwrap_or_else(|| quote!(#ty))
+    pub(crate) fn is_optional(&self) -> bool {
+        self.as_optional_norm_ty().is_some()
     }
 
     pub(crate) fn set_state_type(&self) -> TokenStream2 {
-        let ty = self.set_state_type_param();
+        let ty = &self.norm_ty;
+        let ty = self
+            .as_optional_norm_ty()
+            .map(|ty| quote!(Option<#ty>))
+            .unwrap_or_else(|| quote!(#ty));
 
         quote!(::bon::private::Set<#ty>)
     }
@@ -308,5 +235,91 @@ impl RegularMember {
         }
 
         Ok(verdict_from_override || verdict_from_defaults)
+    }
+}
+
+pub(crate) struct RawMember<'a> {
+    pub(crate) attrs: &'a [syn::Attribute],
+    pub(crate) ident: syn::Ident,
+    pub(crate) norm_ty: Box<syn::Type>,
+    pub(crate) orig_ty: Box<syn::Type>,
+}
+
+impl Member {
+    // False-positive lint. We can't elide the lifetime in `RawMember` because
+    // anonymous lifetimes in impl traits are unstable, and we shouldn't omit
+    // the lifetime parameter because we want to be explicit about its existence
+    // (there is an other lint that checks for this).
+    #[allow(single_use_lifetimes)]
+    pub(crate) fn from_raw<'a>(
+        origin: MemberOrigin,
+        members: impl IntoIterator<Item = RawMember<'a>>,
+    ) -> Result<Vec<Self>> {
+        let mut regular_members_count = 0;
+
+        members
+            .into_iter()
+            .map(|member| {
+                let RawMember {
+                    attrs,
+                    ident,
+                    norm_ty,
+                    orig_ty,
+                } = member;
+
+                let params = MemberParams::from_attributes(attrs)?;
+                params.validate(&origin)?;
+
+                if let Some(value) = params.skip {
+                    return Ok(Member::Skipped(SkippedMember {
+                        ident,
+                        norm_ty,
+                        value,
+                    }));
+                }
+
+                let docs = attrs.iter().filter(|attr| attr.is_doc()).cloned().collect();
+
+                let me = RegularMember {
+                    index: regular_members_count.into(),
+                    origin,
+                    generic_var_ident: quote::format_ident!("__{}", ident.snake_to_pascal_case()),
+                    ident,
+                    norm_ty,
+                    orig_ty,
+                    params,
+                    docs,
+                };
+
+                regular_members_count += 1;
+
+                me.validate()?;
+
+                Ok(Member::Regular(me))
+            })
+            .collect()
+    }
+}
+
+impl Member {
+    pub(crate) fn norm_ty(&self) -> &syn::Type {
+        match self {
+            Self::Regular(me) => &me.norm_ty,
+            Self::Skipped(me) => &me.norm_ty,
+        }
+    }
+
+    pub(crate) fn ident(&self) -> &syn::Ident {
+        match self {
+            Self::Regular(me) => &me.ident,
+            Self::Skipped(me) => &me.ident,
+        }
+    }
+
+    pub(crate) fn as_regular(&self) -> Option<&RegularMember> {
+        match self {
+            Self::Regular(me) => Some(me),
+            Self::Skipped(_) => None,
+        }
     }
 }

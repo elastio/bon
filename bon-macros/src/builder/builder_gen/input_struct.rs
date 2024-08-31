@@ -1,6 +1,6 @@
 use super::{
-    AssocMethodCtx, BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberExpr,
-    MemberOrigin, StartFunc,
+    AssocMethodCtx, BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberOrigin,
+    RawMember, StartFunc,
 };
 use crate::builder::params::{BuilderParams, ItemParams};
 use crate::util::prelude::*;
@@ -74,10 +74,6 @@ impl StructInputCtx {
 
     pub(crate) fn into_builder_gen_ctx(self) -> Result<BuilderGenCtx> {
         let builder_ident = self.builder_ident();
-        let builder_private_impl_ident =
-            quote::format_ident!("__{}PrivateImpl", builder_ident.raw_name());
-
-        let builder_state_trait_ident = quote::format_ident!("__{}State", builder_ident.raw_name());
 
         fn fields(struct_item: &syn::ItemStruct) -> Result<&syn::FieldsNamed> {
             match &struct_item.fields {
@@ -91,12 +87,25 @@ impl StructInputCtx {
         let norm_fields = fields(&self.norm_struct)?;
         let orig_fields = fields(&self.orig_struct)?;
 
-        let members: Vec<_> = norm_fields
+        let members = norm_fields
             .named
             .iter()
             .zip(&orig_fields.named)
-            .map(Member::from_syn_field)
-            .try_collect()?;
+            .map(|(norm_field, orig_field)| {
+                let ident = norm_field.ident.clone().ok_or_else(|| {
+                    err!(norm_field, "only structs with named fields are supported")
+                })?;
+
+                Ok(RawMember {
+                    attrs: &norm_field.attrs,
+                    ident,
+                    norm_ty: Box::new(norm_field.ty.clone()),
+                    orig_ty: Box::new(orig_field.ty.clone()),
+                })
+            })
+            .collect::<Result<Vec<_>>>()?;
+
+        let members = Member::from_raw(MemberOrigin::StructField, members)?;
 
         let generics = Generics {
             params: Vec::from_iter(self.norm_struct.generics.params.iter().cloned()),
@@ -157,8 +166,6 @@ impl StructInputCtx {
             conditional_params: self.params.base.on,
 
             builder_ident,
-            builder_private_impl_ident,
-            builder_state_trait_ident,
 
             assoc_method_ctx,
             generics,
@@ -177,37 +184,16 @@ struct StructLiteralBody {
 }
 
 impl FinishFuncBody for StructLiteralBody {
-    fn generate(&self, member_exprs: &[MemberExpr<'_>]) -> TokenStream2 {
+    fn generate(&self, member_exprs: &[Member]) -> TokenStream2 {
         let Self { struct_ident } = self;
 
-        let member_exprs = member_exprs.iter().map(|MemberExpr { member, expr }| {
-            let ident = member.ident();
-            quote! {
-                #ident: #expr
-            }
-        });
+        // The variables with values of members in scope for this expression.
+        let member_vars = member_exprs.iter().map(Member::ident);
 
         quote! {
             #struct_ident {
-                #(#member_exprs,)*
+                #(#member_vars,)*
             }
         }
-    }
-}
-
-impl Member {
-    fn from_syn_field((norm_field, orig_field): (&syn::Field, &syn::Field)) -> Result<Self> {
-        let ident = norm_field
-            .ident
-            .clone()
-            .ok_or_else(|| err!(norm_field, "only structs with named fields are supported"))?;
-
-        Member::new(
-            MemberOrigin::StructField,
-            &norm_field.attrs,
-            ident,
-            Box::new(norm_field.ty.clone()),
-            Box::new(orig_field.ty.clone()),
-        )
     }
 }

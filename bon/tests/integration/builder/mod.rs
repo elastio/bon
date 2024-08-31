@@ -6,6 +6,7 @@ mod attr_skip;
 mod generics;
 mod init_order;
 mod lints;
+mod name_conflicts;
 mod raw_idents;
 mod smoke;
 
