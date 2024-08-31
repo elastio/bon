@@ -45,8 +45,8 @@ fn unsized_generics_in_params() {
 #[test]
 fn unsized_generics_in_return_type() {
     #[builder]
-    fn sut<T: ?Sized + Default>() -> Box<T> {
-        Box::default()
+    fn sut<T: ?Sized>() -> Option<Box<T>> {
+        None
     }
 
     sut::<u32>().call();
