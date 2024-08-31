@@ -143,7 +143,7 @@ error[E0599]: no method named `x` found for struct `SkipGeneratesNoSetterBuilder
    |     ---------- method `x` not found for this struct
 ...
 21 |     SkipGeneratesNoSetter::builder().x(42).build();
-   |                                      ^ method not found in `SkipGeneratesNoSetterBuilder<()>`
+   |                                      ^ method not found in `SkipGeneratesNoSetterBuilder`
 
 error[E0599]: no method named `y` found for struct `SkipGeneratesNoSetterBuilder` in the current scope
   --> tests/integration/ui/compile_fail/misc.rs:22:38
@@ -152,4 +152,4 @@ error[E0599]: no method named `y` found for struct `SkipGeneratesNoSetterBuilder
    |     ---------- method `y` not found for this struct
 ...
 22 |     SkipGeneratesNoSetter::builder().y(42).build();
-   |                                      ^ method not found in `SkipGeneratesNoSetterBuilder<()>`
+   |                                      ^ method not found in `SkipGeneratesNoSetterBuilder`
