@@ -326,6 +326,7 @@ impl FuncInputCtx {
             ident: finish_func_ident,
             unsafety: self.norm_func.sig.unsafety,
             asyncness: self.norm_func.sig.asyncness,
+            must_use: get_must_use_attribute(&self.norm_func.attrs)?,
             body: Box::new(finish_func_body),
             output: self.norm_func.sig.output,
             docs: "Finishes building and performs the requested action.".to_owned(),
@@ -502,4 +503,18 @@ impl Visit<'_> for FindSelfReference {
             self.self_span = Some(first_segment.ident.span());
         }
     }
+}
+
+fn get_must_use_attribute(attrs: &[syn::Attribute]) -> darling::Result<Option<syn::Attribute>> {
+    let mut iter = attrs
+        .iter()
+        .filter(|attr| attr.meta.path().is_ident("must_use"));
+    let result = iter.next();
+    if let Some(second) = iter.next() {
+        bail!(
+            second,
+            "Found multiple #[must_use], but bon only works with exactly one (or less)."
+        );
+    }
+    Ok(result.cloned())
 }

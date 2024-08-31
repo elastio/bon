@@ -46,6 +46,8 @@ pub(crate) struct FinishFunc {
     pub(crate) ident: syn::Ident,
     pub(crate) unsafety: Option<syn::Token![unsafe]>,
     pub(crate) asyncness: Option<syn::Token![async]>,
+    /// <https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute>
+    pub(crate) must_use: Option<syn::Attribute>,
     pub(crate) body: Box<dyn FinishFuncBody>,
     pub(crate) output: syn::ReturnType,
     pub(crate) docs: String,
@@ -563,6 +565,7 @@ impl BuilderGenCtx {
         let body = &self.finish_func.body.generate(&member_exprs);
         let asyncness = &self.finish_func.asyncness;
         let unsafety = &self.finish_func.unsafety;
+        let must_use = &self.finish_func.must_use;
         let docs = &self.finish_func.docs;
         let vis = &self.vis;
         let builder_ident = &self.builder_ident;
@@ -605,6 +608,7 @@ impl BuilderGenCtx {
             {
                 #[doc = #docs]
                 #[inline(always)]
+                #must_use
                 #vis #asyncness #unsafety fn #finish_func_ident(self) #output {
                     #(#members_vars_decls)*
                     #body
