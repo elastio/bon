@@ -123,6 +123,7 @@ jobs:
           # the `expr` fragment in macro rules.
           RUSTFLAGS: >-
             --deny warnings
+            --allow unknown-lints
             --allow edition-2024-expr-fragment-specifier
             --allow impl-trait-overcaptures
 
