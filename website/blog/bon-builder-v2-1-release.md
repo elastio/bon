@@ -156,7 +156,7 @@ help: use `let _ = ...` to ignore the resulting value
 
 ::: tip
 
-Btw. if you are using [`bon`] or you just like its idea and implementation consider giving it a [⭐ on  Github][`bon`].
+Btw, if you are using [`bon`] or you just like its idea and implementation consider giving it a [⭐ on  Github][`bon`].
 
 :::
 
