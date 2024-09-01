@@ -2,4 +2,5 @@
 fn ui() {
     let t = trybuild::TestCases::new();
     t.compile_fail("tests/integration/ui/compile_fail/*.rs");
+    t.pass("tests/integration/ui/pass/*.rs");
 }
