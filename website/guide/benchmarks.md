@@ -14,23 +14,23 @@ Don't take these microbenchmarks for granted. Do your own performance measuremen
 
 | Benchmark         | Description                                   | Assembly output                                      | Run time
 | --                | --                                            | --                                                   | --
-| `args_3`          | 3 args of primitive types                     | [Equal](https://godbolt.org/z/cc4ao8x6W)             | regular:&nbsp;`6.6536ns`<br/>builder:&nbsp;`6.6494ns`
-| `args_5`          | 5 args of primitive types                     | [Equal](https://godbolt.org/z/M93M3Yfsj)             | regular:&nbsp;`7.9592ns`<br/>builder:&nbsp;`7.9731ns`
-| `args_10`         | 10 args of primitive types                    | [Ordering diff](https://godbolt.org/z/1c9P5Gjrv)     | regular:&nbsp;`18.082ns`<br/>builder:&nbsp;`18.217ns`
-| `args_10_structs` | 10 args of primitive types and structs        | [Equal](https://godbolt.org/z/95vcn78Tn)             | regular:&nbsp;`5.0784ns`<br/>builder:&nbsp;`5.0481ns`
-| `args_10_alloc`   | 10 args of primitive and heap-allocated types | [Instructions diff](https://godbolt.org/z/bzEbqrvPW) | regular:&nbsp;`86.090ns`<br/>builder:&nbsp;`86.790ns`
-| `args_20`         | 20 args of primitive types                    | [Ordering diff](https://godbolt.org/z/GqP44GxnW)     | regular:&nbsp;`37.381ns`<br/>builder:&nbsp;`37.623ns`
+| `args_3`          | 3 args of primitive types                     | [Equal](https://godbolt.org/z/YbTc4xGGY)             | regular:&nbsp;`6.6536ns`<br/>builder:&nbsp;`6.6494ns`
+| `args_5`          | 5 args of primitive types                     | [Equal](https://godbolt.org/z/TM3E7M6b3)             | regular:&nbsp;`7.9592ns`<br/>builder:&nbsp;`7.9731ns`
+| `args_10`         | 10 args of primitive types                    | [Ordering diff](https://godbolt.org/z/1d1fa38co)     | regular:&nbsp;`18.082ns`<br/>builder:&nbsp;`18.217ns`
+| `args_10_structs` | 10 args of primitive types and structs        | [Equal](https://godbolt.org/z/d6nn16E8q)             | regular:&nbsp;`9.2492ns`<br/>builder:&nbsp;`9.2325ns`
+| `args_10_alloc`   | 10 args of primitive and heap-allocated types | [Instructions diff](https://godbolt.org/z/fEMvnWvbc) | regular:&nbsp;`86.090ns`<br/>builder:&nbsp;`86.790ns`
+| `args_20`         | 20 args of primitive types                    | [Ordering diff](https://godbolt.org/z/3czM3h68s)     | regular:&nbsp;`36.121ns`<br/>builder:&nbsp;`36.298ns`
 
 ## High-precision statistics
 
 | Benchmark         | Instructions count                           | L1&nbsp;accesses                                   | L2&nbsp;accesses                             | RAM&nbsp;accesses
 | --                | --                                           | --                                            | --                                      | --
-| `args_3`          | regular:&nbsp;`106`<br/>builder:&nbsp;`106`  | regular:&nbsp;`136`<br/>builder:&nbsp;`136`   | regular:&nbsp;`2`<br/>builder:&nbsp;`2` | regular:&nbsp;`4`<br/>builder:&nbsp;`4`
-| `args_5`          | regular:&nbsp;`124`<br/>builder:&nbsp;`124`  | regular:&nbsp;`161`<br/>builder:&nbsp;`161`   | regular:&nbsp;`1`<br/>builder:&nbsp;`1` | regular:&nbsp;`9`<br/>builder:&nbsp;`9`
+| `args_3`          | regular:&nbsp;`108`<br/>builder:&nbsp;`108`  | regular:&nbsp;`138`<br/>builder:&nbsp;`138`   | regular:&nbsp;`2`<br/>builder:&nbsp;`2` | regular:&nbsp;`4`<br/>builder:&nbsp;`4`
+| `args_5`          | regular:&nbsp;`126`<br/>builder:&nbsp;`126`  | regular:&nbsp;`161`<br/>builder:&nbsp;`161`   | regular:&nbsp;`2`<br/>builder:&nbsp;`2` | regular:&nbsp;`10`<br/>builder:&nbsp;`10`
 | `args_10`         | regular:&nbsp;`281`<br/>builder:&nbsp;`281`  | regular:&nbsp;`381`<br/>builder:&nbsp;`380`   | regular:&nbsp;`2`<br/>builder:&nbsp;`2` | regular:&nbsp;`19`<br/>builder:&nbsp;`20`
-| `args_10_structs` | regular:&nbsp;`73`<br/>builder:&nbsp;`73`    | regular:&nbsp;`108`<br/>builder:&nbsp;`108`   | regular:&nbsp;`2`<br/>builder:&nbsp;`2` | regular:&nbsp;`10`<br/>builder:&nbsp;`10`
-| `args_10_alloc`   | regular:&nbsp;`2025`<br/>builder:&nbsp;`2026`| regular:&nbsp;`2823`<br/>builder:&nbsp;`2823` | regular:&nbsp;`3`<br/>builder:&nbsp;`2` | regular:&nbsp;`35`<br/>builder:&nbsp;`35`
-| `args_20`         | regular:&nbsp;`554`<br/>builder:&nbsp;`554`  | regular:&nbsp;`768`<br/>builder:&nbsp;`769`   | regular:&nbsp;`3`<br/>builder:&nbsp;`3` | regular:&nbsp;`34`<br/>builder:&nbsp;`33`
+| `args_10_structs` | regular:&nbsp;`75`<br/>builder:&nbsp;`75`    | regular:&nbsp;`106`<br/>builder:&nbsp;`106`   | regular:&nbsp;`4`<br/>builder:&nbsp;`4` | regular:&nbsp;`12`<br/>builder:&nbsp;`12`
+| `args_10_alloc`   | regular:&nbsp;`2028`<br/>builder:&nbsp;`2027`| regular:&nbsp;`2824`<br/>builder:&nbsp;`2824` | regular:&nbsp;`3`<br/>builder:&nbsp;`2` | regular:&nbsp;`36`<br/>builder:&nbsp;`36`
+| `args_20`         | regular:&nbsp;`556`<br/>builder:&nbsp;`556`  | regular:&nbsp;`767`<br/>builder:&nbsp;`767`   | regular:&nbsp;`4`<br/>builder:&nbsp;`4` | regular:&nbsp;`36`<br/>builder:&nbsp;`36`
 
 ## Conditions
 
