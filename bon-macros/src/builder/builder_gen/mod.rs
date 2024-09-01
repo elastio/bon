@@ -92,18 +92,61 @@ impl BuilderGenCtx {
     pub(crate) fn output(self) -> Result<MacroOutput> {
         let start_func = self.start_func();
         let builder_decl = self.builder_decl();
-        let call_method_impl = self.finish_method_impl()?;
-        let setter_methods_impls = self.setter_methods_impls()?;
+        let builder_impl = self.builder_impl()?;
 
         let other_items = quote! {
             #builder_decl
-            #call_method_impl
-            #setter_methods_impls
+            #builder_impl
         };
 
         Ok(MacroOutput {
             start_func,
             other_items,
+        })
+    }
+
+    fn builder_impl(&self) -> Result<TokenStream2> {
+        let finish_method = self.finish_method()?;
+        let (setter_methods, items_for_rustdoc) = self.setter_methods()?;
+
+        let generics_decl = &self.generics.params;
+        let generic_args = self.generic_args().collect::<Vec<_>>();
+        let where_clause = &self.generics.where_clause;
+        let state_type_vars = self
+            .regular_members()
+            .map(|member| &member.generic_var_ident)
+            .collect::<Vec<_>>();
+
+        let builder_ident = &self.builder_ident;
+
+        let allows = allow_warnings_on_member_types();
+
+        let regular_members_labels = self
+            .regular_members()
+            .map(|member| self.members_label(member));
+
+        Ok(quote! {
+            #items_for_rustdoc
+
+            #(
+                #[allow(non_camel_case_types)]
+                struct #regular_members_labels;
+            )*
+
+            #allows
+            impl<
+                #(#generics_decl,)*
+                #(#state_type_vars,)*
+            >
+            #builder_ident<
+                #(#generic_args,)*
+                (#(#state_type_vars,)*)
+            >
+            #where_clause
+            {
+                #finish_method
+                #setter_methods
+            }
         })
     }
 
@@ -381,25 +424,31 @@ impl BuilderGenCtx {
             .transpose()?;
 
         let index = &member.index;
+        let set_state_type_param = member.set_state_type_param();
+        let member_label = self.members_label(member);
 
-        let expr = if member.is_optional() {
-            quote! {
-                ::core::convert::Into::<::bon::private::Set<_>>::into(
-                    self.__private_members.#index
-                )
-                .0
-                #maybe_default
-            }
-        } else {
-            quote! {
-                self.__private_members.#index.0
-            }
+        let expr = quote! {
+            ::bon::private::IntoSet::<
+                #set_state_type_param,
+                #member_label
+            >::into_set(self.__private_members.#index).0
+            #maybe_default
         };
 
         Ok(expr)
     }
 
-    fn finish_method_impl(&self) -> Result<TokenStream2> {
+    /// Name of the dummy struct that is generated just to give a name for
+    /// the member in the error message when `IntoSet` trait is not implemented.
+    fn members_label(&self, member: &RegularMember) -> syn::Ident {
+        quote::format_ident!(
+            "{}__{}",
+            self.builder_ident.raw_name(),
+            member.setter_method_core_name()
+        )
+    }
+
+    fn finish_method(&self) -> Result<TokenStream2> {
         let members_vars_decls = self
             .members
             .iter()
@@ -429,63 +478,38 @@ impl BuilderGenCtx {
         let must_use = &self.finish_func.must_use;
         let docs = &self.finish_func.docs;
         let vis = &self.vis;
-        let builder_ident = &self.builder_ident;
         let finish_func_ident = &self.finish_func.ident;
         let output = &self.finish_func.output;
-        let generics_decl = &self.generics.params;
-        let generic_builder_args = self.generic_args();
-        let where_clause = &self.generics.where_clause;
 
-        let builder_state_types = self.regular_members().map(|member| {
-            if member.is_optional() {
-                member.generic_var_ident.to_token_stream()
-            } else {
-                member.set_state_type()
+        let where_bounds = self.regular_members().map(|member| {
+            let member_type_var = &member.generic_var_ident;
+            let set_state_type_param = member.set_state_type_param();
+            let member_label = self.members_label(member);
+            quote! {
+                #member_type_var: ::bon::private::IntoSet<
+                    #set_state_type_param,
+                    #member_label
+                >
             }
         });
 
-        let optional_members_generics_decls = self
-            .regular_members()
-            // Only optional members can have two source states, that we
-            // we need to represent with a trait bound. They can either
-            // be `Unset` (setter never called) or `Set<T>` (setter was called)
-            .filter(|member| member.is_optional())
-            .map(|member| {
-                let ident = &member.generic_var_ident;
-                let set_state_type = member.set_state_type();
-                Some(quote! {
-                    #ident: ::core::convert::Into<#set_state_type>
-                })
-            });
-
-        let allows = allow_warnings_on_member_types();
-
         Ok(quote! {
-            #allows
-            impl<
-                #(#generics_decl,)*
-                #(#optional_members_generics_decls,)*
-            >
-            #builder_ident<
-                #(#generic_builder_args,)*
-                (#(#builder_state_types,)*)
-            >
-            #where_clause
+            #[doc = #docs]
+            #[inline(always)]
+            #must_use
+            #vis #asyncness #unsafety fn #finish_func_ident(self) #output
+            where
+                #(#where_bounds,)*
             {
-                #[doc = #docs]
-                #[inline(always)]
-                #must_use
-                #vis #asyncness #unsafety fn #finish_func_ident(self) #output {
-                    #(#members_vars_decls)*
-                    #body
-                }
+                #(#members_vars_decls)*
+                #body
             }
         })
     }
 
-    fn setter_methods_impls(&self) -> Result<TokenStream2> {
+    fn setter_methods(&self) -> Result<(TokenStream2, TokenStream2)> {
         let generics_decl = &self.generics.params;
-        let generic_builder_args = self.generic_args().collect::<Vec<_>>();
+        let generic_args = self.generic_args().collect::<Vec<_>>();
         let builder_ident = &self.builder_ident;
         let where_clause = &self.generics.where_clause;
 
@@ -500,7 +524,7 @@ impl BuilderGenCtx {
             quote::format_ident!("__{}SetMember", builder_ident.raw_name());
 
         let next_states_decls = self.regular_members().map(|member| {
-            let member_pascal = &member.ident_pascal;
+            let member_pascal = &member.norm_ident_pascal;
             quote! {
                 type #member_pascal;
             }
@@ -510,18 +534,19 @@ impl BuilderGenCtx {
             .regular_members()
             .map(|member| {
                 let state_types = self.regular_members().map(|other_member| {
-                    if other_member.ident == member.ident {
-                        member.set_state_type().to_token_stream()
+                    if other_member.orig_ident == member.orig_ident {
+                        let ty = member.set_state_type_param();
+                        quote!(::bon::private::Set<#ty>)
                     } else {
                         other_member.generic_var_ident.to_token_stream()
                     }
                 });
 
-                let member_pascal = &member.ident_pascal;
+                let member_pascal = &member.norm_ident_pascal;
 
                 let next_state = quote! {
                     #builder_ident<
-                        #(#generic_builder_args,)*
+                        #(#generic_args,)*
                         (#(#state_types,)*)
                     >
                 };
@@ -539,11 +564,9 @@ impl BuilderGenCtx {
                 Ok((setter_methods, next_state))
             })
             .collect::<Result<Vec<_>>>()?;
-
-        let setter_methods = setters.iter().map(|(setter_methods, _)| setter_methods);
         let next_states_defs = setters.iter().map(|(_, next_state)| next_state);
 
-        Ok(quote! {
+        let items_for_rustdoc = quote! {
             // This item is under `cfg(doc)` because it's used only to make the
             // documentation less noisy (see `SettersReturnType` for more info).
             #[cfg(doc)]
@@ -562,28 +585,21 @@ impl BuilderGenCtx {
                 #next_state_trait_ident
             for
                 #builder_ident<
-                    #(#generic_builder_args,)*
+                    #(#generic_args,)*
                     (#(#state_type_vars,)*)
                 >
             #where_clause
             {
                 #(#next_states_defs)*
             }
+        };
 
-            #allows
-            impl<
-                #(#generics_decl,)*
-                #(#state_type_vars,)*
-            >
-            #builder_ident<
-                #(#generic_builder_args,)*
-                (#(#state_type_vars,)*)
-            >
-            #where_clause
-            {
-                #(#setter_methods)*
-            }
-        })
+        let setter_methods = setters
+            .into_iter()
+            .map(|(setter_methods, _)| setter_methods)
+            .concat();
+
+        Ok((setter_methods, items_for_rustdoc))
     }
 }
 

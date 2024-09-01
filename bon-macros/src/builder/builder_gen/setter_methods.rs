@@ -20,7 +20,6 @@ pub(crate) struct MemberSettersCtx<'a> {
     builder_gen: &'a BuilderGenCtx,
     member: &'a RegularMember,
     return_type: SettersReturnType,
-    norm_member_ident: syn::Ident,
 }
 
 impl<'a> MemberSettersCtx<'a> {
@@ -29,32 +28,11 @@ impl<'a> MemberSettersCtx<'a> {
         member: &'a RegularMember,
         return_type: SettersReturnType,
     ) -> Self {
-        let member_ident = &member.ident.to_string();
-        let norm_member_ident = member_ident
-            // Remove the leading underscore from the member name since it's used
-            // to denote unused symbols in Rust. That doesn't mean the builder
-            // API should expose that knowledge to the caller.
-            .strip_prefix('_')
-            .unwrap_or(member_ident);
-
-        // Preserve the original identifier span to make IDE go to definition correctly
-        // and make error messages point to the correct place.
-        let norm_member_ident = syn::Ident::new_maybe_raw(norm_member_ident, member.ident.span());
-
         Self {
             builder_gen,
             member,
             return_type,
-            norm_member_ident,
         }
-    }
-
-    fn setter_method_core_name(&self) -> syn::Ident {
-        self.member
-            .params
-            .name
-            .clone()
-            .unwrap_or_else(|| self.norm_member_ident.clone())
     }
 
     pub(crate) fn setter_methods(&self) -> Result<TokenStream2> {
@@ -75,7 +53,7 @@ impl<'a> MemberSettersCtx<'a> {
         };
 
         Ok(self.setter_method(MemberSetterMethod {
-            method_name: self.setter_method_core_name(),
+            method_name: self.member.setter_method_core_name().clone(),
             fn_params: quote!(value: #fn_param_type),
             overwrite_docs: None,
             body: SetterBody::Default {
@@ -94,7 +72,7 @@ impl<'a> MemberSettersCtx<'a> {
             (quote!(#inner_type), quote!())
         };
 
-        let setter_method_name = self.setter_method_core_name();
+        let setter_method_name = self.member.setter_method_core_name().clone();
 
         // Preserve the original identifier span to make IDE go to definition correctly
         let option_method_name = syn::Ident::new(
@@ -169,7 +147,7 @@ impl<'a> MemberSettersCtx<'a> {
                 let builder_ident = &self.builder_gen.builder_ident;
 
                 let member_exprs = self.builder_gen.regular_members().map(|other_member| {
-                    if other_member.ident == self.member.ident {
+                    if other_member.norm_ident == self.member.norm_ident {
                         return member_init.clone();
                     }
                     let index = &other_member.index;
@@ -210,7 +188,7 @@ impl<'a> MemberSettersCtx<'a> {
     }
 
     fn generate_docs_for_setter(&self) -> Vec<syn::Attribute> {
-        let member_ident = &self.setter_method_core_name();
+        let setter_core_name = self.member.setter_method_core_name();
         let start_fn_ident = &self.builder_gen.start_func.ident;
 
         let more = |start_fn_path: &std::fmt::Arguments<'_>| {
@@ -235,7 +213,7 @@ impl<'a> MemberSettersCtx<'a> {
             })
             .unwrap_or_else(|| more(&format_args!("[`{start_fn_ident}()`]")));
 
-        let docs = format!("Sets the value of `{member_ident}`.{suffix}");
+        let docs = format!("Sets the value of `{setter_core_name}`.{suffix}");
 
         vec![syn::parse_quote!(#[doc = #docs])]
     }

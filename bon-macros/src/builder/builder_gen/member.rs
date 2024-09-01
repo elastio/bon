@@ -49,10 +49,14 @@ pub(crate) struct RegularMember {
     /// in its setter methods. Struct field/fn arg names conventionally use `snake_case`
     /// in Rust, but this isn't enforced, so this member isn't guaranteed to be in
     /// snake case, but 99% of the time it will be.
-    pub(crate) ident: syn::Ident,
+    pub(crate) orig_ident: syn::Ident,
 
-    /// `PascalCase` version of the member name.
-    pub(crate) ident_pascal: syn::Ident,
+    /// Normalized version of `orig_ident`. Here we stripped the leading `_` from the
+    /// member name.
+    pub(crate) norm_ident: syn::Ident,
+
+    /// `PascalCase` version of the `norm_ident`.
+    pub(crate) norm_ident_pascal: syn::Ident,
 
     /// Doc comments for the setter methods are copied from the doc comments placed
     /// on top of the original member
@@ -191,18 +195,15 @@ impl RegularMember {
         Self::as_optional_with_ty(self, &self.norm_ty)
     }
 
-    pub(crate) fn is_optional(&self) -> bool {
-        self.as_optional_norm_ty().is_some()
-    }
-
-    pub(crate) fn set_state_type(&self) -> TokenStream2 {
+    /// The type parameter for the `Set<T>` type that corresponds to this member
+    pub(crate) fn set_state_type_param(&self) -> TokenStream2 {
         let ty = &self.norm_ty;
         let ty = self
             .as_optional_norm_ty()
             .map(|ty| quote!(Option<#ty>))
             .unwrap_or_else(|| quote!(#ty));
 
-        quote!(::bon::private::Set<#ty>)
+        quote!(#ty)
     }
 
     pub(crate) fn param_default(&self) -> Option<Option<&syn::Expr>> {
@@ -239,6 +240,13 @@ impl RegularMember {
 
         Ok(verdict_from_override || verdict_from_defaults)
     }
+
+    pub(crate) fn setter_method_core_name(&self) -> &syn::Ident {
+        self.params
+            .name
+            .as_ref()
+            .unwrap_or(&self.norm_ident)
+    }
 }
 
 pub(crate) struct RawMember<'a> {
@@ -265,7 +273,7 @@ impl Member {
             .map(|member| {
                 let RawMember {
                     attrs,
-                    ident,
+                    ident: orig_ident,
                     norm_ty,
                     orig_ty,
                 } = member;
@@ -275,7 +283,7 @@ impl Member {
 
                 if let Some(value) = params.skip {
                     return Ok(Member::Skipped(SkippedMember {
-                        ident,
+                        ident: orig_ident,
                         norm_ty,
                         value,
                     }));
@@ -283,14 +291,26 @@ impl Member {
 
                 let docs = attrs.iter().filter(|attr| attr.is_doc()).cloned().collect();
 
-                let ident_pascal = ident.snake_to_pascal_case();
+                let orig_ident_str = orig_ident.to_string();
+                let norm_ident = orig_ident_str
+                    // Remove the leading underscore from the member name since it's used
+                    // to denote unused symbols in Rust. That doesn't mean the builder
+                    // API should expose that knowledge to the caller.
+                    .strip_prefix('_')
+                    .unwrap_or(&orig_ident_str);
+
+                // Preserve the original identifier span to make IDE go to definition correctly
+                // and make error messages point to the correct place.
+                let norm_ident = syn::Ident::new_maybe_raw(norm_ident, orig_ident.span());
+                let norm_ident_pascal = norm_ident.snake_to_pascal_case();
 
                 let me = RegularMember {
                     index: regular_members_count.into(),
                     origin,
-                    generic_var_ident: quote::format_ident!("__{}", ident_pascal),
-                    ident_pascal,
-                    ident,
+                    generic_var_ident: quote::format_ident!("__{}", norm_ident_pascal),
+                    norm_ident_pascal,
+                    orig_ident,
+                    norm_ident,
                     norm_ty,
                     orig_ty,
                     params,
@@ -317,7 +337,7 @@ impl Member {
 
     pub(crate) fn ident(&self) -> &syn::Ident {
         match self {
-            Self::Regular(me) => &me.ident,
+            Self::Regular(me) => &me.orig_ident,
             Self::Skipped(me) => &me.ident,
         }
     }

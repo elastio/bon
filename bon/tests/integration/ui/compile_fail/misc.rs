@@ -20,6 +20,18 @@ fn main() {
 
     SkipGeneratesNoSetter::builder().x(42).build();
     SkipGeneratesNoSetter::builder().y(42).build();
+
+    #[builder]
+    struct Example {
+        x: u32,
+        y: u32,
+
+        #[builder(name = renamed)]
+        z: u32,
+    }
+
+    let _ = Example::builder().x(1).build();
+    let _ = Example::builder().y(1).y(2);
 }
 
 #[builder]
