@@ -52,7 +52,7 @@ fn main() {
     let _ = Point3D::builder()
         .x(2.0)
         .y(3.0)
-        .x(4.0) // <--- Oops, `x` was set the second time instead of `z`
+        .x(4.0) // <--- Oops, set `x` the second time instead of `z`
         .build();
 }
 ```
