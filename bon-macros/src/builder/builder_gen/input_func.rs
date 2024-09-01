@@ -1,6 +1,6 @@
 use super::{
     generic_param_to_arg, AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFunc,
-    FinishFuncBody, Generics, Member, MemberExpr, MemberOrigin, StartFunc,
+    FinishFuncBody, Generics, Member, MemberOrigin, RawMember, StartFunc,
 };
 use crate::builder::params::BuilderParams;
 use crate::normalization::NormalizeSelfTy;
@@ -283,23 +283,37 @@ impl FuncInputCtx {
         }
 
         let builder_ident = self.builder_ident();
-        let builder_private_impl_ident =
-            quote::format_ident!("__{}PrivateImpl", builder_ident.raw_name());
-        let builder_state_trait_ident = quote::format_ident!("__{}State", builder_ident.raw_name());
 
         fn typed_args(func: &syn::ItemFn) -> impl Iterator<Item = &syn::PatType> {
             func.sig.inputs.iter().filter_map(syn::FnArg::as_typed)
         }
 
-        let members: Vec<_> = typed_args(&self.norm_func)
+        let members = typed_args(&self.norm_func)
             .zip(typed_args(&self.orig_func))
-            .map(Member::from_typed_fn_arg)
-            .try_collect()?;
+            .map(|(norm_arg, orig_arg)| {
+                let syn::Pat::Ident(pat) = norm_arg.pat.as_ref() else {
+                    bail!(
+                        &orig_arg.pat,
+                        "use a simple `identifier: type` syntax for the function argument; \
+                        destructuring patterns in arguments aren't supported by the `#[builder]`",
+                    )
+                };
+
+                Ok(RawMember {
+                    attrs: &norm_arg.attrs,
+                    ident: pat.ident.clone(),
+                    norm_ty: norm_arg.ty.clone(),
+                    orig_ty: orig_arg.ty.clone(),
+                })
+            })
+            .collect::<Result<Vec<_>>>()?;
+
+        let members = Member::from_raw(MemberOrigin::FnArg, members)?;
 
         let generics = self.generics();
 
         let finish_func_body = FnCallBody {
-            func: self.adapted_func()?,
+            sig: self.adapted_func()?.sig,
             impl_ctx: self.impl_ctx.clone(),
         };
 
@@ -358,8 +372,6 @@ impl FuncInputCtx {
             conditional_params: self.params.base.on,
 
             builder_ident,
-            builder_private_impl_ident,
-            builder_state_trait_ident,
 
             assoc_method_ctx: receiver,
             generics,
@@ -374,13 +386,13 @@ impl FuncInputCtx {
 }
 
 struct FnCallBody {
-    func: syn::ItemFn,
+    sig: syn::Signature,
     impl_ctx: Option<Rc<ImplCtx>>,
 }
 
 impl FinishFuncBody for FnCallBody {
-    fn generate(&self, member_exprs: &[MemberExpr<'_>]) -> TokenStream2 {
-        let asyncness = &self.func.sig.asyncness;
+    fn generate(&self, members: &[Member]) -> TokenStream2 {
+        let asyncness = &self.sig.asyncness;
         let maybe_await = asyncness.is_some().then(|| quote!(.await));
 
         // Filter out lifetime generic arguments, because they are not needed
@@ -389,7 +401,6 @@ impl FinishFuncBody for FnCallBody {
         // the turbofish syntax. See the problem of late-bound lifetimes specification
         // in the issue https://github.com/rust-lang/rust/issues/42868
         let generic_args = self
-            .func
             .sig
             .generics
             .params
@@ -398,25 +409,25 @@ impl FinishFuncBody for FnCallBody {
             .map(generic_param_to_arg);
 
         let prefix = self
-            .func
             .sig
             .receiver()
             .map(|receiver| {
                 let self_token = &receiver.self_token;
-                quote!(#self_token.__private_impl.receiver.)
+                quote!(#self_token.__private_receiver.)
             })
             .or_else(|| {
                 let self_ty = &self.impl_ctx.as_deref()?.self_ty;
                 Some(quote!(<#self_ty>::))
             });
 
-        let func_ident = &self.func.sig.ident;
+        let func_ident = &self.sig.ident;
 
-        let member_exprs = member_exprs.iter().map(|member| &member.expr);
+        // The variables with values of members are in scope for this expression.
+        let member_vars = members.iter().map(Member::ident);
 
         quote! {
             #prefix #func_ident::<#(#generic_args,)*>(
-                #( #member_exprs ),*
+                #( #member_vars ),*
             )
             #maybe_await
         }
@@ -456,26 +467,6 @@ fn merge_generic_params(
         .chain(right_rest)
         .cloned()
         .collect()
-}
-
-impl Member {
-    fn from_typed_fn_arg((norm_arg, orig_arg): (&syn::PatType, &syn::PatType)) -> Result<Self> {
-        let syn::Pat::Ident(pat) = norm_arg.pat.as_ref() else {
-            bail!(
-                &orig_arg.pat,
-                "use a simple `identifier: type` syntax for the function argument; \
-                destructuring patterns in arguments aren't supported by the `#[builder]`",
-            )
-        };
-
-        Member::new(
-            MemberOrigin::FnArg,
-            &norm_arg.attrs,
-            pat.ident.clone(),
-            norm_arg.ty.clone(),
-            orig_arg.ty.clone(),
-        )
-    }
 }
 
 #[derive(Default)]

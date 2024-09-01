@@ -6,9 +6,8 @@ extern crate alloc;
 
 mod prelude {
     #[cfg(feature = "alloc")]
-    pub(crate) use {
-        alloc::borrow::ToOwned, alloc::collections::BTreeSet, alloc::format, alloc::string::String,
-        alloc::vec, alloc::vec::Vec,
+    pub(crate) use alloc::{
+        borrow::ToOwned, collections::BTreeSet, format, string::String, vec, vec::Vec,
     };
 
     pub(crate) use super::assert_debug_eq;

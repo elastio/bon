@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use core::marker::PhantomData;
 
 #[test]
 fn generic_struct() {
@@ -44,11 +45,11 @@ fn unsized_generics_in_params() {
 #[test]
 fn unsized_generics_in_return_type() {
     #[builder]
-    fn sut<T: ?Sized>(arg: &T) {
-        let _ = arg;
+    fn sut<T: ?Sized>() -> PhantomData<T> {
+        PhantomData
     }
 
-    sut().arg(&42).call();
+    sut::<u32>().call();
 }
 
 // This is based on the issue https://github.com/rust-lang/rust/issues/129701

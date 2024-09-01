@@ -9,6 +9,7 @@ mod set;
 mod util;
 
 use proc_macro::TokenStream;
+use quote::ToTokens;
 use syn::parse::Parser;
 
 /// Can be placed on top of a free function or an associated method or a struct
@@ -244,4 +245,24 @@ pub fn set(input: TokenStream) -> TokenStream {
     let entries = syn::parse_macro_input!(input with Punctuated::parse_terminated);
 
     set::generate(entries).into()
+}
+
+/// Private proc macro! Don't use it directly, it's an implementation detail.
+///
+/// This macro takes a function and overrides its return type with the provided one.
+/// It's used in combination with `cfg_attr` to conditionally change the return type
+/// of a function based on the `cfg(doc)` value.
+#[doc(hidden)]
+#[proc_macro_attribute]
+pub fn __return_type(ret_ty: TokenStream, item: TokenStream) -> TokenStream {
+    let mut func: syn::ItemFn = match syn::parse(item.clone()) {
+        Ok(func) => func,
+        Err(err) => return error::error_into_token_stream(err.into(), item.into()).into(),
+    };
+
+    let ret_ty = proc_macro2::TokenStream::from(ret_ty);
+
+    func.sig.output = syn::parse_quote!(-> #ret_ty);
+
+    func.into_token_stream().into()
 }
