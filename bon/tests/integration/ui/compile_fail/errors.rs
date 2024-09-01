@@ -30,7 +30,10 @@ fn main() {
         z: u32,
     }
 
+    // Test error message about missing members
     let _ = Example::builder().x(1).build();
+
+    // Test error message about repeated setter calls
     let _ = Example::builder().y(1).y(2);
 }
 
@@ -104,3 +107,8 @@ enum EnumsAreUnsupported {}
 
 #[builder]
 fn destructuring_in_fn_is_unsupported((_, _): (u32, u32)) {}
+
+#[builder]
+#[must_use]
+#[must_use]
+fn double_must_use() {}

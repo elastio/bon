@@ -136,7 +136,7 @@ impl StructInputCtx {
             unsafety: None,
             asyncness: None,
             must_use: Some(syn::parse_quote! {
-                #[must_use = "Building a struct without using it is likely a bug"]
+                #[must_use = "building a struct without using it is likely a bug"]
             }),
             body: Box::new(finish_func_body),
             output: syn::parse_quote!(-> #struct_ty),

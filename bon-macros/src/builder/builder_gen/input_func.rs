@@ -496,16 +496,29 @@ impl Visit<'_> for FindSelfReference {
     }
 }
 
-fn get_must_use_attribute(attrs: &[syn::Attribute]) -> darling::Result<Option<syn::Attribute>> {
+fn get_must_use_attribute(attrs: &[syn::Attribute]) -> Result<Option<syn::Attribute>> {
     let mut iter = attrs
         .iter()
         .filter(|attr| attr.meta.path().is_ident("must_use"));
+
     let result = iter.next();
+
     if let Some(second) = iter.next() {
         bail!(
             second,
             "Found multiple #[must_use], but bon only works with exactly one (or less)."
         );
     }
+
+    if let Some(attr) = result {
+        if let syn::AttrStyle::Inner(_) = attr.style {
+            bail!(
+                attr,
+                "The #[must_use] attribute must be placed on the function itself, \
+                not inside it."
+            );
+        }
+    }
+
     Ok(result.cloned())
 }

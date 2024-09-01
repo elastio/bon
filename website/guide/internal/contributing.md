@@ -17,7 +17,7 @@ This repository is a regular [`cargo` workspace](https://doc.rust-lang.org/book/
 
 Test your changes with `cargo test`. You may add new tests to the `bon/tests/integration` folder.
 
-If you want to validate that the macro generates a good compile error, then extend the [`trybuild`](https://docs.rs/trybuild/latest/trybuild/) tests in `bon/tests/ui/compile_fail`. There is just one `misc.rs` file there where we have all the erroneous code examples.
+If you want to validate that the macro generates a good compile error or warning, then extend the [`trybuild`](https://docs.rs/trybuild/latest/trybuild/) tests in `bon/tests/ui/compile_fail`. There are `errors.rs` and `warnings.rs` files where we have all the erroneous code examples.
 
 ## Docs
 
