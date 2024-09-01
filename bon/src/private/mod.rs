@@ -19,6 +19,7 @@ pub struct Unset;
 impl IsUnset for Unset {}
 
 /// A trait used to transition optional members to the [`Set`] state.
+///
 /// It also provides a better error message when the member is not set.
 /// The `Member` generic parameter isn't used by the trait implementation,
 /// it's used only as a label with the name of the member to specify which one
