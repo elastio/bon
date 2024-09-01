@@ -6,6 +6,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0](https://github.com/elastio/bon/compare/v2.0.1...v2.1.0) - 2024-09-01
+
+See the [blog post for this release](https://elastio.github.io/bon/blog/bon-builder-generator-v2-release) that describes some of the most notable changes in detail.
+
+### Added
+- `#[must_use]` on the `build()` method for structs and `call()` for functions (if the original function has `#[must_use]`) ([#82](https://github.com/elastio/bon/pull/82)). Thanks [@EdJoPaTo](https://github.com/EdJoPaTo) for the contribution!
+
+### Changed
+
+- Optimize `bon`'s generated code type-checking performance and improve error messages ([#84](https://github.com/elastio/bon/pull/84))
+- Improve builder() method docs ([#76](https://github.com/elastio/bon/pull/76)). Thanks [@EdJoPaTo](https://github.com/EdJoPaTo) for the contribution!
+
+### Fixed
+- Don't warn on `clippy::impl_trait_in_params` ([#80](https://github.com/elastio/bon/pull/80)). Thanks [@EdJoPaTo](https://github.com/EdJoPaTo) for the contribution!
+- Fix typos in messages and code comments ([#79](https://github.com/elastio/bon/pull/79)). Thanks [@EdJoPaTo](https://github.com/EdJoPaTo) for the contribution!
+
+### Other
+- Add more tests for `#[must_use]` ([#87](https://github.com/elastio/bon/pull/87))
+
+
 ## [2.0.1](https://github.com/elastio/bon/compare/v2.0.0...v2.0.1) - 2024-08-28
 
 ### Docs
@@ -63,7 +83,7 @@ See the [blog post](https://elastio.github.io/bon/blog/bon-builder-generator-v2-
 ## [1.0.4](https://github.com/elastio/bon/compare/v1.0.3...v1.0.4) - 2024-07-30
 
 ### Fixed
-- new() method is now hidden by default and Builder type name is the same as when `#[builder]` is on top of a `struct` ([#19](https://github.com/elastio/bon/pull/19))
+- new() method is now hidden by default and the Builder type name is the same as when `#[builder]` is on top of a `struct` ([#19](https://github.com/elastio/bon/pull/19))
 
 ## [1.0.3](https://github.com/elastio/bon/compare/v1.0.2...v1.0.3) - 2024-07-30
 
@@ -73,7 +93,7 @@ See the [blog post](https://elastio.github.io/bon/blog/bon-builder-generator-v2-
 ## [1.0.2](https://github.com/elastio/bon/compare/v1.0.1...v1.0.2) - 2024-07-29
 
 ### Fixed
-- Fix a bug of `Default` trait requirement for types under an `Option` ([#13](https://github.com/elastio/bon/pull/13))
+- Fix a bug of the `Default` trait requirement for types under an `Option` ([#13](https://github.com/elastio/bon/pull/13))
 - Fix the link to docs.rs to so that it references the latest version ([#11](https://github.com/elastio/bon/pull/11))
 
 ## [1.0.1](https://github.com/elastio/bon/compare/v1.0.0...v1.0.1) - 2024-07-29
