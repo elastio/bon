@@ -8,17 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [2.1.0](https://github.com/elastio/bon/compare/v2.0.1...v2.1.0) - 2024-09-01
 
+See the [blog post for this release](https://elastio.github.io/bon/blog/bon-builder-generator-v2-release) that describes some of the most notable changes in details.
+
 ### Added
-- must_use on the finish function ([#82](https://github.com/elastio/bon/pull/82))
+- `#[must_use]` on the finish on the `build()` method for structs and `call()` for functions (if the original function has `#[must_use]`) ([#82](https://github.com/elastio/bon/pull/82)). Thanks [@EdJoPaTo](https://github.com/EdJoPaTo) for the contribution!
+
+### Changed
+
+- Optimize `bon`'s generated code type-checking performance and improve error messages ([#84](https://github.com/elastio/bon/pull/84))
+- Improve builder() method docs ([#76](https://github.com/elastio/bon/pull/76)). Thanks [@EdJoPaTo](https://github.com/EdJoPaTo) for the contribution!
 
 ### Fixed
-- *(clippy)* don't warn on clippy::impl_trait_in_params ([#80](https://github.com/elastio/bon/pull/80))
+- Don't warn on `clippy::impl_trait_in_params` ([#80](https://github.com/elastio/bon/pull/80)). Thanks [@EdJoPaTo](https://github.com/EdJoPaTo) for the contribution!
+- Fix typos in messages and code comments ([#79](https://github.com/elastio/bon/pull/79)). Thanks [@EdJoPaTo](https://github.com/EdJoPaTo) for the contribution!
 
 ### Other
-- Add tests, fix PR comments for must_use ([#87](https://github.com/elastio/bon/pull/87))
-- Optimize bon's generated code typechecking performance and improve error messages ([#84](https://github.com/elastio/bon/pull/84))
-- doc-markdown and some typos ([#79](https://github.com/elastio/bon/pull/79))
-- improve builder() method docs ([#76](https://github.com/elastio/bon/pull/76))
+- Add more tests for `#[must_use]` ([#87](https://github.com/elastio/bon/pull/87))
+
 
 ## [2.0.1](https://github.com/elastio/bon/compare/v2.0.0...v2.0.1) - 2024-08-28
 
