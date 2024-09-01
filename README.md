@@ -17,14 +17,14 @@
             height="20"
         />
     </a>
-    <a href="">
+    <a href="https://crates.io/crates/bon">
         <img
             alt="crates.io"
             src="https://img.shields.io/crates/v/bon.svg?style=for-the-badge&color=e37602&logo=rust"
             height="20"
         />
     </a>
-    <a href="">
+    <a href="https://docs.rs/bon/latest/bon/">
         <img
             alt="docs.rs"
             src="https://img.shields.io/badge/docs.rs-bon-3b74d1?style=for-the-badge&labelColor=555555&logo=docs.rs"
