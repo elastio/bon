@@ -249,7 +249,7 @@ I am very satisfied with this change and I hope you find your code compiling fas
 
 We are continuing to improve [`bon`] and add new features. It's still a young crate and we have big plans for it, so stay tuned!
 
-Also, a huge thank you for 600 stars ⭐ [on Github](https://github.com/elastio/bon)! Consider giving [`bon`] a star if you haven't already. Your support is a big motivation and together we can build a better builder 🐱!
+Also, a huge thank you for 600 stars ⭐ [on Github](https://github.com/elastio/bon)! Consider giving [`bon`] a star if you haven't already. Your support and feedback is a big motivation and together we can build a better builder 🐱!
 
 <!--
 
