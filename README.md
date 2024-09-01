@@ -9,8 +9,28 @@
     />
 </a>
 
-[![crates.io](https://img.shields.io/crates/v/bon.svg?labelColor=orange&color=darkkhaki)](https://crates.io/crates/bon)
-[![Rust Documentation](https://img.shields.io/badge/docs.rs-blue.svg)](https://docs.rs/bon/latest/bon/)
+<p align="center">
+    <a href="https://github.com/elastio/bon">
+        <img
+            alt="github"
+            src="https://img.shields.io/badge/github-elastio/bon-228b22?style=for-the-badge&labelColor=555555&logo=github" height="20"
+        />
+    </a>
+    <a href="">
+        <img
+            alt="crates.io"
+            src="https://img.shields.io/crates/v/bon.svg?style=for-the-badge&color=e37602&logo=rust"
+            height="20"
+        />
+    </a>
+    <a href="">
+        <img
+            alt="docs.rs"
+            src="https://img.shields.io/badge/docs.rs-bon-3b74d1?style=for-the-badge&labelColor=555555&logo=docs.rs"
+            height="20"
+        />
+    </a>
+</p>
 
 `bon` is a Rust crate for generating compile-time-checked builders for functions and structs.
 
