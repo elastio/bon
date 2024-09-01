@@ -52,7 +52,7 @@ fn main() {
     let _ = Point3D::builder()
         .x(2.0)
         .y(3.0)
-        .x(4.0) // <--- Oops, set `x` the second time instead of `z`
+        .x(4.0) // <--- Oops, `x` was set the second time instead of `z`
         .build();
 }
 ```
@@ -77,7 +77,7 @@ error[E0277]: can't finish building yet
 error[E0277]: can't set the same member twice
   --> crates/sandbox/src/main.rs:17:10
    |
-17 |         .x(4.0) // <--- Oops, set `x` the second time instead of `z`
+17 |         .x(4.0) // <--- Oops, `x` was set the second time instead of `z`
    |          ^ this member was already set
 {...}
 
