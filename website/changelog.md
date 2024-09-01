@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0](https://github.com/elastio/bon/compare/v2.0.1...v2.1.0) - 2024-09-01
+
+### Added
+- must_use on the finish function ([#82](https://github.com/elastio/bon/pull/82))
+
+### Fixed
+- *(clippy)* don't warn on clippy::impl_trait_in_params ([#80](https://github.com/elastio/bon/pull/80))
+
+### Other
+- Add tests, fix PR comments for must_use ([#87](https://github.com/elastio/bon/pull/87))
+- Optimize bon's generated code typechecking performance and improve error messages ([#84](https://github.com/elastio/bon/pull/84))
+- doc-markdown and some typos ([#79](https://github.com/elastio/bon/pull/79))
+- improve builder() method docs ([#76](https://github.com/elastio/bon/pull/76))
+
 ## [2.0.1](https://github.com/elastio/bon/compare/v2.0.0...v2.0.1) - 2024-08-28
 
 ### Docs
