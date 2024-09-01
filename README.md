@@ -13,7 +13,8 @@
     <a href="https://github.com/elastio/bon">
         <img
             alt="github"
-            src="https://img.shields.io/badge/github-elastio/bon-228b22?style=for-the-badge&labelColor=555555&logo=github" height="20"
+            src="https://img.shields.io/badge/github-elastio/bon-228b22?style=for-the-badge&labelColor=555555&logo=github"
+            height="20"
         />
     </a>
     <a href="">
