@@ -242,10 +242,7 @@ impl RegularMember {
     }
 
     pub(crate) fn setter_method_core_name(&self) -> &syn::Ident {
-        self.params
-            .name
-            .as_ref()
-            .unwrap_or(&self.norm_ident)
+        self.params.name.as_ref().unwrap_or(&self.norm_ident)
     }
 }
 

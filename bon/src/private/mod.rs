@@ -25,7 +25,7 @@ impl IsUnset for Unset {}
 /// was not set.
 #[diagnostic::on_unimplemented(
     message = "can't finish building yet",
-    label = "the member `{Member}` was not set",
+    label = "the member `{Member}` was not set"
 )]
 pub trait IntoSet<T, Member> {
     fn into_set(self) -> Set<T>;
