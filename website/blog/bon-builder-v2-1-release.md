@@ -251,18 +251,13 @@ We are continuing to improve [`bon`] and add new features. It's still a young cr
 
 Also, a huge thank you for 600 stars ⭐ [on Github](https://github.com/elastio/bon)! Consider giving [`bon`] a star if you haven't already. Your support and feedback is a big motivation and together we can build a better builder 🐱!
 
-<!--
-
 ::: tip
 
 You can leave comments for this post on the platform of your choice:
-- [Reddit](https://www.reddit.com/r/rust/comments/1f1uzkw/bon_builder_generator_20_release/)
-- [X (Twitter)](https://x.com/veetaha/status/1828210142514491658)
-- [Hacker News](https://news.ycombinator.com/item?id=41359892)
+- [Reddit](https://www.reddit.com/r/rust/comments/1f6d7vr/media_nextgen_builder_macro_bon_21_release/)
+- [X (Twitter)](https://x.com/veetaha/status/1830221731677839637)
 
 :::
-
--->
 
 [`bon`]: https://github.com/elastio/bon
 [`typed-builder`]: https://docs.rs/typed-builder/latest/typed_builder/
