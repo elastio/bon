@@ -25,7 +25,7 @@ impl IsUnset for Unset {}
 /// it's used only as a label with the name of the member to specify which one
 /// was not set.
 #[diagnostic::on_unimplemented(
-    message = "can't finish building yet",
+    message = "can't finish building yet; the member `{Member}` was not set",
     label = "the member `{Member}` was not set"
 )]
 pub trait IntoSet<T, Member> {

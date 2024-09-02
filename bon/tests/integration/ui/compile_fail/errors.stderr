@@ -174,7 +174,7 @@ error[E0599]: no method named `y` found for struct `SkipGeneratesNoSetterBuilder
 22 |     SkipGeneratesNoSetter::builder().y(42).build();
    |                                      ^ method not found in `SkipGeneratesNoSetterBuilder`
 
-error[E0277]: can't finish building yet
+error[E0277]: can't finish building yet; the member `ExampleBuilder__y` was not set
   --> tests/integration/ui/compile_fail/errors.rs:34:37
    |
 34 |     let _ = Example::builder().x(1).build();
@@ -192,7 +192,7 @@ note: required by a bound in `ExampleBuilder::<(__X, __Y, __Z)>::build`
    |            ------- required by a bound in this associated function
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0277]: can't finish building yet
+error[E0277]: can't finish building yet; the member `ExampleBuilder__renamed` was not set
   --> tests/integration/ui/compile_fail/errors.rs:34:37
    |
 34 |     let _ = Example::builder().x(1).build();
