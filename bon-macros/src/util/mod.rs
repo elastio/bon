@@ -5,6 +5,8 @@ mod iterator;
 mod path;
 mod ty;
 
+
+pub(crate) mod expand_cfg;
 pub(crate) mod ide;
 
 use prelude::*;
