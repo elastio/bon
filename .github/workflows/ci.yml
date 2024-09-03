@@ -99,7 +99,11 @@ jobs:
           components: clippy
           toolchain: 1.70.0
 
-      - run: cargo clippy --all-features --all-targets --locked
+      # We just test that `bon` crate compile fine. This is the main crate
+      # that needs to compile fine. We also make sure its tests compile
+      # fine as well. Therefore right now we use the MSRV specifically such
+      # that `trybuild` compiles as well (it's trybuild's MSRV).
+      - run: cargo clippy --all-features --all-targets --locked -p bon
         env:
             RUSTFLAGS: >-
               --deny warnings
