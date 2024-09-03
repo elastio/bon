@@ -9,6 +9,7 @@ mod lints;
 mod name_conflicts;
 mod raw_idents;
 mod smoke;
+mod cfgs;
 
 use crate::prelude::*;
 

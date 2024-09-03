@@ -7,7 +7,7 @@
     clippy::missing_const_for_fn,
     clippy::option_option,
     clippy::option_if_let_else,
-    clippy::enum_glob_use
+    clippy::enum_glob_use,
 )]
 
 mod bon;
@@ -18,10 +18,8 @@ mod normalization;
 mod set;
 mod util;
 
-use crate::util::prelude::*;
 use proc_macro::TokenStream;
 use quote::ToTokens;
-use syn::parse::Parser;
 
 /// Can be placed on top of a free function or an associated method or a struct
 /// declaration. Generates a builder for the item beneath it.

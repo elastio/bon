@@ -21,6 +21,9 @@ debug     = 0
 opt-level = 3
 
 [workspace.lints.clippy]
+# We are targeting a pre-let-else MSRV so we can't use it
+manual_let_else = "allow"
+
 # Turn on lints that are allow by default in `clippy`.
 #
 # We set them to a `warn` level instead of `deny` to prevent clippy from

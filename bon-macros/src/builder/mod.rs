@@ -6,9 +6,9 @@ pub(crate) mod item_impl;
 mod item_func;
 mod item_struct;
 
+use crate::normalization::{ExpandCfg, ExpansionOutput};
 use crate::util;
 use crate::util::prelude::*;
-use crate::normalization::{ExpansionOutput, expand_cfg};
 use darling::FromMeta;
 use syn::parse::Parser;
 
@@ -38,14 +38,20 @@ pub(crate) fn generate(params: TokenStream2, item: TokenStream2) -> TokenStream2
     })
 }
 
-fn try_generate(mut params: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
-    let mut item: syn::Item = syn::parse2(item)?;
+fn try_generate(params: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
+    let item: syn::Item = syn::parse2(item)?;
     let macro_path = syn::parse_quote!(::bon::builder);
 
-    match expand_cfg(macro_path, &mut params, &mut item)? {
-        ExpansionOutput::Expanded => {}
+    let ctx = ExpandCfg {
+        macro_path,
+        params,
+        item,
+    };
+
+    let (params, item) = match ctx.expand_cfg()? {
+        ExpansionOutput::Expanded { params, item } => (params, item),
         ExpansionOutput::Recurse(output) => return Ok(output),
-    }
+    };
 
     let output = [
         generate_completion_triggers(params.clone()),

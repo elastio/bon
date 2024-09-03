@@ -76,7 +76,7 @@ macro_rules! expand_cfg_callback {
         $($item:tt)*
     ) => {
         #[cfg($($pred)*)]
-        $crate::expand_cfg! {
+        $crate::expand_cfg_callback! {
             (
                 $(
                     (
@@ -95,7 +95,7 @@ macro_rules! expand_cfg_callback {
         }
 
         #[cfg(not($($pred)*))]
-        $crate::expand_cfg! {
+        $crate::expand_cfg_callback! {
             (
                 $(
                     (
