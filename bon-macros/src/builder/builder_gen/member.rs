@@ -22,7 +22,7 @@ impl fmt::Display for MemberOrigin {
 }
 
 impl MemberOrigin {
-    fn parent_construct(&self) -> &'static str {
+    fn parent_construct(self) -> &'static str {
         match self {
             Self::FnArg => "function",
             Self::StructField => "struct",
@@ -112,7 +112,7 @@ pub(crate) struct MemberParams {
 }
 
 impl MemberParams {
-    fn validate(&self, origin: &MemberOrigin) -> Result {
+    fn validate(&self, origin: MemberOrigin) -> Result {
         if let Self {
             skip: Some(skip),
             into,
@@ -276,10 +276,10 @@ impl Member {
                 } = member;
 
                 let params = MemberParams::from_attributes(attrs)?;
-                params.validate(&origin)?;
+                params.validate(origin)?;
 
                 if let Some(value) = params.skip {
-                    return Ok(Member::Skipped(SkippedMember {
+                    return Ok(Self::Skipped(SkippedMember {
                         ident: orig_ident,
                         norm_ty,
                         value,
@@ -318,7 +318,7 @@ impl Member {
 
                 me.validate()?;
 
-                Ok(Member::Regular(me))
+                Ok(Self::Regular(me))
             })
             .collect()
     }

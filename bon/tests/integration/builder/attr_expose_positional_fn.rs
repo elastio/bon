@@ -15,6 +15,7 @@ fn method_new_doesnt_require_a_value_for_name() {
     let _: Sut = Sut::builder().build();
     let _: Sut = Sut::new();
 
+    #[allow(clippy::items_after_statements)]
     struct Sut2;
 
     #[bon]

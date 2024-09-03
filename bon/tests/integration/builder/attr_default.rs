@@ -209,5 +209,5 @@ fn fn_generic_default() {
         drop(arg2);
     }
 
-    sut::<(), ()>().call()
+    sut::<(), ()>().call();
 }

@@ -123,7 +123,7 @@ fn self_only_generic_param() {
 
     assert!(actual.bar.is_none());
     assert_eq!(actual.str, "littlepip");
-    let () = actual.other_ref;
+    let _: &() = actual.other_ref;
 }
 
 #[test]
@@ -133,6 +133,7 @@ fn impl_block_with_self_in_const_generics() {
 
     impl<const N: usize> Sut<N> {
         const fn val(&self) -> usize {
+            let _ = self;
             42
         }
     }
@@ -154,6 +155,7 @@ fn impl_block_with_self_in_const_generics() {
 #[test]
 fn generics_with_lifetimes() {
     #[builder]
+    #[allow(clippy::trivially_copy_pass_by_ref)]
     fn sut<T>(arg: &&&&&T) {
         let _ = arg;
     }

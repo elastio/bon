@@ -1,5 +1,11 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-#![allow(non_local_definitions)]
+#![allow(
+    clippy::redundant_pub_crate,
+    clippy::missing_const_for_fn,
+    clippy::needless_pass_by_value,
+    clippy::too_many_lines,
+    non_local_definitions
+)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -30,7 +36,7 @@ fn assert_debug_eq(actual: impl core::fmt::Debug, expected: Expect) {
     let snapshot = 'snap: {
         let terse = alloc::format!("{actual:?}");
 
-        let Some(width) = terse.lines().map(|line| line.len()).max() else {
+        let Some(width) = terse.lines().map(str::len).max() else {
             break 'snap terse;
         };
 

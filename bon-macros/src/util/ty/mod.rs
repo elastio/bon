@@ -34,7 +34,7 @@ pub(crate) trait TypeExt {
 impl TypeExt for syn::Type {
     fn as_path(&self) -> Option<&syn::TypePath> {
         match self.peel() {
-            syn::Type::Path(path) => Some(path),
+            Self::Path(path) => Some(path),
             _ => None,
         }
     }

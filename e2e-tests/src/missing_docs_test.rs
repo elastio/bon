@@ -11,6 +11,7 @@ impl MyStruct {
     /// [`MyStruct::builder()`] docs
     #[builder]
     pub fn new() -> Self {
+        eprintln!("Non-const");
         Self
     }
 }
@@ -23,6 +24,7 @@ pub fn function(
     _arg1: u32,
     _arg2: bool,
 ) {
+    eprintln!("Non-const");
 }
 
 /// [`Struct`] docs
@@ -38,7 +40,10 @@ pub struct Struct {
 impl Struct {
     /// [`Struct::method()`] docs
     #[builder]
-    pub fn method(&self, _arg1: u32, _arg2: bool) {}
+    pub fn method(&self, _arg1: u32, _arg2: bool) {
+        eprintln!("Non-const");
+        let _ = self;
+    }
 }
 
 /// [`GenericStruct`] docs

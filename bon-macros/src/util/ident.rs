@@ -35,14 +35,14 @@ impl IdentExt for syn::Ident {
         //
         // So no need to handle raw identifiers here.
         let renamed = RenameRule::PascalCase.apply_to_field(self.raw_name());
-        syn::Ident::new(&renamed, Span::call_site())
+        Self::new(&renamed, Span::call_site())
     }
 
     fn new_maybe_raw(name: &str, span: Span) -> Self {
         if let Some(name) = name.strip_prefix("r#") {
-            syn::Ident::new_raw(name, span)
+            Self::new_raw(name, span)
         } else {
-            syn::Ident::new(name, span)
+            Self::new(name, span)
         }
     }
 

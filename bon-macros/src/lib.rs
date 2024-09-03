@@ -1,4 +1,14 @@
 #![doc = include_str!("../README.md")]
+#![allow(
+    clippy::redundant_pub_crate,
+    clippy::wildcard_imports,
+    clippy::map_unwrap_or,
+    clippy::items_after_statements,
+    clippy::missing_const_for_fn,
+    clippy::option_option,
+    clippy::option_if_let_else,
+    clippy::enum_glob_use
+)]
 
 mod bon;
 mod builder;

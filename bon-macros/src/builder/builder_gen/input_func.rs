@@ -357,7 +357,7 @@ impl FuncInputCtx {
                 .norm_func
                 .attrs
                 .into_iter()
-                .filter(|attr| attr.is_doc())
+                .filter(<_>::is_doc)
                 .collect(),
 
             generics: Some(Generics {

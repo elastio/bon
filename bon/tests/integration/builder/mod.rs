@@ -36,6 +36,9 @@ fn lifetime_elision() {
 #[cfg(feature = "std")]
 #[tokio::test]
 async fn async_func() {
+    // FIXME: https://github.com/elastio/bon/issues/100
+    #![allow(clippy::future_not_send)]
+
     #[builder]
     async fn sut<Fut: std::future::Future>(fut: Fut) -> Fut::Output {
         fut.await
@@ -62,15 +65,14 @@ fn unsafe_func() {
 #[test]
 fn impl_traits() {
     #[builder]
-    #[allow(dropping_copy_types)]
     fn sut(
         /// Some documentation
         iterable: impl IntoIterator<Item = impl Into<u32>>,
         multi_bounds: impl Send + Copy,
     ) {
         drop(iterable.into_iter().map(Into::into));
-        drop(multi_bounds);
-        drop(multi_bounds);
+        let _ = multi_bounds;
+        let _ = multi_bounds;
     }
 
     sut().iterable([1_u16, 2, 3]).multi_bounds("multi").call();
@@ -162,6 +164,7 @@ fn self_in_a_bunch_of_places() {
         where
             Self: Sized,
         {
+            let _ = self;
             me.into_iter()
         }
     }
@@ -178,6 +181,7 @@ fn receiver_is_non_default() {
     #[bon]
     impl Sut {
         #[builder]
+        #[allow(clippy::use_self)]
         fn method(self: &Sut) -> u32 {
             self.val
         }

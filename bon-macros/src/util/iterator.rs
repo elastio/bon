@@ -23,11 +23,11 @@ pub(crate) trait IteratorExt: Iterator + Sized {
         let (lower, _) = self.size_hint();
         let mut result = String::with_capacity(sep.len() * lower);
 
-        write!(&mut result, "{}", first).unwrap();
+        write!(&mut result, "{first}").unwrap();
 
         for elt in self {
             result.push_str(sep);
-            write!(&mut result, "{}", elt).unwrap();
+            write!(&mut result, "{elt}").unwrap();
         }
 
         result

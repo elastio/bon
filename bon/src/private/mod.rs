@@ -6,9 +6,12 @@ pub mod ide;
 pub extern crate alloc;
 
 /// Marker trait to denote the state of the member that is not set yet.
-#[diagnostic::on_unimplemented(
-    message = "can't set the same member twice",
-    label = "this member was already set"
+#[rustversion::attr(
+    since(1.78.0),
+    diagnostic::on_unimplemented(
+        message = "can't set the same member twice",
+        label = "this member was already set"
+    )
 )]
 pub trait IsUnset {}
 
@@ -24,16 +27,19 @@ impl IsUnset for Unset {}
 /// The `Member` generic parameter isn't used by the trait implementation,
 /// it's used only as a label with the name of the member to specify which one
 /// was not set.
-#[diagnostic::on_unimplemented(
-    message = "can't finish building yet; the member `{Member}` was not set",
-    label = "the member `{Member}` was not set"
+#[rustversion::attr(
+    since(1.78.0),
+    diagnostic::on_unimplemented(
+        message = "can't finish building yet; the member `{Member}` was not set",
+        label = "the member `{Member}` was not set"
+    )
 )]
 pub trait IntoSet<T, Member> {
     fn into_set(self) -> Set<T>;
 }
 
 impl<T, Member> IntoSet<T, Member> for Set<T> {
-    fn into_set(self) -> Set<T> {
+    fn into_set(self) -> Self {
         self
     }
 }

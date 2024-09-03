@@ -90,7 +90,7 @@ impl Parse for Meta {
                 value: input.parse().ok(),
             })
         } else {
-            Meta::Path(path)
+            Self::Path(path)
         };
 
         Ok(meta)
@@ -120,7 +120,7 @@ fn paths_from_meta(meta: Vec<Meta>) -> Vec<syn::Path> {
             Meta::Path(path) => Some(path),
             Meta::NameValue(meta) => Some(meta.path),
             Meta::List(meta) => Some(meta.path),
-            _ => None,
+            Meta::None => None,
         })
         .collect()
 }
@@ -177,7 +177,7 @@ impl CompletionsSchema {
         }
     }
 
-    fn with_children(key: &'static str, children: Vec<CompletionsSchema>) -> Self {
+    fn with_children(key: &'static str, children: Vec<Self>) -> Self {
         Self {
             key,
             children,
@@ -196,7 +196,7 @@ impl CompletionsSchema {
         module_prefix: &[&syn::Ident],
     ) -> TokenStream2 {
         if let Some(custom_filter) = self.custom_filter {
-            custom_filter(&mut meta)
+            custom_filter(&mut meta);
         };
 
         let module_suffix = syn::Ident::new(self.key, Span::call_site());
@@ -213,9 +213,8 @@ impl CompletionsSchema {
                 let child_metas = meta
                     .iter()
                     .filter_map(|meta| {
-                        let meta = match meta {
-                            Meta::List(meta) => meta,
-                            _ => return None,
+                        let Meta::List(meta) = meta else {
+                            return None;
                         };
 
                         if !meta.path.is_ident(&child.key) {

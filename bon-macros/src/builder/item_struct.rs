@@ -23,6 +23,7 @@ pub(crate) fn generate(
     let struct_ident = &adapted_struct.ident;
 
     Ok(quote! {
+        #[automatically_derived]
         impl #generics_decl #struct_ident #generic_args
             #where_clause
         {

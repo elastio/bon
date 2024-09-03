@@ -1,8 +1,8 @@
 //! This crate is used only for testing of the public interface of the `bon` crate.
 //! We don't need all the aggressive lints that we use for public crates.
-#![allow(missing_debug_implementations)]
-#![allow(missing_docs)]
+#![allow(missing_debug_implementations, missing_docs)]
 
+pub mod macro_rules_wrapper_test;
 pub mod missing_docs_test;
 
 use bon::{bon, builder};
@@ -16,7 +16,7 @@ mod website_doctests {
     include!(concat!(env!("OUT_DIR"), "/website_doctests.rs"));
 }
 
-#[builder]
+#[bon::builder]
 pub struct Greeter {
     _name: String,
     _level: usize,
@@ -36,6 +36,7 @@ impl Counter {
         #[builder(default)]
         initial: usize,
     ) -> Self {
+        eprintln!("Non-const");
         Self { val: initial }
     }
 
@@ -46,12 +47,14 @@ impl Counter {
         /// Amount to increment the counter by in [`Counter`].
         diff: Option<usize>,
     ) {
+        eprintln!("Non-const");
         self.val += diff.unwrap_or(1);
     }
 }
 
 /// Function-level documentation.
 #[builder]
+#[allow(clippy::needless_pass_by_value)]
 pub fn documented(
     /// Some documentation for the first argument
     ///
@@ -69,6 +72,7 @@ pub fn documented(
 
     _arg4: Vec<String>,
 ) {
+    eprintln!("Non-const");
 }
 
 /// Function that returns a greeting special-tailored for a given person
@@ -85,6 +89,7 @@ pub fn greet(
     /// Age expressed in full years passed since the birth date.
     age: u32,
 ) -> String {
+    eprintln!("Non-const");
     format!("Hello {name} with age {age}!")
 }
 
@@ -127,4 +132,5 @@ pub fn many_function_parameters(
     _include_licensed_content: Option<&str>,
     _geopoint: Option<&str>,
 ) {
+    eprintln!("Non-const");
 }
