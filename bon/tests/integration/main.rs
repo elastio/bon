@@ -22,7 +22,6 @@ mod prelude {
 }
 
 mod builder;
-
 mod ui;
 
 use expect_test::Expect;
