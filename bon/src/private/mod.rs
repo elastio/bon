@@ -53,3 +53,79 @@ impl<T, Member> IntoSet<Option<T>, Member> for Unset {
 #[repr(transparent)]
 #[derive(Debug)]
 pub struct Set<T>(pub T);
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! expand_cfg_callback {
+    (
+        (
+            ($($pred:tt)*),
+            $(
+                (
+                    $($rest:tt)*
+                ),
+            )*
+        )
+        (
+            $($results:tt)*
+        )
+        $final_macro:path,
+        (
+            $($params:tt)*
+        )
+        $($item:tt)*
+    ) => {
+        #[cfg($($pred)*)]
+        $crate::expand_cfg! {
+            (
+                $(
+                    (
+                        $($rest)*
+                    ),
+                )*
+            )
+            (
+                $($results)* true,
+            )
+            $final_macro,
+            (
+                $($params)*
+            )
+            $($item)*
+        }
+
+        #[cfg(not($($pred)*))]
+        $crate::expand_cfg! {
+            (
+                $(
+                    (
+                        $($rest)*
+                    ),
+                )*
+            )
+            (
+                $($results)* false,
+            )
+            $final_macro,
+            (
+                $($params)*
+            )
+            $($item)*
+        }
+    };
+
+    (
+        ()
+        (
+            $($results:tt)*
+        )
+        $final_macro:path,
+        (
+            $($params:tt)*
+        )
+        $($item:tt)*
+    ) => {
+        #[$final_macro(@cfgs($($results)*) $($params)*)]
+        $($item)*
+    };
+}

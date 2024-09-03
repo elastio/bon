@@ -92,44 +92,7 @@ use syn::parse::Parser;
 /// See [the guide](https://elastio.github.io/bon/guide/overview) for the rest.
 #[proc_macro_attribute]
 pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
-    let params = TokenStream2::from(params);
-
-    let main = builder_impl(params.clone(), item.clone())
-        .unwrap_or_else(|err| error::error_into_token_stream(err, item.into()));
-
-    quote::quote! {
-        #completions
-        #main
-    }
-    .into()
-}
-
-fn generate_completion_triggers(params: TokenStream2) -> TokenStream2 {
-    let meta = util::ide::parse_comma_separated_meta
-        .parse2(params)
-        .unwrap_or_default();
-
-    util::ide::generate_completion_triggers(meta)
-}
-
-fn builder_impl(mut params: TokenStream2, item: TokenStream) -> Result<TokenStream2> {
-    let mut item: syn::Item = syn::parse(item)?;
-    let macro_path = syn::parse_quote!(::bon::builder);
-
-    match util::expand_cfg::expand_cfg(macro_path, &mut params, &mut item) {
-        util::expand_cfg::ExpansionOutput::Expanded => {}
-        util::expand_cfg::ExpansionOutput::Recurse(output) => {
-            return Ok(output);
-        }
-    };
-
-    let completions = generate_completion_triggers(params.clone());
-    let main = builder::generate_for_item(params, item)?;
-
-    Ok(quote::quote! {
-        #main
-        #completions
-    })
+    builder::generate(params.into(), item.into()).into()
 }
 
 /// Companion macro for [`builder`]. You should place it on top of the `impl` block
