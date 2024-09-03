@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1](https://github.com/elastio/bon/compare/v2.1.0...v2.1.1) - 2024-09-03
+
+### Other
+- Set MSRV to 1.70.0. Fix lints triggered by generated code ([#101](https://github.com/elastio/bon/pull/101))
+- Add more context to the messages ([#98](https://github.com/elastio/bon/pull/98))
+- Update benchmarks page with the code from the new codegen ([#95](https://github.com/elastio/bon/pull/95))
+
 ## [2.1.0](https://github.com/elastio/bon/compare/v2.0.1...v2.1.0) - 2024-09-01
 
 See the [blog post for this release](https://elastio.github.io/bon/blog/bon-builder-v2-1-release) that describes some of the most notable changes in detail.

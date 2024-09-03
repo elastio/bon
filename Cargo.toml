@@ -4,7 +4,7 @@ resolver = "2"
 
 [workspace.package]
 edition = "2021"
-version = "2.1.0"
+version = "2.1.1"
 
 # MSRV. If you need a lower MSRV, please create an issue and we'll consider lowering it.
 rust-version = "1.70.0"
