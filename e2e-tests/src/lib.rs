@@ -3,7 +3,7 @@
 #![allow(missing_debug_implementations, missing_docs)]
 
 pub mod missing_docs_test;
-pub mod private_bounds_test;
+pub mod macro_rules_wrapper_test;
 
 use bon::{bon, builder};
 
