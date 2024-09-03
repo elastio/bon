@@ -6,6 +6,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1](https://github.com/elastio/bon/compare/v2.1.0...v2.1.1) - 2024-09-03
+
+### Added
+- Set MSRV to 1.70.0. Note that we plan to set an even lower MSRV. This is just an initial attempt to define the MSRV that should be good enough in the meantime while we work on lowering it even more ([#101](https://github.com/elastio/bon/pull/101))
+
+### Fixed
+- Fix lints triggered by generated code such as `private_bounds`, `clippy::missing_const_for_fn` ([#101](https://github.com/elastio/bon/pull/101))
+- Add more context to the messages such that it's clear what member isn't set in Rust Analyzer error messages ([#98](https://github.com/elastio/bon/pull/98))
+
 ## [2.1.0](https://github.com/elastio/bon/compare/v2.0.1...v2.1.0) - 2024-09-01
 
 See the [blog post for this release](https://elastio.github.io/bon/blog/bon-builder-v2-1-release) that describes some of the most notable changes in detail.
@@ -32,7 +41,7 @@ See the [blog post for this release](https://elastio.github.io/bon/blog/bon-buil
 - Add a new section ["`None` literals inference"](https://elastio.github.io/bon/guide/patterns/into-conversions-in-depth#none-literals-inference) to docs for "Into Conversions In-Depth"
 - Fix the docs about the comparison of Into conversions on the ["Alternatives"](http://elastio.github.io/bon/guide/alternatives) page that were not updated during the v2 release
 
-### Fix
+### Fixed
 - Fix capturing of generic params that appear only in return types ([#72](https://github.com/elastio/bon/pull/72))
 - Fix support for associated types ([#72](https://github.com/elastio/bon/pull/72))
 
