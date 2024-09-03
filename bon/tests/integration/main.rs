@@ -30,7 +30,6 @@ use expect_test::Expect;
 const COMMON_SCREEN_CHARS_WIDTH: usize = 60;
 
 #[track_caller]
-#[allow(clippy::needless_pass_by_value)]
 fn assert_debug_eq(actual: impl core::fmt::Debug, expected: Expect) {
     extern crate alloc;
 

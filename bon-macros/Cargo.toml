@@ -6,11 +6,12 @@ This is a proc-macro crate that is supposed to be a private implementation
 detail of the `bon` crate
 """
 
-edition    = { workspace = true }
-homepage   = { workspace = true }
-license    = { workspace = true }
-repository = { workspace = true }
-version    = { workspace = true }
+edition      = { workspace = true }
+homepage     = { workspace = true }
+license      = { workspace = true }
+repository   = { workspace = true }
+rust-version = { workspace = true }
+version      = { workspace = true }
 
 [package.metadata.docs.rs]
 all-features = true

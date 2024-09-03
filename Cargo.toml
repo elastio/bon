@@ -135,6 +135,9 @@ verbose_bit_mask                  = "warn"
 wildcard_dependencies             = "warn"
 zero_sized_map_values             = "warn"
 
+# Priorities are used not because we override lints from these lint groups
+# but just to order them in order from the less noisy to the more noisy in
+# the output
 nursery  = { level = "warn", priority = -2 }
 pedantic = { level = "warn", priority = -1 }
 
