@@ -36,6 +36,9 @@ fn lifetime_elision() {
 #[cfg(feature = "std")]
 #[tokio::test]
 async fn async_func() {
+    // FIXME: https://github.com/elastio/bon/issues/100
+    #![allow(clippy::future_not_send)]
+
     #[builder]
     async fn sut<Fut: std::future::Future>(fut: Fut) -> Fut::Output {
         fut.await
@@ -162,6 +165,7 @@ fn self_in_a_bunch_of_places() {
         where
             Self: Sized,
         {
+            let _ = self;
             me.into_iter()
         }
     }
@@ -178,6 +182,7 @@ fn receiver_is_non_default() {
     #[bon]
     impl Sut {
         #[builder]
+        #[allow(clippy::use_self)]
         fn method(self: &Sut) -> u32 {
             self.val
         }

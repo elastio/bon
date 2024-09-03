@@ -108,7 +108,7 @@ impl StructInputCtx {
         let members = Member::from_raw(MemberOrigin::StructField, members)?;
 
         let generics = Generics {
-            params: Vec::from_iter(self.norm_struct.generics.params.iter().cloned()),
+            params: self.norm_struct.generics.params.iter().cloned().collect(),
             where_clause: self.norm_struct.generics.where_clause.clone(),
         };
 

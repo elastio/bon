@@ -27,7 +27,7 @@ struct IntoGeneric<T>(T);
 
 impl<T> From<IntoGeneric<T>> for Generic<T> {
     fn from(value: IntoGeneric<T>) -> Self {
-        Generic(value.0)
+        Self(value.0)
     }
 }
 

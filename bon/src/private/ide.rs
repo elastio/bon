@@ -1,4 +1,8 @@
-#![allow(non_upper_case_globals, missing_debug_implementations)]
+#![allow(
+    non_upper_case_globals,
+    missing_debug_implementations,
+    clippy::wildcard_imports
+)]
 
 /// Completions for the top-level `builder` attribute.
 pub mod builder_top_level {

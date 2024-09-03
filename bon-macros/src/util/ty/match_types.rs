@@ -235,6 +235,8 @@ fn unsupported_syntax_error(spanned: &impl Spanned, syntax: &str) -> Error {
 
 #[cfg(test)]
 mod tests {
+    // One less `&` character to type in assertions
+    #![allow(clippy::needless_pass_by_value)]
     use super::*;
     use syn::parse_quote as pq;
 

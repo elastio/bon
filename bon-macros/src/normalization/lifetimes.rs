@@ -64,7 +64,7 @@ impl VisitMut for NormalizeLifetimes {
             return;
         };
 
-        ElideOutputLifetime { elided_lifetime }.visit_type_mut(return_type)
+        ElideOutputLifetime { elided_lifetime }.visit_type_mut(return_type);
     }
 }
 

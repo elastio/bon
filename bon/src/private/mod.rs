@@ -33,7 +33,7 @@ pub trait IntoSet<T, Member> {
 }
 
 impl<T, Member> IntoSet<T, Member> for Set<T> {
-    fn into_set(self) -> Set<T> {
+    fn into_set(self) -> Self {
         self
     }
 }

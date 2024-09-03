@@ -132,6 +132,9 @@ verbose_bit_mask                  = "warn"
 wildcard_dependencies             = "warn"
 zero_sized_map_values             = "warn"
 
+nursery  = { level = "warn", priority = -2 }
+pedantic = { level = "warn", priority = -1 }
+
 [workspace.lints.rustdoc]
 missing_crate_level_docs = "warn"
 unescaped_backticks      = "warn"

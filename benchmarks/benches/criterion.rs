@@ -20,10 +20,10 @@ fn criterion_bench(c: &mut criterion::Criterion) {
 
     let mut group = c.benchmark_group("main");
     group.bench_function(criterion::BenchmarkId::new("regular_bench", ""), |b| {
-        b.iter(regular_bench)
+        b.iter(regular_bench);
     });
     group.bench_function(criterion::BenchmarkId::new("builder_bench", ""), |b| {
-        b.iter(builder_bench)
+        b.iter(builder_bench);
     });
     group.finish();
 }

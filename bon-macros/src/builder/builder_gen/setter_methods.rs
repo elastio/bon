@@ -172,7 +172,15 @@ impl<'a> MemberSettersCtx<'a> {
 
         quote! {
             #( #docs )*
-            #[allow(clippy::impl_trait_in_params)]
+            #[allow(
+                // This is intentional. We want the builder syntax to compile away
+                clippy::inline_always,
+                // We don't want to avoid using `impl Trait` in the setter. This way
+                // the setter signature is easier to read, and anyway if you want to
+                // specify a type hint for the method that accepts an `impl Into`, then
+                // your design of this setter already went wrong.
+                clippy::impl_trait_in_params
+            )]
             #[inline(always)]
             // The `cfg_attr` condition is for `doc`, so we don't pay the price
             // if invoking the `__return_type` macro in the usual case when the
@@ -205,7 +213,7 @@ impl<'a> MemberSettersCtx<'a> {
                     // The type is quite complex. It's hard to generate a workable
                     // intra-doc link for it. So in order to avoid the broken
                     // intra-doc links lint we'll just skip adding more info.
-                    return "".to_owned();
+                    return String::new();
                 };
 
                 let prefix = darling::util::path_to_string(&ty_path.path);

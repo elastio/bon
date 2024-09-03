@@ -1,5 +1,11 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-#![allow(non_local_definitions)]
+#![allow(
+    non_local_definitions,
+    clippy::redundant_pub_crate,
+    clippy::missing_const_for_fn,
+    clippy::needless_pass_by_value,
+    clippy::too_many_lines
+)]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
@@ -24,13 +30,14 @@ use expect_test::Expect;
 const COMMON_SCREEN_CHARS_WIDTH: usize = 60;
 
 #[track_caller]
+#[allow(clippy::needless_pass_by_value)]
 fn assert_debug_eq(actual: impl core::fmt::Debug, expected: Expect) {
     extern crate alloc;
 
     let snapshot = 'snap: {
         let terse = alloc::format!("{actual:?}");
 
-        let Some(width) = terse.lines().map(|line| line.len()).max() else {
+        let Some(width) = terse.lines().map(str::len).max() else {
             break 'snap terse;
         };
 
