@@ -123,7 +123,7 @@ fn self_only_generic_param() {
 
     assert!(actual.bar.is_none());
     assert_eq!(actual.str, "littlepip");
-    let () = actual.other_ref;
+    let _: &() = actual.other_ref;
 }
 
 #[test]

@@ -1,10 +1,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(
-    non_local_definitions,
     clippy::redundant_pub_crate,
     clippy::missing_const_for_fn,
     clippy::needless_pass_by_value,
-    clippy::too_many_lines
+    clippy::too_many_lines,
+    non_local_definitions
 )]
 
 #[cfg(feature = "alloc")]
@@ -22,6 +22,7 @@ mod prelude {
 }
 
 mod builder;
+
 mod ui;
 
 use expect_test::Expect;

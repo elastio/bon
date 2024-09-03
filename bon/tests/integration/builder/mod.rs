@@ -65,15 +65,14 @@ fn unsafe_func() {
 #[test]
 fn impl_traits() {
     #[builder]
-    #[allow(dropping_copy_types)]
     fn sut(
         /// Some documentation
         iterable: impl IntoIterator<Item = impl Into<u32>>,
         multi_bounds: impl Send + Copy,
     ) {
         drop(iterable.into_iter().map(Into::into));
-        drop(multi_bounds);
-        drop(multi_bounds);
+        let _ = multi_bounds;
+        let _ = multi_bounds;
     }
 
     sut().iterable([1_u16, 2, 3]).multi_bounds("multi").call();

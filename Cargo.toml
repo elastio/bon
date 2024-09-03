@@ -6,6 +6,9 @@ resolver = "2"
 edition = "2021"
 version = "2.1.0"
 
+# MSRV. If you need a lower MSRV, please create an issue and we'll consider lowering it.
+rust-version = "1.70.0"
+
 authors = ["Vitalii Kryvenko <vkryvenko@elastio.com>"]
 license = "MIT OR Apache-2.0"
 
