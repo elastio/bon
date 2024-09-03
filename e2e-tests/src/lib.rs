@@ -2,8 +2,8 @@
 //! We don't need all the aggressive lints that we use for public crates.
 #![allow(missing_debug_implementations, missing_docs)]
 
-pub mod missing_docs_test;
 pub mod macro_rules_wrapper_test;
+pub mod missing_docs_test;
 
 use bon::{bon, builder};
 
