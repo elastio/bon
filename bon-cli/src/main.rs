@@ -122,12 +122,17 @@ fn migrate_rust_file(edition: Edition, file: &str) -> Result<String> {
             .map(|tt| tt.token_trees_and_tokens().next().is_none())
             .unwrap_or(true);
 
-        if is_empty_builder_attr {
-            ted::remove(builder_attr.syntax());
-        }
+        ted::remove(builder_attr.syntax());
 
-        if insert_builder_derive_into_existing(derive_attr).is_some() {
-            continue;
+        if let Some(derive_attr) = derive_attr {
+            if derive_attr.syntax().index() < builder_attr.syntax().index()
+                && insert_builder_derive_into_existing(derive_attr).is_some()
+            {
+                if !is_empty_builder_attr {
+                    struct_item.add_attr(builder_attr);
+                }
+                continue;
+            }
         }
 
         let bon_builder = ast::make::path_from_text("bon::Builder")
@@ -145,13 +150,16 @@ fn migrate_rust_file(edition: Edition, file: &str) -> Result<String> {
         .clone_for_update();
 
         struct_item.add_attr(new_attr);
+        if !is_empty_builder_attr {
+            struct_item.add_attr(builder_attr);
+        }
     }
 
     Ok(file.to_string())
 }
 
-fn insert_builder_derive_into_existing(derive_attr: Option<ast::Attr>) -> Option<()> {
-    let r_paren = derive_attr?.meta()?.token_tree()?.r_paren_token()?;
+fn insert_builder_derive_into_existing(derive_attr: ast::Attr) -> Option<()> {
+    let r_paren = derive_attr.meta()?.token_tree()?.r_paren_token()?;
 
     let has_trailing_comma = r_paren
         .prev_token()
