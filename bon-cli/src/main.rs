@@ -122,9 +122,9 @@ fn migrate_rust_file(edition: Edition, file: &str) -> Result<String> {
             .map(|tt| tt.token_trees_and_tokens().next().is_none())
             .unwrap_or(true);
 
-        if let Some(prev_sibling) = builder_attr.syntax().prev_sibling_or_token() {
-            if prev_sibling.kind() == SyntaxKind::WHITESPACE {
-                ted::remove(prev_sibling);
+        if let Some(next_sibling) = builder_attr.syntax().next_sibling_or_token() {
+            if next_sibling.kind() == SyntaxKind::WHITESPACE {
+                ted::remove(next_sibling);
             }
         }
 
