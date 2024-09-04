@@ -1,7 +1,6 @@
 #![allow(clippy::non_minimal_cfg)]
 
 use crate::prelude::*;
-use Builder;
 
 #[test]
 fn struct_smoke() {
@@ -24,6 +23,7 @@ fn struct_with_params() {
     #[builder(builder_type = OverrideBuilder)]
     struct Sut {
         #[cfg(all())]
+        #[allow(dead_code)]
         arg1: bool,
 
         #[cfg(not(all()))]

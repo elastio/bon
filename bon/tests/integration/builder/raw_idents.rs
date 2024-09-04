@@ -1,5 +1,5 @@
 //! This is based on the issue <https://github.com/elastio/bon/issues/8>
-use Builder;
+use crate::prelude::*;
 
 #[test]
 #[allow(non_camel_case_types)]
@@ -19,6 +19,7 @@ fn struct_case() {
 
     #[derive(Builder)]
     #[builder(builder_type = r#type)]
+    #[allow(clippy::items_after_statements)]
     struct Sut {}
 
     let _: r#type = Sut::builder();
