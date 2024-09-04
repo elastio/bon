@@ -21,12 +21,12 @@ If you prefer being explicit in code, feel free not to use `Into` conversions at
 
 We'll cover the following:
 
-- [Use `Into` conversions](#reasons-to-use-into-conversions)
-- [Avoid `Into` conversions](#reasons-to-avoid-into-conversions)
+- [Use `Into` conversions](#use-into-conversions)
+- [Avoid `Into` conversions](#avoid-into-conversions)
 
 ## Use `Into` conversions
 
-The main advantage of `impl Into` in setters is that it reduces the boilerplate for the caller. The code becomes shorter and cleaner, although not without [the drawbacks](#reasons-to-avoid-into-conversions).
+The main advantage of `impl Into` in setters is that it reduces the boilerplate for the caller. The code becomes shorter and cleaner, although not without [the drawbacks](#avoid-into-conversions).
 
 `Into` conversions usually make sense only if *all of the following* are true (AND):
 
