@@ -1,7 +1,7 @@
 #![allow(missing_docs)]
 
 use anyhow::{bail, Context, Result};
-use ra_ap_parser::{Edition, T};
+use ra_ap_parser::{Edition, SyntaxKind, T};
 use ra_ap_syntax::ast::edit_in_place::AttrsOwnerEdit;
 use ra_ap_syntax::ast::HasAttrs;
 use ra_ap_syntax::ted::Position;
@@ -121,6 +121,12 @@ fn migrate_rust_file(edition: Edition, file: &str) -> Result<String> {
             .and_then(ast::Meta::token_tree)
             .map(|tt| tt.token_trees_and_tokens().next().is_none())
             .unwrap_or(true);
+
+        if let Some(prev_sibling) = builder_attr.syntax().prev_sibling_or_token() {
+            if prev_sibling.kind() == SyntaxKind::WHITESPACE {
+                ted::remove(prev_sibling);
+            }
+        }
 
         ted::remove(builder_attr.syntax());
 
