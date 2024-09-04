@@ -196,17 +196,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: crate-ci/typos@v1.22.3
-  
-  # Check for broken links in docs
-  check-links:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Run linkspector
-        uses: umbrelladocs/action-linkspector@v1
-        with:
-          reporter: github-pr-review
-          fail_on_error: true
 
   website-build:
     runs-on: ubuntu-latest
@@ -224,7 +213,8 @@ jobs:
 
       - run: cd website && npm ci
       - run: cd website && npm run build
-      - run: |
+      - name: Validate for broken links (mostly broken anchors)
+        run: |
           cd website && FORCE_COLOR=2 \
             node \
               --no-warnings=ExperimentalWarning \

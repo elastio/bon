@@ -4,7 +4,7 @@
     "**/*.mts",
     "**/*.vue",
     ".vitepress/**/*.ts",
-    ".vitepress/**/*.vue", "validate-links.mts",
+    ".vitepress/**/*.vue",
   ],
   "compilerOptions": {
     "target": "es2022",
