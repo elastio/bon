@@ -7,7 +7,7 @@
     clippy::missing_const_for_fn,
     clippy::option_option,
     clippy::option_if_let_else,
-    clippy::enum_glob_use,
+    clippy::enum_glob_use
 )]
 
 mod bon;

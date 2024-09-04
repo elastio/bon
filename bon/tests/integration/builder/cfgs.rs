@@ -29,4 +29,8 @@ fn struct_with_params() {
         #[cfg(not(all()))]
         arg1: u32,
     }
+
+    let _ = Sut::builder()
+        .arg1(true)
+        .build();
 }
