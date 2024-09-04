@@ -1,5 +1,5 @@
 [workspace]
-members  = ["benchmarks", "bon", "bon-macros", "e2e-tests"]
+members  = ["benchmarks", "bon", "bon-cli", "bon-macros", "e2e-tests"]
 resolver = "2"
 
 [workspace.package]
@@ -23,6 +23,10 @@ opt-level = 3
 [workspace.lints.clippy]
 # We are targeting a pre-let-else MSRV so we can't use it
 manual_let_else = "allow"
+
+# `map_or` and `map_or_else` are less readable than `map` followed
+# by `unwrap_or` or `unwrap_or_else`
+map_unwrap_or = "allow"
 
 # Turn on lints that are allow by default in `clippy`.
 #

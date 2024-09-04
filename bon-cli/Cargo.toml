@@ -1,0 +1,26 @@
+[package]
+name = "bon-cli"
+
+description = "Dev tool for working with the `bon` crate"
+
+edition      = { workspace = true }
+homepage     = { workspace = true }
+license      = { workspace = true }
+repository   = { workspace = true }
+rust-version = { workspace = true }
+version      = { workspace = true }
+
+[[bin]]
+name = "bon"
+path = "src/main.rs"
+
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+anyhow       = "1.0"
+ra_ap_parser = "=0.0.233"
+ra_ap_syntax = "=0.0.233"
+walkdir      = "2.5"

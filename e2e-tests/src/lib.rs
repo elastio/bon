@@ -16,9 +16,11 @@ mod website_doctests {
     include!(concat!(env!("OUT_DIR"), "/website_doctests.rs"));
 }
 
-#[bon::builder]
+#[derive(bon::Builder)]
 pub struct Greeter {
     _name: String,
+
+    // #[cfg_attr(all(), builder(start_fn = init))]
     _level: usize,
 }
 

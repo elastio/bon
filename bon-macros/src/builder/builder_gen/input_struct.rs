@@ -15,6 +15,42 @@ pub(crate) struct StructInputParams {
     start_fn: Option<ItemParams>,
 }
 
+impl StructInputParams {
+    fn parse(item_struct: &syn::ItemStruct) -> Result<Self> {
+        let meta = item_struct
+            .attrs
+            .iter()
+            .filter(|attr| attr.path().is_ident("builder"))
+            .filter_map(|attr| {
+                let meta = match &attr.meta {
+                    syn::Meta::List(meta) => meta,
+                    _ => return Some(Err(err!(attr, "expected `#[builder(...)]` syntax"))),
+                };
+
+                // Empty `#[builder()]` is fine.
+                if meta.tokens.is_empty() {
+                    return None;
+                }
+
+                if !matches!(meta.delimiter, syn::MacroDelimiter::Paren(_)) {
+                    return Some(Err(err!(
+                        &meta,
+                        "wrong delimiter {:?}, expected `#[builder(...)]` syntax",
+                        meta.delimiter
+                    )));
+                }
+
+                let meta = syn::parse2::<darling::ast::NestedMeta>(meta.tokens.clone())
+                    .map_err(Into::into);
+
+                Some(meta)
+            })
+            .collect::<Result<Vec<_>>>()?;
+
+        Self::from_list(&meta)
+    }
+}
+
 pub(crate) struct StructInputCtx {
     orig_struct: syn::ItemStruct,
     norm_struct: syn::ItemStruct,
@@ -23,7 +59,9 @@ pub(crate) struct StructInputCtx {
 }
 
 impl StructInputCtx {
-    pub(crate) fn new(params: StructInputParams, orig_struct: syn::ItemStruct) -> Self {
+    pub(crate) fn new(orig_struct: syn::ItemStruct) -> Result<Self> {
+        let params = StructInputParams::parse(&orig_struct)?;
+
         let generic_args = orig_struct
             .generics
             .params
@@ -35,18 +73,20 @@ impl StructInputCtx {
         let mut norm_struct = orig_struct.clone();
 
         // Structs are free to use `Self` inside of their trait bounds and any
-        // internal type contexts.
+        // internal type contexts. However, when copying these bounds to the
+        // builder struct and its impl blocks we need to get rid of `Self`
+        // references and replace them with the actual struct type.
         crate::normalization::NormalizeSelfTy {
             self_ty: &struct_ty,
         }
         .visit_item_struct_mut(&mut norm_struct);
 
-        Self {
+        Ok(Self {
             orig_struct,
             norm_struct,
             params,
             struct_ty,
-        }
+        })
     }
 
     fn builder_ident(&self) -> syn::Ident {
@@ -55,21 +95,6 @@ impl StructInputCtx {
         }
 
         quote::format_ident!("{}Builder", self.norm_struct.ident.raw_name())
-    }
-
-    pub(crate) fn adapted_struct(&self) -> syn::ItemStruct {
-        let mut orig = self.orig_struct.clone();
-
-        // Remove all `#[builder]` attributes from the struct since
-        // we used them just to configure this macro, and are they
-        // no longer needed in the output code
-        orig.attrs.retain(|attr| !attr.path().is_ident("builder"));
-
-        for field in &mut orig.fields {
-            field.attrs.retain(|attr| !attr.path().is_ident("builder"));
-        }
-
-        orig
     }
 
     pub(crate) fn into_builder_gen_ctx(self) -> Result<BuilderGenCtx> {

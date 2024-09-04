@@ -90,7 +90,13 @@ use quote::ToTokens;
 /// See [the guide](https://elastio.github.io/bon/guide/overview) for the rest.
 #[proc_macro_attribute]
 pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
-    builder::generate(params.into(), item.into()).into()
+    builder::generate_from_attr(params.into(), item.into()).into()
+}
+
+/// TODO: docs
+#[proc_macro_derive(Builder, attributes(builder))]
+pub fn derive_builder(item: TokenStream) -> TokenStream {
+    builder::generate_from_derive(item.into()).into()
 }
 
 /// Companion macro for [`builder`]. You should place it on top of the `impl` block

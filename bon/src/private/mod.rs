@@ -129,3 +129,9 @@ macro_rules! expand_cfg_callback {
         $($item)*
     };
 }
+
+#[doc(hidden)]
+#[deprecated(note = "\
+    #[bon::builder] on top of a struct is deprecated; \
+    use `#[derive(bon::Builder)]` instead")]
+pub mod builder_attribute_on_a_struct {}

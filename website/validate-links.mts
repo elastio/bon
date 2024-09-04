@@ -1,7 +1,7 @@
 /**
  * This script was copied almost verbatim from https://github.com/hyperledger/iroha-2-docs/blob/c1520e4cb06216428e21b4b7305e29247bdf0737/etc/validate-links.ts#L1
- * The only custom edits done to this file are the ability to run it as a standalone script and handle
- * use `file.html` search paths instead of `file/index.html`.
+ * The only custom edits done to this file are the ability to run it as a standalone script
+ * and use `file.html` search paths instead of `file/index.html`.
  *
  * Huge thanks to the author of this script 💓: https://github.com/0x009922
  */
