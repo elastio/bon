@@ -88,23 +88,9 @@ fn migrate_rust_file(edition: Edition, file: &str) -> Result<String> {
         .collect::<Vec<_>>();
 
     for struct_item in structs {
-        let builder_attr = struct_item.attrs().find(|attr| {
-            let Some(meta) = attr.meta() else {
-                return false;
-            };
-            let Some(path) = meta.path() else {
-                return false;
-            };
-
-            let Some(last_segment) = path.segment() else {
-                return false;
-            };
-
-            let Some(name_ref) = last_segment.name_ref() else {
-                return false;
-            };
-
-            name_ref.text().as_str() == "builder"
+        let builder_attr = struct_item.attrs().find_map(|attr| {
+            let name_ref = attr.meta()?.path()?.segment()?.name_ref()?;
+            (name_ref.text().as_str() == "builder").then_some(attr)
         });
 
         let Some(builder_attr) = builder_attr else {
