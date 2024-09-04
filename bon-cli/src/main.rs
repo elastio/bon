@@ -1,10 +1,11 @@
 #![allow(missing_docs)]
 
 use anyhow::{bail, Context, Result};
-use ra_ap_parser::Edition;
+use ra_ap_parser::{Edition, T};
 use ra_ap_syntax::ast::edit_in_place::AttrsOwnerEdit;
 use ra_ap_syntax::ast::HasAttrs;
-use ra_ap_syntax::{ast, AstNode, SmolStr, SourceFile};
+use ra_ap_syntax::ted::Position;
+use ra_ap_syntax::{ast, ted, AstNode, NodeOrToken, SourceFile};
 use std::ffi::OsStr;
 use std::process::ExitCode;
 
@@ -56,21 +57,21 @@ fn migrate(edition: Option<&str>) -> Result<()> {
         let file = std::fs::read_to_string(path)
             .with_context(|| format!("Failed to read the file '{}'", path.display()))?;
 
-        eprintln!("Migrating file: {}", path.display());
+        eprintln!("Processing {}...", path.display());
 
-        let file = migrate_rust_file(edition, file)?;
+        let file = migrate_rust_file(edition, &file)?;
 
-        // std::fs::write(path, file)
-            // .with_context(|| format!("Failed to write to the file '{}'", path.display()))?;
+        std::fs::write(path, file)
+            .with_context(|| format!("Failed to write to the file '{}'", path.display()))?;
     }
 
     Ok(())
 }
 
-fn migrate_rust_file(edition: Edition, file: String) -> Result<String> {
+fn migrate_rust_file(edition: Edition, file: &str) -> Result<String> {
     // The `parse` method returns a `Parse` -- a pair of syntax tree and a list
     // of errors. That is, syntax tree is constructed even in presence of errors.
-    let parse = SourceFile::parse(&file, edition);
+    let parse = SourceFile::parse(file, edition);
 
     let errors = parse.errors();
 
@@ -83,7 +84,8 @@ fn migrate_rust_file(edition: Edition, file: String) -> Result<String> {
     let structs = file
         .syntax()
         .descendants()
-        .filter_map(ast::Struct::cast);
+        .filter_map(ast::Struct::cast)
+        .collect::<Vec<_>>();
 
     for struct_item in structs {
         let builder_attr = struct_item.attrs().find(|attr| {
@@ -94,7 +96,7 @@ fn migrate_rust_file(edition: Edition, file: String) -> Result<String> {
                 return false;
             };
 
-            let Some(last_segment) = path.segments().last() else {
+            let Some(last_segment) = path.segment() else {
                 return false;
             };
 
@@ -102,37 +104,73 @@ fn migrate_rust_file(edition: Edition, file: String) -> Result<String> {
                 return false;
             };
 
-            dbg!(name_ref).text().as_str() == "builder"
+            name_ref.text().as_str() == "builder"
         });
 
         let Some(builder_attr) = builder_attr else {
             continue;
         };
 
-        let is_empty_builder_attr = dbg!(builder_attr
-            .meta())
+        let derive_attr = struct_item
+            .attrs()
+            .find(|attr| attr.simple_name().as_deref() == Some("derive"));
+
+        let is_empty_builder_attr = builder_attr
+            .meta()
             .as_ref()
             .and_then(ast::Meta::token_tree)
             .map(|tt| tt.token_trees_and_tokens().next().is_none())
             .unwrap_or(true);
 
         if is_empty_builder_attr {
-            eprint!("Removing empty builder attribute: {:?}", builder_attr);
-            ra_ap_syntax::ted::remove(builder_attr.syntax());
+            ted::remove(builder_attr.syntax());
         }
 
-        // let derive_attr = struct_item
-        //     .attrs()
-        //     .find(|attr| attr.simple_name().as_deref() == Some("derive"));
+        if insert_builder_derive_into_existing(derive_attr).is_some() {
+            continue;
+        }
 
-        // if let Some(derive_attr) = derive_attr {
-        //     let Some(derive_meta) = derive_attr.meta() else {
-        //         continue;
-        //     };)
-        // };
+        let bon_builder = ast::make::path_from_text("bon::Builder")
+            .syntax()
+            .descendants_with_tokens()
+            .filter_map(NodeOrToken::into_token)
+            .map(NodeOrToken::Token);
 
-        // struct_item.add_attr()
+        let tt = bon_builder.collect();
+
+        let new_attr = ast::make::attr_outer(ast::make::meta_token_tree(
+            ast::make::path_from_text("derive"),
+            ast::make::token_tree(T!['('], tt),
+        ))
+        .clone_for_update();
+
+        struct_item.add_attr(new_attr);
     }
 
     Ok(file.to_string())
+}
+
+fn insert_builder_derive_into_existing(derive_attr: Option<ast::Attr>) -> Option<()> {
+    let r_paren = derive_attr?.meta()?.token_tree()?.r_paren_token()?;
+
+    let has_trailing_comma = r_paren
+        .prev_token()
+        .is_some_and(|token| token.kind() == T!(,));
+
+    let bon_builder = ast::make::path_from_text("bon::Builder")
+        .syntax()
+        .clone_for_update();
+
+    let position = Position::before(r_paren);
+
+    if has_trailing_comma {
+        ted::insert(position, bon_builder);
+    } else {
+        ted::insert_all(
+            position,
+            vec![ast::make::token(T![,]).into(), bon_builder.into()],
+        );
+    }
+
+    Some(())
 }
