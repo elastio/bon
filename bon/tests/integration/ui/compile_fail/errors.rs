@@ -1,4 +1,4 @@
-use bon::builder;
+use Builder;
 use std::collections::{BTreeMap, BTreeSet};
 
 fn main() {
@@ -9,7 +9,7 @@ fn main() {
 
     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
 
-    #[builder]
+    #[derive(Builder)]
     struct SkipGeneratesNoSetter {
         #[builder(skip)]
         x: u32,
@@ -21,7 +21,7 @@ fn main() {
     SkipGeneratesNoSetter::builder().x(42).build();
     SkipGeneratesNoSetter::builder().y(42).build();
 
-    #[builder]
+    #[derive(Builder)]
     struct Example {
         x: u32,
         y: u32,
@@ -37,7 +37,7 @@ fn main() {
     let _ = Example::builder().y(1).y(2);
 }
 
-#[builder]
+#[derive(Builder)]
 struct TupleStruct(u32, u32);
 
 #[builder]
@@ -70,22 +70,23 @@ fn incomplete_on3() {}
 #[builder(on(_,))]
 fn incomplete_on4() {}
 
+#[derive(Builder)]
 #[builder(start_fn())]
 struct EmptyStartFn {}
 
-#[builder]
+#[derive(Builder)]
 struct ConflictingAttrs {
     #[builder(skip, into)]
     x: u32,
 }
 
-#[builder]
+#[derive(Builder)]
 struct ConflictingAttrs2 {
     #[builder(skip, name = bar)]
     x: u32,
 }
 
-#[builder]
+#[derive(Builder)]
 struct ConflictingAttrs3 {
     #[builder(skip, default = 42)]
     z: u32,
@@ -99,7 +100,7 @@ fn skip_on_fn_is_unsupporetd(
 ) {
 }
 
-#[builder]
+#[derive(Builder)]
 struct TupleStructsAreUnsupported(u32, u32);
 
 #[builder]

@@ -18,7 +18,7 @@ fn member_and_type_named_the_same_fn() {
 
 #[test]
 fn member_and_type_named_the_same_struct() {
-    #[builder]
+    #[derive(Builder)]
     struct Sut {
         #[allow(dead_code)]
         user: User,

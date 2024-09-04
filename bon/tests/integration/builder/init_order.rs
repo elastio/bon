@@ -22,8 +22,7 @@ fn fn_init_order() {
 
 #[test]
 fn struct_init_order() {
-    #[builder]
-    #[derive(Debug)]
+    #[derive(Debug, Builder)]
     #[allow(dead_code)]
     struct Sut {
         #[builder(skip = 1)]

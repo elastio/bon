@@ -3,13 +3,13 @@ mod attr_expose_positional_fn;
 mod attr_into;
 mod attr_on;
 mod attr_skip;
+mod cfgs;
 mod generics;
 mod init_order;
 mod lints;
 mod name_conflicts;
 mod raw_idents;
 mod smoke;
-mod cfgs;
 
 use crate::prelude::*;
 

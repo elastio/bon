@@ -36,8 +36,7 @@ fn struct_alloc() {
     use bon::bon;
     use expect_test::expect;
 
-    #[builder]
-    #[derive(Debug)]
+    #[derive(Debug, Builder)]
     struct Sut {
         #[builder(default = "default".to_owned())]
         arg1: String,
@@ -152,8 +151,7 @@ fn fn_no_std() {
 fn struct_no_std() {
     use bon::bon;
 
-    #[builder]
-    #[derive(Debug)]
+    #[derive(Debug, Builder)]
     struct Sut {
         #[builder(default)]
         arg1: u32,

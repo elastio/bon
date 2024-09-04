@@ -5,8 +5,8 @@ use bon::{bon, builder};
 fn main() {
     // Test #[must_use]
     {
-        #[builder]
         #[allow(dead_code)]
+        #[derive(Builder)]
         struct Example {
             x: u32,
             y: u32,

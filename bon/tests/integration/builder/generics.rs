@@ -3,8 +3,7 @@ use core::marker::PhantomData;
 
 #[test]
 fn generic_struct() {
-    #[builder]
-    #[derive(Debug)]
+    #[derive(Debug, Builder)]
     #[allow(unused)]
     struct Sut<'a, 'b, T, U, const N: usize> {
         a: &'a str,

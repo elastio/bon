@@ -6,8 +6,7 @@ use expect_test::expect;
 fn struct_alloc() {
     use expect_test::expect;
 
-    #[builder]
-    #[derive(Debug)]
+    #[derive(Debug, Builder)]
     struct Sut {
         #[builder(skip = "skip".to_owned())]
         #[allow(dead_code)]
@@ -26,8 +25,7 @@ fn struct_alloc() {
 
 #[test]
 fn struct_no_std() {
-    #[builder]
-    #[derive(Debug)]
+    #[derive(Debug, Builder)]
     struct Sut {
         #[builder(skip)]
         #[allow(dead_code)]
@@ -43,8 +41,7 @@ fn struct_no_std() {
 
 #[test]
 fn struct_with_non_skipped_arg() {
-    #[builder]
-    #[derive(Debug)]
+    #[derive(Debug, Builder)]
     struct Sut {
         #[builder(skip)]
         #[allow(dead_code)]
@@ -62,7 +59,7 @@ fn struct_with_non_skipped_arg() {
 
 #[test]
 fn struct_generic_skipped() {
-    #[builder]
+    #[derive(Builder)]
     struct Sut<A, B>
     where
         A: Clone + Default,

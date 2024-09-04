@@ -1,10 +1,10 @@
 //! This is based on the issue <https://github.com/elastio/bon/issues/8>
-use bon::builder;
+use Builder;
 
 #[test]
 #[allow(non_camel_case_types)]
 fn struct_case() {
-    #[builder]
+    #[derive(Builder)]
     struct r#Type {
         r#type: u32,
 
@@ -17,6 +17,7 @@ fn struct_case() {
     assert_eq!(actual.r#type, 42);
     assert_eq!(actual.other, 100);
 
+    #[derive(Builder)]
     #[builder(builder_type = r#type)]
     struct Sut {}
 

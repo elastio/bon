@@ -1,12 +1,11 @@
 #![allow(clippy::non_minimal_cfg)]
 
 use crate::prelude::*;
-use bon::builder;
+use Builder;
 
 #[test]
 fn struct_smoke() {
-    #[builder]
-    #[derive(Debug)]
+    #[derive(Debug, Builder)]
     struct Sut {
         #[cfg(all())]
         #[cfg_attr(all(), allow(dead_code))]
@@ -21,6 +20,7 @@ fn struct_smoke() {
 
 #[test]
 fn struct_with_params() {
+    #[derive(Builder)]
     #[builder(builder_type = OverrideBuilder)]
     struct Sut {
         #[cfg(all())]
@@ -30,7 +30,5 @@ fn struct_with_params() {
         arg1: u32,
     }
 
-    let _ = Sut::builder()
-        .arg1(true)
-        .build();
+    let _ = Sut::builder().arg1(true).build();
 }
