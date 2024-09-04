@@ -1,8 +1,34 @@
 {
   "include": [
     "**/*.ts",
+    "**/*.mts",
     "**/*.vue",
     ".vitepress/**/*.ts",
-    ".vitepress/**/*.vue",
-  ]
+    ".vitepress/**/*.vue", "validate-links.mts",
+  ],
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "lib": ["es2022"],
+    "declaration": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "strictPropertyInitialization": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true
+  },
+  "ts-node": {
+    "esm": true
+  }
 }
