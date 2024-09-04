@@ -456,11 +456,11 @@ Makes the member optional and assigns a default value to it. There will be two s
 
 ::: tip
 
-Switching between `#[builder(default)]` and `Option<T>` is [compatible](../guide/compatibility#switching-between-optiont-and-builderdefault).
+Switching between `#[builder(default)]` and `Option<T>` is [compatible](../guide/compatibility#switching-between-option-t-and-builder-default).
 
 :::
 
-The default value will be lazily computed inside of the [finishing function](#finish_fn) (i.e. `build()` or `call()`). It is computed only if the setter for the member wasn't called or `None` was passed to the `maybe_{member}()` setter.
+The default value will be lazily computed inside of the [finishing function](#finish-fn) (i.e. `build()` or `call()`). It is computed only if the setter for the member wasn't called or `None` was passed to the `maybe_{member}()` setter.
 
 The default value is computed based on the form of this attribute:
 

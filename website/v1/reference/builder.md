@@ -322,7 +322,7 @@ Form                               | How default value is computed
 
 The result of the `expression` will automatically be converted into the target type if `Into` conversion is enabled for this setter i.e. the type satisfies [automatic `Into` conversion qualification rules], or there is a [`#[builder(into)]`](#into) override.
 
-The default value will be lazily computed *only if needed* inside of the [finishing function](#finish_fn) (i.e. `build()` or `call()`).
+The default value will be lazily computed *only if needed* inside of the [finishing function](#finish-fn) (i.e. `build()` or `call()`).
 
 **Example:**
 

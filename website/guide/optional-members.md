@@ -60,7 +60,7 @@ To make a member of non-`Option` type optional you may use the attribute [`#[bui
 
 ::: tip
 
-Switching between `#[builder(default)]` and `Option<T>` is [compatible](./compatibility#switching-between-optiont-and-builderdefault).
+Switching between `#[builder(default)]` and `Option<T>` is [compatible](./compatibility#switching-between-option-t-and-builder-default).
 
 :::
 
