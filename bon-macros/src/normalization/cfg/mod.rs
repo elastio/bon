@@ -154,12 +154,11 @@ fn eval_cfgs(true_predicates: &BTreeSet<String>, attrs: &mut Vec<syn::Attribute>
 
     // It's important to iterate in reverse order to avoid index invalidation
     for (i, metas) in cfg_attr_expansions.iter().rev() {
-        let metas = match metas {
-            Some(metas) => metas,
-            None => {
-                attrs.remove(*i);
-                continue;
-            }
+        let metas = if let Some(metas) = metas {
+            metas
+        } else {
+            attrs.remove(*i);
+            continue;
         };
 
         let replacement = metas.iter().map(|meta| syn::parse_quote!(#[#meta]));

@@ -89,69 +89,79 @@ error: this #[builder(on(type_pattern, ...))] contains no options to override th
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected at least one parameter in parentheses
-  --> tests/integration/ui/compile_fail/errors.rs:73:11
+  --> tests/integration/ui/compile_fail/errors.rs:74:11
    |
-73 | #[builder(start_fn())]
+74 | #[builder(start_fn())]
    |           ^^^^^^^^
 
 error: `skip` attribute can't be specified with other attributes like `into` because there will be no setter generated for this member to configure
-  --> tests/integration/ui/compile_fail/errors.rs:78:21
+  --> tests/integration/ui/compile_fail/errors.rs:79:21
    |
-78 |     #[builder(skip, into)]
+79 |     #[builder(skip, into)]
    |                     ^^^^
 
 error: `skip` attribute can't be specified with other attributes like `name` because there will be no setter generated for this member to configure
-  --> tests/integration/ui/compile_fail/errors.rs:84:28
+  --> tests/integration/ui/compile_fail/errors.rs:85:28
    |
-84 |     #[builder(skip, name = bar)]
+85 |     #[builder(skip, name = bar)]
    |                            ^^^
 
 error: `skip` attribute can't be specified with other attributes like `default` because there will be no setter generated for this member to configure. If you wanted to specify a value for the member, then use the following syntax instead `#[builder(skip = value)]`
-  --> tests/integration/ui/compile_fail/errors.rs:90:21
+  --> tests/integration/ui/compile_fail/errors.rs:91:21
    |
-90 |     #[builder(skip, default = 42)]
+91 |     #[builder(skip, default = 42)]
    |                     ^^^^^^^
 
 error: `skip` attribute is not supported on function arguments. Use a local variable instead.
-  --> tests/integration/ui/compile_fail/errors.rs:96:15
+  --> tests/integration/ui/compile_fail/errors.rs:97:15
    |
-96 |     #[builder(skip)] _x: u32,
+97 |     #[builder(skip)] _x: u32,
    |               ^^^^
 
 error: Only structs with named fields are supported
-   --> tests/integration/ui/compile_fail/errors.rs:103:1
+   --> tests/integration/ui/compile_fail/errors.rs:104:1
     |
-103 | struct TupleStructsAreUnsupported(u32, u32);
+104 | struct TupleStructsAreUnsupported(u32, u32);
     | ^^^^^^
 
-error: The attribute is expected to be placed only on an `fn` item or a `struct` declaration
+error: only `fn` items are supported by the `#[bon::builder]` attribute
    --> tests/integration/ui/compile_fail/errors.rs:106:1
     |
-106 | enum EnumsAreUnsupported {}
-    | ^^^^
+106 | #[builder]
+    | ^^^^^^^^^^
+    |
+    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: only `struct` items are supported by the `#[derive(bon::Builder)]` attribute
+   --> tests/integration/ui/compile_fail/errors.rs:109:10
+    |
+109 | #[derive(Builder)]
+    |          ^^^^^^^
+    |
+    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: use a simple `identifier: type` syntax for the function argument; destructuring patterns in arguments aren't supported by the `#[builder]`
-   --> tests/integration/ui/compile_fail/errors.rs:109:39
+   --> tests/integration/ui/compile_fail/errors.rs:113:39
     |
-109 | fn destructuring_in_fn_is_unsupported((_, _): (u32, u32)) {}
+113 | fn destructuring_in_fn_is_unsupported((_, _): (u32, u32)) {}
     |                                       ^^^^^^
 
 error: Found multiple #[must_use], but bon only works with exactly one (or less).
-   --> tests/integration/ui/compile_fail/errors.rs:113:1
+   --> tests/integration/ui/compile_fail/errors.rs:117:1
     |
-113 | #[must_use]
+117 | #[must_use]
     | ^
 
 warning: unused attribute
-   --> tests/integration/ui/compile_fail/errors.rs:113:1
+   --> tests/integration/ui/compile_fail/errors.rs:117:1
     |
-113 | #[must_use]
+117 | #[must_use]
     | ^^^^^^^^^^^ help: remove this attribute
     |
 note: attribute also specified here
-   --> tests/integration/ui/compile_fail/errors.rs:112:1
+   --> tests/integration/ui/compile_fail/errors.rs:116:1
     |
-112 | #[must_use]
+116 | #[must_use]
     | ^^^^^^^^^^^
     = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
     = note: `#[warn(unused_attributes)]` on by default
@@ -159,8 +169,8 @@ note: attribute also specified here
 error[E0599]: no method named `x` found for struct `SkipGeneratesNoSetterBuilder` in the current scope
   --> tests/integration/ui/compile_fail/errors.rs:21:38
    |
-12 |     #[builder]
-   |     ---------- method `x` not found for this struct
+12 |     #[derive(Builder)]
+   |              ------- method `x` not found for this struct
 ...
 21 |     SkipGeneratesNoSetter::builder().x(42).build();
    |                                      ^ method not found in `SkipGeneratesNoSetterBuilder`
@@ -168,8 +178,8 @@ error[E0599]: no method named `x` found for struct `SkipGeneratesNoSetterBuilder
 error[E0599]: no method named `y` found for struct `SkipGeneratesNoSetterBuilder` in the current scope
   --> tests/integration/ui/compile_fail/errors.rs:22:38
    |
-12 |     #[builder]
-   |     ---------- method `y` not found for this struct
+12 |     #[derive(Builder)]
+   |              ------- method `y` not found for this struct
 ...
 22 |     SkipGeneratesNoSetter::builder().y(42).build();
    |                                      ^ method not found in `SkipGeneratesNoSetterBuilder`
@@ -184,13 +194,13 @@ error[E0277]: can't finish building yet; the member `ExampleBuilder__y` was not 
    = help: the trait `IntoSet<Option<_>, ExampleBuilder__y>` is implemented for `Unset`
    = help: for that trait implementation, expected `Option<_>`, found `u32`
 note: required by a bound in `ExampleBuilder::<(__X, __Y, __Z)>::build`
-  --> tests/integration/ui/compile_fail/errors.rs:24:5
+  --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
-24 |     #[builder]
-   |     ^^^^^^^^^^ required by this bound in `ExampleBuilder::<(__X, __Y, __Z)>::build`
+24 |     #[derive(Builder)]
+   |              ^^^^^^^ required by this bound in `ExampleBuilder::<(__X, __Y, __Z)>::build`
 25 |     struct Example {
    |            ------- required by a bound in this associated function
-   = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: can't finish building yet; the member `ExampleBuilder__renamed` was not set
   --> tests/integration/ui/compile_fail/errors.rs:34:37
@@ -202,13 +212,13 @@ error[E0277]: can't finish building yet; the member `ExampleBuilder__renamed` wa
    = help: the trait `IntoSet<Option<_>, ExampleBuilder__renamed>` is implemented for `Unset`
    = help: for that trait implementation, expected `Option<_>`, found `u32`
 note: required by a bound in `ExampleBuilder::<(__X, __Y, __Z)>::build`
-  --> tests/integration/ui/compile_fail/errors.rs:24:5
+  --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
-24 |     #[builder]
-   |     ^^^^^^^^^^ required by this bound in `ExampleBuilder::<(__X, __Y, __Z)>::build`
+24 |     #[derive(Builder)]
+   |              ^^^^^^^ required by this bound in `ExampleBuilder::<(__X, __Y, __Z)>::build`
 25 |     struct Example {
    |            ------- required by a bound in this associated function
-   = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: can't set the same member twice
   --> tests/integration/ui/compile_fail/errors.rs:37:37
@@ -219,11 +229,11 @@ error[E0277]: can't set the same member twice
    = help: the trait `IsUnset` is not implemented for `Set<u32>`
    = help: the trait `IsUnset` is implemented for `Unset`
 note: required by a bound in `ExampleBuilder::<(__X, __Y, __Z)>::y`
-  --> tests/integration/ui/compile_fail/errors.rs:24:5
+  --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
-24 |     #[builder]
-   |     ^^^^^^^^^^ required by this bound in `ExampleBuilder::<(__X, __Y, __Z)>::y`
+24 |     #[derive(Builder)]
+   |              ^^^^^^^ required by this bound in `ExampleBuilder::<(__X, __Y, __Z)>::y`
 ...
 27 |         y: u32,
    |         - required by a bound in this associated function
-   = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+   = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)

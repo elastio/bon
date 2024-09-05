@@ -21,14 +21,9 @@ mod util;
 use proc_macro::TokenStream;
 use quote::ToTokens;
 
-/// Can be placed on top of a free function or an associated method or a struct
-/// declaration. Generates a builder for the item beneath it.
+/// Generates a builder for the function or method it's placed on.
 ///
-/// Docs for this macro are split into two parts:
-/// - [Guide](https://elastio.github.io/bon/guide/overview)
-/// - [Attributes reference](https://elastio.github.io/bon/reference/builder)
-///
-/// # Quick example
+/// ## Quick examples
 ///
 /// `bon` can turn a function with positional parameters into a function with "named"
 /// parameters via a builder. It's as easy as placing the `#[builder]` macro on top of it.
@@ -37,31 +32,37 @@ use quote::ToTokens;
 /// use bon::builder;
 ///
 /// #[builder]
-/// fn greet(name: &str, age: u32) -> String {
-///     format!("Hello {name} with age {age}!")
+/// fn greet(name: &str, level: Option<u32>) -> String {
+///     let level = level.unwrap_or(0);
+///
+///     format!("Hello {name}! Your level is {level}")
 /// }
 ///
 /// let greeting = greet()
 ///     .name("Bon")
-///     .age(24)
+///     .level(24) // <- setting `level` is optional, we could omit it
 ///     .call();
 ///
-/// assert_eq!(greeting, "Hello Bon with age 24!");
+/// assert_eq!(greeting, "Hello Bon! Your level is 24");
 /// ```
 ///
-/// You can also use the `#[builder]` attribute with structs and associated methods:
+/// You can also use the `#[builder]` attribute with associated methods:
 ///
 /// ```rust ignore
-/// use bon::{bon, builder};
+/// use bon::bon;
 ///
-/// #[builder]
 /// struct User {
 ///     id: u32,
 ///     name: String,
 /// }
 ///
-/// #[bon]
+/// #[bon] // <- this attribute is required on impl blocks that contain `#[builder]`
 /// impl User {
+///     #[builder]
+///     fn new(id: u32, name: String) -> Self {
+///         Self { id, name }
+///     }
+///
 ///     #[builder]
 ///     fn greet(&self, target: &str, level: Option<&str>) -> String {
 ///         let level = level.unwrap_or("INFO");
@@ -71,11 +72,13 @@ use quote::ToTokens;
 ///     }
 /// }
 ///
+/// // The method named `new` generates `builder()/build()` method
 /// let user = User::builder()
 ///     .id(1)
 ///     .name("Bon".to_owned())
 ///     .build();
 ///
+/// // All other methods generate `method_name()/call()` methods
 /// let greeting = user
 ///     .greet()
 ///     .target("the world")
@@ -87,13 +90,44 @@ use quote::ToTokens;
 /// assert_eq!(greeting, "[INFO] Bon says hello to the world");
 /// ```
 ///
-/// See [the guide](https://elastio.github.io/bon/guide/overview) for the rest.
+/// See the full documentation for more details:
+/// - [Guide](https://elastio.github.io/bon/guide/overview)
+/// - [Attributes reference](https://elastio.github.io/bon/reference/builder)
 #[proc_macro_attribute]
 pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
     builder::generate_from_attr(params.into(), item.into()).into()
 }
 
-/// TODO: docs
+/// Derives a builder for the struct it's placed on.
+///
+/// ## Quick examples
+///
+/// Add a `#[derive(Builder)]` attribute to your struct:
+///
+/// ```rust ignore
+/// use bon::{bon, builder, Builder};
+///
+/// #[derive(Builder)]
+/// struct User {
+///     name: String,
+///     is_admin: bool,
+///     level: Option<u32>,
+/// }
+///
+/// // Generated `builder()/build()` methods
+/// let user = User::builder()
+///     .name("Bon".to_owned())
+///     .level(24) // <- `level` is optional, we could omit it here
+///     .is_admin(true) // call setters in any order
+///     .build();
+///
+/// assert_eq!(user.name, "Bon");
+/// assert_eq!(user.level, Some(24));
+/// ```
+///
+/// See the full documentation for more details:
+/// - [Guide](https://elastio.github.io/bon/guide/overview)
+/// - [Attributes reference](https://elastio.github.io/bon/reference/builder)
 #[proc_macro_derive(Builder, attributes(builder))]
 pub fn derive_builder(item: TokenStream) -> TokenStream {
     builder::generate_from_derive(item.into()).into()

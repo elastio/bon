@@ -1,6 +1,5 @@
 #![deny(warnings)]
-
-use bon::{bon, builder};
+use bon::{bon, builder, Builder};
 
 fn main() {
     // Test #[must_use]

@@ -1,4 +1,4 @@
-use Builder;
+use bon::{builder, Builder};
 use std::collections::{BTreeMap, BTreeSet};
 
 fn main() {
@@ -104,7 +104,10 @@ fn skip_on_fn_is_unsupporetd(
 struct TupleStructsAreUnsupported(u32, u32);
 
 #[builder]
-enum EnumsAreUnsupported {}
+enum EnumsAreUnsupportedWithAttr {}
+
+#[derive(Builder)]
+enum EnumsAreUnsupportedWithDerive {}
 
 #[builder]
 fn destructuring_in_fn_is_unsupported((_, _): (u32, u32)) {}
