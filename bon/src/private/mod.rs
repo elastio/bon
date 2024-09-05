@@ -75,25 +75,6 @@ macro_rules! expand_cfg_callback {
         )
         $($item:tt)*
     ) => {
-        #[cfg($($pred)*)]
-        $crate::expand_cfg_callback! {
-            (
-                $(
-                    (
-                        $($rest)*
-                    ),
-                )*
-            )
-            (
-                $($results)* true,
-            )
-            $final_macro,
-            (
-                $($params)*
-            )
-            $($item)*
-        }
-
         #[cfg(not($($pred)*))]
         $crate::expand_cfg_callback! {
             (
@@ -105,6 +86,25 @@ macro_rules! expand_cfg_callback {
             )
             (
                 $($results)* false,
+            )
+            $final_macro,
+            (
+                $($params)*
+            )
+            $($item)*
+        }
+
+        #[cfg($($pred)*)]
+        $crate::expand_cfg_callback! {
+            (
+                $(
+                    (
+                        $($rest)*
+                    ),
+                )*
+            )
+            (
+                $($results)* true,
             )
             $final_macro,
             (
