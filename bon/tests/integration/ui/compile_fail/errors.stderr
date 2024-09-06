@@ -166,6 +166,15 @@ note: attribute also specified here
     = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
     = note: `#[warn(unused_attributes)]` on by default
 
+warning: use of deprecated module `bon::private::builder_attribute_on_a_struct`: #[bon::builder] on top of a struct is deprecated; use `#[derive(bon::Builder)]` instead
+   --> tests/integration/ui/compile_fail/errors.rs:131:1
+    |
+131 | #[builder]
+    | ^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+    = note: this warning originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+
 error[E0599]: no method named `x` found for struct `SkipGeneratesNoSetterBuilder` in the current scope
   --> tests/integration/ui/compile_fail/errors.rs:21:38
    |

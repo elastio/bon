@@ -127,3 +127,6 @@ fn destructuring_in_fn_is_unsupported((_, _): (u32, u32)) {}
 #[must_use]
 #[must_use]
 fn double_must_use() {}
+
+#[builder]
+struct BuilderProcMacroAttrOnAStruct {}
