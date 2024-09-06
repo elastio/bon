@@ -17,7 +17,7 @@ use syn::Expr;
 
 pub(crate) mod prelude {
     /// A handy alias for [`proc_macro2::TokenStream`].
-    pub(crate) use proc_macro2::{TokenStream as TokenStream2, Span};
+    pub(crate) use proc_macro2::{Span, TokenStream as TokenStream2};
 
     /// The `Error` type in in this crate is supposed to act like `anyhow::Error`
     /// providing a simple way to create and return errors from format strings.
