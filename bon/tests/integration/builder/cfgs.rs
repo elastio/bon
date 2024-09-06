@@ -17,7 +17,10 @@ fn struct_smoke() {
         arg1: String,
     }
 
-    assert_debug_eq(Sut::builder().arg1(true).build(), expect!["Sut { arg1: true }"]);
+    assert_debug_eq(
+        Sut::builder().arg1(true).build(),
+        expect!["Sut { arg1: true }"],
+    );
 }
 
 #[test]
@@ -53,18 +56,18 @@ fn struct_with_params() {
 fn fn_smoke() {
     #[builder]
     fn sut(
-        #[cfg(all())]
+        #[cfg(not(all()))]
         #[cfg_attr(all(), allow(dead_code))]
         arg1: bool,
 
-        #[cfg(not(all()))] arg1: u32,
+        #[cfg(all())] arg1: u32,
 
         #[cfg(any())] arg1: String,
-    ) -> bool {
-        arg1
+    ) -> u32 {
+        arg1.saturating_mul(2)
     }
 
-    assert!(sut().arg1(true).call());
+    assert_debug_eq(sut().arg1(32).call(), expect!["64"]);
 }
 
 #[test]

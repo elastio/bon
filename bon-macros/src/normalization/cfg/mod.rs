@@ -98,16 +98,21 @@ impl ExpandCfg {
             macro_path,
         } = &self;
 
+        let predicates = predicates
+            .iter()
+            .enumerate()
+            .map(|(i, predicate)| {
+                let id = quote::format_ident!("__pred_{}", i);
+
+                quote!(#id: #predicate)
+            });
+
         let recursive_expansion = quote! {
-            ::bon::expand_cfg_callback! {
-                (
-                    #((#predicates),)*
-                )
-                ()
+            ::bon::__eval_cfg_callback! {
+                {}
+                #((#predicates))*
                 #macro_path,
-                (
-                    #params
-                )
+                ( #params )
                 #item
             }
         };

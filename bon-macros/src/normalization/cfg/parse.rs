@@ -3,7 +3,7 @@ use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 
 mod kw {
-    syn::custom_keyword!(cfgs);
+    syn::custom_keyword!(__cfgs);
 }
 
 pub(crate) fn parse_predicate_results(tokens: &mut TokenStream2) -> Result<Option<Vec<bool>>> {
@@ -34,15 +34,14 @@ pub(crate) struct PredicateResults {
 
 impl Parse for WrapOption<PredicateResults> {
     fn parse(input: ParseStream<'_>) -> syn::Result<Self> {
-        if !input.peek(syn::Token![@]) {
+        if !input.peek(kw::__cfgs) {
             // We need to exhaust the input stream to avoid a "unexpected token" error
             input.parse::<TokenStream2>()?;
 
             return Ok(Self(None));
         }
 
-        input.parse::<syn::Token![@]>()?;
-        input.parse::<kw::cfgs>()?;
+        input.parse::<kw::__cfgs>()?;
 
         let results;
         syn::parenthesized!(results in input);
