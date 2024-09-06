@@ -97,38 +97,42 @@ fn fn_with_params() {
 
 #[test]
 fn impl_block() {
-    // struct Sut;
+    struct Sut;
 
-    // #[bon]
-    // impl Sut {
-    //     #[builder]
-    //     fn sut_smoke(
-    //         #[cfg(all())]
-    //         #[cfg_attr(all(), allow(dead_code))]
-    //         arg1: bool,
+    #[bon::bon]
+    impl Sut {
+        #[builder]
+        fn sut_smoke(
+            #[cfg(all())]
+            #[cfg_attr(all(), allow(dead_code))]
+            arg1: bool,
 
-    //         #[cfg(not(all()))] arg1: u32,
+            #[cfg(not(all()))] arg1: u32,
 
-    //         #[cfg(any())] arg1: String,
-    //     ) -> bool {
-    //         arg1
-    //     }
+            #[cfg(any())] arg1: String,
+        ) -> bool {
+            arg1
+        }
 
-    //     #[cfg_attr(all(), builder(builder_type = OverrideBuilder))]
-    //     #[cfg_attr(any(), builder(builder_type = Unreachable))]
-    //     fn sut_with_params(
-    //         #[cfg(all())] arg1: bool,
+        #[cfg_attr(all(), builder(builder_type = OverrideBuilder))]
+        #[cfg_attr(any(), builder(builder_type = Unreachable))]
+        fn sut_with_params(
+            #[cfg(all())] arg1: bool,
 
-    //         #[cfg(not(all()))] arg1: u32,
+            #[cfg(not(all()))] arg1: u32,
 
-    //         #[cfg_attr(all(), builder(default))] arg2: [u8; 4],
+            #[cfg_attr(all(), builder(default))] arg2: [u8; 4],
 
-    //         #[cfg_attr(any(), builder(name = renamed))] arg3: [char; 2],
-    //     ) -> bool {
-    //         let _ = (arg2, arg3);
-    //         arg1
-    //     }
-    // }
+            #[cfg_attr(any(), builder(name = renamed))] arg3: [char; 2],
+        ) -> bool {
+            let _ = (arg2, arg3);
+            arg1
+        }
+    }
 
-    // assert!(sut().arg1(true).call());
+    assert!(Sut::sut_smoke().arg1(true).call());
+
+    let builder: OverrideBuilder = Sut::sut_with_params();
+
+    assert!(builder.arg1(true).arg3(['a', 'b']).call());
 }

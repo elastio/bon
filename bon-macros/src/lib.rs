@@ -181,10 +181,7 @@ pub fn derive_builder(item: TokenStream) -> TokenStream {
 /// [`builder`]: macro@builder
 #[proc_macro_attribute]
 pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
-    util::parse_attr_macro_input(params, item.clone())
-        .and_then(|(opts, item)| bon::generate(opts, item))
-        .unwrap_or_else(|err| error::error_into_token_stream(err, item.into()))
-        .into()
+    bon::generate(params.into(), item.into()).into()
 }
 
 /// Creates any map-like collection that implements [`FromIterator<(K, V)>`].

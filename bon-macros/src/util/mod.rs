@@ -10,7 +10,6 @@ mod vec;
 pub(crate) mod ide;
 
 use prelude::*;
-use proc_macro::TokenStream;
 use std::collections::HashSet;
 use syn::parse::Parser;
 use syn::punctuated::Punctuated;
@@ -40,22 +39,6 @@ pub(crate) mod prelude {
     pub(crate) use super::ty::TypeExt;
     pub(crate) use super::vec::VecExt;
     pub(crate) use super::{bail, err};
-}
-
-/// Parse a pair of [`proc_macro::TokenStream`] that an attribute macro accepts
-/// into a structured input.
-pub(crate) fn parse_attr_macro_input<Params, Item>(
-    params: TokenStream,
-    item: TokenStream,
-) -> Result<(Params, Item)>
-where
-    Params: darling::FromMeta,
-    Item: syn::parse::Parse,
-{
-    let meta = darling::ast::NestedMeta::parse_meta_list(params.into())?;
-    let params = Params::from_list(&meta)?;
-    let item = syn::parse(item)?;
-    Ok((params, item))
 }
 
 /// Utility for parsing with `#[darling(with = ...)]` attribute that allows to
