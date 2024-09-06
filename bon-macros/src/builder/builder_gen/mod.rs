@@ -228,9 +228,13 @@ impl BuilderGenCtx {
 
         let receiver = receiver.map(|receiver| &receiver.with_self_keyword);
 
-        let unset_state_literals = self
-            .regular_members()
-            .map(|_| quote!(::bon::private::Unset));
+        let unset_state_literals = self.regular_members().map(|member| {
+            if member.is_optional() {
+                quote!(::bon::private::Unset(::bon::private::Optional))
+            } else {
+                quote!(::bon::private::Unset(::bon::private::Required))
+            }
+        });
 
         let ide_hints = self.ide_hints();
 
@@ -359,9 +363,13 @@ impl BuilderGenCtx {
         let initial_state_type_alias_ident =
             quote::format_ident!("__{}InitialState", builder_ident.raw_name());
 
-        let unset_state_types = self
-            .regular_members()
-            .map(|_| quote!(::bon::private::Unset));
+        let unset_state_types = self.regular_members().map(|member| {
+            if member.is_optional() {
+                quote!(::bon::private::Unset<::bon::private::Optional>)
+            } else {
+                quote!(::bon::private::Unset<::bon::private::Required>)
+            }
+        });
 
         quote! {
             // This type alias exists just to shorten the type signature of

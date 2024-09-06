@@ -96,3 +96,15 @@ help: use `let _ = ...` to ignore the resulting value
    |
 39 |         let _ = __orig_must_use();
    |         +++++++
+
+error: unused return value of `MustUseUnderCfgBuilder::call` that must be used
+  --> tests/integration/ui/compile_fail/warnings.rs:47:9
+   |
+47 |         must_use_under_cfg().call();
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: must use message
+help: use `let _ = ...` to ignore the resulting value
+   |
+47 |         let _ = must_use_under_cfg().call();
+   |         +++++++

@@ -15,11 +15,17 @@ pub extern crate alloc;
 )]
 pub trait IsUnset {}
 
+#[derive(Debug)]
+pub struct Required;
+
+#[derive(Debug)]
+pub struct Optional;
+
 /// The sole implementation of the [`IsUnset`] trait.
 #[derive(Debug)]
-pub struct Unset;
+pub struct Unset<T>(pub T);
 
-impl IsUnset for Unset {}
+impl<T> IsUnset for Unset<T> {}
 
 /// A trait used to transition optional members to the [`Set`] state.
 ///
@@ -44,7 +50,7 @@ impl<T, Member> IntoSet<T, Member> for Set<T> {
     }
 }
 
-impl<T, Member> IntoSet<Option<T>, Member> for Unset {
+impl<T, Member> IntoSet<Option<T>, Member> for Unset<Optional> {
     fn into_set(self) -> Set<Option<T>> {
         Set(None)
     }
@@ -110,9 +116,11 @@ macro_rules! __eval_cfg_callback {
         // predicate evaluation so that we can use in a `use` statement to define
         // a new unique name for the macro to call.
         #[cfg($($pred)*)]
+        #[doc(hidden)]
         use $crate::__eval_cfg_callback_true as $pred_id;
 
         #[cfg(not($($pred)*))]
+        #[doc(hidden)]
         use $crate::__eval_cfg_callback_false as $pred_id;
 
         // The trick here is that `$pred_id` now resolves either to

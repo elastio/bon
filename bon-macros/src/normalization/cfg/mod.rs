@@ -33,7 +33,7 @@ impl ExpandCfg {
 
         let predicate_results = match parse::parse_predicate_results(&mut self.params)? {
             Some(predicate_results) => predicate_results,
-            None => return Ok(self.into_recursion(&predicates)),
+            None => return self.into_recursion(&predicates),
         };
 
         let true_predicates: BTreeSet<_> = predicates
@@ -57,7 +57,7 @@ impl ExpandCfg {
             });
         }
 
-        Ok(self.into_recursion(&predicates))
+        self.into_recursion(&predicates)
     }
 
     /// There is no mutation happening here, but we just reuse the same
@@ -89,23 +89,21 @@ impl ExpandCfg {
         Ok(predicates)
     }
 
-    fn into_recursion(self, predicates: &[TokenStream2]) -> ExpansionOutput {
+    fn into_recursion(self, predicates: &[TokenStream2]) -> Result<ExpansionOutput> {
         let Self {
             params,
             item,
             macro_path,
         } = &self;
 
-        let predicates = predicates
-            .iter()
-            .enumerate()
-            .map(|(i, predicate)| {
-                let id = quote::format_ident!("__pred_{}", i);
+        let invocation_name = self.unique_invocation_name()?;
 
-                quote!(#id: #predicate)
-            });
+        let predicates = predicates.iter().enumerate().map(|(i, predicate)| {
+            let pred_id = quote::format_ident!("{invocation_name}_{}", i);
+            quote!(#pred_id: #predicate)
+        });
 
-        let recursive_expansion = quote! {
+        let expansion = quote! {
             ::bon::__eval_cfg_callback! {
                 {}
                 #((#predicates))*
@@ -115,7 +113,68 @@ impl ExpandCfg {
             }
         };
 
-        ExpansionOutput::Recurse(recursive_expansion)
+        Ok(ExpansionOutput::Recurse(expansion))
+    }
+
+    /// The macro `__eval_cfg_callback` needs to generate a use statement for
+    /// every `cfg` predicate. To do that it needs to assign a unique name for
+    /// every `use` statement so they doesn't collide with other items in
+    /// the same scope and with each other.
+    ///
+    /// But.. How in the world can we generate a unique name for every `use`
+    /// if proc macros are supposed to be stateless and deterministic? 😳
+    ///
+    /// We could use a random number here, but that would make the output
+    /// non-deterministic, which is not good for reproducible builds and
+    /// generally may lead to some unexpected headaches 🤧.
+    ///
+    /// That's a silly problem, and here is a silly solution that doesn't
+    /// work in 100% of the cases but it's probably good enough 😸.
+    ///
+    /// We just need to use some existing name as a source of uniqueness.
+    /// The name of the item under the macro is a good candidate for that.
+    /// If the item is a function, then we can use the function name as that
+    /// reliable source of uniqueness.
+    ///
+    /// If the item is an `impl` block, then we have a bit of a problem because
+    /// the `impl` block doesn't have a unique identifier attached to it, especially
+    /// if the `self_ty` of the `impl` block isn't some simple syntax like a path.
+    ///
+    /// However, in most of the cases it will be a simple path, so its combination
+    /// with the name of the first function in the `impl` block should be unique enough.
+    fn unique_invocation_name(&self) -> Result<String> {
+        let path_to_ident =
+            |path: &syn::Path| path.segments.iter().map(|segment| &segment.ident).join("_");
+
+        // Include the name of the proc macro in the unique name to avoid
+        // collisions when different proc macros are placed on the same item
+        // and they use this code to generate unique names.
+        let macro_path_str = path_to_ident(&self.macro_path);
+
+        let item_name = match &self.item {
+            syn::Item::Fn(item) => item.sig.ident.to_string(),
+            syn::Item::Impl(item) => {
+                let self_ty = item
+                    .self_ty
+                    .as_path()
+                    .map(|path| path_to_ident(&path.path))
+                    .unwrap_or_default();
+
+                let first_fn = item
+                    .items
+                    .iter()
+                    .find_map(|item| match item {
+                        syn::ImplItem::Fn(method) => Some(method.sig.ident.to_string()),
+                        _ => None,
+                    })
+                    .unwrap_or_default();
+
+                format!("impl_{self_ty}_fn_{first_fn}")
+            }
+            _ => bail!(&Span::call_site(), "Unsupported item type"),
+        };
+
+        Ok(format!("__eval_cfg_{macro_path_str}_{item_name}"))
     }
 }
 

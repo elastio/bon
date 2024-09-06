@@ -7,6 +7,7 @@ mod cfgs;
 mod generics;
 mod init_order;
 mod lints;
+mod many_params;
 mod name_conflicts;
 mod raw_idents;
 mod smoke;

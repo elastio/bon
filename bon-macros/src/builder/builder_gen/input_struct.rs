@@ -40,12 +40,14 @@ impl StructInputParams {
                     )));
                 }
 
-                let meta = syn::parse2::<darling::ast::NestedMeta>(meta.tokens.clone())
+                let meta = darling::ast::NestedMeta::parse_meta_list(meta.tokens.clone())
                     .map_err(Into::into);
 
                 Some(meta)
             })
-            .collect::<Result<Vec<_>>>()?;
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .concat();
 
         Self::from_list(&meta)
     }

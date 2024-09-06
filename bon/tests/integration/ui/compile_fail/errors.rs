@@ -35,6 +35,17 @@ fn main() {
 
     // Test error message about repeated setter calls
     let _ = Example::builder().y(1).y(2);
+
+    {
+        type OpaqueOption<T> = Option<T>;
+
+        #[derive(Builder)]
+        struct Sut {
+            arg1: OpaqueOption<u32>,
+        }
+
+        let _ = Sut::builder().build();
+    }
 }
 
 #[derive(Builder)]
