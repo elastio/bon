@@ -151,7 +151,7 @@ impl AssignLifetimes<'_> {
         self.next_lifetime_index += 1;
 
         let lifetime = format!("'__{}{index}", self.prefix);
-        let lifetime = syn::Lifetime::new(&lifetime, proc_macro2::Span::call_site());
+        let lifetime = syn::Lifetime::new(&lifetime, Span::call_site());
 
         let lifetime_param = syn::LifetimeParam::new(lifetime.clone());
         let lifetime_param = syn::GenericParam::Lifetime(lifetime_param);

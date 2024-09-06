@@ -21,7 +21,7 @@ fn try_generate_from_derive(item: TokenStream2) -> Result<TokenStream2> {
     match syn::parse2(item)? {
         syn::Item::Struct(item_struct) => item_struct::generate(item_struct),
         _ => bail!(
-            &proc_macro2::Span::call_site(),
+            &Span::call_site(),
             "only `struct` items are supported by the `#[derive(bon::Builder)]` attribute"
         ),
     }
@@ -68,7 +68,7 @@ fn try_generate_from_attr(params: TokenStream2, item: TokenStream2) -> Result<To
     let main_output = match item {
         syn::Item::Fn(item_fn) => item_func::generate(FromMeta::from_list(nested_meta)?, item_fn)?,
         _ => bail!(
-            &proc_macro2::Span::call_site(),
+            &Span::call_site(),
             "only `fn` items are supported by the `#[bon::builder]` attribute"
         ),
     };

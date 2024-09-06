@@ -6,9 +6,12 @@ pub(crate) trait TypeExt {
     /// Try downcasting the type to [`syn::Type::Path`]
     fn as_path(&self) -> Option<&syn::TypePath>;
 
+    /// Returns the identifier of the path if this type is a simple path
+    fn last_path_segment_ident(&self) -> Option<&syn::Ident>;
+
     /// Returns `true` if the given type is p [`syn::Type::Path`] and its
     /// final segment is equal to `needle` identifier.
-    fn is_final_segment(&self, needle: &str) -> bool;
+    fn is_last_segment(&self, needle: &str) -> bool;
 
     /// Detects if the type is `desired_type` and returns its generic type parameter
     fn type_param(&self, desired_type: &str) -> Option<&syn::Type>;
@@ -39,7 +42,11 @@ impl TypeExt for syn::Type {
         }
     }
 
-    fn is_final_segment(&self, needle: &str) -> bool {
+    fn last_path_segment_ident(&self) -> Option<&syn::Ident> {
+        Some(&self.as_path()?.path.segments.last()?.ident)
+    }
+
+    fn is_last_segment(&self, needle: &str) -> bool {
         let Some(path) = self.as_path() else {
             return false;
         };
@@ -81,7 +88,7 @@ impl TypeExt for syn::Type {
     }
 
     fn is_option(&self) -> bool {
-        self.is_final_segment("Option")
+        self.is_last_segment("Option")
     }
 
     fn peel(&self) -> &Self {

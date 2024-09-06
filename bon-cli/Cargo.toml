@@ -3,6 +3,7 @@ name = "bon-cli"
 
 description = "Dev tool for working with the `bon` crate"
 
+authors      = { workspace = true }
 edition      = { workspace = true }
 homepage     = { workspace = true }
 license      = { workspace = true }

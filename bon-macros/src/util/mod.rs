@@ -18,7 +18,7 @@ use syn::Expr;
 
 pub(crate) mod prelude {
     /// A handy alias for [`proc_macro2::TokenStream`].
-    pub(crate) use proc_macro2::TokenStream as TokenStream2;
+    pub(crate) use proc_macro2::{TokenStream as TokenStream2, Span};
 
     /// The `Error` type in in this crate is supposed to act like `anyhow::Error`
     /// providing a simple way to create and return errors from format strings.
@@ -133,6 +133,7 @@ fn is_pure(expr: &Expr) -> bool {
 /// Inspired by `anyhow::bail`, but returns a [`Result`] with [`darling::Error`].
 /// It accepts the value that implements [`syn::spanned::Spanned`] to attach the
 /// span to the error.
+#[expect(edition_2024_expr_fragment_specifier)]
 macro_rules! bail {
     ($spanned:expr, $($tt:tt)*) => {
         return Err($crate::util::err!($spanned, $($tt)*))
@@ -142,6 +143,7 @@ macro_rules! bail {
 /// Inspired by `anyhow::anyhow`, but returns a [`darling::Error`].
 /// It accepts the value that implements [`syn::spanned::Spanned`] to attach the
 /// span to the error.
+#[expect(edition_2024_expr_fragment_specifier)]
 macro_rules! err {
     ($spanned:expr, $($tt:tt)*) => {
         ::darling::Error::custom(format_args!($($tt)*)).with_span($spanned)

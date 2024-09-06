@@ -6,6 +6,7 @@ This is a proc-macro crate that is supposed to be a private implementation
 detail of the `bon` crate
 """
 
+authors      = { workspace = true }
 edition      = { workspace = true }
 homepage     = { workspace = true }
 license      = { workspace = true }
