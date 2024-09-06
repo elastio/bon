@@ -31,8 +31,6 @@ impl ExpandCfg {
             });
         }
 
-        eprintln!("{}", self.params);
-
         let predicate_results = match parse::parse_predicate_results(&mut self.params)? {
             Some(predicate_results) => predicate_results,
             None => return Ok(self.into_recursion(&predicates)),
