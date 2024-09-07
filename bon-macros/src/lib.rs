@@ -100,9 +100,9 @@ pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
 
 /// Derives a builder for the struct it's placed on.
 ///
-/// ## Quick examples
+/// ## Quick example
 ///
-/// Add a `#[derive(Builder)]` attribute to your struct:
+/// Add a `#[derive(Builder)]` attribute to your struct to generate a `builder()` method for it.
 ///
 /// ```rust ignore
 /// use bon::{bon, builder, Builder};
@@ -114,16 +114,21 @@ pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
 ///     level: Option<u32>,
 /// }
 ///
-/// // Generated `builder()/build()` methods
 /// let user = User::builder()
 ///     .name("Bon".to_owned())
-///     .level(24) // <- `level` is optional, we could omit it here
-///     .is_admin(true) // call setters in any order
+///     // `level` is optional, we could omit it here
+///     .level(24)
+///     // call setters in any order
+///     .is_admin(true)
 ///     .build();
 ///
 /// assert_eq!(user.name, "Bon");
 /// assert_eq!(user.level, Some(24));
+/// assert_eq!(user.is_admin);
 /// ```
+///
+/// The builder never panics. Any mistakes such as missing required fields or setting
+/// the same field twice will be reported as compile-time errors.
 ///
 /// See the full documentation for more details:
 /// - [Guide](https://elastio.github.io/bon/guide/overview)

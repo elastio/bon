@@ -1,3 +1,5 @@
+//! Simple CLI initially created to assits with upgrading to the new versions of
+//! the `bon` crate.
 #![allow(missing_docs)]
 
 use anyhow::{bail, Context, Result};

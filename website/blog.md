@@ -3,6 +3,7 @@ title: Blog
 sidebar: false
 editLink: false
 lastUpdated: false
+layout: home
 ---
 
 <script setup>
@@ -17,8 +18,8 @@ const sortedPosts = getSorted(filteredPosts);
 
 <ul>
     <li v-for="post of sortedPosts">
-        <strong><a :href="withBase(post.url)">{{ post.frontmatter.title }}</a></strong><br/>
         <span>{{ formatDate( post.frontmatter.date ) }}</span>
+        <strong><a :href="withBase(post.url)">{{ post.frontmatter.title }}</a></strong>
     </li>
 </ul>
 
@@ -30,9 +31,14 @@ ul {
     line-height: 1.75;
 }
 
+a {
+    text-decoration: none;
+}
+
 li {
     display: flex;
-    justify-content: space-between;
+    gap: 20px;
+    align-items: baseline
 }
 
 li span {

@@ -2,7 +2,71 @@
 outline: [2, 3]
 ---
 
-# `#[builder]`
+# Builder macros
+
+There are several ways to generate a builder depending on the syntax you place the builder macro on.
+
+**Structs:**
+
+Use `#[derive(bon::Builder)]`
+
+```rust
+use bon::Builder;
+
+#[derive(Builder)]
+#[builder(/* Top-Level Attributes */)]
+struct Example {
+    #[builder(/* Member-Level Attributes */)]
+    field: u32
+}
+```
+
+**Free functions:**
+
+Use `#[bon::builder]`
+
+```rust
+use bon::builder;
+
+#[builder(/* Top-Level Attributes */)]
+fn example(
+    #[builder(/* Member-Level Attributes */)]
+    arg: u32
+) {
+    // body
+}
+```
+
+**Associated methods:**
+
+ Use `#[bon::builder]`
+
+```rust
+use bon::bon;
+
+struct Example;
+
+#[bon]
+impl Example {
+    #[builder(/* Top-Level Attributes */)]
+    fn example(
+        #[builder(/* Member-Level Attributes */)]
+        arg: u32
+    ) {
+        // body
+    }
+}
+```
+
+---
+
+Most of the attributes apply to all kinds of syntax. However, some of them are only available with structs or only with functions/methods, for example. The **"Applies to"** clause specifies the contexts where the attribute can be used.
+
+::: tip Historical note
+
+Older versions of `bon` (i.e. `<= 2.1` specifically) supported the usage of `#[bon::builder]` with structs, but that syntax was deprecated in favour of `#[derive(bon::Builder)]` syntax for various reasons described in the [2.2 release blog post](../blog/bon-builder-v2-2-release).
+
+:::
 
 ## Top-Level Attributes
 

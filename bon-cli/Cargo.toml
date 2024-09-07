@@ -14,6 +14,7 @@ version      = { workspace = true }
 publish = false
 
 [[bin]]
+doc  = false
 name = "bon"
 path = "src/main.rs"
 

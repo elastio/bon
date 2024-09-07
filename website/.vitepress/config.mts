@@ -138,7 +138,7 @@ export default defineConfig({
                     text: "Reference",
                     items: [
                         {
-                            text: "#[builder]",
+                            text: "Builder macros",
                             link: "/reference/builder",
                             items: [
                                 {
