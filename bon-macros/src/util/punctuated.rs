@@ -12,7 +12,7 @@ where
     P: Default,
 {
     fn try_retain_mut(&mut self, mut try_predicate: impl FnMut(&mut T) -> Result<bool>) -> Result {
-        // Unforunatelly, there is no builtin `retain` or `remove` in punctuated
+        // Unforunatelly, there is no builtin `retain` or `remove` in `Punctuated`
         // so we just re-create it from scratch.
         for mut pair in std::mem::take(self).into_pairs() {
             if try_predicate(pair.value_mut())? {

@@ -6,7 +6,7 @@ pub(crate) trait TypeExt {
     /// Try downcasting the type to [`syn::Type::Path`]
     fn as_path(&self) -> Option<&syn::TypePath>;
 
-    /// Returns the identifier of the path if this type is a simple path
+    /// Returns the last identifier of the path if this type is a simple path
     fn last_path_segment_ident(&self) -> Option<&syn::Ident>;
 
     /// Returns `true` if the given type is p [`syn::Type::Path`] and its

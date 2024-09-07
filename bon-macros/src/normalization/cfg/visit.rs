@@ -21,30 +21,10 @@ where
 
     fn visit_item(&mut self, item: &mut syn::Item) -> Result {
         match item {
-            syn::Item::Struct(struct_item) => self.visit_item_struct(struct_item),
             syn::Item::Fn(fn_item) => self.visit_item_fn(fn_item),
             syn::Item::Impl(impl_item) => self.visit_item_impl(impl_item),
             _ => Ok(()),
         }
-    }
-
-    fn visit_item_struct(&mut self, struct_item: &mut syn::ItemStruct) -> Result {
-        if !self.visit(&mut struct_item.attrs)? {
-            bail!(
-                struct_item,
-                "This code should never be executed if there is a `#[cfg(...)]` attribute \
-                on the struct itself, because if that cfg evaluates to `false`, \
-                no other proc macros on the item should be called."
-            )
-        }
-
-        let syn::Fields::Named(fields) = &mut struct_item.fields else {
-            bail!(struct_item, "Only structs with named fields are supported");
-        };
-
-        fields
-            .named
-            .try_retain_mut(|field| self.visit(&mut field.attrs))
     }
 
     fn visit_item_fn(&mut self, fn_item: &mut syn::ItemFn) -> Result {
@@ -53,7 +33,7 @@ where
                 fn_item,
                 "This code should never be executed if there is a `#[cfg(...)]` attribute \
                 on the function itself, because if that cfg evaluates to `false`, \
-                no other proc macros on the item should be called."
+                no other proc macro on the item should be called."
             )
         }
 
@@ -105,7 +85,7 @@ where
                 impl_item,
                 "This code should never be executed if there is a `#[cfg(...)]` attribute \
                 on the impl itself, because if that cfg evaluates to `false`, \
-                no other proc macros on the item should be called."
+                no other proc macro on the item should be called."
             )
         }
 

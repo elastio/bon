@@ -44,14 +44,14 @@ impl Parse for WrapOption<PredicateResults> {
 
         results.parse::<syn::Token![,]>()?;
 
-        let cfgs: Vec<bool> =
+        let results: Vec<bool> =
             Punctuated::<syn::LitBool, syn::Token![,]>::parse_terminated(&results)?
                 .into_iter()
                 .map(|bool| bool.value)
                 .collect();
 
         let results = PredicateResults {
-            results: cfgs,
+            results,
             recursion_counter,
             rest: input.parse()?,
         };
@@ -67,8 +67,9 @@ pub(crate) enum CfgSyntax {
 
 impl CfgSyntax {
     pub(crate) fn from_meta(meta: &syn::Meta) -> Result<Option<Self>> {
-        let syn::Meta::List(meta) = meta else {
-            return Ok(None);
+        let meta = match meta {
+            syn::Meta::List(meta) => meta,
+            _ => return Ok(None),
         };
 
         if meta.path.is_ident("cfg") {

@@ -58,7 +58,7 @@ impl<T, Member> IntoSet<Option<T>, Member> for Unset<Optional> {
 
 /// This is all a big embarrassing workaround, please don't oversee 😳😳😳.
 ///
-/// Anyway, if you you are curious what the hell is going on here, then here is
+/// Anyway, if you are curious what the hell is going on here, then here is
 /// an explanation 😸. So... where to start 🤔. Ah! The problem!
 ///
 /// ## The problem
@@ -101,7 +101,7 @@ impl<T, Member> IntoSet<Option<T>, Member> for Unset<Optional> {
 ///
 /// For the last call to this macro (when no more `$pred` are left) the macro calls back
 /// to the proc macro attribute that called it with the results of the evaluation and
-/// the original parameters and item which are passed through via the `$rest` macro variable.
+/// the original parameters and the item which are passed through via the `$rest` macro variable.
 ///
 /// [the trick]: https://users.rust-lang.org/t/supporting-or-evaluating-cfg-in-proc-macro-parameters/93240/2
 #[macro_export]
@@ -165,7 +165,7 @@ macro_rules! __eval_cfg_callback {
 #[derive(Debug)]
 pub struct Set<T>(pub T);
 
-/// The `cfg` predicated evaluated to `true`, now push that information into
+/// The `cfg` predicate evaluated to `true`, now push that information into
 /// the `$results` list.
 #[macro_export]
 #[doc(hidden)]
@@ -181,7 +181,7 @@ macro_rules! __eval_cfg_callback_true {
     };
 }
 
-/// The `cfg` predicated evaluated to `false`, now push that information into
+/// The `cfg` predicate evaluated to `false`, now push that information into
 /// the `$results` list.
 #[macro_export]
 #[doc(hidden)]
