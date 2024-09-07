@@ -2,6 +2,7 @@ use super::{
     AssocMethodCtx, BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberOrigin,
     RawMember, StartFunc,
 };
+use crate::builder::builder_gen::BuilderGenParams;
 use crate::builder::params::{BuilderParams, ItemParams};
 use crate::util::prelude::*;
 use darling::FromMeta;
@@ -128,10 +129,10 @@ impl StructInputCtx {
 
         let members = Member::from_raw(MemberOrigin::StructField, members)?;
 
-        let generics = Generics {
-            params: self.norm_struct.generics.params.iter().cloned().collect(),
-            where_clause: self.norm_struct.generics.where_clause.clone(),
-        };
+        let generics = Generics::new(
+            self.norm_struct.generics.params.iter().cloned().collect(),
+            self.norm_struct.generics.where_clause.clone(),
+        );
 
         let finish_func_body = StructLiteralBody {
             struct_ident: self.norm_struct.ident.clone(),
@@ -181,7 +182,7 @@ impl StructInputCtx {
             receiver: None,
         });
 
-        let ctx = BuilderGenCtx {
+        let ctx = BuilderGenCtx::new(BuilderGenParams {
             members,
 
             conditional_params: self.params.base.on,
@@ -194,7 +195,7 @@ impl StructInputCtx {
 
             start_func,
             finish_func,
-        };
+        });
 
         Ok(ctx)
     }

@@ -2,6 +2,7 @@ use super::{
     generic_param_to_arg, AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFunc,
     FinishFuncBody, Generics, Member, MemberOrigin, RawMember, StartFunc,
 };
+use crate::builder::builder_gen::BuilderGenParams;
 use crate::builder::params::BuilderParams;
 use crate::normalization::NormalizeSelfTy;
 use crate::util::prelude::*;
@@ -125,10 +126,7 @@ impl FuncInputCtx {
                 combined
             });
 
-        Generics {
-            params,
-            where_clause,
-        }
+        Generics::new(params, where_clause)
     }
 
     fn builder_ident(&self) -> syn::Ident {
@@ -356,13 +354,16 @@ impl FuncInputCtx {
                 .filter(<_>::is_doc)
                 .collect(),
 
-            generics: Some(Generics {
-                params: Vec::from_iter(self.norm_func.sig.generics.params),
-                where_clause: self.norm_func.sig.generics.where_clause,
-            }),
+            // Override on the start fn to use the the generics from the
+            // target function itself. We don't need to duplicate the generics
+            // from the impl block here.
+            generics: Some(Generics::new(
+                Vec::from_iter(self.norm_func.sig.generics.params),
+                self.norm_func.sig.generics.where_clause,
+            )),
         };
 
-        let ctx = BuilderGenCtx {
+        let ctx = BuilderGenCtx::new(BuilderGenParams {
             members,
 
             conditional_params: self.params.base.on,
@@ -375,7 +376,7 @@ impl FuncInputCtx {
 
             start_func,
             finish_func,
-        };
+        });
 
         Ok(ctx)
     }

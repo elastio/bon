@@ -161,3 +161,23 @@ fn generics_with_lifetimes() {
 
     sut().arg(&&&&&&&&&&42).call();
 }
+
+// This is based on the issue https://github.com/elastio/bon/issues/106
+#[test]
+fn default_generic_type_params() {
+    #[derive(bon::Builder)]
+    struct Bruh<T = u32, U = ()> {
+        #[builder(skip)]
+        _phantom: ::core::marker::PhantomData<(T, U)>,
+    }
+
+    let _: Bruh = Bruh::builder().build();
+}
+
+#[test]
+fn default_generic_const_params() {
+    #[derive(bon::Builder)]
+    struct Bruh<const N: usize = 99, const K: usize = 0> {}
+
+    let _: Bruh = Bruh::builder().build();
+}
