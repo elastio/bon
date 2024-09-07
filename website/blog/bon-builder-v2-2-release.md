@@ -13,7 +13,7 @@ If you don't know about [`bon`], then see the [motivational blog post](./how-to-
 
 ### `#[derive(Builder)]` syntax for structs
 
-A new `#[derive(Builder)]` API is now exposed by `bon`, which is destined to replace the raw `#[bon::builder]` macro when a builder is derived for a struct. The reasons for this change are described in ["Why using a `#[derive(Builder)]` syntax?"](#why-using-a-derivebuilder-syntax).
+A new `#[derive(Builder)]` API is now exposed by `bon`, which is destined to replace the raw `#[bon::builder]` macro when a builder is derived for a struct. The reasons for this change are described in ["Why using a `#[derive(Builder)]` syntax?"](#why-using-a-derive-builder-syntax).
 
 ```rust ignore
 use bon::builder; // [!code --]
