@@ -85,14 +85,19 @@ fn fn_with_params() {
         #[cfg_attr(all(), builder(default))] arg2: [u8; 4],
 
         #[cfg_attr(any(), builder(name = renamed))] arg3: [char; 2],
-    ) -> bool {
+
+        #[cfg_attr(all(), cfg_attr(not(not(all())), builder(name = renamed)))] arg5: u32,
+    ) -> (bool, u32) {
         let _ = (arg2, arg3);
-        arg1
+        (arg1, arg5)
     }
 
     let builder: OverrideBuilder = sut();
 
-    assert!(builder.arg1(true).arg3(['a', 'b']).call());
+    assert_debug_eq(
+        builder.arg1(true).arg3(['a', 'b']).renamed(32).call(),
+        expect!["(true, 32)"],
+    );
 }
 
 #[test]

@@ -21,29 +21,23 @@ impl StructInputParams {
             .attrs
             .iter()
             .filter(|attr| attr.path().is_ident("builder"))
-            .filter_map(|attr| {
+            .map(|attr| {
                 let meta = match &attr.meta {
                     syn::Meta::List(meta) => meta,
-                    _ => return Some(Err(err!(attr, "expected `#[builder(...)]` syntax"))),
+                    _ => bail!(attr, "expected `#[builder(...)]` syntax"),
                 };
 
-                // Empty `#[builder()]` is fine.
-                if meta.tokens.is_empty() {
-                    return None;
-                }
-
                 if !matches!(meta.delimiter, syn::MacroDelimiter::Paren(_)) {
-                    return Some(Err(err!(
+                    bail!(
                         &meta,
                         "wrong delimiter {:?}, expected `#[builder(...)]` syntax",
                         meta.delimiter
-                    )));
+                    );
                 }
 
-                let meta = darling::ast::NestedMeta::parse_meta_list(meta.tokens.clone())
-                    .map_err(Into::into);
+                let meta = darling::ast::NestedMeta::parse_meta_list(meta.tokens.clone())?;
 
-                Some(meta)
+                Ok(meta)
             })
             .collect::<Result<Vec<_>>>()?
             .into_iter()

@@ -145,6 +145,9 @@ macro_rules! __eval_cfg_callback {
         // The proc macro attribute to invoke with the results
         $final_macro:path,
 
+        // The number of times this macro was called recursively from the proc macro
+        $recursion_counter:literal,
+
         // Parameters to pass to the proc macro attribute after the cfg results
         ( $($macro_params:tt)* )
 
@@ -153,7 +156,7 @@ macro_rules! __eval_cfg_callback {
     ) => {
         // The special `__cfgs(...)` prefix is parsed by the proc macro attribute
         // to get the results of the cfg evaluations.
-        #[$final_macro(__cfgs($($results)*) $($macro_params)*)]
+        #[$final_macro(__cfgs($recursion_counter, $($results)*) $($macro_params)*)]
         $($item)*
     };
 }

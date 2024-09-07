@@ -31,15 +31,18 @@ impl ExpandCfg {
             });
         }
 
-        let predicate_results = match parse::parse_predicate_results(&mut self.params)? {
+        let predicate_results = match parse::parse_predicate_results(self.params.clone())? {
             Some(predicate_results) => predicate_results,
-            None => return self.into_recursion(&predicates),
+            None => return self.into_recursion(0, &predicates),
         };
+
+        // Update the parameters to remove the `@cfgs(...)` prefix from them
+        self.params = predicate_results.rest;
 
         let true_predicates: BTreeSet<_> = predicates
             .iter()
             .map(ToString::to_string)
-            .zip(predicate_results)
+            .zip(predicate_results.results)
             .filter(|(_, result)| *result)
             .map(|(predicate, _)| predicate)
             .collect();
@@ -57,7 +60,7 @@ impl ExpandCfg {
             });
         }
 
-        self.into_recursion(&predicates)
+        self.into_recursion(predicate_results.recursion_counter + 1, &predicates)
     }
 
     /// There is no mutation happening here, but we just reuse the same
@@ -89,7 +92,11 @@ impl ExpandCfg {
         Ok(predicates)
     }
 
-    fn into_recursion(self, predicates: &[TokenStream2]) -> Result<ExpansionOutput> {
+    fn into_recursion(
+        self,
+        recursion_counter: usize,
+        predicates: &[TokenStream2],
+    ) -> Result<ExpansionOutput> {
         let Self {
             params,
             item,
@@ -99,7 +106,7 @@ impl ExpandCfg {
         let invocation_name = self.unique_invocation_name()?;
 
         let predicates = predicates.iter().enumerate().map(|(i, predicate)| {
-            let pred_id = quote::format_ident!("{invocation_name}_{}", i);
+            let pred_id = quote::format_ident!("{invocation_name}_{recursion_counter}_{}", i);
             quote!(#pred_id: #predicate)
         });
 
@@ -108,6 +115,7 @@ impl ExpandCfg {
                 {}
                 #((#predicates))*
                 #macro_path,
+                #recursion_counter,
                 ( #params )
                 #item
             }

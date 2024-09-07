@@ -1,5 +1,5 @@
 ---
-title: Next-gen builder macro Bon 2.2 release 🎉. Derive syntax 🚀
+title: Next-gen builder macro Bon 2.2 release 🎉. Derive syntax and cfg support 🚀
 date: 2024-09-08
 author: Veetaha
 outline: deep

@@ -72,7 +72,7 @@ use quote::ToTokens;
 ///     }
 /// }
 ///
-/// // The method named `new` generates `builder()/build()` method
+/// // The method named `new` generates `builder()/build()` methods
 /// let user = User::builder()
 ///     .id(1)
 ///     .name("Bon".to_owned())
@@ -89,6 +89,9 @@ use quote::ToTokens;
 /// assert_eq!(user.name, "Bon");
 /// assert_eq!(greeting, "[INFO] Bon says hello to the world");
 /// ```
+///
+/// The builder never panics. Any mistakes such as missing required fields
+/// or setting the same field twice will be reported as compile-time errors.
 ///
 /// See the full documentation for more details:
 /// - [Guide](https://elastio.github.io/bon/guide/overview)
@@ -124,11 +127,11 @@ pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
 ///
 /// assert_eq!(user.name, "Bon");
 /// assert_eq!(user.level, Some(24));
-/// assert_eq!(user.is_admin);
+/// assert!(user.is_admin);
 /// ```
 ///
-/// The builder never panics. Any mistakes such as missing required fields or setting
-/// the same field twice will be reported as compile-time errors.
+/// The builder never panics. Any mistakes such as missing required fields
+/// or setting the same field twice will be reported as compile-time errors.
 ///
 /// See the full documentation for more details:
 /// - [Guide](https://elastio.github.io/bon/guide/overview)
@@ -144,44 +147,55 @@ pub fn derive_builder(item: TokenStream) -> TokenStream {
 /// It provides the necessary context to the [`builder`] macros on top of the functions
 /// inside of the `impl` block. You'll get compile errors without that context.
 ///
-/// For details on this macro including the reason why it's needed see this
-/// paragraph in the [overview](https://elastio.github.io/bon/guide/overview#builder-for-an-associated-method).
-///
 /// # Quick example
 ///
 /// ```rust ignore
 /// use bon::bon;
 ///
-/// struct Counter {
-///     val: u32,
+/// struct User {
+///     id: u32,
+///     name: String,
 /// }
 ///
-/// #[bon] // <- this macro is required on the impl block
-/// impl Counter {
+/// #[bon] // <- this attribute is required on impl blocks that contain `#[builder]`
+/// impl User {
 ///     #[builder]
-///     fn new(initial: Option<u32>) -> Self {
-///         Self {
-///             val: initial.unwrap_or_default(),
-///         }
+///     fn new(id: u32, name: String) -> Self {
+///         Self { id, name }
 ///     }
 ///
 ///     #[builder]
-///     fn increment(&mut self, diff: u32) {
-///         self.val += diff;
+///     fn greet(&self, target: &str, level: Option<&str>) -> String {
+///         let level = level.unwrap_or("INFO");
+///         let name = &self.name;
+///
+///         format!("[{level}] {name} says hello to {target}")
 ///     }
 /// }
 ///
-/// let mut counter = Counter::builder()
-///     .initial(3)
+/// // The method named `new` generates `builder()/build()` methods
+/// let user = User::builder()
+///     .id(1)
+///     .name("Bon".to_owned())
 ///     .build();
 ///
-/// counter
-///     .increment()
-///     .diff(3)
+/// // All other methods generate `method_name()/call()` methods
+/// let greeting = user
+///     .greet()
+///     .target("the world")
+///     // `level` is optional, we can omit it here
 ///     .call();
 ///
-/// assert_eq!(counter.val, 6);
+/// assert_eq!(user.id, 1);
+/// assert_eq!(user.name, "Bon");
+/// assert_eq!(greeting, "[INFO] Bon says hello to the world");
 /// ```
+///
+/// The builder never panics. Any mistakes such as missing required fields
+/// or setting the same field twice will be reported as compile-time errors.
+///
+/// For details on this macro including the reason why it's needed see
+/// [this paragraph in the overview](https://elastio.github.io/bon/guide/overview#builder-for-an-associated-method).
 ///
 /// [`builder`]: macro@builder
 #[proc_macro_attribute]

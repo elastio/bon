@@ -6,17 +6,9 @@ mod kw {
     syn::custom_keyword!(__cfgs);
 }
 
-pub(crate) fn parse_predicate_results(tokens: &mut TokenStream2) -> Result<Option<Vec<bool>>> {
+pub(crate) fn parse_predicate_results(tokens: TokenStream2) -> Result<Option<PredicateResults>> {
     let results: WrapOption<PredicateResults> = syn::parse2(tokens.clone())?;
-
-    let results = results.0.map(|results| {
-        // Update the parameters to remove the `@cfgs(...)` prefix from them
-        *tokens = results.rest;
-
-        results.results
-    });
-
-    Ok(results)
+    Ok(results.0)
 }
 
 // Newtypes over an `Option` to be able to implement trait on it
@@ -29,6 +21,7 @@ struct WrapOption<T>(Option<T>);
 #[derive(Debug)]
 pub(crate) struct PredicateResults {
     pub(crate) results: Vec<bool>,
+    pub(crate) recursion_counter: usize,
     pub(crate) rest: TokenStream2,
 }
 
@@ -46,6 +39,11 @@ impl Parse for WrapOption<PredicateResults> {
         let results;
         syn::parenthesized!(results in input);
 
+        let recursion_counter: syn::LitInt = results.parse()?;
+        let recursion_counter = recursion_counter.base10_parse::<usize>()?;
+
+        results.parse::<syn::Token![,]>()?;
+
         let cfgs: Vec<bool> =
             Punctuated::<syn::LitBool, syn::Token![,]>::parse_terminated(&results)?
                 .into_iter()
@@ -54,6 +52,7 @@ impl Parse for WrapOption<PredicateResults> {
 
         let results = PredicateResults {
             results: cfgs,
+            recursion_counter,
             rest: input.parse()?,
         };
 
