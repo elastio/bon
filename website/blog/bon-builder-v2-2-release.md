@@ -57,7 +57,9 @@ bon migrate
 cargo fmt
 ```
 
+### Guaranteed MSRV
 
+`bon` now has an official minimum supported Rust version (MSRV) `1.70.0`. It is guaranteed to compile on all versions of Rust starting with `1.70.0` and higher. Note that this isn't the lowest MSRV we can provide. We are planning to lower the MSRV even more in the future ([bon/#102](https://github.com/elastio/bon/issues/102)), but this first step of setting the MSRV at `1.70.0` is already useful enough that we released it.
 
 
 ## Why using a `#[derive(Builder)]` syntax?
