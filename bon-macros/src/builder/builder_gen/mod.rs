@@ -11,56 +11,56 @@ use crate::util::prelude::*;
 use quote::{quote, ToTokens};
 use setter_methods::{MemberSettersCtx, SettersReturnType};
 
-pub(crate) struct AssocMethodReceiverCtx {
-    pub(crate) with_self_keyword: syn::Receiver,
-    pub(crate) without_self_keyword: Box<syn::Type>,
+struct AssocMethodReceiverCtx {
+    with_self_keyword: syn::Receiver,
+    without_self_keyword: Box<syn::Type>,
 }
 
-pub(crate) struct AssocMethodCtx {
+struct AssocMethodCtx {
     /// The `Self` type of the impl block. It doesn't contain any nested
     /// `Self` keywords in it. This is prohibited by Rust's syntax itself.
-    pub(crate) self_ty: Box<syn::Type>,
+    self_ty: Box<syn::Type>,
 
     /// Present only if the method has a receiver, i.e. `self` or `&self` or
     /// `&mut self` or `self: ExplicitType`.
-    pub(crate) receiver: Option<AssocMethodReceiverCtx>,
+    receiver: Option<AssocMethodReceiverCtx>,
 }
 
 pub(crate) struct BuilderGenCtx {
-    pub(crate) members: Vec<Member>,
+    members: Vec<Member>,
 
-    pub(crate) conditional_params: Vec<ConditionalParams>,
+    conditional_params: Vec<ConditionalParams>,
 
-    pub(crate) generics: Generics,
-    pub(crate) vis: syn::Visibility,
-    pub(crate) assoc_method_ctx: Option<AssocMethodCtx>,
+    generics: Generics,
+    vis: syn::Visibility,
+    assoc_method_ctx: Option<AssocMethodCtx>,
 
-    pub(crate) start_func: StartFunc,
-    pub(crate) finish_func: FinishFunc,
+    start_func: StartFunc,
+    finish_func: FinishFunc,
 
-    pub(crate) builder_ident: syn::Ident,
+    builder_ident: syn::Ident,
 }
 
-pub(crate) struct FinishFunc {
-    pub(crate) ident: syn::Ident,
-    pub(crate) unsafety: Option<syn::Token![unsafe]>,
-    pub(crate) asyncness: Option<syn::Token![async]>,
+struct FinishFunc {
+    ident: syn::Ident,
+    unsafety: Option<syn::Token![unsafe]>,
+    asyncness: Option<syn::Token![async]>,
     /// <https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute>
-    pub(crate) must_use: Option<syn::Attribute>,
-    pub(crate) body: Box<dyn FinishFuncBody>,
-    pub(crate) output: syn::ReturnType,
-    pub(crate) docs: String,
+    must_use: Option<syn::Attribute>,
+    body: Box<dyn FinishFuncBody>,
+    output: syn::ReturnType,
+    docs: String,
 }
 
-pub(crate) struct StartFunc {
-    pub(crate) ident: syn::Ident,
-    pub(crate) attrs: Vec<syn::Attribute>,
+struct StartFunc {
+    ident: syn::Ident,
+    attrs: Vec<syn::Attribute>,
 
     /// Overrides the common generics
-    pub(crate) generics: Option<Generics>,
+    generics: Option<Generics>,
 
     /// If present overrides the automatic visibility
-    pub(crate) vis: Option<syn::Visibility>,
+    vis: Option<syn::Visibility>,
 }
 
 pub(crate) trait FinishFuncBody {
@@ -70,9 +70,57 @@ pub(crate) trait FinishFuncBody {
     fn generate(&self, members: &[Member]) -> TokenStream2;
 }
 
-pub(crate) struct Generics {
-    pub(crate) params: Vec<syn::GenericParam>,
-    pub(crate) where_clause: Option<syn::WhereClause>,
+struct Generics {
+    where_clause: Option<syn::WhereClause>,
+
+    /// Original generics that may contain default values in them. This is only
+    /// suitable for use in places where default values for generic parameters
+    /// are allowed.
+    decl_with_defaults: Vec<syn::GenericParam>,
+
+    /// Generic parameters without default values in them. This is suitable for
+    /// use as generics in function signatures or impl blocks.
+    decl_without_defaults: Vec<syn::GenericParam>,
+
+    /// Mirrors the `decl` representing how generic params should be represented
+    /// when these parameters are passed through as arguments in a turbofish.
+    args: Vec<syn::GenericArgument>,
+}
+
+impl Generics {
+    fn new(
+        decl_with_defaults: Vec<syn::GenericParam>,
+        where_clause: Option<syn::WhereClause>,
+    ) -> Self {
+        let decl_without_defaults = decl_with_defaults
+            .iter()
+            .cloned()
+            .map(|mut param| {
+                match &mut param {
+                    syn::GenericParam::Type(param) => {
+                        param.default = None;
+                    }
+                    syn::GenericParam::Const(param) => {
+                        param.default = None;
+                    }
+                    syn::GenericParam::Lifetime(_) => {}
+                }
+                param
+            })
+            .collect();
+
+        let args = decl_with_defaults
+            .iter()
+            .map(generic_param_to_arg)
+            .collect();
+
+        Self {
+            where_clause,
+            decl_with_defaults,
+            decl_without_defaults,
+            args,
+        }
+    }
 }
 
 pub(crate) struct MacroOutput {
@@ -80,13 +128,38 @@ pub(crate) struct MacroOutput {
     pub(crate) other_items: TokenStream2,
 }
 
+struct BuilderGenParams {
+    members: Vec<Member>,
+
+    conditional_params: Vec<ConditionalParams>,
+
+    generics: Generics,
+
+    vis: syn::Visibility,
+    assoc_method_ctx: Option<AssocMethodCtx>,
+
+    start_func: StartFunc,
+    finish_func: FinishFunc,
+
+    builder_ident: syn::Ident,
+}
+
 impl BuilderGenCtx {
-    fn regular_members(&self) -> impl Iterator<Item = &RegularMember> {
-        self.members.iter().filter_map(Member::as_regular)
+    fn new(params: BuilderGenParams) -> Self {
+        Self {
+            members: params.members,
+            conditional_params: params.conditional_params,
+            generics: params.generics,
+            vis: params.vis,
+            assoc_method_ctx: params.assoc_method_ctx,
+            start_func: params.start_func,
+            finish_func: params.finish_func,
+            builder_ident: params.builder_ident,
+        }
     }
 
-    fn generic_args(&self) -> impl Iterator<Item = syn::GenericArgument> + '_ {
-        self.generics.params.iter().map(generic_param_to_arg)
+    fn regular_members(&self) -> impl Iterator<Item = &RegularMember> {
+        self.members.iter().filter_map(Member::as_regular)
     }
 
     pub(crate) fn output(self) -> Result<MacroOutput> {
@@ -109,8 +182,8 @@ impl BuilderGenCtx {
         let finish_method = self.finish_method()?;
         let (setter_methods, items_for_rustdoc) = self.setter_methods()?;
 
-        let generics_decl = &self.generics.params;
-        let generic_args = self.generic_args().collect::<Vec<_>>();
+        let generics_decl = &self.generics.decl_without_defaults;
+        let generic_args = &self.generics.args;
         let where_clause = &self.generics.where_clause;
         let state_type_vars = self
             .regular_members()
@@ -210,9 +283,9 @@ impl BuilderGenCtx {
 
         let generics = self.start_func_generics();
 
-        let generics_decl = &generics.params;
+        let generics_decl = &generics.decl_without_defaults;
         let where_clause = &generics.where_clause;
-        let generic_args = self.generic_args();
+        let generic_args = &self.generics.args;
 
         let receiver = self
             .assoc_method_ctx
@@ -275,7 +348,7 @@ impl BuilderGenCtx {
             .as_ref()
             .map(|ctx| ctx.self_ty.as_ref());
 
-        let generic_args: Vec<_> = self.generic_args().collect();
+        let generic_args = &self.generics.args;
         let generic_types = generic_args.iter().filter_map(|arg| match arg {
             syn::GenericArgument::Type(ty) => Some(ty),
             _ => None,
@@ -327,7 +400,7 @@ impl BuilderGenCtx {
     fn builder_decl(&self) -> TokenStream2 {
         let vis = &self.vis;
         let builder_ident = &self.builder_ident;
-        let generics_decl = &self.generics.params;
+        let generics_decl = &self.generics.decl_with_defaults;
         let where_clause = &self.generics.where_clause;
         let phantom_data = self.phantom_data();
 
@@ -541,8 +614,8 @@ impl BuilderGenCtx {
     }
 
     fn setter_methods(&self) -> Result<(TokenStream2, TokenStream2)> {
-        let generics_decl = &self.generics.params;
-        let generic_args = self.generic_args().collect::<Vec<_>>();
+        let generics_decl = &self.generics.decl_without_defaults;
+        let generic_args = &self.generics.args;
         let builder_ident = &self.builder_ident;
         let where_clause = &self.generics.where_clause;
 

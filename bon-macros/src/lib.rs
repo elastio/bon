@@ -12,10 +12,9 @@
 
 mod bon;
 mod builder;
+mod collections;
 mod error;
-mod map;
 mod normalization;
-mod set;
 mod util;
 
 use proc_macro::TokenStream;
@@ -244,9 +243,9 @@ pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
 /// [`HashMap`]: https://doc.rust-lang.org/stable/std/collections/struct.HashMap.html
 #[proc_macro]
 pub fn map(input: TokenStream) -> TokenStream {
-    let entries = syn::parse_macro_input!(input with map::parse_macro_input);
+    let entries = syn::parse_macro_input!(input with collections::map::parse_macro_input);
 
-    map::generate(entries).into()
+    collections::map::generate(entries).into()
 }
 
 /// Creates any set-like collection that implements [`FromIterator<T>`].
@@ -294,7 +293,7 @@ pub fn set(input: TokenStream) -> TokenStream {
 
     let entries = syn::parse_macro_input!(input with Punctuated::parse_terminated);
 
-    set::generate(entries).into()
+    collections::set::generate(entries).into()
 }
 
 /// Private proc macro! Don't use it directly, it's an implementation detail.

@@ -1,12 +1,10 @@
-use crate::util;
 use crate::util::prelude::*;
 use quote::quote;
 use syn::punctuated::Punctuated;
-use syn::Expr;
-use syn::Token;
+use syn::{Expr, Token};
 
 pub(crate) fn generate(entries: Punctuated<Expr, Token![,]>) -> TokenStream2 {
-    let error = util::validate_expressions_are_unique("value in the set", &entries);
+    let error = super::validate_expressions_are_unique("value in the set", &entries);
     let entries = entries.into_iter();
     let output = quote! {
         ::core::iter::FromIterator::from_iter([

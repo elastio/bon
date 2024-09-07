@@ -1,10 +1,8 @@
-use crate::util;
 use crate::util::prelude::*;
 use quote::quote;
 use syn::parse::ParseStream;
 use syn::punctuated::Punctuated;
-use syn::Expr;
-use syn::Token;
+use syn::{Expr, Token};
 
 pub(crate) fn parse_macro_input(
     input: ParseStream<'_>,
@@ -22,7 +20,7 @@ fn parse_map_pair(pair: ParseStream<'_>) -> Result<(Expr, Expr), syn::Error> {
 
 pub(crate) fn generate(entries: Punctuated<(Expr, Expr), Token![,]>) -> TokenStream2 {
     let error =
-        util::validate_expressions_are_unique("key in the map", entries.iter().map(|(k, _)| k));
+        super::validate_expressions_are_unique("key in the map", entries.iter().map(|(k, _)| k));
 
     let items = entries.into_iter().map(|(key, value)| {
         quote!((
