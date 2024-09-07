@@ -153,7 +153,7 @@ assert_eq!(user.name, "Bon");
 
 `#[derive(Builder)]` on a struct generates builder API that is fully compatible with placing `#[builder]` attribute on the `new()` method with a signature similar to the struct's fields.
 
-See [compatibility](./compatibility#switching-between-derivebuilder-and-builder-on-the-new-method) page for details.
+See [compatibility](./compatibility#switching-between-derive-builder-and-builder-on-the-new-method) page for details.
 :::
 
 In general, both `#[derive(Builder)]` on structs and `#[builder]` on functions/methods have almost the same API. We'll use both of them throughout the documentation to provide examples. If the example shows only the usage of one syntax (e.g. `#[builder]`), it's very likely that the other syntax (e.g. `#[derive(Builder)]`) works similarly unless explicitly stated otherwise.

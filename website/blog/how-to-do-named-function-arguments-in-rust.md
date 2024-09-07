@@ -146,7 +146,7 @@ User::builder()
     .build();
 ```
 
-So, you can use just one builder crate solution consistently for everything. Builders for functions and structs both share the same API design, which allows you, for example, to switch between a `#[derive(Builder)]` on a struct and a `#[builder]` attribute on a method that creates a struct. This won't be an API-breaking change for your consumers ([details](../guide/compatibility#switching-between-derivebuilder-and-builder-on-the-new-method)).
+So, you can use just one builder crate solution consistently for everything. Builders for functions and structs both share the same API design, which allows you, for example, to switch between a `#[derive(Builder)]` on a struct and a `#[builder]` attribute on a method that creates a struct. This won't be an API-breaking change for your consumers ([details](../guide/compatibility#switching-between-derive-builder-and-builder-on-the-new-method)).
 
 
 ## Summary

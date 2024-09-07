@@ -245,7 +245,7 @@ This change also improved the `rustdoc` output a bit. Now that there is a single
 
 I am very satisfied with this change and I hope you find your code compiling faster if you are using [`bon`] extensively 🐱.
 
-# Summary
+## Summary
 
 We are continuing to improve [`bon`] and add new features. It's still a young crate and we have big plans for it, so stay tuned!
 

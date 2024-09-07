@@ -146,7 +146,7 @@ assert_eq!(user.name, "Bon");
 
 `#[builder]` on a struct generates builder API that is fully compatible with placing `#[builder]` on the `new()` method with a signature similar to the struct's fields.
 
-See [compatibility](./compatibility#switching-between-optiont-and-builderdefault) page for details.
+See [compatibility](./compatibility#switching-between-option-t-and-builder-default) page for details.
 
 :::
 

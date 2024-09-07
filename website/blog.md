@@ -16,17 +16,17 @@ const filteredPosts = posts.filter(post => !post.frontmatter.hidden);
 const sortedPosts = getSorted(filteredPosts);
 </script>
 
+<h1 align="center">Blog</h1>
 <ul>
     <li v-for="post of sortedPosts">
-        <span>{{ formatDate( post.frontmatter.date ) }}</span>
         <strong><a :href="withBase(post.url)">{{ post.frontmatter.title }}</a></strong>
+        <span>{{ formatDate( post.frontmatter.date ) }}</span>
     </li>
 </ul>
 
 <style scoped>
 ul {
     list-style-type: none;
-    padding-left: 0;
     font-size: 1.125rem;
     line-height: 1.75;
 }
@@ -38,7 +38,8 @@ a {
 li {
     display: flex;
     gap: 20px;
-    align-items: baseline
+    align-items: baseline;
+    justify-content: space-between;
 }
 
 li span {
