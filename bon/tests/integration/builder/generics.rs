@@ -166,18 +166,20 @@ fn generics_with_lifetimes() {
 #[test]
 fn default_generic_type_params() {
     #[derive(bon::Builder)]
-    struct Bruh<T = u32, U = ()> {
+    struct Sut<T = u32, U = ()> {
         #[builder(skip)]
         _phantom: ::core::marker::PhantomData<(T, U)>,
     }
 
-    let _: Bruh = Bruh::builder().build();
+    let builder: SutBuilder = Sut::builder();
+    let _: Sut = builder.build();
 }
 
 #[test]
 fn default_generic_const_params() {
     #[derive(bon::Builder)]
-    struct Bruh<const N: usize = 99, const K: usize = 0> {}
+    struct Sut<const N: usize = 99, const K: usize = 0> {}
 
-    let _: Bruh = Bruh::builder().build();
+    let builder: SutBuilder = Sut::builder();
+    let _: Sut = builder.build();
 }
