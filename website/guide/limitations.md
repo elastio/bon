@@ -1,6 +1,6 @@
 # Limitations
 
-Every tool has its constraints, and `bon` is not an exception. The limitations described below shouldn't generally occur in your day-to-day code, and if they do, there are ways to work around them. If you feel that some of the limitations are unacceptable, feel free to [open an issue] to ask for relaxing some of them.
+Every tool has its constraints, and `bon` is not an exception. The limitations described below shouldn't generally occur in your day-to-day code, and if they do, there are ways to work around them. If you feel that some of the limitations are unacceptable, feel free to [open an issue] to ask for some of them to be relaxed.
 
 ## Intra-doc links to `Self` on setter methods
 
@@ -141,10 +141,6 @@ Here is [the related issue](https://github.com/rust-lang/rustfmt/issues/6276) in
 It's possible to place `#[builder]` on top of a `const fn`, but the generated builder methods won't be marked `const`. They use the non-const method `Into::into` to transition between type states. Except for that, the generated code should be `const`-compatible.
 
 If you have a strong use case that requires full support for `const`, feel free to [open an issue]. We'll figure something out for sure 🐱.
-
-## Conditional compilation
-
-Conditionally-compiled members aren't supported yet. The blocker for this feature is a lack of support for attributes in `where` bounds in the language. See [rust-lang/rust/#115590](https://github.com/rust-lang/rust/issues/115590) for details.
 
 [open an issue]: https://github.com/elastio/bon/issues
 

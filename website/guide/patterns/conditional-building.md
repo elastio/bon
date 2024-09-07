@@ -11,8 +11,9 @@ If your conditional code needs to set the same values for the same members, cons
 **Example:**
 
 ```rust
-use bon::builder;
+use bon::Builder;
 
+#[derive(Builder)]
 #[builder(on(String, into))]
 struct User {
     name: String,
@@ -60,8 +61,9 @@ In contrast to the [shared partial builder](#shared-partial-builder), here we ar
 **Example:**
 
 ```rust
-use bon::builder;
+use bon::Builder;
 
+#[derive(Builder)]
 #[builder(on(String, into))]
 struct User {
     name: String,

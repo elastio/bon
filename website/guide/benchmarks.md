@@ -2,7 +2,7 @@
 
 `#[builder]` generates code that is easily optimizable by the compiler. This has been tested by the benchmarks below. The benchmarks compare regular positional function call syntax and builder syntax for functions annotated with `#[builder]`.
 
-In many cases `rustc` generates the same assembly code for the builder syntax as it would for a regular function call. Even when generated assembly differs, the performance differences are negligible.
+In many cases `rustc` generates the same assembly code for the builder syntax as it would for a regular function call. Even when the generated assembly differs, the performance differences are negligible.
 
 ::: tip TIP
 

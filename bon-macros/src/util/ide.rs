@@ -135,7 +135,7 @@ fn paths_from_meta(meta: Vec<Meta>) -> Vec<syn::Path> {
 /// By placing these input identifiers in the right places inside of `use` statements
 /// we can hint the IDEs to provide completions for the attributes based on what's
 /// available in the module the use statement references.
-pub(crate) fn generate_completions(meta: Vec<Meta>) -> TokenStream2 {
+pub(crate) fn generate_completion_triggers(meta: Vec<Meta>) -> TokenStream2 {
     let completions = CompletionsSchema::with_children(
         "builder_top_level",
         vec![

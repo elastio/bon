@@ -6,7 +6,7 @@ aside: false
 
 There are several other existing alternative crates that generate builders. `bon` was designed with many lessons learned from them. Here is a table that compares the builder crates with some additional explanations below.
 
-<!-- If you want to edit the table below make sure to reduce the font size in editor or turn off word wrap to easier view the table -->
+<!-- If you want to edit the table below make sure to reduce the font size in the editor or turn off word wrap to easier view the table -->
 
 Feature                                                  | `bon`                                                        | [`buildstructor`]               | [`typed-builder`]                                                   | [`derive_builder`]
 ---------------------------------------------------------|--------------------------------------------------------------|---------------------------------|---------------------------------------------------------------------|-------------------
@@ -28,9 +28,9 @@ Builder may be configured to use &self/&mut self         |                      
 
 ## Function builder fallback paradigm
 
-The builder crates `typed-builder` and `derive_builder` have a bunch of attributes that allow users to insert custom behavior into the building process of the struct. However, `bon` and `buildstructor` avoid the complexity of additional config attributes for advanced use cases by proposing the user to fallback to defining a custom function with the `#[builder]` attached to it where it's possible to do anything you want.
+The builder crates `typed-builder` and `derive_builder` have a bunch of attributes that allow users to insert custom behaviour into the building process of the struct. However, `bon` and `buildstructor` avoid the complexity of additional config attributes for advanced use cases by proposing the user fallback to defining a custom function with the `#[builder]` attached to it where it's possible to do anything you want.
 
-However, `bon` still provides some simple attributes for common use cases to configure the behavior without falling back to a more verbose syntax.
+However, `bon` still provides some simple attributes for common use cases to configure the behaviour without falling back to a more verbose syntax.
 
 ## Special setter methods for collections
 
@@ -59,7 +59,7 @@ Why is there an explicit `main()` function in this code snippet 🤔? It's a lon
 
 This feature isn't available today in `bon`, but it's planned for the future. However, it won't be enabled by default, but rather be opt-in like it is in `derive_builder`.
 
-The problem of this feature is that a setter that pushes an element into a collection like that may confuse the reader in case if only one element is pushed. This may hide the fact that the member is actually a collection called `friends` in plural. However, this feature is still useful to provide backwards-compatibility when changing the type of a member from `T` or `Option<T>` to `Collection<T>`.
+The problem with this feature is that a setter that pushes an element into a collection like that may confuse the reader in case if only one element is pushed. This may hide the fact that the member is actually a collection called `friends` in the plural. However, this feature is still useful to provide backwards compatibility when changing the type of a member from `T` or `Option<T>` to `Collection<T>`.
 
 Alternatively, `bon` provides a separate solution. `bon` exposes the following macros that provide convenient syntax to create collections.
 
@@ -67,14 +67,14 @@ Alternatively, `bon` provides a separate solution. `bon` exposes the following m
 ---------------------|----------------------|----------------------|---------------------
 [`bon::vec![]`][vec] | [`bon::arr![]`][arr] | [`bon::map!{}`][map] | [`bon::set![]`][set]
 
-These macros share a common feature that every element of the collection is converted with `Into` to shorten the syntax if you, for example need to initialize a `Vec<String>` with items of type `&str`. Use these macros only if you need this behavior, or ignore them if you want to be explicit in code and avoid implicit `Into` conversions.
+These macros share a common feature that every element of the collection is converted with `Into` to shorten the syntax if you, for example, need to initialize a `Vec<String>` with items of type `&str`. Use these macros only if you need this behaviour, or ignore them if you want to be explicit in code and avoid implicit `Into` conversions.
 
 **Example:**
 
 ```rust
-use bon::builder;
+use bon::Builder;
 
-#[builder]
+#[derive(Builder)]
 struct User {
     friends: Vec<String>
 }

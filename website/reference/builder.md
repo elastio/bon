@@ -2,7 +2,71 @@
 outline: [2, 3]
 ---
 
-# `#[builder]`
+# Builder macros
+
+There are several ways to generate a builder depending on the syntax you place the builder macro on.
+
+**Structs:**
+
+Use `#[derive(bon::Builder)]`
+
+```rust
+use bon::Builder;
+
+#[derive(Builder)]
+#[builder(/* Top-Level Attributes */)]
+struct Example {
+    #[builder(/* Member-Level Attributes */)]
+    field: u32
+}
+```
+
+**Free functions:**
+
+Use `#[bon::builder]`
+
+```rust
+use bon::builder;
+
+#[builder(/* Top-Level Attributes */)]
+fn example(
+    #[builder(/* Member-Level Attributes */)]
+    arg: u32
+) {
+    // body
+}
+```
+
+**Associated methods:**
+
+Use `#[bon::bon]` + `#[builder]` on individual methods
+
+```rust
+use bon::bon;
+
+struct Example;
+
+#[bon]
+impl Example {
+    #[builder(/* Top-Level Attributes */)]
+    fn example(
+        #[builder(/* Member-Level Attributes */)]
+        arg: u32
+    ) {
+        // body
+    }
+}
+```
+
+---
+
+Most of the attributes apply to all kinds of syntax. However, some of them are only available with structs or only with functions/methods, for example. The **"Applies to"** clause specifies the contexts where the attribute can be used.
+
+::: tip Historical note
+
+`#[derive(bon::Builder)]` syntax appeared with the version `2.2` of `bon`. The older versions of `bon` (i.e. `<= 2.1`) supported only `#[bon::builder]` syntax with structs, but that syntax was deprecated in favor of the `derive` syntax for various reasons described in the [2.2 release blog post](../blog/bon-builder-v2-2-release).
+
+:::
 
 ## Top-Level Attributes
 
@@ -14,7 +78,7 @@ Overrides the name of the generated builder struct.
 
 The default naming pattern is the following:
 
-| Type of item `#[builder]` is placed on | Naming pattern                                |
+| Underlying item                        | Naming pattern                                |
 | -------------------------------------- | --------------------------------------------- |
 | Struct                                 | `{StructName}Builder`                         |
 | `StructName::new()` method             | `{StructName}Builder`                         |
@@ -28,8 +92,9 @@ The attribute expects the desired builder type identifier as its input.
 ::: code-group
 
 ```rust [Struct]
-use bon::builder;
+use bon::Builder;
 
+#[derive(Builder)]
 #[builder(builder_type = MyBuilder)] // [!code highlight]
 struct Brush {}
 
@@ -68,9 +133,9 @@ You'll usually want to override the builder type name when you already have such
 ::: code-group
 
 ```rust compile_fail [Errored]
-use bon::builder;
+use bon::{builder, Builder};
 
-#[builder] // [!code error]
+#[derive(Builder)] // [!code error]
 struct Brush {}
 
 #[builder] // [!code error]
@@ -83,8 +148,9 @@ let builder: BrushBuilder = brush();
 ```
 
 ```rust [Fixed]
-use bon::builder;
+use bon::{builder, Builder};
 
+#[derive(Builder)]
 #[builder(builder_type = MyBuilder)] // [!code highlight]
 struct Brush {}
 
@@ -208,8 +274,9 @@ This attribute allows overriding the name of the generated builder's method that
 ::: code-group
 
 ```rust [Struct]
-use bon::builder;
+use bon::Builder;
 
+#[derive(Builder)]
 #[builder(finish_fn = assemble)] // [!code highlight]
 struct Article {
     id: u32
@@ -280,8 +347,9 @@ This attribute can take several forms.
 ::: code-group
 
 ```rust [Simple form]
-use bon::builder;
+use bon::Builder;
 
+#[derive(Builder)]
 #[builder(start_fn = init)] // [!code highlight]
 struct User {
     id: u32
@@ -293,10 +361,11 @@ User::init() // [!code highlight]
 ```
 
 ```rust [Verbose form]
-use bon::builder;
+use bon::Builder;
 
 // `User::init()` method will have `pub(crate)` visibility // [!code highlight]
 // Use `vis = ""` to make it fully private instead         // [!code highlight]
+#[derive(Builder)]
 #[builder(start_fn(name = init, vis = "pub(crate)"))]      // [!code highlight]
 pub struct User {
     id: u32
@@ -318,8 +387,9 @@ Applies the given builder attributes to all members that match the selected type
 ::: code-group
 
 ```rust [Struct]
-use bon::builder;
+use bon::Builder;
 
+#[derive(Builder)]
 #[builder(on(String, into))]
 struct Example {
     id: String,
@@ -400,8 +470,9 @@ For optional members the underlying type is matched ignoring the `Option` wrappe
 **Example:**
 
 ```rust
-use bon::builder;
+use bon::Builder;
 
+#[derive(Builder)]
 #[builder(on(String, into))]
 struct Example {
     name: String,
@@ -425,9 +496,10 @@ You can specify `on(...)` multiple times.
 **Example:**
 
 ```rust
-use bon::builder;
+use bon::Builder;
 use std::path::PathBuf;
 
+#[derive(Builder)]
 #[builder(on(String, into), on(PathBuf, into))]
 struct Example {
     name: String,
@@ -476,9 +548,9 @@ The result of the `expression` will be converted into the target type using [`In
 ::: code-group
 
 ```rust [Struct field]
-use bon::builder;
+use bon::Builder;
 
-#[builder]
+#[derive(Builder)]
 struct User {
     #[builder(default)] // [!code highlight]
     level: u32,
@@ -570,9 +642,9 @@ You can also use the values of other members by referencing their names in the `
 ::: code-group
 
 ```rust [Struct field]
-use bon::builder;
+use bon::Builder;
 
-#[builder]
+#[derive(Builder)]
 struct Example {
     member_1: u32,
 
@@ -767,16 +839,16 @@ Example::example()
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
 
-Overrdies the name for the setters generated for the member. This is most useful when `#[builder]` is placed on a struct where you'd like to use a different name for the field internally. For functions this attribute makes less sense since it's easy to just create a variable named differently `let new_name = param_name;`. However, this attribute is still supported for functions.
+Overrides the name of the setters generated for the member. This is most useful with the struct syntax where you'd like to use a different name for the field internally. For functions this attribute makes less sense since it's easy to just create a variable named differently `let new_name = param_name;`. However, this attribute is still supported for functions.
 
 **Example:**
 
 ::: code-group
 
 ```rust [Struct field]
-use bon::builder;
+use bon::Builder;
 
-#[builder]
+#[derive(Builder)]
 struct Player {
     #[builder(name = rank)] // [!code highlight]
     level: u32
@@ -842,9 +914,9 @@ The value for the member will be computed based on the form of the attribute:
 **Example:**
 
 ```rust
-use bon::builder;
+use bon::Builder;
 
-#[builder]
+#[derive(Builder)]
 struct User {
     #[builder(skip)] // [!code highlight]
     level: u32,
@@ -867,9 +939,9 @@ You can also use the values of other members by referencing their names in the `
 **Example:**
 
 ```rust
-use bon::builder;
+use bon::Builder;
 
-#[builder]
+#[derive(Builder)]
 struct Example {
     member_1: u32,
 

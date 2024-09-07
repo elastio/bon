@@ -1,7 +1,7 @@
 error: unused `ExampleBuilder` that must be used
-  --> tests/integration/ui/compile_fail/warnings.rs:30:9
+  --> tests/integration/ui/compile_fail/warnings.rs:29:9
    |
-30 |         Example::builder();
+29 |         Example::builder();
    |         ^^^^^^^^^^^^^^^^^^
    |
    = note: the builder does nothing until you call `build()` on it to finish building
@@ -13,86 +13,98 @@ note: the lint level is defined here
    = note: `#[deny(unused_must_use)]` implied by `#[deny(warnings)]`
 help: use `let _ = ...` to ignore the resulting value
    |
-30 |         let _ = Example::builder();
+29 |         let _ = Example::builder();
    |         +++++++
 
 error: unused `ExampleMustUseBuilder` that must be used
-  --> tests/integration/ui/compile_fail/warnings.rs:31:9
+  --> tests/integration/ui/compile_fail/warnings.rs:30:9
    |
-31 |         Example::must_use();
+30 |         Example::must_use();
    |         ^^^^^^^^^^^^^^^^^^^
    |
    = note: the builder does nothing until you call `call()` on it to finish building
 help: use `let _ = ...` to ignore the resulting value
    |
-31 |         let _ = Example::must_use();
+30 |         let _ = Example::must_use();
    |         +++++++
 
 error: unused `MustUseBuilder` that must be used
-  --> tests/integration/ui/compile_fail/warnings.rs:32:9
+  --> tests/integration/ui/compile_fail/warnings.rs:31:9
    |
-32 |         must_use();
+31 |         must_use();
    |         ^^^^^^^^^^
    |
    = note: the builder does nothing until you call `call()` on it to finish building
 help: use `let _ = ...` to ignore the resulting value
    |
-32 |         let _ = must_use();
+31 |         let _ = must_use();
    |         +++++++
 
 error: unused `ExampleBuilder` that must be used
-  --> tests/integration/ui/compile_fail/warnings.rs:34:9
+  --> tests/integration/ui/compile_fail/warnings.rs:33:9
    |
-34 |         Example::builder().x(1);
+33 |         Example::builder().x(1);
    |         ^^^^^^^^^^^^^^^^^^^^^^^
    |
    = note: the builder does nothing until you call `build()` on it to finish building
 help: use `let _ = ...` to ignore the resulting value
    |
-34 |         let _ = Example::builder().x(1);
+33 |         let _ = Example::builder().x(1);
    |         +++++++
 
 error: unused return value of `ExampleBuilder::<(__X, __Y)>::build` that must be used
-  --> tests/integration/ui/compile_fail/warnings.rs:35:9
+  --> tests/integration/ui/compile_fail/warnings.rs:34:9
    |
-35 |         Example::builder().x(1).y(2).build();
+34 |         Example::builder().x(1).y(2).build();
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
    |
    = note: building a struct without using it is likely a bug
 help: use `let _ = ...` to ignore the resulting value
    |
-35 |         let _ = Example::builder().x(1).y(2).build();
+34 |         let _ = Example::builder().x(1).y(2).build();
    |         +++++++
 
 error: unused return value of `ExampleMustUseBuilder::call` that must be used
-  --> tests/integration/ui/compile_fail/warnings.rs:37:9
+  --> tests/integration/ui/compile_fail/warnings.rs:36:9
    |
-37 |         Example::must_use().call();
+36 |         Example::must_use().call();
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^
    |
 help: use `let _ = ...` to ignore the resulting value
    |
-37 |         let _ = Example::must_use().call();
+36 |         let _ = Example::must_use().call();
    |         +++++++
 
 error: unused return value of `MustUseBuilder::call` that must be used
-  --> tests/integration/ui/compile_fail/warnings.rs:39:9
+  --> tests/integration/ui/compile_fail/warnings.rs:38:9
    |
-39 |         must_use().call();
+38 |         must_use().call();
    |         ^^^^^^^^^^^^^^^^^
    |
 help: use `let _ = ...` to ignore the resulting value
    |
-39 |         let _ = must_use().call();
+38 |         let _ = must_use().call();
    |         +++++++
 
 error: unused return value of `__orig_must_use` that must be used
-  --> tests/integration/ui/compile_fail/warnings.rs:40:9
+  --> tests/integration/ui/compile_fail/warnings.rs:39:9
    |
-40 |         __orig_must_use();
+39 |         __orig_must_use();
    |         ^^^^^^^^^^^^^^^^^
    |
 help: use `let _ = ...` to ignore the resulting value
    |
-40 |         let _ = __orig_must_use();
+39 |         let _ = __orig_must_use();
+   |         +++++++
+
+error: unused return value of `MustUseUnderCfgBuilder::call` that must be used
+  --> tests/integration/ui/compile_fail/warnings.rs:47:9
+   |
+47 |         must_use_under_cfg().call();
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+   |
+   = note: must use message
+help: use `let _ = ...` to ignore the resulting value
+   |
+47 |         let _ = must_use_under_cfg().call();
    |         +++++++

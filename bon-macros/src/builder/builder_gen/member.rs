@@ -195,6 +195,10 @@ impl RegularMember {
         Self::as_optional_with_ty(self, &self.norm_ty)
     }
 
+    pub(crate) fn is_optional(&self) -> bool {
+        self.as_optional_norm_ty().is_some()
+    }
+
     /// The type parameter for the `Set<T>` type that corresponds to this member
     pub(crate) fn set_state_type_param(&self) -> TokenStream2 {
         let ty = &self.norm_ty;

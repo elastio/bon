@@ -50,9 +50,9 @@ Switch between the UI tabs in the code snippets below to see how the code looks 
 
 ::: code-group
 ```rust [Into Conversions]
-use bon::builder;
+use bon::Builder;
 
-#[builder]
+#[derive(Builder)]
 struct Example {
     #[builder(into)] // [!code highlight]
     string: String,
@@ -75,9 +75,9 @@ Example::builder()
 ```
 
 ```rust [Default]
-use bon::builder;
+use bon::Builder;
 
-#[builder]
+#[derive(Builder)]
 struct Example {
     // No attributes
     string: String,
@@ -301,9 +301,9 @@ This is the drawback of using not only `impl Into`, but any generics at all.
 `impl Into` breaks type inference for `None` literals. For example, this code doesn't use `Into` conversions and compiles fine:
 
 ```rust
-use bon::builder;
+use bon::Builder;
 
-#[builder]
+#[derive(Builder)]
 struct Example {
     member: Option<String>
 }
@@ -318,9 +318,9 @@ Example::builder()
 Now, let's enable an `Into` conversion for the `member`:
 
 ```rust compile_fail
-use bon::builder;
+use bon::Builder;
 
-#[builder]
+#[derive(Builder)]
 struct Example {
     #[builder(into)] // [!code ++]
     member: Option<String>
@@ -355,9 +355,9 @@ It means that the `None` literal could be of types `Option<&str>` or `Option<Str
 To work around this problem the caller would need to explicitly specify the generic parameter for the `Option` type when passing the `None` literal:
 
 ```rust
-use bon::builder;
+use bon::Builder;
 
-#[builder]
+#[derive(Builder)]
 struct Example {
     #[builder(into)] // [!code ++]
     member: Option<String>

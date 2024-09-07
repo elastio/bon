@@ -1,4 +1,4 @@
-use bon::builder;
+use bon::{builder, Builder};
 use std::collections::{BTreeMap, BTreeSet};
 
 fn main() {
@@ -9,7 +9,7 @@ fn main() {
 
     let set: BTreeSet<String> = bon::set!["mintals", "guns", "mintals", "roses"];
 
-    #[builder]
+    #[derive(Builder)]
     struct SkipGeneratesNoSetter {
         #[builder(skip)]
         x: u32,
@@ -21,7 +21,7 @@ fn main() {
     SkipGeneratesNoSetter::builder().x(42).build();
     SkipGeneratesNoSetter::builder().y(42).build();
 
-    #[builder]
+    #[derive(Builder)]
     struct Example {
         x: u32,
         y: u32,
@@ -35,9 +35,20 @@ fn main() {
 
     // Test error message about repeated setter calls
     let _ = Example::builder().y(1).y(2);
+
+    {
+        type OpaqueOption<T> = Option<T>;
+
+        #[derive(Builder)]
+        struct Sut {
+            arg1: OpaqueOption<u32>,
+        }
+
+        let _ = Sut::builder().build();
+    }
 }
 
-#[builder]
+#[derive(Builder)]
 struct TupleStruct(u32, u32);
 
 #[builder]
@@ -70,22 +81,23 @@ fn incomplete_on3() {}
 #[builder(on(_,))]
 fn incomplete_on4() {}
 
+#[derive(Builder)]
 #[builder(start_fn())]
 struct EmptyStartFn {}
 
-#[builder]
+#[derive(Builder)]
 struct ConflictingAttrs {
     #[builder(skip, into)]
     x: u32,
 }
 
-#[builder]
+#[derive(Builder)]
 struct ConflictingAttrs2 {
     #[builder(skip, name = bar)]
     x: u32,
 }
 
-#[builder]
+#[derive(Builder)]
 struct ConflictingAttrs3 {
     #[builder(skip, default = 42)]
     z: u32,
@@ -99,11 +111,14 @@ fn skip_on_fn_is_unsupporetd(
 ) {
 }
 
-#[builder]
+#[derive(Builder)]
 struct TupleStructsAreUnsupported(u32, u32);
 
 #[builder]
-enum EnumsAreUnsupported {}
+enum EnumsAreUnsupportedWithAttr {}
+
+#[derive(Builder)]
+enum EnumsAreUnsupportedWithDerive {}
 
 #[builder]
 fn destructuring_in_fn_is_unsupported((_, _): (u32, u32)) {}
@@ -112,3 +127,6 @@ fn destructuring_in_fn_is_unsupported((_, _): (u32, u32)) {}
 #[must_use]
 #[must_use]
 fn double_must_use() {}
+
+#[builder]
+struct BuilderProcMacroAttrOnAStruct {}

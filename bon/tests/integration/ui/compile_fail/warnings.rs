@@ -1,12 +1,11 @@
 #![deny(warnings)]
-
-use bon::{bon, builder};
+use bon::{bon, builder, Builder};
 
 fn main() {
     // Test #[must_use]
     {
-        #[builder]
         #[allow(dead_code)]
+        #[derive(Builder)]
         struct Example {
             x: u32,
             y: u32,
@@ -38,5 +37,21 @@ fn main() {
 
         must_use().call();
         __orig_must_use();
+
+        #[builder]
+        #[cfg_attr(all(), must_use = "must use message")]
+        fn must_use_under_cfg() -> u32 {
+            99
+        }
+
+        must_use_under_cfg().call();
+
+        #[builder]
+        #[cfg_attr(any(), must_use = "unreachable must use")]
+        fn must_use_compiled_out() -> u32 {
+            99
+        }
+
+        must_use_compiled_out().call();
     }
 }

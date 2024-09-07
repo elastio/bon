@@ -3,12 +3,18 @@ mod attr_expose_positional_fn;
 mod attr_into;
 mod attr_on;
 mod attr_skip;
+mod cfgs;
 mod generics;
 mod init_order;
 mod lints;
+mod many_params;
 mod name_conflicts;
 mod raw_idents;
 mod smoke;
+
+/// Tests for the deprecated features that we still support, but that we'll
+/// eventually remove in the future in a new major version release.
+mod legacy;
 
 use crate::prelude::*;
 

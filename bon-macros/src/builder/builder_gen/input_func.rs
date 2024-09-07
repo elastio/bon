@@ -78,11 +78,7 @@ impl FuncInputCtx {
             .impl_ctx
             .as_deref()?
             .self_ty
-            .as_path()?
-            .path
-            .segments
-            .last()?
-            .ident
+            .last_path_segment_ident()?
             .to_string();
 
         Some(prefix)

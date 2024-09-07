@@ -3,12 +3,13 @@ mod fn_arg;
 mod ident;
 mod iterator;
 mod path;
+mod punctuated;
 mod ty;
+mod vec;
 
 pub(crate) mod ide;
 
 use prelude::*;
-use proc_macro::TokenStream;
 use std::collections::HashSet;
 use syn::parse::Parser;
 use syn::punctuated::Punctuated;
@@ -16,7 +17,7 @@ use syn::Expr;
 
 pub(crate) mod prelude {
     /// A handy alias for [`proc_macro2::TokenStream`].
-    pub(crate) use proc_macro2::TokenStream as TokenStream2;
+    pub(crate) use proc_macro2::{Span, TokenStream as TokenStream2};
 
     /// The `Error` type in in this crate is supposed to act like `anyhow::Error`
     /// providing a simple way to create and return errors from format strings.
@@ -34,24 +35,10 @@ pub(crate) mod prelude {
     pub(crate) use super::iterator::IntoIteratorExt;
     pub(crate) use super::iterator::IteratorExt;
     pub(crate) use super::path::PathExt;
+    pub(crate) use super::punctuated::PunctuatedExt;
     pub(crate) use super::ty::TypeExt;
+    pub(crate) use super::vec::VecExt;
     pub(crate) use super::{bail, err};
-}
-
-/// Parse a pair of [`proc_macro::TokenStream`] that an attribute macro accepts
-/// into a structured input.
-pub(crate) fn parse_attr_macro_input<Params, Item>(
-    params: TokenStream,
-    item: TokenStream,
-) -> Result<(Params, Item)>
-where
-    Params: darling::FromMeta,
-    Item: syn::parse::Parse,
-{
-    let meta = darling::ast::NestedMeta::parse_meta_list(params.into())?;
-    let params = Params::from_list(&meta)?;
-    let item = syn::parse(item)?;
-    Ok((params, item))
 }
 
 /// Utility for parsing with `#[darling(with = ...)]` attribute that allows to
@@ -129,6 +116,7 @@ fn is_pure(expr: &Expr) -> bool {
 /// Inspired by `anyhow::bail`, but returns a [`Result`] with [`darling::Error`].
 /// It accepts the value that implements [`syn::spanned::Spanned`] to attach the
 /// span to the error.
+#[allow(edition_2024_expr_fragment_specifier)]
 macro_rules! bail {
     ($spanned:expr, $($tt:tt)*) => {
         return Err($crate::util::err!($spanned, $($tt)*))
@@ -138,6 +126,7 @@ macro_rules! bail {
 /// Inspired by `anyhow::anyhow`, but returns a [`darling::Error`].
 /// It accepts the value that implements [`syn::spanned::Spanned`] to attach the
 /// span to the error.
+#[allow(edition_2024_expr_fragment_specifier)]
 macro_rules! err {
     ($spanned:expr, $($tt:tt)*) => {
         ::darling::Error::custom(format_args!($($tt)*)).with_span($spanned)

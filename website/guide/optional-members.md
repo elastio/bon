@@ -16,7 +16,7 @@ fn example(level: Option<u32>) {}
 example().call();
 ```
 
-The `#[builder]` attribute generates two setters for each optional member. One setter accepts `T` and the other accepts `Option<T>`. The following setters will be generated in the example above (simplified):
+The generated builder has two setters for each optional member. One setter accepts `T` and the other accepts `Option<T>`. The following setters will be generated in the example above (simplified):
 
 ```rust ignore
 impl ExampleBuilder {

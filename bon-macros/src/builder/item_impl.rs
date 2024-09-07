@@ -25,7 +25,7 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
 
     if builder_funcs.is_empty() {
         bail!(
-            &proc_macro2::Span::call_site(),
+            &Span::call_site(),
             "There are no #[builder] functions in the impl block, so there is no \
             need for a #[bon] attribute on the impl block"
         );

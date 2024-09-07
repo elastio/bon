@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Fixed a bug where a member of opaque `Option` type (i.e. the `Option` type was renamed to make the builder macro not detect it as `Option`) was still optional.
+
 ## [2.1.1](https://github.com/elastio/bon/compare/v2.1.0...v2.1.1) - 2024-09-03
 
 ### Added

@@ -52,9 +52,8 @@ fn smoke_fn() {
 fn smoke_struct() {
     /// Docs on struct itself.
     /// Multiline.
-    #[builder]
     #[allow(dead_code)]
-    #[derive(Debug)]
+    #[derive(Debug, Builder)]
     pub(crate) struct Sut<'a> {
         /// Docs on bool field.
         /// Multiline.

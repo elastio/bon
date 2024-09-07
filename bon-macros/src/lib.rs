@@ -20,16 +20,10 @@ mod util;
 
 use proc_macro::TokenStream;
 use quote::ToTokens;
-use syn::parse::Parser;
 
-/// Can be placed on top of a free function or an associated method or a struct
-/// declaration. Generates a builder for the item beneath it.
+/// Generates a builder for the function or method it's placed on.
 ///
-/// Docs for this macro are split into two parts:
-/// - [Guide](https://elastio.github.io/bon/guide/overview)
-/// - [Attributes reference](https://elastio.github.io/bon/reference/builder)
-///
-/// # Quick example
+/// ## Quick examples
 ///
 /// `bon` can turn a function with positional parameters into a function with "named"
 /// parameters via a builder. It's as easy as placing the `#[builder]` macro on top of it.
@@ -38,31 +32,37 @@ use syn::parse::Parser;
 /// use bon::builder;
 ///
 /// #[builder]
-/// fn greet(name: &str, age: u32) -> String {
-///     format!("Hello {name} with age {age}!")
+/// fn greet(name: &str, level: Option<u32>) -> String {
+///     let level = level.unwrap_or(0);
+///
+///     format!("Hello {name}! Your level is {level}")
 /// }
 ///
 /// let greeting = greet()
 ///     .name("Bon")
-///     .age(24)
+///     .level(24) // <- setting `level` is optional, we could omit it
 ///     .call();
 ///
-/// assert_eq!(greeting, "Hello Bon with age 24!");
+/// assert_eq!(greeting, "Hello Bon! Your level is 24");
 /// ```
 ///
-/// You can also use the `#[builder]` attribute with structs and associated methods:
+/// You can also use the `#[builder]` attribute with associated methods:
 ///
 /// ```rust ignore
-/// use bon::{bon, builder};
+/// use bon::bon;
 ///
-/// #[builder]
 /// struct User {
 ///     id: u32,
 ///     name: String,
 /// }
 ///
-/// #[bon]
+/// #[bon] // <- this attribute is required on impl blocks that contain `#[builder]`
 /// impl User {
+///     #[builder]
+///     fn new(id: u32, name: String) -> Self {
+///         Self { id, name }
+///     }
+///
 ///     #[builder]
 ///     fn greet(&self, target: &str, level: Option<&str>) -> String {
 ///         let level = level.unwrap_or("INFO");
@@ -72,11 +72,13 @@ use syn::parse::Parser;
 ///     }
 /// }
 ///
+/// // The method named `new` generates `builder()/build()` methods
 /// let user = User::builder()
 ///     .id(1)
 ///     .name("Bon".to_owned())
 ///     .build();
 ///
+/// // All other methods generate `method_name()/call()` methods
 /// let greeting = user
 ///     .greet()
 ///     .target("the world")
@@ -88,25 +90,55 @@ use syn::parse::Parser;
 /// assert_eq!(greeting, "[INFO] Bon says hello to the world");
 /// ```
 ///
-/// See [the guide](https://elastio.github.io/bon/guide/overview) for the rest.
+/// The builder never panics. Any mistakes such as missing required fields
+/// or setting the same field twice will be reported as compile-time errors.
+///
+/// See the full documentation for more details:
+/// - [Guide](https://elastio.github.io/bon/guide/overview)
+/// - [Attributes reference](https://elastio.github.io/bon/reference/builder)
 #[proc_macro_attribute]
 pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
-    let meta = util::ide::parse_comma_separated_meta
-        .parse2(params.clone().into())
-        .unwrap_or_default();
+    builder::generate_from_attr(params.into(), item.into()).into()
+}
 
-    let completions = util::ide::generate_completions(meta);
-
-    let main = syn::parse(item.clone())
-        .map_err(Into::into)
-        .and_then(|item| builder::generate_for_item(params.into(), item))
-        .unwrap_or_else(|err| error::error_into_token_stream(err, item.into()));
-
-    quote::quote! {
-        #completions
-        #main
-    }
-    .into()
+/// Derives a builder for the struct it's placed on.
+///
+/// ## Quick example
+///
+/// Add a `#[derive(Builder)]` attribute to your struct to generate a `builder()` method for it.
+///
+/// ```rust ignore
+/// use bon::{bon, builder, Builder};
+///
+/// #[derive(Builder)]
+/// struct User {
+///     name: String,
+///     is_admin: bool,
+///     level: Option<u32>,
+/// }
+///
+/// let user = User::builder()
+///     .name("Bon".to_owned())
+///     // `level` is optional, we could omit it here
+///     .level(24)
+///     // call setters in any order
+///     .is_admin(true)
+///     .build();
+///
+/// assert_eq!(user.name, "Bon");
+/// assert_eq!(user.level, Some(24));
+/// assert!(user.is_admin);
+/// ```
+///
+/// The builder never panics. Any mistakes such as missing required fields
+/// or setting the same field twice will be reported as compile-time errors.
+///
+/// See the full documentation for more details:
+/// - [Guide](https://elastio.github.io/bon/guide/overview)
+/// - [Attributes reference](https://elastio.github.io/bon/reference/builder)
+#[proc_macro_derive(Builder, attributes(builder))]
+pub fn derive_builder(item: TokenStream) -> TokenStream {
+    builder::generate_from_derive(item.into()).into()
 }
 
 /// Companion macro for [`builder`]. You should place it on top of the `impl` block
@@ -115,52 +147,60 @@ pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
 /// It provides the necessary context to the [`builder`] macros on top of the functions
 /// inside of the `impl` block. You'll get compile errors without that context.
 ///
-/// For details on this macro including the reason why it's needed see this
-/// paragraph in the [overview](https://elastio.github.io/bon/guide/overview#builder-for-an-associated-method).
-///
 /// # Quick example
 ///
 /// ```rust ignore
 /// use bon::bon;
 ///
-/// struct Counter {
-///     val: u32,
+/// struct User {
+///     id: u32,
+///     name: String,
 /// }
 ///
-/// #[bon] // <- this macro is required on the impl block
-/// impl Counter {
+/// #[bon] // <- this attribute is required on impl blocks that contain `#[builder]`
+/// impl User {
 ///     #[builder]
-///     fn new(initial: Option<u32>) -> Self {
-///         Self {
-///             val: initial.unwrap_or_default(),
-///         }
+///     fn new(id: u32, name: String) -> Self {
+///         Self { id, name }
 ///     }
 ///
 ///     #[builder]
-///     fn increment(&mut self, diff: u32) {
-///         self.val += diff;
+///     fn greet(&self, target: &str, level: Option<&str>) -> String {
+///         let level = level.unwrap_or("INFO");
+///         let name = &self.name;
+///
+///         format!("[{level}] {name} says hello to {target}")
 ///     }
 /// }
 ///
-/// let mut counter = Counter::builder()
-///     .initial(3)
+/// // The method named `new` generates `builder()/build()` methods
+/// let user = User::builder()
+///     .id(1)
+///     .name("Bon".to_owned())
 ///     .build();
 ///
-/// counter
-///     .increment()
-///     .diff(3)
+/// // All other methods generate `method_name()/call()` methods
+/// let greeting = user
+///     .greet()
+///     .target("the world")
+///     // `level` is optional, we can omit it here
 ///     .call();
 ///
-/// assert_eq!(counter.val, 6);
+/// assert_eq!(user.id, 1);
+/// assert_eq!(user.name, "Bon");
+/// assert_eq!(greeting, "[INFO] Bon says hello to the world");
 /// ```
+///
+/// The builder never panics. Any mistakes such as missing required fields
+/// or setting the same field twice will be reported as compile-time errors.
+///
+/// For details on this macro including the reason why it's needed see
+/// [this paragraph in the overview](https://elastio.github.io/bon/guide/overview#builder-for-an-associated-method).
 ///
 /// [`builder`]: macro@builder
 #[proc_macro_attribute]
 pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
-    util::parse_attr_macro_input(params, item.clone())
-        .and_then(|(opts, item)| bon::generate(opts, item))
-        .unwrap_or_else(|err| error::error_into_token_stream(err, item.into()))
-        .into()
+    bon::generate(params.into(), item.into()).into()
 }
 
 /// Creates any map-like collection that implements [`FromIterator<(K, V)>`].
