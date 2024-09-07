@@ -1,5 +1,6 @@
 <script setup>
 import { data as version } from '/data/version.data'
+import VPSocialLink from "vitepress/dist/client/theme-default/components/VPSocialLink.vue";
 const [_, versionWildcard] = version.match(/(\d+.\d+).\d+/);
 </script>
 
@@ -263,7 +264,37 @@ This is just part of what's available in `bon`. You may consider reading the res
 
 However, feel free to skip the docs and just use the `#[builder]` and `#[derive(Builder)]` in your code. They are designed to be intuitive, so they'll probably do the thing you want them to do already.
 
-If you can't figure something out, consult the docs and maybe use that search `🔍 Search` thing at the top to navigate. You may also create an issue or a discussion in the [Github repository](https://github.com/elastio/bon) for help.
+If you can't figure something out, consult the docs and maybe use that search `🔍 Search` thing at the top to navigate. You may also create an issue or a discussion in the [Github repository](https://github.com/elastio/bon) for help, or write us a message in [Discord](https://discord.gg/QcBYSamw4c) (see below).
+
+## Socials
+
+<table>
+    <tr>
+        <td>
+            <div style="display: flex; align-items: center">
+                <VPSocialLink
+                    icon="discord"
+                    link="https://discord.gg/8VJ8J3c"
+                />
+                <a href="https://discord.gg/QcBYSamw4c">Discord</a>
+            </div>
+        </td>
+        <td>Here you can leave feedback, ask questions, report bugs, or just write "thank you".</td>
+    </tr>
+    <tr>
+        <td>
+            <div style="display: flex; align-items: center">
+                <VPSocialLink
+                    icon="x"
+                    link="https://x.com/veetaha"
+                />
+                <a href="https://x.com/veetaha" class="nobr">X (Twitter)</a>
+            </div>
+        </td>
+        <td>Profile of the maintainer. There are only posts about <code>bon</code> and Rust in general there.</td>
+    </tr>
+</table>
+
 
 ## Acknowledgments
 
