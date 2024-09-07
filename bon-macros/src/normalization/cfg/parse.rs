@@ -7,7 +7,7 @@ mod kw {
 }
 
 pub(crate) fn parse_predicate_results(tokens: TokenStream2) -> Result<Option<PredicateResults>> {
-    let results: WrapOption<PredicateResults> = syn::parse2(tokens.clone())?;
+    let results: WrapOption<PredicateResults> = syn::parse2(tokens)?;
     Ok(results.0)
 }
 
