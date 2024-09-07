@@ -1,10 +1,9 @@
 #![allow(deprecated)]
 
-use crate::prelude::*;
-
 #[rustversion::since(1.77.0)]
 #[test]
 fn builder_on_struct() {
+    use crate::prelude::*;
     use core::net::IpAddr;
 
     #[builder]
