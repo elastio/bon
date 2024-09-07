@@ -206,9 +206,9 @@ Macros generate code, and that code must not always be fully accessible to the s
 I'll use `bon`'s macros syntax to showcase this.
 
 ```rust
-use bon::builder;
+use bon::Builder;
 
-#[builder]
+#[derive(Builder)]
 struct User {
     name: String,
 }
@@ -275,19 +275,19 @@ So... problem solved, right?... Wrong 🐱!
 Now imagine our builder macro is invoked for a struct defined inside of a local function scope:
 
 ```rust
-use bon::builder;
+use bon::Builder;
 
 fn example() {
     struct Password(String);
 
-    #[builder]
+    #[derive(Builder)]
     struct User {
         password: Password,
     }
 }
 ```
 
-If `#[builder]` creates a child module, then we have a problem. Let's see the generated code:
+If `#[derive(Builder)]` creates a child module, then we have a problem. Let's see the generated code:
 
 ```rust compile_fail
 fn example() {
@@ -323,7 +323,7 @@ The core problem is the conflict:
 - We want to make the builder's fields private, so we need to define the builder struct inside of a child module.
 - We want to reference types from the surrounding scope in the builder's fields, including local items, so we can't define the builder struct inside the child module.
 
-This is the problem that I found in `buildstructor`. The only way to solve this is to make a compromise, which I did when implementing [`#[bon::builder]`](../guide/overview). The compromise is not to use a child module, and obfuscate the private fields of the builder struct with leading `__` and `#[doc(hidden)]` attributes to make it hard for the user to access them (even though not physically impossible).
+This is the problem that I found in `buildstructor`. The only way to solve this is to make a compromise, which I did when implementing [`#[derive(bon::Builder)]`](../guide/overview). The compromise is not to use a child module, and obfuscate the private fields of the builder struct with leading `__` and `#[doc(hidden)]` attributes to make it hard for the user to access them (even though not physically impossible).
 
 But then... Defining types inside of functions is rather a niche use case. How do child modules in macro-generated code break the doc test mentioned at the beginning of this article?
 

@@ -2,7 +2,7 @@
 
 ## Making a required member optional
 
-It's totally backward compatible to make a required member optional by changing the type from `T` to `Option<T>` or by adding [`#[builder(default)]`](../reference/builder.md#default) to it.
+It's totally backwards compatible to make a required member optional by changing the type from `T` to `Option<T>` or by adding [`#[builder(default)]`](../reference/builder.md#default) to it.
 
 This is because both required and optional members have a setter that accepts `T` (not wrapped in an `Option`). The only change to the public API when making the required member optional is that a `maybe_`-prefixed setter is added to the builder. That new method accepts an `Option<T>`.
 
@@ -87,9 +87,9 @@ You may add `_` prefix to the member name to mark it as unused for the time bein
 ::: code-group
 
 ```rust [Struct]
-use bon::builder;
+use bon::Builder;
 
-#[builder]
+#[derive(Builder)]
 struct Example {
     _name: String
 }
@@ -130,21 +130,22 @@ Example::example()
 
 :::
 
-## Moving `#[builder]` from the struct to the `new()` method
+## Switching between `#[derive(Builder)]` and `#[builder]` on the `new()` method
 
-`#[builder]` on a struct generates builder API that is fully compatible with placing `#[builder]` on the `new()` method with the signature similar to struct's fields.
+`#[derive(Builder)]` on a struct generates builder API that is fully compatible with placing `#[builder]` on the `new()` method with the signature similar to struct's fields.
 
-This means, for example, it's preferable to place the `#[builder]` attribute on top of your struct in most cases because it's convenient. However, if you need to have some custom logic during the construction of your type, you may simply create a `new()` method annotated with `#[builder]` where you can do anything you want to create an instance of your type.
+This means, for example, it's preferable to place the `#[derive(Builder)]` attribute on top of your struct in most cases because it's convenient. However, if you need to have some custom logic during the construction of your type, you may simply create a `new()` method annotated with `#[builder]` where you can do anything you want to create an instance of your type.
 
-To keep your struct's public API compatible with the time when `#[builder]` was on the struct directly, the `new()` method must accept the same parameters as there were fields in the struct.
+To keep your struct's public API compatible with the time when `#[derive(Builder)]` was on the struct directly, the `new()` method must accept the same parameters as there were fields in the struct.
 
 **Example:**
 
 ```rust ignore
-use bon::bon;
+use bon::Builder; // [!code --]
+use bon::bon;     // [!code ++]
 
-// Previously we used `#[builder]` on the struct
-#[builder] // [!code --]
+// Previously we used `#[derive(Builder)]` on the struct
+#[derive(Builder)] // [!code --]
 struct User {
     // But then we decided to change the internal representation
     // of the `id` field to use `String` instead of `u32`
@@ -154,7 +155,7 @@ struct User {
 }
 
 // To preserve compatibility we need to define a `new()` method with `#[builder]`
-// that still accepts `u32` for `id` member.
+// that still accepts `u32` for the `id` member.
 #[bon]                                      // [!code ++]
 impl User {                                 // [!code ++]
     #[builder]                              // [!code ++]
@@ -166,7 +167,7 @@ impl User {                                 // [!code ++]
     }                                       // [!code ++]
 }                                           // [!code ++]
 
-// The caller's code didn't change. It still uses `u32` for `id` member.
+// The caller's code didn't change. It still uses `u32` for the `id` member.
 let user = User::builder()
     // `id` is still accepted as a `u32` here
     .id(1)
@@ -174,7 +175,7 @@ let user = User::builder()
     .build();
 ```
 
-## Adding #[builder] to existing code
+## Adding `#[builder]` to existing code
 
 If your existing code defines functions with positional parameters in its public API that you'd like to change to use builder syntax, but you want to keep the old code compatible with the positional functions API, then you may use `#[builder(expose_positional_fn)]` attribute to keep both syntaxes available.
 
