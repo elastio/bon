@@ -116,7 +116,7 @@ fn is_pure(expr: &Expr) -> bool {
 /// Inspired by `anyhow::bail`, but returns a [`Result`] with [`darling::Error`].
 /// It accepts the value that implements [`syn::spanned::Spanned`] to attach the
 /// span to the error.
-#[expect(edition_2024_expr_fragment_specifier)]
+#[allow(edition_2024_expr_fragment_specifier)]
 macro_rules! bail {
     ($spanned:expr, $($tt:tt)*) => {
         return Err($crate::util::err!($spanned, $($tt)*))
@@ -126,7 +126,7 @@ macro_rules! bail {
 /// Inspired by `anyhow::anyhow`, but returns a [`darling::Error`].
 /// It accepts the value that implements [`syn::spanned::Spanned`] to attach the
 /// span to the error.
-#[expect(edition_2024_expr_fragment_specifier)]
+#[allow(edition_2024_expr_fragment_specifier)]
 macro_rules! err {
     ($spanned:expr, $($tt:tt)*) => {
         ::darling::Error::custom(format_args!($($tt)*)).with_span($spanned)

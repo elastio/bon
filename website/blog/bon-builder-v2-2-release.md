@@ -15,7 +15,7 @@ If you don't know about [`bon`], then see the [motivational blog post](./how-to-
 
 A new `#[derive(Builder)]` API is now exposed by `bon`, which is destined to replace the raw `#[bon::builder]` macro when a builder is derived for a struct. The reasons for this change are described in ["Why using a `#[derive(Builder)]` syntax?"](#why-using-a-derivebuilder-syntax).
 
-```rust
+```rust ignore
 use bon::builder; // [!code --]
 use bon::Builder; // [!code ++]
 
@@ -76,7 +76,7 @@ People were generally understanding of the goal to have a single `#[builder]` ma
 
 For example, suppose you had an existing struct with a bunch of derives on it, and then you decided to generate a builder for that struct using `bon`:
 
-```rust
+```rust ignore
 #[bon::builder] // [!code ++]
 #[derive(Debug, Clone, serde::Serialize)]
 struct Example {
@@ -88,7 +88,7 @@ Notice how `#[bon::builder]` needs to be on a separate line and looks more magic
 
 Instead, a more natural change would be the extension to the existing list of derives:
 
-```rust
+```rust ignore
 #[derive(Debug, Clone, serde::Serialize)] // [!code --]
 #[derive(Debug, Clone, serde::Serialize, bon::Builder)] // [!code ++]
 struct Example {

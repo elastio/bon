@@ -38,7 +38,7 @@ pub mod private;
 #[macro_export]
 #[cfg(feature = "alloc")]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "std", feature = "alloc"))))]
-#[expect(edition_2024_expr_fragment_specifier)]
+#[allow(edition_2024_expr_fragment_specifier))]
 macro_rules! vec {
     () => ($crate::private::alloc::vec::Vec::new());
     ($($item:expr),+ $(,)?) => ($crate::private::alloc::vec![$(::core::convert::Into::into($item)),+ ]);
@@ -76,7 +76,7 @@ macro_rules! vec {
 /// [`Command::args`]: std::process::Command::args
 /// [`bon::vec!`]: crate::vec
 #[macro_export]
-#[expect(edition_2024_expr_fragment_specifier)]
+#[allow(edition_2024_expr_fragment_specifier))]
 macro_rules! arr {
     () => ([]);
     ($($item:expr),+ $(,)?) => ([$(::core::convert::Into::into($item)),+]);
