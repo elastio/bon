@@ -46,17 +46,13 @@ fn main() {
             let doc = doc
                 .lines()
                 .map(|line| {
-                    if !line.starts_with("```rust") {
+                    if !line.contains("```") {
                         return line.into();
                     }
 
-                    lazy_regex::regex_replace_all!(r"\[.*\]", line, "")
+                    lazy_regex::regex_replace_all!(r"\[.*?\]", line, "")
                 })
                 .join("\n");
-
-            if path.file_name().unwrap().to_string_lossy() == "how-to-do-named-function-arguments-in-rust.md" {
-                panic!("{doc}");
-            }
 
             format!(
                 "#[doc = r###\"{doc}\"###] \
