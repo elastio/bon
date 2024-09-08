@@ -103,7 +103,7 @@ assert_eq!(greeting, "[INFO] Bon says hello to the world");
 
 ### Builder for a struct
 
-For a struct, you can add a `#[derive(Builder)]` to generate a `builder()` method for it.
+The `#[derive(Builder)]` macro generates a builder for a struct.
 
 ```rust
 use bon::{bon, builder, Builder};
