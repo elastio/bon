@@ -27,13 +27,14 @@
     /></a>
 </p>
 
-`bon` is a Rust crate for generating compile-time-checked builders for functions and structs.
+
+`bon` is a Rust crate for generating compile-time-checked builders for functions and structs, supporting partial struct building and idiomatic partial application with optional and named parameters for functions and methods.
 
 Visit the [guide for a complete overview of the crate](https://elastio.github.io/bon/guide/overview).
 
 ## Quick examples
 
-`bon` can turn a function with positional parameters into a function with "named" parameters via a builder. It's as easy as placing the `#[builder]` attribute on top of it.
+`bon` turns a function with positional parameters into a function with named parameters just by placing the `#[builder]` attribute on top of it.
 
 ```rust
 use bon::builder;
