@@ -59,7 +59,7 @@ fn builder_with_receiver() {
         .clone();
 
     assert_debug_eq(
-        &actual,
+        actual,
         expect![[r#"
             SutMethodBuilder {
                 self: Sut {
