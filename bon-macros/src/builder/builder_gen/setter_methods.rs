@@ -139,10 +139,8 @@ impl<'a> MemberSettersCtx<'a> {
             SetterBody::Default { member_init } => {
                 let maybe_receiver_field = self
                     .builder_gen
-                    .assoc_method_ctx
-                    .as_ref()
-                    .is_some_and(|ctx| ctx.receiver.is_some())
-                    .then(|| quote!(__private_receiver: self.__private_receiver,));
+                    .receiver()
+                    .map(|_| quote!(__private_receiver: self.__private_receiver,));
 
                 let builder_ident = &self.builder_gen.builder_ident;
 
@@ -208,8 +206,7 @@ impl<'a> MemberSettersCtx<'a> {
             .assoc_method_ctx
             .as_ref()
             .map(|assoc_ctx| {
-                let ty = assoc_ctx.self_ty.peel();
-                let syn::Type::Path(ty_path) = ty else {
+                let Some(ty_path) = assoc_ctx.self_ty.as_path() else {
                     // The type is quite complex. It's hard to generate a workable
                     // intra-doc link for it. So in order to avoid the broken
                     // intra-doc links lint we'll just skip adding more info.

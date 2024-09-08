@@ -146,6 +146,7 @@ pub(crate) fn generate_completion_triggers(meta: Vec<Meta>) -> TokenStream2 {
                     meta.remove(0);
                 }
             }),
+            CompletionsSchema::leaf("derive"),
         ],
     );
 

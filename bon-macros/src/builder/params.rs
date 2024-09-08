@@ -13,6 +13,18 @@ pub(crate) struct BuilderParams {
 
     #[darling(multiple)]
     pub(crate) on: Vec<ConditionalParams>,
+
+    /// Specifies the which derives to apply to the builder.
+    pub(crate) derive: Option<BuilderDerives>,
+}
+
+#[derive(Debug, FromMeta)]
+pub(crate) struct BuilderDerives {
+    #[darling(rename = "Clone")]
+    pub(crate) clone: darling::util::Flag,
+
+    #[darling(rename = "Debug")]
+    pub(crate) debug: darling::util::Flag,
 }
 
 #[derive(Debug)]

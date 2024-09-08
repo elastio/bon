@@ -1,3 +1,4 @@
+mod builder_derives;
 mod member;
 mod setter_methods;
 
@@ -6,7 +7,7 @@ pub(crate) mod input_struct;
 
 use member::*;
 
-use super::params::ConditionalParams;
+use super::params::{BuilderDerives, ConditionalParams};
 use crate::util::prelude::*;
 use quote::{quote, ToTokens};
 use setter_methods::{MemberSettersCtx, SettersReturnType};
@@ -30,6 +31,7 @@ pub(crate) struct BuilderGenCtx {
     members: Vec<Member>,
 
     conditional_params: Vec<ConditionalParams>,
+    builder_derives: Option<BuilderDerives>,
 
     generics: Generics,
     vis: syn::Visibility,
@@ -121,6 +123,13 @@ impl Generics {
             args,
         }
     }
+
+    fn where_clause_predicates(&self) -> impl Iterator<Item = &syn::WherePredicate> {
+        self.where_clause
+            .as_ref()
+            .into_iter()
+            .flat_map(|clause| &clause.predicates)
+    }
 }
 
 pub(crate) struct MacroOutput {
@@ -132,6 +141,7 @@ struct BuilderGenParams {
     members: Vec<Member>,
 
     conditional_params: Vec<ConditionalParams>,
+    builder_derives: Option<BuilderDerives>,
 
     generics: Generics,
 
@@ -149,6 +159,7 @@ impl BuilderGenCtx {
         Self {
             members: params.members,
             conditional_params: params.conditional_params,
+            builder_derives: params.builder_derives,
             generics: params.generics,
             vis: params.vis,
             assoc_method_ctx: params.assoc_method_ctx,
@@ -156,6 +167,12 @@ impl BuilderGenCtx {
             finish_func: params.finish_func,
             builder_ident: params.builder_ident,
         }
+    }
+
+    fn receiver(&self) -> Option<&AssocMethodReceiverCtx> {
+        self.assoc_method_ctx
+            .as_ref()
+            .and_then(|ctx| ctx.receiver.as_ref())
     }
 
     fn regular_members(&self) -> impl Iterator<Item = &RegularMember> {
@@ -166,9 +183,11 @@ impl BuilderGenCtx {
         let start_func = self.start_func();
         let builder_decl = self.builder_decl();
         let builder_impl = self.builder_impl()?;
+        let builder_derives = self.builder_derives();
 
         let other_items = quote! {
             #builder_decl
+            #builder_derives
             #builder_impl
         };
 
@@ -287,10 +306,7 @@ impl BuilderGenCtx {
         let where_clause = &generics.where_clause;
         let generic_args = &self.generics.args;
 
-        let receiver = self
-            .assoc_method_ctx
-            .as_ref()
-            .and_then(|ctx| ctx.receiver.as_ref());
+        let receiver = self.receiver();
 
         let receiver_field_init = receiver.map(|receiver| {
             let self_token = &receiver.with_self_keyword.self_token;
@@ -412,12 +428,12 @@ impl BuilderGenCtx {
             (https://elastio.github.io/bon/blog/the-weird-of-function-local-types-in-rust).
         ";
 
-        let receiver_field = self.assoc_method_ctx.as_ref().and_then(|receiver| {
-            let ty = &receiver.receiver.as_ref()?.without_self_keyword;
-            Some(quote! {
+        let receiver_field = self.receiver().map(|receiver| {
+            let ty = &receiver.without_self_keyword;
+            quote! {
                 #[doc = #private_field_doc]
                 __private_receiver: #ty,
-            })
+            }
         });
 
         let must_use_message = format!(
@@ -535,7 +551,7 @@ impl BuilderGenCtx {
             ::bon::private::IntoSet::<
                 #set_state_type_param,
                 #member_label
-            >::into_set(self.__private_members.#index).0
+            >::into_set(self.__private_members.#index)
             #maybe_default
         };
 
