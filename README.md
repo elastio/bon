@@ -57,7 +57,7 @@ assert_eq!(greeting, "Hello Bon! Your level is 24");
 
 ### Builder for an associated method
 
-For associated methods you need to add a `#[bon]` macro on top of the impl block.
+For associated methods you also need to add the `#[bon]` macro on top of the impl block.
 
 ```rust
 use bon::bon;
