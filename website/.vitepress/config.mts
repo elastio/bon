@@ -87,6 +87,10 @@ export default defineConfig({
                             link: "/guide/compatibility",
                         },
                         {
+                            text: "Inspecting",
+                            link: "/guide/inspecting",
+                        },
+                        {
                             text: "Documenting",
                             link: "/guide/documenting",
                         },

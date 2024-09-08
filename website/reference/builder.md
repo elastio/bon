@@ -168,7 +168,7 @@ let builder: BrushBuilder = brush();
 
 **Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
 
-Generates additional derives on the builder type. The syntax is similar to the regular `#[derive(...)]` attribute. You need to one or more of the supported derives separated by commas.
+Generates additional derives on the builder type. The syntax is similar to the regular `#[derive(...)]` attribute. You need to specify one or more of the supported derives separated by commas.
 
 The following derives are supported: `Clone`, `Debug`.
 
