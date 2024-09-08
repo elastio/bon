@@ -5,7 +5,7 @@ author: Veetaha
 outline: deep
 ---
 
-[`bon`] is a Rust crate for generating compile-time-checked builders for functions and structs.
+[`bon`] is a Rust crate for generating compile-time-checked builders for functions and structs. It also provides idiomatic partial application with optional and named parameters for functions and methods.
 
 If you don't know about [`bon`], then see the [motivational blog post](./how-to-do-named-function-arguments-in-rust) and [the crate overview](../guide/overview).
 
@@ -35,7 +35,7 @@ User::builder()
 
 ::: warning It's not a breaking change
 
-The usage of `#[bon::builder]` on a struct is still supported in this minor release, and all it does is just forward to the `#[derive(Builder)]` under the hood. Starting with the *next* minor release (`2.3`) of `bon` it'll emit a deprecation warning suggesting a migration to `#[derive(Builder)]`. If we ever make a `bon 3.0` (which we have no reason to yet), we'll remove support for `#[bon::builder]` on structs at that point.
+The usage of `#[bon::builder]` on a struct is still supported in this minor release, and all it does is just [forward](https://github.com/elastio/bon/blob/7294312bbc7ad7c612104d31d65251dc2c7f2d8d/bon-macros/src/builder/mod.rs#L43-L53) to the `#[derive(Builder)]` under the hood. Starting with the *next* minor release (`2.3`) of `bon` it'll emit a deprecation warning suggesting a migration to `#[derive(Builder)]`. If we ever make a `bon 3.0` (which we have no reason to yet), we'll remove support for `#[bon::builder]` on structs at that point.
 
 :::
 
@@ -115,7 +115,7 @@ However, after the initial `bon`'s release, I started receiving feedback from th
 
 ### Foreignness of the syntax
 
-People generally understood the goal of having a single `#[builder]` macro, but it felt quite foreign to them to use it on structs. Developers are accustomed to using `derive(...)` with structs much more, while the `#[builder]` syntax stands out like the ugly duckling.
+People generally understood the goal of having a single `#[builder]` macro, but it felt quite foreign to them to use it on structs. Developers are accustomed to using `derive(...)` with structs much more, while the `#[builder]` syntax on structs stands out like the ugly duckling.
 
 For example, suppose you had an existing struct with a bunch of derives on it, and then you decided to generate a builder for that struct using `bon`:
 
@@ -165,7 +165,7 @@ So before this `2.2` version of `bon` there was no support for conditional compi
 
 ---
 
-But what about conditional compilation with the function and associated method syntax? The answer is... it's supported as well 🐱! But it's supported with a hack which basically involves reinventing the ~~wheel~~ `#[cfg/cfg_attr(...)]` attributes, evaluating them and expanding manually. This hack uses a bunch of hard-to-explain macro trickery. This same hack could be adopted for the struct syntax but there is already a `derive(...)` syntax that solves this problem much better.
+But what about conditional compilation with the function and associated method syntax? The answer is... it's supported as well 🐱! But it's supported with a hack which basically involves reinventing the ~~wheel~~ `#[cfg/cfg_attr(...)]` attributes, evaluating them and expanding manually. This hack uses a [long-to-explain macro trickery](https://github.com/elastio/bon/blob/7294312bbc7ad7c612104d31d65251dc2c7f2d8d/bon/src/private/mod.rs#L59-L106). This same hack could be adopted for the struct syntax but there is already a `derive(...)` syntax that solves this problem much better.
 
 ::: info Acknowledgements ❤️
 
@@ -175,7 +175,7 @@ This hack is an evolution of [the idea](https://users.rust-lang.org/t/supporting
 
 ### Worse IDE experience
 
-I've got feedback from the developer using Rust Rover ([#bon/104](https://github.com/elastio/bon/issues/104)) that `#[bon::builder]` on a struct messed up its syntax highlighting and broke the code actions on struct like viewing the places where it's used ("usages").
+I've got feedback from the developer using Rust Rover ([#bon/104](https://github.com/elastio/bon/issues/104)) that `#[bon::builder]` on a struct messed up its syntax highlighting and broke the code actions on the struct like viewing the places where it's used ("usages").
 
 Here is how the code was displayed by Rust Rover before adding the `#[bon::builder]` attribute:
 
@@ -224,7 +224,7 @@ If you like or dislike this change in syntax feel free to write a comment on Red
 
 We are listening to your feedback! If you'd like to propose a change in `bon`, or ask a question, or just say "thank you", consider joining our [newly launched Discord server](https://discord.gg/QcBYSamw4c)!
 
-Also, a huge thank you for 765 stars ⭐ [on Github](https://github.com/elastio/bon)! Consider giving [`bon`] a star if you haven't already. Your support and feedback are a big motivation and together we can build a better builder 🐱!
+Also, a huge thank you for 750 stars ⭐ [on Github](https://github.com/elastio/bon)! Consider giving [`bon`] a star if you haven't already. Your support and feedback are a big motivation and together we can build a better builder 🐱!
 
 <!--
 

@@ -274,7 +274,7 @@ assert_eq!(
 // Finish building
 builder.is_admin(true).call();
 
-// The debug output of the builder for methods with `self` will include
+// The debug output of the builder for methods with `self` includes
 // the special `self` field with the receiver.
 assert_eq!(
     format!("{:?}", Example.method_with_self()),
