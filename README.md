@@ -27,7 +27,7 @@
     /></a>
 </p>
 
-`bon` is a Rust crate for generating compile-time-checked builders for functions and structs, supporting partial struct building and idiomatic partial application with optional and named parameters for functions and methods.
+`bon` is a Rust crate for generating compile-time-checked builders for functions and structs. It provides idiomatic partial application with optional and named parameters for functions and methods.
 
 Visit the [guide for a complete overview of the crate](https://elastio.github.io/bon/guide/overview).
 
