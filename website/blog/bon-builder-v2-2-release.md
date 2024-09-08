@@ -41,7 +41,7 @@ The usage of `#[bon::builder]` on a struct is still supported in this minor rele
 
 Note that `#[bon::builder]` is still supported on functions and associated methods, and it's still the only way to generate a builder for these use cases. The only change is that for structs `bon` now propagates the usage of the `#[derive(Builder)]` syntax instead.
 
-To assist in this migration there is a CLI tool that can update all usages of `#[builder]` on structs to the new `#[derive(Builder)]` syntax in your existing code. Install and run it in your repository like this.:
+To assist in this migration there is a CLI tool that can update all usages of `#[builder]` on structs to the new `#[derive(Builder)]` syntax in your existing code. Install and run it in your repository like this:
 
 ::: warning
 
