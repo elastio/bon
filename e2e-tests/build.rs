@@ -39,11 +39,23 @@ fn main() {
                 })
                 .join("_");
 
-            let canonical_path = std::fs::canonicalize(path).unwrap();
-            let canonical_path = canonical_path.to_string_lossy().replace('\\', "\\\\");
+            let doc = std::fs::read_to_string(&path).unwrap();
+
+            // Remove VitePress-specific `[attrs...]` from code blocks because rustdoc
+            // doesn't understand them and skips the docs tests.
+            let doc = doc
+                .lines()
+                .map(|line| {
+                    if !line.starts_with("```rust") {
+                        return line.into();
+                    }
+
+                    lazy_regex::regex_replace_all!(r"\[.*\]", line, "")
+                })
+                .join("\n");
 
             format!(
-                "#[doc = include_str!(\"{canonical_path}\")] \
+                "#[doc = r###\"{doc}\"###] \
                 mod {test_name} {{}}"
             )
         })

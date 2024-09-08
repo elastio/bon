@@ -152,6 +152,10 @@ export default defineConfig({
                                             link: "/reference/builder#builder-type",
                                         },
                                         {
+                                            text: "derive",
+                                            link: "/reference/builder#derive",
+                                        },
+                                        {
                                             text: "expose_positional_fn",
                                             link: "/reference/builder#expose-positional-fn",
                                         },

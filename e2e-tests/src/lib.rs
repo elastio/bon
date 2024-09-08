@@ -11,7 +11,6 @@ use bon::{bon, builder};
 // We use a bunch of Vitepress-specific syntax in the doctests, for example to
 // give a name to a code group in a fenced code block, which conflicts with this
 // lint.
-#[allow(rustdoc::invalid_codeblock_attributes)]
 mod website_doctests {
     include!(concat!(env!("OUT_DIR"), "/website_doctests.rs"));
 }

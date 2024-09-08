@@ -25,5 +25,6 @@ anyhow        = "1.0"
 buildstructor = "0.5"
 
 [build-dependencies]
-itertools = "0.13"
-walkdir   = "2.5"
+itertools  = "0.13"
+lazy-regex = "3.3"
+walkdir    = "2.5"
