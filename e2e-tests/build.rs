@@ -54,6 +54,10 @@ fn main() {
                 })
                 .join("\n");
 
+            if path.file_name().unwrap().to_string_lossy() == "how-to-do-named-function-arguments-in-rust.md" {
+                panic!("{doc}");
+            }
+
             format!(
                 "#[doc = r###\"{doc}\"###] \
                 mod {test_name} {{}}"
