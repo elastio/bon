@@ -27,44 +27,53 @@
     /></a>
 </p>
 
-
 `bon` is a Rust crate for generating compile-time-checked builders for functions and structs, supporting partial struct building and idiomatic partial application with optional and named parameters for functions and methods.
 
 Visit the [guide for a complete overview of the crate](https://elastio.github.io/bon/guide/overview).
 
 ## Quick examples
 
-`bon` turns a function with positional parameters into a function with named parameters just by placing the `#[builder]` attribute on top of it.
+### Builder for a free function
+
+You can turn a function with positional parameters into a function with named parameters just by placing the `#[builder]` attribute on top of it.
 
 ```rust
 use bon::builder;
 
 #[builder]
-fn greet(name: &str, age: u32) -> String {
-    format!("Hello {name} with age {age}!")
+fn greet(name: &str, level: Option<u32>) -> String {
+    let level = level.unwrap_or(0);
+
+    format!("Hello {name}! Your level is {level}")
 }
 
 let greeting = greet()
     .name("Bon")
-    .age(24)
+    .level(24) // <- setting `level` is optional, we could omit it
     .call();
 
-assert_eq!(greeting, "Hello Bon with age 24!");
+assert_eq!(greeting, "Hello Bon! Your level is 24");
 ```
 
-You can also use the `#[builder]` attribute with structs and associated methods:
+### Builder for an associated method
+
+For associated methods you need to add a `#[bon]` macro on top of the impl block.
 
 ```rust
-use bon::{bon, builder};
+use bon::bon;
 
-#[builder]
 struct User {
     id: u32,
     name: String,
 }
 
-#[bon]
+#[bon] // <- this attribute is required on impl blocks that contain `#[builder]`
 impl User {
+    #[builder]
+    fn new(id: u32, name: String) -> Self {
+        Self { id, name }
+    }
+
     #[builder]
     fn greet(&self, target: &str, level: Option<&str>) -> String {
         let level = level.unwrap_or("INFO");
@@ -74,11 +83,13 @@ impl User {
     }
 }
 
+// The method named `new` generates `builder()/build()` methods
 let user = User::builder()
     .id(1)
     .name("Bon".to_owned())
     .build();
 
+// All other methods generate `method_name()/call()` methods
 let greeting = user
     .greet()
     .target("the world")
@@ -88,6 +99,33 @@ let greeting = user
 assert_eq!(user.id, 1);
 assert_eq!(user.name, "Bon");
 assert_eq!(greeting, "[INFO] Bon says hello to the world");
+```
+
+### Builder for a struct
+
+For a struct, you can add a `#[derive(Builder)]` to generate a `builder()` method for it.
+
+```rust
+use bon::{bon, builder, Builder};
+
+#[derive(Builder)]
+struct User {
+    name: String,
+    is_admin: bool,
+    level: Option<u32>,
+}
+
+let user = User::builder()
+    .name("Bon".to_owned())
+    // `level` is optional, we could omit it here
+    .level(24)
+    // call setters in any order
+    .is_admin(true)
+    .build();
+
+assert_eq!(user.name, "Bon");
+assert_eq!(user.level, Some(24));
+assert!(user.is_admin);
 ```
 
 See [the guide](https://elastio.github.io/bon/guide/overview) for the rest.

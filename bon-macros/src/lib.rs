@@ -24,8 +24,8 @@ use quote::ToTokens;
 ///
 /// ## Quick examples
 ///
-/// `bon` can turn a function with positional parameters into a function with "named"
-/// parameters via a builder. It's as easy as placing the `#[builder]` macro on top of it.
+/// You can turn a function with positional parameters into a function with
+/// named parameters just by placing the `#[builder]` attribute on top of it.
 ///
 /// ```rust ignore
 /// use bon::builder;
