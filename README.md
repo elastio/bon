@@ -106,7 +106,7 @@ assert_eq!(greeting, "[INFO] Bon says hello to the world");
 The `#[derive(Builder)]` macro generates a builder for a struct.
 
 ```rust
-use bon::{bon, builder, Builder};
+use bon::Builder;
 
 #[derive(Builder)]
 struct User {
