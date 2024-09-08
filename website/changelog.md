@@ -6,8 +6,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.0](https://github.com/elastio/bon/compare/v2.1.1...v2.2.0) - 2024-09-08
+
+See the [blog post for this release](https://elastio.github.io/bon/blog/bon-builder-v2-2-release) that describes some of the most notable changes in detail.
+
+### Changed
+
+- The `#[bon::builder]` attribute was deprecated on structs. The new [`#[derive(bon::Builder)]`](https://elastio.github.io/bon/reference/builder) should be used to derive a builder from a struct. Starting with `bon` 2.3 (next minor release) all usages of `#[bon::builder]` on structs will generate deprecation warnings. ([#99](https://github.com/elastio/bon/pull/99)).
+
+  There is a CLI to assist in migrating to the new syntax. See the [release blog post](https://elastio.github.io/bon/blog/bon-builder-v2-2-release#derive-builder-syntax-for-structs) for details about that.
+
+### Added
+- Add the top-level `#[builder(derive(...))]` attribute to be able to derive `Clone` and `Debug` for the builder type itself ([#113](https://github.com/elastio/bon/pull/113))
+
+- Add support for conditional compilation with `cfg/cfg_attr` ([#99](https://github.com/elastio/bon/pull/99))
+
 ### Fixed
-- Fixed a bug where a member of opaque `Option` type (i.e. the `Option` type was renamed to make the builder macro not detect it as `Option`) was still optional.
+- Fix developer experience in Rust Rover. The new `#[derive(Builder)]` syntax should now be easier for Rust Rover to analyze ([#99](https://github.com/elastio/bon/pull/99))
+- Fix a bug where a member of opaque `Option` type (i.e. the `Option` type that was renamed to make the builder macro not detect it as `Option`) was still optional. ([#99](https://github.com/elastio/bon/pull/99))
+- Fix code generation for structs with default values for generic parameters ([#108](https://github.com/elastio/bon/pull/108))
 
 ## [2.1.1](https://github.com/elastio/bon/compare/v2.1.0...v2.1.1) - 2024-09-03
 
