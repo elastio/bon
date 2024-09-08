@@ -183,3 +183,14 @@ fn default_generic_const_params() {
     let builder: SutBuilder = Sut::builder();
     let _: Sut = builder.build();
 }
+
+#[test]
+fn lifetimes_with_bounds() {
+    #[builder]
+    fn sut<'a, 'b: 'a, T: 'a, U: 'b>(arg: &'a T, arg2: &'b U) {
+        let _ = arg;
+        let _ = arg2;
+    }
+
+    sut().arg(&42).arg2(&42).call();
+}

@@ -1,3 +1,7 @@
+// We place `#[inline(always)]` only on very small methods where we'd event want
+// a guarantee of them being inlined.
+#![allow(clippy::inline_always)]
+
 /// Used for providing better IDE hints (completions and syntax highlighting).
 pub mod ide;
 
@@ -15,14 +19,14 @@ pub extern crate alloc;
 )]
 pub trait IsUnset {}
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Required;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Optional;
 
 /// The sole implementation of the [`IsUnset`] trait.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Unset<T>(pub T);
 
 impl<T> IsUnset for Unset<T> {}
@@ -41,18 +45,40 @@ impl<T> IsUnset for Unset<T> {}
     )
 )]
 pub trait IntoSet<T, Member> {
-    fn into_set(self) -> Set<T>;
+    fn into_set(self) -> T;
 }
 
 impl<T, Member> IntoSet<T, Member> for Set<T> {
-    fn into_set(self) -> Self {
-        self
+    #[inline(always)]
+    fn into_set(self) -> T {
+        self.0
     }
 }
 
 impl<T, Member> IntoSet<Option<T>, Member> for Unset<Optional> {
-    fn into_set(self) -> Set<Option<T>> {
-        Set(None)
+    #[inline(always)]
+    fn into_set(self) -> Option<T> {
+        None
+    }
+}
+
+/// Implemented by `Unset` and `Set` states of members, which are basically
+/// all possible states of a member.
+pub trait MemberState {
+    fn is_set(&self) -> bool;
+}
+
+impl<T> MemberState for Set<T> {
+    #[inline(always)]
+    fn is_set(&self) -> bool {
+        true
+    }
+}
+
+impl<T> MemberState for Unset<T> {
+    #[inline(always)]
+    fn is_set(&self) -> bool {
+        false
     }
 }
 
@@ -162,8 +188,14 @@ macro_rules! __eval_cfg_callback {
 }
 
 #[repr(transparent)]
-#[derive(Debug)]
+#[derive(Clone)]
 pub struct Set<T>(pub T);
+
+impl<T: core::fmt::Debug> core::fmt::Debug for Set<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        core::fmt::Debug::fmt(&self.0, f)
+    }
+}
 
 /// The `cfg` predicate evaluated to `true`, now push that information into
 /// the `$results` list.

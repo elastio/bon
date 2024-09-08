@@ -367,6 +367,7 @@ impl FuncInputCtx {
             members,
 
             conditional_params: self.params.base.on,
+            builder_derives: self.params.base.derive,
 
             builder_ident,
 

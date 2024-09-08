@@ -87,6 +87,10 @@ export default defineConfig({
                             link: "/guide/compatibility",
                         },
                         {
+                            text: "Inspecting",
+                            link: "/guide/inspecting",
+                        },
+                        {
                             text: "Documenting",
                             link: "/guide/documenting",
                         },
@@ -150,6 +154,10 @@ export default defineConfig({
                                         {
                                             text: "builder_type",
                                             link: "/reference/builder#builder-type",
+                                        },
+                                        {
+                                            text: "derive",
+                                            link: "/reference/builder#derive",
                                         },
                                         {
                                             text: "expose_positional_fn",

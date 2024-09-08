@@ -1,0 +1,89 @@
+error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
+ --> tests/integration/ui/compile_fail/builder_derives.rs:5:10
+  |
+5 | #[derive(Builder)]
+  |          ^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
+  |
+  = help: see issue #48214
+  = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
+  |
+3 + #[derive(Clone)]
+4 | struct NoTraitImpls;
+  |
+
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+ --> tests/integration/ui/compile_fail/builder_derives.rs:5:10
+  |
+5 | #[derive(Builder)]
+  |          ^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+  |
+  = help: the trait `Debug` is not implemented for `NoTraitImpls`
+  = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
+  = help: see issue #48214
+  = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
+  |
+3 + #[derive(Debug)]
+4 | struct NoTraitImpls;
+  |
+
+error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/builder_derives.rs:12:1
+   |
+12 | #[builder(derive(Clone, Debug))]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
+   |
+   = help: see issue #48214
+   = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
+   |
+3  + #[derive(Clone)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+  --> tests/integration/ui/compile_fail/builder_derives.rs:12:1
+   |
+12 | #[builder(derive(Clone, Debug))]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+   |
+   = help: the trait `Debug` is not implemented for `NoTraitImpls`
+   = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
+   = help: see issue #48214
+   = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
+   |
+3  + #[derive(Debug)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/builder_derives.rs:15:1
+   |
+15 | #[bon]
+   | ^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
+   |
+   = help: see issue #48214
+   = note: this error originates in the attribute macro `bon` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
+   |
+3  + #[derive(Clone)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+  --> tests/integration/ui/compile_fail/builder_derives.rs:15:1
+   |
+15 | #[bon]
+   | ^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+   |
+   = help: the trait `Debug` is not implemented for `NoTraitImpls`
+   = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
+   = help: see issue #48214
+   = note: this error originates in the attribute macro `bon` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
+   |
+3  + #[derive(Debug)]
+4  | struct NoTraitImpls;
+   |

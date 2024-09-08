@@ -49,6 +49,15 @@ pub mod builder_top_level {
         /// See the docs at <https://elastio.github.io/bon/reference/builder#on>
         pub const into: Flag = Flag;
     }
+
+    /// See the docs at <https://elastio.github.io/bon/reference/builder#derive>
+    pub mod derive {
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#derive>
+        pub use core::fmt::Debug;
+
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#derive>
+        pub use core::clone::Clone;
+    }
 }
 
 /// Visibility inside of a string literal. Empty string means private visibility.
