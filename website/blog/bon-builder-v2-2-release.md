@@ -45,7 +45,7 @@ To assist in this migration there is a CLI tool that can update all usages of `#
 
 ::: warning
 
-Make sure to commit your changes before you run this script because it modifies your Rust source files.
+Make sure your working directory is clean from files not committed to git before you run this script because it modifies your Rust source files.
 
 :::
 
@@ -55,6 +55,47 @@ bon migrate
 
 # Prettify the resulting code
 cargo fmt
+```
+
+### Derive `Clone` and `Debug` for the builder
+
+A new attribute is now supported at the top level. You can add [`#[builder(derive(...))]`](../reference/builder#derive) to ask `bon` to generate implementations of  `Clone` or `Debug` for the builder.
+
+This helps with reusing [partial builders](../guide/patterns/conditional-building#shared-partial-builder), because now you can clone the builder where only part of the fields are set.
+
+The `Debug` derive allows you to [inspect](../guide/inspecting) the builder state for debugging purposes.
+
+**Example:**
+
+```rust
+use bon::Builder;
+
+#[derive(Builder)]
+#[builder(derive(Clone, Debug))] // [!code highlight]
+struct Example {
+    name: String,
+    level: u32,
+}
+
+let builder = Example::builder()
+    .name("Bon".to_owned());
+
+// We can get the debug output of the builder
+assert_eq!(
+    format!("{builder:?}"),
+    r#"ExampleBuilder { name: "Bon" }"#
+);
+
+let _ = builder
+    // We can clone the builder
+    .clone()
+    .level(99)
+    .build();
+
+// Because we cloned the builder, it's still available here
+let _ = builder
+    .level(100)
+    .build();
 ```
 
 ### Guaranteed MSRV
@@ -74,7 +115,7 @@ However, after the initial `bon`'s release, I started receiving feedback from th
 
 ### Foreignness of the syntax
 
-People were generally understanding of the goal to have a single `#[builder]` macro, but it felt quite foreign to them to use it on structs. Developers are accustomed to using `derive(...)` with structs much more, while the `#[builder]` syntax stands out like the ugly duckling.
+People generally understood the goal of having a single `#[builder]` macro, but it felt quite foreign to them to use it on structs. Developers are accustomed to using `derive(...)` with structs much more, while the `#[builder]` syntax stands out like the ugly duckling.
 
 For example, suppose you had an existing struct with a bunch of derives on it, and then you decided to generate a builder for that struct using `bon`:
 
