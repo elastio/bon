@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.2](https://github.com/elastio/bon/compare/v2.1.1...v2.1.2) - 2024-09-08
+
+### Other
+
+- Add `#[builder(derive(...))]` ([#113](https://github.com/elastio/bon/pull/113))
+- Fix code generation for structs with default values for generic parameters ([#108](https://github.com/elastio/bon/pull/108))
+- `#[derive(bon::Builder)]` and support for `cfg/cfg_attr` ([#99](https://github.com/elastio/bon/pull/99))
+
 ### Fixed
 - Fixed a bug where a member of opaque `Option` type (i.e. the `Option` type was renamed to make the builder macro not detect it as `Option`) was still optional.
 
