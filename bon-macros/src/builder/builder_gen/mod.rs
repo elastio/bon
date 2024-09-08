@@ -170,9 +170,7 @@ impl BuilderGenCtx {
     }
 
     fn receiver(&self) -> Option<&AssocMethodReceiverCtx> {
-        self.assoc_method_ctx
-            .as_ref()
-            .and_then(|ctx| ctx.receiver.as_ref())
+        self.assoc_method_ctx.as_ref()?.receiver.as_ref()
     }
 
     fn regular_members(&self) -> impl Iterator<Item = &RegularMember> {

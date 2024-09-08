@@ -9,7 +9,14 @@ fn smoke_fn() {
 
     assert_debug_eq(
         actual,
-        expect![[r#"SutBuilder { arg1: true, arg3: Some("value"), arg4: None }"#]],
+        expect![[r#"
+            SutBuilder {
+                _arg1: true,
+                _arg3: Some(
+                    "value",
+                ),
+                _arg4: None,
+            }"#]],
     );
 }
 
@@ -32,7 +39,14 @@ fn smoke_struct() {
 
     assert_debug_eq(
         actual,
-        expect![[r#"SutBuilder { arg1: true, arg3: Some("value"), arg4: None }"#]],
+        expect![[r#"
+            SutBuilder {
+                _arg1: true,
+                _arg3: Some(
+                    "value",
+                ),
+                _arg4: None,
+            }"#]],
     );
 }
 
@@ -84,4 +98,35 @@ fn empty_derives() {
     }
 
     let _ = Sut::builder().arg1(true).build();
+}
+
+#[test]
+fn skipped_members() {
+    struct NoDebug;
+
+    #[derive(Builder)]
+    #[builder(derive(Debug, Clone))]
+    struct Sut {
+        _arg1: bool,
+
+        #[builder(skip = NoDebug)]
+        _arg2: NoDebug,
+    }
+
+    #[allow(clippy::redundant_clone)]
+    let actual = Sut::builder().arg1(true).clone();
+
+    assert_debug_eq(actual, expect!["SutBuilder { _arg1: true }"]);
+}
+
+#[test]
+fn empty_builder() {
+    #[derive(Builder)]
+    #[builder(derive(Clone, Debug))]
+    struct Sut {}
+
+    #[allow(clippy::redundant_clone)]
+    let actual = Sut::builder().clone();
+
+    assert_debug_eq(actual, expect!["SutBuilder"]);
 }

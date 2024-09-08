@@ -14,7 +14,7 @@ pub(crate) struct BuilderParams {
     #[darling(multiple)]
     pub(crate) on: Vec<ConditionalParams>,
 
-    /// Specifies the which derives to apply to the builder.
+    /// Specifies the derives to apply to the builder.
     pub(crate) derive: Option<BuilderDerives>,
 }
 

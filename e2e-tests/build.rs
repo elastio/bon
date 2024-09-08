@@ -42,7 +42,7 @@ fn main() {
             let doc = std::fs::read_to_string(&path).unwrap();
 
             // Remove VitePress-specific `[attrs...]` from code blocks because rustdoc
-            // doesn't understand them and skips the docs tests.
+            // doesn't understand them and skips the doc tests.
             let doc = doc
                 .lines()
                 .map(|line| {

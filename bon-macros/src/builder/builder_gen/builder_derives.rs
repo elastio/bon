@@ -25,7 +25,7 @@ impl BuilderGenCtx {
     /// These bounds are required to ensure that all members of the,
     /// builder (including the receiver) implement the target trait,
     /// so that there is no possible state of the builder that cannot
-    /// implement the trarget trait.
+    /// implement the target trait.
     fn builder_components_trait_bounds<'a>(
         &'a self,
         trait_path: &'a TokenStream2,
@@ -113,7 +113,7 @@ impl BuilderGenCtx {
 
         let format_members = self.regular_members().map(|member| {
             let member_index = &member.index;
-            let member_ident_str = member.norm_ident.to_string();
+            let member_ident_str = member.orig_ident.to_string();
 
             quote! {
                 // Skip members that are not set to reduce noise

@@ -1,5 +1,5 @@
-// We place `#[inline(always)]` only on very small methods that we'd actually even
-// would want a guarantee to be inlined for performance reasons.
+// We place `#[inline(always)]` only on very small methods where we'd event want
+// a guarantee of them being inlined.
 #![allow(clippy::inline_always)]
 
 /// Used for providing better IDE hints (completions and syntax highlighting).
@@ -62,6 +62,8 @@ impl<T, Member> IntoSet<Option<T>, Member> for Unset<Optional> {
     }
 }
 
+/// Implemented by `Unset` and `Set` states of members, which are basically
+/// all possible states of a member.
 pub trait MemberState {
     fn is_set(&self) -> bool;
 }
