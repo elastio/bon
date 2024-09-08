@@ -25,8 +25,6 @@ jobs:
           fetch-depth: 0
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-            cache: false
 
       - uses: MarcoIeni/release-plz-action@v0.5
         env:
