@@ -35,7 +35,7 @@ Visit the [guide for a complete overview of the crate](https://elastio.github.io
 
 ### Builder for a free function
 
-You can turn a function with positional parameters into a function with named parameters just by placing the `#[builder]` attribute on top of it.
+You can turn a function with positional parameters into a function with named parameters just by placing the <code style="white-space nowrap">#[builder]</code> attribute on top of it.
 
 ```rust
 use bon::builder;
