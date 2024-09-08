@@ -226,17 +226,13 @@ We are listening to your feedback! If you'd like to propose a change in `bon`, o
 
 Also, a huge thank you for 750 stars ⭐ [on Github](https://github.com/elastio/bon)! Consider giving [`bon`] a star if you haven't already. Your support and feedback are a big motivation and together we can build a better builder 🐱!
 
-<!--
-
 ::: tip
 
 You can leave comments for this post on the platform of your choice:
-- [Reddit](https://www.reddit.com/r/rust/comments/1f6d7vr/media_nextgen_builder_macro_bon_21_release/)
-- [X (Twitter)](https://x.com/veetaha/status/1830221731677839637)
+- [Reddit](https://www.reddit.com/r/rust/comments/1fc0ai7/media_nextgen_builder_macro_bon_22_release_derive/)
+- [X (Twitter)](https://x.com/veetaha/status/1832804375154065432)
 
 :::
-
--->
 
 [`bon`]: https://github.com/elastio/bon
 [@recatek]: https://github.com/recatek
