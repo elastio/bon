@@ -5,6 +5,8 @@ mod setter_methods;
 pub(crate) mod input_func;
 pub(crate) mod input_struct;
 
+use core::iter::once;
+
 use member::*;
 
 use super::params::{BuilderDerives, ConditionalParams};
@@ -197,7 +199,7 @@ impl BuilderGenCtx {
 
     fn builder_impl(&self) -> Result<TokenStream2> {
         let finish_method = self.finish_method()?;
-        let (setter_methods, items_for_rustdoc) = self.setter_methods()?;
+        let (accessor_methods, items_for_rustdoc) = self.accessor_methods()?;
 
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
@@ -239,7 +241,7 @@ impl BuilderGenCtx {
             #where_clause
             {
                 #finish_method
-                #setter_methods
+                #accessor_methods
             }
         })
     }
@@ -562,7 +564,7 @@ impl BuilderGenCtx {
         quote::format_ident!(
             "{}__{}",
             self.builder_ident.raw_name(),
-            member.setter_method_core_name()
+            member.accessor_method_core_name()
         )
     }
 
@@ -627,7 +629,7 @@ impl BuilderGenCtx {
         })
     }
 
-    fn setter_methods(&self) -> Result<(TokenStream2, TokenStream2)> {
+    fn accessor_methods(&self) -> Result<(TokenStream2, TokenStream2)> {
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
         let builder_ident = &self.builder_ident;
@@ -650,7 +652,7 @@ impl BuilderGenCtx {
             }
         });
 
-        let setters = self
+        let accessors = self
             .regular_members()
             .map(|member| {
                 let state_types = self.regular_members().map(|other_member| {
@@ -676,15 +678,17 @@ impl BuilderGenCtx {
                     doc_false: next_state.clone(),
                 };
 
-                let setter_methods =
+                let setter_method =
                     MemberSettersCtx::new(self, member, return_type).setter_methods()?;
+
+                let maybe_getter = self.getter_method(member);
 
                 let next_state = quote!(type #member_pascal = #next_state;);
 
-                Ok((setter_methods, next_state))
+                Ok((setter_method, next_state, maybe_getter))
             })
             .collect::<Result<Vec<_>>>()?;
-        let next_states_defs = setters.iter().map(|(_, next_state)| next_state);
+        let next_states_defs = accessors.iter().map(|(_, next_state, _)| next_state);
 
         let items_for_rustdoc = quote! {
             // This item is under `cfg(doc)` because it's used only to make the
@@ -715,12 +719,67 @@ impl BuilderGenCtx {
             }
         };
 
-        let setter_methods = setters
+        let accessor_methods = accessors
             .into_iter()
-            .map(|(setter_methods, _)| setter_methods)
+            .flat_map(|(setter_method, _, maybe_getter_method)| {
+                once(setter_method).chain(maybe_getter_method)
+            })
             .concat();
 
-        Ok((setter_methods, items_for_rustdoc))
+        Ok((accessor_methods, items_for_rustdoc))
+    }
+
+    fn getter_method(&self, member: &RegularMember) -> Option<TokenStream2> {
+        member.param_getter()?;
+        let member_type = member.norm_ty.as_ref();
+        let member_index = &member.index;
+        let member_state_type = &member.generic_var_ident;
+        let vis = &self.vis;
+        let member_label = self.members_label(member);
+
+        let accessor_method_name = member.accessor_method_core_name().clone();
+        let getter_method_name = syn::Ident::new(
+            &format!("get_{}", accessor_method_name.raw_name()),
+            accessor_method_name.span(),
+        );
+
+        let docs = format!(
+            "Returns the value of `{}`",
+            member.accessor_method_core_name()
+        );
+
+        let docs: syn::Attribute = syn::parse_quote!(#[doc = #docs]);
+
+        let stream = if let Some(inner_type) = member.as_optional_norm_ty() {
+            quote! {
+                #docs
+                #[allow(
+                    clippy::inline_always,
+                )]
+                #[inline(always)]
+                #vis fn #getter_method_name(&self) -> Option<&#inner_type>
+                where
+                    #member_state_type: ::bon::private::IsSet<Option<#inner_type>, #member_label>,
+                {
+                    self.__private_members.#member_index.as_ref().as_ref()
+                }
+            }
+        } else {
+            quote! {
+                #docs
+                #[allow(
+                    clippy::inline_always,
+                )]
+                #[inline(always)]
+                #vis fn #getter_method_name(&self) -> &#member_type
+                where
+                    #member_state_type: ::bon::private::IsSet<#member_type, #member_label>,
+                {
+                    self.__private_members.#member_index.as_ref()
+                }
+            }
+        };
+        Some(stream)
     }
 }
 

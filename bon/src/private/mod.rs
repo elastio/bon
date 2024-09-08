@@ -19,6 +19,16 @@ pub extern crate alloc;
 )]
 pub trait IsUnset {}
 
+/// Similar to `AsRef`, but with better error messages
+#[rustversion::attr(
+    since(1.78.0),
+    diagnostic::on_unimplemented(
+        message = "can't get value reference yet; the member `{Member}` was not set",
+        label = "the member `{Member}` was not set"
+    )
+)]
+pub trait IsSet<T, Member>: AsRef<T> {}
+
 #[derive(Debug, Clone)]
 pub struct Required;
 
@@ -194,6 +204,14 @@ pub struct Set<T>(pub T);
 impl<T: core::fmt::Debug> core::fmt::Debug for Set<T> {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
         core::fmt::Debug::fmt(&self.0, f)
+    }
+}
+
+impl<T, Member> IsSet<T, Member> for Set<T> {}
+
+impl<T> AsRef<T> for Set<T> {
+    fn as_ref(&self) -> &T {
+        &self.0
     }
 }
 

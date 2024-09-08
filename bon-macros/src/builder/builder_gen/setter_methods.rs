@@ -53,7 +53,7 @@ impl<'a> MemberSettersCtx<'a> {
         };
 
         Ok(self.setter_method(MemberSetterMethod {
-            method_name: self.member.setter_method_core_name().clone(),
+            method_name: self.member.accessor_method_core_name().clone(),
             fn_params: quote!(value: #fn_param_type),
             overwrite_docs: None,
             body: SetterBody::Default {
@@ -72,12 +72,12 @@ impl<'a> MemberSettersCtx<'a> {
             (quote!(#inner_type), quote!())
         };
 
-        let setter_method_name = self.member.setter_method_core_name().clone();
+        let accessor_method_name = self.member.accessor_method_core_name().clone();
 
         // Preserve the original identifier span to make IDE go to definition correctly
         let option_method_name = syn::Ident::new(
-            &format!("maybe_{}", setter_method_name.raw_name()),
-            setter_method_name.span(),
+            &format!("maybe_{}", accessor_method_name.raw_name()),
+            accessor_method_name.span(),
         );
 
         // Option-less setter is just a shortcut for wrapping the value in `Some`.
@@ -90,7 +90,7 @@ impl<'a> MemberSettersCtx<'a> {
                 method_name: option_method_name,
                 fn_params: quote!(value: Option<#inner_type>),
                 overwrite_docs: Some(format!(
-                    "Same as [`Self::{setter_method_name}`], but accepts \
+                    "Same as [`Self::{accessor_method_name}`], but accepts \
                     an `Option` as input. See that method's documentation for \
                     more details.",
                 )),
@@ -105,7 +105,7 @@ impl<'a> MemberSettersCtx<'a> {
             // To be able to explicitly pass an `Option` value to the setter method
             // users need to use the `maybe_{member_ident}` method.
             MemberSetterMethod {
-                method_name: setter_method_name,
+                method_name: accessor_method_name,
                 fn_params: quote!(value: #inner_type),
                 overwrite_docs: None,
                 body: SetterBody::Custom(optionless_setter_body),
@@ -194,7 +194,7 @@ impl<'a> MemberSettersCtx<'a> {
     }
 
     fn generate_docs_for_setter(&self) -> Vec<syn::Attribute> {
-        let setter_core_name = self.member.setter_method_core_name();
+        let setter_core_name = self.member.accessor_method_core_name();
         let start_fn_ident = &self.builder_gen.start_func.ident;
 
         let more = |start_fn_path: &std::fmt::Arguments<'_>| {

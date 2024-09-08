@@ -53,3 +53,7 @@ quote       = "1"
 
 # This is the highest version that supports our MSRV
 syn = { version = "2.0.56", features = ["full", "visit-mut", "visit"] }
+
+[features]
+default = []
+getter     = []

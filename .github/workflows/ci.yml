@@ -76,10 +76,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - run: cargo clippy --all-features --all-targets --locked
+      - run: cargo clippy --features=default,std,alloc,args_3,args_5,args_10,args_10_alloc,args_10_structs,args_20,getter --all-targets --locked
 
-      - run: cargo test --locked --all-features --all-targets
-      - run: cargo test --locked --all-features --doc
+      - run: cargo test --locked --features=default,std,alloc,args_3,args_5,args_10,args_10_alloc,args_10_structs,args_20,getter --all-targets
+      - run: cargo test --locked --features=default,std,alloc,args_3,args_5,args_10,args_10_alloc,args_10_structs,args_20,getter --doc
       - run: cd bon && cargo test --locked --no-default-features --features=
       - run: cd bon && cargo test --locked --no-default-features --features=alloc
 

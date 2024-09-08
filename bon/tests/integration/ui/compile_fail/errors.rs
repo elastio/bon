@@ -46,6 +46,22 @@ fn main() {
 
         let _ = Sut::builder().build();
     }
+
+    {
+        #[derive(bon::Builder)]
+        struct Sut {
+            #[builder(getter)]
+            a: i32,
+            #[builder(getter)]
+            b: u8,
+            c: Option<()>,
+            #[builder(getter)]
+            d: Option<[u8; 32]>,
+        }
+        let sut = Sut::builder().c(());
+        sut.get_c();
+        sut.get_a();
+    }
 }
 
 #[derive(Builder)]
@@ -130,3 +146,4 @@ fn double_must_use() {}
 
 #[builder]
 struct BuilderProcMacroAttrOnAStruct {}
+

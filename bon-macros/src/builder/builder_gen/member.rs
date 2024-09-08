@@ -109,6 +109,9 @@ pub(crate) struct MemberParams {
 
     /// Rename the name exposed in the builder API.
     pub(crate) name: Option<syn::Ident>,
+
+    /// Whether to generate a public reference getter method for this member.
+    pub(crate) getter: darling::util::Flag,
 }
 
 impl MemberParams {
@@ -118,6 +121,7 @@ impl MemberParams {
             into,
             default,
             name,
+            getter,
         } = self
         {
             match origin {
@@ -152,6 +156,13 @@ impl MemberParams {
                     &span,
                     "`skip` attribute can't be specified with other attributes like `{attr_name}` \
                     because there will be no setter generated for this member to configure{default_hint}",
+                );
+            }
+
+            if !cfg!(feature = "getter") && getter.is_present() {
+                bail!(
+                    &getter.span(),
+                    "`getter` attribute is only available when the `getter` feature is enabled",
                 );
             }
         }
@@ -244,8 +255,12 @@ impl RegularMember {
         Ok(verdict_from_override || verdict_from_defaults)
     }
 
-    pub(crate) fn setter_method_core_name(&self) -> &syn::Ident {
+    pub(crate) fn accessor_method_core_name(&self) -> &syn::Ident {
         self.params.name.as_ref().unwrap_or(&self.norm_ident)
+    }
+
+    pub(crate) fn param_getter(&self) -> Option<()> {
+        self.params.getter.is_present().then(|| ())
     }
 }
 

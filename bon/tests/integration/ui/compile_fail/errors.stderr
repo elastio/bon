@@ -23,145 +23,145 @@ error: duplicate value in the set
    |                                                              ^^^^^^^^^
 
 error: Only structs with named fields are supported
-  --> tests/integration/ui/compile_fail/errors.rs:52:1
+  --> tests/integration/ui/compile_fail/errors.rs:68:1
    |
-52 | struct TupleStruct(u32, u32);
+68 | struct TupleStruct(u32, u32);
    | ^^^^^^
 
 error: use a simple `identifier: type` syntax for the function argument; destructuring patterns in arguments aren't supported by the `#[builder]`
-  --> tests/integration/ui/compile_fail/errors.rs:55:18
+  --> tests/integration/ui/compile_fail/errors.rs:71:18
    |
-55 | fn destructuring((x, y): (u32, u32)) {
+71 | fn destructuring((x, y): (u32, u32)) {
    |                  ^^^^^^
 
 error: Unexpected type `bool`
-  --> tests/integration/ui/compile_fail/errors.rs:61:44
+  --> tests/integration/ui/compile_fail/errors.rs:77:44
    |
-61 | fn unnecessary_into_false(#[builder(into = false)] _x: u32) {}
+77 | fn unnecessary_into_false(#[builder(into = false)] _x: u32) {}
    |                                            ^^^^^
 
 error: this `#[builder(into)]` attribute is redundant, because `into` is already implied for this member via the `#[builder(on(...))]` at the top of the function
-  --> tests/integration/ui/compile_fail/errors.rs:64:31
+  --> tests/integration/ui/compile_fail/errors.rs:80:31
    |
-64 | fn unnecessary_into(#[builder(into)] _x: String) {}
+80 | fn unnecessary_into(#[builder(into)] _x: String) {}
    |                               ^^^^
 
 error: This syntax is not supported in type patterns yet. If you have a use case for this, please open an issue at https://github.com/elastio/bon/issues.
-  --> tests/integration/ui/compile_fail/errors.rs:66:15
+  --> tests/integration/ui/compile_fail/errors.rs:82:15
    |
-66 | #[builder(on(&dyn std::fmt::Debug, into))]
+82 | #[builder(on(&dyn std::fmt::Debug, into))]
    |               ^^^
 
 error: nested attributes are not allowed in the type pattern of #[builder(on(type_pattern, ...))]
-  --> tests/integration/ui/compile_fail/errors.rs:69:17
+  --> tests/integration/ui/compile_fail/errors.rs:85:17
    |
-69 | #[builder(on(fn(#[attr] a: u32), into))]
+85 | #[builder(on(fn(#[attr] a: u32), into))]
    |                 ^
 
 error: Expected an attribute of form `on(type_pattern, ...)`
-  --> tests/integration/ui/compile_fail/errors.rs:72:11
+  --> tests/integration/ui/compile_fail/errors.rs:88:11
    |
-72 | #[builder(on)]
+88 | #[builder(on)]
    |           ^^
 
 error: unexpected end of input, expected one of: `for`, parentheses, `fn`, `unsafe`, `extern`, identifier, `::`, `<`, `dyn`, square brackets, `*`, `&`, `!`, `impl`, `_`, lifetime
-  --> tests/integration/ui/compile_fail/errors.rs:75:1
+  --> tests/integration/ui/compile_fail/errors.rs:91:1
    |
-75 | #[builder(on())]
+91 | #[builder(on())]
    | ^^^^^^^^^^^^^^^^
    |
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected `,`
-  --> tests/integration/ui/compile_fail/errors.rs:78:1
+  --> tests/integration/ui/compile_fail/errors.rs:94:1
    |
-78 | #[builder(on(_))]
+94 | #[builder(on(_))]
    | ^^^^^^^^^^^^^^^^^
    |
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: this #[builder(on(type_pattern, ...))] contains no options to override the default behavior for the selected setters like `into`, so it does nothing
-  --> tests/integration/ui/compile_fail/errors.rs:81:1
+  --> tests/integration/ui/compile_fail/errors.rs:97:1
    |
-81 | #[builder(on(_,))]
+97 | #[builder(on(_,))]
    | ^^^^^^^^^^^^^^^^^^
    |
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected at least one parameter in parentheses
-  --> tests/integration/ui/compile_fail/errors.rs:85:11
-   |
-85 | #[builder(start_fn())]
-   |           ^^^^^^^^
+   --> tests/integration/ui/compile_fail/errors.rs:101:11
+    |
+101 | #[builder(start_fn())]
+    |           ^^^^^^^^
 
 error: `skip` attribute can't be specified with other attributes like `into` because there will be no setter generated for this member to configure
-  --> tests/integration/ui/compile_fail/errors.rs:90:21
-   |
-90 |     #[builder(skip, into)]
-   |                     ^^^^
+   --> tests/integration/ui/compile_fail/errors.rs:106:21
+    |
+106 |     #[builder(skip, into)]
+    |                     ^^^^
 
 error: `skip` attribute can't be specified with other attributes like `name` because there will be no setter generated for this member to configure
-  --> tests/integration/ui/compile_fail/errors.rs:96:28
-   |
-96 |     #[builder(skip, name = bar)]
-   |                            ^^^
+   --> tests/integration/ui/compile_fail/errors.rs:112:28
+    |
+112 |     #[builder(skip, name = bar)]
+    |                            ^^^
 
 error: `skip` attribute can't be specified with other attributes like `default` because there will be no setter generated for this member to configure. If you wanted to specify a value for the member, then use the following syntax instead `#[builder(skip = value)]`
-   --> tests/integration/ui/compile_fail/errors.rs:102:21
+   --> tests/integration/ui/compile_fail/errors.rs:118:21
     |
-102 |     #[builder(skip, default = 42)]
+118 |     #[builder(skip, default = 42)]
     |                     ^^^^^^^
 
 error: `skip` attribute is not supported on function arguments. Use a local variable instead.
-   --> tests/integration/ui/compile_fail/errors.rs:108:15
+   --> tests/integration/ui/compile_fail/errors.rs:124:15
     |
-108 |     #[builder(skip)] _x: u32,
+124 |     #[builder(skip)] _x: u32,
     |               ^^^^
 
 error: Only structs with named fields are supported
-   --> tests/integration/ui/compile_fail/errors.rs:115:1
+   --> tests/integration/ui/compile_fail/errors.rs:131:1
     |
-115 | struct TupleStructsAreUnsupported(u32, u32);
+131 | struct TupleStructsAreUnsupported(u32, u32);
     | ^^^^^^
 
 error: only `fn` items are supported by the `#[bon::builder]` attribute
-   --> tests/integration/ui/compile_fail/errors.rs:117:1
+   --> tests/integration/ui/compile_fail/errors.rs:133:1
     |
-117 | #[builder]
+133 | #[builder]
     | ^^^^^^^^^^
     |
     = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: only `struct` items are supported by the `#[derive(bon::Builder)]` attribute
-   --> tests/integration/ui/compile_fail/errors.rs:120:10
+   --> tests/integration/ui/compile_fail/errors.rs:136:10
     |
-120 | #[derive(Builder)]
+136 | #[derive(Builder)]
     |          ^^^^^^^
     |
     = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: use a simple `identifier: type` syntax for the function argument; destructuring patterns in arguments aren't supported by the `#[builder]`
-   --> tests/integration/ui/compile_fail/errors.rs:124:39
+   --> tests/integration/ui/compile_fail/errors.rs:140:39
     |
-124 | fn destructuring_in_fn_is_unsupported((_, _): (u32, u32)) {}
+140 | fn destructuring_in_fn_is_unsupported((_, _): (u32, u32)) {}
     |                                       ^^^^^^
 
 error: Found multiple #[must_use], but bon only works with exactly one (or less).
-   --> tests/integration/ui/compile_fail/errors.rs:128:1
+   --> tests/integration/ui/compile_fail/errors.rs:144:1
     |
-128 | #[must_use]
+144 | #[must_use]
     | ^
 
 warning: unused attribute
-   --> tests/integration/ui/compile_fail/errors.rs:128:1
+   --> tests/integration/ui/compile_fail/errors.rs:144:1
     |
-128 | #[must_use]
+144 | #[must_use]
     | ^^^^^^^^^^^ help: remove this attribute
     |
 note: attribute also specified here
-   --> tests/integration/ui/compile_fail/errors.rs:127:1
+   --> tests/integration/ui/compile_fail/errors.rs:143:1
     |
-127 | #[must_use]
+143 | #[must_use]
     | ^^^^^^^^^^^
     = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
     = note: `#[warn(unused_attributes)]` on by default
@@ -245,7 +245,7 @@ error[E0277]: can't finish building yet; the member `SutBuilder__arg1` was not s
    = help: the trait `IntoSet<Option<u32>, SutBuilder__arg1>` is not implemented for `Unset<Required>`
    = help: the trait `IntoSet<Option<u32>, SutBuilder__arg1>` is implemented for `Unset<Optional>`
    = help: for that trait implementation, expected `Optional`, found `Required`
-note: required by a bound in `SutBuilder::<(__Arg1,)>::build`
+note: required by a bound in `main::SutBuilder::<(__Arg1,)>::build`
   --> tests/integration/ui/compile_fail/errors.rs:42:18
    |
 42 |         #[derive(Builder)]
@@ -253,3 +253,35 @@ note: required by a bound in `SutBuilder::<(__Arg1,)>::build`
 43 |         struct Sut {
    |                --- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0599]: no method named `get_c` found for struct `main::SutBuilder` in the current scope
+  --> tests/integration/ui/compile_fail/errors.rs:62:13
+   |
+51 |         #[derive(bon::Builder)]
+   |                  ------------ method `get_c` not found for this struct
+...
+62 |         sut.get_c();
+   |             ^^^^^
+   |
+help: there is a method `get_a` with a similar name
+   |
+62 |         sut.get_a();
+   |             ~~~~~
+
+error[E0277]: can't get value reference yet; the member `SutBuilder__a` was not set
+  --> tests/integration/ui/compile_fail/errors.rs:63:13
+   |
+63 |         sut.get_a();
+   |             ^^^^^ the member `SutBuilder__a` was not set
+   |
+   = help: the trait `IsSet<i32, SutBuilder__a>` is not implemented for `Unset<Required>`
+   = help: the trait `IsSet<T, Member>` is implemented for `Set<T>`
+note: required by a bound in `main::SutBuilder::<(__A, __B, __C, __D)>::get_a`
+  --> tests/integration/ui/compile_fail/errors.rs:51:18
+   |
+51 |         #[derive(bon::Builder)]
+   |                  ^^^^^^^^^^^^ required by this bound in `SutBuilder::<(__A, __B, __C, __D)>::get_a`
+...
+54 |             a: i32,
+   |             - required by a bound in this associated function
+   = note: this error originates in the derive macro `bon::Builder` (in Nightly builds, run with -Z macro-backtrace for more info)

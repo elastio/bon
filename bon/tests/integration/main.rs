@@ -1,3 +1,4 @@
+//! Tests success of macro usage, and failing cases of compilation of wrong macro and builder usage.
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(
     clippy::redundant_pub_crate,

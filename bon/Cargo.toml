@@ -61,4 +61,5 @@ trybuild = "1.0.89"
 [features]
 alloc   = []
 default = ["std"]
+getter     = ["bon-macros/getter"]
 std     = ["alloc"]
