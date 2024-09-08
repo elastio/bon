@@ -20,12 +20,17 @@ fn many_attrs_struct() {
     struct Sut {
         #[builder(default, name = renamed)]
         arg1: u32,
+
+        #[builder(default)]
+        #[builder(name = renamed2)]
+        arg2: u32,
     }
 
     let builder = || -> OverrideBuilder { Sut::builder() };
 
     assert_eq!(builder().finish().arg1, 0);
     assert_eq!(builder().renamed(32).finish().arg1, 32);
+    assert_eq!(builder().renamed2(32).finish().arg2, 32);
 }
 
 #[test]
