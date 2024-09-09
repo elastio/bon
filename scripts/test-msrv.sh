@@ -26,6 +26,8 @@ fi
 
 step echo '1.59.0' > rust-toolchain
 
+step cargo --version --verbose
+
 with_log cd bon
 
 step echo '[workspace]' >> Cargo.toml
