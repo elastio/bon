@@ -155,7 +155,7 @@ jobs:
 
   # Check for unused dependencies that uses simple regex search,
   # meaning it's ⚡️ blazingly ⚡️ fast
-  rust-unused-dependencies:
+  cargo-machete:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
