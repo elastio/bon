@@ -16,12 +16,13 @@ where
         .into_iter()
         .filter(|item| is_pure(item))
         .for_each(|new_item| {
-            let Some(existing) = exprs.replace(new_item) else {
-                return;
+            let existing = match exprs.replace(new_item) {
+                Some(existing) => existing,
+                _ => return,
             };
             errors.extend([
-                err!(existing, "duplicate {err_label}"),
-                err!(new_item, "duplicate {err_label}"),
+                err!(existing, "duplicate {}", err_label),
+                err!(new_item, "duplicate {}", err_label),
             ]);
         });
 

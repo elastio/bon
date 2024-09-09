@@ -9,8 +9,9 @@ impl AttributeExt for syn::Attribute {
     }
 
     fn as_doc(&self) -> Option<&syn::Expr> {
-        let syn::Meta::NameValue(attr) = &self.meta else {
-            return None;
+        let attr = match &self.meta {
+            syn::Meta::NameValue(attr) => attr,
+            _ => return None,
         };
 
         if !attr.path.is_ident("doc") {

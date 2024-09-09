@@ -31,8 +31,9 @@ impl VisitMut for NormalizeSelfTy<'_> {
     fn visit_type_mut(&mut self, ty: &mut syn::Type) {
         syn::visit_mut::visit_type_mut(self, ty);
 
-        let syn::Type::Path(ty_path) = ty else {
-            return;
+        let ty_path = match ty {
+            syn::Type::Path(ty_path) => ty_path,
+            _ => return,
         };
 
         if !ty_path.path.is_ident("Self") {

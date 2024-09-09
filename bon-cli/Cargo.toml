@@ -1,15 +1,13 @@
 [package]
-name = "bon-cli"
+name    = "bon-cli"
+version = "0.1.0"
 
 description = "Dev tool for working with the `bon` crate"
 
-authors      = { workspace = true }
-edition      = { workspace = true }
-homepage     = { workspace = true }
-license      = { workspace = true }
-repository   = { workspace = true }
-rust-version = { workspace = true }
-version      = { workspace = true }
+edition    = "2021"
+homepage   = "https://elastio.github.io/bon/"
+license    = "MIT OR Apache-2.0"
+repository = "https://github.com/elastio/bon"
 
 publish = false
 

@@ -98,20 +98,23 @@ fn match_generic_args(
             matches!(scrutinee, Lifetime(_))
         }
         Type(pattern) => {
-            let Type(scrutinee) = scrutinee else {
-                return Ok(false);
+            let scrutinee = match scrutinee {
+                Type(scrutinee) => scrutinee,
+                _ => return Ok(false),
             };
             match_types(scrutinee, pattern)?
         }
         Const(pattern) => {
-            let Const(scrutinee) = scrutinee else {
-                return Ok(false);
+            let scrutinee = match scrutinee {
+                Const(scrutinee) => scrutinee,
+                _ => return Ok(false),
             };
             match_exprs(scrutinee, pattern)
         }
         AssocType(pattern) => {
-            let AssocType(scrutinee) = scrutinee else {
-                return Ok(false);
+            let scrutinee = match scrutinee {
+                AssocType(scrutinee) => scrutinee,
+                _ => return Ok(false),
             };
             scrutinee.ident == pattern.ident
                 && match_types(&scrutinee.ty, &pattern.ty)?
@@ -122,8 +125,9 @@ fn match_generic_args(
                 )?
         }
         AssocConst(pattern) => {
-            let AssocConst(scrutinee) = scrutinee else {
-                return Ok(false);
+            let scrutinee = match scrutinee {
+                AssocConst(scrutinee) => scrutinee,
+                _ => return Ok(false),
             };
 
             scrutinee.ident == pattern.ident
@@ -158,8 +162,9 @@ pub(crate) fn match_types(scrutinee: &syn::Type, pattern: &syn::Type) -> Result<
 
     let verdict = match pattern {
         Array(pattern) => {
-            let Array(scrutinee) = scrutinee else {
-                return Ok(false);
+            let scrutinee = match scrutinee {
+                Array(scrutinee) => scrutinee,
+                _ => return Ok(false),
             };
 
             match_types(&scrutinee.elem, &pattern.elem)?
@@ -170,15 +175,17 @@ pub(crate) fn match_types(scrutinee: &syn::Type, pattern: &syn::Type) -> Result<
                 return Err(unsupported_syntax_error(qself, "<T as Trait> syntax"));
             }
 
-            let Path(scrutinee) = scrutinee else {
-                return Ok(false);
+            let scrutinee = match scrutinee {
+                Path(scrutinee) => scrutinee,
+                _ => return Ok(false),
             };
 
             scrutinee.qself.is_none() && match_paths(&scrutinee.path, &pattern.path)?
         }
         Ptr(pattern) => {
-            let Ptr(scrutinee) = scrutinee else {
-                return Ok(false);
+            let scrutinee = match scrutinee {
+                Ptr(scrutinee) => scrutinee,
+                _ => return Ok(false),
             };
             scrutinee.const_token == pattern.const_token
                 && scrutinee.mutability == pattern.mutability
@@ -193,22 +200,25 @@ pub(crate) fn match_types(scrutinee: &syn::Type, pattern: &syn::Type) -> Result<
                 ));
             }
 
-            let Reference(scrutinee) = scrutinee else {
-                return Ok(false);
+            let scrutinee = match scrutinee {
+                Reference(scrutinee) => scrutinee,
+                _ => return Ok(false),
             };
 
             scrutinee.mutability == pattern.mutability
                 && match_types(&scrutinee.elem, &pattern.elem)?
         }
         Slice(pattern) => {
-            let Slice(scrutinee) = scrutinee else {
-                return Ok(false);
+            let scrutinee = match scrutinee {
+                Slice(scrutinee) => scrutinee,
+                _ => return Ok(false),
             };
             match_types(&scrutinee.elem, &pattern.elem)?
         }
         Tuple(pattern) => {
-            let Tuple(scrutinee) = scrutinee else {
-                return Ok(false);
+            let scrutinee = match scrutinee {
+                Tuple(scrutinee) => scrutinee,
+                _ => return Ok(false),
             };
             scrutinee
                 .elems
@@ -227,9 +237,10 @@ pub(crate) fn match_types(scrutinee: &syn::Type, pattern: &syn::Type) -> Result<
 fn unsupported_syntax_error(spanned: &impl Spanned, syntax: &str) -> Error {
     err!(
         spanned,
-        "{syntax} is not supported in type patterns yet. If you have \
+        "{} is not supported in type patterns yet. If you have \
         a use case for this, please open an issue at \
-        https://github.com/elastio/bon/issues."
+        https://github.com/elastio/bon/issues.",
+        syntax
     )
 }
 

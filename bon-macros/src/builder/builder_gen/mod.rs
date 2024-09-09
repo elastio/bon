@@ -742,12 +742,19 @@ pub(crate) fn generic_param_to_arg(param: &syn::GenericParam) -> syn::GenericArg
 
 fn reject_self_references_in_docs(docs: &[syn::Attribute]) -> Result {
     for doc in docs {
-        let Some(doc) = &doc.as_doc() else { continue };
+        let doc = match doc.as_doc() {
+            Some(doc) => doc,
+            _ => continue,
+        };
 
-        let syn::Expr::Lit(doc) = &doc else { continue };
+        let doc = match &doc {
+            syn::Expr::Lit(doc) => doc,
+            _ => continue,
+        };
 
-        let syn::Lit::Str(doc) = &doc.lit else {
-            continue;
+        let doc = match &doc.lit {
+            syn::Lit::Str(doc) => doc,
+            _ => continue,
         };
 
         let self_references = ["[`Self`]", "[Self]"];

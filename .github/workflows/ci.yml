@@ -22,10 +22,6 @@ env:
   # All other dependencies including registry deps will still use the incremental cache.
   CARGO_INCREMENTAL: 0
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   # Sanity-check that benchmarks work
   benchmarks:
@@ -98,17 +94,13 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           components: clippy
-          toolchain: 1.70.0
+          toolchain: 1.59.0
 
       # We just test that `bon` crate compile fine. This is the main crate
       # that needs to compile fine. We also make sure its tests compile
       # fine as well. Therefore right now we use the MSRV specifically such
       # that `trybuild` compiles as well (it's trybuild's MSRV).
-      - run: cargo clippy --all-features --all-targets --locked -p bon
-        env:
-            RUSTFLAGS: >-
-              --deny warnings
-              --allow unknown-lints
+      - run: ./scripts/test-msrv.sh
 
   cargo-clippy-stablle:
     runs-on: ${{ matrix.os }}-latest

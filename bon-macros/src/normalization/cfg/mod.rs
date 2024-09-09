@@ -108,7 +108,7 @@ impl ExpandCfg {
         let predicates = predicates.iter().enumerate().map(|(i, predicate)| {
             // We need to insert the recursion counter into the name so that
             // the name is unique on every recursive iteration of the cfg eval.
-            let pred_id = quote::format_ident!("{invocation_name}_{recursion_counter}_{}", i);
+            let pred_id = quote::format_ident!("{}_{}_{}", invocation_name, recursion_counter, i);
             quote!(#pred_id: #predicate)
         });
 
@@ -192,8 +192,9 @@ fn eval_cfgs(true_predicates: &BTreeSet<String>, attrs: &mut Vec<syn::Attribute>
     let mut cfg_attr_expansions = vec![];
 
     for (i, attr) in attrs.iter().enumerate() {
-        let Some(syntax) = CfgSyntax::from_meta(&attr.meta)? else {
-            continue;
+        let syntax = match CfgSyntax::from_meta(&attr.meta)? {
+            Some(syntax) => syntax,
+            _ => continue,
         };
 
         let expansion = match syntax {
@@ -217,7 +218,7 @@ fn eval_cfgs(true_predicates: &BTreeSet<String>, attrs: &mut Vec<syn::Attribute>
 
                 true_predicates
                     .contains(&predicate)
-                    .then_some(cfg_attr.then_branch)
+                    .then(|| cfg_attr.then_branch)
             }
         };
 

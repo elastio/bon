@@ -1,5 +1,6 @@
 [package]
-name = "e2e-tests"
+name    = "e2e-tests"
+version = "0.1.0"
 
 publish = false
 
@@ -11,8 +12,7 @@ description = """
     We also use this crate to test the code examples in the documentation in the `website`.
 """
 
-edition = { workspace = true }
-version = { workspace = true }
+edition = "2021"
 
 [lints]
 workspace = true
