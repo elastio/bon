@@ -47,8 +47,9 @@ impl TypeExt for syn::Type {
     }
 
     fn is_last_segment(&self, needle: &str) -> bool {
-        let Some(path) = self.as_path() else {
-            return false;
+        let path = match self.as_path() {
+            Some(path) => path,
+            _ => return false,
         };
 
         let last_segment = &path
@@ -70,14 +71,16 @@ impl TypeExt for syn::Type {
             .iter()
             .find(|&segment| segment.ident == desired_type)?;
 
-        let syn::PathArguments::AngleBracketed(args) = &vec_segment.arguments else {
-            return None;
+        let args = match &vec_segment.arguments {
+            syn::PathArguments::AngleBracketed(args) => args,
+            _ => return None,
         };
 
         let arg = args.args.first()?;
 
-        let syn::GenericArgument::Type(arg) = arg else {
-            return None;
+        let arg = match arg {
+            syn::GenericArgument::Type(arg) => arg,
+            _ => return None,
         };
 
         Some(arg)

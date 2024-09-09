@@ -94,11 +94,12 @@ impl Parse for ConditionalParams {
 
 impl FromMeta for ConditionalParams {
     fn from_meta(meta: &syn::Meta) -> Result<Self> {
-        let syn::Meta::List(meta) = meta else {
-            bail!(
+        let meta = match meta {
+            syn::Meta::List(meta) => meta,
+            _ => bail!(
                 meta,
                 "Expected an attribute of form `on(type_pattern, ...)`"
-            );
+            ),
         };
 
         let me = syn::parse2(meta.tokens.clone())?;

@@ -7,6 +7,7 @@ impl PathExt for syn::Path {
     fn starts_with_segment(&self, desired_segment: &str) -> bool {
         self.segments
             .first()
-            .is_some_and(|first| first.ident == desired_segment)
+            .map(|first| first.ident == desired_segment)
+            .unwrap_or(false)
     }
 }

@@ -206,11 +206,13 @@ impl<'a> MemberSettersCtx<'a> {
             .assoc_method_ctx
             .as_ref()
             .map(|assoc_ctx| {
-                let Some(ty_path) = assoc_ctx.self_ty.as_path() else {
+                let ty_path = match assoc_ctx.self_ty.as_path() {
+                    Some(ty_path) => ty_path,
+
                     // The type is quite complex. It's hard to generate a workable
                     // intra-doc link for it. So in order to avoid the broken
                     // intra-doc links lint we'll just skip adding more info.
-                    return String::new();
+                    _ => return String::new(),
                 };
 
                 let prefix = darling::util::path_to_string(&ty_path.path);

@@ -15,8 +15,9 @@ pub(crate) trait IteratorExt: Iterator + Sized {
     where
         Self::Item: std::fmt::Display,
     {
-        let Some(first) = self.next() else {
-            return String::new();
+        let first = match self.next() {
+            Some(first) => first,
+            _ => return String::new(),
         };
 
         // estimate lower bound of capacity needed

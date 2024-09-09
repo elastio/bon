@@ -25,6 +25,11 @@
         src="https://img.shields.io/badge/docs.rs-bon-3b74d1?style=for-the-badge&labelColor=555555&logo=docs.rs"
         height="25"
     /></a>
+      <a href="https://docs.rs/bon/latest/bon/"><img
+        alt="docs.rs"
+        src="https://img.shields.io/badge/MSRV-1.59.0-b83fbf?style=for-the-badge&labelColor=555555&logo=docs.rs"
+        height="25"
+    /></a>
 </p>
 
 `bon` is a Rust crate for generating compile-time-checked builders for functions and structs. It also provides idiomatic partial application with optional and named parameters for functions and methods.

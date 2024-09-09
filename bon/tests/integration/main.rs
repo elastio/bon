@@ -33,19 +33,20 @@ const COMMON_SCREEN_CHARS_WIDTH: usize = 60;
 fn assert_debug_eq(actual: impl core::fmt::Debug, expected: Expect) {
     extern crate alloc;
 
-    let snapshot = 'snap: {
+    let snapshot = || {
         let terse = alloc::format!("{actual:?}");
 
-        let Some(width) = terse.lines().map(str::len).max() else {
-            break 'snap terse;
+        let width = match terse.lines().map(str::len).max() {
+            Some(width) => width,
+            _ => return terse,
         };
 
         if width < COMMON_SCREEN_CHARS_WIDTH {
-            break 'snap terse;
+            return terse;
         }
 
         alloc::format!("{actual:#?}")
     };
 
-    expected.assert_eq(&snapshot);
+    expected.assert_eq(&snapshot());
 }

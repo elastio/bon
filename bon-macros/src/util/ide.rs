@@ -214,8 +214,9 @@ impl CompletionsSchema {
                 let child_metas = meta
                     .iter()
                     .filter_map(|meta| {
-                        let Meta::List(meta) = meta else {
-                            return None;
+                        let meta = match meta {
+                            Meta::List(meta) => meta,
+                            _ => return None,
                         };
 
                         if !meta.path.is_ident(&child.key) {

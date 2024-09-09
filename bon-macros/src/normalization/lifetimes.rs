@@ -24,8 +24,9 @@ impl VisitMut for NormalizeLifetimes {
             visitor.visit_fn_arg_mut(arg);
         }
 
-        let syn::ReturnType::Type(_, return_type) = &mut signature.output else {
-            return;
+        let return_type = match &mut signature.output {
+            syn::ReturnType::Type(_, return_type) => return_type,
+            syn::ReturnType::Default => return,
         };
 
         // Now perform lifetime elision for the lifetimes in the return type.
@@ -37,11 +38,9 @@ impl VisitMut for NormalizeLifetimes {
             .first()
             .and_then(|arg| {
                 let receiver = arg.as_receiver()?;
-                receiver.lifetime().or_else(|| {
-                    let syn::Type::Reference(reference) = receiver.ty.as_ref() else {
-                        return None;
-                    };
-                    reference.lifetime.as_ref()
+                receiver.lifetime().or_else(|| match receiver.ty.as_ref() {
+                    syn::Type::Reference(reference) => reference.lifetime.as_ref(),
+                    _ => None,
                 })
             })
             .or_else(|| {
@@ -60,8 +59,9 @@ impl VisitMut for NormalizeLifetimes {
                 }
             });
 
-        let Some(elided_lifetime) = elided_output_lifetime else {
-            return;
+        let elided_lifetime = match elided_output_lifetime {
+            Some(elided_lifetime) => elided_lifetime,
+            _ => return,
         };
 
         ElideOutputLifetime { elided_lifetime }.visit_type_mut(return_type);
@@ -122,16 +122,18 @@ impl VisitMut for AssignLifetimes<'_> {
             return;
         }
 
-        let Some((_and, lifetime)) = &mut receiver.reference else {
-            return;
+        let lifetime = match &mut receiver.reference {
+            Some((_and, lifetime)) => lifetime,
+            _ => return,
         };
 
         if matches!(lifetime, Some(lifetime) if lifetime.ident != "_") {
             return;
         }
 
-        let syn::Type::Reference(receiver_ty) = receiver.ty.as_mut() else {
-            return;
+        let receiver_ty = match receiver.ty.as_mut() {
+            syn::Type::Reference(receiver_ty) => receiver_ty,
+            _ => return,
         };
 
         let new_lifetime = self.next_lifetime();

@@ -4,13 +4,13 @@ use core::marker::PhantomData;
 #[test]
 fn generic_struct() {
     #[derive(Debug, Builder)]
-    #[allow(unused)]
-    struct Sut<'a, 'b, T, U, const N: usize> {
+    #[allow(dead_code)]
+    struct Sut<'a, 'b, T, U> {
         a: &'a str,
         b: &'b str,
         c: T,
         d: U,
-        e: [u8; N],
+        e: [u8; 3],
     }
 
     let actual = Sut::builder().a("a").b("b").c(42).d("d").e([0; 3]).build();
@@ -173,6 +173,21 @@ fn default_generic_type_params() {
 
     let builder: SutBuilder = Sut::builder();
     let _: Sut = builder.build();
+}
+
+#[test]
+fn const_generics() {
+    #[derive(Debug, Builder)]
+    #[allow(dead_code)]
+    struct Sut<'a, T, const N: usize> {
+        a: &'a str,
+        b: T,
+        c: [u8; N],
+    }
+
+    let actual = Sut::builder().a("a").b(42).c([0; 3]).build();
+
+    assert_debug_eq(actual, expect![[r#"Sut { a: "a", b: 42, c: [0, 0, 0] }"#]]);
 }
 
 #[test]

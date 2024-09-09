@@ -141,7 +141,7 @@ impl MemberParams {
             .next();
 
             if let Some((attr_name, span)) = other_attr {
-                let default_hint = if default.as_ref().is_some_and(|expr| expr.is_some()) {
+                let default_hint = if let Some(Some(_expr)) = default.as_deref() {
                     ". If you wanted to specify a value for the member, then use \
                     the following syntax instead `#[builder(skip = value)]`"
                 } else {
@@ -150,9 +150,8 @@ impl MemberParams {
 
                 bail!(
                     &span,
-                    "`skip` attribute can't be specified with other attributes like `{}` \
+                    "`skip` attribute can't be specified with other attributes like `{attr_name}` \
                     because there will be no setter generated for this member to configure{default_hint}",
-                    attr_name,
                 );
             }
         }
@@ -188,7 +187,7 @@ impl RegularMember {
 
     fn as_optional_with_ty<'a>(&'a self, ty: &'a syn::Type) -> Option<&'a syn::Type> {
         ty.option_type_param()
-            .or_else(|| (self.params.default.is_some()).then_some(ty))
+            .or_else(|| (self.params.default.is_some()).then(|| ty))
     }
 
     pub(crate) fn as_optional_norm_ty(&self) -> Option<&syn::Type> {

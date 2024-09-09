@@ -57,8 +57,11 @@ impl VisitMut for AssignTypeParams<'_> {
         let type_param = quote::format_ident!("__{index}");
         let impl_trait = std::mem::replace(ty, syn::Type::Path(syn::parse_quote!(#type_param)));
 
-        let syn::Type::ImplTrait(impl_trait) = impl_trait else {
-            unreachable!("BUG: code higher validated that this is impl trait: {impl_trait:?}",)
+        let impl_trait = match impl_trait {
+            syn::Type::ImplTrait(impl_trait) => impl_trait,
+            _ => {
+                unreachable!("BUG: code higher validated that this is impl trait: {impl_trait:?}");
+            }
         };
 
         self.generics

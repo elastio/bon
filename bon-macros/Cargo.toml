@@ -1,18 +1,26 @@
 [package]
-name = "bon-macros"
+name    = "bon-macros"
+version = "2.2.0"
 
 description = """
 This is a proc-macro crate that is supposed to be a private implementation
 detail of the `bon` crate
 """
 
-authors      = { workspace = true }
-edition      = { workspace = true }
-homepage     = { workspace = true }
-license      = { workspace = true }
-repository   = { workspace = true }
-rust-version = { workspace = true }
-version      = { workspace = true }
+edition    = "2021"
+homepage   = "https://elastio.github.io/bon/"
+license    = "MIT OR Apache-2.0"
+repository = "https://github.com/elastio/bon"
+
+# This MSRV was chosen because Rust supports mixing generic type and const
+# parameters only starting with this version. We require this feature for the
+# cases when the builder is generated for a function or struct that uses const
+# generics. The generated builder **always** appends a generic type parameter
+# for the type state at the end of the Builder generics list. So for functions
+# or structs that use const generics the generated builder will have a generic
+# type parameter after the const generic parameter, which is only supported
+# starting from Rust 1.59.0.
+rust-version = "1.59.0"
 
 [package.metadata.docs.rs]
 all-features = true
@@ -38,8 +46,10 @@ darling = "0.20.10"
 
 # This dependency is used by `darling` itself, so we use it as well for case
 # conversions to share the same dependency.
-ident_case = "1.0"
+ident_case = "1"
 
-proc-macro2 = "1.0"
-quote       = "1.0"
-syn         = { version = "2.0", features = ["full", "visit-mut", "visit"] }
+proc-macro2 = "1"
+quote       = "1"
+
+# This is the highest version that supports our MSRV
+syn = { version = "2.0.56", features = ["full", "visit-mut", "visit"] }

@@ -22,10 +22,6 @@ env:
   # All other dependencies including registry deps will still use the incremental cache.
   CARGO_INCREMENTAL: 0
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   # Sanity-check that benchmarks work
   benchmarks:
@@ -68,49 +64,7 @@ jobs:
           git diff --exit-code --color=always || ( echo "Cargo.lock is
           out-of-date. See the diff above. Try rebasing on master" && exit 1 )
 
-  cargo-test:
-    runs-on: ${{ matrix.os }}-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu, windows, macos]
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - run: cargo test --locked --all-features --all-targets
-      - run: cargo test --locked --all-features --doc
-      - run: cd bon && cargo test --locked --no-default-features --features=
-      - run: cd bon && cargo test --locked --no-default-features --features=alloc
-
-  cargo-clippy-msrv:
-    runs-on: ${{ matrix.os }}-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu, windows, macos]
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          components: clippy
-          toolchain: 1.70.0
-
-      # We just test that `bon` crate compile fine. This is the main crate
-      # that needs to compile fine. We also make sure its tests compile
-      # fine as well. Therefore right now we use the MSRV specifically such
-      # that `trybuild` compiles as well (it's trybuild's MSRV).
-      - run: cargo clippy --all-features --all-targets --locked -p bon
-        env:
-            RUSTFLAGS: >-
-              --deny warnings
-              --allow unknown-lints
-
-  cargo-clippy-stablle:
+  test-stable:
     runs-on: ${{ matrix.os }}-latest
 
     strategy:
@@ -124,7 +78,33 @@ jobs:
 
       - run: cargo clippy --all-features --all-targets --locked
 
-  cargo-clippy-unstable:
+      - run: cargo test --locked --all-features --all-targets
+      - run: cargo test --locked --all-features --doc
+      - run: cd bon && cargo test --locked --no-default-features --features=
+      - run: cd bon && cargo test --locked --no-default-features --features=alloc
+
+  test-msrv:
+    runs-on: ${{ matrix.os }}-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu, windows, macos]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: clippy
+          toolchain: 1.59.0
+
+      # We just test that `bon` crate compile fine. This is the main crate
+      # that needs to compile fine. We also make sure its tests compile
+      # fine as well. Therefore right now we use the MSRV specifically such
+      # that `trybuild` compiles as well (it's trybuild's MSRV).
+      - run: ./scripts/test-msrv.sh
+
+  test-unstable:
     runs-on: ubuntu-latest
 
     # This job is optional to pass. It notifies us about the potential breakages
@@ -153,7 +133,6 @@ jobs:
             --allow edition-2024-expr-fragment-specifier
             --allow impl-trait-overcaptures
 
-
   cargo-doc:
     runs-on: ${{ matrix.os }}-latest
 
@@ -176,7 +155,7 @@ jobs:
 
   # Check for unused dependencies that uses simple regex search,
   # meaning it's ⚡️ blazingly ⚡️ fast
-  rust-unused-dependencies:
+  cargo-machete:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -184,7 +163,7 @@ jobs:
       - run: cargo-machete
 
   # Check the formatting of TOML files in the repository
-  toml:
+  taplo-fmt:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

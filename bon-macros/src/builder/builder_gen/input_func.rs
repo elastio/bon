@@ -142,7 +142,7 @@ impl FuncInputCtx {
 
         quote::format_ident!(
             "{}{pascal_case_func}Builder",
-            self.self_ty_prefix().unwrap_or_default()
+            self.self_ty_prefix().unwrap_or_default(),
         )
     }
 
@@ -195,7 +195,7 @@ impl FuncInputCtx {
                     .clone()
                     // We treat `new` method specially. In this case we already know the best
                     // default name for the positional function, which is `new` itself.
-                    .or_else(|| self.is_method_new().then_some(orig.sig.ident))
+                    .or_else(|| self.is_method_new().then(|| orig.sig.ident))
             })
             // By default we don't want to expose the positional function, so we
             // hide it under a generated name to avoid name conflicts.
@@ -285,12 +285,13 @@ impl FuncInputCtx {
         let members = typed_args(&self.norm_func)
             .zip(typed_args(&self.orig_func))
             .map(|(norm_arg, orig_arg)| {
-                let syn::Pat::Ident(pat) = norm_arg.pat.as_ref() else {
-                    bail!(
+                let pat = match norm_arg.pat.as_ref() {
+                    syn::Pat::Ident(pat) => pat,
+                    _ => bail!(
                         &orig_arg.pat,
                         "use a simple `identifier: type` syntax for the function argument; \
                         destructuring patterns in arguments aren't supported by the `#[builder]`",
-                    )
+                    ),
                 };
 
                 Ok(RawMember {
@@ -484,8 +485,9 @@ impl Visit<'_> for FindSelfReference {
         }
         syn::visit::visit_path(self, path);
 
-        let Some(first_segment) = path.segments.first() else {
-            return;
+        let first_segment = match path.segments.first() {
+            Some(first_segment) => first_segment,
+            _ => return,
         };
 
         if first_segment.ident == "Self" {

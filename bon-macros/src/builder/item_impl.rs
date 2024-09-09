@@ -13,8 +13,9 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
 
     let (builder_funcs, other_items): (Vec<_>, Vec<_>) =
         orig_impl_block.items.into_iter().partition(|item| {
-            let syn::ImplItem::Fn(fn_item) = item else {
-                return false;
+            let fn_item = match item {
+                syn::ImplItem::Fn(fn_item) => fn_item,
+                _ => return false,
             };
 
             fn_item
@@ -62,13 +63,18 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
         generics: norm_impl_block.generics,
     });
 
-    let outputs: Vec<_> = std::iter::zip(orig_impl_block.items, norm_impl_block.items)
+    let outputs: Vec<_> = orig_impl_block
+        .items
+        .into_iter()
+        .zip(norm_impl_block.items)
         .map(|(orig_item, norm_item)| {
-            let syn::ImplItem::Fn(norm_func) = norm_item else {
-                unreachable!();
+            let norm_func = match norm_item {
+                syn::ImplItem::Fn(norm_func) => norm_func,
+                _ => unreachable!(),
             };
-            let syn::ImplItem::Fn(orig_func) = orig_item else {
-                unreachable!();
+            let orig_func = match orig_item {
+                syn::ImplItem::Fn(orig_func) => orig_func,
+                _ => unreachable!(),
             };
 
             let norm_func = impl_item_fn_into_fn_item(norm_func)?;
