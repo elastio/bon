@@ -163,7 +163,7 @@ jobs:
       - run: cargo-machete
 
   # Check the formatting of TOML files in the repository
-  toml:
+  taplo-fmt:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
