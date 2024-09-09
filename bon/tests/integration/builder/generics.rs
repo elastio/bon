@@ -190,7 +190,6 @@ fn const_generics() {
     assert_debug_eq(actual, expect![[r#"Sut { a: "a", b: 42, c: [0, 0, 0] }"#]]);
 }
 
-
 #[test]
 fn default_generic_const_params() {
     #[derive(bon::Builder)]

@@ -7,10 +7,10 @@ This is a proc-macro crate that is supposed to be a private implementation
 detail of the `bon` crate
 """
 
-edition      = "2021"
-homepage     = "https://elastio.github.io/bon/"
-license      = "MIT OR Apache-2.0"
-repository   = "https://github.com/elastio/bon"
+edition    = "2021"
+homepage   = "https://elastio.github.io/bon/"
+license    = "MIT OR Apache-2.0"
+repository = "https://github.com/elastio/bon"
 
 # This MSRV was chosen because Rust supports mixing generic type and const
 # parameters only starting with this version. We require this feature for the
