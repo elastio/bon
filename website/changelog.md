@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.2.1](https://github.com/elastio/bon/compare/v2.2.0...v2.2.1) - 2024-09-09
+
+### Changed
+
+- Lower MSRV from 1.70.0 to 1.59.0 ([#120](https://github.com/elastio/bon/pull/120))
+
 ## [2.2.0](https://github.com/elastio/bon/compare/v2.1.1...v2.2.0) - 2024-09-08
 
 See the [blog post for this release](https://elastio.github.io/bon/blog/bon-builder-v2-2-release) that describes some of the most notable changes in detail.
