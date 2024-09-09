@@ -6,7 +6,7 @@ const [_, versionWildcard] = version.match(/(\d+.\d+).\d+/);
 
 # Overview
 
-`bon` is a Rust crate for generating compile-time-checked builders for functions and structs.
+`bon` is a Rust crate for generating compile-time-checked builders for functions and structs. It also provides idiomatic partial application with optional and named parameters for functions and methods.
 
 If you are new to the concept of builders or named function arguments, and you don't know what problems they may solve for you, then check out the motivational [blog post](../blog/how-to-do-named-function-arguments-in-rust).
 
