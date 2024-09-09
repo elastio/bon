@@ -64,7 +64,7 @@ jobs:
           git diff --exit-code --color=always || ( echo "Cargo.lock is
           out-of-date. See the diff above. Try rebasing on master" && exit 1 )
 
-  cargo-test:
+  test-stable:
     runs-on: ${{ matrix.os }}-latest
 
     strategy:
@@ -76,12 +76,14 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
 
+      - run: cargo clippy --all-features --all-targets --locked
+
       - run: cargo test --locked --all-features --all-targets
       - run: cargo test --locked --all-features --doc
       - run: cd bon && cargo test --locked --no-default-features --features=
       - run: cd bon && cargo test --locked --no-default-features --features=alloc
 
-  cargo-clippy-msrv:
+  test-msrv:
     runs-on: ${{ matrix.os }}-latest
 
     strategy:
@@ -102,21 +104,7 @@ jobs:
       # that `trybuild` compiles as well (it's trybuild's MSRV).
       - run: ./scripts/test-msrv.sh
 
-  cargo-clippy-stablle:
-    runs-on: ${{ matrix.os }}-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu, windows, macos]
-
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-
-      - run: cargo clippy --all-features --all-targets --locked
-
-  cargo-clippy-unstable:
+  test-unstable:
     runs-on: ubuntu-latest
 
     # This job is optional to pass. It notifies us about the potential breakages
@@ -144,7 +132,6 @@ jobs:
             --allow unknown-lints
             --allow edition-2024-expr-fragment-specifier
             --allow impl-trait-overcaptures
-
 
   cargo-doc:
     runs-on: ${{ matrix.os }}-latest
