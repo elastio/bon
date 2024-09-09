@@ -18,14 +18,14 @@ homepage   = "https://elastio.github.io/bon/"
 license    = "MIT OR Apache-2.0"
 repository = "https://github.com/elastio/bon"
 
-# This MSRV is chosen because only starting with this version Rust supports
-# mixing generic type and const parameters. We require this feature for the
-# cases when builder is derived for a function or struct that uses const
+# This MSRV was chosen because Rust supports mixing generic type and const
+# parameters only starting with this version. We require this feature for the
+# cases when the builder is generated for a function or struct that uses const
 # generics. The generated builder **always** appends a generic type parameter
-# for the type state at the end of the Builder type generics list. So for
-# functions or structs that use const generics the generated builder will have
-# a generic type parameter after the const generic parameter, which is only
-# supported starting from Rust 1.59.0.
+# for the type state at the end of the Builder generics list. So for functions
+# or structs that use const generics the generated builder will have a generic
+# type parameter after the const generic parameter, which is only supported
+# starting from Rust 1.59.0.
 rust-version = "1.59.0"
 
 [package.metadata.docs.rs]
