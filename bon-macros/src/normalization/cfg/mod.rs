@@ -108,7 +108,7 @@ impl ExpandCfg {
         let predicates = predicates.iter().enumerate().map(|(i, predicate)| {
             // We need to insert the recursion counter into the name so that
             // the name is unique on every recursive iteration of the cfg eval.
-            let pred_id = quote::format_ident!("{}_{}_{}", invocation_name, recursion_counter, i);
+            let pred_id = quote::format_ident!("{invocation_name}_{recursion_counter}_{i}");
             quote!(#pred_id: #predicate)
         });
 

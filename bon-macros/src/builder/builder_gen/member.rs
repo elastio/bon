@@ -150,10 +150,8 @@ impl MemberParams {
 
                 bail!(
                     &span,
-                    "`skip` attribute can't be specified with other attributes like `{}` \
-                    because there will be no setter generated for this member to configure{}",
-                    attr_name,
-                    default_hint,
+                    "`skip` attribute can't be specified with other attributes like `{attr_name}` \
+                    because there will be no setter generated for this member to configure{default_hint}",
                 );
             }
         }

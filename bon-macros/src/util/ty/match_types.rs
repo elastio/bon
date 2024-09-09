@@ -237,10 +237,9 @@ pub(crate) fn match_types(scrutinee: &syn::Type, pattern: &syn::Type) -> Result<
 fn unsupported_syntax_error(spanned: &impl Spanned, syntax: &str) -> Error {
     err!(
         spanned,
-        "{} is not supported in type patterns yet. If you have \
+        "{syntax} is not supported in type patterns yet. If you have \
         a use case for this, please open an issue at \
         https://github.com/elastio/bon/issues.",
-        syntax
     )
 }
 

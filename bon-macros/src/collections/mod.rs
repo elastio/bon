@@ -21,8 +21,8 @@ where
                 _ => return,
             };
             errors.extend([
-                err!(existing, "duplicate {}", err_label),
-                err!(new_item, "duplicate {}", err_label),
+                err!(existing, "duplicate {err_label}"),
+                err!(new_item, "duplicate {err_label}"),
             ]);
         });
 

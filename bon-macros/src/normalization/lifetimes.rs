@@ -152,7 +152,7 @@ impl AssignLifetimes<'_> {
         let index = self.next_lifetime_index;
         self.next_lifetime_index += 1;
 
-        let lifetime = format!("'__{}{}", self.prefix, index);
+        let lifetime = format!("'__{}{index}", self.prefix);
         let lifetime = syn::Lifetime::new(&lifetime, Span::call_site());
 
         let lifetime_param = syn::LifetimeParam::new(lifetime.clone());

@@ -141,9 +141,8 @@ impl FuncInputCtx {
         let pascal_case_func = self.norm_func.sig.ident.snake_to_pascal_case();
 
         quote::format_ident!(
-            "{}{}Builder",
+            "{}{pascal_case_func}Builder",
             self.self_ty_prefix().unwrap_or_default(),
-            pascal_case_func,
         )
     }
 

@@ -39,7 +39,6 @@ export RUSTFLAGS="${RUSTFLAGS:-} --allow unknown-lints"
 
 step cargo clippy --all-features --all-targets --locked
 
-
 test_args=(
     --all-features
     --locked
