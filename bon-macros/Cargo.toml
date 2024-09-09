@@ -52,4 +52,4 @@ proc-macro2 = "1"
 quote       = "1"
 
 # This is the highest version that supports our MSRV
-syn         = { version = "2.0.56", features = ["full", "visit-mut", "visit"] }
+syn = { version = "2.0.56", features = ["full", "visit-mut", "visit"] }
