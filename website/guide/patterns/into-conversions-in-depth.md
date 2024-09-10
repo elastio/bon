@@ -350,7 +350,7 @@ Before we enabled `Into` conversions the signature provided a hint for the compi
 
 However, after we enabled `Into` conversions, the signature no longer provides a single concrete type. It says that it accepts an `Option` of any type that implements `Into<String>`.
 
-It means that the `None` literal could be of types `Option<&str>` or `Option<String>`, for example, so the compiler can't decide which one you meant. And this matters, because `Option<&str>` and `Option<String>` are totally different types. Simplified, `Option<&str>` is 8 bytes in size and `Option<String>` is 24 bytes, even when they are `None`.
+It means that the `None` literal could be of types `Option<&str>` or `Option<String>`, for example, so the compiler can't decide which one you meant. And this matters, because `Option<&str>` and `Option<String>` are totally different types. Simplified, `Option<&str>` is 16 bytes in size and `Option<String>` is 24 bytes, even when they are `None`.
 
 To work around this problem the caller would need to explicitly specify the generic parameter for the `Option` type when passing the `None` literal:
 
