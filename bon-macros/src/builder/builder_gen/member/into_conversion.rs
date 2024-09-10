@@ -31,20 +31,21 @@ impl PositionalFnArgMember {
         is_into_enabled(self.origin, &self.params, scrutinee, conditional_params)
     }
 
-    pub(crate) fn fn_input_type(
+    pub(crate) fn fn_input_param(
         &self,
         conditional_params: &[ConditionalParams],
     ) -> Result<TokenStream2> {
         let has_into = self.param_into(conditional_params)?;
         let norm_ty = &self.norm_ty;
+        let ident = &self.ident;
 
-        let ty = if has_into {
-            quote! { impl Into<#norm_ty> }
+        let input = if has_into {
+            quote! { #ident: impl Into<#norm_ty> }
         } else {
-            quote! { #norm_ty }
+            quote! { #ident: #norm_ty }
         };
 
-        Ok(ty)
+        Ok(input)
     }
 
     pub(crate) fn maybe_into_ident_expr(

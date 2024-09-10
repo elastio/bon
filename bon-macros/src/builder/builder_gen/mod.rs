@@ -317,7 +317,10 @@ impl BuilderGenCtx {
             }
         });
 
-        let receiver = receiver.map(|receiver| &receiver.with_self_keyword);
+        let receiver = receiver.map(|receiver| {
+            let receiver = &receiver.with_self_keyword;
+            quote! { #receiver, }
+        });
 
         let unset_state_literals = self.named_members().map(|member| {
             if member.is_optional() {
@@ -327,9 +330,9 @@ impl BuilderGenCtx {
             }
         });
 
-        let start_fn_args = self
+        let start_fn_params = self
             .start_fn_args()
-            .map(|member| member.base.fn_input_type(&self.conditional_params))
+            .map(|member| member.base.fn_input_param(&self.conditional_params))
             .collect::<Result<Vec<_>>>()?;
 
         let start_fn_arg_exprs = self
@@ -359,7 +362,7 @@ impl BuilderGenCtx {
             )]
             #vis fn #start_func_ident<#(#generics_decl),*>(
                 #receiver
-                #(#start_fn_args,)*
+                #(#start_fn_params,)*
             ) -> #builder_ident<#(#generic_args,)*>
             #where_clause
             {
@@ -653,11 +656,11 @@ impl BuilderGenCtx {
             }
         });
 
-        let finish_fn_args = self
+        let finish_fn_params = self
             .members
             .iter()
             .filter_map(Member::as_finish_fn_arg)
-            .map(|member| member.fn_input_type(&self.conditional_params))
+            .map(|member| member.fn_input_param(&self.conditional_params))
             .collect::<Result<Vec<_>>>()?;
 
         Ok(quote! {
@@ -676,7 +679,7 @@ impl BuilderGenCtx {
             #must_use
             #vis #asyncness #unsafety fn #finish_func_ident(
                 self,
-                #(#finish_fn_args,)*
+                #(#finish_fn_params,)*
             ) #output
             where
                 #(#where_bounds,)*
