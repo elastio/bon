@@ -11,6 +11,7 @@ mod lints;
 mod many_params;
 mod name_conflicts;
 mod raw_idents;
+mod positional_members;
 mod smoke;
 
 /// Tests for the deprecated features that we still support, but that we'll
@@ -43,13 +44,28 @@ fn lifetime_elision() {
 #[cfg(feature = "std")]
 #[tokio::test]
 async fn async_func() {
-    // FIXME: https://github.com/elastio/bon/issues/100
-    #![allow(clippy::future_not_send)]
-
     #[builder]
-    async fn sut<Fut: std::future::Future>(fut: Fut) -> Fut::Output {
+    async fn sut(arg: u32) -> u32 {
+        std::future::ready(arg).await
+    }
+
+    let actual = sut().arg(42).call().await;
+    assert_eq!(actual, 42);
+}
+
+#[cfg(feature = "std")]
+#[tokio::test]
+async fn async_func_with_future_arg() {
+    #[builder]
+    async fn sut<Fut: std::future::Future + Send>(fut: Fut) -> Fut::Output {
         fut.await
     }
+
+    fn is_send(_val: impl Send + Sync) {}
+
+    let fut = sut().fut(std::future::ready(42)).call();
+
+    is_send(fut);
 
     let actual = sut().fut(async { 42 }).call().await;
     assert_eq!(actual, 42);

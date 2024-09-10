@@ -1,4 +1,4 @@
-use super::{BuilderGenCtx, RegularMember};
+use super::{BuilderGenCtx, NamedMember};
 use crate::util::prelude::*;
 use quote::quote;
 
@@ -18,14 +18,14 @@ pub(crate) struct SettersReturnType {
 
 pub(crate) struct MemberSettersCtx<'a> {
     builder_gen: &'a BuilderGenCtx,
-    member: &'a RegularMember,
+    member: &'a NamedMember,
     return_type: SettersReturnType,
 }
 
 impl<'a> MemberSettersCtx<'a> {
     pub(crate) fn new(
         builder_gen: &'a BuilderGenCtx,
-        member: &'a RegularMember,
+        member: &'a NamedMember,
         return_type: SettersReturnType,
     ) -> Self {
         Self {
@@ -144,19 +144,19 @@ impl<'a> MemberSettersCtx<'a> {
 
                 let builder_ident = &self.builder_gen.builder_ident;
 
-                let member_exprs = self.builder_gen.regular_members().map(|other_member| {
+                let member_exprs = self.builder_gen.named_members().map(|other_member| {
                     if other_member.norm_ident == self.member.norm_ident {
                         return member_init.clone();
                     }
                     let index = &other_member.index;
-                    quote!(self.__private_members.#index)
+                    quote!(self.__private_named_members.#index)
                 });
 
                 quote! {
                     #builder_ident {
                         __private_phantom: ::core::marker::PhantomData,
                         #maybe_receiver_field
-                        __private_members: (#( #member_exprs, )*)
+                        __private_named_members: (#( #member_exprs, )*)
                     }
                 }
             }

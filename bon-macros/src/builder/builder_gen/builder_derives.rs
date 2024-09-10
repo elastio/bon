@@ -34,7 +34,7 @@ impl BuilderGenCtx {
             .receiver()
             .map(|receiver| &receiver.without_self_keyword);
 
-        let member_types = self.regular_members().map(|member| &member.norm_ty);
+        let member_types = self.named_members().map(|member| &member.norm_ty);
 
         std::iter::empty()
             .chain(receiver_ty)
@@ -81,7 +81,7 @@ impl BuilderGenCtx {
                     Self {
                         __private_phantom: ::core::marker::PhantomData,
                         #clone_receiver
-                        __private_members: self.__private_members.clone(),
+                        __private_named_members: self.__private_named_members.clone(),
                     }
                 }
             }
@@ -107,18 +107,18 @@ impl BuilderGenCtx {
         let builder_ident_str = builder_ident.to_string();
 
         let state_type_vars = self
-            .regular_members()
+            .named_members()
             .map(|member| &member.generic_var_ident)
             .collect::<Vec<_>>();
 
-        let format_members = self.regular_members().map(|member| {
+        let format_members = self.named_members().map(|member| {
             let member_index = &member.index;
             let member_ident_str = member.orig_ident.to_string();
 
             quote! {
                 // Skip members that are not set to reduce noise
-                if self.__private_members.#member_index.is_set() {
-                    output.field(#member_ident_str, &self.__private_members.#member_index);
+                if self.__private_named_members.#member_index.is_set() {
+                    output.field(#member_ident_str, &self.__private_named_members.#member_index);
                 }
             }
         });

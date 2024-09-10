@@ -106,7 +106,7 @@ impl<T> MemberState for Unset<T> {
 /// removed by the time the `#[builder]`'s macro expansion is invoked.
 ///
 /// It is a problem because the `#[builder]` macro needs to know the exact list
-/// of members it has to generate setters for. It doesn't know whether the
+/// of members it has to generate setters for. It doesn't know whether
 /// the `windows` predicate evaluates to `true` or `false`, especially if this was
 /// a more complex predicate. So it can't decide whether to generate a setter for
 /// the `windows_only_param` or not.

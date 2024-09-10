@@ -211,7 +211,7 @@ impl FinishFuncBody for StructLiteralBody {
         let Self { struct_ident } = self;
 
         // The variables with values of members are in scope for this expression.
-        let member_vars = member_exprs.iter().map(Member::ident);
+        let member_vars = member_exprs.iter().map(Member::orig_ident);
 
         quote! {
             #struct_ident {

@@ -98,10 +98,6 @@ jobs:
           components: clippy
           toolchain: 1.59.0
 
-      # We just test that `bon` crate compile fine. This is the main crate
-      # that needs to compile fine. We also make sure its tests compile
-      # fine as well. Therefore right now we use the MSRV specifically such
-      # that `trybuild` compiles as well (it's trybuild's MSRV).
       - run: ./scripts/test-msrv.sh
 
   test-unstable:

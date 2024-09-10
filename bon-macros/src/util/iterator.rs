@@ -2,13 +2,6 @@ use crate::util::prelude::*;
 use std::fmt::Write;
 
 pub(crate) trait IteratorExt: Iterator + Sized {
-    fn try_collect<U, E>(self) -> Result<U, E>
-    where
-        Result<U, E>: FromIterator<Self::Item>,
-    {
-        self.collect()
-    }
-
     /// Based on itertools:
     /// <https://github.com/rust-itertools/itertools/blob/a4a82e4b97eb76687c2a57cdfd2e5343ff507827/src/lib.rs#L2301-L2330>
     fn join(mut self, sep: &str) -> String

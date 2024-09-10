@@ -173,12 +173,16 @@ impl BuilderGenCtx {
         self.assoc_method_ctx.as_ref()?.receiver.as_ref()
     }
 
-    fn regular_members(&self) -> impl Iterator<Item = &RegularMember> {
-        self.members.iter().filter_map(Member::as_regular)
+    fn named_members(&self) -> impl Iterator<Item = &NamedMember> {
+        self.members.iter().filter_map(Member::as_named)
+    }
+
+    fn start_fn_args(&self) -> impl Iterator<Item = &StartFnArgMember> {
+        self.members.iter().filter_map(Member::as_start_fn_arg)
     }
 
     pub(crate) fn output(self) -> Result<MacroOutput> {
-        let start_func = self.start_func();
+        let start_func = self.start_func()?;
         let builder_decl = self.builder_decl();
         let builder_impl = self.builder_impl()?;
         let builder_derives = self.builder_derives();
@@ -203,7 +207,7 @@ impl BuilderGenCtx {
         let generic_args = &self.generics.args;
         let where_clause = &self.generics.where_clause;
         let state_type_vars = self
-            .regular_members()
+            .named_members()
             .map(|member| &member.generic_var_ident)
             .collect::<Vec<_>>();
 
@@ -212,7 +216,7 @@ impl BuilderGenCtx {
         let allows = allow_warnings_on_member_types();
 
         let regular_members_labels = self
-            .regular_members()
+            .named_members()
             .map(|member| self.members_label(member));
 
         let vis = &self.vis;
@@ -283,7 +287,7 @@ impl BuilderGenCtx {
         }
     }
 
-    fn start_func(&self) -> syn::ItemFn {
+    fn start_func(&self) -> Result<syn::ItemFn> {
         let builder_ident = &self.builder_ident;
 
         let docs = &self.start_func.attrs;
@@ -315,11 +319,27 @@ impl BuilderGenCtx {
 
         let receiver = receiver.map(|receiver| &receiver.with_self_keyword);
 
-        let unset_state_literals = self.regular_members().map(|member| {
+        let unset_state_literals = self.named_members().map(|member| {
             if member.is_optional() {
                 quote!(::bon::private::Unset(::bon::private::Optional))
             } else {
                 quote!(::bon::private::Unset(::bon::private::Required))
+            }
+        });
+
+        let start_fn_args = self
+            .start_fn_args()
+            .map(|member| member.base.fn_input_type(&self.conditional_params))
+            .collect::<Result<Vec<_>>>()?;
+
+        let start_fn_arg_exprs = self
+            .start_fn_args()
+            .map(|member| member.base.maybe_into_ident_expr(&self.conditional_params))
+            .collect::<Result<Vec<_>>>()?;
+
+        let start_fn_args_field_init = (!start_fn_arg_exprs.is_empty()).then(|| {
+            quote! {
+                __private_start_fn_args: (#(#start_fn_arg_exprs,)*),
             }
         });
 
@@ -339,6 +359,7 @@ impl BuilderGenCtx {
             )]
             #vis fn #start_func_ident<#(#generics_decl),*>(
                 #receiver
+                #(#start_fn_args,)*
             ) -> #builder_ident<#(#generic_args,)*>
             #where_clause
             {
@@ -347,12 +368,13 @@ impl BuilderGenCtx {
                 #builder_ident {
                     __private_phantom: ::core::marker::PhantomData,
                     #receiver_field_init
-                    __private_members: (#( #unset_state_literals, )*)
+                    #start_fn_args_field_init
+                    __private_named_members: (#( #unset_state_literals, )*)
                 }
             }
         };
 
-        syn::parse_quote!(#func)
+        Ok(syn::parse_quote!(#func))
     }
 
     fn phantom_data(&self) -> TokenStream2 {
@@ -450,11 +472,23 @@ impl BuilderGenCtx {
         let initial_state_type_alias_ident =
             quote::format_ident!("__{}InitialState", builder_ident.raw_name());
 
-        let unset_state_types = self.regular_members().map(|member| {
+        let unset_state_types = self.named_members().map(|member| {
             if member.is_optional() {
                 quote!(::bon::private::Unset<::bon::private::Optional>)
             } else {
                 quote!(::bon::private::Unset<::bon::private::Required>)
+            }
+        });
+
+        let mut start_fn_arg_types = self
+            .start_fn_args()
+            .map(|member| &member.base.norm_ty)
+            .peekable();
+
+        let start_fn_arg_types_field = start_fn_arg_types.peek().is_some().then(|| {
+            quote! {
+                #[doc = #private_field_doc]
+                __private_start_fn_args: (#(#start_fn_arg_types,)*),
             }
         });
 
@@ -495,16 +529,17 @@ impl BuilderGenCtx {
                 __private_phantom: #phantom_data,
 
                 #receiver_field
+                #start_fn_arg_types_field
 
                 #[doc = #private_field_doc]
-                __private_members: ___State
+                __private_named_members: ___State
             }
         }
     }
 
     fn member_expr(&self, member: &Member) -> Result<TokenStream2> {
         let member = match member {
-            Member::Regular(member) => member,
+            Member::Named(member) => member,
             Member::Skipped(member) => {
                 let expr = member
                     .value
@@ -514,6 +549,13 @@ impl BuilderGenCtx {
                     .unwrap_or_else(|| quote! { ::core::default::Default::default() });
 
                 return Ok(expr);
+            }
+            Member::StartFnArg(member) => {
+                let index = &member.index;
+                return Ok(quote! { self.__private_start_fn_args.#index });
+            }
+            Member::FinishFnArg(member) => {
+                return member.maybe_into_ident_expr(&self.conditional_params);
             }
         };
 
@@ -549,7 +591,7 @@ impl BuilderGenCtx {
             ::bon::private::IntoSet::<
                 #set_state_type_param,
                 #member_label
-            >::into_set(self.__private_members.#index)
+            >::into_set(self.__private_named_members.#index)
             #maybe_default
         };
 
@@ -558,7 +600,7 @@ impl BuilderGenCtx {
 
     /// Name of the dummy struct that is generated just to give a name for
     /// the member in the error message when `IntoSet` trait is not implemented.
-    fn members_label(&self, member: &RegularMember) -> syn::Ident {
+    fn members_label(&self, member: &NamedMember) -> syn::Ident {
         quote::format_ident!(
             "{}__{}",
             self.builder_ident.raw_name(),
@@ -572,7 +614,7 @@ impl BuilderGenCtx {
             .iter()
             .map(|member| {
                 let expr = self.member_expr(member)?;
-                let var_ident = member.ident();
+                let var_ident = member.orig_ident();
 
                 // The type hint is necessary in some cases to assist the compiler
                 // in type inference.
@@ -599,7 +641,7 @@ impl BuilderGenCtx {
         let finish_func_ident = &self.finish_func.ident;
         let output = &self.finish_func.output;
 
-        let where_bounds = self.regular_members().map(|member| {
+        let where_bounds = self.named_members().map(|member| {
             let member_type_var = &member.generic_var_ident;
             let set_state_type_param = member.set_state_type_param();
             let member_label = self.members_label(member);
@@ -611,13 +653,31 @@ impl BuilderGenCtx {
             }
         });
 
+        let finish_fn_args = self
+            .members
+            .iter()
+            .filter_map(Member::as_finish_fn_arg)
+            .map(|member| member.fn_input_type(&self.conditional_params))
+            .collect::<Result<Vec<_>>>()?;
+
         Ok(quote! {
             #[doc = #docs]
             #[inline(always)]
-            // This is intentional. We want the builder syntax to compile away
-            #[allow(clippy::inline_always)]
+            #[allow(
+                // This is intentional. We want the builder syntax to compile away
+                clippy::inline_always,
+
+                // This lint flags any function that returns a possibly `!Send` future.
+                // However, it doesn't apply in the generic context where the future is
+                // `Send` if the generic parameters are `Send` as well, so we just suppress
+                // this lint. See the issue: https://github.com/rust-lang/rust-clippy/issues/6947
+                clippy::future_not_send,
+            )]
             #must_use
-            #vis #asyncness #unsafety fn #finish_func_ident(self) #output
+            #vis #asyncness #unsafety fn #finish_func_ident(
+                self,
+                #(#finish_fn_args,)*
+            ) #output
             where
                 #(#where_bounds,)*
             {
@@ -634,7 +694,7 @@ impl BuilderGenCtx {
         let where_clause = &self.generics.where_clause;
 
         let state_type_vars = self
-            .regular_members()
+            .named_members()
             .map(|member| &member.generic_var_ident)
             .collect::<Vec<_>>();
 
@@ -643,7 +703,7 @@ impl BuilderGenCtx {
         let next_state_trait_ident =
             quote::format_ident!("__{}SetMember", builder_ident.raw_name());
 
-        let next_states_decls = self.regular_members().map(|member| {
+        let next_states_decls = self.named_members().map(|member| {
             let member_pascal = &member.norm_ident_pascal;
             quote! {
                 type #member_pascal;
@@ -651,9 +711,9 @@ impl BuilderGenCtx {
         });
 
         let setters = self
-            .regular_members()
+            .named_members()
             .map(|member| {
-                let state_types = self.regular_members().map(|other_member| {
+                let state_types = self.named_members().map(|other_member| {
                     if other_member.orig_ident == member.orig_ident {
                         let ty = member.set_state_type_param();
                         quote!(::bon::private::Set<#ty>)

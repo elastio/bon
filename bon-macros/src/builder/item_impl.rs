@@ -63,7 +63,7 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
         generics: norm_impl_block.generics,
     });
 
-    let outputs: Vec<_> = orig_impl_block
+    let outputs = orig_impl_block
         .items
         .into_iter()
         .zip(norm_impl_block.items)
@@ -104,7 +104,7 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
 
             Result::<_>::Ok((ctx.adapted_func()?, ctx.into_builder_gen_ctx()?.output()?))
         })
-        .try_collect()?;
+        .collect::<Result<Vec<_>>>()?;
 
     let new_impl_items = outputs.iter().flat_map(|(adapted_func, output)| {
         let start_func = &output.start_func;
