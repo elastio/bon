@@ -1,7 +1,6 @@
 use super::MemberOrigin;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
-use darling::FromMeta;
 use std::fmt;
 use syn::spanned::Spanned;
 
@@ -28,10 +27,11 @@ pub(crate) struct MemberParams {
     /// Rename the name exposed in the builder API.
     pub(crate) name: Option<syn::Ident>,
 
-    /// Where to place the member in the generate builder methods API.
+    /// Where to place the member in the generated builder methods API.
     /// By default the member is treated like a named parameter that
     /// gets its own setter methods.
-    pub(crate) source: Option<MemberInputSource>,
+    pub(crate) start_fn: darling::util::Flag,
+    pub(crate) finish_fn: darling::util::Flag,
 }
 
 #[derive(PartialEq, Eq, Clone, Copy)]
@@ -39,8 +39,9 @@ enum ParamName {
     Default,
     Into,
     Name,
-    Source,
     Skip,
+    StartFn,
+    FinishFn,
 }
 
 impl fmt::Display for ParamName {
@@ -49,8 +50,9 @@ impl fmt::Display for ParamName {
             Self::Default => "default",
             Self::Into => "into",
             Self::Name => "name",
-            Self::Source => "source",
             Self::Skip => "skip",
+            Self::StartFn => "start_fn",
+            Self::FinishFn => "finish_fn",
         };
         f.write_str(str)
     }
@@ -91,15 +93,17 @@ impl MemberParams {
             default,
             skip,
             name,
-            source: pos,
+            finish_fn,
+            start_fn,
         } = self;
 
         let attrs = [
             (default.is_some(), ParamName::Default),
             (name.is_some(), ParamName::Name),
             (into.is_present(), ParamName::Into),
-            (pos.is_some(), ParamName::Source),
             (skip.is_some(), ParamName::Skip),
+            (start_fn.is_present(), ParamName::StartFn),
+            (finish_fn.is_present(), ParamName::FinishFn),
         ];
 
         attrs
@@ -109,8 +113,20 @@ impl MemberParams {
     }
 
     pub(crate) fn validate(&self, origin: MemberOrigin) -> Result {
-        if let Some(pos) = self.source {
-            self.validate_mutually_allowed(ParamName::Source, pos.span(), &[ParamName::Into])?;
+        if self.start_fn.is_present() {
+            self.validate_mutually_allowed(
+                ParamName::StartFn,
+                self.start_fn.span(),
+                &[ParamName::Into],
+            )?;
+        }
+
+        if self.finish_fn.is_present() {
+            self.validate_mutually_allowed(
+                ParamName::FinishFn,
+                self.finish_fn.span(),
+                &[ParamName::Into],
+            )?;
         }
 
         if let Some(skip) = &self.skip {
@@ -146,42 +162,5 @@ fn parse_optional_expression(meta: &syn::Meta) -> Result<SpannedValue<Option<syn
         syn::Meta::Path(_) => Ok(SpannedValue::new(None, meta.span())),
         syn::Meta::List(_) => Err(Error::unsupported_format("list").with_span(meta)),
         syn::Meta::NameValue(nv) => Ok(SpannedValue::new(Some(nv.value.clone()), nv.span())),
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-pub(crate) enum MemberInputSource {
-    /// The member must be a positional argument in the start function
-    StartFn(Span),
-
-    /// The member must be a positional argument in the finish function
-    FinishFn(Span),
-}
-
-impl FromMeta for MemberInputSource {
-    fn from_expr(expr: &syn::Expr) -> Result<Self> {
-        let err = || err!(expr, "expected one of `start_fn` or `finish_fn`");
-        let path = match expr {
-            syn::Expr::Path(path) if path.attrs.is_empty() && path.qself.is_none() => path,
-            _ => return Err(err()),
-        };
-
-        let ident = path.path.get_ident().ok_or_else(err)?.to_string();
-
-        let kind = match ident.as_str() {
-            "start_fn" => Self::StartFn,
-            "finish_fn" => Self::FinishFn,
-            _ => return Err(err()),
-        };
-
-        Ok(kind(path.span()))
-    }
-}
-
-impl MemberInputSource {
-    fn span(self) -> Span {
-        match self {
-            Self::StartFn(span) | Self::FinishFn(span) => span,
-        }
     }
 }

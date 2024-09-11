@@ -4,7 +4,7 @@ mod params;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
 use darling::FromAttributes;
-use params::{MemberInputSource, MemberParams};
+use params::MemberParams;
 use quote::quote;
 use std::fmt;
 
@@ -213,7 +213,9 @@ impl Member {
                     }));
                 }
 
-                if let Some(pos) = params.source {
+                if params.finish_fn.is_present() || params.start_fn.is_present() {
+                    let is_finish_fn = params.finish_fn.is_present();
+
                     let base = PositionalFnArgMember {
                         origin,
                         ident: orig_ident,
@@ -221,16 +223,14 @@ impl Member {
                         orig_ty,
                         params,
                     };
-                    match pos {
-                        MemberInputSource::StartFn(_) => {
-                            let index = start_fn_arg_count.into();
-                            start_fn_arg_count += 1;
-                            return Ok(Self::StartFnArg(StartFnArgMember { base, index }));
-                        }
-                        MemberInputSource::FinishFn(_) => {
-                            return Ok(Self::FinishFnArg(base));
-                        }
+
+                    if is_finish_fn {
+                        return Ok(Self::FinishFnArg(base));
                     }
+
+                    let index = start_fn_arg_count.into();
+                    start_fn_arg_count += 1;
+                    return Ok(Self::StartFnArg(StartFnArgMember { base, index }));
                 }
 
                 // XXX: docs are collected only for named members. There is obvious

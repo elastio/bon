@@ -21,21 +21,21 @@ fn smoke_struct() {
     #[derive(Debug, Builder)]
     #[allow(dead_code)]
     struct Sut {
-        #[builder(source = start_fn)]
+        #[builder(start_fn)]
         starter_1: bool,
 
-        #[builder(source = start_fn, into)]
+        #[builder(start_fn, into)]
         starter_2: char,
 
-        #[builder(source = start_fn, into)]
+        #[builder(start_fn, into)]
         starter_3: Option<&'static str>,
 
         named: u32,
 
-        #[builder(source = finish_fn)]
+        #[builder(finish_fn)]
         finisher_1: &'static str,
 
-        #[builder(source = finish_fn, into)]
+        #[builder(finish_fn, into)]
         finisher_2: &'static str,
     }
 
@@ -61,12 +61,12 @@ fn smoke_struct() {
 fn smoke_fn() {
     #[builder]
     fn sut(
-        #[builder(source = start_fn)] starter_1: bool,
-        #[builder(source = start_fn, into)] starter_2: char,
-        #[builder(source = start_fn, into)] starter_3: Option<&'static str>,
+        #[builder(start_fn)] starter_1: bool,
+        #[builder(start_fn, into)] starter_2: char,
+        #[builder(start_fn, into)] starter_3: Option<&'static str>,
         named: u32,
-        #[builder(source = finish_fn)] finisher_1: &'static str,
-        #[builder(source = finish_fn, into)] finisher_2: &'static str,
+        #[builder(finish_fn)] finisher_1: &'static str,
+        #[builder(finish_fn, into)] finisher_2: &'static str,
     ) -> (
         bool,
         char,
@@ -98,12 +98,12 @@ fn smoke_impl_block() {
     impl Sut {
         #[builder]
         fn sut(
-            #[builder(source = start_fn)] starter_1: bool,
-            #[builder(source = start_fn, into)] starter_2: char,
-            #[builder(source = start_fn, into)] starter_3: Option<&'static str>,
+            #[builder(start_fn)] starter_1: bool,
+            #[builder(start_fn, into)] starter_2: char,
+            #[builder(start_fn, into)] starter_3: Option<&'static str>,
             named: u32,
-            #[builder(source = finish_fn)] finisher_1: &'static str,
-            #[builder(source = finish_fn, into)] finisher_2: &'static str,
+            #[builder(finish_fn)] finisher_1: &'static str,
+            #[builder(finish_fn, into)] finisher_2: &'static str,
         ) -> (
             bool,
             char,
@@ -120,9 +120,9 @@ fn smoke_impl_block() {
         #[builder]
         fn with_self(
             &self,
-            #[builder(source = start_fn)] starter_1: bool,
+            #[builder(start_fn)] starter_1: bool,
             named: u32,
-            #[builder(source = finish_fn)] finisher_1: &'static str,
+            #[builder(finish_fn)] finisher_1: &'static str,
         ) -> (bool, u32, &'static str) {
             let _ = self;
             (starter_1, named, finisher_1)
