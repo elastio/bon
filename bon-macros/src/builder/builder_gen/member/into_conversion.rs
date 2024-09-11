@@ -24,7 +24,7 @@ impl NamedMember {
 impl PositionalFnArgMember {
     pub(crate) fn param_into(&self, conditional_params: &[ConditionalParams]) -> Result<bool> {
         // Positional members are never optional. Users must always specify them, so there
-        // is no need to us to look into the `Option<T>` generic parameter, because the
+        // is no need for us to look into the `Option<T>` generic parameter, because the
         // `Option<T>` itself is the target of the into conversion, not the `T` inside it.
         let scrutinee = self.orig_ty.as_ref();
 
