@@ -1,11 +1,12 @@
 mod into_conversion;
+mod params;
 
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
-use darling::{FromAttributes, FromMeta};
+use darling::FromAttributes;
+use params::{MemberInputSource, MemberParams};
 use quote::quote;
 use std::fmt;
-use syn::spanned::Spanned;
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum MemberOrigin {
@@ -122,154 +123,6 @@ pub(crate) struct SkippedMember {
     pub(crate) value: SpannedValue<Option<syn::Expr>>,
 }
 
-#[derive(Debug, Clone, darling::FromAttributes)]
-#[darling(attributes(builder))]
-pub(crate) struct MemberParams {
-    /// Enables an `Into` conversion for the setter method.
-    into: darling::util::Flag,
-
-    /// Assign a default value to the member it it's not specified.
-    ///
-    /// An optional expression can be provided to set the value for the member,
-    /// otherwise its  [`Default`] trait impl will be used.
-    #[darling(with = parse_optional_expression, map = Some)]
-    default: Option<SpannedValue<Option<syn::Expr>>>,
-
-    /// Skip generating a setter method for this member.
-    ///
-    /// An optional expression can be provided to set the value for the member,
-    /// otherwise its  [`Default`] trait impl will be used.
-    #[darling(with = parse_optional_expression, map = Some)]
-    skip: Option<SpannedValue<Option<syn::Expr>>>,
-
-    /// Rename the name exposed in the builder API.
-    name: Option<syn::Ident>,
-
-    /// Where to place the member in the generate builder methods API.
-    /// By default the member is treated like a named parameter that
-    /// gets its own setter methods.
-    pos: Option<PosMemberLocation>,
-}
-
-#[derive(PartialEq, Eq, Clone, Copy)]
-enum MemberParamName {
-    Default,
-    Into,
-    Name,
-    Pos,
-    Skip,
-}
-
-impl fmt::Display for MemberParamName {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let str = match self {
-            Self::Default => "default",
-            Self::Into => "into",
-            Self::Name => "name",
-            Self::Pos => "pos",
-            Self::Skip => "skip",
-        };
-        f.write_str(str)
-    }
-}
-
-impl MemberParams {
-    fn validate_mutually_allowed(
-        &self,
-        attr_name: MemberParamName,
-        attr_span: Span,
-        allowed: &[MemberParamName],
-    ) -> Result<()> {
-        let conflicting: Vec<_> = self
-            .specified_param_names()
-            .filter(|name| *name != attr_name && !allowed.contains(name))
-            .collect();
-
-        if conflicting.is_empty() {
-            return Ok(());
-        }
-
-        let conflicting = conflicting
-            .iter()
-            .map(|name| format!("`{name}`"))
-            .join(", ");
-
-        bail!(
-            &attr_span,
-            "`{attr_name}` attribute can't be specified with other \
-            attributes like {}",
-            conflicting,
-        );
-    }
-
-    fn specified_param_names(&self) -> impl Iterator<Item = MemberParamName> {
-        let Self {
-            into,
-            default,
-            skip,
-            name,
-            pos,
-        } = self;
-
-        let attrs = [
-            (default.is_some(), MemberParamName::Default),
-            (name.is_some(), MemberParamName::Name),
-            (into.is_present(), MemberParamName::Into),
-            (pos.is_some(), MemberParamName::Pos),
-            (skip.is_some(), MemberParamName::Skip),
-        ];
-
-        attrs
-            .into_iter()
-            .filter(|(is_present, _)| *is_present)
-            .map(|(_, name)| name)
-    }
-
-    fn validate(&self, origin: MemberOrigin) -> Result {
-        if let Some(pos) = self.pos {
-            self.validate_mutually_allowed(
-                MemberParamName::Pos,
-                pos.span(),
-                &[MemberParamName::Into],
-            )?;
-        }
-
-        if let Some(skip) = &self.skip {
-            match origin {
-                MemberOrigin::FnArg => {
-                    bail!(
-                        &skip.span(),
-                        "`skip` attribute is not supported on function arguments. \
-                        Use a local variable instead.",
-                    );
-                }
-                MemberOrigin::StructField => {}
-            }
-
-            if let Some(Some(_expr)) = self.default.as_deref() {
-                bail!(
-                    &skip.span(),
-                    "`skip` attribute can't be specified with `default` attribute; \
-                    if you wanted to specify a value for the member, then use \
-                    the following syntax instead `#[builder(skip = value)]`",
-                );
-            }
-
-            self.validate_mutually_allowed(MemberParamName::Skip, skip.span(), &[])?;
-        }
-
-        Ok(())
-    }
-}
-
-fn parse_optional_expression(meta: &syn::Meta) -> Result<SpannedValue<Option<syn::Expr>>> {
-    match meta {
-        syn::Meta::Path(_) => Ok(SpannedValue::new(None, meta.span())),
-        syn::Meta::List(_) => Err(Error::unsupported_format("list").with_span(meta)),
-        syn::Meta::NameValue(nv) => Ok(SpannedValue::new(Some(nv.value.clone()), nv.span())),
-    }
-}
-
 impl NamedMember {
     fn validate(&self) -> Result {
         super::reject_self_references_in_docs(&self.docs)?;
@@ -360,7 +213,7 @@ impl Member {
                     }));
                 }
 
-                if let Some(pos) = params.pos {
+                if let Some(pos) = params.source {
                     let base = PositionalFnArgMember {
                         origin,
                         ident: orig_ident,
@@ -369,12 +222,12 @@ impl Member {
                         params,
                     };
                     match pos {
-                        PosMemberLocation::StartFn(_) => {
+                        MemberInputSource::StartFn(_) => {
                             let index = start_fn_arg_count.into();
                             start_fn_arg_count += 1;
                             return Ok(Self::StartFnArg(StartFnArgMember { base, index }));
                         }
-                        PosMemberLocation::FinishFn(_) => {
+                        MemberInputSource::FinishFn(_) => {
                             return Ok(Self::FinishFnArg(base));
                         }
                     }
@@ -462,43 +315,6 @@ impl Member {
         match self {
             Self::FinishFnArg(me) => Some(me),
             _ => None,
-        }
-    }
-}
-
-#[derive(Debug, Copy, Clone)]
-enum PosMemberLocation {
-    /// The member must be a positional argument in the start function
-    StartFn(Span),
-
-    /// The member must be a positional argument in the finish function
-    FinishFn(Span),
-}
-
-impl FromMeta for PosMemberLocation {
-    fn from_expr(expr: &syn::Expr) -> Result<Self> {
-        let err = || err!(expr, "expected one of `start_fn` or `finish_fn`");
-        let path = match expr {
-            syn::Expr::Path(path) if path.attrs.is_empty() && path.qself.is_none() => path,
-            _ => return Err(err()),
-        };
-
-        let ident = path.path.get_ident().ok_or_else(err)?.to_string();
-
-        let kind = match ident.as_str() {
-            "start_fn" => Self::StartFn,
-            "finish_fn" => Self::FinishFn,
-            _ => return Err(err()),
-        };
-
-        Ok(kind(path.span()))
-    }
-}
-
-impl PosMemberLocation {
-    fn span(self) -> Span {
-        match self {
-            Self::StartFn(span) | Self::FinishFn(span) => span,
         }
     }
 }
