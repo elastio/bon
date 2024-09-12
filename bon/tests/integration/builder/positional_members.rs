@@ -30,13 +30,13 @@ fn smoke_struct() {
         #[builder(start_fn, into)]
         starter_3: Option<&'static str>,
 
-        named: u32,
-
         #[builder(finish_fn)]
         finisher_1: &'static str,
 
         #[builder(finish_fn, into)]
         finisher_2: &'static str,
+
+        named: u32,
     }
 
     assert_debug_eq(
@@ -48,9 +48,9 @@ fn smoke_struct() {
                 starter_1: true,
                 starter_2: 'c',
                 starter_3: None,
-                named: 99,
                 finisher_1: "1",
                 finisher_2: "2",
+                named: 99,
             }"#]],
     );
 
@@ -64,9 +64,9 @@ fn smoke_fn() {
         #[builder(start_fn)] starter_1: bool,
         #[builder(start_fn, into)] starter_2: char,
         #[builder(start_fn, into)] starter_3: Option<&'static str>,
-        named: u32,
         #[builder(finish_fn)] finisher_1: &'static str,
         #[builder(finish_fn, into)] finisher_2: &'static str,
+        named: u32,
     ) -> (
         bool,
         char,
@@ -101,9 +101,9 @@ fn smoke_impl_block() {
             #[builder(start_fn)] starter_1: bool,
             #[builder(start_fn, into)] starter_2: char,
             #[builder(start_fn, into)] starter_3: Option<&'static str>,
-            named: u32,
             #[builder(finish_fn)] finisher_1: &'static str,
             #[builder(finish_fn, into)] finisher_2: &'static str,
+            named: u32,
         ) -> (
             bool,
             char,
@@ -121,8 +121,8 @@ fn smoke_impl_block() {
         fn with_self(
             &self,
             #[builder(start_fn)] starter_1: bool,
-            named: u32,
             #[builder(finish_fn)] finisher_1: &'static str,
+            named: u32,
         ) -> (bool, u32, &'static str) {
             let _ = self;
             (starter_1, named, finisher_1)

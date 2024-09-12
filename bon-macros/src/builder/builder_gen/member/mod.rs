@@ -189,92 +189,114 @@ impl Member {
         origin: MemberOrigin,
         members: impl IntoIterator<Item = RawMember<'a>>,
     ) -> Result<Vec<Self>> {
-        let mut named_count = 0;
-        let mut start_fn_arg_count = 0;
-
-        members
+        let mut members = members
             .into_iter()
             .map(|member| {
-                let RawMember {
-                    attrs,
+                let params = MemberParams::from_attributes(member.attrs)?;
+                params.validate(origin)?;
+                Ok((member, params))
+            })
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .peekable();
+
+        let mut output = vec![];
+
+        let start_fn_args = (0..).map_while(|index| {
+            let (member, params) = members.next_if(|(_, params)| params.start_fn.is_present())?;
+            let base = PositionalFnArgMember::new(origin, member, params);
+            Some(Self::StartFnArg(StartFnArgMember {
+                base,
+                index: index.into(),
+            }))
+        });
+
+        output.extend(start_fn_args);
+
+        let finish_fn_args = members
+            .peeking_take_while(|(_, params)| params.finish_fn.is_present())
+            .map(|(member, params)| {
+                Self::FinishFnArg(PositionalFnArgMember::new(origin, member, params))
+            });
+
+        output.extend(finish_fn_args);
+
+        let mut named_count = 0;
+
+        for (member, params) in members {
+            let RawMember {
+                attrs,
+                ident: orig_ident,
+                norm_ty,
+                orig_ty,
+            } = member;
+
+            if let Some(value) = params.skip {
+                output.push(Self::Skipped(SkippedMember {
                     ident: orig_ident,
                     norm_ty,
-                    orig_ty,
-                } = member;
+                    value,
+                }));
+                continue;
+            }
 
-                let params = MemberParams::from_attributes(attrs)?;
-                params.validate(origin)?;
+            let active_flag = |flag: darling::util::Flag| flag.is_present().then(|| flag);
 
-                if let Some(value) = params.skip {
-                    return Ok(Self::Skipped(SkippedMember {
-                        ident: orig_ident,
-                        norm_ty,
-                        value,
-                    }));
-                }
+            let incorrect_order =
+                active_flag(params.finish_fn).or_else(|| active_flag(params.start_fn));
 
-                if params.finish_fn.is_present() || params.start_fn.is_present() {
-                    let is_finish_fn = params.finish_fn.is_present();
+            if let Some(attr) = incorrect_order {
+                bail!(
+                    &attr.span(),
+                    "incorrect members oredering; the order of members must be the following:\n\
+                    (1) members annotated with #[builder(start_fn)]\n\
+                    (2) members annotated with #[builder(finish_fn)]\n\
+                    (3) all other members in any order",
+                );
+            }
 
-                    let base = PositionalFnArgMember {
-                        origin,
-                        ident: orig_ident,
-                        norm_ty,
-                        orig_ty,
-                        params,
-                    };
+            // XXX: docs are collected only for named members. There is no obvious
+            // place where to put the docs for positional and skipped members.
+            //
+            // Even if there are some docs on them and the function syntax is used
+            // then these docs will just be removed from the output function.
+            // It's probably fine since the doc comments are there in the code
+            // itself which is also useful for people reading the source code.
+            let docs = attrs.iter().filter(|attr| attr.is_doc()).cloned().collect();
 
-                    if is_finish_fn {
-                        return Ok(Self::FinishFnArg(base));
-                    }
+            let orig_ident_str = orig_ident.to_string();
+            let norm_ident = orig_ident_str
+                // Remove the leading underscore from the member name since it's used
+                // to denote unused symbols in Rust. That doesn't mean the builder
+                // API should expose that knowledge to the caller.
+                .strip_prefix('_')
+                .unwrap_or(&orig_ident_str);
 
-                    let index = start_fn_arg_count.into();
-                    start_fn_arg_count += 1;
-                    return Ok(Self::StartFnArg(StartFnArgMember { base, index }));
-                }
+            // Preserve the original identifier span to make IDE go to definition correctly
+            // and make error messages point to the correct place.
+            let norm_ident = syn::Ident::new_maybe_raw(norm_ident, orig_ident.span());
+            let norm_ident_pascal = norm_ident.snake_to_pascal_case();
 
-                // XXX: docs are collected only for named members. There is obvious
-                // place where to put the docs for positional and skipped members.
-                //
-                // Even if there are some docs on them and the function syntax is used
-                // then these docs will just be removed from the output function.
-                // It's probably fine since the doc comments are there in the code
-                // itself which is also useful for people reading the source code.
-                let docs = attrs.iter().filter(|attr| attr.is_doc()).cloned().collect();
+            let me = NamedMember {
+                index: named_count.into(),
+                origin,
+                generic_var_ident: quote::format_ident!("__{}", norm_ident_pascal),
+                norm_ident_pascal,
+                orig_ident,
+                norm_ident,
+                norm_ty,
+                orig_ty,
+                params,
+                docs,
+            };
 
-                let orig_ident_str = orig_ident.to_string();
-                let norm_ident = orig_ident_str
-                    // Remove the leading underscore from the member name since it's used
-                    // to denote unused symbols in Rust. That doesn't mean the builder
-                    // API should expose that knowledge to the caller.
-                    .strip_prefix('_')
-                    .unwrap_or(&orig_ident_str);
+            me.validate()?;
 
-                // Preserve the original identifier span to make IDE go to definition correctly
-                // and make error messages point to the correct place.
-                let norm_ident = syn::Ident::new_maybe_raw(norm_ident, orig_ident.span());
-                let norm_ident_pascal = norm_ident.snake_to_pascal_case();
+            output.push(Self::Named(me));
+            named_count += 1;
+        }
 
-                let me = NamedMember {
-                    index: named_count.into(),
-                    origin,
-                    generic_var_ident: quote::format_ident!("__{}", norm_ident_pascal),
-                    norm_ident_pascal,
-                    orig_ident,
-                    norm_ident,
-                    norm_ty,
-                    orig_ty,
-                    params,
-                    docs,
-                };
-
-                named_count += 1;
-
-                me.validate()?;
-
-                Ok(Self::Named(me))
-            })
-            .collect()
+        Ok(output)
     }
 }
 
@@ -315,6 +337,25 @@ impl Member {
         match self {
             Self::FinishFnArg(me) => Some(me),
             _ => None,
+        }
+    }
+}
+
+impl PositionalFnArgMember {
+    fn new(origin: MemberOrigin, member: RawMember<'_>, params: MemberParams) -> Self {
+        let RawMember {
+            attrs: _,
+            ident,
+            norm_ty,
+            orig_ty,
+        } = member;
+
+        Self {
+            origin,
+            ident,
+            norm_ty,
+            orig_ty,
+            params,
         }
     }
 }

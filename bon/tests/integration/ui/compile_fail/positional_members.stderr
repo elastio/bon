@@ -1,0 +1,82 @@
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+ --> tests/integration/ui/compile_fail/positional_members.rs:8:15
+  |
+8 |     #[builder(start_fn)]
+  |               ^^^^^^^^
+
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+  --> tests/integration/ui/compile_fail/positional_members.rs:17:15
+   |
+17 |     #[builder(start_fn)]
+   |               ^^^^^^^^
+
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+  --> tests/integration/ui/compile_fail/positional_members.rs:24:15
+   |
+24 |     #[builder(start_fn)]
+   |               ^^^^^^^^
+
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+  --> tests/integration/ui/compile_fail/positional_members.rs:31:15
+   |
+31 |     #[builder(finish_fn)]
+   |               ^^^^^^^^^
+
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+  --> tests/integration/ui/compile_fail/positional_members.rs:39:15
+   |
+39 |     #[builder(start_fn)]
+   |               ^^^^^^^^
+
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+  --> tests/integration/ui/compile_fail/positional_members.rs:47:15
+   |
+47 |     #[builder(finish_fn)]
+   |               ^^^^^^^^^
+
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+  --> tests/integration/ui/compile_fail/positional_members.rs:55:15
+   |
+55 |     #[builder(start_fn)]
+   |               ^^^^^^^^
+
+error[E0428]: the name `IncorrectOrder7` is defined multiple times
+  --> tests/integration/ui/compile_fail/positional_members.rs:60:1
+   |
+52 | struct IncorrectOrder7 {
+   | ---------------------- previous definition of the type `IncorrectOrder7` here
+...
+60 | struct IncorrectOrder7 {
+   | ^^^^^^^^^^^^^^^^^^^^^^ `IncorrectOrder7` redefined here
+   |
+   = note: `IncorrectOrder7` must be defined only once in the type namespace of this module
+
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+  --> tests/integration/ui/compile_fail/positional_members.rs:65:15
+   |
+65 |     #[builder(start_fn)]
+   |               ^^^^^^^^

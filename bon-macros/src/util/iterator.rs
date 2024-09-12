@@ -1,5 +1,6 @@
 use crate::util::prelude::*;
 use std::fmt::Write;
+use std::iter::Peekable;
 
 pub(crate) trait IteratorExt: Iterator + Sized {
     /// Based on itertools:
@@ -71,3 +72,25 @@ pub(crate) trait IntoIteratorExt: IntoIterator + Sized {
 }
 
 impl<I: IntoIterator> IntoIteratorExt for I {}
+
+pub(crate) trait PeekableExt: Iterator {
+    fn peeking_take_while(
+        &mut self,
+        predicate: impl FnMut(&Self::Item) -> bool,
+    ) -> impl Iterator<Item = Self::Item>;
+}
+
+impl<I: Iterator> PeekableExt for Peekable<I> {
+    fn peeking_take_while(
+        &mut self,
+        mut predicate: impl FnMut(&Self::Item) -> bool,
+    ) -> impl Iterator<Item = Self::Item> {
+        std::iter::from_fn(move || {
+            if !predicate(self.peek()?) {
+                return None;
+            }
+
+            self.next()
+        })
+    }
+}

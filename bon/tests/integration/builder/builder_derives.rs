@@ -143,10 +143,10 @@ fn positional_members_struct() {
         #[builder(start_fn)]
         start_fn_arg: bool,
 
-        named: u32,
-
         #[builder(finish_fn)]
         finish_fn_arg: &'static str,
+
+        named: u32,
     }
 
     let actual = Sut::builder(true);
@@ -165,8 +165,8 @@ fn positional_members_fn() {
     #[allow(unused_variables)]
     fn sut(
         #[builder(start_fn)] start_fn_arg: bool,
-        named: u32,
         #[builder(finish_fn)] finish_fn_arg: &'static str,
+        named: u32,
     ) {
     }
 
@@ -191,8 +191,8 @@ fn positional_members_impl_block() {
         #[builder(derive(Clone, Debug))]
         fn sut(
             #[builder(start_fn)] start_fn_arg: bool,
-            named: u32,
             #[builder(finish_fn)] finish_fn_arg: &'static str,
+            named: u32,
         ) {
         }
 
@@ -200,8 +200,8 @@ fn positional_members_impl_block() {
         fn with_self(
             &self,
             #[builder(start_fn)] start_fn_arg: bool,
-            named: u32,
             #[builder(finish_fn)] finish_fn_arg: &'static str,
+            named: u32,
         ) {
             let _ = self;
         }
