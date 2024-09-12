@@ -9,6 +9,9 @@ pub mod ide;
 #[cfg(feature = "alloc")]
 pub extern crate alloc;
 
+pub const fn assert_clone<T: Clone>() {}
+pub const fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
+
 /// Marker trait to denote the state of the member that is not set yet.
 #[rustversion::attr(
     since(1.78.0),
