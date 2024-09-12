@@ -213,13 +213,12 @@ impl Member {
 
         output.extend(start_fn_args);
 
-        let finish_fn_args = members
-            .peeking_take_while(|(_, params)| params.finish_fn.is_present())
-            .map(|(member, params)| {
-                Self::FinishFnArg(PositionalFnArgMember::new(origin, member, params))
-            });
-
-        output.extend(finish_fn_args);
+        while let Some((member, params)) =
+            members.next_if(|(_, params)| params.finish_fn.is_present())
+        {
+            let member = PositionalFnArgMember::new(origin, member, params);
+            output.push(Self::FinishFnArg(member));
+        }
 
         let mut named_count = 0;
 

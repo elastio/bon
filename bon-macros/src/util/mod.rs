@@ -28,7 +28,7 @@ pub(crate) mod prelude {
     pub(crate) use super::attrs::AttributeExt;
     pub(crate) use super::fn_arg::FnArgExt;
     pub(crate) use super::ident::IdentExt;
-    pub(crate) use super::iterator::{IntoIteratorExt, IteratorExt, PeekableExt};
+    pub(crate) use super::iterator::{IntoIteratorExt, IteratorExt};
     pub(crate) use super::path::PathExt;
     pub(crate) use super::punctuated::PunctuatedExt;
     pub(crate) use super::ty::TypeExt;

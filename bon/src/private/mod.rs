@@ -1,6 +1,13 @@
-// We place `#[inline(always)]` only on very small methods where we'd event want
-// a guarantee of them being inlined.
-#![allow(clippy::inline_always)]
+#![allow(
+    // We place `#[inline(always)]` only on very small methods where we'd event want
+    // a guarantee of them being inlined.
+    clippy::inline_always,
+
+    // Marking every potential function as `const` is a bit too much.
+    // Especially, this doesn't play well with our MSRV trait bounds
+    // aren't allowed on const functions.
+    clippy::missing_const_for_fn
+)]
 
 /// Used for providing better IDE hints (completions and syntax highlighting).
 pub mod ide;
@@ -9,8 +16,8 @@ pub mod ide;
 #[cfg(feature = "alloc")]
 pub extern crate alloc;
 
-pub const fn assert_clone<T: Clone>() {}
-pub const fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
+pub fn assert_clone<T: Clone>() {}
+pub fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
 
 /// Marker trait to denote the state of the member that is not set yet.
 #[rustversion::attr(
