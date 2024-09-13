@@ -7,8 +7,8 @@ error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
 note: required by a bound in `assert_clone`
  --> src/private/mod.rs
   |
-  | pub const fn assert_clone<T: Clone>() {}
-  |                              ^^^^^ required by this bound in `assert_clone`
+  | pub fn assert_clone<T: Clone>() {}
+  |                        ^^^^^ required by this bound in `assert_clone`
 help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
   |
 3  + #[derive(Clone)]
@@ -26,8 +26,8 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
 note: required by a bound in `assert_debug`
  --> src/private/mod.rs
   |
-  | pub const fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
-  |                                       ^^^^^^^^^^^^^^^^ required by this bound in `assert_debug`
+  | pub fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
+  |                                 ^^^^^^^^^^^^^^^^ required by this bound in `assert_debug`
 help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
   |
 3  + #[derive(Debug)]
@@ -43,8 +43,8 @@ error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
 note: required by a bound in `assert_clone`
   --> src/private/mod.rs
    |
-   | pub const fn assert_clone<T: Clone>() {}
-   |                              ^^^^^ required by this bound in `assert_clone`
+   | pub fn assert_clone<T: Clone>() {}
+   |                        ^^^^^ required by this bound in `assert_clone`
 help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 3  + #[derive(Clone)]
@@ -62,8 +62,8 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
 note: required by a bound in `assert_debug`
   --> src/private/mod.rs
    |
-   | pub const fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
-   |                                       ^^^^^^^^^^^^^^^^ required by this bound in `assert_debug`
+   | pub fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
+   |                                 ^^^^^^^^^^^^^^^^ required by this bound in `assert_debug`
 help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 3  + #[derive(Debug)]
@@ -79,8 +79,8 @@ error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
 note: required by a bound in `assert_clone`
   --> src/private/mod.rs
    |
-   | pub const fn assert_clone<T: Clone>() {}
-   |                              ^^^^^ required by this bound in `assert_clone`
+   | pub fn assert_clone<T: Clone>() {}
+   |                        ^^^^^ required by this bound in `assert_clone`
 help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 3  + #[derive(Clone)]
@@ -98,8 +98,8 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
 note: required by a bound in `assert_debug`
   --> src/private/mod.rs
    |
-   | pub const fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
-   |                                       ^^^^^^^^^^^^^^^^ required by this bound in `assert_debug`
+   | pub fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
+   |                                 ^^^^^^^^^^^^^^^^ required by this bound in `assert_debug`
 help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 3  + #[derive(Debug)]
