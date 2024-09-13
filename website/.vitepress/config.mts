@@ -197,6 +197,15 @@ export default defineConfig({
                                             text: "skip",
                                             link: "/reference/builder#skip",
                                         },
+                                        {
+                                            text: "start_fn",
+                                            link: "/reference/builder#start-fn-1",
+                                        },
+                                        {
+                                            text: "finish_fn",
+                                            link: "/reference/builder#finish-fn-1",
+                                        },
+
                                     ],
                                 },
                             ],
