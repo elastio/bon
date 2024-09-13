@@ -2,7 +2,6 @@ use super::{
     AssocMethodCtx, BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberOrigin,
     RawMember, StartFunc,
 };
-use crate::builder::builder_gen::BuilderGenParams;
 use crate::builder::params::{BuilderParams, ItemParams};
 use crate::util::prelude::*;
 use darling::FromMeta;
@@ -182,8 +181,17 @@ impl StructInputCtx {
             receiver: None,
         });
 
-        let ctx = BuilderGenCtx::new(BuilderGenParams {
+        let allow_attrs = self
+            .norm_struct
+            .attrs
+            .iter()
+            .filter_map(syn::Attribute::to_allow)
+            .collect();
+
+        let ctx = BuilderGenCtx {
             members,
+
+            allow_attrs,
 
             conditional_params: self.params.base.on,
             builder_derives: self.params.base.derive,
@@ -196,7 +204,7 @@ impl StructInputCtx {
 
             start_func,
             finish_func,
-        });
+        };
 
         Ok(ctx)
     }
