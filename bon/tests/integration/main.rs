@@ -6,7 +6,8 @@
     clippy::too_many_lines,
     // `expect_test` sometimes adds redundant hashes, we just have to live with that
     clippy::needless_raw_string_hashes,
-    non_local_definitions
+    non_local_definitions,
+    missing_docs,
 )]
 
 #[cfg(feature = "alloc")]
