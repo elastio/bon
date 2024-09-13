@@ -253,7 +253,7 @@ mod attr_on {
 
 mod generics {
     use super::*;
-    use std::fmt::Debug;
+    use core::fmt::Debug;
 
     #[test]
     fn test_struct() {
