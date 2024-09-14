@@ -87,6 +87,10 @@ export default defineConfig({
                             link: "/guide/compatibility",
                         },
                         {
+                            text: "Positional Members",
+                            link: "/guide/positional-members",
+                        },
+                        {
                             text: "Inspecting",
                             link: "/guide/inspecting",
                         },
