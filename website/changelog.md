@@ -6,6 +6,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0](https://github.com/elastio/bon/compare/v2.2.1...v3.0.0) - 2024-09-14
+
+### Other
+
+- Add support for positional params in `start_fn` and `finish_fn` ([#125](https://github.com/elastio/bon/pull/125))
+
 ### Fixed
 
 - Forward lint suppression from `#[allow()/expect()]` attributes written by the user on the top-level to the generated items
