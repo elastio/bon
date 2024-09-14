@@ -201,9 +201,7 @@ impl BuilderGenCtx {
 
         let allows = allow_warnings_on_member_types();
 
-        let named_members_labels = self
-            .named_members()
-            .map(Self::members_label);
+        let named_members_labels = self.named_members().map(Self::members_label);
 
         let mod_name = &self.inner_mod_label();
 
