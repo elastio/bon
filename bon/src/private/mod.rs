@@ -9,6 +9,9 @@
     clippy::missing_const_for_fn
 )]
 
+/// Used to trigger deprecation warnings from the macros.
+pub mod deprecations;
+
 /// Used for providing better IDE hints (completions and syntax highlighting).
 pub mod ide;
 
@@ -238,9 +241,3 @@ macro_rules! __eval_cfg_callback_false {
         }
     };
 }
-
-#[doc(hidden)]
-#[deprecated(note = "\
-    #[bon::builder] on top of a struct is deprecated; \
-    use `#[derive(bon::Builder)]` instead")]
-pub mod builder_attribute_on_a_struct {}

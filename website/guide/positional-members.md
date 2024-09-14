@@ -56,7 +56,7 @@ impl Treasure {
 
 Now let's say we need to know the person who claimed the `Treasure`. While describing the treasure using the current builder syntax we'd like the person who claimed it to specify their first name and last name at the end of the building process.
 
-We can use the similar combination of the [top-level](../reference/builder#finish-fn) `#[builder(finish_fn = ...)]` and the [member-level `#[builder(finish_fn)]`](../reference/builder#finish-fn-1) attributes to do that.
+We can use a similar combination of the [top-level `#[builder(finish_fn = ...)]`](../reference/builder#finish-fn) and the [member-level `#[builder(finish_fn)]`](../reference/builder#finish-fn-1) attributes to do that.
 
 **Example:**
 
