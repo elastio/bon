@@ -42,9 +42,9 @@ fn try_generate_from_attr(params: TokenStream2, item: TokenStream2) -> Result<To
 
     if let syn::Item::Struct(item_struct) = item {
         return Ok(quote! {
-            // Triggers a deprecation warning. The plan is to uncomment this
-            // and start showing deprecation warnings in the next minor release.
-            // use ::bon::private::builder_attribute_on_a_struct as _;
+            // Triggers a deprecation warning if the user is using the old attribute
+            // syntax on the structs instead of the derive syntax.
+            use ::bon::private::deprecations::builder_attribute_on_a_struct as _;
 
             #[derive(::bon::Builder)]
             #[builder(#params)]

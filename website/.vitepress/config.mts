@@ -87,6 +87,10 @@ export default defineConfig({
                             link: "/guide/compatibility",
                         },
                         {
+                            text: "Positional Members",
+                            link: "/guide/positional-members",
+                        },
+                        {
                             text: "Inspecting",
                             link: "/guide/inspecting",
                         },
@@ -197,6 +201,15 @@ export default defineConfig({
                                             text: "skip",
                                             link: "/reference/builder#skip",
                                         },
+                                        {
+                                            text: "start_fn",
+                                            link: "/reference/builder#start-fn-1",
+                                        },
+                                        {
+                                            text: "finish_fn",
+                                            link: "/reference/builder#finish-fn-1",
+                                        },
+
                                     ],
                                 },
                             ],

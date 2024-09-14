@@ -1,6 +1,7 @@
 pub(crate) trait AttributeExt {
     fn is_doc(&self) -> bool;
     fn as_doc(&self) -> Option<&syn::Expr>;
+    fn to_allow(&self) -> Option<syn::Attribute>;
 }
 
 impl AttributeExt for syn::Attribute {
@@ -19,5 +20,31 @@ impl AttributeExt for syn::Attribute {
         }
 
         Some(&attr.value)
+    }
+
+    /// Returns `Some` if this is an `#[allow(...)]` or `#[expect(...)]` attribute.
+    /// Turns an `#[expect(...)]` into `#[allow(...)]`, which is useful to make sure
+    /// that macro doesn't trigger another warning that there is actually no
+    /// instance of a lint warning under the `#[expect(...)]`.
+    fn to_allow(&self) -> Option<syn::Attribute> {
+        if self.path().is_ident("allow") {
+            return Some(self.clone());
+        }
+
+        if !self.path().is_ident("expect") {
+            return None;
+        }
+
+        // Turn an `expect` into allow
+        let mut attr = self.clone();
+        let path = match &mut attr.meta {
+            syn::Meta::Path(path) => path,
+            syn::Meta::List(meta) => &mut meta.path,
+            syn::Meta::NameValue(meta) => &mut meta.path,
+        };
+
+        *path = syn::parse_quote!(allow);
+
+        Some(attr)
     }
 }

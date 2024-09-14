@@ -1,4 +1,4 @@
-use super::{BuilderGenCtx, RegularMember};
+use super::{BuilderGenCtx, NamedMember};
 use crate::util::prelude::*;
 use quote::quote;
 
@@ -18,14 +18,14 @@ pub(crate) struct SettersReturnType {
 
 pub(crate) struct MemberSettersCtx<'a> {
     builder_gen: &'a BuilderGenCtx,
-    member: &'a RegularMember,
+    member: &'a NamedMember,
     return_type: SettersReturnType,
 }
 
 impl<'a> MemberSettersCtx<'a> {
     pub(crate) fn new(
         builder_gen: &'a BuilderGenCtx,
-        member: &'a RegularMember,
+        member: &'a NamedMember,
         return_type: SettersReturnType,
     ) -> Self {
         Self {
@@ -74,7 +74,7 @@ impl<'a> MemberSettersCtx<'a> {
 
         let setter_method_name = self.member.setter_method_core_name().clone();
 
-        // Preserve the original identifier span to make IDE go to definition correctly
+        // Preserve the original identifier span to make IDE's "go to definition" work correctly
         let option_method_name = syn::Ident::new(
             &format!("maybe_{}", setter_method_name.raw_name()),
             setter_method_name.span(),
@@ -142,21 +142,28 @@ impl<'a> MemberSettersCtx<'a> {
                     .receiver()
                     .map(|_| quote!(__private_receiver: self.__private_receiver,));
 
+                let maybe_start_fn_args_field = self
+                    .builder_gen
+                    .start_fn_args()
+                    .next()
+                    .map(|_| quote!(__private_start_fn_args: self.__private_start_fn_args,));
+
                 let builder_ident = &self.builder_gen.builder_ident;
 
-                let member_exprs = self.builder_gen.regular_members().map(|other_member| {
+                let member_exprs = self.builder_gen.named_members().map(|other_member| {
                     if other_member.norm_ident == self.member.norm_ident {
                         return member_init.clone();
                     }
                     let index = &other_member.index;
-                    quote!(self.__private_members.#index)
+                    quote!(self.__private_named_members.#index)
                 });
 
                 quote! {
                     #builder_ident {
                         __private_phantom: ::core::marker::PhantomData,
                         #maybe_receiver_field
-                        __private_members: (#( #member_exprs, )*)
+                        #maybe_start_fn_args_field
+                        __private_named_members: (#( #member_exprs, )*)
                     }
                 }
             }

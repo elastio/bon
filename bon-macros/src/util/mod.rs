@@ -1,6 +1,7 @@
 mod attrs;
 mod fn_arg;
 mod ident;
+mod item;
 mod iterator;
 mod path;
 mod punctuated;
@@ -28,8 +29,8 @@ pub(crate) mod prelude {
     pub(crate) use super::attrs::AttributeExt;
     pub(crate) use super::fn_arg::FnArgExt;
     pub(crate) use super::ident::IdentExt;
-    pub(crate) use super::iterator::IntoIteratorExt;
-    pub(crate) use super::iterator::IteratorExt;
+    pub(crate) use super::item::ItemExt;
+    pub(crate) use super::iterator::{IntoIteratorExt, IteratorExt};
     pub(crate) use super::path::PathExt;
     pub(crate) use super::punctuated::PunctuatedExt;
     pub(crate) use super::ty::TypeExt;

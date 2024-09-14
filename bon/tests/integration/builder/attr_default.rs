@@ -209,3 +209,147 @@ fn fn_generic_default() {
 
     sut::<(), ()>().call();
 }
+
+mod interaction_with_positional_members {
+    use crate::prelude::*;
+
+    #[test]
+    fn test_struct() {
+        #[derive(Builder, Debug)]
+        #[allow(dead_code)]
+        struct Sut {
+            #[builder(start_fn)]
+            starter_1: u32,
+
+            #[builder(start_fn)]
+            starter_2: u32,
+
+            #[builder(finish_fn)]
+            finisher_1: u32,
+
+            #[builder(finish_fn)]
+            finisher_2: u32,
+
+            #[builder(default = [starter_1, starter_2, finisher_1, finisher_2])]
+            named_1: [u32; 4],
+
+            #[builder(default = (32, named_1))]
+            named_2: (u32, [u32; 4]),
+        }
+
+        assert_debug_eq(
+            Sut::builder(1, 2).build(3, 4),
+            expect![[r#"
+                Sut {
+                    starter_1: 1,
+                    starter_2: 2,
+                    finisher_1: 3,
+                    finisher_2: 4,
+                    named_1: [
+                        1,
+                        2,
+                        3,
+                        4,
+                    ],
+                    named_2: (
+                        32,
+                        [
+                            1,
+                            2,
+                            3,
+                            4,
+                        ],
+                    ),
+                }"#]],
+        );
+
+        assert_debug_eq(
+            Sut::builder(1, 2).named_1([5, 6, 7, 8]).build(3, 4),
+            expect![[r#"
+                Sut {
+                    starter_1: 1,
+                    starter_2: 2,
+                    finisher_1: 3,
+                    finisher_2: 4,
+                    named_1: [
+                        5,
+                        6,
+                        7,
+                        8,
+                    ],
+                    named_2: (
+                        32,
+                        [
+                            5,
+                            6,
+                            7,
+                            8,
+                        ],
+                    ),
+                }"#]],
+        );
+    }
+
+    #[test]
+    fn test_free_fn() {
+        #[builder]
+        #[allow(clippy::type_complexity)]
+        fn sut(
+            #[builder(start_fn)] starter_1: u32,
+            #[builder(start_fn)] starter_2: u32,
+            #[builder(finish_fn)] finisher_1: u32,
+            #[builder(finish_fn)] finisher_2: u32,
+            #[builder(default = [starter_1, starter_2, finisher_1, finisher_2])] //
+            named_1: [u32; 4],
+            #[builder(default = (32, named_1))] named_2: (u32, [u32; 4]),
+        ) -> (u32, u32, u32, u32, [u32; 4], (u32, [u32; 4])) {
+            (
+                starter_1, starter_2, finisher_1, finisher_2, named_1, named_2,
+            )
+        }
+
+        assert_debug_eq(
+            sut(1, 2).call(3, 4),
+            expect!["(1, 2, 3, 4, [1, 2, 3, 4], (32, [1, 2, 3, 4]))"],
+        );
+
+        assert_debug_eq(
+            sut(1, 2).named_1([5, 6, 7, 8]).call(3, 4),
+            expect!["(1, 2, 3, 4, [5, 6, 7, 8], (32, [5, 6, 7, 8]))"],
+        );
+    }
+
+    #[test]
+    fn test_assoc_method() {
+        struct Sut;
+
+        #[bon]
+        impl Sut {
+            #[builder]
+            #[allow(clippy::type_complexity)]
+            fn sut(
+                #[builder(start_fn)] starter_1: u32,
+                #[builder(start_fn)] starter_2: u32,
+                #[builder(finish_fn)] finisher_1: u32,
+                #[builder(finish_fn)] finisher_2: u32,
+                #[builder(default = [starter_1, starter_2, finisher_1, finisher_2])] //
+                named_1: [u32; 4],
+                #[builder(default = (32, named_1))] named_2: (u32, [u32; 4]),
+            ) -> (u32, u32, u32, u32, [u32; 4], (u32, [u32; 4])) {
+                (
+                    starter_1, starter_2, finisher_1, finisher_2, named_1, named_2,
+                )
+            }
+        }
+
+        assert_debug_eq(
+            Sut::sut(1, 2).call(3, 4),
+            expect!["(1, 2, 3, 4, [1, 2, 3, 4], (32, [1, 2, 3, 4]))"],
+        );
+
+        assert_debug_eq(
+            Sut::sut(1, 2).named_1([5, 6, 7, 8]).call(3, 4),
+            expect!["(1, 2, 3, 4, [5, 6, 7, 8], (32, [5, 6, 7, 8]))"],
+        );
+    }
+}

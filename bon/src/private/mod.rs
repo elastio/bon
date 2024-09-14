@@ -1,6 +1,16 @@
-// We place `#[inline(always)]` only on very small methods where we'd event want
-// a guarantee of them being inlined.
-#![allow(clippy::inline_always)]
+#![allow(
+    // We place `#[inline(always)]` only on very small methods where we'd event want
+    // a guarantee of them being inlined.
+    clippy::inline_always,
+
+    // Marking every potential function as `const` is a bit too much.
+    // Especially, this doesn't play well with our MSRV. Trait bounds
+    // aren't allowed on const functions in older Rust versions.
+    clippy::missing_const_for_fn
+)]
+
+/// Used to trigger deprecation warnings from the macros.
+pub mod deprecations;
 
 /// Used for providing better IDE hints (completions and syntax highlighting).
 pub mod ide;
@@ -8,6 +18,9 @@ pub mod ide;
 /// Used to implement the `alloc` feature.
 #[cfg(feature = "alloc")]
 pub extern crate alloc;
+
+pub fn assert_clone<T: Clone>() {}
+pub fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
 
 /// Marker trait to denote the state of the member that is not set yet.
 #[rustversion::attr(
@@ -106,7 +119,7 @@ impl<T> MemberState for Unset<T> {
 /// removed by the time the `#[builder]`'s macro expansion is invoked.
 ///
 /// It is a problem because the `#[builder]` macro needs to know the exact list
-/// of members it has to generate setters for. It doesn't know whether the
+/// of members it has to generate setters for. It doesn't know whether
 /// the `windows` predicate evaluates to `true` or `false`, especially if this was
 /// a more complex predicate. So it can't decide whether to generate a setter for
 /// the `windows_only_param` or not.
@@ -228,9 +241,3 @@ macro_rules! __eval_cfg_callback_false {
         }
     };
 }
-
-#[doc(hidden)]
-#[deprecated(note = "\
-    #[bon::builder] on top of a struct is deprecated; \
-    use `#[derive(bon::Builder)]` instead")]
-pub mod builder_attribute_on_a_struct {}

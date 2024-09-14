@@ -1,0 +1,109 @@
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+ --> tests/integration/ui/compile_fail/positional_members.rs:8:15
+  |
+8 |     #[builder(start_fn)]
+  |               ^^^^^^^^
+
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+  --> tests/integration/ui/compile_fail/positional_members.rs:17:15
+   |
+17 |     #[builder(start_fn)]
+   |               ^^^^^^^^
+
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+  --> tests/integration/ui/compile_fail/positional_members.rs:24:15
+   |
+24 |     #[builder(start_fn)]
+   |               ^^^^^^^^
+
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+  --> tests/integration/ui/compile_fail/positional_members.rs:31:15
+   |
+31 |     #[builder(finish_fn)]
+   |               ^^^^^^^^^
+
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+  --> tests/integration/ui/compile_fail/positional_members.rs:39:15
+   |
+39 |     #[builder(start_fn)]
+   |               ^^^^^^^^
+
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+  --> tests/integration/ui/compile_fail/positional_members.rs:47:15
+   |
+47 |     #[builder(finish_fn)]
+   |               ^^^^^^^^^
+
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+  --> tests/integration/ui/compile_fail/positional_members.rs:55:15
+   |
+55 |     #[builder(start_fn)]
+   |               ^^^^^^^^
+
+error: incorrect members oredering; the order of members must be the following:
+       (1) members annotated with #[builder(start_fn)]
+       (2) members annotated with #[builder(finish_fn)]
+       (3) all other members in any order
+  --> tests/integration/ui/compile_fail/positional_members.rs:65:15
+   |
+65 |     #[builder(start_fn)]
+   |               ^^^^^^^^
+
+error[E0308]: mismatched types
+  --> tests/integration/ui/compile_fail/positional_members.rs:94:44
+   |
+94 |     TypePatternMatching::builder(IntoUnit, IntoUnit)
+   |     ----------------------------           ^^^^^^^^ expected `Option<()>`, found `IntoUnit`
+   |     |
+   |     arguments to this function are incorrect
+   |
+   = note: expected enum `Option<()>`
+            found struct `IntoUnit`
+note: associated function defined here
+  --> tests/integration/ui/compile_fail/positional_members.rs:80:12
+   |
+80 |     struct TypePatternMatching {
+   |            ^^^^^^^^^^^^^^^^^^^
+...
+85 |         _b: Option<()>,
+   |         --------------
+
+error[E0308]: mismatched types
+  --> tests/integration/ui/compile_fail/positional_members.rs:95:26
+   |
+95 |         .build(IntoUnit, IntoUnit);
+   |          -----           ^^^^^^^^ expected `Option<()>`, found `IntoUnit`
+   |          |
+   |          arguments to this method are incorrect
+   |
+   = note: expected enum `Option<()>`
+            found struct `IntoUnit`
+note: method defined here
+  --> tests/integration/ui/compile_fail/positional_members.rs:80:12
+   |
+80 |     struct TypePatternMatching {
+   |            ^^^^^^^^^^^^^^^^^^^
+...
+91 |         _d: Option<()>,
+   |         --------------

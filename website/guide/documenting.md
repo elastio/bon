@@ -32,3 +32,7 @@ This works because Rust compiler checks for invalid placement of `#[doc = ...]` 
 :::
 
 When `#[derive(Builder)]` is placed on top of a struct, then documentation on the struct fields will be copied to the docs on the setter methods.
+
+## Positional members
+
+Documentation comments are allowed on [positional members](./positional-members). However, since there are no separate setter methods generated for them, the docs on these members will not be copied anywhere, and thus they won't appear in `rustdoc`. Instead, it's recommended to write documentation for these members on the top level of the struct or function.

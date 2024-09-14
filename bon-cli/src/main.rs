@@ -1,4 +1,4 @@
-//! Simple CLI initially created to assits with upgrading to the new versions of
+//! Simple CLI initially created to assist with upgrading to the new versions of
 //! the `bon` crate.
 #![allow(missing_docs)]
 

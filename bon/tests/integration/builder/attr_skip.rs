@@ -76,3 +76,54 @@ fn struct_generic_skipped() {
 
     let _: Sut<(), ()> = Sut::<(), ()>::builder().build();
 }
+
+#[test]
+fn interaction_with_positional_members() {
+    #[derive(Builder, Debug)]
+    #[allow(dead_code)]
+    struct Sut {
+        #[builder(start_fn)]
+        starter_1: u32,
+
+        #[builder(start_fn)]
+        starter_2: u32,
+
+        #[builder(finish_fn)]
+        finisher_1: u32,
+
+        #[builder(finish_fn)]
+        finisher_2: u32,
+
+        #[builder(skip = [starter_1, starter_2, finisher_1, finisher_2])]
+        named_1: [u32; 4],
+
+        #[builder(skip = (32, named_1))]
+        named_2: (u32, [u32; 4]),
+    }
+
+    assert_debug_eq(
+        Sut::builder(1, 2).build(3, 4),
+        expect![[r#"
+            Sut {
+                starter_1: 1,
+                starter_2: 2,
+                finisher_1: 3,
+                finisher_2: 4,
+                named_1: [
+                    1,
+                    2,
+                    3,
+                    4,
+                ],
+                named_2: (
+                    32,
+                    [
+                        1,
+                        2,
+                        3,
+                        4,
+                    ],
+                ),
+            }"#]],
+    );
+}

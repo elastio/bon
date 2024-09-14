@@ -65,13 +65,13 @@ impl TypeExt for syn::Type {
     fn type_param(&self, desired_type: &str) -> Option<&syn::Type> {
         let path = self.as_path()?;
 
-        let vec_segment = path
+        let segment = path
             .path
             .segments
             .iter()
             .find(|&segment| segment.ident == desired_type)?;
 
-        let args = match &vec_segment.arguments {
+        let args = match &segment.arguments {
             syn::PathArguments::AngleBracketed(args) => args,
             _ => return None,
         };

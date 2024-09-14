@@ -98,10 +98,6 @@ jobs:
           components: clippy
           toolchain: 1.59.0
 
-      # We just test that `bon` crate compile fine. This is the main crate
-      # that needs to compile fine. We also make sure its tests compile
-      # fine as well. Therefore right now we use the MSRV specifically such
-      # that `trybuild` compiles as well (it's trybuild's MSRV).
       - run: ./scripts/test-msrv.sh
 
   test-unstable:
@@ -192,11 +188,4 @@ jobs:
           cache-dependency-path: website/package-lock.json
 
       - run: cd website && npm ci
-      - run: cd website && npm run build
-      - name: Validate for broken links (mostly broken anchors)
-        run: |
-          cd website && FORCE_COLOR=2 \
-            node \
-              --no-warnings=ExperimentalWarning \
-              --loader ts-node/esm \
-              ./validate-links.mts
+      - run: scripts/validate-links.sh
