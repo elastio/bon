@@ -8,7 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- Forward lint suppression from `#[allow()/expect()]` attributes written by the user on the top-level to the generated items.
+- Forward lint suppression from `#[allow()/expect()]` attributes written by the user on the top-level to the generated items
+- Suppress the false-positive ([clippy issue]https://github.com/rust-lang/rust-clippy/issues/6947)) `clippy::future_not_send` lint
 
 ## [2.2.1](https://github.com/elastio/bon/compare/v2.2.0...v2.2.1) - 2024-09-09
 

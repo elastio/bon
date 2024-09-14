@@ -61,17 +61,6 @@ error: incorrect members oredering; the order of members must be the following:
 55 |     #[builder(start_fn)]
    |               ^^^^^^^^
 
-error[E0428]: the name `IncorrectOrder7` is defined multiple times
-  --> tests/integration/ui/compile_fail/positional_members.rs:60:1
-   |
-52 | struct IncorrectOrder7 {
-   | ---------------------- previous definition of the type `IncorrectOrder7` here
-...
-60 | struct IncorrectOrder7 {
-   | ^^^^^^^^^^^^^^^^^^^^^^ `IncorrectOrder7` redefined here
-   |
-   = note: `IncorrectOrder7` must be defined only once in the type namespace of this module
-
 error: incorrect members oredering; the order of members must be the following:
        (1) members annotated with #[builder(start_fn)]
        (2) members annotated with #[builder(finish_fn)]

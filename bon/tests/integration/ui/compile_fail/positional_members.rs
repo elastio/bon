@@ -57,7 +57,7 @@ struct IncorrectOrder7 {
 }
 
 #[derive(Builder)]
-struct IncorrectOrder7 {
+struct IncorrectOrder8 {
     #[builder(start_fn)]
     _a: (),
     #[builder(finish_fn)]

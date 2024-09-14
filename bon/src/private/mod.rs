@@ -4,8 +4,8 @@
     clippy::inline_always,
 
     // Marking every potential function as `const` is a bit too much.
-    // Especially, this doesn't play well with our MSRV trait bounds
-    // aren't allowed on const functions.
+    // Especially, this doesn't play well with our MSRV. Trait bounds
+    // aren't allowed on const functions in older Rust versions.
     clippy::missing_const_for_fn
 )]
 

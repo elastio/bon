@@ -201,7 +201,7 @@ impl BuilderGenCtx {
 
         let allows = allow_warnings_on_member_types();
 
-        let regular_members_labels = self
+        let named_members_labels = self
             .named_members()
             .map(|member| self.members_label(member));
 
@@ -213,7 +213,7 @@ impl BuilderGenCtx {
             #(
                 #[allow(non_camel_case_types)]
                 #[doc(hidden)]
-                #vis struct #regular_members_labels;
+                #vis struct #named_members_labels;
             )*
 
             #allows
@@ -787,41 +787,6 @@ pub(crate) fn generic_param_to_arg(param: &syn::GenericParam) -> syn::GenericArg
             syn::GenericArgument::Const(syn::parse_quote!(#ident))
         }
     }
-}
-
-fn reject_self_references_in_docs(docs: &[syn::Attribute]) -> Result {
-    for doc in docs {
-        let doc = match doc.as_doc() {
-            Some(doc) => doc,
-            _ => continue,
-        };
-
-        let doc = match &doc {
-            syn::Expr::Lit(doc) => doc,
-            _ => continue,
-        };
-
-        let doc = match &doc.lit {
-            syn::Lit::Str(doc) => doc,
-            _ => continue,
-        };
-
-        let self_references = ["[`Self`]", "[Self]"];
-
-        if self_references
-            .iter()
-            .any(|self_ref| doc.value().contains(self_ref))
-        {
-            bail!(
-                &doc.span(),
-                "The documentation for the member should not reference `Self` \
-                because it will be moved to the builder struct context where \
-                `Self` changes meaning. Use explicit type names instead.",
-            );
-        }
-    }
-
-    Ok(())
 }
 
 fn allow_warnings_on_member_types() -> TokenStream2 {

@@ -81,9 +81,7 @@ impl MemberParams {
 
         bail!(
             &attr_span,
-            "`{attr_name}` attribute can't be specified with other \
-            attributes like {}",
-            conflicting,
+            "`{attr_name}` attribute can't be specified together with {conflicting}",
         );
     }
 

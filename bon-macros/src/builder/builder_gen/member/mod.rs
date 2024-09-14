@@ -124,8 +124,43 @@ pub(crate) struct SkippedMember {
 }
 
 impl NamedMember {
+    fn reject_self_references_in_docs(&self) -> Result {
+        for doc in &self.docs {
+            let doc = match doc.as_doc() {
+                Some(doc) => doc,
+                _ => continue,
+            };
+
+            let doc = match &doc {
+                syn::Expr::Lit(doc) => doc,
+                _ => continue,
+            };
+
+            let doc = match &doc.lit {
+                syn::Lit::Str(doc) => doc,
+                _ => continue,
+            };
+
+            let self_references = ["[`Self`]", "[Self]"];
+
+            if self_references
+                .iter()
+                .any(|self_ref| doc.value().contains(self_ref))
+            {
+                bail!(
+                    &doc.span(),
+                    "The documentation for the member should not reference `Self` \
+                    because it will be moved to the builder struct context where \
+                    `Self` changes meaning. Use explicit type names instead.",
+                );
+            }
+        }
+
+        Ok(())
+    }
+
     fn validate(&self) -> Result {
-        super::reject_self_references_in_docs(&self.docs)?;
+        self.reject_self_references_in_docs()?;
 
         if let Some(default) = &self.params.default {
             if self.norm_ty.is_option() {
@@ -271,7 +306,7 @@ impl Member {
                 .strip_prefix('_')
                 .unwrap_or(&orig_ident_str);
 
-            // Preserve the original identifier span to make IDE go to definition correctly
+            // Preserve the original identifier span to make IDE's "go to definition" work correctly
             // and make error messages point to the correct place.
             let norm_ident = syn::Ident::new_maybe_raw(norm_ident, orig_ident.span());
             let norm_ident_pascal = norm_ident.snake_to_pascal_case();

@@ -74,7 +74,7 @@ impl<'a> MemberSettersCtx<'a> {
 
         let setter_method_name = self.member.setter_method_core_name().clone();
 
-        // Preserve the original identifier span to make IDE go to definition correctly
+        // Preserve the original identifier span to make IDE's "go to definition" work correctly
         let option_method_name = syn::Ident::new(
             &format!("maybe_{}", setter_method_name.raw_name()),
             setter_method_name.span(),
