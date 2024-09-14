@@ -205,8 +205,6 @@ impl BuilderGenCtx {
             .named_members()
             .map(Self::members_label);
 
-        let vis = &self.vis;
-
         let mod_name = &self.inner_mod_label();
 
         Ok(quote! {
@@ -214,9 +212,9 @@ impl BuilderGenCtx {
 
             #[doc(hidden)]
             #[allow(non_camel_case_types)]
-            #vis mod #mod_name {
+            mod #mod_name {
                 #(
-                    pub(super) struct #named_members_labels;
+                    pub struct #named_members_labels;
                 )*
             }
 
@@ -813,9 +811,5 @@ fn allow_warnings_on_member_types() -> TokenStream2 {
         //
         // And it triggers the warning. We just suppress it here.
         #[allow(unused_parens)]
-        // This working relates to structs used inside `IntoSet` for nicer error messages.
-        // These structs are not used by user, so warning relating to them not being
-        // available can be ignored.
-        #[allow(private_bounds)]
     }
 }
