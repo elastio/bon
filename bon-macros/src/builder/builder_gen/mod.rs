@@ -129,7 +129,7 @@ impl Generics {
         }
     }
 
-    fn where_clause_predicates(&self) -> impl Iterator<Item=&syn::WherePredicate> {
+    fn where_clause_predicates(&self) -> impl Iterator<Item = &syn::WherePredicate> {
         self.where_clause
             .as_ref()
             .into_iter()
@@ -147,11 +147,11 @@ impl BuilderGenCtx {
         self.assoc_method_ctx.as_ref()?.receiver.as_ref()
     }
 
-    fn named_members(&self) -> impl Iterator<Item=&NamedMember> {
+    fn named_members(&self) -> impl Iterator<Item = &NamedMember> {
         self.members.iter().filter_map(Member::as_named)
     }
 
-    fn start_fn_args(&self) -> impl Iterator<Item=&StartFnArgMember> {
+    fn start_fn_args(&self) -> impl Iterator<Item = &StartFnArgMember> {
         self.members.iter().filter_map(Member::as_start_fn_arg)
     }
 
@@ -604,10 +604,7 @@ impl BuilderGenCtx {
     }
 
     fn inner_mod_label(&self) -> syn::Ident {
-        quote::format_ident!(
-            "{}__inner",
-            self.builder_ident.raw_name(),
-        )
+        quote::format_ident!("{}__inner", self.builder_ident.raw_name(),)
     }
 
     fn finish_method(&self) -> Result<TokenStream2> {
