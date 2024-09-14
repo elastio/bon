@@ -6,16 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.0.0](https://github.com/elastio/bon/compare/v2.2.1...v3.0.0) - 2024-09-14
+## [2.3.0](https://github.com/elastio/bon/compare/v2.2.1...v2.3.0) - 2024-09-14
 
-### Other
+See the [blog post for this release](https://elastio.github.io/bon/blog/bon-builder-v2-3-release) that describes some of the most notable changes in detail.
+
+### Added
 
 - Add support for positional params in `start_fn` and `finish_fn` ([#125](https://github.com/elastio/bon/pull/125))
 
 ### Fixed
 
-- Forward lint suppression from `#[allow()/expect()]` attributes written by the user on the top-level to the generated items
-- Suppress the false-positive ([clippy issue]https://github.com/rust-lang/rust-clippy/issues/6947)) `clippy::future_not_send` lint
+- Forward lint suppression from `#[allow()/expect()]` attributes written by the user on the top-level to the generated items ([#125](https://github.com/elastio/bon/pull/125))
+- Suppress the false-positive ([clippy issue](https://github.com/rust-lang/rust-clippy/issues/6947)) `clippy::future_not_send` lint ([#125](https://github.com/elastio/bon/pull/125))
+- Fix the cases where `#[builder(derive(Debug, Clone))]` didn't validate for all members to implement `Clone/Debug` if these members were of reference or generic types ([#125](https://github.com/elastio/bon/pull/125))
 
 ## [2.2.1](https://github.com/elastio/bon/compare/v2.2.0...v2.2.1) - 2024-09-09
 

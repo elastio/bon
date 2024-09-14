@@ -1,6 +1,6 @@
 [package]
 name    = "bon"
-version = "3.0.0"
+version = "2.3.0"
 
 description = "Generate builders for everything!"
 
