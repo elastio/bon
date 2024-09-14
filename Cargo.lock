@@ -107,7 +107,7 @@ dependencies = [
 
 [[package]]
 name = "bon-macros"
-version = "2.2.2"
+version = "2.3.0"
 dependencies = [
  "darling",
  "ident_case",
