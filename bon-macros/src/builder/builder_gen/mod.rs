@@ -203,7 +203,7 @@ impl BuilderGenCtx {
 
         let named_members_labels = self
             .named_members()
-            .map(|member| Self::members_label(member));
+            .map(Self::members_label);
 
         let vis = &self.vis;
 
@@ -813,5 +813,9 @@ fn allow_warnings_on_member_types() -> TokenStream2 {
         //
         // And it triggers the warning. We just suppress it here.
         #[allow(unused_parens)]
+        // This working relates to structs used inside `IntoSet` for nicer error messages.
+        // These structs are not used by user, so warning relating to them not being
+        // available can be ignored.
+        #[allow(private_bounds)]
     }
 }
