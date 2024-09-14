@@ -145,16 +145,13 @@ Huge thank you for 925 stars ⭐ [on Github](https://github.com/elastio/bon)! Co
 
 Bon's goal is to empower everyone to build beautiful APIs with great flexibility and extensibility. If you have any feedback or ideas for improvement consider joining [our Discord server](https://discord.gg/QcBYSamw4c) to discuss them, or just [open an issue on Github](https://github.com/elastio/bon/issues).
 
-
-<!--
 ::: tip
 
 You can leave comments for this post on the platform of your choice:
-- [Reddit](https://www.reddit.com/r/rust/comments/1fc0ai7/media_nextgen_builder_macro_bon_22_release_derive/)
-- [X (Twitter)](https://x.com/veetaha/status/1832804375154065432)
+- [Reddit](https://www.reddit.com/r/rust/comments/1fgmbo7/media_nextgen_builder_macro_bon_23_release/)
+- [X (Twitter)](https://x.com/veetaha/status/1834951093559648544)
 
 :::
--->
 
 [`bon`]: https://github.com/elastio/bon
 
