@@ -129,7 +129,7 @@ impl Generics {
         }
     }
 
-    fn where_clause_predicates(&self) -> impl Iterator<Item = &syn::WherePredicate> {
+    fn where_clause_predicates(&self) -> impl Iterator<Item=&syn::WherePredicate> {
         self.where_clause
             .as_ref()
             .into_iter()
@@ -147,11 +147,11 @@ impl BuilderGenCtx {
         self.assoc_method_ctx.as_ref()?.receiver.as_ref()
     }
 
-    fn named_members(&self) -> impl Iterator<Item = &NamedMember> {
+    fn named_members(&self) -> impl Iterator<Item=&NamedMember> {
         self.members.iter().filter_map(Member::as_named)
     }
 
-    fn start_fn_args(&self) -> impl Iterator<Item = &StartFnArgMember> {
+    fn start_fn_args(&self) -> impl Iterator<Item=&StartFnArgMember> {
         self.members.iter().filter_map(Member::as_start_fn_arg)
     }
 
@@ -207,14 +207,18 @@ impl BuilderGenCtx {
 
         let vis = &self.vis;
 
+        let mod_name = &self.inner_mod_label();
+
         Ok(quote! {
             #items_for_rustdoc
 
-            #(
-                #[allow(non_camel_case_types)]
-                #[doc(hidden)]
-                #vis struct #named_members_labels;
-            )*
+            #[doc(hidden)]
+            #[allow(non_camel_case_types)]
+            #vis mod #mod_name {
+                #(
+                    pub(super) struct #named_members_labels;
+                )*
+            }
 
             #allows
             #[automatically_derived]
@@ -574,7 +578,7 @@ impl BuilderGenCtx {
 
         let index = &member.index;
         let set_state_type_param = member.set_state_type_param();
-        let member_label = self.members_label(member);
+        let member_label = self.absolute_members_label(member);
 
         let expr = quote! {
             ::bon::private::IntoSet::<
@@ -589,11 +593,20 @@ impl BuilderGenCtx {
 
     /// Name of the dummy struct that is generated just to give a name for
     /// the member in the error message when `IntoSet` trait is not implemented.
-    fn members_label(&self, member: &NamedMember) -> syn::Ident {
+    fn members_label<'a>(&self, member: &'a NamedMember) -> &'a syn::Ident {
+        member.setter_method_core_name()
+    }
+
+    fn absolute_members_label(&self, member: &NamedMember) -> TokenStream2 {
+        let mode_label = &self.inner_mod_label();
+        let member_label = &self.members_label(member);
+        quote!(#mode_label::#member_label)
+    }
+
+    fn inner_mod_label(&self) -> syn::Ident {
         quote::format_ident!(
-            "{}__{}",
+            "{}__inner",
             self.builder_ident.raw_name(),
-            member.setter_method_core_name()
         )
     }
 
@@ -633,7 +646,7 @@ impl BuilderGenCtx {
         let where_bounds = self.named_members().map(|member| {
             let member_type_var = &member.generic_var_ident;
             let set_state_type_param = member.set_state_type_param();
-            let member_label = self.members_label(member);
+            let member_label = self.absolute_members_label(member);
             quote! {
                 #member_type_var: ::bon::private::IntoSet<
                     #set_state_type_param,

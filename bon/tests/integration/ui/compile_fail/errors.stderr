@@ -193,14 +193,14 @@ error[E0599]: no method named `y` found for struct `SkipGeneratesNoSetterBuilder
 22 |     SkipGeneratesNoSetter::builder().y(42).build();
    |                                      ^ method not found in `SkipGeneratesNoSetterBuilder`
 
-error[E0277]: can't finish building yet; the member `ExampleBuilder__y` was not set
+error[E0277]: can't finish building yet; the member `y` was not set
   --> tests/integration/ui/compile_fail/errors.rs:34:37
    |
 34 |     let _ = Example::builder().x(1).build();
-   |                                     ^^^^^ the member `ExampleBuilder__y` was not set
+   |                                     ^^^^^ the member `y` was not set
    |
-   = help: the trait `IntoSet<u32, ExampleBuilder__y>` is not implemented for `Unset<Required>`
-   = help: the trait `IntoSet<Option<_>, ExampleBuilder__y>` is implemented for `Unset<Optional>`
+   = help: the trait `IntoSet<u32, y>` is not implemented for `Unset<Required>`
+   = help: the trait `IntoSet<Option<_>, y>` is implemented for `Unset<Optional>`
 note: required by a bound in `ExampleBuilder::<(__X, __Y, __Z)>::build`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
@@ -210,14 +210,14 @@ note: required by a bound in `ExampleBuilder::<(__X, __Y, __Z)>::build`
    |            ------- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0277]: can't finish building yet; the member `ExampleBuilder__renamed` was not set
+error[E0277]: can't finish building yet; the member `renamed` was not set
   --> tests/integration/ui/compile_fail/errors.rs:34:37
    |
 34 |     let _ = Example::builder().x(1).build();
-   |                                     ^^^^^ the member `ExampleBuilder__renamed` was not set
+   |                                     ^^^^^ the member `renamed` was not set
    |
-   = help: the trait `IntoSet<u32, ExampleBuilder__renamed>` is not implemented for `Unset<Required>`
-   = help: the trait `IntoSet<Option<_>, ExampleBuilder__renamed>` is implemented for `Unset<Optional>`
+   = help: the trait `IntoSet<u32, renamed>` is not implemented for `Unset<Required>`
+   = help: the trait `IntoSet<Option<_>, renamed>` is implemented for `Unset<Optional>`
 note: required by a bound in `ExampleBuilder::<(__X, __Y, __Z)>::build`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
@@ -245,14 +245,14 @@ note: required by a bound in `ExampleBuilder::<(__X, __Y, __Z)>::y`
    |         - required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0277]: can't finish building yet; the member `SutBuilder__arg1` was not set
+error[E0277]: can't finish building yet; the member `arg1` was not set
   --> tests/integration/ui/compile_fail/errors.rs:47:32
    |
 47 |         let _ = Sut::builder().build();
-   |                                ^^^^^ the member `SutBuilder__arg1` was not set
+   |                                ^^^^^ the member `arg1` was not set
    |
-   = help: the trait `IntoSet<Option<u32>, SutBuilder__arg1>` is not implemented for `Unset<Required>`
-   = help: the trait `IntoSet<Option<u32>, SutBuilder__arg1>` is implemented for `Unset<Optional>`
+   = help: the trait `IntoSet<Option<u32>, arg1>` is not implemented for `Unset<Required>`
+   = help: the trait `IntoSet<Option<u32>, arg1>` is implemented for `Unset<Optional>`
    = help: for that trait implementation, expected `Optional`, found `Required`
 note: required by a bound in `SutBuilder::<(__Arg1,)>::build`
   --> tests/integration/ui/compile_fail/errors.rs:42:18
