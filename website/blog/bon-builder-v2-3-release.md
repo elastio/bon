@@ -9,7 +9,7 @@ outline: deep
 
 If you don't know about [`bon`], then see the [motivational blog post](./how-to-do-named-function-arguments-in-rust) and [the crate overview](../guide/overview).
 
-## Meme of this release 🐱
+## Meme of this release :cat:
 
 <img
     src="https://github.com/user-attachments/assets/f9657e2b-1e64-4023-b239-3acc0cead350"
