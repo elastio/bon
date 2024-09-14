@@ -203,7 +203,7 @@ impl BuilderGenCtx {
 
         let named_members_labels = self
             .named_members()
-            .map(|member| self.members_label(member));
+            .map(|member| Self::members_label(member));
 
         let vis = &self.vis;
 
@@ -593,13 +593,13 @@ impl BuilderGenCtx {
 
     /// Name of the dummy struct that is generated just to give a name for
     /// the member in the error message when `IntoSet` trait is not implemented.
-    fn members_label<'a>(&self, member: &'a NamedMember) -> &'a syn::Ident {
+    fn members_label(member: &NamedMember) -> &syn::Ident {
         member.setter_method_core_name()
     }
 
     fn absolute_members_label(&self, member: &NamedMember) -> TokenStream2 {
         let mode_label = &self.inner_mod_label();
-        let member_label = &self.members_label(member);
+        let member_label = &Self::members_label(member);
         quote!(#mode_label::#member_label)
     }
 
