@@ -6,10 +6,11 @@ git_tag_enable     = false
 changelog_update = false
 
 [[package]]
+name = "bon"
+
 changelog_include = ["bon-macros"]
 changelog_path    = "website/changelog.md"
 changelog_update  = true
-name              = "bon"
 
 git_release_enable = true
 git_release_name   = "v{{ version }}"

@@ -16,6 +16,7 @@ mod website_doctests {
     include!(concat!(env!("OUT_DIR"), "/website_doctests.rs"));
 }
 
+/// Docs on the [`Self`] struct
 #[derive(bon::Builder)]
 pub struct Greeter {
     _name: String,

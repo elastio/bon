@@ -3,6 +3,8 @@ use super::{
     generic_param_to_arg, AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFunc,
     FinishFuncBody, Generics, Member, MemberOrigin, RawMember, StartFunc,
 };
+use crate::builder::builder_gen::builder_params::ItemParams;
+use crate::builder::builder_gen::BuilderType;
 use crate::normalization::NormalizeSelfTy;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
@@ -134,8 +136,10 @@ impl FuncInputCtx {
     }
 
     fn builder_ident(&self) -> syn::Ident {
-        if let Some(builder_type) = &self.params.base.builder_type {
-            return builder_type.clone();
+        let user_override = self.params.base.builder_type.name.as_ref();
+
+        if let Some(user_override) = user_override {
+            return user_override.clone();
         }
 
         if self.is_method_new() {
@@ -326,13 +330,25 @@ impl FuncInputCtx {
             self.norm_func.sig.ident.clone()
         };
 
-        let finish_func_ident = self.params.base.finish_fn.unwrap_or_else(|| {
+        let ItemParams {
+            name: finish_func_ident,
+            vis: _,
+            docs: finish_func_docs,
+        } = self.params.base.finish_fn;
+
+        let finish_func_ident = finish_func_ident.unwrap_or_else(|| {
             // For `new` methods the `build` finisher is more conventional
             if is_method_new {
                 quote::format_ident!("build")
             } else {
                 quote::format_ident!("call")
             }
+        });
+
+        let finish_func_docs = finish_func_docs.unwrap_or_else(|| {
+            vec![syn::parse_quote! {
+                /// Finishes building and performs the requested action.
+            }]
         });
 
         let finish_func = FinishFunc {
@@ -342,7 +358,7 @@ impl FuncInputCtx {
             must_use: get_must_use_attribute(&self.norm_func.attrs)?,
             body: Box::new(finish_func_body),
             output: self.norm_func.sig.output,
-            docs: "Finishes building and performs the requested action.".to_owned(),
+            attrs: finish_func_docs,
         };
 
         let fn_allows = self
@@ -382,20 +398,24 @@ impl FuncInputCtx {
             )),
         };
 
+        let builder_type = BuilderType {
+            ident: builder_ident,
+            derives: self.params.base.derive,
+            docs: self.params.base.builder_type.docs,
+        };
+
         let ctx = BuilderGenCtx {
             members,
 
             allow_attrs,
 
             on_params: self.params.base.on,
-            builder_derives: self.params.base.derive,
-
-            builder_ident,
 
             assoc_method_ctx: receiver,
             generics,
             vis: self.norm_func.vis,
 
+            builder_type,
             start_func,
             finish_func,
         };

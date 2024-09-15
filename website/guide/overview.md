@@ -291,7 +291,7 @@ If you can't figure something out, consult the docs and maybe use that search `ð
                 <a href="https://x.com/veetaha" class="nobr">X (Twitter)</a>
             </div>
         </td>
-        <td>Profile of the maintainer. There are only posts about <code>bon</code> and Rust in general there.</td>
+        <td>Profile of the maintainer. There are only posts about <code>bon</code> and Rust in general here.</td>
     </tr>
 </table>
 

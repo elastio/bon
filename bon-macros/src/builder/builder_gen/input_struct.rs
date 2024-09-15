@@ -1,8 +1,9 @@
-use super::builder_params::{BuilderParams, ItemParams};
+use super::builder_params::{BuilderParams, ItemParams, ItemParamsParsing};
 use super::{
     AssocMethodCtx, BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberOrigin,
     RawMember, StartFunc,
 };
+use crate::builder::builder_gen::BuilderType;
 use crate::util::prelude::*;
 use darling::FromMeta;
 use quote::quote;
@@ -12,7 +13,18 @@ use syn::visit_mut::VisitMut;
 pub(crate) struct StructInputParams {
     #[darling(flatten)]
     base: BuilderParams,
-    start_fn: Option<ItemParams>,
+
+    #[darling(default, with = parse_start_fn)]
+    start_fn: ItemParams,
+}
+
+fn parse_start_fn(meta: &syn::Meta) -> Result<ItemParams> {
+    ItemParamsParsing {
+        meta,
+        allow_vis: true,
+        reject_self_mentions: None,
+    }
+    .parse()
 }
 
 impl StructInputParams {
@@ -85,16 +97,20 @@ impl StructInputCtx {
         })
     }
 
-    fn builder_ident(&self) -> syn::Ident {
-        if let Some(builder_type) = &self.params.base.builder_type {
-            return builder_type.clone();
-        }
-
-        quote::format_ident!("{}Builder", self.norm_struct.ident.raw_name())
-    }
-
     pub(crate) fn into_builder_gen_ctx(self) -> Result<BuilderGenCtx> {
-        let builder_ident = self.builder_ident();
+        let builder_type = {
+            let ItemParams { name, vis: _, docs } = self.params.base.builder_type;
+
+            let builder_ident = name.unwrap_or_else(|| {
+                quote::format_ident!("{}Builder", self.norm_struct.ident.raw_name())
+            });
+
+            BuilderType {
+                derives: self.params.base.derive.clone(),
+                ident: builder_ident,
+                docs,
+            }
+        };
 
         fn fields(struct_item: &syn::ItemStruct) -> Result<&syn::FieldsNamed> {
             match &struct_item.fields {
@@ -140,16 +156,20 @@ impl StructInputCtx {
         let ItemParams {
             name: start_func_ident,
             vis: start_func_vis,
-        } = self.params.start_fn.unwrap_or_default();
+            docs: start_func_docs,
+        } = self.params.start_fn;
 
         let start_func_ident = start_func_ident
             .unwrap_or_else(|| syn::Ident::new("builder", self.norm_struct.ident.span()));
 
-        let finish_func_ident = self
-            .params
-            .base
-            .finish_fn
-            .unwrap_or_else(|| syn::Ident::new("build", start_func_ident.span()));
+        let ItemParams {
+            name: finish_func_ident,
+            vis: _,
+            docs: finish_func_docs,
+        } = self.params.base.finish_fn;
+
+        let finish_func_ident =
+            finish_func_ident.unwrap_or_else(|| syn::Ident::new("build", start_func_ident.span()));
 
         let struct_ty = &self.struct_ty;
         let finish_func = FinishFunc {
@@ -161,18 +181,26 @@ impl StructInputCtx {
             }),
             body: Box::new(finish_func_body),
             output: syn::parse_quote!(-> #struct_ty),
-            docs: "Finishes building and returns the requested object.".to_owned(),
+            attrs: finish_func_docs.unwrap_or_else(|| {
+                vec![syn::parse_quote! {
+                    /// Finishes building and returns the requested object
+                }]
+            }),
         };
 
-        let start_func_docs = format!(
-            "Create an instance of [`{}`] using the builder syntax",
-            self.norm_struct.ident
-        );
+        let start_func_docs = start_func_docs.unwrap_or_else(|| {
+            let docs = format!(
+                "Create an instance of [`{}`] using the builder syntax",
+                self.norm_struct.ident
+            );
+
+            vec![syn::parse_quote!(#[doc = #docs])]
+        });
 
         let start_func = StartFunc {
             ident: start_func_ident,
             vis: start_func_vis,
-            attrs: vec![syn::parse_quote!(#[doc = #start_func_docs])],
+            attrs: start_func_docs,
             generics: None,
         };
 
@@ -194,14 +222,12 @@ impl StructInputCtx {
             allow_attrs,
 
             on_params: self.params.base.on,
-            builder_derives: self.params.base.derive,
-
-            builder_ident,
 
             assoc_method_ctx,
             generics,
             vis: self.norm_struct.vis,
 
+            builder_type,
             start_func,
             finish_func,
         };
