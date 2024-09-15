@@ -31,10 +31,7 @@ impl PositionalFnArgMember {
         is_into_enabled(self.origin, &self.params, scrutinee, on_params)
     }
 
-    pub(crate) fn fn_input_param(
-        &self,
-        on_params: &[OnParams],
-    ) -> Result<TokenStream2> {
+    pub(crate) fn fn_input_param(&self, on_params: &[OnParams]) -> Result<TokenStream2> {
         let has_into = self.param_into(on_params)?;
         let norm_ty = &self.norm_ty;
         let ident = &self.ident;
@@ -48,10 +45,7 @@ impl PositionalFnArgMember {
         Ok(input)
     }
 
-    pub(crate) fn maybe_into_ident_expr(
-        &self,
-        on_params: &[OnParams],
-    ) -> Result<TokenStream2> {
+    pub(crate) fn maybe_into_ident_expr(&self, on_params: &[OnParams]) -> Result<TokenStream2> {
         let has_into = self.param_into(on_params)?;
         let ident = &self.ident;
 
