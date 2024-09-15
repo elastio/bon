@@ -1,5 +1,5 @@
 use super::{MemberOrigin, MemberParams, NamedMember, PositionalFnArgMember};
-use crate::builder::params::ConditionalParams;
+use crate::builder::builder_gen::builder_params::ConditionalParams;
 use crate::util::prelude::*;
 use quote::{quote, ToTokens};
 

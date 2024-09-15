@@ -1,14 +1,14 @@
 mod builder_derives;
+mod builder_params;
 mod member;
 mod setter_methods;
 
 pub(crate) mod input_func;
 pub(crate) mod input_struct;
 
-use member::*;
-
-use super::params::{BuilderDerives, ConditionalParams};
 use crate::util::prelude::*;
+use builder_params::{BuilderDerives, ConditionalParams};
+use member::{Member, MemberOrigin, NamedMember, RawMember, StartFnArgMember};
 use quote::{quote, ToTokens};
 use setter_methods::{MemberSettersCtx, SettersReturnType};
 

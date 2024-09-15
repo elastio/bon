@@ -51,6 +51,10 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
     crate::normalization::NormalizeLifetimes.visit_item_impl_mut(&mut norm_impl_block);
     crate::normalization::NormalizeImplTraits.visit_item_impl_mut(&mut norm_impl_block);
 
+    // Retain a variant of the impl block without the normalized `Self` mentions.
+    // This way we preserve the original code that the user wrote with `Self` mentions
+    // as much as possible, therefore IDE's are able to provide correct syntax highlighting
+    // for `Self` mentions, because they aren't removed from the generated code output
     let mut norm_selfful_impl_block = norm_impl_block.clone();
 
     crate::normalization::NormalizeSelfTy {

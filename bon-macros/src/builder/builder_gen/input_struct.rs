@@ -1,8 +1,8 @@
+use super::builder_params::{BuilderParams, ItemParams};
 use super::{
     AssocMethodCtx, BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberOrigin,
     RawMember, StartFunc,
 };
-use crate::builder::params::{BuilderParams, ItemParams};
 use crate::util::prelude::*;
 use darling::FromMeta;
 use quote::quote;
