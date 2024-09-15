@@ -17,8 +17,8 @@ pub(crate) fn try_generate(params: TokenStream2, item: TokenStream2) -> Result<T
         item,
     };
 
-    let (_params, item) = match ctx.expand_cfg()? {
-        ExpansionOutput::Expanded { params, item } => (params, item),
+    let item = match ctx.expand_cfg()? {
+        ExpansionOutput::Expanded { params: _, item } => item,
         ExpansionOutput::Recurse(output) => return Ok(output),
     };
 

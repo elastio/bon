@@ -1,8 +1,8 @@
+use super::builder_params::{BuilderParams, ItemParams};
 use super::{
     AssocMethodCtx, BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberOrigin,
     RawMember, StartFunc,
 };
-use crate::builder::params::{BuilderParams, ItemParams};
 use crate::util::prelude::*;
 use darling::FromMeta;
 use quote::quote;
@@ -193,7 +193,7 @@ impl StructInputCtx {
 
             allow_attrs,
 
-            conditional_params: self.params.base.on,
+            on_params: self.params.base.on,
             builder_derives: self.params.base.derive,
 
             builder_ident,

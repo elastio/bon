@@ -1,8 +1,8 @@
+use super::builder_params::BuilderParams;
 use super::{
     generic_param_to_arg, AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFunc,
     FinishFuncBody, Generics, Member, MemberOrigin, RawMember, StartFunc,
 };
-use crate::builder::params::BuilderParams;
 use crate::normalization::NormalizeSelfTy;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
@@ -387,7 +387,7 @@ impl FuncInputCtx {
 
             allow_attrs,
 
-            conditional_params: self.params.base.on,
+            on_params: self.params.base.on,
             builder_derives: self.params.base.derive,
 
             builder_ident,

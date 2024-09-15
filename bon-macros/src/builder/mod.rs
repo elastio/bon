@@ -1,5 +1,4 @@
 mod builder_gen;
-mod params;
 
 pub(crate) mod item_impl;
 
