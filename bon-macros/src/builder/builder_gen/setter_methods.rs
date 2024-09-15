@@ -44,7 +44,7 @@ impl<'a> MemberSettersCtx<'a> {
 
         let has_into = self
             .member
-            .param_into(&self.builder_gen.conditional_params)?;
+            .param_into(&self.builder_gen.on_params)?;
 
         let (fn_param_type, maybe_into_call) = if has_into {
             (quote!(impl Into<#member_type>), quote!(.into()))
@@ -65,7 +65,7 @@ impl<'a> MemberSettersCtx<'a> {
     fn setters_for_optional_member(&self, inner_type: &syn::Type) -> Result<TokenStream2> {
         let has_into = self
             .member
-            .param_into(&self.builder_gen.conditional_params)?;
+            .param_into(&self.builder_gen.on_params)?;
         let (inner_type, maybe_map_conv_call) = if has_into {
             (quote!(impl Into<#inner_type>), quote!(.map(Into::into)))
         } else {

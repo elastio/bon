@@ -12,7 +12,7 @@ pub(crate) struct BuilderParams {
     pub(crate) builder_type: Option<syn::Ident>,
 
     #[darling(multiple)]
-    pub(crate) on: Vec<ConditionalParams>,
+    pub(crate) on: Vec<OnParams>,
 
     /// Specifies the derives to apply to the builder.
     pub(crate) derive: Option<BuilderDerives>,
@@ -28,12 +28,12 @@ pub(crate) struct BuilderDerives {
 }
 
 #[derive(Debug)]
-pub(crate) struct ConditionalParams {
+pub(crate) struct OnParams {
     pub(crate) type_pattern: syn::Type,
     pub(crate) into: darling::util::Flag,
 }
 
-impl Parse for ConditionalParams {
+impl Parse for OnParams {
     fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
         let type_pattern = input.parse()?;
 
@@ -92,7 +92,7 @@ impl Parse for ConditionalParams {
     }
 }
 
-impl FromMeta for ConditionalParams {
+impl FromMeta for OnParams {
     fn from_meta(meta: &syn::Meta) -> Result<Self> {
         let meta = match meta {
             syn::Meta::List(meta) => meta,

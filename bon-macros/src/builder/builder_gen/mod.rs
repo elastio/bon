@@ -7,7 +7,7 @@ pub(crate) mod input_func;
 pub(crate) mod input_struct;
 
 use crate::util::prelude::*;
-use builder_params::{BuilderDerives, ConditionalParams};
+use builder_params::{BuilderDerives, OnParams};
 use member::{Member, MemberOrigin, NamedMember, RawMember, StartFnArgMember};
 use quote::{quote, ToTokens};
 use setter_methods::{MemberSettersCtx, SettersReturnType};
@@ -35,7 +35,7 @@ pub(crate) struct BuilderGenCtx {
     /// then it must be represented as `#[allow(...)]` here.
     allow_attrs: Vec<syn::Attribute>,
 
-    conditional_params: Vec<ConditionalParams>,
+    on_params: Vec<OnParams>,
     builder_derives: Option<BuilderDerives>,
 
     generics: Generics,
@@ -243,7 +243,7 @@ impl BuilderGenCtx {
     /// hints.
     fn ide_hints(&self) -> TokenStream2 {
         let type_patterns = self
-            .conditional_params
+            .on_params
             .iter()
             .map(|params| &params.type_pattern)
             .collect::<Vec<_>>();
@@ -318,12 +318,12 @@ impl BuilderGenCtx {
 
         let start_fn_params = self
             .start_fn_args()
-            .map(|member| member.base.fn_input_param(&self.conditional_params))
+            .map(|member| member.base.fn_input_param(&self.on_params))
             .collect::<Result<Vec<_>>>()?;
 
         let start_fn_arg_exprs = self
             .start_fn_args()
-            .map(|member| member.base.maybe_into_ident_expr(&self.conditional_params))
+            .map(|member| member.base.maybe_into_ident_expr(&self.on_params))
             .collect::<Result<Vec<_>>>()?;
 
         let start_fn_args_field_init = (!start_fn_arg_exprs.is_empty()).then(|| {
@@ -544,7 +544,7 @@ impl BuilderGenCtx {
                 return Ok(quote! { self.__private_start_fn_args.#index });
             }
             Member::FinishFnArg(member) => {
-                return member.maybe_into_ident_expr(&self.conditional_params);
+                return member.maybe_into_ident_expr(&self.on_params);
             }
         };
 
@@ -559,7 +559,7 @@ impl BuilderGenCtx {
                     .param_default()
                     .flatten()
                     .map(|default| {
-                        let has_into = member.param_into(&self.conditional_params)?;
+                        let has_into = member.param_into(&self.on_params)?;
                         let default = if has_into {
                             quote! { ::core::convert::Into::into((|| #default)()) }
                         } else {
@@ -646,7 +646,7 @@ impl BuilderGenCtx {
             .members
             .iter()
             .filter_map(Member::as_finish_fn_arg)
-            .map(|member| member.fn_input_param(&self.conditional_params))
+            .map(|member| member.fn_input_param(&self.on_params))
             .collect::<Result<Vec<_>>>()?;
 
         Ok(quote! {

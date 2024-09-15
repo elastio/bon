@@ -1,10 +1,10 @@
 use super::{MemberOrigin, MemberParams, NamedMember, PositionalFnArgMember};
-use crate::builder::builder_gen::builder_params::ConditionalParams;
+use crate::builder::builder_gen::builder_params::OnParams;
 use crate::util::prelude::*;
 use quote::{quote, ToTokens};
 
 impl NamedMember {
-    pub(crate) fn param_into(&self, conditional_params: &[ConditionalParams]) -> Result<bool> {
+    pub(crate) fn param_into(&self, on_params: &[OnParams]) -> Result<bool> {
         // For optional named members the target of the `Into` conversion is the type
         // inside of the `Option<T>`, not the `Option<T>` itself because we generate
         // a setter that accepts `T` itself. It also makes this logic stable regardless
@@ -13,7 +13,7 @@ impl NamedMember {
             .as_optional_with_ty(&self.orig_ty)
             .unwrap_or(&self.orig_ty);
 
-        is_into_enabled(self.origin, &self.params, scrutinee, conditional_params)
+        is_into_enabled(self.origin, &self.params, scrutinee, on_params)
     }
 
     pub(crate) fn setter_method_core_name(&self) -> &syn::Ident {
@@ -22,20 +22,20 @@ impl NamedMember {
 }
 
 impl PositionalFnArgMember {
-    pub(crate) fn param_into(&self, conditional_params: &[ConditionalParams]) -> Result<bool> {
+    pub(crate) fn param_into(&self, on_params: &[OnParams]) -> Result<bool> {
         // Positional members are never optional. Users must always specify them, so there
         // is no need for us to look into the `Option<T>` generic parameter, because the
         // `Option<T>` itself is the target of the into conversion, not the `T` inside it.
         let scrutinee = self.orig_ty.as_ref();
 
-        is_into_enabled(self.origin, &self.params, scrutinee, conditional_params)
+        is_into_enabled(self.origin, &self.params, scrutinee, on_params)
     }
 
     pub(crate) fn fn_input_param(
         &self,
-        conditional_params: &[ConditionalParams],
+        on_params: &[OnParams],
     ) -> Result<TokenStream2> {
-        let has_into = self.param_into(conditional_params)?;
+        let has_into = self.param_into(on_params)?;
         let norm_ty = &self.norm_ty;
         let ident = &self.ident;
 
@@ -50,9 +50,9 @@ impl PositionalFnArgMember {
 
     pub(crate) fn maybe_into_ident_expr(
         &self,
-        conditional_params: &[ConditionalParams],
+        on_params: &[OnParams],
     ) -> Result<TokenStream2> {
-        let has_into = self.param_into(conditional_params)?;
+        let has_into = self.param_into(on_params)?;
         let ident = &self.ident;
 
         let expr = if has_into {
@@ -71,9 +71,9 @@ fn is_into_enabled(
     origin: MemberOrigin,
     member_params: &MemberParams,
     scrutinee: &syn::Type,
-    conditional_params: &[ConditionalParams],
+    on_params: &[OnParams],
 ) -> Result<bool> {
-    let verdict_from_defaults = conditional_params
+    let verdict_from_defaults = on_params
         .iter()
         .map(|params| Ok((params, scrutinee.matches(&params.type_pattern)?)))
         .collect::<Result<Vec<_>>>()?

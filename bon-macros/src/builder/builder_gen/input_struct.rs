@@ -193,7 +193,7 @@ impl StructInputCtx {
 
             allow_attrs,
 
-            conditional_params: self.params.base.on,
+            on_params: self.params.base.on,
             builder_derives: self.params.base.derive,
 
             builder_ident,
