@@ -19,18 +19,27 @@ mod website_doctests {
 /// Docs on the [`Self`] struct
 #[derive(bon::Builder)]
 #[builder(
-    builder_type(docs(
-        /// Docs on [`GreeterBuilder`]
-        /// the builder type
-    )),
-    start_fn(docs(
-        /// Docs on
-        /// [`Self::builder`]
-    )),
-    finish_fn(docs(
-        /// Docs on
-        /// [`GreeterBuilder::build()`]
-    ))
+    builder_type(
+        docs {
+            /// Docs on [`GreeterBuilder`]
+            /// the builder type
+        },
+        name = GreeterOverriddenBuilder,
+    ),
+    start_fn(
+        docs {
+            /// Docs on
+            /// [`Self::builder`]
+        },
+        name = start_fn_override,
+    ),
+    finish_fn(
+        docs {
+            /// Docs on
+            /// [`GreeterBuilder::build()`]
+        },
+        name = finish_fn_override,
+    )
 )]
 pub struct Greeter {
     /// Docs on
