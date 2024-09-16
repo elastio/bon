@@ -125,7 +125,7 @@ pub(crate) struct SkippedMember {
 
 impl NamedMember {
     fn validate(&self) -> Result {
-        super::reject_self_mentions_in_docs("builder struct", &self.docs)?;
+        super::reject_self_mentions_in_docs("builder struct's impl block", &self.docs)?;
 
         if let Some(default) = &self.params.default {
             if self.norm_ty.is_option() {

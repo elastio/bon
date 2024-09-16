@@ -18,10 +18,27 @@ mod website_doctests {
 
 /// Docs on the [`Self`] struct
 #[derive(bon::Builder)]
+#[builder(
+    builder_type(docs(
+        /// Docs on [`GreeterBuilder`]
+        /// the builder type
+    )),
+    start_fn(docs(
+        /// Docs on
+        /// [`Self::builder`]
+    )),
+    finish_fn(docs(
+        /// Docs on
+        /// [`GreeterBuilder::build()`]
+    ))
+)]
 pub struct Greeter {
+    /// Docs on
+    /// the `name` field
     _name: String,
 
-    // #[cfg_attr(all(), builder(start_fn = init))]
+    /// Docs on
+    /// the `level` field
     _level: usize,
 }
 

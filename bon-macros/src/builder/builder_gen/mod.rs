@@ -852,10 +852,9 @@ fn reject_self_mentions_in_docs(context: &'static str, attrs: &[syn::Attribute])
         {
             bail!(
                 &doc.span(),
-                "the documentation for the member should not reference `Self` \
-                because it will be moved to the {context} where \
-                `Self` changes meaning, which may confuse the reader of this code; \
-                use explicit type names instead.",
+                "the documentation should not reference `Self` because it will \
+                be moved to the {context} where `Self` changes meaning, which \
+                may confuse the reader of this code; use explicit type names instead.",
             );
         }
     }
