@@ -95,6 +95,16 @@ impl<T> MemberState for Unset<T> {
     }
 }
 
+#[repr(transparent)]
+#[derive(Clone)]
+pub struct Set<T>(pub T);
+
+impl<T: core::fmt::Debug> core::fmt::Debug for Set<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        core::fmt::Debug::fmt(&self.0, f)
+    }
+}
+
 /// This is all a big embarrassing workaround, please don't oversee 😳😳😳.
 ///
 /// Anyway, if you are curious what the hell is going on here, then here is
@@ -152,7 +162,7 @@ macro_rules! __eval_cfg_callback {
         $($rest:tt)*
     ) => {
         // The `pred_id` is required to be a unique identifier for the current
-        // predicate evaluation so that we can use in a `use` statement to define
+        // predicate evaluation so that we can use it in a `use` statement to define
         // a new unique name for the macro to call.
         #[cfg($($pred)*)]
         #[doc(hidden)]
@@ -198,16 +208,6 @@ macro_rules! __eval_cfg_callback {
         #[$final_macro(__cfgs($recursion_counter, $($results)*) $($macro_params)*)]
         $($item)*
     };
-}
-
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct Set<T>(pub T);
-
-impl<T: core::fmt::Debug> core::fmt::Debug for Set<T> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        core::fmt::Debug::fmt(&self.0, f)
-    }
 }
 
 /// The `cfg` predicate evaluated to `true`, now push that information into
