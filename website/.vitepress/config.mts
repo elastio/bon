@@ -131,6 +131,10 @@ export default defineConfig({
                             text: "Into Conversions In-Depth",
                             link: "/guide/patterns/into-conversions-in-depth",
                         },
+                        {
+                            text: "Shared Configuration",
+                            link: "/guide/patterns/shared-configuration",
+                        }
                     ],
                 },
                 {
