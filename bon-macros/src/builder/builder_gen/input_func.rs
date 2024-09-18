@@ -430,10 +430,7 @@ impl FinishFuncBody for FnCallBody {
         let prefix = self
             .sig
             .receiver()
-            .map(|receiver| {
-                let self_token = &receiver.self_token;
-                quote!(#self_token.__private_receiver.)
-            })
+            .map(|_| quote!(self.__private_receiver.))
             .or_else(|| {
                 let self_ty = &self.impl_ctx.as_deref()?.self_ty;
                 Some(quote!(<#self_ty>::))

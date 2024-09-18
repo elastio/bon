@@ -180,7 +180,7 @@ If your existing code defines functions with positional parameters in its public
 
 See [this attribute's docs](../reference/builder#expose-positional-fn) for details.
 
-**Example**:
+**Example:**
 
 ```rust ignore
 use bon::builder;

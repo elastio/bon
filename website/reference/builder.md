@@ -1117,7 +1117,7 @@ Don't confuse this with the top-level [`#[builder(start_fn = ...)]`](#start-fn) 
 
 :::
 
-**Example**:
+**Example:**
 
 ::: code-group
 
@@ -1224,7 +1224,7 @@ Don't confuse this with the top-level [`#[builder(finish_fn = ...)]`](#finish-fn
 
 :::
 
-**Example**:
+**Example:**
 
 ::: code-group
 
