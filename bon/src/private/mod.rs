@@ -9,6 +9,9 @@
     clippy::missing_const_for_fn
 )]
 
+/// Implementation details of the builder state
+pub mod state;
+
 /// Used to trigger deprecation warnings from the macros.
 pub mod deprecations;
 

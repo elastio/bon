@@ -16,7 +16,7 @@ impl NamedMember {
         is_into_enabled(self.origin, &self.params, scrutinee, on_params)
     }
 
-    pub(crate) fn setter_method_core_name(&self) -> &syn::Ident {
+    pub(crate) fn public_ident(&self) -> &syn::Ident {
         self.params.name.as_ref().unwrap_or(&self.norm_ident)
     }
 }

@@ -51,7 +51,7 @@ impl<'a> MemberSettersCtx<'a> {
         };
 
         Ok(self.setter_method(MemberSetterMethod {
-            method_name: self.member.setter_method_core_name().clone(),
+            method_name: self.member.public_ident().clone(),
             fn_params: quote!(value: #fn_param_type),
             overwrite_docs: None,
             body: SetterBody::Default {
@@ -68,7 +68,7 @@ impl<'a> MemberSettersCtx<'a> {
             (quote!(#inner_type), quote!())
         };
 
-        let setter_method_name = self.member.setter_method_core_name().clone();
+        let setter_method_name = self.member.public_ident().clone();
 
         // Preserve the original identifier span to make IDE's "go to definition" work correctly
         let option_method_name = syn::Ident::new(
@@ -197,7 +197,7 @@ impl<'a> MemberSettersCtx<'a> {
     }
 
     fn generate_docs_for_setter(&self) -> Vec<syn::Attribute> {
-        let setter_core_name = self.member.setter_method_core_name();
+        let setter_core_name = self.member.public_ident();
         let start_fn_ident = &self.builder_gen.start_func.ident;
 
         let more = |start_fn_path: &std::fmt::Arguments<'_>| {

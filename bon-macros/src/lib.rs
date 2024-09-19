@@ -316,3 +316,185 @@ pub fn __return_type(ret_ty: TokenStream, item: TokenStream) -> TokenStream {
 
     func.into_token_stream().into()
 }
+
+#[doc(hidden)]
+#[proc_macro]
+pub fn __gen_tuple_traits(total: TokenStream) -> TokenStream {
+    use crate::util::prelude::*;
+    use quote::quote;
+
+    let total = syn::parse_macro_input!(total as syn::LitInt);
+    let total: u16 = total.base10_parse().unwrap();
+
+    let traits = (1..=total).map(|i| {
+        let tuple_trait = quote::format_ident!("Tuple{i}");
+        let item_type = quote::format_ident!("T{i}");
+
+        let tuple_impls = (i..=total).map(|j| {
+            let generics = (1..=j).map(|k| quote::format_ident!("T{k}"));
+            let generics2 = generics.clone();
+
+            quote! {
+                impl<#(#generics,)*> #tuple_trait for (#(#generics2,)*) {
+                    type #item_type = #item_type;
+                }
+            }
+        });
+
+        let maybe_super_trait = if i > 1 {
+            let prev = quote::format_ident!("Tuple{}", i - 1);
+            quote!(: #prev)
+        } else {
+            quote! {}
+        };
+
+        quote! {
+            trait #tuple_trait #maybe_super_trait {
+                type #item_type;
+            }
+
+            #(#tuple_impls)*
+        }
+    });
+
+    traits.concat().into()
+}
+
+#[doc(hidden)]
+#[proc_macro]
+pub fn __gen_tuple_traits2(total: TokenStream) -> TokenStream {
+    use quote::quote;
+
+    let total = syn::parse_macro_input!(total as syn::LitInt);
+    let total: u16 = total.base10_parse().unwrap();
+
+    let items = (1..=total).map(|i| quote::format_ident!("T{i}"));
+
+    let impls = (1..=total).map(|i| {
+        let covered = (1..=i).map(|j| quote::format_ident!("T{j}"));
+        let covered2 = covered.clone();
+        let covered3 = covered.clone();
+        let rest = (i + 1..=total).map(|j| quote::format_ident!("T{j}"));
+
+        quote! {
+            impl<#(#covered,)*> Tuple for (#(#covered2,)*) {
+                #( type #covered3 = #covered3; )*
+                #( type #rest = N; )*
+            }
+        }
+    });
+
+    quote! {
+        pub trait Tuple {
+            #( type #items;)*
+        }
+
+        #(#impls)*
+    }
+    .into()
+}
+
+#[doc(hidden)]
+#[proc_macro]
+pub fn __builder_type(params: TokenStream) -> TokenStream {
+    use crate::util::prelude::*;
+    use quote::quote;
+
+    enum MemberKind {
+        Required,
+        Optional,
+    }
+
+    mod kw {
+        syn::custom_keyword!(required);
+        syn::custom_keyword!(optional);
+    }
+
+    struct Input {
+        builder_ident: syn::Ident,
+        members: Vec<(syn::Ident, MemberKind)>,
+        set_members: Vec<syn::Ident>,
+    }
+
+    impl syn::parse::Parse for Input {
+        fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
+            let builder_ident = input.parse()?;
+
+            let schema;
+
+            syn::braced!(schema in input);
+
+            let parse_members = |input: syn::parse::ParseStream<'_>| {
+                let key: syn::Ident = input.parse()?;
+                input.parse::<syn::Token![:]>()?;
+
+                let lookahead = input.lookahead1();
+
+                let kind = if lookahead.peek(kw::required) {
+                    input.parse::<kw::required>()?;
+                    MemberKind::Required
+                } else if lookahead.peek(kw::optional) {
+                    input.parse::<kw::optional>()?;
+                    MemberKind::Optional
+                } else {
+                    return Err(lookahead.error());
+                };
+
+                Ok((key, kind))
+            };
+
+            let members = schema.parse_terminated(parse_members, syn::Token![,])?;
+            let members = Vec::from_iter(members);
+
+            let set_members = input.parse_terminated(syn::Ident::parse, syn::Token![,])?;
+            let set_members = Vec::from_iter(set_members);
+
+            Ok(Self {
+                builder_ident,
+                members,
+                set_members,
+            })
+        }
+    }
+
+    let input = syn::parse_macro_input!(params as Input);
+
+    let Input {
+        builder_ident,
+        members,
+
+        // TODO: validate only correct members are specified,
+        // maybe add completions
+        set_members,
+    } = input;
+
+    let p = quote!(::bon::private);
+
+    let state_types = members.iter().enumerate().map(|(i, (ident, kind))| {
+        let is_set = set_members.contains(ident);
+
+        if is_set {
+            let tuple_item = quote::format_ident!("T{}", i + 1);
+            quote! {
+                #p::Set<
+                    <
+                        <#builder_ident as #p::state::Members>::Members
+                        as
+                        #p::state::Tuple
+                    >::#tuple_item
+                >
+            }
+        } else {
+            match kind {
+                MemberKind::Required => quote! { #p::Unset<#p::Required> },
+                MemberKind::Optional => quote! { #p::Unset<#p::Optional> },
+            }
+        }
+    });
+
+    // TODO: deliver regular generics from input
+    quote! {
+        #builder_ident<(#(#state_types,)*)>
+    }
+    .into()
+}

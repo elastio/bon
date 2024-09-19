@@ -171,6 +171,7 @@ impl BuilderGenCtx {
         let builder_decl = self.builder_decl();
         let builder_impl = self.builder_impl()?;
         let builder_derives = self.builder_derives();
+        let builder_type_macro = self.builder_type_macro();
 
         // -- Postprocessing --
         // Here we parse all items back and add the `allow` attributes to them.
@@ -178,6 +179,7 @@ impl BuilderGenCtx {
             #builder_decl
             #builder_derives
             #builder_impl
+            #builder_type_macro
         };
 
         let mut other_items = other_items.items;
@@ -194,6 +196,49 @@ impl BuilderGenCtx {
             start_func,
             other_items: quote!(#(#other_items)*),
         })
+    }
+
+    fn builder_type_macro(&self) -> TokenStream2 {
+        let private_macro_ident = quote::format_ident!("__{}", self.builder_ident.raw_name());
+
+        let vis = &self.vis;
+        let builder_ident = &self.builder_ident;
+
+        let member_types = self.named_members().map(|member| &member.norm_ty);
+        let generics_decl = &self.generics.decl_without_defaults;
+        let generic_args = &self.generics.args;
+        let where_clause = &self.generics.where_clause;
+
+        let schema = self.named_members().map(|member| {
+            let member_ident = &member.public_ident();
+            if member.is_optional() {
+                quote!(#member_ident: optional)
+            } else {
+                quote!(#member_ident: required)
+            }
+        });
+
+        quote! {
+            impl <#(#generics_decl,)*>
+                ::bon::private::state::Members for #builder_ident<#(#generic_args,)*>
+            #where_clause
+            {
+                type Members = (#(#member_types,)*);
+            }
+
+            macro_rules! #private_macro_ident {
+                ($($tt:tt)*) => {
+                    ::bon::__builder_type!(
+                        #builder_ident {
+                            #(#schema,)*
+                        }
+                        $($tt)*
+                    )
+                }
+            }
+
+            #vis use #private_macro_ident as #builder_ident;
+        }
     }
 
     fn builder_impl(&self) -> Result<TokenStream2> {
@@ -217,6 +262,8 @@ impl BuilderGenCtx {
             .map(|member| self.members_label(member));
 
         let vis = &self.vis;
+
+        let builder_traits_mod = quote::format_ident!("{}Traits", builder_ident.raw_name());
 
         Ok(quote! {
             #items_for_rustdoc
@@ -610,7 +657,7 @@ impl BuilderGenCtx {
         quote::format_ident!(
             "{}__{}",
             self.builder_type.ident.raw_name(),
-            member.setter_method_core_name()
+            member.public_ident()
         )
     }
 
