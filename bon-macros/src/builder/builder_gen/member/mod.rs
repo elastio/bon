@@ -247,7 +247,7 @@ impl Member {
             if let Some(attr) = incorrect_order {
                 bail!(
                     &attr.span(),
-                    "incorrect members oredering; the order of members must be the following:\n\
+                    "incorrect members ordering; the order of members must be the following:\n\
                     (1) members annotated with #[builder(start_fn)]\n\
                     (2) members annotated with #[builder(finish_fn)]\n\
                     (3) all other members in any order",
