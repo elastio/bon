@@ -16,11 +16,38 @@ mod website_doctests {
     include!(concat!(env!("OUT_DIR"), "/website_doctests.rs"));
 }
 
+/// Docs on the [`Self`] struct
 #[derive(bon::Builder)]
+#[builder(
+    builder_type(
+        docs {
+            /// Docs on [`GreeterOverriddenBuilder`]
+            /// the builder type
+        },
+        name = GreeterOverriddenBuilder,
+    ),
+    start_fn(
+        docs {
+            /// Docs on
+            /// [`Self::start_fn_override`]
+        },
+        name = start_fn_override,
+    ),
+    finish_fn(
+        docs {
+            /// Docs on
+            /// [`GreeterOverriddenBuilder::finish_fn_override()`]
+        },
+        name = finish_fn_override,
+    )
+)]
 pub struct Greeter {
+    /// Docs on
+    /// the `name` field
     _name: String,
 
-    // #[cfg_attr(all(), builder(start_fn = init))]
+    /// Docs on
+    /// the `level` field
     _level: usize,
 }
 

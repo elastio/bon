@@ -1,3 +1,4 @@
+use super::builder_params::BuilderDerives;
 use super::BuilderGenCtx;
 use crate::builder::builder_gen::Member;
 use crate::util::prelude::*;
@@ -5,18 +6,15 @@ use quote::quote;
 
 impl BuilderGenCtx {
     pub(crate) fn builder_derives(&self) -> TokenStream2 {
-        let derives = match &self.builder_derives {
-            Some(derives) => derives,
-            None => return quote!(),
-        };
+        let BuilderDerives { clone, debug } = &self.builder_type.derives;
 
         let mut tokens = TokenStream2::new();
 
-        if derives.clone.is_present() {
+        if clone.is_present() {
             tokens.extend(self.derive_clone());
         }
 
-        if derives.debug.is_present() {
+        if debug.is_present() {
             tokens.extend(self.derive_debug());
         }
 
@@ -39,7 +37,7 @@ impl BuilderGenCtx {
     fn derive_clone(&self) -> TokenStream2 {
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
-        let builder_ident = &self.builder_ident;
+        let builder_ident = &self.builder_type.ident;
 
         let clone = quote!(::core::clone::Clone);
 
@@ -89,7 +87,7 @@ impl BuilderGenCtx {
     fn derive_debug(&self) -> TokenStream2 {
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
-        let builder_ident = &self.builder_ident;
+        let builder_ident = &self.builder_type.ident;
 
         let debug = quote!(::core::fmt::Debug);
 

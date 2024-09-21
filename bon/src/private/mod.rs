@@ -152,7 +152,7 @@ macro_rules! __eval_cfg_callback {
         $($rest:tt)*
     ) => {
         // The `pred_id` is required to be a unique identifier for the current
-        // predicate evaluation so that we can use in a `use` statement to define
+        // predicate evaluation so that we can use it in a `use` statement to define
         // a new unique name for the macro to call.
         #[cfg($($pred)*)]
         #[doc(hidden)]

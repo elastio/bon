@@ -6,19 +6,41 @@ use syn::parse::Parse;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
+fn parse_finish_fn(meta: &syn::Meta) -> Result<ItemParams> {
+    ItemParamsParsing {
+        meta,
+        allow_vis: false,
+        reject_self_mentions: Some("builder struct's impl block"),
+    }
+    .parse()
+}
+
+fn parse_builder_type(meta: &syn::Meta) -> Result<ItemParams> {
+    ItemParamsParsing {
+        meta,
+        allow_vis: false,
+        reject_self_mentions: Some("builder struct"),
+    }
+    .parse()
+}
+
 #[derive(Debug, FromMeta)]
 pub(crate) struct BuilderParams {
-    pub(crate) finish_fn: Option<syn::Ident>,
-    pub(crate) builder_type: Option<syn::Ident>,
+    #[darling(default, with = parse_finish_fn)]
+    pub(crate) finish_fn: ItemParams,
+
+    #[darling(default, with = parse_builder_type)]
+    pub(crate) builder_type: ItemParams,
 
     #[darling(multiple)]
     pub(crate) on: Vec<OnParams>,
 
     /// Specifies the derives to apply to the builder.
-    pub(crate) derive: Option<BuilderDerives>,
+    #[darling(default)]
+    pub(crate) derive: BuilderDerives,
 }
 
-#[derive(Debug, FromMeta)]
+#[derive(Debug, Clone, Default, FromMeta)]
 pub(crate) struct BuilderDerives {
     #[darling(rename = "Clone")]
     pub(crate) clone: darling::util::Flag,
@@ -108,21 +130,47 @@ impl FromMeta for OnParams {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 pub(crate) struct ItemParams {
     pub(crate) name: Option<syn::Ident>,
     pub(crate) vis: Option<syn::Visibility>,
+    pub(crate) docs: Option<Vec<syn::Attribute>>,
 }
 
-impl FromMeta for ItemParams {
-    fn from_meta(meta: &syn::Meta) -> Result<Self> {
+pub(crate) struct ItemParamsParsing<'a> {
+    pub(crate) meta: &'a syn::Meta,
+    pub(crate) allow_vis: bool,
+    pub(crate) reject_self_mentions: Option<&'static str>,
+}
+
+impl ItemParamsParsing<'_> {
+    pub(crate) fn parse(self) -> Result<ItemParams> {
+        let params = Self::params_from_meta(self.meta)?;
+
+        if !self.allow_vis {
+            if let Some(vis) = &params.vis {
+                bail!(vis, "visibility can't be overridden for this item");
+            }
+        }
+
+        if let Some(context) = self.reject_self_mentions {
+            if let Some(docs) = &params.docs {
+                super::reject_self_mentions_in_docs(context, docs)?;
+            }
+        }
+
+        Ok(params)
+    }
+
+    fn params_from_meta(meta: &syn::Meta) -> Result<ItemParams> {
         if let syn::Meta::NameValue(meta) = meta {
             let val = &meta.value;
             let name = syn::parse2(quote!(#val))?;
 
-            return Ok(Self {
+            return Ok(ItemParams {
                 name: Some(name),
                 vis: None,
+                docs: None,
             });
         }
 
@@ -130,6 +178,7 @@ impl FromMeta for ItemParams {
         struct Full {
             name: Option<syn::Ident>,
             vis: Option<syn::Visibility>,
+            docs: Option<syn::Meta>,
         }
 
         let full = Full::from_meta(meta)?;
@@ -139,6 +188,7 @@ impl FromMeta for ItemParams {
             Full {
                 name: None,
                 vis: None,
+                docs: None,
             }
         );
 
@@ -146,11 +196,28 @@ impl FromMeta for ItemParams {
             bail!(meta, "expected at least one parameter in parentheses");
         }
 
-        let me = Self {
+        let docs = full
+            .docs
+            .map(|docs| {
+                let docs = docs.require_list()?;
+                let docs = docs.parse_args_with(syn::Attribute::parse_outer)?;
+
+                for attr in &docs {
+                    if !attr.is_doc() {
+                        bail!(attr, "expected a doc comment");
+                    }
+                }
+
+                Ok(docs)
+            })
+            .transpose()?;
+
+        let params = ItemParams {
             name: full.name,
             vis: full.vis,
+            docs,
         };
 
-        Ok(me)
+        Ok(params)
     }
 }

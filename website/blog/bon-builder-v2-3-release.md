@@ -121,7 +121,7 @@ You may also combine these attributes with [`#[builder(into)]`](../reference/bui
 
 On the previous week's update (2.2 release) [a promise was made](./bon-builder-v2-2-release#guaranteed-msrv) to reduce the MSRV (minimum supported Rust version) from the initial 1.70.0 even further, and this has been done 🎉!
 
-This is the lowest possible MSRV we can guarantee for now. The choice of this version was made based on our design requirements for const generics supports described in [the comment here](https://github.com/elastio/bon/blob/3217b4b0349f03f0b2a5853310f420c5b8b005a7/bon/Cargo.toml#L21-L28).
+This is the lowest possible MSRV we can guarantee for now. The choice of this version was made based on our design requirements for const generics support described in [the comment here](https://github.com/elastio/bon/blob/3217b4b0349f03f0b2a5853310f420c5b8b005a7/bon/Cargo.toml#L21-L28).
 
 
 ## Deprecation warnings

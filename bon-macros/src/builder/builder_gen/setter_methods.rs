@@ -144,7 +144,7 @@ impl<'a> MemberSettersCtx<'a> {
                     .next()
                     .map(|_| quote!(__private_start_fn_args: self.__private_start_fn_args,));
 
-                let builder_ident = &self.builder_gen.builder_ident;
+                let builder_ident = &self.builder_gen.builder_type.ident;
 
                 let member_exprs = self.builder_gen.named_members().map(|other_member| {
                     if other_member.norm_ident == self.member.norm_ident {
