@@ -9,7 +9,7 @@ impl VisitMut for NormalizeLifetimes {
     fn visit_item_impl_mut(&mut self, impl_block: &mut syn::ItemImpl) {
         syn::visit_mut::visit_item_impl_mut(self, impl_block);
 
-        AssignLifetimes::new("i", &mut impl_block.generics).visit_type_mut(&mut impl_block.self_ty);
+        AssignLifetimes::new("impl", &mut impl_block.generics).visit_type_mut(&mut impl_block.self_ty);
     }
 
     fn visit_impl_item_fn_mut(&mut self, fn_item: &mut syn::ImplItemFn) {
@@ -19,7 +19,7 @@ impl VisitMut for NormalizeLifetimes {
     }
 
     fn visit_signature_mut(&mut self, signature: &mut syn::Signature) {
-        let mut visitor = AssignLifetimes::new("f", &mut signature.generics);
+        let mut visitor = AssignLifetimes::new("fn", &mut signature.generics);
         for arg in &mut signature.inputs {
             visitor.visit_fn_arg_mut(arg);
         }
@@ -152,7 +152,7 @@ impl AssignLifetimes<'_> {
         let index = self.next_lifetime_index;
         self.next_lifetime_index += 1;
 
-        let lifetime = format!("'__{}{index}", self.prefix);
+        let lifetime = format!("'{}{index}", self.prefix);
         let lifetime = syn::Lifetime::new(&lifetime, Span::call_site());
 
         let lifetime_param = syn::LifetimeParam::new(lifetime.clone());

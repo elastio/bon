@@ -9,9 +9,8 @@ pub(crate) mod input_struct;
 use crate::util::prelude::*;
 use builder_params::{BuilderDerives, OnParams};
 use member::{Member, MemberOrigin, NamedMember, RawMember, StartFnArgMember};
-use quote::{quote, ToTokens};
-use setter_methods::{MemberSettersCtx, SettersReturnType};
-use std::hint::unreachable_unchecked;
+use quote::quote;
+use setter_methods::MemberSettersCtx;
 
 struct AssocMethodReceiverCtx {
     with_self_keyword: syn::Receiver,
@@ -167,44 +166,57 @@ impl BuilderGenCtx {
         self.members.iter().filter_map(Member::as_start_fn_arg)
     }
 
-    fn builder_state_trait_ident(&self) -> syn::Ident {
-        quote::format_ident!("{}State", self.builder_ident.raw_name())
+    fn builder_mod_ident(&self) -> syn::Ident {
+        self.builder_ident.pascal_to_snake_case()
     }
 
     pub(crate) fn output(self) -> Result<MacroOutput> {
         let mut start_func = self.start_func()?;
-        let builder_decl = self.builder_decl();
+        let builder_decl = self.builder_decl()?;
         let builder_impl = self.builder_impl()?;
         let builder_derives = self.builder_derives();
-        // let builder_type_macro = self.builder_type_macro();
 
-        // let all = quote! {
-        //     #builder_decl
-        //     #builder_derives
-        //     #builder_impl
-        //     #builder_type_macro
-        // };
+        let default_allows = syn::parse_quote!(#[allow(
+            // We have a `deprecated` lint on any `bon::private` items which we
+            // use in the generated code extensively
+            deprecated
+        )]);
 
-        // eprintln!("{}", all.to_string());
+        let allows = self.allow_attrs.iter().cloned().chain([default_allows]);
 
         // -- Postprocessing --
         // Here we parse all items back and add the `allow` attributes to them.
-        let other_items: syn::File = syn::parse_quote! {
+        let other_items = quote! {
             #builder_decl
             #builder_derives
             #builder_impl
-            // #builder_type_macro
         };
+
+        let other_items_str = other_items.to_string();
+
+        let other_items: syn::File = syn::parse2(other_items).map_err(|err| {
+            err!(
+                &Span::call_site(),
+                "bug in the `bon` crate: the macro generated code that contains syntax errors; \
+                please report this issue at our Github repository: \
+                https://github.com/elastio/bon.\n\
+                syntax error in generated code: {err:#?}.\n\
+                generated code:\n\
+                ```rust
+                {other_items_str}\n\
+                ```",
+            )
+        })?;
 
         let mut other_items = other_items.items;
 
         for item in &mut other_items {
             if let Some(attrs) = item.attrs_mut() {
-                attrs.extend(self.allow_attrs.iter().cloned());
+                attrs.extend(allows.clone());
             }
         }
 
-        start_func.attrs.extend(self.allow_attrs);
+        start_func.attrs.extend(allows);
 
         Ok(MacroOutput {
             start_func,
@@ -212,88 +224,36 @@ impl BuilderGenCtx {
         })
     }
 
-    fn builder_type_macro(&self) -> TokenStream2 {
-        let private_macro_ident = quote::format_ident!("__{}", self.builder_ident.raw_name());
-
-        let vis = &self.vis;
-        let builder_ident = &self.builder_ident;
-
-        let member_types = self.named_members().map(|member| &member.norm_ty);
-        let generics_decl = &self.generics.decl_without_defaults;
-        let generic_args = &self.generics.args;
-        let where_clause = &self.generics.where_clause;
-
-        let schema = self.named_members().map(|member| {
-            let member_ident = &member.public_ident();
-            if member.is_optional() {
-                quote!(#member_ident: optional)
-            } else {
-                quote!(#member_ident: required)
-            }
-        });
-
-        quote! {
-            impl <#(#generics_decl,)*>
-                ::bon::private::state::Members for #builder_ident<#(#generic_args,)*>
-            #where_clause
-            {
-                type Members = (#(#member_types,)*);
-            }
-
-            macro_rules! #private_macro_ident {
-                ($($tt:tt)*) => {
-                    ::bon::__builder_type!(
-                        #builder_ident {
-                            #(#schema,)*
-                        }
-                        $($tt)*
-                    )
-                }
-            }
-
-            #vis use #private_macro_ident as #builder_ident;
-        }
-    }
-
     fn builder_impl(&self) -> Result<TokenStream2> {
         let finish_method = self.finish_method()?;
-        let (setter_methods, items_for_rustdoc) = self.setter_methods()?;
+        let setter_methods = self
+            .named_members()
+            .map(|member| MemberSettersCtx::new(self, member).setter_methods())
+            .collect::<Result<Vec<_>>>()?;
 
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
         let where_clause = &self.generics.where_clause;
         let builder_ident = &self.builder_type.ident;
-        let builder_state_trait_ident = self.builder_state_trait_ident();
+        let builder_mod = self.builder_mod_ident();
 
         let allows = allow_warnings_on_member_types();
 
-        let named_members_labels = self.named_members().map(|member| self.member_label(member));
-
-        let vis = &self.vis;
-
         Ok(quote! {
-            #items_for_rustdoc
-
-            #(
-                #[allow(non_camel_case_types)]
-                #[doc(hidden)]
-                #vis struct #named_members_labels;
-            )*
-
             #allows
             #[automatically_derived]
             impl<
                 #(#generics_decl,)*
-                BuilderState: #builder_state_trait_ident
+                BuilderTypeState: #builder_mod::State
             >
             #builder_ident<
                 #(#generic_args,)*
-                BuilderState
+                BuilderTypeState
             >
             #where_clause
             {
                 #finish_method
-                #setter_methods
+                #(#setter_methods)*
             }
         })
     }
@@ -456,7 +416,7 @@ impl BuilderGenCtx {
                 // Wrap `ty` in another phantom data because it can be `?Sized`,
                 // and simply using it as a type of the tuple member would
                 // be wrong, because tuple's members must be sized
-                quote!(::core::marker::PhantomData<#ty>)
+                quote!(fn() -> ::core::marker::PhantomData<#ty>)
             });
 
         quote! {
@@ -484,19 +444,20 @@ impl BuilderGenCtx {
                 // explanation for it, I just didn't care to research it yet ¯\_(ツ)_/¯.
                 #(#types,)*
 
-                // A special case of zero members requires storing `BuilderState` in phantom data
-                // otherwise it would be reported as an unused type parameter.
-                ::core::marker::PhantomData<BuilderState>
+                // A special case of zero members requires storing `BuilderTypeState` in
+                // phantom data otherwise it would be reported as an unused type parameter.
+                fn() -> ::core::marker::PhantomData<BuilderTypeState>,
             )>
         }
     }
 
-    fn builder_decl(&self) -> TokenStream2 {
+    fn builder_decl(&self) -> Result<TokenStream2> {
         let vis = &self.vis;
         let builder_ident = &self.builder_type.ident;
         let generics_decl = &self.generics.decl_with_defaults;
         let where_clause = &self.generics.where_clause;
         let phantom_data = self.phantom_data();
+        let builder_mod = self.builder_mod_ident();
 
         let private_field_doc = "\
             Please don't touch this field. It's an implementation \
@@ -533,13 +494,6 @@ impl BuilderGenCtx {
 
         let allows = allow_warnings_on_member_types();
 
-        let state_all_unset = quote::format_ident!("{}StateAllUnset", builder_ident.raw_name());
-
-        let unset_state_types = self.named_members().map(|member| {
-            let label = self.member_label(member);
-            quote!(::bon::private::Unset<#label>)
-        });
-
         let mut start_fn_arg_types = self
             .start_fn_args()
             .map(|member| &member.base.norm_ty)
@@ -565,12 +519,11 @@ impl BuilderGenCtx {
                 let member_pascal = &member.norm_ident_pascal;
                 quote! {
                     #[doc = #private_field_doc]
-                    #ident: ::bon::private::MemberCell<BuilderState::#member_pascal, #ty>
+                    #ident: ::bon::private::MemberCell<BuilderTypeState::#member_pascal, #ty>
                 }
             }
         });
 
-        let builder_state_trait_ident = self.builder_state_trait_ident();
         let named_members_pascal_idents: Vec<_> = self
             .named_members()
             .map(|member| &member.norm_ident_pascal)
@@ -578,12 +531,10 @@ impl BuilderGenCtx {
 
         let total_named_members = named_members_pascal_idents.len();
 
+        let vis_child = self.vis.clone().into_equivalent_in_child_module()?;
+
         let state_transition_aliases = self.named_members().map(|member| {
-            let alias_name = quote::format_ident!(
-                "{}Set{}",
-                self.builder_ident.raw_name(),
-                member.norm_ident_pascal.raw_name()
-            );
+            let alias_name = quote::format_ident!("Set{}", member.norm_ident_pascal.raw_name());
 
             let states = self.named_members().map(|other_member| {
                 if other_member.orig_ident == member.orig_ident {
@@ -599,32 +550,92 @@ impl BuilderGenCtx {
                 }
             });
 
+            let member_ident = member.public_ident();
+
             if total_named_members == 1 {
+                let docs = format!(
+                    "Changes the type state of the builder to set the member `{member_ident}`.",
+                );
+
                 return quote! {
-                    #vis type #alias_name = ( #(#states,)* );
+                    #[doc = #docs]
+                    #vis_child type #alias_name = ( #(#states,)* );
                 };
             }
 
+            let docs = format!(
+                "Changes the type state of the builder to set the member `{member_ident}`. \
+                The `S` parameter is the type state to update. If not specified \
+                then [`AllUnset`] state is used, which results in all members being \
+                unset except for `{member_ident}`.\n\n\
+                [`AllUnset`]: self::AllUnset",
+            );
+
             quote! {
-                #vis type #alias_name<S: #builder_state_trait_ident> = ( #(#states,)* );
+                #[doc = #docs]
+                #vis_child type #alias_name<S: self::State = self::AllUnset> = ( #(#states,)* );
             }
         });
+        let named_members_labels: Vec<_> = self
+            .named_members()
+            .map(|member| self.member_label(member))
+            .collect();
 
-        quote! {
-            #( #state_transition_aliases )*
+        let assoc_types_docs = self.named_members().map(|member| {
+            let ident = &member.public_ident();
+            format!(
+                "Represents the state of the member `{ident}`.\n\n\
+                See the [`State`] trait-level docs for details",
+            )
+        });
 
-            #vis trait #builder_state_trait_ident {
-                #(type #named_members_pascal_idents: ::bon::private::MemberState; )*
+        let builder_mod_docs = format!(
+            "Contains the traits and type aliases for manipulating \
+            the type state of the {builder_ident}"
+        );
+
+        Ok(quote! {
+            #[doc = #builder_mod_docs]
+            #vis mod #builder_mod {
+                #( #state_transition_aliases )*
+
+                /// Represents the builder's type state that specifies which members are set and which are not.
+                ///
+                /// You can use the associated types of this trait to control the state of individual members
+                /// with the [`bon::IsSet`] and [`bon::IsUnset`] traits.
+                ///
+                /// [`bon::IsSet`]: ::bon::IsSet
+                /// [`bon::IsUnset]: ::bon::IsUnset
+                #vis_child trait State: ::core::marker::Sized {
+                    #(
+                        #[doc = #assoc_types_docs]
+                        type #named_members_pascal_idents: ::bon::private::MemberState;
+                    )*
+                }
+
+                // Using `self::State` explicitly to avoid name conflicts with the
+                // members named `state` which would create a generic param named `State`
+                // that would shadow the trait `State` in the same scope.
+                impl< #(#named_members_pascal_idents: ::bon::private::MemberState,)* > self::State
+                for ( #(#named_members_pascal_idents,)* )
+                {
+                    #( type #named_members_pascal_idents = #named_members_pascal_idents; )*
+                }
+
+                /// Initial state of the builder where all named members are unset
+                #vis_child type AllUnset = (#(::bon::private::Unset<#named_members_labels>,)*);
+
+                #(
+                    #[allow(non_camel_case_types)]
+                    #[doc(hidden)]
+                    #[deprecated =
+                        "this type is an implementation detail and should not be \
+                        used directly; use the Set* type aliases to control the \
+                        state of members instead"
+                    ]
+                    #vis_child struct #named_members_labels;
+                )*
             }
-
-            impl< #(#named_members_pascal_idents: ::bon::private::MemberState,)* > #builder_state_trait_ident
-            for ( #(#named_members_pascal_idents,)* )
-            {
-                #( type #named_members_pascal_idents = #named_members_pascal_idents; )*
-            }
-
-            /// Initial state of the builder where all named members are unset
-            #vis type #state_all_unset = (#(#unset_state_types,)*);
 
             #[must_use = #must_use_message]
             #(#docs)*
@@ -641,7 +652,7 @@ impl BuilderGenCtx {
             )]
             #vis struct #builder_ident<
                 #(#generics_decl,)*
-                BuilderState: #builder_state_trait_ident = #state_all_unset
+                BuilderTypeState: #builder_mod::State = #builder_mod::AllUnset
             >
             #where_clause
             {
@@ -657,7 +668,7 @@ impl BuilderGenCtx {
 
                 #( #member_fields, )*
             }
-        }
+        })
     }
 
     fn member_expr(&self, member: &Member) -> Result<TokenStream2> {
@@ -776,7 +787,7 @@ impl BuilderGenCtx {
             .map(|member| {
                 let member_pascal = &member.norm_ident_pascal;
                 quote! {
-                    BuilderState::#member_pascal: ::bon::private::IsSet
+                    BuilderTypeState::#member_pascal: ::bon::IsSet
                 }
             });
 
@@ -812,102 +823,6 @@ impl BuilderGenCtx {
                 #body
             }
         })
-    }
-
-    fn setter_methods(&self) -> Result<(TokenStream2, TokenStream2)> {
-        let generics_decl = &self.generics.decl_without_defaults;
-        let generic_args = &self.generics.args;
-        let builder_ident = &self.builder_type.ident;
-        let where_clause = &self.generics.where_clause;
-
-        let state_type_vars = self
-            .named_members()
-            .map(|member| &member.generic_var_ident)
-            .collect::<Vec<_>>();
-
-        let allows = allow_warnings_on_member_types();
-
-        let next_state_trait_ident =
-            quote::format_ident!("__{}SetMember", builder_ident.raw_name());
-
-        let next_states_decls = self.named_members().map(|member| {
-            let member_pascal = &member.norm_ident_pascal;
-            quote! {
-                type #member_pascal;
-            }
-        });
-
-        let setters = self
-            .named_members()
-            .map(|member| {
-                let state_types = self.named_members().map(|other_member| {
-                    if other_member.orig_ident == member.orig_ident {
-                        let ty = member.set_state_type_param();
-                        quote!(::bon::private::Set<#ty>)
-                    } else {
-                        other_member.generic_var_ident.to_token_stream()
-                    }
-                });
-
-                let member_pascal = &member.norm_ident_pascal;
-
-                let next_state = quote! {
-                    #builder_ident<
-                        #(#generic_args,)*
-                        (#(#state_types,)*)
-                    >
-                };
-
-                let return_type = SettersReturnType {
-                    doc_true: quote!(<Self as #next_state_trait_ident>::#member_pascal),
-                    doc_false: next_state.clone(),
-                };
-
-                let setter_methods =
-                    MemberSettersCtx::new(self, member, return_type).setter_methods()?;
-
-                let next_state = quote!(type #member_pascal = #next_state;);
-
-                Ok((setter_methods, next_state))
-            })
-            .collect::<Result<Vec<_>>>()?;
-        let next_states_defs = setters.iter().map(|(_, next_state)| next_state);
-
-        let items_for_rustdoc = quote! {
-            // This item is under `cfg(doc)` because it's used only to make the
-            // documentation less noisy (see `SettersReturnType` for more info).
-            #[cfg(doc)]
-            trait #next_state_trait_ident {
-                #(#next_states_decls)*
-            }
-
-            // This item is under `cfg(doc)` because it's used only to make the
-            // documentation less noisy (see `SettersReturnType` for more info).
-            #[cfg(doc)]
-            #allows
-            #[automatically_derived]
-            impl<
-                #(#generics_decl,)*
-                #(#state_type_vars,)*
-            >
-                #next_state_trait_ident
-            for
-                #builder_ident<
-                    #(#generic_args,)*
-                    (#(#state_type_vars,)*)
-                >
-            #where_clause
-            {
-                #(#next_states_defs)*
-            }
-        };
-
-        let setter_methods = setters
-            .into_iter()
-            .map(|(setter_methods, _)| setter_methods)
-            .concat();
-
-        Ok((setter_methods, items_for_rustdoc))
     }
 }
 

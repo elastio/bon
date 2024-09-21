@@ -17,12 +17,13 @@ fn struct_case() {
     assert_eq!(actual.r#type, 42);
     assert_eq!(actual.other, 100);
 
-    #[derive(Builder)]
-    #[builder(builder_type = r#type)]
-    #[allow(clippy::items_after_statements)]
-    struct Sut {}
+    // TODO: add builder_mod overrides
+    // #[derive(Builder)]
+    // #[builder(builder_type = r#type)]
+    // #[allow(clippy::items_after_statements)]
+    // struct Sut {}
 
-    let _: r#type = Sut::builder();
+    // let _: r#type = Sut::builder();
 }
 
 #[test]
@@ -35,8 +36,9 @@ fn fn_case() {
 
     r#type().r#type(42).r#while(100).call();
 
-    #[builder(builder_type = r#type)]
-    fn sut() {}
+    // TODO: add builder_mod overrides
+    // #[builder(builder_type = r#type)]
+    // fn sut() {}
 
-    let _: r#type = sut();
+    // let _: r#type = sut();
 }

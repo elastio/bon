@@ -35,3 +35,55 @@ fn member_and_type_named_the_same_struct() {
     let _ = Sut::builder().user(User).build();
     Sut::sut().user(User).call();
 }
+
+mod member_names_state {
+    use crate::prelude::*;
+
+    #[test]
+    fn test_free_fn() {
+        #[builder]
+        fn sut(state: u32, member_state: u32, unset: u32, all_unset: u32) {
+            let _ = (state, member_state, unset, all_unset);
+        }
+
+        sut().state(1).member_state(2).unset(3).all_unset(4).call()
+    }
+
+    #[test]
+    fn test_struct() {
+        #[derive(Builder)]
+        struct Sut {
+            state: u32,
+            member_state: u32,
+            unset: u32,
+            all_unset: u32,
+        }
+
+        let _ = Sut::builder()
+            .state(1)
+            .member_state(2)
+            .unset(3)
+            .all_unset(4)
+            .build();
+    }
+
+    #[test]
+    fn test_assoc_method() {
+        struct Sut;
+
+        #[bon]
+        impl Sut {
+            #[builder]
+            fn sut(state: u32, member_state: u32, unset: u32, all_unset: u32) {
+                let _ = (state, member_state, unset, all_unset);
+            }
+        }
+
+        Sut::sut()
+            .state(1)
+            .member_state(2)
+            .unset(3)
+            .all_unset(4)
+            .call();
+    }
+}

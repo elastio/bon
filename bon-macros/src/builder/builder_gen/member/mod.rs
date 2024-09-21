@@ -5,7 +5,6 @@ use crate::util::prelude::*;
 use darling::util::SpannedValue;
 use darling::FromAttributes;
 use params::MemberParams;
-use quote::quote;
 use std::fmt;
 
 #[derive(Debug, Clone, Copy)]
@@ -151,17 +150,6 @@ impl NamedMember {
 
     pub(crate) fn is_optional(&self) -> bool {
         self.as_optional_norm_ty().is_some()
-    }
-
-    /// The type parameter for the `Set<T>` type that corresponds to this member
-    pub(crate) fn set_state_type_param(&self) -> TokenStream2 {
-        let ty = &self.norm_ty;
-        let ty = self
-            .as_optional_norm_ty()
-            .map(|ty| quote!(Option<#ty>))
-            .unwrap_or_else(|| quote!(#ty));
-
-        quote!(#ty)
     }
 
     pub(crate) fn param_default(&self) -> Option<Option<&syn::Expr>> {

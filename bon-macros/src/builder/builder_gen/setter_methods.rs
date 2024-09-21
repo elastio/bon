@@ -2,36 +2,19 @@ use super::{BuilderGenCtx, NamedMember};
 use crate::util::prelude::*;
 use quote::quote;
 
-/// Specifies the return type of the setter method. It is conditioned by the
-/// `cfg(doc)`. If `cfg(doc)` is enabled, we want to generate a shorter type
-/// signature that doesn't clutter the docs.
-///
-/// However, such type signature uses an associated type of a trait which makes
-/// it much slower to compile when the code is built outside of `rustdoc`.
-///
-/// So the `doc_false` variant is used as an easier to compile alternative,
-/// but still the equivalent of the same return type.
-pub(crate) struct SettersReturnType {
-    pub(crate) doc_true: TokenStream2,
-    pub(crate) doc_false: TokenStream2,
-}
-
 pub(crate) struct MemberSettersCtx<'a> {
     builder_gen: &'a BuilderGenCtx,
     member: &'a NamedMember,
-    return_type: SettersReturnType,
 }
 
 impl<'a> MemberSettersCtx<'a> {
     pub(crate) fn new(
         builder_gen: &'a BuilderGenCtx,
         member: &'a NamedMember,
-        return_type: SettersReturnType,
     ) -> Self {
         Self {
             builder_gen,
             member,
-            return_type,
         }
     }
 
@@ -55,7 +38,7 @@ impl<'a> MemberSettersCtx<'a> {
             fn_params: quote!(value: #fn_param_type),
             overwrite_docs: None,
             body: SetterBody::Default {
-                member_init: quote!(::bon::private::MemberCell::init(value #maybe_into_call)),
+                member_init: quote!(::bon::private::MemberCell::new(value #maybe_into_call)),
             },
         }))
     }
@@ -172,24 +155,22 @@ impl<'a> MemberSettersCtx<'a> {
         };
 
         let member_pascal = &self.member.norm_ident_pascal;
-        // let SettersReturnType {
-        //     doc_true: ret_doc_true,
-        //     doc_false: ret_doc_false,
-        // } = &self.return_type;
-        let state_transition = quote::format_ident!(
-            "{}Set{}",
-            self.builder_gen.builder_ident.raw_name(),
-            self.member.norm_ident_pascal.raw_name()
-        );
 
-        let state_transition = if self.builder_gen.named_members().count() == 1 {
-            quote!(#state_transition)
+        let state_transition =
+            quote::format_ident!("Set{}", self.member.norm_ident_pascal.raw_name());
+
+        let builder_mod = &self.builder_gen.builder_mod_ident();
+        let generic_param = if self.builder_gen.named_members().count() == 1 {
+            quote!()
         } else {
-            quote!(#state_transition<BuilderState>)
+            quote!(<BuilderTypeState>)
+        };
+
+        let state_transition = quote! {
+            #builder_mod::#state_transition #generic_param
         };
 
         let builder_ident = &self.builder_gen.builder_ident;
-
         let generic_args = &self.builder_gen.generics.args;
 
         quote! {
@@ -206,7 +187,7 @@ impl<'a> MemberSettersCtx<'a> {
             #[inline(always)]
             #vis fn #method_name(self, #fn_params) -> #builder_ident<#(#generic_args,)* #state_transition>
             where
-                BuilderState::#member_pascal: ::bon::private::IsUnset,
+                BuilderTypeState::#member_pascal: ::bon::IsUnset,
             {
                 #body
             }

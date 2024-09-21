@@ -7,6 +7,7 @@ mod path;
 mod punctuated;
 mod ty;
 mod vec;
+mod visibility;
 
 pub(crate) mod ide;
 
@@ -35,6 +36,7 @@ pub(crate) mod prelude {
     pub(crate) use super::punctuated::PunctuatedExt;
     pub(crate) use super::ty::TypeExt;
     pub(crate) use super::vec::VecExt;
+    pub(crate) use super::visibility::VisibilityExt;
     pub(crate) use super::{bail, err};
 }
 
