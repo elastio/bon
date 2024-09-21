@@ -21,7 +21,7 @@ mod website_doctests {
 #[builder(
     builder_type(
         docs {
-            /// Docs on [`GreeterBuilder`]
+            /// Docs on [`GreeterOverriddenBuilder`]
             /// the builder type
         },
         name = GreeterOverriddenBuilder,
@@ -29,14 +29,14 @@ mod website_doctests {
     start_fn(
         docs {
             /// Docs on
-            /// [`Self::builder`]
+            /// [`Self::start_fn_override`]
         },
         name = start_fn_override,
     ),
     finish_fn(
         docs {
             /// Docs on
-            /// [`GreeterBuilder::build()`]
+            /// [`GreeterOverriddenBuilder::finish_fn_override()`]
         },
         name = finish_fn_override,
     )
