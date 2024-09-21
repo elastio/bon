@@ -58,10 +58,22 @@ use private::sealed::Sealed;
 ///     }
 /// }
 /// ```
-#[diagnostic::on_unimplemented(message = "The member {Self} was already set!")]
+#[rustversion::attr(
+    since(1.78.0),
+    diagnostic::on_unimplemented(
+        message = "the following member was already set: `{Self}`, but this method requires it to be unset",
+        label = "the following member was already set: `{Self}`, but this method requires it to be unset",
+    )
+)]
 pub trait IsUnset: Sealed {}
 
 /// Marker trait that indicates that the member is set, i.e. at least one of its setters was called.
 // TODO: add examples (they would require having custom renames and visibility overrides for default setters)
-#[diagnostic::on_unimplemented(message = "The member {Self} was not set!")]
+#[rustversion::attr(
+    since(1.78.0),
+    diagnostic::on_unimplemented(
+        message = "the following member was not set: `{Self}`, but this method requires it to be set",
+        label = "the following member was not set: `{Self}`, but this method requires it to be set",
+    )
+)]
 pub trait IsSet: Sealed {}

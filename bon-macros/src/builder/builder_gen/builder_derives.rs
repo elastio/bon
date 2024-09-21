@@ -82,7 +82,27 @@ impl BuilderGenCtx {
 
         let where_clause = self.where_clause_for_derive(&clone);
         let builder_mod_ident = &self.builder_mod.ident;
-        let builder_component_types = self.builder_component_types();
+
+        let clone_named_members = self.named_members().map(|member| {
+            let member_index = &member.index;
+
+            // The type hints here are necessary to get better error messages
+            // that point directly to the types that don't implement `Clone`
+            // in the input code using the span info from the type hints.
+            let clone_fn = member
+                .as_optional_norm_ty()
+                .map(|ty| quote!(clone_optional_member::<#ty>))
+                .unwrap_or_else(|| {
+                    let ty = &member.norm_ty;
+                    quote!(clone_required_member::<_, #ty>)
+                });
+
+            quote! {
+                ::bon::private::derives::#clone_fn(
+                    &self.__private_named_members.#member_index
+                )
+            }
+        });
 
         quote! {
             #[automatically_derived]
@@ -97,14 +117,21 @@ impl BuilderGenCtx {
             #where_clause
             {
                 fn clone(&self) -> Self {
-                    // These assertions improve error messages by pointing directly to the
-                    // types that don't implement the target trait in the user's code.
-                    #(::bon::private::assert_clone::<#builder_component_types>();)*
                     Self {
                         __private_phantom: ::core::marker::PhantomData,
                         #clone_receiver
                         #clone_start_fn_args
-                        __private_named_members: #clone::clone(&self.__private_named_members),
+
+                        // We clone named members individually instead of cloning
+                        // the entire tuple to improve error messages in case if
+                        // one of the members doesn't implement `Clone`. This avoids
+                        // a sentence that say smth like
+                        // ```
+                        // required for `(...huge tuple type...)` to implement `Clone`
+                        // ```
+                        __private_named_members: (
+                            #( #clone_named_members, )*
+                        ),
                     }
                 }
             }
@@ -118,12 +145,22 @@ impl BuilderGenCtx {
                     let member_index = &member.index;
                     let member_ident_str = member.public_ident().to_string();
                     let member_pascal = &member.norm_ident_pascal;
+
+                    let debug_fn = member.as_optional_norm_ty()
+                        .map(|ty| quote!(debug_optional_member::<#ty>))
+                        .unwrap_or_else(|| {
+                            let ty = &member.norm_ty;
+                            quote!(debug_required_member::<_, #ty>)
+                        });
+
                     Some(quote! {
                         // Skip members that are not set to reduce noise
                         if <BuilderTypeState::#member_pascal as ::bon::private::MemberState>::is_set() {
                             output.field(
                                 #member_ident_str,
-                                &self.__private_named_members.#member_index
+                                ::bon::private::derives::#debug_fn(
+                                    &self.__private_named_members.#member_index
+                                )
                             );
                         }
                     })
@@ -159,7 +196,6 @@ impl BuilderGenCtx {
         let generic_args = &self.generics.args;
         let builder_ident = &self.builder_type.ident;
         let builder_ident_str = builder_ident.to_string();
-        let builder_component_types = self.builder_component_types();
 
         quote! {
             #[automatically_derived]
@@ -174,10 +210,6 @@ impl BuilderGenCtx {
             #where_clause
             {
                 fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    // These assertions improve error messages by pointing directly to the
-                    // types that don't implement the target trait in the user's code.
-                    #(::bon::private::assert_debug::<#builder_component_types>();)*
-
                     let mut output = f.debug_struct(#builder_ident_str);
 
                     #format_receiver

@@ -19,6 +19,8 @@ pub mod deprecations;
 /// Used for providing better IDE hints (completions and syntax highlighting).
 pub mod ide;
 
+pub mod derives;
+
 mod cfg_eval;
 mod member_cell;
 
@@ -31,7 +33,7 @@ pub(crate) mod sealed {
     impl<T> Sealed for super::Set<T> {}
 }
 
-pub use member_cell::MemberCell;
+pub use member_cell::*;
 
 use core::fmt;
 use sealed::Sealed;
@@ -52,7 +54,9 @@ pub fn assert_debug<T: ?Sized + fmt::Debug>() {}
 #[derive(Debug)]
 pub struct Unset<T>(T);
 
-impl<T> crate::IsUnset for Unset<T> {}
+impl<T> crate::IsUnset for Unset<T> {
+    // type MemberName =;
+}
 
 #[doc(hidden)]
 #[deprecated = "this type is an implementation detail and should not be used directly; \

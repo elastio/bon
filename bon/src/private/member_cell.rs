@@ -119,20 +119,6 @@ impl<T, State: MemberState> MemberCell<State, T> {
     }
 }
 
-impl<State, T> fmt::Debug for MemberCell<State, T>
-where
-    State: MemberState,
-    T: fmt::Debug,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        if let Some(value) = self.try_get() {
-            fmt::Debug::fmt(value, f)
-        } else {
-            f.write_str("Unset")
-        }
-    }
-}
-
 impl<State, T> Clone for MemberCell<State, T>
 where
     State: MemberState,
@@ -153,6 +139,20 @@ where
                 state: PhantomData,
                 value: MaybeUninit::uninit(),
             }
+        }
+    }
+}
+
+impl<State, T> fmt::Debug for MemberCell<State, T>
+where
+    State: MemberState,
+    T: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if let Some(value) = self.try_get() {
+            fmt::Debug::fmt(value, f)
+        } else {
+            f.write_str("Unset")
         }
     }
 }

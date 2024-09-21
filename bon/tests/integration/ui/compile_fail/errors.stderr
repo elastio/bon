@@ -193,12 +193,13 @@ error[E0599]: no method named `y` found for struct `SkipGeneratesNoSetterBuilder
 22 |     SkipGeneratesNoSetter::builder().y(42).build();
    |                                      ^ method not found in `SkipGeneratesNoSetterBuilder`
 
-error[E0277]: The member Unset<ExampleBuilder__y> was not set!
+error[E0277]: the following member was not set: `Unset<y>`, but this method requires it to be set
   --> tests/integration/ui/compile_fail/errors.rs:34:37
    |
 34 |     let _ = Example::builder().x(1).build();
-   |                                     ^^^^^ the trait `IsSet` is not implemented for `Unset<ExampleBuilder__y>`
+   |                                     ^^^^^ the following member was not set: `Unset<y>`, but this method requires it to be set
    |
+   = help: the trait `IsSet` is not implemented for `Unset<y>`
    = help: the trait `IsSet` is implemented for `Set<T>`
 note: required by a bound in `ExampleBuilder::<BuilderTypeState>::build`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
@@ -209,12 +210,13 @@ note: required by a bound in `ExampleBuilder::<BuilderTypeState>::build`
    |            ------- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0277]: The member Unset<ExampleBuilder__renamed> was not set!
+error[E0277]: the following member was not set: `Unset<renamed>`, but this method requires it to be set
   --> tests/integration/ui/compile_fail/errors.rs:34:37
    |
 34 |     let _ = Example::builder().x(1).build();
-   |                                     ^^^^^ the trait `IsSet` is not implemented for `Unset<ExampleBuilder__renamed>`
+   |                                     ^^^^^ the following member was not set: `Unset<renamed>`, but this method requires it to be set
    |
+   = help: the trait `IsSet` is not implemented for `Unset<renamed>`
    = help: the trait `IsSet` is implemented for `Set<T>`
 note: required by a bound in `ExampleBuilder::<BuilderTypeState>::build`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
@@ -225,12 +227,13 @@ note: required by a bound in `ExampleBuilder::<BuilderTypeState>::build`
    |            ------- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0277]: The member Set<ExampleBuilder__y> was already set!
+error[E0277]: the following member was already set: `Set<y>`, but this method requires it to be unset
   --> tests/integration/ui/compile_fail/errors.rs:37:37
    |
 37 |     let _ = Example::builder().y(1).y(2);
-   |                                     ^ the trait `IsUnset` is not implemented for `Set<ExampleBuilder__y>`
+   |                                     ^ the following member was already set: `Set<y>`, but this method requires it to be unset
    |
+   = help: the trait `IsUnset` is not implemented for `Set<y>`
    = help: the trait `IsUnset` is implemented for `Unset<T>`
 note: required by a bound in `ExampleBuilder::<BuilderTypeState>::y`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
@@ -242,12 +245,13 @@ note: required by a bound in `ExampleBuilder::<BuilderTypeState>::y`
    |         - required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0277]: The member Unset<SutBuilder__arg1> was not set!
+error[E0277]: the following member was not set: `Unset<arg1>`, but this method requires it to be set
   --> tests/integration/ui/compile_fail/errors.rs:47:32
    |
 47 |         let _ = Sut::builder().build();
-   |                                ^^^^^ the trait `IsSet` is not implemented for `Unset<SutBuilder__arg1>`
+   |                                ^^^^^ the following member was not set: `Unset<arg1>`, but this method requires it to be set
    |
+   = help: the trait `IsSet` is not implemented for `Unset<arg1>`
    = help: the trait `IsSet` is implemented for `Set<T>`
 note: required by a bound in `SutBuilder::<BuilderTypeState>::build`
   --> tests/integration/ui/compile_fail/errors.rs:42:18
