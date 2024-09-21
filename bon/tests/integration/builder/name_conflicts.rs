@@ -46,12 +46,13 @@ mod member_names_state {
             let _ = (state, member_state, unset, all_unset);
         }
 
-        sut().state(1).member_state(2).unset(3).all_unset(4).call()
+        sut().state(1).member_state(2).unset(3).all_unset(4).call();
     }
 
     #[test]
     fn test_struct() {
         #[derive(Builder)]
+        #[allow(dead_code)]
         struct Sut {
             state: u32,
             member_state: u32,

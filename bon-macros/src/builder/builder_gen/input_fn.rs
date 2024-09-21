@@ -1,10 +1,10 @@
 use super::builder_params::BuilderParams;
 use super::{
-    generic_param_to_arg, AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFunc,
-    FinishFuncBody, Generics, Member, MemberOrigin, RawMember, StartFunc,
+    AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFn, FinishFnBody, Generics,
+    Member, MemberOrigin, RawMember, StartFn,
 };
 use crate::builder::builder_gen::builder_params::ItemParams;
-use crate::builder::builder_gen::BuilderType;
+use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams};
 use crate::normalization::NormalizeSelfTy;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
@@ -17,7 +17,7 @@ use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
 
 #[derive(Debug, FromMeta)]
-pub(crate) struct FuncInputParams {
+pub(crate) struct FnInputParams {
     expose_positional_fn: Option<SpannedValue<ExposePositionalFnParams>>,
 
     #[darling(flatten)]
@@ -62,11 +62,11 @@ impl FromMeta for ExposePositionalFnParams {
     }
 }
 
-pub(crate) struct FuncInputCtx {
-    pub(crate) orig_func: syn::ItemFn,
-    pub(crate) norm_func: syn::ItemFn,
+pub(crate) struct FnInputCtx {
+    pub(crate) orig_fn: syn::ItemFn,
+    pub(crate) norm_fn: syn::ItemFn,
     pub(crate) impl_ctx: Option<Rc<ImplCtx>>,
-    pub(crate) params: FuncInputParams,
+    pub(crate) params: FnInputParams,
 }
 
 pub(crate) struct ImplCtx {
@@ -79,7 +79,7 @@ pub(crate) struct ImplCtx {
     pub(crate) allow_attrs: Vec<syn::Attribute>,
 }
 
-impl FuncInputCtx {
+impl FnInputCtx {
     fn self_ty_prefix(&self) -> Option<String> {
         let prefix = self
             .impl_ctx
@@ -99,7 +99,7 @@ impl FuncInputCtx {
     }
 
     fn assoc_method_receiver_ctx(&self) -> Option<AssocMethodReceiverCtx> {
-        let receiver = self.norm_func.sig.receiver()?;
+        let receiver = self.norm_fn.sig.receiver()?;
         let self_ty = &self.impl_ctx.as_deref()?.self_ty;
 
         let mut without_self_keyword = receiver.ty.clone();
@@ -114,13 +114,13 @@ impl FuncInputCtx {
 
     fn generics(&self) -> Generics {
         let impl_ctx = self.impl_ctx.as_ref();
-        let norm_func_params = &self.norm_func.sig.generics.params;
+        let norm_fn_params = &self.norm_fn.sig.generics.params;
         let params = impl_ctx
-            .map(|impl_ctx| merge_generic_params(&impl_ctx.generics.params, norm_func_params))
-            .unwrap_or_else(|| norm_func_params.iter().cloned().collect());
+            .map(|impl_ctx| merge_generic_params(&impl_ctx.generics.params, norm_fn_params))
+            .unwrap_or_else(|| norm_fn_params.iter().cloned().collect());
 
         let where_clauses = [
-            self.norm_func.sig.generics.where_clause.clone(),
+            self.norm_fn.sig.generics.where_clause.clone(),
             impl_ctx.and_then(|impl_ctx| impl_ctx.generics.where_clause.clone()),
         ];
 
@@ -146,16 +146,16 @@ impl FuncInputCtx {
             return quote::format_ident!("{}Builder", self.self_ty_prefix().unwrap_or_default());
         }
 
-        let pascal_case_func = self.norm_func.sig.ident.snake_to_pascal_case();
+        let pascal_case_fn = self.norm_fn.sig.ident.snake_to_pascal_case();
 
         quote::format_ident!(
-            "{}{pascal_case_func}Builder",
+            "{}{pascal_case_fn}Builder",
             self.self_ty_prefix().unwrap_or_default(),
         )
     }
 
-    pub(crate) fn adapted_func(&self) -> Result<syn::ItemFn> {
-        let mut orig = self.orig_func.clone();
+    pub(crate) fn adapted_fn(&self) -> Result<syn::ItemFn> {
+        let mut orig = self.orig_fn.clone();
 
         let params = self.params.expose_positional_fn.as_ref();
 
@@ -166,7 +166,7 @@ impl FuncInputCtx {
                     .clone()
                     // If exposing of positional fn is enabled without an explicit
                     // visibility, then just use the visibility of the original function.
-                    .unwrap_or_else(|| self.norm_func.vis.clone())
+                    .unwrap_or_else(|| self.norm_fn.vis.clone())
             })
             // By default we change the positional function's visibility to private
             // to avoid exposing it to the surrounding code. The surrounding code is
@@ -253,7 +253,7 @@ impl FuncInputCtx {
     }
 
     fn is_method_new(&self) -> bool {
-        self.impl_ctx.is_some() && self.norm_func.sig.ident == "new"
+        self.impl_ctx.is_some() && self.norm_fn.sig.ident == "new"
     }
 
     pub(crate) fn into_builder_gen_ctx(self) -> Result<BuilderGenCtx> {
@@ -267,7 +267,7 @@ impl FuncInputCtx {
                 the type of `Self` and properly generate the builder struct \
                 definition adjacently to the impl block.";
 
-            if let Some(receiver) = &self.orig_func.sig.receiver() {
+            if let Some(receiver) = &self.orig_fn.sig.receiver() {
                 bail!(
                     &receiver.self_token,
                     "Function contains a `self` parameter {explanation}"
@@ -275,7 +275,7 @@ impl FuncInputCtx {
             }
 
             let mut ctx = FindSelfReference::default();
-            ctx.visit_item_fn(&self.orig_func);
+            ctx.visit_item_fn(&self.orig_fn);
             if let Some(self_span) = ctx.self_span {
                 bail!(
                     &self_span,
@@ -290,8 +290,8 @@ impl FuncInputCtx {
             func.sig.inputs.iter().filter_map(syn::FnArg::as_typed)
         }
 
-        let members = typed_args(&self.norm_func)
-            .zip(typed_args(&self.orig_func))
+        let members = typed_args(&self.norm_fn)
+            .zip(typed_args(&self.orig_fn))
             .map(|(norm_arg, orig_arg)| {
                 let pat = match norm_arg.pat.as_ref() {
                     syn::Pat::Ident(pat) => pat,
@@ -315,8 +315,8 @@ impl FuncInputCtx {
 
         let generics = self.generics();
 
-        let finish_func_body = FnCallBody {
-            sig: self.adapted_func()?.sig,
+        let finish_fn_body = FnCallBody {
+            sig: self.adapted_fn()?.sig,
             impl_ctx: self.impl_ctx.clone(),
         };
 
@@ -324,19 +324,19 @@ impl FuncInputCtx {
 
         // Special case for `new` methods. We rename them to `builder`
         // since this is the name that is used in the builder pattern
-        let start_func_ident = if is_method_new {
+        let start_fn_ident = if is_method_new {
             quote::format_ident!("builder")
         } else {
-            self.norm_func.sig.ident.clone()
+            self.norm_fn.sig.ident.clone()
         };
 
         let ItemParams {
-            name: finish_func_ident,
+            name: finish_fn_ident,
             vis: _,
-            docs: finish_func_docs,
+            docs: finish_fn_docs,
         } = self.params.base.finish_fn;
 
-        let finish_func_ident = finish_func_ident.unwrap_or_else(|| {
+        let finish_fn_ident = finish_fn_ident.unwrap_or_else(|| {
             // For `new` methods the `build` finisher is more conventional
             if is_method_new {
                 quote::format_ident!("build")
@@ -345,24 +345,24 @@ impl FuncInputCtx {
             }
         });
 
-        let finish_func_docs = finish_func_docs.unwrap_or_else(|| {
+        let finish_fn_docs = finish_fn_docs.unwrap_or_else(|| {
             vec![syn::parse_quote! {
                 /// Finishes building and performs the requested action.
             }]
         });
 
-        let finish_func = FinishFunc {
-            ident: finish_func_ident,
-            unsafety: self.norm_func.sig.unsafety,
-            asyncness: self.norm_func.sig.asyncness,
-            must_use: get_must_use_attribute(&self.norm_func.attrs)?,
-            body: Box::new(finish_func_body),
-            output: self.norm_func.sig.output,
-            attrs: finish_func_docs,
+        let finish_fn = FinishFn {
+            ident: finish_fn_ident,
+            unsafety: self.norm_fn.sig.unsafety,
+            asyncness: self.norm_fn.sig.asyncness,
+            must_use: get_must_use_attribute(&self.norm_fn.attrs)?,
+            body: Box::new(finish_fn_body),
+            output: self.norm_fn.sig.output,
+            attrs: finish_fn_docs,
         };
 
         let fn_allows = self
-            .norm_func
+            .norm_fn
             .attrs
             .iter()
             .filter_map(syn::Attribute::to_allow);
@@ -375,15 +375,15 @@ impl FuncInputCtx {
             .chain(fn_allows)
             .collect();
 
-        let start_func = StartFunc {
-            ident: start_func_ident,
+        let start_fn = StartFn {
+            ident: start_fn_ident,
 
             // No override for visibility for the start fn is provided here.
             // It's supposed to be the same as the original function's visibility.
             vis: None,
 
             attrs: self
-                .norm_func
+                .norm_fn
                 .attrs
                 .into_iter()
                 .filter(<_>::is_doc)
@@ -393,18 +393,18 @@ impl FuncInputCtx {
             // target function itself. We don't need to duplicate the generics
             // from the impl block here.
             generics: Some(Generics::new(
-                Vec::from_iter(self.norm_func.sig.generics.params),
-                self.norm_func.sig.generics.where_clause,
+                Vec::from_iter(self.norm_fn.sig.generics.params),
+                self.norm_fn.sig.generics.where_clause,
             )),
         };
 
-        let builder_type = BuilderType {
+        let builder_type = BuilderTypeParams {
             ident: builder_ident,
             derives: self.params.base.derive,
             docs: self.params.base.builder_type.docs,
         };
 
-        let ctx = BuilderGenCtx {
+        BuilderGenCtx::new(BuilderGenCtxParams {
             members,
 
             allow_attrs,
@@ -413,14 +413,13 @@ impl FuncInputCtx {
 
             assoc_method_ctx: receiver,
             generics,
-            vis: self.norm_func.vis,
+            vis: self.norm_fn.vis,
 
             builder_type,
-            start_func,
-            finish_func,
-        };
-
-        Ok(ctx)
+            builder_mod: self.params.base.builder_mod,
+            start_fn,
+            finish_fn,
+        })
     }
 }
 
@@ -429,7 +428,7 @@ struct FnCallBody {
     impl_ctx: Option<Rc<ImplCtx>>,
 }
 
-impl FinishFuncBody for FnCallBody {
+impl FinishFnBody for FnCallBody {
     fn generate(&self, members: &[Member]) -> TokenStream2 {
         let asyncness = &self.sig.asyncness;
         let maybe_await = asyncness.is_some().then(|| quote!(.await));
@@ -445,7 +444,7 @@ impl FinishFuncBody for FnCallBody {
             .params
             .iter()
             .filter(|arg| !matches!(arg, syn::GenericParam::Lifetime(_)))
-            .map(generic_param_to_arg);
+            .map(syn::GenericParam::to_generic_argument);
 
         let prefix = self
             .sig
@@ -456,13 +455,13 @@ impl FinishFuncBody for FnCallBody {
                 Some(quote!(<#self_ty>::))
             });
 
-        let func_ident = &self.sig.ident;
+        let fn_ident = &self.sig.ident;
 
         // The variables with values of members are in scope for this expression.
         let member_vars = members.iter().map(Member::orig_ident);
 
         quote! {
-            #prefix #func_ident::<#(#generic_args,)*>(
+            #prefix #fn_ident::<#(#generic_args,)*>(
                 #( #member_vars ),*
             )
             #maybe_await

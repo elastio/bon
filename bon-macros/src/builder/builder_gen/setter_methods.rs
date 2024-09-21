@@ -8,10 +8,7 @@ pub(crate) struct MemberSettersCtx<'a> {
 }
 
 impl<'a> MemberSettersCtx<'a> {
-    pub(crate) fn new(
-        builder_gen: &'a BuilderGenCtx,
-        member: &'a NamedMember,
-    ) -> Self {
+    pub(crate) fn new(builder_gen: &'a BuilderGenCtx, member: &'a NamedMember) -> Self {
         Self {
             builder_gen,
             member,
@@ -129,18 +126,12 @@ impl<'a> MemberSettersCtx<'a> {
 
                 let builder_ident = &self.builder_gen.builder_type.ident;
 
-                let member_forwards = self.builder_gen.named_members().map(|other_member| {
-                    let member_ident = &other_member.norm_ident;
-                    if *member_ident == self.member.norm_ident {
-                        return quote! {
-                            #member_ident: #member_init
-                        };
+                let member_exprs = self.builder_gen.named_members().map(|other_member| {
+                    if other_member.norm_ident == self.member.norm_ident {
+                        return member_init.clone();
                     }
-
-                    let ident = &other_member.norm_ident;
-                    quote! {
-                        #member_ident: self.#ident
-                    }
+                    let index = &other_member.index;
+                    quote!(self.__private_named_members.#index)
                 });
 
                 quote! {
@@ -148,7 +139,7 @@ impl<'a> MemberSettersCtx<'a> {
                         __private_phantom: ::core::marker::PhantomData,
                         #maybe_receiver_field
                         #maybe_start_fn_args_field
-                        #( #member_forwards, )*
+                        __private_named_members: (#( #member_exprs, )*)
                     }
                 }
             }
@@ -159,8 +150,8 @@ impl<'a> MemberSettersCtx<'a> {
         let state_transition =
             quote::format_ident!("Set{}", self.member.norm_ident_pascal.raw_name());
 
-        let builder_mod = &self.builder_gen.builder_mod_ident();
-        let generic_param = if self.builder_gen.named_members().count() == 1 {
+        let builder_mod = &self.builder_gen.builder_mod.ident;
+        let generic_param = if self.builder_gen.named_members().take(2).count() == 1 {
             quote!()
         } else {
             quote!(<BuilderTypeState>)
@@ -170,7 +161,7 @@ impl<'a> MemberSettersCtx<'a> {
             #builder_mod::#state_transition #generic_param
         };
 
-        let builder_ident = &self.builder_gen.builder_ident;
+        let builder_ident = &self.builder_gen.builder_type.ident;
         let generic_args = &self.builder_gen.generics.args;
 
         quote! {
@@ -196,7 +187,7 @@ impl<'a> MemberSettersCtx<'a> {
 
     fn generate_docs_for_setter(&self) -> Vec<syn::Attribute> {
         let setter_core_name = self.member.public_ident();
-        let start_fn_ident = &self.builder_gen.start_func.ident;
+        let start_fn_ident = &self.builder_gen.start_fn.ident;
 
         let more = |start_fn_path: &std::fmt::Arguments<'_>| {
             format!(" See {start_fn_path} for more info.")

@@ -2,7 +2,7 @@ mod builder_gen;
 
 pub(crate) mod item_impl;
 
-mod item_func;
+mod item_fn;
 mod item_struct;
 
 use crate::normalization::{ExpandCfg, ExpansionOutput};
@@ -67,7 +67,7 @@ fn try_generate_from_attr(params: TokenStream2, item: TokenStream2) -> Result<To
     let nested_meta = &darling::ast::NestedMeta::parse_meta_list(params.clone())?;
 
     let main_output = match item {
-        syn::Item::Fn(item_fn) => item_func::generate(FromMeta::from_list(nested_meta)?, item_fn)?,
+        syn::Item::Fn(item_fn) => item_fn::generate(FromMeta::from_list(nested_meta)?, item_fn)?,
         _ => bail!(
             &Span::call_site(),
             "only `fn` items are supported by the `#[bon::builder]` attribute"

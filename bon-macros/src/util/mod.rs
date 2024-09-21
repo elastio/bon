@@ -1,5 +1,6 @@
 mod attrs;
 mod fn_arg;
+mod generic_param;
 mod ident;
 mod item;
 mod iterator;
@@ -29,6 +30,7 @@ pub(crate) mod prelude {
 
     pub(crate) use super::attrs::AttributeExt;
     pub(crate) use super::fn_arg::FnArgExt;
+    pub(crate) use super::generic_param::GenericParamExt;
     pub(crate) use super::ident::IdentExt;
     pub(crate) use super::item::ItemExt;
     pub(crate) use super::iterator::{IntoIteratorExt, IteratorExt};

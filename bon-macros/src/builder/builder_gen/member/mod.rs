@@ -76,10 +76,6 @@ pub(crate) struct NamedMember {
     /// Original type of the member (not normalized)
     pub(crate) orig_ty: Box<syn::Type>,
 
-    /// The name of the type variable that can be used as the type of this
-    /// member in contexts where it should be generic.
-    pub(crate) generic_var_ident: syn::Ident,
-
     /// Parameters configured by the user explicitly via attributes
     pub(crate) params: MemberParams,
 }
@@ -137,6 +133,10 @@ impl NamedMember {
         }
 
         Ok(())
+    }
+
+    pub(crate) fn public_ident(&self) -> &syn::Ident {
+        self.params.name.as_ref().unwrap_or(&self.norm_ident)
     }
 
     fn as_optional_with_ty<'a>(&'a self, ty: &'a syn::Type) -> Option<&'a syn::Type> {
@@ -267,7 +267,6 @@ impl Member {
             let me = NamedMember {
                 index: named_count.into(),
                 origin,
-                generic_var_ident: quote::format_ident!("__{}", norm_ident_pascal),
                 norm_ident_pascal,
                 orig_ident,
                 norm_ident,

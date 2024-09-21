@@ -2,6 +2,7 @@ use super::builder_params::BuilderDerives;
 use super::BuilderGenCtx;
 use crate::builder::builder_gen::Member;
 use crate::util::prelude::*;
+use darling::ast::GenericParamExt;
 use quote::quote;
 
 impl BuilderGenCtx {
@@ -34,6 +35,32 @@ impl BuilderGenCtx {
             .map(Box::as_ref)
     }
 
+    /// We follow the logic of the standard `#[derive(...)]` macros such as `Clone` and `Debug`.
+    /// They add bounds of their respective traits to every generic type parameter on the struct
+    /// without trying to analyze if that bound is actually required for the derive to work, so
+    /// it's a conservative approach.
+    fn where_clause_for_derive(&self, target_trait_bounds: &TokenStream2) -> TokenStream2 {
+        let target_trait_bounds_predicates = self
+            .generics
+            .decl_without_defaults
+            .iter()
+            .filter_map(syn::GenericParam::as_type_param)
+            .map(|param| {
+                let ident = &param.ident;
+                quote! {
+                    #ident: #target_trait_bounds
+                }
+            });
+
+        let base_predicates = self.generics.where_clause_predicates();
+
+        quote! {
+            where
+                #( #base_predicates, )*
+                #( #target_trait_bounds_predicates, )*
+        }
+    }
+
     fn derive_clone(&self) -> TokenStream2 {
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
@@ -53,31 +80,31 @@ impl BuilderGenCtx {
             }
         });
 
-        let builder_where_clause_predicates = self.generics.where_clause_predicates();
-
+        let where_clause = self.where_clause_for_derive(&clone);
+        let builder_mod_ident = &self.builder_mod.ident;
         let builder_component_types = self.builder_component_types();
 
         quote! {
             #[automatically_derived]
-            impl <
+            impl<
                 #(#generics_decl,)*
-                ___State
+                BuilderTypeState: #builder_mod_ident::State
             >
-            #clone for #builder_ident <
+            #clone for #builder_ident<
                 #(#generic_args,)*
-                ___State
+                BuilderTypeState
             >
-            where
-                #(#builder_where_clause_predicates,)*
-                ___State: #clone,
+            #where_clause
             {
                 fn clone(&self) -> Self {
+                    // These assertions improve error messages by pointing directly to the
+                    // types that don't implement the target trait in the user's code.
                     #(::bon::private::assert_clone::<#builder_component_types>();)*
                     Self {
                         __private_phantom: ::core::marker::PhantomData,
                         #clone_receiver
                         #clone_start_fn_args
-                        __private_named_members: self.__private_named_members.clone(),
+                        __private_named_members: #clone::clone(&self.__private_named_members),
                     }
                 }
             }
@@ -85,36 +112,15 @@ impl BuilderGenCtx {
     }
 
     fn derive_debug(&self) -> TokenStream2 {
-        let generics_decl = &self.generics.decl_without_defaults;
-        let generic_args = &self.generics.args;
-        let builder_ident = &self.builder_type.ident;
-
-        let debug = quote!(::core::fmt::Debug);
-
-        let format_receiver = self.receiver().map(|_| {
-            quote! {
-                output.field("self", &self.__private_receiver);
-            }
-        });
-
-        let builder_where_clause_predicates = self.generics.where_clause_predicates();
-        let builder_component_types = self.builder_component_types();
-
-        let builder_ident_str = builder_ident.to_string();
-
-        let state_type_vars = self
-            .named_members()
-            .map(|member| &member.generic_var_ident)
-            .collect::<Vec<_>>();
-
         let format_members = self.members.iter().filter_map(|member| {
             match member {
                 Member::Named(member) => {
                     let member_index = &member.index;
-                    let member_ident_str = member.orig_ident.to_string();
+                    let member_ident_str = member.public_ident().to_string();
+                    let member_pascal = &member.norm_ident_pascal;
                     Some(quote! {
                         // Skip members that are not set to reduce noise
-                        if self.__private_named_members.#member_index.is_set() {
+                        if <BuilderTypeState::#member_pascal as ::bon::private::MemberState>::is_set() {
                             output.field(
                                 #member_ident_str,
                                 &self.__private_named_members.#member_index
@@ -140,21 +146,36 @@ impl BuilderGenCtx {
             }
         });
 
+        let format_receiver = self.receiver().map(|_| {
+            quote! {
+                output.field("self", &self.__private_receiver);
+            }
+        });
+
+        let debug = quote!(::core::fmt::Debug);
+        let where_clause = self.where_clause_for_derive(&debug);
+        let builder_mod_ident = &self.builder_mod.ident;
+        let generics_decl = &self.generics.decl_without_defaults;
+        let generic_args = &self.generics.args;
+        let builder_ident = &self.builder_type.ident;
+        let builder_ident_str = builder_ident.to_string();
+        let builder_component_types = self.builder_component_types();
+
         quote! {
             #[automatically_derived]
-            impl <
+            impl<
                 #(#generics_decl,)*
-                #(#state_type_vars,)*
+                BuilderTypeState: #builder_mod_ident::State
             >
-            #debug for #builder_ident <
+            #debug for #builder_ident<
                 #(#generic_args,)*
-                (#(#state_type_vars,)*)
+                BuilderTypeState
             >
-            where
-                #(#builder_where_clause_predicates,)*
-                #(#state_type_vars: ::bon::private::MemberState + ::core::fmt::Debug,)*
+            #where_clause
             {
                 fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                    // These assertions improve error messages by pointing directly to the
+                    // types that don't implement the target trait in the user's code.
                     #(::bon::private::assert_debug::<#builder_component_types>();)*
 
                     let mut output = f.debug_struct(#builder_ident_str);

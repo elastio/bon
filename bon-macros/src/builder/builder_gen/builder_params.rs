@@ -24,6 +24,15 @@ fn parse_builder_type(meta: &syn::Meta) -> Result<ItemParams> {
     .parse()
 }
 
+fn parse_builder_mod(meta: &syn::Meta) -> Result<ItemParams> {
+    ItemParamsParsing {
+        meta,
+        allow_vis: false,
+        reject_self_mentions: Some("buuilder module"),
+    }
+    .parse()
+}
+
 #[derive(Debug, FromMeta)]
 pub(crate) struct BuilderParams {
     #[darling(default, with = parse_finish_fn)]
@@ -31,6 +40,9 @@ pub(crate) struct BuilderParams {
 
     #[darling(default, with = parse_builder_type)]
     pub(crate) builder_type: ItemParams,
+
+    #[darling(default, with = parse_builder_mod)]
+    pub(crate) builder_mod: ItemParams,
 
     #[darling(multiple)]
     pub(crate) on: Vec<OnParams>,

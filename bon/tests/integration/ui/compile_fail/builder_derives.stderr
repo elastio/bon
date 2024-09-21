@@ -15,6 +15,22 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
 4  | struct NoTraitImpls;
    |
 
+error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
+ --> tests/integration/ui/compile_fail/builder_derives.rs:5:10
+  |
+5 | #[derive(Builder)]
+  |          ^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`, which is required by `(MemberCell<<BuilderTypeState as struct_contains_non_trait_builder::State>::NonDebug, NoTraitImpls>, MemberCell<<BuilderTypeState as struct_contains_non_trait_builder::State>::X, u32>): Clone`
+  |
+  = note: required for `MemberCell<<BuilderTypeState as struct_contains_non_trait_builder::State>::NonDebug, NoTraitImpls>` to implement `Clone`
+  = note: required because it appears within the type `(MemberCell<<BuilderTypeState as State>::NonDebug, NoTraitImpls>, MemberCell<<... as State>::X, ...>)`
+  = note: consider using `--verbose` to print the full type name to the console
+  = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
+  |
+3 + #[derive(Clone)]
+4 | struct NoTraitImpls;
+  |
+
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
  --> tests/integration/ui/compile_fail/builder_derives.rs:8:16
   |
@@ -26,13 +42,31 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
 note: required by a bound in `assert_debug`
  --> src/private/mod.rs
   |
-  | pub fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
-  |                                 ^^^^^^^^^^^^^^^^ required by this bound in `assert_debug`
+  | pub fn assert_debug<T: ?Sized + fmt::Debug>() {}
+  |                                 ^^^^^^^^^^ required by this bound in `assert_debug`
 help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
   |
 3  + #[derive(Debug)]
 4  | struct NoTraitImpls;
    |
+
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+ --> tests/integration/ui/compile_fail/builder_derives.rs:5:10
+  |
+5 | #[derive(Builder)]
+  |          ^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+  |
+  = help: the trait `Debug` is not implemented for `NoTraitImpls`, which is required by `MemberCell<<BuilderTypeState as struct_contains_non_trait_builder::State>::NonDebug, NoTraitImpls>: Debug`
+  = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
+  = help: the trait `Debug` is implemented for `MemberCell<State, T>`
+  = note: required for `MemberCell<<BuilderTypeState as struct_contains_non_trait_builder::State>::NonDebug, NoTraitImpls>` to implement `Debug`
+  = note: required for the cast from `&MemberCell<<BuilderTypeState as struct_contains_non_trait_builder::State>::NonDebug, NoTraitImpls>` to `&dyn Debug`
+  = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
+  |
+3 + #[derive(Debug)]
+4 | struct NoTraitImpls;
+  |
 
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
   --> tests/integration/ui/compile_fail/builder_derives.rs:13:38
@@ -51,6 +85,22 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
 4  | struct NoTraitImpls;
    |
 
+error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/builder_derives.rs:12:1
+   |
+12 | #[builder(derive(Clone, Debug))]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`, which is required by `(MemberCell<<BuilderTypeState as fn_contains_non_trait_builder::State>::NonDebug, NoTraitImpls>, MemberCell<<BuilderTypeState as fn_contains_non_trait_builder::State>::X, u32>): Clone`
+   |
+   = note: required for `MemberCell<<BuilderTypeState as fn_contains_non_trait_builder::State>::NonDebug, NoTraitImpls>` to implement `Clone`
+   = note: required because it appears within the type `(MemberCell<<BuilderTypeState as State>::NonDebug, NoTraitImpls>, MemberCell<<... as State>::X, ...>)`
+   = note: consider using `--verbose` to print the full type name to the console
+   = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
+   |
+3  + #[derive(Clone)]
+4  | struct NoTraitImpls;
+   |
+
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
   --> tests/integration/ui/compile_fail/builder_derives.rs:13:38
    |
@@ -62,8 +112,26 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
 note: required by a bound in `assert_debug`
   --> src/private/mod.rs
    |
-   | pub fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
-   |                                 ^^^^^^^^^^^^^^^^ required by this bound in `assert_debug`
+   | pub fn assert_debug<T: ?Sized + fmt::Debug>() {}
+   |                                 ^^^^^^^^^^ required by this bound in `assert_debug`
+help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
+   |
+3  + #[derive(Debug)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+  --> tests/integration/ui/compile_fail/builder_derives.rs:12:1
+   |
+12 | #[builder(derive(Clone, Debug))]
+   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+   |
+   = help: the trait `Debug` is not implemented for `NoTraitImpls`, which is required by `MemberCell<<BuilderTypeState as fn_contains_non_trait_builder::State>::NonDebug, NoTraitImpls>: Debug`
+   = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
+   = help: the trait `Debug` is implemented for `MemberCell<State, T>`
+   = note: required for `MemberCell<<BuilderTypeState as fn_contains_non_trait_builder::State>::NonDebug, NoTraitImpls>` to implement `Debug`
+   = note: required for the cast from `&MemberCell<<BuilderTypeState as fn_contains_non_trait_builder::State>::NonDebug, NoTraitImpls>` to `&dyn Debug`
+   = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 3  + #[derive(Debug)]
@@ -87,6 +155,22 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
 4  | struct NoTraitImpls;
    |
 
+error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/builder_derives.rs:15:1
+   |
+15 | #[bon]
+   | ^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`, which is required by `(MemberCell<<BuilderTypeState as struct_contains_non_trait_method_contains_non_trait_builder::State>::NonDebug, NoTraitImpls>, MemberCell<<BuilderTypeState as struct_contains_non_trait_method_contains_non_trait_builder::State>::X, u32>): Clone`
+   |
+   = note: required for `MemberCell<<BuilderTypeState as struct_contains_non_trait_method_contains_non_trait_builder::State>::NonDebug, NoTraitImpls>` to implement `Clone`
+   = note: required because it appears within the type `(MemberCell<<BuilderTypeState as State>::NonDebug, NoTraitImpls>, MemberCell<<... as State>::X, ...>)`
+   = note: consider using `--verbose` to print the full type name to the console
+   = note: this error originates in the attribute macro `bon` (in Nightly builds, run with -Z macro-backtrace for more info)
+help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
+   |
+3  + #[derive(Clone)]
+4  | struct NoTraitImpls;
+   |
+
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
   --> tests/integration/ui/compile_fail/builder_derives.rs:18:46
    |
@@ -98,8 +182,26 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
 note: required by a bound in `assert_debug`
   --> src/private/mod.rs
    |
-   | pub fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
-   |                                 ^^^^^^^^^^^^^^^^ required by this bound in `assert_debug`
+   | pub fn assert_debug<T: ?Sized + fmt::Debug>() {}
+   |                                 ^^^^^^^^^^ required by this bound in `assert_debug`
+help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
+   |
+3  + #[derive(Debug)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+  --> tests/integration/ui/compile_fail/builder_derives.rs:15:1
+   |
+15 | #[bon]
+   | ^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+   |
+   = help: the trait `Debug` is not implemented for `NoTraitImpls`, which is required by `MemberCell<<BuilderTypeState as struct_contains_non_trait_method_contains_non_trait_builder::State>::NonDebug, NoTraitImpls>: Debug`
+   = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
+   = help: the trait `Debug` is implemented for `MemberCell<State, T>`
+   = note: required for `MemberCell<<BuilderTypeState as struct_contains_non_trait_method_contains_non_trait_builder::State>::NonDebug, NoTraitImpls>` to implement `Debug`
+   = note: required for the cast from `&MemberCell<<BuilderTypeState as struct_contains_non_trait_method_contains_non_trait_builder::State>::NonDebug, NoTraitImpls>` to `&dyn Debug`
+   = note: this error originates in the attribute macro `bon` (in Nightly builds, run with -Z macro-backtrace for more info)
 help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 3  + #[derive(Debug)]

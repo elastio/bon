@@ -22,11 +22,6 @@ use core::mem::MaybeUninit;
 /// [`IsSet`] and [`IsUnset`] trait implementations can possible overlap even though
 /// they are sealed.
 #[doc(hidden)]
-#[deprecated = "this type is an implementation detail and should not be used directly; \
-    if you found yourself needing it, then you are probably doing something wrong; \
-    feel free to open an issue/discussion in our GitHub repository \
-    (https://github.com/elastio/bon) or ask for help in our Discord server \
-    (https://discord.gg/QcBYSamw4c)"]
 #[must_use]
 pub struct MemberCell<State: MemberState, T> {
     /// The [`PhantomData`] uses an `fn()` pointer to signify that this type

@@ -1,4 +1,4 @@
-use super::builder_gen::input_func::{FuncInputCtx, FuncInputParams, ImplCtx};
+use super::builder_gen::input_fn::{FnInputCtx, FnInputParams, ImplCtx};
 use crate::util::prelude::*;
 use darling::ast::NestedMeta;
 use darling::FromMeta;
@@ -11,7 +11,7 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
         bail!(trait_path, "Impls of traits are not supported yet");
     }
 
-    let (builder_funcs, other_items): (Vec<_>, Vec<_>) =
+    let (builder_fns, other_items): (Vec<_>, Vec<_>) =
         orig_impl_block.items.into_iter().partition(|item| {
             let fn_item = match item {
                 syn::ImplItem::Fn(fn_item) => fn_item,
@@ -24,7 +24,7 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
                 .any(|attr| attr.path().is_ident("builder"))
         });
 
-    if builder_funcs.is_empty() {
+    if builder_fns.is_empty() {
         bail!(
             &Span::call_site(),
             "There are no #[builder] functions in the impl block, so there is no \
@@ -32,7 +32,7 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
         );
     }
 
-    orig_impl_block.items = builder_funcs;
+    orig_impl_block.items = builder_fns;
 
     // We do this back-and-forth with normalizing various syntax and saving original
     // to provide cleaner code generation that is easier to consume for IDEs and for
@@ -77,19 +77,19 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
         .into_iter()
         .zip(norm_impl_block.items)
         .map(|(orig_item, norm_item)| {
-            let norm_func = match norm_item {
-                syn::ImplItem::Fn(norm_func) => norm_func,
+            let norm_fn = match norm_item {
+                syn::ImplItem::Fn(norm_fn) => norm_fn,
                 _ => unreachable!(),
             };
-            let orig_func = match orig_item {
-                syn::ImplItem::Fn(orig_func) => orig_func,
+            let orig_fn = match orig_item {
+                syn::ImplItem::Fn(orig_fn) => orig_fn,
                 _ => unreachable!(),
             };
 
-            let norm_func = impl_item_fn_into_fn_item(norm_func)?;
-            let orig_func = impl_item_fn_into_fn_item(orig_func)?;
+            let norm_fn = impl_item_fn_into_fn_item(norm_fn)?;
+            let orig_fn = impl_item_fn_into_fn_item(orig_fn)?;
 
-            let meta = orig_func
+            let meta = orig_fn
                 .attrs
                 .iter()
                 .filter(|attr| attr.path().is_ident("builder"))
@@ -102,24 +102,24 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
                 .flatten()
                 .collect::<Vec<_>>();
 
-            let params = FuncInputParams::from_list(&meta)?;
+            let params = FnInputParams::from_list(&meta)?;
 
-            let ctx = FuncInputCtx {
-                orig_func,
-                norm_func,
+            let ctx = FnInputCtx {
+                orig_fn,
+                norm_fn,
                 impl_ctx: Some(impl_ctx.clone()),
                 params,
             };
 
-            Result::<_>::Ok((ctx.adapted_func()?, ctx.into_builder_gen_ctx()?.output()?))
+            Result::<_>::Ok((ctx.adapted_fn()?, ctx.into_builder_gen_ctx()?.output()?))
         })
         .collect::<Result<Vec<_>>>()?;
 
-    let new_impl_items = outputs.iter().flat_map(|(adapted_func, output)| {
-        let start_func = &output.start_func;
+    let new_impl_items = outputs.iter().flat_map(|(adapted_fn, output)| {
+        let start_fn = &output.start_fn;
         [
-            syn::parse_quote!(#start_func),
-            syn::parse_quote!(#adapted_func),
+            syn::parse_quote!(#start_fn),
+            syn::parse_quote!(#adapted_fn),
         ]
     });
 

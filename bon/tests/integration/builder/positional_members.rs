@@ -57,7 +57,7 @@ mod smoke {
             }"#]],
         );
 
-        let _ = Sut::builder(true, 'c', "str");
+        let _actual = Sut::builder(true, 'c', "str");
     }
 
     #[test]
@@ -90,7 +90,7 @@ mod smoke {
             expect![[r#"(true, 'c', None, 99, "1", "2")"#]],
         );
 
-        let _ = sut(true, 'c', "str");
+        let _actual = sut(true, 'c', "str");
     }
 
     #[test]
@@ -139,7 +139,7 @@ mod smoke {
             expect![[r#"(true, 'c', None, 99, "1", "2")"#]],
         );
 
-        let _ = Sut::sut(true, 'c', "str");
+        let _actual = Sut::sut(true, 'c', "str");
 
         assert_debug_eq(
             Sut.with_self(true).named(99).call("1"),
