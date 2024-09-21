@@ -397,7 +397,6 @@ pub fn __gen_tuple_traits2(total: TokenStream) -> TokenStream {
 #[doc(hidden)]
 #[proc_macro]
 pub fn __builder_type(params: TokenStream) -> TokenStream {
-    use crate::util::prelude::*;
     use quote::quote;
 
     enum MemberKind {

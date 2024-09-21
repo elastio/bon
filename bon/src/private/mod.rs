@@ -9,6 +9,9 @@
     clippy::missing_const_for_fn
 )]
 
+use core::marker::PhantomData;
+use core::mem::MaybeUninit;
+
 /// Implementation details of the builder state
 pub mod state;
 
@@ -25,78 +28,77 @@ pub extern crate alloc;
 pub fn assert_clone<T: Clone>() {}
 pub fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
 
-/// Marker trait to denote the state of the member that is not set yet.
-#[rustversion::attr(
-    since(1.78.0),
-    diagnostic::on_unimplemented(
-        message = "can't set the same member twice",
-        label = "this member was already set"
-    )
-)]
-pub trait IsUnset {}
+#[derive(Debug)]
+pub struct Unset<T>(T);
 
-#[derive(Debug, Clone)]
-pub struct Required;
-
-#[derive(Debug, Clone)]
-pub struct Optional;
-
-/// The sole implementation of the [`IsUnset`] trait.
-#[derive(Debug, Clone)]
-pub struct Unset<T>(pub T);
-
-impl<T> IsUnset for Unset<T> {}
-
-/// A trait used to transition optional members to the [`Set`] state.
-///
-/// It also provides a better error message when the member is not set.
-/// The `Member` generic parameter isn't used by the trait implementation,
-/// it's used only as a label with the name of the member to specify which one
-/// was not set.
-#[rustversion::attr(
-    since(1.78.0),
-    diagnostic::on_unimplemented(
-        message = "can't finish building yet; the member `{Member}` was not set",
-        label = "the member `{Member}` was not set"
-    )
-)]
-pub trait IntoSet<T, Member> {
-    fn into_set(self) -> T;
+pub struct MemberCell<State: MemberState, T> {
+    state: PhantomData<State>,
+    value: MaybeUninit<T>,
 }
 
-impl<T, Member> IntoSet<T, Member> for Set<T> {
-    #[inline(always)]
-    fn into_set(self) -> T {
-        self.0
+impl<State: IsUnset + MemberState, T> MemberCell<State, T> {
+    pub fn uninit() -> Self {
+        Self {
+            state: PhantomData,
+            value: MaybeUninit::uninit(),
+        }
     }
 }
 
-impl<T, Member> IntoSet<Option<T>, Member> for Unset<Optional> {
-    #[inline(always)]
-    fn into_set(self) -> Option<T> {
-        None
+impl<State: IsSet + MemberState, T> MemberCell<State, T> {
+    pub fn init(value: T) -> Self {
+        Self {
+            state: PhantomData,
+            value: MaybeUninit::new(value),
+        }
+    }
+
+    pub fn into_inner(self) -> T {
+        unsafe {
+            let value = self.value.assume_init_read();
+            std::mem::forget(self);
+            value
+        }
     }
 }
-
-/// Implemented by `Unset` and `Set` states of members, which are basically
-/// all possible states of a member.
 pub trait MemberState {
-    fn is_set(&self) -> bool;
+    fn is_set() -> bool;
+}
+
+impl<T> MemberState for Unset<T> {
+    fn is_set() -> bool {
+        false
+    }
 }
 
 impl<T> MemberState for Set<T> {
-    #[inline(always)]
-    fn is_set(&self) -> bool {
+    fn is_set() -> bool {
         true
     }
 }
 
-impl<T> MemberState for Unset<T> {
-    #[inline(always)]
-    fn is_set(&self) -> bool {
-        false
+impl<State: MemberState, T> Drop for MemberCell<State, T> {
+    fn drop(&mut self) {
+        if State::is_set() {
+            #[allow(unsafe_code)]
+            unsafe {
+                self.value.assume_init_drop();
+            }
+        }
     }
 }
+
+#[diagnostic::on_unimplemented(message = "The member {Self} was already set!")]
+pub trait IsUnset {}
+impl<T> IsUnset for Unset<T> {}
+
+#[derive(Debug)]
+pub struct Set<T>(T);
+
+#[diagnostic::on_unimplemented(message = "The member {Self} was not set!")]
+pub trait IsSet {}
+
+impl<T> IsSet for Set<T> {}
 
 /// This is all a big embarrassing workaround, please don't oversee 😳😳😳.
 ///
@@ -201,16 +203,6 @@ macro_rules! __eval_cfg_callback {
         #[$final_macro(__cfgs($recursion_counter, $($results)*) $($macro_params)*)]
         $($item)*
     };
-}
-
-#[repr(transparent)]
-#[derive(Clone)]
-pub struct Set<T>(pub T);
-
-impl<T: core::fmt::Debug> core::fmt::Debug for Set<T> {
-    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        core::fmt::Debug::fmt(&self.0, f)
-    }
 }
 
 /// The `cfg` predicate evaluated to `true`, now push that information into

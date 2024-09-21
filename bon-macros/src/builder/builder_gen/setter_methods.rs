@@ -55,7 +55,7 @@ impl<'a> MemberSettersCtx<'a> {
             fn_params: quote!(value: #fn_param_type),
             overwrite_docs: None,
             body: SetterBody::Default {
-                member_init: quote!(::bon::private::Set(value #maybe_into_call)),
+                member_init: quote!(::bon::private::MemberCell::init(value #maybe_into_call)),
             },
         }))
     }
@@ -91,7 +91,7 @@ impl<'a> MemberSettersCtx<'a> {
                     more details.",
                 )),
                 body: SetterBody::Default {
-                    member_init: quote!(::bon::private::Set(value #maybe_map_conv_call)),
+                    member_init: quote!(value #maybe_map_conv_call),
                 },
             },
             // We intentionally keep the name and signature of the setter method
@@ -146,12 +146,18 @@ impl<'a> MemberSettersCtx<'a> {
 
                 let builder_ident = &self.builder_gen.builder_type.ident;
 
-                let member_exprs = self.builder_gen.named_members().map(|other_member| {
-                    if other_member.norm_ident == self.member.norm_ident {
-                        return member_init.clone();
+                let member_forwards = self.builder_gen.named_members().map(|other_member| {
+                    let member_ident = &other_member.norm_ident;
+                    if *member_ident == self.member.norm_ident {
+                        return quote! {
+                            #member_ident: #member_init
+                        };
                     }
-                    let index = &other_member.index;
-                    quote!(self.__private_named_members.#index)
+
+                    let ident = &other_member.norm_ident;
+                    quote! {
+                        #member_ident: self.#ident
+                    }
                 });
 
                 quote! {
@@ -159,17 +165,32 @@ impl<'a> MemberSettersCtx<'a> {
                         __private_phantom: ::core::marker::PhantomData,
                         #maybe_receiver_field
                         #maybe_start_fn_args_field
-                        __private_named_members: (#( #member_exprs, )*)
+                        #( #member_forwards, )*
                     }
                 }
             }
         };
 
-        let member_state_type = &self.member.generic_var_ident;
-        let SettersReturnType {
-            doc_true: ret_doc_true,
-            doc_false: ret_doc_false,
-        } = &self.return_type;
+        let member_pascal = &self.member.norm_ident_pascal;
+        // let SettersReturnType {
+        //     doc_true: ret_doc_true,
+        //     doc_false: ret_doc_false,
+        // } = &self.return_type;
+        let state_transition = quote::format_ident!(
+            "{}Set{}",
+            self.builder_gen.builder_ident.raw_name(),
+            self.member.norm_ident_pascal.raw_name()
+        );
+
+        let state_transition = if self.builder_gen.named_members().count() == 1 {
+            quote!(#state_transition)
+        } else {
+            quote!(#state_transition<BuilderState>)
+        };
+
+        let builder_ident = &self.builder_gen.builder_ident;
+
+        let generic_args = &self.builder_gen.generics.args;
 
         quote! {
             #( #docs )*
@@ -183,13 +204,9 @@ impl<'a> MemberSettersCtx<'a> {
                 clippy::impl_trait_in_params
             )]
             #[inline(always)]
-            // The `cfg_attr` condition is for `doc`, so we don't pay the price
-            // if invoking the `__return_type` macro in the usual case when the
-            // code is compiled outside of `rustdoc`.
-            #[cfg_attr(doc, bon::__return_type(#ret_doc_true))]
-            #vis fn #method_name(self, #fn_params) -> #ret_doc_false
+            #vis fn #method_name(self, #fn_params) -> #builder_ident<#(#generic_args,)* #state_transition>
             where
-                #member_state_type: ::bon::private::IsUnset,
+                BuilderState::#member_pascal: ::bon::private::IsUnset,
             {
                 #body
             }
