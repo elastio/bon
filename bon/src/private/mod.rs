@@ -46,41 +46,31 @@ pub fn assert_clone<T: Clone>() {}
 pub fn assert_debug<T: ?Sized + fmt::Debug>() {}
 
 #[doc(hidden)]
-#[deprecated = "this type is an implementation detail and should not be used directly; \
-    if you found yourself needing it, then you are probably doing something wrong; \
-    feel free to open an issue/discussion in our GitHub repository \
-    (https://github.com/elastio/bon) or ask for help in our Discord server \
-    (https://discord.gg/QcBYSamw4c)"]
 #[derive(Debug)]
-pub struct Unset<T>(T);
+pub struct Unset<Name>(Name);
 
-impl<T> crate::IsUnset for Unset<T> {
-    // type MemberName =;
-}
+impl<Name> crate::IsUnset for Unset<Name> {}
 
 #[doc(hidden)]
-#[deprecated = "this type is an implementation detail and should not be used directly; \
-    if you found yourself needing it, then you are probably doing something wrong; \
-    feel free to open an issue/discussion in our GitHub repository \
-    (https://github.com/elastio/bon) or ask for help in our Discord server \
-    (https://discord.gg/QcBYSamw4c)"]
 #[derive(Debug)]
-pub struct Set<T>(T);
+pub struct Set<Name>(Name);
 
-impl<T> crate::IsSet for Set<T> {}
+impl<Name> crate::IsSet for Set<Name> {}
 
+/// Allows to statically check if a member is set or not.
+/// This is basically a utility to do compile-time downcasts.
 pub trait MemberState: Sealed {
     fn is_set() -> bool;
 }
 
-impl<T> MemberState for Unset<T> {
+impl<Name> MemberState for Unset<Name> {
     #[inline(always)]
     fn is_set() -> bool {
         false
     }
 }
 
-impl<T> MemberState for Set<T> {
+impl<Name> MemberState for Set<Name> {
     #[inline(always)]
     fn is_set() -> bool {
         true

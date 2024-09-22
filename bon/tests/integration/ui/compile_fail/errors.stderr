@@ -200,7 +200,7 @@ error[E0277]: the following member was not set: `Unset<y>`, but this method requ
    |                                     ^^^^^ the following member was not set: `Unset<y>`, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<y>`
-   = help: the trait `IsSet` is implemented for `Set<T>`
+   = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required by a bound in `ExampleBuilder::<BuilderTypeState>::build`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
@@ -217,7 +217,7 @@ error[E0277]: the following member was not set: `Unset<renamed>`, but this metho
    |                                     ^^^^^ the following member was not set: `Unset<renamed>`, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<renamed>`
-   = help: the trait `IsSet` is implemented for `Set<T>`
+   = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required by a bound in `ExampleBuilder::<BuilderTypeState>::build`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
@@ -234,7 +234,7 @@ error[E0277]: the following member was already set: `Set<y>`, but this method re
    |                                     ^ the following member was already set: `Set<y>`, but this method requires it to be unset
    |
    = help: the trait `IsUnset` is not implemented for `Set<y>`
-   = help: the trait `IsUnset` is implemented for `Unset<T>`
+   = help: the trait `IsUnset` is implemented for `Unset<Name>`
 note: required by a bound in `ExampleBuilder::<BuilderTypeState>::y`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
@@ -252,7 +252,7 @@ error[E0277]: the following member was not set: `Unset<arg1>`, but this method r
    |                                ^^^^^ the following member was not set: `Unset<arg1>`, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<arg1>`
-   = help: the trait `IsSet` is implemented for `Set<T>`
+   = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required by a bound in `SutBuilder::<BuilderTypeState>::build`
   --> tests/integration/ui/compile_fail/errors.rs:42:18
    |

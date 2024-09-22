@@ -21,7 +21,6 @@ pub(crate) struct StructInputParams {
 fn parse_start_fn(meta: &syn::Meta) -> Result<ItemParams> {
     ItemParamsParsing {
         meta,
-        allow_vis: true,
         reject_self_mentions: None,
     }
     .parse()
@@ -150,7 +149,7 @@ impl StructInputCtx {
 
         let ItemParams {
             name: finish_fn_ident,
-            vis: _,
+            vis: finish_fn_vis,
             docs: finish_fn_docs,
         } = self.params.base.finish_fn;
 
@@ -160,6 +159,7 @@ impl StructInputCtx {
         let struct_ty = &self.struct_ty;
         let finish_fn = FinishFn {
             ident: finish_fn_ident,
+            vis: finish_fn_vis,
             unsafety: None,
             asyncness: None,
             must_use: Some(syn::parse_quote! {
@@ -203,7 +203,7 @@ impl StructInputCtx {
             .collect();
 
         let builder_type = {
-            let ItemParams { name, vis: _, docs } = self.params.base.builder_type;
+            let ItemParams { name, vis, docs } = self.params.base.builder_type;
 
             let builder_ident = name.unwrap_or_else(|| {
                 quote::format_ident!("{}Builder", self.norm_struct.ident.raw_name())
@@ -213,6 +213,7 @@ impl StructInputCtx {
                 derives: self.params.base.derive,
                 ident: builder_ident,
                 docs,
+                vis,
             }
         };
 

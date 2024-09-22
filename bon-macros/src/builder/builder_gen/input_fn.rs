@@ -332,7 +332,7 @@ impl FnInputCtx {
 
         let ItemParams {
             name: finish_fn_ident,
-            vis: _,
+            vis: finish_fn_vis,
             docs: finish_fn_docs,
         } = self.params.base.finish_fn;
 
@@ -353,6 +353,7 @@ impl FnInputCtx {
 
         let finish_fn = FinishFn {
             ident: finish_fn_ident,
+            vis: finish_fn_vis,
             unsafety: self.norm_fn.sig.unsafety,
             asyncness: self.norm_fn.sig.asyncness,
             must_use: get_must_use_attribute(&self.norm_fn.attrs)?,
@@ -397,6 +398,7 @@ impl FnInputCtx {
             ident: builder_ident,
             derives: self.params.base.derive,
             docs: self.params.base.builder_type.docs,
+            vis: self.params.base.builder_type.vis,
         };
 
         BuilderGenCtx::new(BuilderGenCtxParams {

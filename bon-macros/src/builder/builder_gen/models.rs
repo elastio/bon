@@ -27,6 +27,9 @@ pub(super) struct AssocMethodCtx {
 pub(super) struct FinishFn {
     pub(super) ident: syn::Ident,
 
+    /// Visibility override specified by the user
+    pub(super) vis: Option<syn::Visibility>,
+
     /// Additional attributes to apply to the item
     pub(super) attrs: Vec<syn::Attribute>,
 
@@ -53,21 +56,29 @@ pub(super) struct StartFn {
 
 pub(super) struct BuilderType {
     pub(super) ident: syn::Ident,
+
+    /// Visibility of the builder module itself.
+    pub(super) vis: syn::Visibility,
+
     pub(super) derives: BuilderDerives,
     pub(super) docs: Vec<syn::Attribute>,
 }
 
 pub(super) struct BuilderMod {
     pub(super) ident: syn::Ident,
-    pub(super) docs: Vec<syn::Attribute>,
 
-    /// Visibility equivalent to the [`BuilderGenCtx::vis`], but for items
+    /// Visibility of the builder module itself.
+    pub(super) vis: syn::Visibility,
+
+    /// Visibility equivalent to the [`Self::vis`], but for items
     /// generated inside the builder child module.
     pub(super) vis_child: syn::Visibility,
 
     /// Visibility equivalent to the [`Self::vis_child`], but for items
     /// generated inside one more level of nesting in the builder child module.
     pub(super) vis_child_child: syn::Visibility,
+
+    pub(super) docs: Vec<syn::Attribute>,
 }
 
 pub(super) struct Generics {
@@ -127,6 +138,7 @@ pub(super) struct BuilderGenCtxParams {
 
 pub(super) struct BuilderTypeParams {
     pub(super) ident: syn::Ident,
+    pub(super) vis: Option<syn::Visibility>,
     pub(super) derives: BuilderDerives,
     pub(super) docs: Option<Vec<syn::Attribute>>,
 }
@@ -146,52 +158,10 @@ impl BuilderGenCtx {
             finish_fn,
         } = params;
 
-        let vis_child = vis.clone().into_equivalent_in_child_module()?;
-        let vis_child_child = vis_child.clone().into_equivalent_in_child_module()?;
-
-        let builder_mod_ident_overridden = builder_mod.name.is_some();
-        let builder_mod_ident = builder_mod
-            .name
-            .unwrap_or_else(|| builder_type.ident.pascal_to_snake_case());
-
-        if builder_type.ident == builder_mod_ident {
-            if builder_mod_ident_overridden {
-                bail!(
-                    &builder_mod_ident,
-                    "the builder module name must be different from the builder type name"
-                )
-            }
-
-            bail!(
-                &builder_type.ident,
-                "couldn't infer the builder module name that doesn't conflict with \
-                the builder type name; by default, the builder module name is set \
-                to a snake_case equivalent of the builder type name; the snake_case \
-                conversion doesn't produce a different name for this builder type \
-                name; consider using PascalCase for the builder type name or specify \
-                a separate name for the builder module explicitly via \
-                `#[builder(builder_mod = ...)]`"
-            );
-        }
-
-        let builder_mod = BuilderMod {
-            vis_child,
-            vis_child_child,
-
-            ident: builder_mod_ident,
-
-            docs: builder_mod.docs.unwrap_or_else(|| {
-                let docs = format!(
-                    "Contains the traits and type aliases for manipulating \
-                    the type state of the {}",
-                    builder_type.ident
-                );
-
-                vec![syn::parse_quote!(#[doc = #docs])]
-            }),
-        };
-
         let builder_type = BuilderType {
+            ident: builder_type.ident,
+            vis: builder_type.vis.unwrap_or_else(|| vis.clone()),
+            derives: builder_type.derives,
             docs: builder_type.docs.unwrap_or_else(|| {
                 let doc = format!(
                     "Use builder syntax to set the required parameters and finish \
@@ -203,8 +173,59 @@ impl BuilderGenCtx {
                     #[doc = #doc]
                 }]
             }),
-            derives: builder_type.derives,
-            ident: builder_type.ident,
+        };
+
+        let builder_mod = {
+            let ident_overridden = builder_mod.name.is_some();
+            let ident = builder_mod
+                .name
+                .unwrap_or_else(|| builder_type.ident.pascal_to_snake_case());
+
+            if builder_type.ident == ident {
+                if ident_overridden {
+                    bail!(
+                        &ident,
+                        "the builder module name must be different from the builder type name"
+                    )
+                }
+
+                bail!(
+                    &builder_type.ident,
+                    "couldn't infer the builder module name that doesn't conflict with \
+                    the builder type name; by default, the builder module name is set \
+                    to a snake_case equivalent of the builder type name; the snake_case \
+                    conversion doesn't produce a different name for this builder type \
+                    name; consider using PascalCase for the builder type name or specify \
+                    a separate name for the builder module explicitly via \
+                    `#[builder(builder_mod = ...)]`"
+                );
+            }
+
+            let vis = builder_mod.vis.unwrap_or_else(|| builder_type.vis.clone());
+
+            // The visibility for child items is based on the visibility of the
+            // builder type itself, because the types and traits from this module
+            // are part of the builder type generic type state parameter signature.
+            let vis_child = builder_type.vis.clone().into_equivalent_in_child_module()?;
+            let vis_child_child = vis_child.clone().into_equivalent_in_child_module()?;
+
+            BuilderMod {
+                vis,
+                vis_child,
+                vis_child_child,
+
+                ident,
+
+                docs: builder_mod.docs.unwrap_or_else(|| {
+                    let docs = format!(
+                        "Contains the traits and type aliases for manipulating \
+                        the type state of the {}",
+                        builder_type.ident
+                    );
+
+                    vec![syn::parse_quote!(#[doc = #docs])]
+                }),
+            }
         };
 
         Ok(Self {

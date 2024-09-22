@@ -9,7 +9,6 @@ use syn::visit::Visit;
 fn parse_finish_fn(meta: &syn::Meta) -> Result<ItemParams> {
     ItemParamsParsing {
         meta,
-        allow_vis: false,
         reject_self_mentions: Some("builder struct's impl block"),
     }
     .parse()
@@ -18,7 +17,6 @@ fn parse_finish_fn(meta: &syn::Meta) -> Result<ItemParams> {
 fn parse_builder_type(meta: &syn::Meta) -> Result<ItemParams> {
     ItemParamsParsing {
         meta,
-        allow_vis: false,
         reject_self_mentions: Some("builder struct"),
     }
     .parse()
@@ -27,7 +25,6 @@ fn parse_builder_type(meta: &syn::Meta) -> Result<ItemParams> {
 fn parse_builder_mod(meta: &syn::Meta) -> Result<ItemParams> {
     ItemParamsParsing {
         meta,
-        allow_vis: false,
         reject_self_mentions: Some("builder module"),
     }
     .parse()
@@ -151,19 +148,12 @@ pub(crate) struct ItemParams {
 
 pub(crate) struct ItemParamsParsing<'a> {
     pub(crate) meta: &'a syn::Meta,
-    pub(crate) allow_vis: bool,
     pub(crate) reject_self_mentions: Option<&'static str>,
 }
 
 impl ItemParamsParsing<'_> {
     pub(crate) fn parse(self) -> Result<ItemParams> {
         let params = Self::params_from_meta(self.meta)?;
-
-        if !self.allow_vis {
-            if let Some(vis) = &params.vis {
-                bail!(vis, "visibility can't be overridden for this item");
-            }
-        }
 
         if let Some(context) = self.reject_self_mentions {
             if let Some(docs) = &params.docs {
