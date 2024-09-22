@@ -4,6 +4,7 @@ mod generic_param;
 mod ident;
 mod item;
 mod iterator;
+mod meta_list;
 mod path;
 mod punctuated;
 mod ty;
@@ -11,6 +12,7 @@ mod vec;
 mod visibility;
 
 pub(crate) mod ide;
+pub(crate) mod parse;
 
 use prelude::*;
 
@@ -34,6 +36,7 @@ pub(crate) mod prelude {
     pub(crate) use super::ident::IdentExt;
     pub(crate) use super::item::ItemExt;
     pub(crate) use super::iterator::{IntoIteratorExt, IteratorExt};
+    pub(crate) use super::meta_list::MetaListExt;
     pub(crate) use super::path::PathExt;
     pub(crate) use super::punctuated::PunctuatedExt;
     pub(crate) use super::ty::TypeExt;

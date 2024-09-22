@@ -28,7 +28,7 @@ fn parse_builder_mod(meta: &syn::Meta) -> Result<ItemParams> {
     ItemParamsParsing {
         meta,
         allow_vis: false,
-        reject_self_mentions: Some("buuilder module"),
+        reject_self_mentions: Some("builder module"),
     }
     .parse()
 }
@@ -189,6 +189,8 @@ impl ItemParamsParsing<'_> {
         #[derive(Debug, FromMeta)]
         struct Full {
             name: Option<syn::Ident>,
+
+            #[darling(with = crate::util::parse::visibility, map = Some)]
             vis: Option<syn::Visibility>,
             docs: Option<syn::Meta>,
         }

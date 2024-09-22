@@ -314,9 +314,9 @@ Usually you'd want the underlying positional function to be hidden to provide on
 This attribute can take several forms.
 
 -   Simple: `#[builder(expose_positional_fn = identifier)]`. Sets only the name of the positional function.
--   Verbose: `#[builder(expose_positional_fn(name = identifier, vis = "visibility"))]`.
+-   Verbose: `#[builder(expose_positional_fn(name = identifier, vis(visibility)))]`.
     Allows setting both the name and the visibility of the positional function.
-    Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
+    Each key is optional. The `vis` must be specified in parentheses e.g. `vis(pub)`, `vis(pub(crate))`. For private visibility use the syntax `vis(pub(self))`.
 
 If `vis` parameter is not specified, then the visibility of the exposed positional function will be the same as specified on the function that the `#[builder]` was applied to.
 
@@ -477,9 +477,9 @@ The default name for this method is `builder`, and the default visibility is the
 This attribute can take several forms.
 
 -   Simple: `#[builder(start_fn = identifier)]`. Overrides only the name of the "start" method.
--   Verbose: `#[builder(start_fn(name = identifier, vis = "visibility"))]`.
+-   Verbose: `#[builder(start_fn(name = identifier, vis(visibility)]`.
     Allows overriding both the name and the visibility of the "start" method.
-    Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
+    Each key is optional. The `vis` must be specified in parentheses e.g. `vis(pub)`, `vis(pub(crate))`. For private visibility use the syntax `vis(pub(self))`.
 
 **Example:**
 
@@ -503,9 +503,9 @@ User::init() // [!code highlight]
 use bon::Builder;
 
 // `User::init()` method will have `pub(crate)` visibility // [!code highlight]
-// Use `vis = ""` to make it fully private instead         // [!code highlight]
+// Use `vis(pub(self))` to make it fully private instead   // [!code highlight]
 #[derive(Builder)]
-#[builder(start_fn(name = init, vis = "pub(crate)"))]      // [!code highlight]
+#[builder(start_fn(name = init, vis(pub(crate))))] // [!code highlight]
 pub struct User {
     id: u32
 }
