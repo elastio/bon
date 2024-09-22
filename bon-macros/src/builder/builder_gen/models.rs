@@ -149,13 +149,36 @@ impl BuilderGenCtx {
         let vis_child = vis.clone().into_equivalent_in_child_module()?;
         let vis_child_child = vis_child.clone().into_equivalent_in_child_module()?;
 
+        let builder_mod_ident_overridden = builder_mod.name.is_some();
+        let builder_mod_ident = builder_mod
+            .name
+            .unwrap_or_else(|| builder_type.ident.pascal_to_snake_case());
+
+        if builder_type.ident == builder_mod_ident {
+            if builder_mod_ident_overridden {
+                bail!(
+                    &builder_mod_ident,
+                    "the builder module name must be different from the builder type name"
+                )
+            }
+
+            bail!(
+                &builder_type.ident,
+                "couldn't infer the builder module name that doesn't conflict with \
+                the builder type name; by default, the builder module name is set \
+                to a snake_case equivalent of the builder type name; the snake_case \
+                conversion doesn't produce a different name for this builder type \
+                name; consider using PascalCase for the builder type name or specify \
+                a separate name for the builder module explicitly via \
+                `#[builder(builder_mod = ...)]`"
+            );
+        }
+
         let builder_mod = BuilderMod {
             vis_child,
             vis_child_child,
 
-            ident: builder_mod
-                .name
-                .unwrap_or_else(|| builder_type.ident.pascal_to_snake_case()),
+            ident: builder_mod_ident,
 
             docs: builder_mod.docs.unwrap_or_else(|| {
                 let docs = format!(
