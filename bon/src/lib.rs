@@ -61,8 +61,8 @@ use private::sealed::Sealed;
 #[rustversion::attr(
     since(1.78.0),
     diagnostic::on_unimplemented(
-        message = "the following member was already set: `{Self}`, but this method requires it to be unset",
-        label = "the following member was already set: `{Self}`, but this method requires it to be unset",
+        message = "the member `{Self}` was already set, but this method requires it to be unset",
+        label = "the member `{Self}` was already set, but this method requires it to be unset",
     )
 )]
 pub trait IsUnset: Sealed {}
@@ -72,8 +72,8 @@ pub trait IsUnset: Sealed {}
 #[rustversion::attr(
     since(1.78.0),
     diagnostic::on_unimplemented(
-        message = "the following member was not set: `{Self}`, but this method requires it to be set",
-        label = "the following member was not set: `{Self}`, but this method requires it to be set",
+        message = "the member `{Self}` was not set, but this method requires it to be set",
+        label = "the member `{Self}` was not set, but this method requires it to be set",
     )
 )]
 pub trait IsSet: Sealed {}

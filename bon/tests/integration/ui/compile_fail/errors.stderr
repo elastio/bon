@@ -193,11 +193,11 @@ error[E0599]: no method named `y` found for struct `SkipGeneratesNoSetterBuilder
 22 |     SkipGeneratesNoSetter::builder().y(42).build();
    |                                      ^ method not found in `SkipGeneratesNoSetterBuilder`
 
-error[E0277]: the following member was not set: `Unset<y>`, but this method requires it to be set
+error[E0277]: the member `Unset<y>` was not set, but this method requires it to be set
   --> tests/integration/ui/compile_fail/errors.rs:34:37
    |
 34 |     let _ = Example::builder().x(1).build();
-   |                                     ^^^^^ the following member was not set: `Unset<y>`, but this method requires it to be set
+   |                                     ^^^^^ the member `Unset<y>` was not set, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<y>`
    = help: the trait `IsSet` is implemented for `Set<Name>`
@@ -210,11 +210,11 @@ note: required by a bound in `ExampleBuilder::<BuilderTypeState>::build`
    |            ------- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0277]: the following member was not set: `Unset<renamed>`, but this method requires it to be set
+error[E0277]: the member `Unset<renamed>` was not set, but this method requires it to be set
   --> tests/integration/ui/compile_fail/errors.rs:34:37
    |
 34 |     let _ = Example::builder().x(1).build();
-   |                                     ^^^^^ the following member was not set: `Unset<renamed>`, but this method requires it to be set
+   |                                     ^^^^^ the member `Unset<renamed>` was not set, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<renamed>`
    = help: the trait `IsSet` is implemented for `Set<Name>`
@@ -227,11 +227,11 @@ note: required by a bound in `ExampleBuilder::<BuilderTypeState>::build`
    |            ------- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0277]: the following member was already set: `Set<y>`, but this method requires it to be unset
+error[E0277]: the member `Set<y>` was already set, but this method requires it to be unset
   --> tests/integration/ui/compile_fail/errors.rs:37:37
    |
 37 |     let _ = Example::builder().y(1).y(2);
-   |                                     ^ the following member was already set: `Set<y>`, but this method requires it to be unset
+   |                                     ^ the member `Set<y>` was already set, but this method requires it to be unset
    |
    = help: the trait `IsUnset` is not implemented for `Set<y>`
    = help: the trait `IsUnset` is implemented for `Unset<Name>`
@@ -245,11 +245,11 @@ note: required by a bound in `ExampleBuilder::<BuilderTypeState>::y`
    |         - required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0277]: the following member was not set: `Unset<arg1>`, but this method requires it to be set
+error[E0277]: the member `Unset<arg1>` was not set, but this method requires it to be set
   --> tests/integration/ui/compile_fail/errors.rs:47:32
    |
 47 |         let _ = Sut::builder().build();
-   |                                ^^^^^ the following member was not set: `Unset<arg1>`, but this method requires it to be set
+   |                                ^^^^^ the member `Unset<arg1>` was not set, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<arg1>`
    = help: the trait `IsSet` is implemented for `Set<Name>`
