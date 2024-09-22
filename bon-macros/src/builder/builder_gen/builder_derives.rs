@@ -55,15 +55,24 @@ impl BuilderGenCtx {
 
         let clone = quote!(::core::clone::Clone);
 
-        let clone_receiver = self.receiver().map(|_| {
+        let clone_receiver = self.receiver().map(|receiver| {
+            let ty = &receiver.without_self_keyword;
             quote! {
-                __private_receiver: #clone::clone(&self.__private_receiver),
+                __private_receiver: <#ty as #clone>::clone(&self.__private_receiver),
             }
         });
 
         let clone_start_fn_args = self.start_fn_args().next().map(|_| {
+            let clone_start_fn_args = self.start_fn_args().map(|arg| {
+                let ty = &arg.base.norm_ty;
+                let index = &arg.index;
+                quote! {
+                    <#ty as #clone>::clone(&self.__private_start_fn_args.#index)
+                }
+            });
+
             quote! {
-                __private_start_fn_args: #clone::clone(&self.__private_start_fn_args),
+                __private_start_fn_args: ( #(#clone_start_fn_args,)* ),
             }
         });
 
@@ -116,9 +125,7 @@ impl BuilderGenCtx {
                         // ```
                         // required for `(...huge tuple type...)` to implement `Clone`
                         // ```
-                        __private_named_members: (
-                            #( #clone_named_members, )*
-                        ),
+                        __private_named_members: ( #( #clone_named_members, )* ),
                     }
                 }
             }
@@ -155,10 +162,13 @@ impl BuilderGenCtx {
                 Member::StartFnArg(member) => {
                     let member_index = &member.index;
                     let member_ident_str = member.base.ident.to_string();
+                    let member_ty = &member.base.norm_ty;
                     Some(quote! {
                         output.field(
                             #member_ident_str,
-                            &self.__private_start_fn_args.#member_index
+                            ::bon::private::derives::as_dyn_debug::<#member_ty>(
+                                &self.__private_start_fn_args.#member_index
+                            )
                         );
                     })
                 }
@@ -170,9 +180,15 @@ impl BuilderGenCtx {
             }
         });
 
-        let format_receiver = self.receiver().map(|_| {
+        let format_receiver = self.receiver().map(|receiver| {
+            let ty = &receiver.without_self_keyword;
             quote! {
-                output.field("self", &self.__private_receiver);
+                output.field(
+                    "self",
+                    ::bon::private::derives::as_dyn_debug::<#ty>(
+                        &self.__private_receiver
+                    )
+                );
             }
         });
 

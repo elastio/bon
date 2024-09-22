@@ -41,3 +41,8 @@ pub fn debug_required_member<State: MemberState, T: Debug>(
 ) -> &dyn Debug {
     member
 }
+
+#[inline(always)]
+pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
+    member
+}

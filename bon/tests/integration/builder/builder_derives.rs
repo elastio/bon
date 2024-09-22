@@ -120,61 +120,93 @@ fn empty_builder() {
     assert_debug_eq(actual, expect!["SutBuilder"]);
 }
 
-#[test]
-fn positional_members_struct() {
-    #[derive(Builder)]
-    #[builder(derive(Clone, Debug))]
-    #[allow(dead_code)]
-    struct Sut {
-        #[builder(start_fn)]
-        start_fn_arg: bool,
+mod generics {
+    use crate::prelude::*;
 
-        #[builder(finish_fn)]
-        finish_fn_arg: &'static str,
-
-        named: u32,
-    }
-
-    let actual = Sut::builder(true);
-
-    assert_debug_eq(actual.clone(), expect!["SutBuilder { start_fn_arg: true }"]);
-
-    assert_debug_eq(
-        actual.named(42).clone(),
-        expect!["SutBuilder { start_fn_arg: true, named: 42 }"],
-    );
-}
-
-#[test]
-fn positional_members_fn() {
-    #[builder(derive(Clone, Debug))]
-    #[allow(unused_variables)]
-    fn sut(
-        #[builder(start_fn)] start_fn_arg: bool,
-        #[builder(finish_fn)] finish_fn_arg: &'static str,
-        named: u32,
-    ) {
-    }
-
-    let actual = sut(true);
-
-    assert_debug_eq(actual.clone(), expect!["SutBuilder { start_fn_arg: true }"]);
-
-    assert_debug_eq(
-        actual.named(42).clone(),
-        expect!["SutBuilder { start_fn_arg: true, named: 42 }"],
-    );
-}
-
-#[test]
-fn positional_members_impl_block() {
-    #[derive(Debug)]
-    struct Sut;
-
-    #[bon]
-    #[allow(unused_variables)]
-    impl Sut {
+    #[test]
+    fn test_struct() {
+        #[derive(Builder)]
         #[builder(derive(Clone, Debug))]
+        struct Sut<T> {
+            _arg1: T,
+        }
+
+        let actual = Sut::builder().arg1(42).clone();
+
+        assert_debug_eq(actual, expect!["SutBuilder { arg1: 42 }"]);
+    }
+
+    #[test]
+    fn test_free_fn() {
+        #[builder(derive(Clone, Debug))]
+        fn sut<T>(_arg1: T) {}
+
+        let actual = sut::<u32>().arg1(42).clone();
+
+        assert_debug_eq(actual, expect!["SutBuilder { arg1: 42 }"]);
+    }
+
+    #[test]
+    fn test_assoc_method() {
+        #[derive(Clone, Debug)]
+        struct Sut<T>(T);
+
+        #[bon]
+        impl<T> Sut<T> {
+            #[builder(derive(Clone, Debug))]
+            fn sut<U>(_arg1: U) {}
+
+            #[builder(derive(Clone, Debug))]
+            fn with_self<U>(&self, _arg1: U) {
+                let _ = self;
+            }
+        }
+
+        let actual = Sut::<()>::sut::<u32>().arg1(42).clone();
+
+        assert_debug_eq(actual, expect!["SutSutBuilder { arg1: 42 }"]);
+
+        let actual = Sut(true).with_self::<u32>().arg1(42).clone();
+
+        assert_debug_eq(
+            actual,
+            expect!["SutWithSelfBuilder { self: Sut(true), arg1: 42 }"],
+        );
+    }
+}
+
+mod positional_members {
+    use crate::prelude::*;
+
+    #[test]
+    fn test_struct() {
+        #[derive(Builder)]
+        #[builder(derive(Clone, Debug))]
+        #[allow(dead_code)]
+        struct Sut {
+            #[builder(start_fn)]
+            start_fn_arg: bool,
+
+            #[builder(finish_fn)]
+            finish_fn_arg: &'static str,
+
+            named: u32,
+        }
+
+        let actual = Sut::builder(true);
+
+        assert_debug_eq(actual.clone(), expect!["SutBuilder { start_fn_arg: true }"]);
+
+        assert_debug_eq(
+            actual.named(42).clone(),
+            expect!["SutBuilder { start_fn_arg: true, named: 42 }"],
+        );
+    }
+
+    #[test]
+    fn test_free_fn() {
+        #[builder(derive(Clone, Debug))]
+        #[allow(unused_variables)]
         fn sut(
             #[builder(start_fn)] start_fn_arg: bool,
             #[builder(finish_fn)] finish_fn_arg: &'static str,
@@ -182,41 +214,68 @@ fn positional_members_impl_block() {
         ) {
         }
 
-        #[builder(derive(Clone, Debug))]
-        fn with_self(
-            &self,
-            #[builder(start_fn)] start_fn_arg: bool,
-            #[builder(finish_fn)] finish_fn_arg: &'static str,
-            named: u32,
-        ) {
-            let _ = self;
-        }
+        let actual = sut(true);
+
+        assert_debug_eq(actual.clone(), expect!["SutBuilder { start_fn_arg: true }"]);
+
+        assert_debug_eq(
+            actual.named(42).clone(),
+            expect!["SutBuilder { start_fn_arg: true, named: 42 }"],
+        );
     }
 
-    let actual = Sut::sut(true);
+    #[test]
+    fn test_assoc_method() {
+        #[derive(Debug)]
+        struct Sut;
 
-    assert_debug_eq(
-        actual.clone(),
-        expect!["SutSutBuilder { start_fn_arg: true }"],
-    );
-    assert_debug_eq(
-        actual.named(42).clone(),
-        expect!["SutSutBuilder { start_fn_arg: true, named: 42 }"],
-    );
+        #[bon]
+        #[allow(unused_variables)]
+        impl Sut {
+            #[builder(derive(Clone, Debug))]
+            fn sut(
+                #[builder(start_fn)] start_fn_arg: bool,
+                #[builder(finish_fn)] finish_fn_arg: &'static str,
+                named: u32,
+            ) {
+            }
 
-    let actual = Sut.with_self(true);
+            #[builder(derive(Clone, Debug))]
+            fn with_self(
+                &self,
+                #[builder(start_fn)] start_fn_arg: bool,
+                #[builder(finish_fn)] finish_fn_arg: &'static str,
+                named: u32,
+            ) {
+                let _ = self;
+            }
+        }
 
-    assert_debug_eq(
-        actual.clone(),
-        expect!["SutWithSelfBuilder { self: Sut, start_fn_arg: true }"],
-    );
-    assert_debug_eq(
-        actual.named(42).clone(),
-        expect![[r#"
+        let actual = Sut::sut(true);
+
+        assert_debug_eq(
+            actual.clone(),
+            expect!["SutSutBuilder { start_fn_arg: true }"],
+        );
+        assert_debug_eq(
+            actual.named(42).clone(),
+            expect!["SutSutBuilder { start_fn_arg: true, named: 42 }"],
+        );
+
+        let actual = Sut.with_self(true);
+
+        assert_debug_eq(
+            actual.clone(),
+            expect!["SutWithSelfBuilder { self: Sut, start_fn_arg: true }"],
+        );
+        assert_debug_eq(
+            actual.named(42).clone(),
+            expect![[r#"
             SutWithSelfBuilder {
                 self: Sut,
                 start_fn_arg: true,
                 named: 42,
             }"#]],
-    );
+        );
+    }
 }

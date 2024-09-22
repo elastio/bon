@@ -28,7 +28,7 @@ impl<'a> AssignTypeParams<'a> {
     fn new(generics: &'a mut syn::Generics) -> Self {
         Self {
             generics,
-            next_type_param_index: 0,
+            next_type_param_index: 1,
         }
     }
 }
@@ -54,7 +54,7 @@ impl VisitMut for AssignTypeParams<'_> {
         let index = self.next_type_param_index;
         self.next_type_param_index += 1;
 
-        let type_param = quote::format_ident!("__{index}");
+        let type_param = quote::format_ident!("ImplTrait{index}");
         let impl_trait = std::mem::replace(ty, syn::Type::Path(syn::parse_quote!(#type_param)));
 
         let impl_trait = match impl_trait {

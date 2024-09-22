@@ -79,7 +79,7 @@ impl<'a> AssignLifetimes<'a> {
         Self {
             prefix,
             generics,
-            next_lifetime_index: 0,
+            next_lifetime_index: 1,
         }
     }
 }
@@ -157,7 +157,7 @@ impl AssignLifetimes<'_> {
 
         let lifetime_param = syn::LifetimeParam::new(lifetime.clone());
         let lifetime_param = syn::GenericParam::Lifetime(lifetime_param);
-        self.generics.params.insert(index, lifetime_param);
+        self.generics.params.insert(index - 1, lifetime_param);
 
         lifetime
     }
