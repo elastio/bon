@@ -382,12 +382,7 @@ impl FnInputCtx {
             // It's supposed to be the same as the original function's visibility.
             vis: None,
 
-            attrs: self
-                .norm_fn
-                .attrs
-                .into_iter()
-                .filter(<_>::is_doc)
-                .collect(),
+            attrs: self.norm_fn.attrs.into_iter().filter(<_>::is_doc).collect(),
 
             // Override on the start fn to use the the generics from the
             // target function itself. We don't need to duplicate the generics

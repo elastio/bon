@@ -9,7 +9,8 @@ impl VisitMut for NormalizeLifetimes {
     fn visit_item_impl_mut(&mut self, impl_block: &mut syn::ItemImpl) {
         syn::visit_mut::visit_item_impl_mut(self, impl_block);
 
-        AssignLifetimes::new("impl", &mut impl_block.generics).visit_type_mut(&mut impl_block.self_ty);
+        AssignLifetimes::new("impl", &mut impl_block.generics)
+            .visit_type_mut(&mut impl_block.self_ty);
     }
 
     fn visit_impl_item_fn_mut(&mut self, fn_item: &mut syn::ImplItemFn) {

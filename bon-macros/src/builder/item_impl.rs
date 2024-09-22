@@ -117,10 +117,7 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
 
     let new_impl_items = outputs.iter().flat_map(|(adapted_fn, output)| {
         let start_fn = &output.start_fn;
-        [
-            syn::parse_quote!(#start_fn),
-            syn::parse_quote!(#adapted_fn),
-        ]
+        [syn::parse_quote!(#start_fn), syn::parse_quote!(#adapted_fn)]
     });
 
     norm_selfful_impl_block.items = other_items;
