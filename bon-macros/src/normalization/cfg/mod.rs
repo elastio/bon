@@ -73,7 +73,7 @@ impl ExpandCfg {
             for attr in attrs {
                 let cfg_syntax = match CfgSyntax::from_meta(&attr.meta)? {
                     Some(cfg_syntax) => cfg_syntax,
-                    None => return Ok(true),
+                    None => continue,
                 };
 
                 let predicate = match cfg_syntax {

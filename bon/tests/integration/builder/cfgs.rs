@@ -10,6 +10,7 @@ fn struct_smoke() {
         #[cfg_attr(all(), allow(dead_code))]
         arg1: bool,
 
+        /// doc comment
         #[cfg(not(all()))]
         arg1: u32,
 
@@ -33,6 +34,7 @@ fn struct_with_params() {
         #[cfg(all())]
         arg1: bool,
 
+        /// doc comment
         #[cfg(not(all()))]
         arg1: u32,
 
@@ -63,6 +65,7 @@ fn fn_smoke() {
         #[cfg_attr(all(), allow(dead_code))]
         arg1: bool,
 
+        /// doc comment
         #[cfg(not(all()))] arg1: u32,
 
         #[cfg(any())] arg1: String,
@@ -80,6 +83,7 @@ fn fn_with_params() {
     fn sut(
         #[cfg(all())] arg1: bool,
 
+        /// doc comment
         #[cfg(not(all()))] arg1: u32,
 
         #[cfg_attr(all(), builder(default))] arg2: [u8; 4],
@@ -119,6 +123,7 @@ fn impl_block() {
             #[cfg_attr(all(), allow(dead_code))]
             arg1: bool,
 
+            /// doc comment
             #[cfg(not(all()))] arg1: u32,
 
             #[cfg(any())] arg1: String,
@@ -131,6 +136,7 @@ fn impl_block() {
         fn sut_with_params(
             #[cfg(all())] arg1: bool,
 
+            /// doc comment
             #[cfg(not(all()))] arg1: u32,
 
             #[cfg_attr(all(), builder(default))] arg2: [u8; 4],
