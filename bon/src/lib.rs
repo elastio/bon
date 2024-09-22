@@ -41,7 +41,7 @@ use private::sealed::Sealed;
 /// use example_builder::{SetX, SetY};
 ///
 /// impl<State: example_builder::State> ExampleBuilder<State> {
-///     fn x_doubled(value: i32) -> ExampleBuilder<SetX<State>>
+///     fn x_doubled(self, value: i32) -> ExampleBuilder<SetX<State>>
 ///     where
 ///         // The code won't compile without this bound
 ///         State::X: bon::IsUnset,
@@ -49,7 +49,7 @@ use private::sealed::Sealed;
 ///         self.x(value * 2)
 ///     }
 ///
-///     fn y_doubled(value: i32) -> ExampleBuilder<SetY<State>>
+///     fn y_doubled(self, value: i32) -> ExampleBuilder<SetY<State>>
 ///     where
 ///         // The code won't compile without this bound
 ///         State::Y: bon::IsUnset,

@@ -253,7 +253,16 @@ impl BuilderGenCtx {
     }
 
     fn phantom_data(&self) -> TokenStream2 {
-        let member_types = self.members.iter().map(Member::norm_ty);
+        let member_types = self.members.iter().filter_map(|member| {
+            match member {
+                // The types of these members already appear in the struct in the types
+                // of __private_named_members and __private_start_fn_args fields.
+                Member::Named(_) | Member::StartFnArg(_) => None,
+                Member::FinishFnArg(member) => Some(member.norm_ty.as_ref()),
+                Member::Skipped(member) => Some(member.norm_ty.as_ref()),
+            }
+        });
+
         let receiver_ty = self
             .assoc_method_ctx
             .as_ref()
@@ -394,7 +403,7 @@ impl BuilderGenCtx {
                 /// with the [`bon::IsSet`] and [`bon::IsUnset`] traits.
                 ///
                 /// [`bon::IsSet`]: ::bon::IsSet
-                /// [`bon::IsUnset]: ::bon::IsUnset
+                /// [`bon::IsUnset`]: ::bon::IsUnset
                 #vis_child trait State: ::core::marker::Sized {
                     #(
                         #[doc = #assoc_types_docs]

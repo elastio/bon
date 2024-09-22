@@ -22,19 +22,6 @@ impl BuilderGenCtx {
         tokens
     }
 
-    fn builder_component_types(&self) -> impl Iterator<Item = &'_ syn::Type> {
-        let receiver_ty = self
-            .receiver()
-            .map(|receiver| &receiver.without_self_keyword);
-
-        let member_types = self.named_members().map(|member| &member.norm_ty);
-
-        std::iter::empty()
-            .chain(receiver_ty)
-            .chain(member_types)
-            .map(Box::as_ref)
-    }
-
     /// We follow the logic of the standard `#[derive(...)]` macros such as `Clone` and `Debug`.
     /// They add bounds of their respective traits to every generic type parameter on the struct
     /// without trying to analyze if that bound is actually required for the derive to work, so

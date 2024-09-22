@@ -13,14 +13,7 @@ fn smoke_fn() {
 
     assert_debug_eq(
         actual,
-        expect![[r#"
-            SutBuilder {
-                _arg1: true,
-                _arg3: Some(
-                    "value",
-                ),
-                _arg4: None,
-            }"#]],
+        expect![[r#"SutBuilder { arg1: true, arg3: Some("value"), arg4: None }"#]],
     );
 }
 
@@ -43,14 +36,7 @@ fn smoke_struct() {
 
     assert_debug_eq(
         actual,
-        expect![[r#"
-            SutBuilder {
-                _arg1: true,
-                _arg3: Some(
-                    "value",
-                ),
-                _arg4: None,
-            }"#]],
+        expect![[r#"SutBuilder { arg1: true, arg3: Some("value"), arg4: None }"#]],
     );
 }
 
@@ -119,7 +105,7 @@ fn skipped_members() {
 
     let actual = Sut::builder().arg1(true).clone();
 
-    assert_debug_eq(actual, expect!["SutBuilder { _arg1: true }"]);
+    assert_debug_eq(actual, expect!["SutBuilder { arg1: true }"]);
 }
 
 #[test]
