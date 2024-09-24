@@ -22,36 +22,30 @@ pub mod ide;
 pub mod derives;
 
 mod cfg_eval;
-mod member_cell;
+mod member;
 
 pub(crate) mod sealed {
     // The purpose of the `Sealed` trait **is** to be unnameable from outside the crate.
     #[allow(unnameable_types)]
     pub trait Sealed: Sized {}
 
-    impl<T> Sealed for super::Unset<T> {}
-    impl<T> Sealed for super::Set<T> {}
+    impl<Name> Sealed for super::Unset<Name> {}
+    impl<Name> Sealed for super::Set<Name> {}
 }
 
-pub use member_cell::*;
+pub use member::*;
 
-use core::fmt;
 use sealed::Sealed;
 
 /// Used to implement the `alloc` feature.
 #[cfg(feature = "alloc")]
 pub extern crate alloc;
 
-pub fn assert_clone<T: Clone>() {}
-pub fn assert_debug<T: ?Sized + fmt::Debug>() {}
-
-#[doc(hidden)]
 #[derive(Debug)]
 pub struct Unset<Name>(Name);
 
 impl<Name> crate::IsUnset for Unset<Name> {}
 
-#[doc(hidden)]
 #[derive(Debug)]
 pub struct Set<Name>(Name);
 
@@ -76,3 +70,14 @@ impl<Name> MemberState for Set<Name> {
         true
     }
 }
+
+#[rustversion::attr(
+    since(1.78.0),
+    diagnostic::on_unimplemented(
+        message = "expected type state for the member `{Name}`, but found `{Self}`",
+        label = "expected type state for the member `{Name}`, but found `{Self}`",
+    )
+)]
+pub trait NamedMemberState<Name>: MemberState {}
+impl<Name> NamedMemberState<Name> for Set<Name> {}
+impl<Name> NamedMemberState<Name> for Unset<Name> {}

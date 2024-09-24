@@ -35,7 +35,7 @@ impl<'a> MemberSettersCtx<'a> {
             fn_params: quote!(value: #fn_param_type),
             overwrite_docs: None,
             body: SetterBody::Default {
-                member_init: quote!(::bon::private::MemberCell::new(value #maybe_into_call)),
+                member_init: quote!(::bon::private::Member::set(value #maybe_into_call)),
             },
         }))
     }

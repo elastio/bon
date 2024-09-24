@@ -23,7 +23,7 @@ use core::mem::MaybeUninit;
 /// they are sealed.
 #[doc(hidden)]
 #[must_use]
-pub struct MemberCell<State: MemberState, T> {
+pub struct Member<State: MemberState, T> {
     /// The [`PhantomData`] uses an `fn()` pointer to signify that this type
     /// doesn't hold an instance of `State`.
     state: PhantomData<fn() -> State>,
@@ -31,7 +31,7 @@ pub struct MemberCell<State: MemberState, T> {
     value: MaybeUninit<T>,
 }
 
-impl<State: MemberState, T> Drop for MemberCell<State, T> {
+impl<State: MemberState, T> Drop for Member<State, T> {
     fn drop(&mut self) {
         if State::is_set() {
             // SAFETY: this is safe. The `value` is guaranteed to be initialized
@@ -54,11 +54,11 @@ impl<State: MemberState, T> Drop for MemberCell<State, T> {
     }
 }
 
-impl<State: IsUnset + MemberState, T> MemberCell<State, T> {
-    /// Creates a new [`MemberCell`] with an uninitialized value. This is only
+impl<State: IsUnset + MemberState, T> Member<State, T> {
+    /// Creates a new [`Member`] with an uninitialized value. This is only
     /// possible when the `State` implements the [`IsUnset`] trait.
     #[inline(always)]
-    pub fn uninit() -> Self {
+    pub fn unset() -> Self {
         Self {
             state: PhantomData,
             value: MaybeUninit::uninit(),
@@ -66,11 +66,11 @@ impl<State: IsUnset + MemberState, T> MemberCell<State, T> {
     }
 }
 
-impl<State: IsSet + MemberState, T> MemberCell<State, T> {
-    /// Creates a new [`MemberCell`] initialized with the specified value. This is
+impl<State: IsSet + MemberState, T> Member<State, T> {
+    /// Creates a new [`Member`] initialized with the specified value. This is
     /// only possible when the `State` implements the [`IsSet`] trait.
     #[inline(always)]
-    pub fn new(value: T) -> Self {
+    pub fn set(value: T) -> Self {
         Self {
             state: PhantomData,
             value: MaybeUninit::new(value),
@@ -81,8 +81,8 @@ impl<State: IsSet + MemberState, T> MemberCell<State, T> {
     #[inline(always)]
     pub fn into_inner(self) -> T {
         // SAFETY: this is safe. The `value` is guaranteed to be initialized
-        // by the `MemberCell::new` constructor. There is no other way to
-        // create a `MemberCell` where `State: IsSet`. The trait implementation
+        // by the `Member::new` constructor. There is no other way to
+        // create a `Member` where `State: IsSet`. The trait implementation
         // if `IsSet` and `IsUnset` are guaranteed to be mutually exclusive.
         // They are sealed and implemented for Set/Unset types respectively.
         #[allow(unsafe_code)]
@@ -100,13 +100,13 @@ impl<State: IsSet + MemberState, T> MemberCell<State, T> {
     }
 }
 
-impl<T, State: MemberState> MemberCell<State, T> {
+impl<T, State: MemberState> Member<State, T> {
     #[inline(always)]
     fn try_get(&self) -> Option<&T> {
         if State::is_set() {
             // SAFETY: this is safe. The `value` is guaranteed to be initialized
-            // by the `MemberCell::new` constructor. There is no other way to
-            // create a `MemberCell` where `State: IsSet`. The trait implementation
+            // by the `Member::new` constructor. There is no other way to
+            // create a `Member` where `State: IsSet`. The trait implementation
             // if `IsSet` and `IsUnset` are guaranteed to be mutually exclusive.
             // They are sealed and implemented for Set/Unset types respectively.
             #[allow(unsafe_code)]
@@ -119,7 +119,7 @@ impl<T, State: MemberState> MemberCell<State, T> {
     }
 }
 
-impl<State, T> Clone for MemberCell<State, T>
+impl<State, T> Clone for Member<State, T>
 where
     State: MemberState,
     T: Clone,
@@ -143,7 +143,7 @@ where
     }
 }
 
-impl<State, T> fmt::Debug for MemberCell<State, T>
+impl<State, T> fmt::Debug for Member<State, T>
 where
     State: MemberState,
     T: fmt::Debug,

@@ -216,7 +216,7 @@ impl BuilderGenCtx {
             if member.is_optional() {
                 quote!(None)
             } else {
-                quote!(::bon::private::MemberCell::uninit())
+                quote!(::bon::private::Member::unset())
             }
         });
 
@@ -407,7 +407,9 @@ impl BuilderGenCtx {
                 #vis_child trait State: ::core::marker::Sized {
                     #(
                         #[doc = #assoc_types_docs]
-                        type #named_members_pascal: ::bon::private::MemberState;
+                        type #named_members_pascal: ::bon::private::NamedMemberState<
+                            self::members::#named_members_idents
+                        >;
                     )*
 
                     fn __sealed(_: self::sealed::Sealed);
@@ -420,7 +422,11 @@ impl BuilderGenCtx {
                 // Using `self::State` explicitly to avoid name conflicts with the
                 // members named `state` which would create a generic param named `State`
                 // that would shadow the trait `State` in the same scope.
-                impl<#( #named_members_pascal: ::bon::private::MemberState, )*>
+                impl<#(
+                    #named_members_pascal: ::bon::private::NamedMemberState<
+                        self::members::#named_members_idents
+                    >,
+                )*>
                 self::State for ( #(#named_members_pascal,)* )
                 {
                     #( type #named_members_pascal = #named_members_pascal; )*
@@ -433,6 +439,12 @@ impl BuilderGenCtx {
                     #(::bon::private::Unset<members::#named_members_idents>,)*
                 );
 
+                #[deprecated =
+                    "this is an implementation detail and should not be \
+                    used directly; use the Set* type aliases to control the \
+                    state of members instead"
+                ]
+                #[doc(hidden)]
                 mod members {
                     #(
                         #[allow(
@@ -444,12 +456,6 @@ impl BuilderGenCtx {
                             // exported items of the parent module.
                             unnameable_types,
                         )]
-                        #[doc(hidden)]
-                        #[deprecated =
-                            "this type is an implementation detail and should not be \
-                            used directly; use the Set* type aliases to control the \
-                            state of members instead"
-                        ]
                         #vis_child_child enum #named_members_idents {}
                     )*
                 }
@@ -522,7 +528,7 @@ impl BuilderGenCtx {
                     let ty = &member.norm_ty;
                     let member_pascal = &member.norm_ident_pascal;
                     quote! {
-                        ::bon::private::MemberCell<BuilderTypeState::#member_pascal, #ty>
+                        ::bon::private::Member<BuilderTypeState::#member_pascal, #ty>
                     }
                 })
         });
