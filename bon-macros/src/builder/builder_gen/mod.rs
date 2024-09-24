@@ -13,7 +13,7 @@ use models::{
     AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFn, FinishFnBody, Generics,
     StartFn,
 };
-use quote::quote;
+use quote::{quote, ToTokens};
 use setter_methods::MemberSettersCtx;
 
 pub(crate) struct MacroOutput {
@@ -92,6 +92,7 @@ impl BuilderGenCtx {
 
     fn builder_impl(&self) -> Result<TokenStream2> {
         let finish_fn = self.finish_fn()?;
+        let transition_type_state_fn = self.transition_type_state_fn();
         let setter_methods = self
             .named_members()
             .map(|member| MemberSettersCtx::new(self, member).setter_methods())
@@ -120,6 +121,7 @@ impl BuilderGenCtx {
             {
                 #finish_fn
                 #(#setter_methods)*
+                #transition_type_state_fn
             }
         })
     }
@@ -155,6 +157,43 @@ impl BuilderGenCtx {
                 // type patterns by placing them in the context where type patterns
                 // are expected.
                 let _: (#(#type_patterns,)*);
+            }
+        }
+    }
+
+    fn transition_type_state_fn(&self) -> TokenStream2 {
+        let builder_ident = &self.builder_type.ident;
+        let builder_mod = &self.builder_mod.ident;
+
+        let maybe_receiver_field = self
+            .receiver()
+            .map(|_| quote!(__private_receiver: self.__private_receiver,));
+
+        let maybe_start_fn_args_field = self
+            .start_fn_args()
+            .next()
+            .map(|_| quote!(__private_start_fn_args: self.__private_start_fn_args,));
+
+        let generic_args = &self.generics.args;
+
+        quote! {
+            #[deprecated =
+                "this method is an implementation detail; it should not be used directly; \
+                if you found yourself needing it, then you are probably doing something wrong; \
+                feel free to open an issue/discussion in our GitHub repository \
+                (https://github.com/elastio/bon) or ask for help in our Discord server \
+                (https://discord.gg/QcBYSamw4c)"
+            ]
+            #[inline(always)]
+            fn __private_transition_type_state<__NewBuilderState: #builder_mod::State>(self)
+            -> #builder_ident<#(#generic_args,)* __NewBuilderState>
+            {
+                #builder_ident {
+                    __private_phantom: ::core::marker::PhantomData,
+                    #maybe_receiver_field
+                    #maybe_start_fn_args_field
+                    __private_named_members: self.__private_named_members,
+                }
             }
         }
     }
@@ -212,13 +251,18 @@ impl BuilderGenCtx {
 
         let ide_hints = self.ide_hints();
 
-        let named_members_init_exprs = self.named_members().map(|member| {
-            if member.is_optional() {
-                quote!(None)
-            } else {
-                quote!(::bon::private::Member::unset())
+        //`Default` trait implementation is provided only for tuples up to 12
+        // elements in the standard library 😳:
+        // https://github.com/rust-lang/rust/blob/67bb749c2e1cf503fee64842963dd3e72a417a3f/library/core/src/tuple.rs#L213
+        let named_members_field_init = if self.named_members().take(13).count() < 12 {
+            quote!(::core::default::Default::default())
+        } else {
+            let none = quote!(::core::option::Option::None);
+            let nones = self.named_members().map(|_| &none);
+            quote! {
+                (#(#nones,)*)
             }
-        });
+        };
 
         let func = quote! {
             #(#docs)*
@@ -244,7 +288,7 @@ impl BuilderGenCtx {
                     __private_phantom: ::core::marker::PhantomData,
                     #receiver_field_init
                     #start_fn_args_field_init
-                    __private_named_members: (#( #named_members_init_exprs, )*)
+                    __private_named_members: #named_members_field_init,
                 }
             }
         };
@@ -517,20 +561,10 @@ impl BuilderGenCtx {
         });
 
         let named_members_types = self.named_members().map(|member| {
-            member
-                .as_optional_norm_ty()
-                .map(|ty| {
-                    quote! {
-                        ::core::option::Option<#ty>
-                    }
-                })
-                .unwrap_or_else(|| {
-                    let ty = &member.norm_ty;
-                    let member_pascal = &member.norm_ident_pascal;
-                    quote! {
-                        ::bon::private::Member<BuilderTypeState::#member_pascal, #ty>
-                    }
-                })
+            let ty = member.as_optional_norm_ty().unwrap_or(&member.norm_ty);
+            quote! {
+                ::core::option::Option<#ty>
+            }
         });
 
         let docs = &self.builder_type.docs;
@@ -589,42 +623,53 @@ impl BuilderGenCtx {
             }
         };
 
-        let suffix = member
-            .as_optional_norm_ty()
-            .map(|_| {
-                // For `Option` members we don't need any `unwrap_or_[else/default]`.
-                // The implementation of `From<Unset> for Set<Option<T>>` already
-                // returns an `Option<T>`.
-                if member.norm_ty.is_option() {
-                    return None;
-                }
-
-                let default = member
-                    .param_default()
-                    .flatten()
-                    .map(|default| {
-                        let has_into = member.param_into(&self.on_params)?;
-                        let default = if has_into {
-                            quote! { ::core::convert::Into::into((|| #default)()) }
-                        } else {
-                            quote! { #default }
-                        };
-
-                        Result::<_>::Ok(quote! { .unwrap_or_else(|| #default) })
-                    })
-                    .unwrap_or_else(|| Ok(quote! { .unwrap_or_default() }));
-
-                Some(default)
-            })
-            .map(Option::transpose)
-            .transpose()?
-            .unwrap_or_else(|| Some(quote! { .into_inner() }));
-
         let index = &member.index;
 
-        Ok(quote! {
-            self.__private_named_members.#index #suffix
-        })
+        let member_field = quote! {
+            self.__private_named_members.#index
+        };
+
+        // For `Option` the default value is always `None`. So we can just return
+        // the value of the member field itself (which is already an `Option<T>`).
+        if member.norm_ty.is_option() {
+            return Ok(member_field.to_token_stream());
+        }
+
+        let default = match member.param_default() {
+            Some(Some(default)) => {
+                let has_into = member.param_into(&self.on_params)?;
+                let default = if has_into {
+                    quote! { ::core::convert::Into::into((|| #default)()) }
+                } else {
+                    quote! { #default }
+                };
+
+                quote! {
+                    ::core::option::Option::unwrap_or_else(#member_field, || #default)
+                }
+            }
+            Some(None) => {
+                quote! {
+                    ::core::option::Option::unwrap_or_default(#member_field)
+                }
+            }
+            None => {
+                quote! {
+                    unsafe {
+                        // SAFETY: we know that the member is set because we are in
+                        // the `finish` function because this method uses the trait
+                        // bounds of `IsSet` for every required member. It's also
+                        // not possible to intervene with the builder's state from
+                        // the outside because all members of the builder are considered
+                        // private (we even generate random names for them to make it
+                        // impossible to access them from the outside in the same module).
+                        ::core::option::Option::unwrap_unchecked(#member_field)
+                    }
+                }
+            }
+        };
+
+        Ok(default)
     }
 
     fn finish_fn(&self) -> Result<TokenStream2> {
