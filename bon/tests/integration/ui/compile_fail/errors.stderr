@@ -201,11 +201,11 @@ error[E0277]: the member `Unset<y>` was not set, but this method requires it to 
    |
    = help: the trait `IsSet` is not implemented for `Unset<y>`
    = help: the trait `IsSet` is implemented for `Set<Name>`
-note: required by a bound in `ExampleBuilder::<BuilderTypeState>::build`
+note: required by a bound in `ExampleBuilder::<BuilderState>::build`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
 24 |     #[derive(Builder)]
-   |              ^^^^^^^ required by this bound in `ExampleBuilder::<BuilderTypeState>::build`
+   |              ^^^^^^^ required by this bound in `ExampleBuilder::<BuilderState>::build`
 25 |     struct Example {
    |            ------- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
@@ -218,11 +218,11 @@ error[E0277]: the member `Unset<renamed>` was not set, but this method requires 
    |
    = help: the trait `IsSet` is not implemented for `Unset<renamed>`
    = help: the trait `IsSet` is implemented for `Set<Name>`
-note: required by a bound in `ExampleBuilder::<BuilderTypeState>::build`
+note: required by a bound in `ExampleBuilder::<BuilderState>::build`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
 24 |     #[derive(Builder)]
-   |              ^^^^^^^ required by this bound in `ExampleBuilder::<BuilderTypeState>::build`
+   |              ^^^^^^^ required by this bound in `ExampleBuilder::<BuilderState>::build`
 25 |     struct Example {
    |            ------- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
@@ -235,11 +235,11 @@ error[E0277]: the member `Set<y>` was already set, but this method requires it t
    |
    = help: the trait `IsUnset` is not implemented for `Set<y>`
    = help: the trait `IsUnset` is implemented for `Unset<Name>`
-note: required by a bound in `ExampleBuilder::<BuilderTypeState>::y`
+note: required by a bound in `ExampleBuilder::<BuilderState>::y`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
 24 |     #[derive(Builder)]
-   |              ^^^^^^^ required by this bound in `ExampleBuilder::<BuilderTypeState>::y`
+   |              ^^^^^^^ required by this bound in `ExampleBuilder::<BuilderState>::y`
 ...
 27 |         y: u32,
    |         - required by a bound in this associated function
@@ -253,11 +253,11 @@ error[E0277]: the member `Unset<arg1>` was not set, but this method requires it 
    |
    = help: the trait `IsSet` is not implemented for `Unset<arg1>`
    = help: the trait `IsSet` is implemented for `Set<Name>`
-note: required by a bound in `SutBuilder::<BuilderTypeState>::build`
+note: required by a bound in `SutBuilder::<BuilderState>::build`
   --> tests/integration/ui/compile_fail/errors.rs:42:18
    |
 42 |         #[derive(Builder)]
-   |                  ^^^^^^^ required by this bound in `SutBuilder::<BuilderTypeState>::build`
+   |                  ^^^^^^^ required by this bound in `SutBuilder::<BuilderState>::build`
 43 |         struct Sut {
    |                --- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)

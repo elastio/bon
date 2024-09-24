@@ -62,6 +62,7 @@ pub(crate) struct BuilderDerives {
 pub(crate) struct OnParams {
     pub(crate) type_pattern: syn::Type,
     pub(crate) into: darling::util::Flag,
+    pub(crate) mutable: darling::util::Flag,
 }
 
 impl Parse for OnParams {
@@ -74,17 +75,26 @@ impl Parse for OnParams {
         #[derive(FromMeta)]
         struct Parsed {
             into: darling::util::Flag,
+            mutable: darling::util::Flag,
         }
 
-        let Parsed { into } = Parsed::from_meta(&syn::parse_quote!(on(#rest)))?;
+        let parsed = Parsed::from_meta(&syn::parse_quote!(on(#rest)))?;
 
-        if !into.is_present() {
-            return Err(syn::Error::new_spanned(
-                &rest,
-                "this #[builder(on(type_pattern, ...))] contains no options to override \
-                the default behavior for the selected setters like `into`, so it \
-                does nothing",
-            ));
+        {
+            // Validate that at least some option was enabled.
+            // This lives in a separate block to make sure that if a new
+            // field is added to `Parsed` and unused here, then a compiler
+            // warning is emitted.
+            let Parsed { into, mutable } = &parsed;
+
+            if !into.is_present() && !mutable.is_present() {
+                return Err(syn::Error::new_spanned(
+                    &rest,
+                    "this #[builder(on(type_pattern, ...))] contains no options to override \
+                    the default behavior for the selected setters like `into`, so it \
+                    does nothing",
+                ));
+            }
         }
 
         struct FindAttr {
@@ -119,7 +129,13 @@ impl Parse for OnParams {
             "BUG: the type pattern does not match itself: {type_pattern:#?}"
         );
 
-        Ok(Self { type_pattern, into })
+        let Parsed { into, mutable } = parsed;
+
+        Ok(Self {
+            type_pattern,
+            into,
+            mutable,
+        })
     }
 }
 

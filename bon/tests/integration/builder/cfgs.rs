@@ -66,7 +66,8 @@ fn fn_smoke() {
         arg1: bool,
 
         /// doc comment
-        #[cfg(not(all()))] arg1: u32,
+        #[cfg(not(all()))]
+        arg1: u32,
 
         #[cfg(any())] arg1: String,
     ) -> bool {
@@ -84,7 +85,8 @@ fn fn_with_params() {
         #[cfg(all())] arg1: bool,
 
         /// doc comment
-        #[cfg(not(all()))] arg1: u32,
+        #[cfg(not(all()))]
+        arg1: u32,
 
         #[cfg_attr(all(), builder(default))] arg2: [u8; 4],
 
@@ -124,7 +126,8 @@ fn impl_block() {
             arg1: bool,
 
             /// doc comment
-            #[cfg(not(all()))] arg1: u32,
+            #[cfg(not(all()))]
+            arg1: u32,
 
             #[cfg(any())] arg1: String,
         ) -> bool {
@@ -137,7 +140,8 @@ fn impl_block() {
             #[cfg(all())] arg1: bool,
 
             /// doc comment
-            #[cfg(not(all()))] arg1: u32,
+            #[cfg(not(all()))]
+            arg1: u32,
 
             #[cfg_attr(all(), builder(default))] arg2: [u8; 4],
 

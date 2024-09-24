@@ -311,7 +311,7 @@ impl FnInputCtx {
             })
             .collect::<Result<Vec<_>>>()?;
 
-        let members = Member::from_raw(MemberOrigin::FnArg, members)?;
+        let members = Member::from_raw(&self.params.base.on, MemberOrigin::FnArg, members)?;
 
         let generics = self.generics();
 

@@ -1,6 +1,7 @@
 mod into_conversion;
 mod params;
 
+use super::builder_params::OnParams;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
 use darling::FromAttributes;
@@ -158,6 +159,23 @@ impl NamedMember {
             .as_ref()
             .map(|default| default.as_ref().as_ref())
     }
+
+    pub(crate) fn is_stateful(&self) -> bool {
+        !self.is_optional() || !self.params.mutable.is_present()
+    }
+
+    pub(crate) fn merge_param_mutable(&mut self, on_params: &[OnParams]) -> Result {
+        self.params.mutable = params::EvalBlanketFlagParam {
+            on_params,
+            param_name: params::BlanketParamName::Mutable,
+            member_params: &self.params,
+            scrutinee: &self.norm_ty,
+            origin: self.origin,
+        }
+        .eval()?;
+
+        Ok(())
+    }
 }
 
 pub(crate) struct RawMember<'a> {
@@ -174,6 +192,7 @@ impl Member {
     // (there is an other lint that checks for this).
     #[allow(single_use_lifetimes)]
     pub(crate) fn from_raw<'a>(
+        on_params: &[OnParams],
         origin: MemberOrigin,
         members: impl IntoIterator<Item = RawMember<'a>>,
     ) -> Result<Vec<Self>> {
@@ -190,21 +209,23 @@ impl Member {
 
         let mut output = vec![];
 
-        let start_fn_args = (0..).map_while(|index| {
-            let (member, params) = members.next_if(|(_, params)| params.start_fn.is_present())?;
-            let base = PositionalFnArgMember::new(origin, member, params);
-            Some(Self::StartFnArg(StartFnArgMember {
+        for index in 0.. {
+            let next = members.next_if(|(_, params)| params.start_fn.is_present());
+            let (member, params) = match next {
+                Some(item) => item,
+                None => break,
+            };
+            let base = PositionalFnArgMember::new(origin, member, on_params, params)?;
+            output.push(Self::StartFnArg(StartFnArgMember {
                 base,
                 index: index.into(),
             }))
-        });
-
-        output.extend(start_fn_args);
+        }
 
         while let Some((member, params)) =
             members.next_if(|(_, params)| params.finish_fn.is_present())
         {
-            let member = PositionalFnArgMember::new(origin, member, params);
+            let member = PositionalFnArgMember::new(origin, member, on_params, params)?;
             output.push(Self::FinishFnArg(member));
         }
 
@@ -264,7 +285,7 @@ impl Member {
             let norm_ident = syn::Ident::new_maybe_raw(norm_ident, orig_ident.span());
             let norm_ident_pascal = norm_ident.snake_to_pascal_case();
 
-            let me = NamedMember {
+            let mut member = NamedMember {
                 index: named_count.into(),
                 origin,
                 norm_ident_pascal,
@@ -276,9 +297,11 @@ impl Member {
                 docs,
             };
 
-            me.validate()?;
+            member.merge_param_into(on_params)?;
+            member.merge_param_mutable(on_params)?;
+            member.validate()?;
 
-            output.push(Self::Named(me));
+            output.push(Self::Named(member));
             named_count += 1;
         }
 
@@ -328,7 +351,12 @@ impl Member {
 }
 
 impl PositionalFnArgMember {
-    fn new(origin: MemberOrigin, member: RawMember<'_>, params: MemberParams) -> Self {
+    fn new(
+        origin: MemberOrigin,
+        member: RawMember<'_>,
+        on_params: &[OnParams],
+        params: MemberParams,
+    ) -> Result<Self> {
         let RawMember {
             attrs: _,
             ident,
@@ -336,12 +364,16 @@ impl PositionalFnArgMember {
             orig_ty,
         } = member;
 
-        Self {
+        let mut me = Self {
             origin,
             ident,
             norm_ty,
             orig_ty,
             params,
-        }
+        };
+
+        me.merge_param_into(on_params)?;
+
+        Ok(me)
     }
 }

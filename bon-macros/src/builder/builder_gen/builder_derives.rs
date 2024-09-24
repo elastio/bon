@@ -104,11 +104,11 @@ impl BuilderGenCtx {
             #[automatically_derived]
             impl<
                 #(#generics_decl,)*
-                BuilderTypeState: #builder_mod_ident::State
+                BuilderState: #builder_mod_ident::State
             >
             #clone for #builder_ident<
                 #(#generic_args,)*
-                BuilderTypeState
+                BuilderState
             >
             #where_clause
             {
@@ -140,7 +140,8 @@ impl BuilderGenCtx {
                     let member_ident_str = member.public_ident().to_string();
                     let member_pascal = &member.norm_ident_pascal;
 
-                    let debug_fn = member.as_optional_norm_ty()
+                    let debug_fn = member
+                        .as_optional_norm_ty()
                         .map(|ty| quote!(debug_optional_member::<#ty>))
                         .unwrap_or_else(|| {
                             let ty = &member.norm_ty;
@@ -149,7 +150,7 @@ impl BuilderGenCtx {
 
                     Some(quote! {
                         // Skip members that are not set to reduce noise
-                        if <BuilderTypeState::#member_pascal as ::bon::private::MemberState>::is_set() {
+                        if <BuilderState::#member_pascal as ::bon::private::MemberState>::is_set() {
                             output.field(
                                 #member_ident_str,
                                 ::bon::private::derives::#debug_fn(
@@ -204,11 +205,11 @@ impl BuilderGenCtx {
             #[automatically_derived]
             impl<
                 #(#generics_decl,)*
-                BuilderTypeState: #builder_mod_ident::State
+                BuilderState: #builder_mod_ident::State
             >
             #debug for #builder_ident<
                 #(#generic_args,)*
-                BuilderTypeState
+                BuilderState
             >
             #where_clause
             {

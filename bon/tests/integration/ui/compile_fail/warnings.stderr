@@ -52,7 +52,7 @@ help: use `let _ = ...` to ignore the resulting value
 33 |         let _ = Example::builder().x(1);
    |         +++++++
 
-error: unused return value of `ExampleBuilder::<BuilderTypeState>::build` that must be used
+error: unused return value of `ExampleBuilder::<BuilderState>::build` that must be used
   --> tests/integration/ui/compile_fail/warnings.rs:34:9
    |
 34 |         Example::builder().x(1).y(2).build();
@@ -64,7 +64,7 @@ help: use `let _ = ...` to ignore the resulting value
 34 |         let _ = Example::builder().x(1).y(2).build();
    |         +++++++
 
-error: unused return value of `ExampleMustUseBuilder::<BuilderTypeState>::call` that must be used
+error: unused return value of `ExampleMustUseBuilder::<BuilderState>::call` that must be used
   --> tests/integration/ui/compile_fail/warnings.rs:36:9
    |
 36 |         Example::must_use().call();
@@ -75,7 +75,7 @@ help: use `let _ = ...` to ignore the resulting value
 36 |         let _ = Example::must_use().call();
    |         +++++++
 
-error: unused return value of `MustUseBuilder::<BuilderTypeState>::call` that must be used
+error: unused return value of `MustUseBuilder::<BuilderState>::call` that must be used
   --> tests/integration/ui/compile_fail/warnings.rs:38:9
    |
 38 |         must_use().call();
@@ -97,7 +97,7 @@ help: use `let _ = ...` to ignore the resulting value
 39 |         let _ = __orig_must_use();
    |         +++++++
 
-error: unused return value of `MustUseUnderCfgBuilder::<BuilderTypeState>::call` that must be used
+error: unused return value of `MustUseUnderCfgBuilder::<BuilderState>::call` that must be used
   --> tests/integration/ui/compile_fail/warnings.rs:47:9
    |
 47 |         must_use_under_cfg().call();

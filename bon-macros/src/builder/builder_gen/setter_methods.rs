@@ -15,14 +15,14 @@ impl<'a> MemberSettersCtx<'a> {
         }
     }
 
-    pub(crate) fn setter_methods(&self) -> Result<TokenStream2> {
+    pub(crate) fn setter_methods(&self) -> TokenStream2 {
         let member_type = self.member.norm_ty.as_ref();
 
         if let Some(inner_type) = self.member.as_optional_norm_ty() {
             return self.setters_for_optional_member(inner_type);
         }
 
-        let has_into = self.member.param_into(&self.builder_gen.on_params)?;
+        let has_into = self.member.params.into.is_present();
 
         let (fn_param_type, maybe_into_call) = if has_into {
             (quote!(impl Into<#member_type>), quote!(.into()))
@@ -30,18 +30,18 @@ impl<'a> MemberSettersCtx<'a> {
             (quote!(#member_type), quote!())
         };
 
-        Ok(self.setter_method(MemberSetterMethod {
+        self.setter_method(MemberSetterMethod {
             method_name: self.member.public_ident().clone(),
             fn_params: quote!(value: #fn_param_type),
             overwrite_docs: None,
             body: SetterBody::Default {
                 member_init: quote!(Some(value #maybe_into_call)),
             },
-        }))
+        })
     }
 
-    fn setters_for_optional_member(&self, inner_type: &syn::Type) -> Result<TokenStream2> {
-        let has_into = self.member.param_into(&self.builder_gen.on_params)?;
+    fn setters_for_optional_member(&self, inner_type: &syn::Type) -> TokenStream2 {
+        let has_into = self.member.params.into.is_present();
         let (inner_type, maybe_map_conv_call) = if has_into {
             (quote!(impl Into<#inner_type>), quote!(.map(Into::into)))
         } else {
@@ -88,10 +88,10 @@ impl<'a> MemberSettersCtx<'a> {
             },
         ];
 
-        Ok(methods
+        methods
             .into_iter()
             .map(|method| self.setter_method(method))
-            .collect())
+            .concat()
     }
 
     fn setter_method(&self, method: MemberSetterMethod) -> TokenStream2 {
@@ -114,9 +114,18 @@ impl<'a> MemberSettersCtx<'a> {
             SetterBody::Custom(body) => body,
             SetterBody::Default { member_init } => {
                 let index = &self.member.index;
+
+                let state_transition_call = if self.member.is_stateful() {
+                    quote! {
+                        .__private_transition_type_state()
+                    }
+                } else {
+                    quote! {}
+                };
+
                 quote! {
                     self.__private_named_members.#index = #member_init;
-                    self.__private_transition_type_state()
+                    self #state_transition_call
                 }
             }
         };
@@ -127,10 +136,10 @@ impl<'a> MemberSettersCtx<'a> {
             quote::format_ident!("Set{}", self.member.norm_ident_pascal.raw_name());
 
         let builder_mod = &self.builder_gen.builder_mod.ident;
-        let generic_param = if self.builder_gen.named_members().take(2).count() == 1 {
+        let generic_param = if self.builder_gen.stateful_members().take(2).count() == 1 {
             quote!()
         } else {
-            quote!(<BuilderTypeState>)
+            quote!(<BuilderState>)
         };
 
         let state_transition = quote! {
@@ -139,6 +148,24 @@ impl<'a> MemberSettersCtx<'a> {
 
         let builder_ident = &self.builder_gen.builder_type.ident;
         let generic_args = &self.builder_gen.generics.args;
+
+        let return_type = if self.member.is_stateful() {
+            quote! {
+                #builder_ident<#(#generic_args,)* #state_transition>
+            }
+        } else {
+            quote! { Self }
+        };
+
+        let where_clause = if self.member.is_stateful() && !self.member.params.mutable.is_present()
+        {
+            quote! {
+                where
+                    BuilderState::#member_pascal: ::bon::IsUnset,
+            }
+        } else {
+            quote! {}
+        };
 
         quote! {
             #( #docs )*
@@ -152,9 +179,8 @@ impl<'a> MemberSettersCtx<'a> {
                 clippy::impl_trait_in_params
             )]
             #[inline(always)]
-            #vis fn #method_name(mut self, #fn_params) -> #builder_ident<#(#generic_args,)* #state_transition>
-            where
-                BuilderTypeState::#member_pascal: ::bon::IsUnset,
+            #vis fn #method_name(mut self, #fn_params) -> #return_type
+            #where_clause
             {
                 #body
             }

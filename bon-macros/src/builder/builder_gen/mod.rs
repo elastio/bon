@@ -8,7 +8,9 @@ pub(crate) mod input_fn;
 pub(crate) mod input_struct;
 
 use crate::util::prelude::*;
-use member::{Member, MemberOrigin, NamedMember, RawMember, StartFnArgMember};
+use member::{
+    Member, MemberOrigin, NamedMember, PositionalFnArgMember, RawMember, StartFnArgMember,
+};
 use models::{
     AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFn, FinishFnBody, Generics,
     StartFn,
@@ -34,11 +36,15 @@ impl BuilderGenCtx {
         self.members.iter().filter_map(Member::as_start_fn_arg)
     }
 
+    fn stateful_members(&self) -> impl Iterator<Item = &NamedMember> {
+        self.named_members().filter(|member| member.is_stateful())
+    }
+
     pub(crate) fn output(self) -> Result<MacroOutput> {
-        let mut start_fn = self.start_fn()?;
+        let mut start_fn = self.start_fn();
         let builder_mod = self.builder_mod();
         let builder_decl = self.builder_decl();
-        let builder_impl = self.builder_impl()?;
+        let builder_impl = self.builder_impl();
         let builder_derives = self.builder_derives();
 
         let default_allows = syn::parse_quote!(#[allow(
@@ -90,13 +96,12 @@ impl BuilderGenCtx {
         })
     }
 
-    fn builder_impl(&self) -> Result<TokenStream2> {
-        let finish_fn = self.finish_fn()?;
+    fn builder_impl(&self) -> TokenStream2 {
+        let finish_fn = self.finish_fn();
         let transition_type_state_fn = self.transition_type_state_fn();
         let setter_methods = self
             .named_members()
-            .map(|member| MemberSettersCtx::new(self, member).setter_methods())
-            .collect::<Result<Vec<_>>>()?;
+            .map(|member| MemberSettersCtx::new(self, member).setter_methods());
 
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
@@ -106,16 +111,16 @@ impl BuilderGenCtx {
 
         let allows = allow_warnings_on_member_types();
 
-        Ok(quote! {
+        quote! {
             #allows
             #[automatically_derived]
             impl<
                 #(#generics_decl,)*
-                BuilderTypeState: #builder_mod::State
+                BuilderState: #builder_mod::State
             >
             #builder_ident<
                 #(#generic_args,)*
-                BuilderTypeState
+                BuilderState
             >
             #where_clause
             {
@@ -123,7 +128,7 @@ impl BuilderGenCtx {
                 #(#setter_methods)*
                 #transition_type_state_fn
             }
-        })
+        }
     }
 
     /// Generates code that has no meaning to the compiler, but it helps
@@ -198,7 +203,7 @@ impl BuilderGenCtx {
         }
     }
 
-    fn start_fn(&self) -> Result<syn::ItemFn> {
+    fn start_fn(&self) -> syn::ItemFn {
         let builder_ident = &self.builder_type.ident;
 
         let docs = &self.start_fn.attrs;
@@ -235,15 +240,14 @@ impl BuilderGenCtx {
 
         let start_fn_params = self
             .start_fn_args()
-            .map(|member| member.base.fn_input_param(&self.on_params))
-            .collect::<Result<Vec<_>>>()?;
+            .map(|member| member.base.fn_input_param());
 
-        let start_fn_arg_exprs = self
+        let mut start_fn_arg_exprs = self
             .start_fn_args()
-            .map(|member| member.base.maybe_into_ident_expr(&self.on_params))
-            .collect::<Result<Vec<_>>>()?;
+            .map(|member| member.base.maybe_into_ident_expr())
+            .peekable();
 
-        let start_fn_args_field_init = (!start_fn_arg_exprs.is_empty()).then(|| {
+        let start_fn_args_field_init = start_fn_arg_exprs.peek().is_some().then(|| {
             quote! {
                 __private_start_fn_args: (#(#start_fn_arg_exprs,)*),
             }
@@ -254,7 +258,7 @@ impl BuilderGenCtx {
         //`Default` trait implementation is provided only for tuples up to 12
         // elements in the standard library 😳:
         // https://github.com/rust-lang/rust/blob/67bb749c2e1cf503fee64842963dd3e72a417a3f/library/core/src/tuple.rs#L213
-        let named_members_field_init = if self.named_members().take(13).count() < 12 {
+        let named_members_field_init = if self.named_members().take(13).count() <= 12 {
             quote!(::core::default::Default::default())
         } else {
             let none = quote!(::core::option::Option::None);
@@ -264,7 +268,7 @@ impl BuilderGenCtx {
             }
         };
 
-        let func = quote! {
+        syn::parse_quote! {
             #(#docs)*
             #[inline(always)]
             #[allow(
@@ -291,9 +295,7 @@ impl BuilderGenCtx {
                     __private_named_members: #named_members_field_init,
                 }
             }
-        };
-
-        Ok(syn::parse_quote!(#func))
+        }
     }
 
     fn phantom_data(&self) -> TokenStream2 {
@@ -354,59 +356,70 @@ impl BuilderGenCtx {
                 // explanation for it, I just didn't care to research it yet ¯\_(ツ)_/¯.
                 #(#types,)*
 
-                // A special case of zero members requires storing `BuilderTypeState` in
+                // A special case of zero members requires storing `BuilderState` in
                 // phantom data otherwise it would be reported as an unused type parameter.
-                fn() -> ::core::marker::PhantomData<BuilderTypeState>,
+                fn() -> ::core::marker::PhantomData<BuilderState>,
             )>
         }
     }
 
-    fn state_transition_aliases(&self) -> impl Iterator<Item = TokenStream2> + '_ {
+    fn state_transition_aliases(&self) -> TokenStream2 {
         let vis_child = &self.builder_mod.vis_child;
-        let is_single_member = self.named_members().take(2).count() == 1;
 
-        self.named_members().map(move |member| {
-            let states = self.named_members().map(|other_member| {
-                if other_member.orig_ident == member.orig_ident {
-                    let ident = &member.public_ident();
-                    quote! {
-                        ::bon::private::Set<members::#ident>
+        let stateful_members = self.stateful_members().collect::<Vec<_>>();
+        let is_single_member = stateful_members.len() == 1;
+
+        stateful_members
+            .iter()
+            .map(|member| {
+                let states = stateful_members.iter().map(|other_member| {
+                    if other_member.orig_ident == member.orig_ident {
+                        let ident = &member.public_ident();
+                        quote! {
+                            ::bon::private::Set<members::#ident>
+                        }
+                    } else {
+                        let member_pascal = &other_member.norm_ident_pascal;
+                        quote! {
+                            S::#member_pascal
+                        }
                     }
-                } else {
-                    let member_pascal = &other_member.norm_ident_pascal;
-                    quote! {
-                        S::#member_pascal
-                    }
+                });
+
+                let member_ident = member.public_ident();
+                let alias_ident =
+                    quote::format_ident!("Set{}", member.norm_ident_pascal.raw_name());
+
+                if is_single_member {
+                    let docs = format!(
+                        "Changes the type state of the builder to set the member \
+                        `{member_ident}`.",
+                    );
+
+                    return quote! {
+                        #[doc = #docs]
+                        #vis_child type #alias_ident = ( #(#states,)* );
+                    };
                 }
-            });
 
-            let member_ident = member.public_ident();
-            let alias_ident = quote::format_ident!("Set{}", member.norm_ident_pascal.raw_name());
-
-            if is_single_member {
                 let docs = format!(
-                    "Changes the type state of the builder to set the member `{member_ident}`.",
+                    "Changes the type state of the builder to set the member `{member_ident}`. \
+                    The `S` parameter is the type state to update. If not specified \
+                    then [`AllUnset`] state is used, which results in all members being \
+                    unset except for `{member_ident}`.\n\n\
+                    [`AllUnset`]: self::AllUnset",
                 );
 
-                return quote! {
+                quote! {
                     #[doc = #docs]
-                    #vis_child type #alias_ident = ( #(#states,)* );
-                };
-            }
-
-            let docs = format!(
-                "Changes the type state of the builder to set the member `{member_ident}`. \
-                The `S` parameter is the type state to update. If not specified \
-                then [`AllUnset`] state is used, which results in all members being \
-                unset except for `{member_ident}`.\n\n\
-                [`AllUnset`]: self::AllUnset",
-            );
-
-            quote! {
-                #[doc = #docs]
-                #vis_child type #alias_ident<S: self::State = self::AllUnset> = ( #(#states,)* );
-            }
-        })
+                    #vis_child type #alias_ident<
+                        S: self::State = self::AllUnset
+                    > = (
+                        #(#states,)*
+                    );
+                }
+            })
+            .concat()
     }
 
     fn builder_mod(&self) -> TokenStream2 {
@@ -416,14 +429,14 @@ impl BuilderGenCtx {
 
         let builder_mod_docs = &self.builder_mod.docs;
         let builder_mod_ident = &self.builder_mod.ident;
-        let state_transition_aliases = self.state_transition_aliases().collect::<Vec<_>>();
+        let state_transition_aliases = self.state_transition_aliases();
 
-        let named_members_idents = self
-            .named_members()
+        let stateful_members_idents = self
+            .stateful_members()
             .map(NamedMember::public_ident)
             .collect::<Vec<_>>();
 
-        let assoc_types_docs = self.named_members().map(|member| {
+        let assoc_types_docs = self.stateful_members().map(|member| {
             let ident = &member.public_ident();
             format!(
                 "Represents the state of the member `{ident}`.\n\n\
@@ -431,15 +444,15 @@ impl BuilderGenCtx {
             )
         });
 
-        let named_members_pascal = self
-            .named_members()
+        let stateful_members_pascal = self
+            .stateful_members()
             .map(|member| &member.norm_ident_pascal)
             .collect::<Vec<_>>();
 
         quote! {
             #( #builder_mod_docs )*
             #vis_mod mod #builder_mod_ident {
-                #( #state_transition_aliases )*
+                #state_transition_aliases
 
                 /// Represents the builder's type state that specifies which members are set and which are not.
                 ///
@@ -451,8 +464,8 @@ impl BuilderGenCtx {
                 #vis_child trait State: ::core::marker::Sized {
                     #(
                         #[doc = #assoc_types_docs]
-                        type #named_members_pascal: ::bon::private::NamedMemberState<
-                            self::members::#named_members_idents
+                        type #stateful_members_pascal: ::bon::private::NamedMemberState<
+                            self::members::#stateful_members_idents
                         >;
                     )*
 
@@ -467,20 +480,20 @@ impl BuilderGenCtx {
                 // members named `state` which would create a generic param named `State`
                 // that would shadow the trait `State` in the same scope.
                 impl<#(
-                    #named_members_pascal: ::bon::private::NamedMemberState<
-                        self::members::#named_members_idents
+                    #stateful_members_pascal: ::bon::private::NamedMemberState<
+                        self::members::#stateful_members_idents
                     >,
                 )*>
-                self::State for ( #(#named_members_pascal,)* )
+                self::State for ( #(#stateful_members_pascal,)* )
                 {
-                    #( type #named_members_pascal = #named_members_pascal; )*
+                    #( type #stateful_members_pascal = #stateful_members_pascal; )*
 
                     fn __sealed(_: self::sealed::Sealed) {}
                 }
 
                 /// Initial state of the builder where all named members are unset
                 #vis_child type AllUnset = (
-                    #(::bon::private::Unset<members::#named_members_idents>,)*
+                    #(::bon::private::Unset<members::#stateful_members_idents>,)*
                 );
 
                 #[deprecated =
@@ -500,7 +513,7 @@ impl BuilderGenCtx {
                             // exported items of the parent module.
                             unnameable_types,
                         )]
-                        #vis_child_child enum #named_members_idents {}
+                        #vis_child_child enum #stateful_members_idents {}
                     )*
                 }
             }
@@ -585,7 +598,7 @@ impl BuilderGenCtx {
             )]
             #builder_vis struct #builder_ident<
                 #(#generics_decl,)*
-                BuilderTypeState: #builder_mod::State = #builder_mod::AllUnset
+                BuilderState: #builder_mod::State = #builder_mod::AllUnset
             >
             #where_clause
             {
@@ -601,25 +614,23 @@ impl BuilderGenCtx {
         }
     }
 
-    fn finish_fn_member_expr(&self, member: &Member) -> Result<TokenStream2> {
+    fn finish_fn_member_expr(member: &Member) -> TokenStream2 {
         let member = match member {
             Member::Named(member) => member,
             Member::Skipped(member) => {
-                let expr = member
+                return member
                     .value
                     .as_ref()
                     .as_ref()
                     .map(|value| quote! { (|| #value)() })
                     .unwrap_or_else(|| quote! { ::core::default::Default::default() });
-
-                return Ok(expr);
             }
             Member::StartFnArg(member) => {
                 let index = &member.index;
-                return Ok(quote! { self.__private_start_fn_args.#index });
+                return quote! { self.__private_start_fn_args.#index };
             }
             Member::FinishFnArg(member) => {
-                return member.maybe_into_ident_expr(&self.on_params);
+                return member.maybe_into_ident_expr();
             }
         };
 
@@ -632,12 +643,12 @@ impl BuilderGenCtx {
         // For `Option` the default value is always `None`. So we can just return
         // the value of the member field itself (which is already an `Option<T>`).
         if member.norm_ty.is_option() {
-            return Ok(member_field.to_token_stream());
+            return member_field.to_token_stream();
         }
 
-        let default = match member.param_default() {
+        match member.param_default() {
             Some(Some(default)) => {
-                let has_into = member.param_into(&self.on_params)?;
+                let has_into = member.params.into.is_present();
                 let default = if has_into {
                     quote! { ::core::convert::Into::into((|| #default)()) }
                 } else {
@@ -667,34 +678,28 @@ impl BuilderGenCtx {
                     }
                 }
             }
-        };
-
-        Ok(default)
+        }
     }
 
-    fn finish_fn(&self) -> Result<TokenStream2> {
-        let members_vars_decls = self
-            .members
-            .iter()
-            .map(|member| {
-                let expr = self.finish_fn_member_expr(member)?;
-                let var_ident = member.orig_ident();
+    fn finish_fn(&self) -> TokenStream2 {
+        let members_vars_decls = self.members.iter().map(|member| {
+            let expr = Self::finish_fn_member_expr(member);
+            let var_ident = member.orig_ident();
 
-                // The type hint is necessary in some cases to assist the compiler
-                // in type inference.
-                //
-                // For example, if the expression is passed to a function that accepts
-                // an impl Trait such as `impl Default`, and the expression itself looks
-                // like `Default::default()`. In this case nothing hints to the compiler
-                // the resulting type of the expression, so we add a type hint via an
-                // intermediate variable here.
-                let ty = member.norm_ty();
+            // The type hint is necessary in some cases to assist the compiler
+            // in type inference.
+            //
+            // For example, if the expression is passed to a function that accepts
+            // an impl Trait such as `impl Default`, and the expression itself looks
+            // like `Default::default()`. In this case nothing hints to the compiler
+            // the resulting type of the expression, so we add a type hint via an
+            // intermediate variable here.
+            let ty = member.norm_ty();
 
-                Ok(quote! {
-                    let #var_ident: #ty = #expr;
-                })
-            })
-            .collect::<Result<Vec<_>>>()?;
+            quote! {
+                let #var_ident: #ty = #expr;
+            }
+        });
 
         let where_bounds = self
             .named_members()
@@ -702,7 +707,7 @@ impl BuilderGenCtx {
             .map(|member| {
                 let member_pascal = &member.norm_ident_pascal;
                 quote! {
-                    BuilderTypeState::#member_pascal: ::bon::IsSet
+                    BuilderState::#member_pascal: ::bon::IsSet
                 }
             });
 
@@ -710,8 +715,7 @@ impl BuilderGenCtx {
             .members
             .iter()
             .filter_map(Member::as_finish_fn_arg)
-            .map(|member| member.fn_input_param(&self.on_params))
-            .collect::<Result<Vec<_>>>()?;
+            .map(PositionalFnArgMember::fn_input_param);
 
         let body = &self.finish_fn.body.generate(&self.members);
         let asyncness = &self.finish_fn.asyncness;
@@ -726,7 +730,7 @@ impl BuilderGenCtx {
         let finish_fn_ident = &self.finish_fn.ident;
         let output = &self.finish_fn.output;
 
-        Ok(quote! {
+        quote! {
             #(#attrs)*
             #[inline(always)]
             #[allow(
@@ -747,7 +751,7 @@ impl BuilderGenCtx {
                 #(#members_vars_decls)*
                 #body
             }
-        })
+        }
     }
 }
 

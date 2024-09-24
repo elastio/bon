@@ -1,4 +1,9 @@
-use super::MemberOrigin;
+mod blanket;
+
+pub(crate) use blanket::{BlanketParamName, EvalBlanketFlagParam};
+
+use super::{MemberOrigin, RawMember};
+use crate::builder::builder_gen::builder_params::OnParams;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
 use std::fmt;
@@ -32,6 +37,14 @@ pub(crate) struct MemberParams {
     /// gets its own setter methods.
     pub(crate) start_fn: darling::util::Flag,
     pub(crate) finish_fn: darling::util::Flag,
+
+    /// Allows setting the value for the member repeatedly. This reduces the
+    /// number of type states and thus increases the compilation performance.
+    ///
+    /// However, this also means that unintended overwrites won't be caught
+    /// at compile time. Measure the compilation time before and after enabling
+    /// this option to see if it's worth it.
+    pub(crate) mutable: darling::util::Flag,
 }
 
 #[derive(PartialEq, Eq, Clone, Copy)]
@@ -42,6 +55,7 @@ enum ParamName {
     Skip,
     StartFn,
     FinishFn,
+    Mutable,
 }
 
 impl fmt::Display for ParamName {
@@ -53,6 +67,7 @@ impl fmt::Display for ParamName {
             Self::Skip => "skip",
             Self::StartFn => "start_fn",
             Self::FinishFn => "finish_fn",
+            Self::Mutable => "mutable",
         };
         f.write_str(str)
     }
@@ -93,6 +108,7 @@ impl MemberParams {
             name,
             finish_fn,
             start_fn,
+            mutable,
         } = self;
 
         let attrs = [
@@ -102,6 +118,7 @@ impl MemberParams {
             (skip.is_some(), ParamName::Skip),
             (start_fn.is_present(), ParamName::StartFn),
             (finish_fn.is_present(), ParamName::FinishFn),
+            (mutable.is_present(), ParamName::Mutable),
         ];
 
         attrs
