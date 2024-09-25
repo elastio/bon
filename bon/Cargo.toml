@@ -2,7 +2,7 @@
 name    = "bon"
 version = "2.3.0"
 
-description = "Next gen compile-time-checked builder generator, named function arguments, and more!"
+description = "Next-gen compile-time-checked builder generator, named function's arguments, and more!"
 
 categories = [
   "rust-patterns",
