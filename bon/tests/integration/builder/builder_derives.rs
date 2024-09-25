@@ -13,7 +13,7 @@ fn smoke_fn() {
 
     assert_debug_eq(
         actual,
-        expect![[r#"SutBuilder { arg1: true, arg3: Some("value"), arg4: None }"#]],
+        expect![[r#"SutBuilder { arg1: true, arg3: "value" }"#]],
     );
 }
 
@@ -36,7 +36,7 @@ fn smoke_struct() {
 
     assert_debug_eq(
         actual,
-        expect![[r#"SutBuilder { arg1: true, arg3: Some("value"), arg4: None }"#]],
+        expect![[r#"SutBuilder { arg1: true, arg3: "value" }"#]],
     );
 }
 

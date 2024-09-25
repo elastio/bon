@@ -464,7 +464,7 @@ impl BuilderGenCtx {
                 #vis_child trait State: ::core::marker::Sized {
                     #(
                         #[doc = #assoc_types_docs]
-                        type #stateful_members_pascal: ::bon::private::NamedMemberState<
+                        type #stateful_members_pascal: ::bon::private::MemberState<
                             self::members::#stateful_members_idents
                         >;
                     )*
@@ -480,7 +480,7 @@ impl BuilderGenCtx {
                 // members named `state` which would create a generic param named `State`
                 // that would shadow the trait `State` in the same scope.
                 impl<#(
-                    #stateful_members_pascal: ::bon::private::NamedMemberState<
+                    #stateful_members_pascal: ::bon::private::MemberState<
                         self::members::#stateful_members_idents
                     >,
                 )*>

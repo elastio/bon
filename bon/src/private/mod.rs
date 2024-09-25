@@ -22,7 +22,6 @@ pub mod ide;
 pub mod derives;
 
 mod cfg_eval;
-mod member;
 
 pub(crate) mod sealed {
     // The purpose of the `Sealed` trait **is** to be unnameable from outside the crate.
@@ -32,8 +31,6 @@ pub(crate) mod sealed {
     impl<Name> Sealed for super::Unset<Name> {}
     impl<Name> Sealed for super::Set<Name> {}
 }
-
-pub use member::*;
 
 use sealed::Sealed;
 
@@ -51,33 +48,14 @@ pub struct Set<Name>(Name);
 
 impl<Name> crate::IsSet for Set<Name> {}
 
-/// Allows to statically check if a member is set or not.
-/// This is basically a utility to do compile-time downcasts.
-pub trait MemberState: Sealed {
-    fn is_set() -> bool;
-}
-
-impl<Name> MemberState for Unset<Name> {
-    #[inline(always)]
-    fn is_set() -> bool {
-        false
-    }
-}
-
-impl<Name> MemberState for Set<Name> {
-    #[inline(always)]
-    fn is_set() -> bool {
-        true
-    }
-}
-
 #[rustversion::attr(
     since(1.78.0),
     diagnostic::on_unimplemented(
-        message = "expected type state for the member `{Name}`, but found `{Self}`",
-        label = "expected type state for the member `{Name}`, but found `{Self}`",
+        message = "expected the type state for the member `{Name}`, but found `{Self}`",
+        label = "expected the type state for the member `{Name}`, but found `{Self}`",
     )
 )]
-pub trait NamedMemberState<Name>: MemberState {}
-impl<Name> NamedMemberState<Name> for Set<Name> {}
-impl<Name> NamedMemberState<Name> for Unset<Name> {}
+pub trait MemberState<Name>: Sealed {}
+
+impl<Name> MemberState<Name> for Unset<Name> {}
+impl<Name> MemberState<Name> for Set<Name> {}

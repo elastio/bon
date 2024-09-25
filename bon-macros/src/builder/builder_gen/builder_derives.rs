@@ -85,16 +85,10 @@ impl BuilderGenCtx {
             // The type hints here are necessary to get better error messages
             // that point directly to the types that don't implement `Clone`
             // in the input code using the span info from the type hints.
-            let clone_fn = member
-                .as_optional_norm_ty()
-                .map(|ty| quote!(clone_optional_member::<#ty>))
-                .unwrap_or_else(|| {
-                    let ty = &member.norm_ty;
-                    quote!(clone_required_member::<_, #ty>)
-                });
+            let ty = member.as_optional_norm_ty().unwrap_or(&member.norm_ty);
 
             quote! {
-                ::bon::private::derives::#clone_fn(
+                ::bon::private::derives::clone_member::<#ty>(
                     &self.__private_named_members.#member_index
                 )
             }
@@ -138,24 +132,12 @@ impl BuilderGenCtx {
                 Member::Named(member) => {
                     let member_index = &member.index;
                     let member_ident_str = member.public_ident().to_string();
-                    let member_pascal = &member.norm_ident_pascal;
-
-                    let debug_fn = member
-                        .as_optional_norm_ty()
-                        .map(|ty| quote!(debug_optional_member::<#ty>))
-                        .unwrap_or_else(|| {
-                            let ty = &member.norm_ty;
-                            quote!(debug_required_member::<_, #ty>)
-                        });
-
+                    let member_ty = member.as_optional_norm_ty().unwrap_or(&member.norm_ty);
                     Some(quote! {
-                        // Skip members that are not set to reduce noise
-                        if <BuilderState::#member_pascal as ::bon::private::MemberState>::is_set() {
+                        if let ::core::option::Option::Some(value) = &self.__private_named_members.#member_index {
                             output.field(
                                 #member_ident_str,
-                                ::bon::private::derives::#debug_fn(
-                                    &self.__private_named_members.#member_index
-                                )
+                                ::bon::private::derives::as_dyn_debug::<#member_ty>(value)
                             );
                         }
                     })
