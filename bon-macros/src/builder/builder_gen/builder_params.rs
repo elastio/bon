@@ -195,8 +195,6 @@ impl ItemParamsParsing<'_> {
         #[derive(Debug, FromMeta)]
         struct Full {
             name: Option<syn::Ident>,
-
-            #[darling(with = crate::util::parse::visibility, map = Some)]
             vis: Option<syn::Visibility>,
             docs: Option<syn::Meta>,
         }
