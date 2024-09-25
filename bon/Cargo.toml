@@ -2,7 +2,7 @@
 name    = "bon"
 version = "2.3.0"
 
-description = "Generate builders for everything!"
+description = "Next gen compile-time-checked builder generator, named function arguments, and more!"
 
 categories = [
   "rust-patterns",
