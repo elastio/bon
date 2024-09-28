@@ -41,7 +41,7 @@ impl BuilderGenCtx {
 
     pub(crate) fn output(self) -> Result<MacroOutput> {
         let mut start_fn = self.start_fn();
-        let builder_mod = self.builder_mod();
+        let state_mod = self.state_mod();
         let builder_decl = self.builder_decl();
         let builder_impl = self.builder_impl();
         let builder_derives = self.builder_derives();
@@ -57,7 +57,7 @@ impl BuilderGenCtx {
         // -- Postprocessing --
         // Here we parse all items back and add the `allow` attributes to them.
         let other_items = quote! {
-            #builder_mod
+            #state_mod
             #builder_decl
             #builder_derives
             #builder_impl
@@ -106,7 +106,7 @@ impl BuilderGenCtx {
         let generic_args = &self.generics.args;
         let where_clause = &self.generics.where_clause;
         let builder_ident = &self.builder_type.ident;
-        let builder_mod = &self.builder_mod.ident;
+        let state_mod = &self.state_mod.ident;
 
         let allows = allow_warnings_on_member_types();
 
@@ -115,7 +115,7 @@ impl BuilderGenCtx {
             #[automatically_derived]
             impl<
                 #(#generics_decl,)*
-                BuilderState: #builder_mod::State
+                BuilderState: #state_mod::State
             >
             #builder_ident<
                 #(#generic_args,)*
@@ -167,7 +167,7 @@ impl BuilderGenCtx {
 
     fn transition_type_state_fn(&self) -> TokenStream2 {
         let builder_ident = &self.builder_type.ident;
-        let builder_mod = &self.builder_mod.ident;
+        let state_mod = &self.state_mod.ident;
 
         let maybe_receiver_field = self
             .receiver()
@@ -189,7 +189,7 @@ impl BuilderGenCtx {
                 (https://discord.gg/QcBYSamw4c)"
             ]
             #[inline(always)]
-            fn __private_transition_type_state<__NewBuilderState: #builder_mod::State>(self)
+            fn __private_transition_type_state<__NewBuilderState: #state_mod::State>(self)
             -> #builder_ident<#(#generic_args,)* __NewBuilderState>
             {
                 #builder_ident {
@@ -362,7 +362,7 @@ impl BuilderGenCtx {
     }
 
     fn state_transition_aliases(&self) -> TokenStream2 {
-        let vis_child = &self.builder_mod.vis_child;
+        let vis_child = &self.state_mod.vis_child;
 
         let stateful_members = self.stateful_members().collect::<Vec<_>>();
         let is_single_member = stateful_members.len() == 1;
@@ -414,13 +414,13 @@ impl BuilderGenCtx {
             .concat()
     }
 
-    fn builder_mod(&self) -> TokenStream2 {
-        let vis_mod = &self.builder_mod.vis;
-        let vis_child = &self.builder_mod.vis_child;
-        let vis_child_child = &self.builder_mod.vis_child_child;
+    fn state_mod(&self) -> TokenStream2 {
+        let vis_mod = &self.state_mod.vis;
+        let vis_child = &self.state_mod.vis_child;
+        let vis_child_child = &self.state_mod.vis_child_child;
 
-        let builder_mod_docs = &self.builder_mod.docs;
-        let builder_mod_ident = &self.builder_mod.ident;
+        let state_mod_docs = &self.state_mod.docs;
+        let state_mod_ident = &self.state_mod.ident;
         let state_transition_aliases = self.state_transition_aliases();
 
         let stateful_members_idents = self
@@ -446,9 +446,20 @@ impl BuilderGenCtx {
             .collect::<Vec<_>>();
 
         quote! {
-            #( #builder_mod_docs )*
-            #vis_mod mod #builder_mod_ident {
-                #state_transition_aliases
+            #( #state_mod_docs )*
+            // This is intentional. By default, the builder module is private
+            // and can't be accessed outside of the module where the builder
+            // type is defined. This makes the builder type "anonymous" to
+            // the outside modules, which is a good thing if users don't want
+            // to expose this API surface.
+            //
+            // Also, there are some genuinely private items like the `Sealed`
+            // enum and members "name" enums that we don't want to expose even
+            // to the module that defines the builder. These APIs are not
+            // public, and users instead should only reference the traits
+            // and state transition type aliases from here.
+            #[allow(unnameable_types, unreachable_pub)]
+            #vis_mod mod #state_mod_ident {
 
                 /// Marker trait implemented by members that are set.
                 #[::bon::private::rustversion::attr(
@@ -459,6 +470,7 @@ impl BuilderGenCtx {
                     )
                 )]
                 #vis_child trait IsSet {
+                    // Also a method without `self` makes the trait non-object safe
                     #[doc(hidden)]
                     fn __sealed(_: self::sealed::Sealed);
                 }
@@ -477,6 +489,7 @@ impl BuilderGenCtx {
                     )
                 )]
                 #vis_child trait IsUnset {
+                    // Also a method without `self` makes the trait non-object safe
                     #[doc(hidden)]
                     fn __sealed(_: self::sealed::Sealed);
                 }
@@ -507,7 +520,6 @@ impl BuilderGenCtx {
                 }
 
                 mod sealed {
-                    #[allow(unnameable_types)]
                     #vis_child_child enum Sealed {}
                 }
 
@@ -540,18 +552,12 @@ impl BuilderGenCtx {
                 #[doc(hidden)]
                 mod members {
                     #(
-                        #[allow(
-                            non_camel_case_types,
-
-                            // This is intentional. We don't want users to touch
-                            // the implementation details of the builder's type
-                            // signature like this one. They should use only the
-                            // exported items of the parent module.
-                            unnameable_types,
-                        )]
+                        #[allow(non_camel_case_types)]
                         #vis_child_child enum #stateful_members_idents {}
                     )*
                 }
+
+                #state_transition_aliases
             }
         }
     }
@@ -562,7 +568,7 @@ impl BuilderGenCtx {
         let generics_decl = &self.generics.decl_with_defaults;
         let where_clause = &self.generics.where_clause;
         let phantom_data = self.phantom_data();
-        let builder_mod = &self.builder_mod.ident;
+        let state_mod = &self.state_mod.ident;
 
         let private_field_attrs = quote! {
             // The fields can't be hidden using Rust's privacy syntax.
@@ -634,7 +640,7 @@ impl BuilderGenCtx {
             )]
             #builder_vis struct #builder_ident<
                 #(#generics_decl,)*
-                BuilderState: #builder_mod::State = #builder_mod::AllUnset
+                BuilderState: #state_mod::State = #state_mod::AllUnset
             >
             #where_clause
             {
@@ -737,7 +743,7 @@ impl BuilderGenCtx {
             }
         });
 
-        let builder_mod = &self.builder_mod.ident;
+        let state_mod = &self.state_mod.ident;
 
         let where_bounds = self
             .named_members()
@@ -745,7 +751,7 @@ impl BuilderGenCtx {
             .map(|member| {
                 let member_pascal = &member.norm_ident_pascal;
                 quote! {
-                    BuilderState::#member_pascal: #builder_mod::IsSet
+                    BuilderState::#member_pascal: #state_mod::IsSet
                 }
             });
 

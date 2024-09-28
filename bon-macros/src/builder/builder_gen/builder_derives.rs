@@ -77,7 +77,7 @@ impl BuilderGenCtx {
         });
 
         let where_clause = self.where_clause_for_derive(&clone);
-        let builder_mod_ident = &self.builder_mod.ident;
+        let state_mod = &self.state_mod.ident;
 
         let clone_named_members = self.named_members().map(|member| {
             let member_index = &member.index;
@@ -98,7 +98,7 @@ impl BuilderGenCtx {
             #[automatically_derived]
             impl<
                 #(#generics_decl,)*
-                BuilderState: #builder_mod_ident::State
+                BuilderState: #state_mod::State
             >
             #clone for #builder_ident<
                 #(#generic_args,)*
@@ -177,7 +177,7 @@ impl BuilderGenCtx {
 
         let debug = quote!(::core::fmt::Debug);
         let where_clause = self.where_clause_for_derive(&debug);
-        let builder_mod_ident = &self.builder_mod.ident;
+        let state_mod = &self.state_mod.ident;
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
         let builder_ident = &self.builder_type.ident;
@@ -187,7 +187,7 @@ impl BuilderGenCtx {
             #[automatically_derived]
             impl<
                 #(#generics_decl,)*
-                BuilderState: #builder_mod_ident::State
+                BuilderState: #state_mod::State
             >
             #debug for #builder_ident<
                 #(#generic_args,)*

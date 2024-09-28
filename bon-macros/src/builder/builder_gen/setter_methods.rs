@@ -133,7 +133,7 @@ impl<'a> MemberSettersCtx<'a> {
         let state_transition =
             quote::format_ident!("Set{}", self.member.norm_ident_pascal.raw_name());
 
-        let builder_mod = &self.builder_gen.builder_mod.ident;
+        let state_mod = &self.builder_gen.state_mod.ident;
         let generic_param = if self.builder_gen.stateful_members().take(2).count() == 1 {
             quote!()
         } else {
@@ -141,7 +141,7 @@ impl<'a> MemberSettersCtx<'a> {
         };
 
         let state_transition = quote! {
-            #builder_mod::#state_transition #generic_param
+            #state_mod::#state_transition #generic_param
         };
 
         let builder_ident = &self.builder_gen.builder_type.ident;
@@ -159,7 +159,7 @@ impl<'a> MemberSettersCtx<'a> {
         {
             quote! {
                 where
-                    BuilderState::#member_pascal: #builder_mod::IsUnset,
+                    BuilderState::#member_pascal: #state_mod::IsUnset,
             }
         } else {
             quote! {}

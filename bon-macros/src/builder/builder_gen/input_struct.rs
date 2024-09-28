@@ -229,7 +229,7 @@ impl StructInputCtx {
             orig_item_vis: self.norm_struct.vis,
 
             builder_type,
-            builder_mod: self.params.base.builder_mod,
+            state_mod: self.params.base.state_mod,
             start_fn,
             finish_fn,
         })

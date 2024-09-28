@@ -17,9 +17,8 @@ fn struct_case() {
     assert_eq!(actual.r#type, 42);
     assert_eq!(actual.other, 100);
 
-    // TODO: add builder_mod overrides
     #[derive(Builder)]
-    #[builder(builder_type = r#type, builder_mod = r#mod)]
+    #[builder(builder_type = r#type, state_mod = r#mod)]
     #[allow(clippy::items_after_statements, dead_code)]
     struct Sut {
         r#while: u32,
@@ -39,9 +38,8 @@ fn fn_case() {
 
     r#type().r#type(42).r#while(100).call();
 
-    // TODO: add builder_mod overrides
-    // #[builder(builder_type = r#type)]
-    // fn sut() {}
+    #[builder(builder_type = r#type, state_mod = r#mod)]
+    fn sut() {}
 
-    // let _: r#type = sut();
+    let _: r#type = sut();
 }

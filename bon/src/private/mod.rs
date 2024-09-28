@@ -41,12 +41,8 @@ pub extern crate alloc;
 #[derive(Debug)]
 pub struct Unset<Name>(Name);
 
-impl<Name> crate::IsUnset for Unset<Name> {}
-
 #[derive(Debug)]
 pub struct Set<Name>(Name);
-
-impl<Name> crate::IsSet for Set<Name> {}
 
 #[rustversion::attr(
     since(1.78.0),

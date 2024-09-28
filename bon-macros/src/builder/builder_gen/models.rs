@@ -83,7 +83,7 @@ pub(super) struct BuilderTypeParams {
     pub(super) docs: Option<Vec<syn::Attribute>>,
 }
 
-pub(super) struct BuilderMod {
+pub(super) struct StateMod {
     pub(super) ident: syn::Ident,
 
     /// Visibility of the builder module itself.
@@ -131,7 +131,7 @@ pub(crate) struct BuilderGenCtx {
     pub(super) assoc_method_ctx: Option<AssocMethodCtx>,
 
     pub(super) builder_type: BuilderType,
-    pub(super) builder_mod: BuilderMod,
+    pub(super) state_mod: StateMod,
     pub(super) start_fn: StartFn,
     pub(super) finish_fn: FinishFn,
 }
@@ -156,7 +156,7 @@ pub(super) struct BuilderGenCtxParams {
     pub(super) assoc_method_ctx: Option<AssocMethodCtx>,
 
     pub(super) builder_type: BuilderTypeParams,
-    pub(super) builder_mod: ItemParams,
+    pub(super) state_mod: ItemParams,
     pub(super) start_fn: StartFnParams,
     pub(super) finish_fn: FinishFn,
 }
@@ -171,7 +171,7 @@ impl BuilderGenCtx {
             orig_item_vis,
             assoc_method_ctx,
             builder_type,
-            builder_mod,
+            state_mod,
             start_fn,
             finish_fn,
         } = params;
@@ -192,9 +192,9 @@ impl BuilderGenCtx {
             }),
         };
 
-        let builder_mod = {
-            let ident_overridden = builder_mod.name.is_some();
-            let ident = builder_mod
+        let state_mod = {
+            let ident_overridden = state_mod.name.is_some();
+            let ident = state_mod
                 .name
                 .unwrap_or_else(|| builder_type.ident.pascal_to_snake_case());
 
@@ -214,11 +214,16 @@ impl BuilderGenCtx {
                     conversion doesn't produce a different name for this builder type \
                     name; consider using PascalCase for the builder type name or specify \
                     a separate name for the builder module explicitly via \
-                    `#[builder(builder_mod = ...)]`"
+                    `#[builder(state_mod = ...)]`"
                 );
             }
 
-            let vis = builder_mod.vis.unwrap_or_else(|| builder_type.vis.clone());
+            // The builder module is private by default, meaning all symbols under
+            // that module can't be accessed from outside the module where the builder
+            // is defined. This makes the builder type signature unnamable from outside
+            // the module where we output the builder. The users need to explicitly
+            // opt-in to make the builder module public.
+            let vis = state_mod.vis.unwrap_or_else(|| syn::Visibility::Inherited);
 
             // The visibility for child items is based on the visibility of the
             // builder type itself, because the types and traits from this module
@@ -226,14 +231,14 @@ impl BuilderGenCtx {
             let vis_child = builder_type.vis.clone().into_equivalent_in_child_module()?;
             let vis_child_child = vis_child.clone().into_equivalent_in_child_module()?;
 
-            BuilderMod {
+            StateMod {
                 vis,
                 vis_child,
                 vis_child_child,
 
                 ident,
 
-                docs: builder_mod.docs.unwrap_or_else(|| {
+                docs: state_mod.docs.unwrap_or_else(|| {
                     let docs = format!(
                         "Tools for manipulating the type state of the [`{}`].",
                         builder_type.ident
@@ -258,7 +263,7 @@ impl BuilderGenCtx {
             generics,
             assoc_method_ctx,
             builder_type,
-            builder_mod,
+            state_mod,
             start_fn,
             finish_fn,
         })
