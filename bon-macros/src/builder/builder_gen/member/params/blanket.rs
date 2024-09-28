@@ -58,8 +58,8 @@ impl EvalBlanketFlagParam<'_> {
             .collect::<Result<Vec<_>>>()?
             .into_iter()
             .filter(|(_, matched)| *matched)
-            .map(|(params, _)| param_name.value_in_on_params(&params))
-            .find(|flag| flag.is_present());
+            .map(|(params, _)| param_name.value_in_on_params(params))
+            .find(darling::util::Flag::is_present);
 
         let value_in_member = param_name.value_in_member_params(member_params);
         let flag = match (verdict_from_on_params, value_in_member.is_present()) {

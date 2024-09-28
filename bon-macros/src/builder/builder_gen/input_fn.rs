@@ -1,10 +1,10 @@
 use super::builder_params::BuilderParams;
 use super::{
     AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFn, FinishFnBody, Generics,
-    Member, MemberOrigin, RawMember, StartFn,
+    Member, MemberOrigin, RawMember,
 };
 use crate::builder::builder_gen::builder_params::ItemParams;
-use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams};
+use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
 use crate::normalization::NormalizeSelfTy;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
@@ -257,7 +257,7 @@ impl FnInputCtx {
     }
 
     pub(crate) fn into_builder_gen_ctx(self) -> Result<BuilderGenCtx> {
-        let receiver = self.assoc_method_ctx();
+        let assoc_method_ctx = self.assoc_method_ctx();
 
         if self.impl_ctx.is_none() {
             let explanation = "\
@@ -376,7 +376,7 @@ impl FnInputCtx {
             .chain(fn_allows)
             .collect();
 
-        let start_fn = StartFn {
+        let start_fn = StartFnParams {
             ident: start_fn_ident,
 
             // No override for visibility for the start fn is provided here.
@@ -408,9 +408,9 @@ impl FnInputCtx {
 
             on_params: self.params.base.on,
 
-            assoc_method_ctx: receiver,
+            assoc_method_ctx,
             generics,
-            vis: self.norm_fn.vis,
+            orig_item_vis: self.norm_fn.vis,
 
             builder_type,
             builder_mod: self.params.base.builder_mod,

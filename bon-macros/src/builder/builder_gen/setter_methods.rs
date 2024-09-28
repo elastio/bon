@@ -108,8 +108,6 @@ impl<'a> MemberSettersCtx<'a> {
             None => self.generate_docs_for_setter(),
         };
 
-        let vis = &self.builder_gen.vis;
-
         let body = match body {
             SetterBody::Custom(body) => body,
             SetterBody::Default { member_init } => {
@@ -166,6 +164,9 @@ impl<'a> MemberSettersCtx<'a> {
         } else {
             quote! {}
         };
+
+
+        let vis = &self.builder_gen.builder_type.vis;
 
         quote! {
             #( #docs )*

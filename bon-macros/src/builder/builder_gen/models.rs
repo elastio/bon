@@ -43,15 +43,27 @@ pub(super) struct FinishFn {
 
 pub(super) struct StartFn {
     pub(super) ident: syn::Ident,
+    pub(super) vis: syn::Visibility,
 
     /// Additional attributes to apply to the item
     pub(super) attrs: Vec<syn::Attribute>,
 
-    /// Overrides the common generics
+    /// Overrides the default generics
     pub(super) generics: Option<Generics>,
+}
 
-    /// If present overrides the automatic visibility
+pub(super) struct StartFnParams {
+    pub(super) ident: syn::Ident,
+
+    /// If present overrides the default visibility taken from the original item
+    /// the builder is generated for
     pub(super) vis: Option<syn::Visibility>,
+
+    /// Additional attributes to apply to the item
+    pub(super) attrs: Vec<syn::Attribute>,
+
+    /// Overrides the default generics
+    pub(super) generics: Option<Generics>,
 }
 
 pub(super) struct BuilderType {
@@ -62,6 +74,13 @@ pub(super) struct BuilderType {
 
     pub(super) derives: BuilderDerives,
     pub(super) docs: Vec<syn::Attribute>,
+}
+
+pub(super) struct BuilderTypeParams {
+    pub(super) ident: syn::Ident,
+    pub(super) vis: Option<syn::Visibility>,
+    pub(super) derives: BuilderDerives,
+    pub(super) docs: Option<Vec<syn::Attribute>>,
 }
 
 pub(super) struct BuilderMod {
@@ -109,9 +128,6 @@ pub(crate) struct BuilderGenCtx {
 
     pub(super) generics: Generics,
 
-    /// Visibility of the generated items
-    pub(super) vis: syn::Visibility,
-
     pub(super) assoc_method_ctx: Option<AssocMethodCtx>,
 
     pub(super) builder_type: BuilderType,
@@ -126,21 +142,23 @@ pub(super) struct BuilderGenCtxParams {
     pub(super) allow_attrs: Vec<syn::Attribute>,
     pub(super) on_params: Vec<OnParams>,
 
+    /// This is the visibility of the original item that the builder is generated for.
+    /// For example, the `struct` or `fn` item visibility that the `#[builder]` or
+    /// `#[derive(Builder)]` attribute is applied to.
+    ///
+    /// It is used as the default visibility for all the generated items unless
+    /// explicitly overridden at a more specific level.
+    pub(super) orig_item_vis: syn::Visibility,
+
+    /// Generics to apply to the builder type.
     pub(super) generics: Generics,
-    pub(super) vis: syn::Visibility,
+
     pub(super) assoc_method_ctx: Option<AssocMethodCtx>,
 
     pub(super) builder_type: BuilderTypeParams,
     pub(super) builder_mod: ItemParams,
-    pub(super) start_fn: StartFn,
+    pub(super) start_fn: StartFnParams,
     pub(super) finish_fn: FinishFn,
-}
-
-pub(super) struct BuilderTypeParams {
-    pub(super) ident: syn::Ident,
-    pub(super) vis: Option<syn::Visibility>,
-    pub(super) derives: BuilderDerives,
-    pub(super) docs: Option<Vec<syn::Attribute>>,
 }
 
 impl BuilderGenCtx {
@@ -150,7 +168,7 @@ impl BuilderGenCtx {
             allow_attrs,
             on_params,
             generics,
-            vis,
+            orig_item_vis,
             assoc_method_ctx,
             builder_type,
             builder_mod,
@@ -160,7 +178,7 @@ impl BuilderGenCtx {
 
         let builder_type = BuilderType {
             ident: builder_type.ident,
-            vis: builder_type.vis.unwrap_or_else(|| vis.clone()),
+            vis: builder_type.vis.unwrap_or(orig_item_vis),
             derives: builder_type.derives,
             docs: builder_type.docs.unwrap_or_else(|| {
                 let doc = format!(
@@ -226,12 +244,18 @@ impl BuilderGenCtx {
             }
         };
 
+        let start_fn = StartFn {
+            ident: start_fn.ident,
+            attrs: start_fn.attrs,
+            generics: start_fn.generics,
+            vis: start_fn.vis.unwrap_or_else(|| builder_type.vis.clone()),
+        };
+
         Ok(Self {
             members,
             allow_attrs,
             on_params,
             generics,
-            vis,
             assoc_method_ctx,
             builder_type,
             builder_mod,

@@ -1,9 +1,9 @@
 use super::builder_params::{BuilderParams, ItemParams, ItemParamsParsing};
 use super::{
     AssocMethodCtx, BuilderGenCtx, FinishFn, FinishFnBody, Generics, Member, MemberOrigin,
-    RawMember, StartFn,
+    RawMember,
 };
-use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams};
+use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
 use crate::util::prelude::*;
 use darling::FromMeta;
 use quote::quote;
@@ -183,7 +183,7 @@ impl StructInputCtx {
             vec![syn::parse_quote!(#[doc = #docs])]
         });
 
-        let start_fn = StartFn {
+        let start_fn = StartFnParams {
             ident: start_fn_ident,
             vis: start_fn_vis,
             attrs: start_fn_docs,
@@ -226,7 +226,7 @@ impl StructInputCtx {
 
             assoc_method_ctx,
             generics,
-            vis: self.norm_struct.vis,
+            orig_item_vis: self.norm_struct.vis,
 
             builder_type,
             builder_mod: self.params.base.builder_mod,

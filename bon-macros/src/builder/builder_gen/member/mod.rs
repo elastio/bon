@@ -219,7 +219,7 @@ impl Member {
             output.push(Self::StartFnArg(StartFnArgMember {
                 base,
                 index: index.into(),
-            }))
+            }));
         }
 
         while let Some((member, params)) =

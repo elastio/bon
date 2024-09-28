@@ -13,7 +13,6 @@ use member::{
 };
 use models::{
     AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFn, FinishFnBody, Generics,
-    StartFn,
 };
 use quote::{quote, ToTokens};
 use setter_methods::MemberSettersCtx;
@@ -205,9 +204,8 @@ impl BuilderGenCtx {
 
     fn start_fn(&self) -> syn::ItemFn {
         let builder_ident = &self.builder_type.ident;
-
-        let docs = &self.start_fn.attrs;
-        let vis = self.start_fn.vis.as_ref().unwrap_or(&self.vis);
+        let attrs = &self.start_fn.attrs;
+        let vis = &self.start_fn.vis;
 
         let start_fn_ident = &self.start_fn.ident;
 
@@ -255,7 +253,7 @@ impl BuilderGenCtx {
 
         let ide_hints = self.ide_hints();
 
-        //`Default` trait implementation is provided only for tuples up to 12
+        // `Default` trait implementation is provided only for tuples up to 12
         // elements in the standard library 😳:
         // https://github.com/rust-lang/rust/blob/67bb749c2e1cf503fee64842963dd3e72a417a3f/library/core/src/tuple.rs#L213
         let named_members_field_init = if self.named_members().take(13).count() <= 12 {
@@ -269,7 +267,7 @@ impl BuilderGenCtx {
         };
 
         syn::parse_quote! {
-            #(#docs)*
+            #(#attrs)*
             #[inline(always)]
             #[allow(
                 // This is intentional. We want the builder syntax to compile away
