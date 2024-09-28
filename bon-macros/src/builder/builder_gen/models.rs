@@ -164,8 +164,7 @@ impl BuilderGenCtx {
             derives: builder_type.derives,
             docs: builder_type.docs.unwrap_or_else(|| {
                 let doc = format!(
-                    "Use builder syntax to set the required parameters and finish \
-                    by calling the method [`Self::{}()`].",
+                    "Use builder syntax to set the inputs and finish with [`Self::{}()`].",
                     finish_fn.ident
                 );
 
@@ -218,8 +217,7 @@ impl BuilderGenCtx {
 
                 docs: builder_mod.docs.unwrap_or_else(|| {
                     let docs = format!(
-                        "Contains the traits and type aliases for manipulating \
-                        the type state of the {}",
+                        "Tools for manipulating the type state of the [`{}`].",
                         builder_type.ident
                     );
 

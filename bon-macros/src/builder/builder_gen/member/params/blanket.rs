@@ -6,14 +6,14 @@ use std::fmt;
 
 pub(crate) enum BlanketParamName {
     Into,
-    Mutable,
+    Overwritable,
 }
 
 impl fmt::Display for BlanketParamName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::Into => fmt::Display::fmt(&super::ParamName::Into, f),
-            Self::Mutable => fmt::Display::fmt(&super::ParamName::Mutable, f),
+            Self::Overwritable => fmt::Display::fmt(&super::ParamName::Overwritable, f),
         }
     }
 }
@@ -22,14 +22,14 @@ impl BlanketParamName {
     fn value_in_on_params(&self, on_params: &OnParams) -> darling::util::Flag {
         match self {
             Self::Into => on_params.into,
-            Self::Mutable => on_params.mutable,
+            Self::Overwritable => on_params.overwritable,
         }
     }
 
     fn value_in_member_params(&self, member_params: &MemberParams) -> darling::util::Flag {
         match self {
             Self::Into => member_params.into,
-            Self::Mutable => member_params.mutable,
+            Self::Overwritable => member_params.overwritable,
         }
     }
 }

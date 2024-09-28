@@ -40,6 +40,7 @@ use private::sealed::Sealed;
 /// // Import the type aliases for transforming the builder's type state
 /// use example_builder::{SetX, SetY};
 ///
+/// // Add method to the builder
 /// impl<State: example_builder::State> ExampleBuilder<State> {
 ///     fn x_doubled(self, value: i32) -> ExampleBuilder<SetX<State>>
 ///     where
@@ -57,6 +58,14 @@ use private::sealed::Sealed;
 ///        self.y(value * 2)
 ///     }
 /// }
+///
+/// let example = Example::builder()
+///     .x_doubled(2)
+///     .y_doubled(3)
+///     .build();
+///
+/// assert_eq!(example.x, 4);
+/// assert_eq!(example.y, 6);
 /// ```
 #[rustversion::attr(
     since(1.78.0),

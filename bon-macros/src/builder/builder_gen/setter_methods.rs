@@ -157,7 +157,7 @@ impl<'a> MemberSettersCtx<'a> {
             quote! { Self }
         };
 
-        let where_clause = if self.member.is_stateful() && !self.member.params.mutable.is_present()
+        let where_clause = if self.member.is_stateful() && !self.member.params.overwritable.is_present()
         {
             quote! {
                 where

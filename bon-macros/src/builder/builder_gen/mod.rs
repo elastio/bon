@@ -390,25 +390,19 @@ impl BuilderGenCtx {
                 let alias_ident =
                     quote::format_ident!("Set{}", member.norm_ident_pascal.raw_name());
 
-                if is_single_member {
-                    let docs = format!(
-                        "Changes the type state of the builder to set the member \
-                        `{member_ident}`.",
-                    );
+                let docs = format!(
+                    "Returns a [`State`] that has [`IsSet`] implemented for `{member_ident}`\n\
+                    \n\
+                    [`State`]: self::State\n\
+                    [`IsSet`]: ::bon::IsSet",
+                );
 
+                if is_single_member {
                     return quote! {
                         #[doc = #docs]
                         #vis_child type #alias_ident = ( #(#states,)* );
                     };
                 }
-
-                let docs = format!(
-                    "Changes the type state of the builder to set the member `{member_ident}`. \
-                    The `S` parameter is the type state to update. If not specified \
-                    then [`AllUnset`] state is used, which results in all members being \
-                    unset except for `{member_ident}`.\n\n\
-                    [`AllUnset`]: self::AllUnset",
-                );
 
                 quote! {
                     #[doc = #docs]
@@ -439,8 +433,12 @@ impl BuilderGenCtx {
         let assoc_types_docs = self.stateful_members().map(|member| {
             let ident = &member.public_ident();
             format!(
-                "Represents the state of the member `{ident}`.\n\n\
-                See the [`State`] trait-level docs for details",
+                "Type state of the member `{ident}`.\n\
+                \n\
+                It can implement either [`IsSet`] or [`IsUnset`].\n\
+                \n\
+                [`IsSet`]: ::bon::IsSet\n\
+                [`IsUnset`]: ::bon::IsUnset",
             )
         });
 
@@ -454,13 +452,14 @@ impl BuilderGenCtx {
             #vis_mod mod #builder_mod_ident {
                 #state_transition_aliases
 
-                /// Represents the builder's type state that specifies which members are set and which are not.
+                /// Builder's type state specifies if members are set or not (unset).
                 ///
                 /// You can use the associated types of this trait to control the state of individual members
-                /// with the [`bon::IsSet`] and [`bon::IsUnset`] traits.
+                /// with the [`IsSet`] and [`IsUnset`] traits. You can change the state of the members with
+                /// the `Set*` type aliases available in this module.
                 ///
-                /// [`bon::IsSet`]: ::bon::IsSet
-                /// [`bon::IsUnset`]: ::bon::IsUnset
+                /// [`IsSet`]: ::bon::IsSet
+                /// [`IsUnset`]: ::bon::IsUnset
                 #vis_child trait State: ::core::marker::Sized {
                     #(
                         #[doc = #assoc_types_docs]
@@ -469,16 +468,19 @@ impl BuilderGenCtx {
                         >;
                     )*
 
+                    #[doc(hidden)]
                     fn __sealed(_: self::sealed::Sealed);
                 }
 
                 mod sealed {
+                    #[allow(unnameable_types)]
                     #vis_child_child enum Sealed {}
                 }
 
                 // Using `self::State` explicitly to avoid name conflicts with the
                 // members named `state` which would create a generic param named `State`
                 // that would shadow the trait `State` in the same scope.
+                #[doc(hidden)]
                 impl<#(
                     #stateful_members_pascal: ::bon::private::MemberState<
                         self::members::#stateful_members_idents
@@ -491,7 +493,7 @@ impl BuilderGenCtx {
                     fn __sealed(_: self::sealed::Sealed) {}
                 }
 
-                /// Initial state of the builder where all named members are unset
+                /// Initial state of the builder where all members are unset
                 #vis_child type AllUnset = (
                     #(::bon::private::Unset<members::#stateful_members_idents>,)*
                 );

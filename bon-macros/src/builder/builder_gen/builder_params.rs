@@ -62,7 +62,7 @@ pub(crate) struct BuilderDerives {
 pub(crate) struct OnParams {
     pub(crate) type_pattern: syn::Type,
     pub(crate) into: darling::util::Flag,
-    pub(crate) mutable: darling::util::Flag,
+    pub(crate) overwritable: darling::util::Flag,
 }
 
 impl Parse for OnParams {
@@ -75,7 +75,7 @@ impl Parse for OnParams {
         #[derive(FromMeta)]
         struct Parsed {
             into: darling::util::Flag,
-            mutable: darling::util::Flag,
+            overwritable: darling::util::Flag,
         }
 
         let parsed = Parsed::from_meta(&syn::parse_quote!(on(#rest)))?;
@@ -85,9 +85,9 @@ impl Parse for OnParams {
             // This lives in a separate block to make sure that if a new
             // field is added to `Parsed` and unused here, then a compiler
             // warning is emitted.
-            let Parsed { into, mutable } = &parsed;
+            let Parsed { into, overwritable } = &parsed;
 
-            if !into.is_present() && !mutable.is_present() {
+            if !into.is_present() && !overwritable.is_present() {
                 return Err(syn::Error::new_spanned(
                     &rest,
                     "this #[builder(on(type_pattern, ...))] contains no options to override \
@@ -129,12 +129,12 @@ impl Parse for OnParams {
             "BUG: the type pattern does not match itself: {type_pattern:#?}"
         );
 
-        let Parsed { into, mutable } = parsed;
+        let Parsed { into, overwritable } = parsed;
 
         Ok(Self {
             type_pattern,
             into,
-            mutable,
+            overwritable,
         })
     }
 }

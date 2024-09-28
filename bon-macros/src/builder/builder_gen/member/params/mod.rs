@@ -43,7 +43,7 @@ pub(crate) struct MemberParams {
     /// However, this also means that unintended overwrites won't be caught
     /// at compile time. Measure the compilation time before and after enabling
     /// this option to see if it's worth it.
-    pub(crate) mutable: darling::util::Flag,
+    pub(crate) overwritable: darling::util::Flag,
 }
 
 #[derive(PartialEq, Eq, Clone, Copy)]
@@ -54,7 +54,7 @@ enum ParamName {
     Skip,
     StartFn,
     FinishFn,
-    Mutable,
+    Overwritable,
 }
 
 impl fmt::Display for ParamName {
@@ -66,7 +66,7 @@ impl fmt::Display for ParamName {
             Self::Skip => "skip",
             Self::StartFn => "start_fn",
             Self::FinishFn => "finish_fn",
-            Self::Mutable => "mutable",
+            Self::Overwritable => "overwritable",
         };
         f.write_str(str)
     }
@@ -107,7 +107,7 @@ impl MemberParams {
             name,
             finish_fn,
             start_fn,
-            mutable,
+            overwritable,
         } = self;
 
         let attrs = [
@@ -117,7 +117,7 @@ impl MemberParams {
             (skip.is_some(), ParamName::Skip),
             (start_fn.is_present(), ParamName::StartFn),
             (finish_fn.is_present(), ParamName::FinishFn),
-            (mutable.is_present(), ParamName::Mutable),
+            (overwritable.is_present(), ParamName::Overwritable),
         ];
 
         attrs

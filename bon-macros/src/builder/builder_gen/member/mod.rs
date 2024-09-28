@@ -161,13 +161,13 @@ impl NamedMember {
     }
 
     pub(crate) fn is_stateful(&self) -> bool {
-        !self.is_optional() || !self.params.mutable.is_present()
+        !self.is_optional() || !self.params.overwritable.is_present()
     }
 
-    pub(crate) fn merge_param_mutable(&mut self, on_params: &[OnParams]) -> Result {
-        self.params.mutable = params::EvalBlanketFlagParam {
+    pub(crate) fn merge_param_overwritable(&mut self, on_params: &[OnParams]) -> Result {
+        self.params.overwritable = params::EvalBlanketFlagParam {
             on_params,
-            param_name: params::BlanketParamName::Mutable,
+            param_name: params::BlanketParamName::Overwritable,
             member_params: &self.params,
             scrutinee: &self.norm_ty,
             origin: self.origin,
@@ -298,7 +298,7 @@ impl Member {
             };
 
             member.merge_param_into(on_params)?;
-            member.merge_param_mutable(on_params)?;
+            member.merge_param_overwritable(on_params)?;
             member.validate()?;
 
             output.push(Self::Named(member));
