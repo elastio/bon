@@ -450,6 +450,42 @@ impl BuilderGenCtx {
             #vis_mod mod #builder_mod_ident {
                 #state_transition_aliases
 
+                /// Marker trait implemented by members that are set.
+                #[::bon::private::rustversion::attr(
+                    since(1.78.0),
+                    diagnostic::on_unimplemented(
+                        message = "the member `{Self}` was not set, but this method requires it to be set",
+                        label = "the member `{Self}` was not set, but this method requires it to be set",
+                    )
+                )]
+                #vis_child trait IsSet {
+                    #[doc(hidden)]
+                    fn __sealed(_: self::sealed::Sealed);
+                }
+
+                #[doc(hidden)]
+                impl<Name> IsSet for ::bon::private::Set<Name> {
+                    fn __sealed(_: self::sealed::Sealed) {}
+                }
+
+                /// Marker trait implemented by members that are not set.
+                #[::bon::private::rustversion::attr(
+                    since(1.78.0),
+                    diagnostic::on_unimplemented(
+                        message = "the member `{Self}` was already set, but this method requires it to be unset",
+                        label = "the member `{Self}` was already set, but this method requires it to be unset",
+                    )
+                )]
+                #vis_child trait IsUnset {
+                    #[doc(hidden)]
+                    fn __sealed(_: self::sealed::Sealed);
+                }
+
+                #[doc(hidden)]
+                impl<Name> IsUnset for ::bon::private::Unset<Name> {
+                    fn __sealed(_: self::sealed::Sealed) {}
+                }
+
                 /// Builder's type state specifies if members are set or not (unset).
                 ///
                 /// You can use the associated types of this trait to control the state of individual members
@@ -701,13 +737,15 @@ impl BuilderGenCtx {
             }
         });
 
+        let builder_mod = &self.builder_mod.ident;
+
         let where_bounds = self
             .named_members()
             .filter(|member| !member.is_optional())
             .map(|member| {
                 let member_pascal = &member.norm_ident_pascal;
                 quote! {
-                    BuilderState::#member_pascal: ::bon::IsSet
+                    BuilderState::#member_pascal: #builder_mod::IsSet
                 }
             });
 

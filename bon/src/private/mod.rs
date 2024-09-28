@@ -59,3 +59,5 @@ pub trait MemberState<Name>: Sealed {}
 
 impl<Name> MemberState<Name> for Unset<Name> {}
 impl<Name> MemberState<Name> for Set<Name> {}
+
+pub use rustversion;

@@ -159,7 +159,7 @@ impl<'a> MemberSettersCtx<'a> {
         {
             quote! {
                 where
-                    BuilderState::#member_pascal: ::bon::IsUnset,
+                    BuilderState::#member_pascal: #builder_mod::IsUnset,
             }
         } else {
             quote! {}
