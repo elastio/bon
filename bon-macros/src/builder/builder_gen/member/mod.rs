@@ -149,8 +149,8 @@ impl NamedMember {
         Self::as_optional_with_ty(self, &self.norm_ty)
     }
 
-    pub(crate) fn is_optional(&self) -> bool {
-        self.as_optional_norm_ty().is_some()
+    pub(crate) fn is_required(&self) -> bool {
+        self.as_optional_norm_ty().is_none()
     }
 
     pub(crate) fn param_default(&self) -> Option<Option<&syn::Expr>> {
@@ -161,7 +161,7 @@ impl NamedMember {
     }
 
     pub(crate) fn is_stateful(&self) -> bool {
-        !self.is_optional() || !self.params.overwritable.is_present()
+        self.is_required() || !self.params.overwritable.is_present()
     }
 
     pub(crate) fn merge_param_overwritable(&mut self, on_params: &[OnParams]) -> Result {

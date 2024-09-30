@@ -199,8 +199,13 @@ error[E0277]: the member `Unset<y>` was not set, but this method requires it to 
 34 |     let _ = Example::builder().x(1).build();
    |                                     ^^^^^ the member `Unset<y>` was not set, but this method requires it to be set
    |
-   = help: the trait `IsSet` is not implemented for `Unset<y>`
-   = help: the trait `IsSet` is implemented for `Set<Name>`
+   = help: the trait `example_builder::IsSet` is not implemented for `Unset<y>`, which is required by `(Set<x>, Unset<y>, Unset<renamed>): example_builder::IsComplete`
+   = help: the trait `example_builder::IsSet` is implemented for `Set<Name>`
+note: required for `(Set<x>, Unset<y>, Unset<renamed>)` to implement `example_builder::IsComplete`
+  --> tests/integration/ui/compile_fail/errors.rs:24:14
+   |
+24 |     #[derive(Builder)]
+   |              ^^^^^^^ unsatisfied trait bound introduced in this `derive` macro
 note: required by a bound in `ExampleBuilder::<BuilderState>::build`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
@@ -216,8 +221,13 @@ error[E0277]: the member `Unset<renamed>` was not set, but this method requires 
 34 |     let _ = Example::builder().x(1).build();
    |                                     ^^^^^ the member `Unset<renamed>` was not set, but this method requires it to be set
    |
-   = help: the trait `IsSet` is not implemented for `Unset<renamed>`
-   = help: the trait `IsSet` is implemented for `Set<Name>`
+   = help: the trait `example_builder::IsSet` is not implemented for `Unset<renamed>`, which is required by `(Set<x>, Unset<y>, Unset<renamed>): example_builder::IsComplete`
+   = help: the trait `example_builder::IsSet` is implemented for `Set<Name>`
+note: required for `(Set<x>, Unset<y>, Unset<renamed>)` to implement `example_builder::IsComplete`
+  --> tests/integration/ui/compile_fail/errors.rs:24:14
+   |
+24 |     #[derive(Builder)]
+   |              ^^^^^^^ unsatisfied trait bound introduced in this `derive` macro
 note: required by a bound in `ExampleBuilder::<BuilderState>::build`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
@@ -233,8 +243,8 @@ error[E0277]: the member `Set<y>` was already set, but this method requires it t
 37 |     let _ = Example::builder().y(1).y(2);
    |                                     ^ the member `Set<y>` was already set, but this method requires it to be unset
    |
-   = help: the trait `IsUnset` is not implemented for `Set<y>`
-   = help: the trait `IsUnset` is implemented for `Unset<Name>`
+   = help: the trait `example_builder::IsUnset` is not implemented for `Set<y>`
+   = help: the trait `example_builder::IsUnset` is implemented for `Unset<Name>`
 note: required by a bound in `ExampleBuilder::<BuilderState>::y`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
@@ -251,8 +261,13 @@ error[E0277]: the member `Unset<arg1>` was not set, but this method requires it 
 47 |         let _ = Sut::builder().build();
    |                                ^^^^^ the member `Unset<arg1>` was not set, but this method requires it to be set
    |
-   = help: the trait `IsSet` is not implemented for `Unset<arg1>`
-   = help: the trait `IsSet` is implemented for `Set<Name>`
+   = help: the trait `sut_builder::IsSet` is not implemented for `Unset<arg1>`, which is required by `(Unset<arg1>,): sut_builder::IsComplete`
+   = help: the trait `sut_builder::IsSet` is implemented for `Set<Name>`
+note: required for `(Unset<arg1>,)` to implement `sut_builder::IsComplete`
+  --> tests/integration/ui/compile_fail/errors.rs:42:18
+   |
+42 |         #[derive(Builder)]
+   |                  ^^^^^^^ unsatisfied trait bound introduced in this `derive` macro
 note: required by a bound in `SutBuilder::<BuilderState>::build`
   --> tests/integration/ui/compile_fail/errors.rs:42:18
    |
