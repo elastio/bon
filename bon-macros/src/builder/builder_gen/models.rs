@@ -6,7 +6,7 @@ pub(super) trait FinishFnBody {
     /// Generate the `finish` function body from the ready-made variables.
     /// The generated function body may assume that there are variables
     /// named the same as the members in scope.
-    fn generate(&self, members: &[Member]) -> TokenStream2;
+    fn generate(&self, members: &[Member]) -> TokenStream;
 }
 
 pub(super) struct AssocMethodReceiverCtx {

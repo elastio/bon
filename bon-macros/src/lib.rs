@@ -18,8 +18,6 @@ mod error;
 mod normalization;
 mod util;
 
-use proc_macro::TokenStream;
-
 /// Generates a builder for the function or method it's placed on.
 ///
 /// ## Quick examples
@@ -96,7 +94,10 @@ use proc_macro::TokenStream;
 /// - [Guide](https://elastio.github.io/bon/guide/overview)
 /// - [Attributes reference](https://elastio.github.io/bon/reference/builder)
 #[proc_macro_attribute]
-pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
+pub fn builder(
+    params: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
     builder::generate_from_attr(params.into(), item.into()).into()
 }
 
@@ -136,7 +137,7 @@ pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
 /// - [Guide](https://elastio.github.io/bon/guide/overview)
 /// - [Attributes reference](https://elastio.github.io/bon/reference/builder)
 #[proc_macro_derive(Builder, attributes(builder))]
-pub fn derive_builder(item: TokenStream) -> TokenStream {
+pub fn derive_builder(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
     builder::generate_from_derive(item.into()).into()
 }
 
@@ -198,7 +199,10 @@ pub fn derive_builder(item: TokenStream) -> TokenStream {
 ///
 /// [`builder`]: macro@builder
 #[proc_macro_attribute]
-pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
+pub fn bon(
+    params: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
     bon::generate(params.into(), item.into()).into()
 }
 
@@ -242,7 +246,7 @@ pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
 /// [`BTreeMap`]: https://doc.rust-lang.org/stable/std/collections/struct.BTreeMap.html
 /// [`HashMap`]: https://doc.rust-lang.org/stable/std/collections/struct.HashMap.html
 #[proc_macro]
-pub fn map(input: TokenStream) -> TokenStream {
+pub fn map(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let entries = syn::parse_macro_input!(input with collections::map::parse_macro_input);
 
     collections::map::generate(entries).into()
@@ -288,7 +292,7 @@ pub fn map(input: TokenStream) -> TokenStream {
 /// [`BTreeSet`]: https://doc.rust-lang.org/stable/std/collections/struct.BTreeSet.html
 /// [`HashSet`]: https://doc.rust-lang.org/stable/std/collections/struct.HashSet.html
 #[proc_macro]
-pub fn set(input: TokenStream) -> TokenStream {
+pub fn set(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     use syn::punctuated::Punctuated;
 
     let entries = syn::parse_macro_input!(input with Punctuated::parse_terminated);

@@ -57,7 +57,7 @@ impl super::BuilderGenCtx {
     }
 
     #[allow(clippy::cognitive_complexity)]
-    pub(super) fn state_mod(&self) -> TokenStream2 {
+    pub(super) fn state_mod(&self) -> TokenStream {
         let builder_vis = &self.builder_type.vis;
         let vis_mod = &self.state_mod.vis;
         let vis_child = &self.state_mod.vis_child;

@@ -1,12 +1,12 @@
 use crate::util::prelude::*;
-use proc_macro2::{TokenStream as TokenStream2, TokenTree};
+use proc_macro2::{TokenStream as TokenStream, TokenTree};
 use quote::{quote, ToTokens};
 use syn::parse::Parse;
 
 /// Handle the error returned from the macro logic. This may be either a syntax
-/// error or a logic error. In either case, we want to return a [`TokenStream2`]
+/// error or a logic error. In either case, we want to return a [`TokenStream`]
 /// that still provides good IDE experience. See [`Fallback`] for details.
-pub(crate) fn error_into_token_stream(err: Error, item: TokenStream2) -> TokenStream2 {
+pub(crate) fn error_into_token_stream(err: Error, item: TokenStream) -> TokenStream {
     let compile_error = err.write_errors();
 
     syn::parse2::<Fallback>(item)
@@ -28,12 +28,12 @@ pub(crate) fn error_into_token_stream(err: Error, item: TokenStream2) -> TokenSt
 /// attributes that need to be processed by this macro to avoid the IDE from
 /// reporting those as well.
 struct Fallback {
-    output: TokenStream2,
+    output: TokenStream,
 }
 
 impl Parse for Fallback {
     fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
-        let mut output = TokenStream2::new();
+        let mut output = TokenStream::new();
 
         loop {
             let found_attr = input.step(|cursor| {
@@ -75,7 +75,7 @@ impl Parse for Fallback {
 }
 
 impl ToTokens for Fallback {
-    fn to_tokens(&self, tokens: &mut TokenStream2) {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
         self.output.to_tokens(tokens);
     }
 }

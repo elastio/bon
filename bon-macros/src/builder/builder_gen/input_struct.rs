@@ -241,7 +241,7 @@ struct StructLiteralBody {
 }
 
 impl FinishFnBody for StructLiteralBody {
-    fn generate(&self, member_exprs: &[Member]) -> TokenStream2 {
+    fn generate(&self, member_exprs: &[Member]) -> TokenStream {
         let Self { struct_ident } = self;
 
         // The variables with values of members are in scope for this expression.

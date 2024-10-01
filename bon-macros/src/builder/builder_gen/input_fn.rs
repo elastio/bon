@@ -426,7 +426,7 @@ struct FnCallBody {
 }
 
 impl FinishFnBody for FnCallBody {
-    fn generate(&self, members: &[Member]) -> TokenStream2 {
+    fn generate(&self, members: &[Member]) -> TokenStream {
         let asyncness = &self.sig.asyncness;
         let maybe_await = asyncness.is_some().then(|| quote!(.await));
 

@@ -6,7 +6,7 @@ use quote::quote;
 use std::rc::Rc;
 use syn::visit_mut::VisitMut;
 
-pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream2> {
+pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream> {
     if let Some((_, trait_path, _)) = &orig_impl_block.trait_ {
         bail!(trait_path, "Impls of traits are not supported yet");
     }

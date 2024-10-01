@@ -46,7 +46,7 @@ impl PositionalFnArgMember {
         Ok(())
     }
 
-    pub(crate) fn fn_input_param(&self) -> TokenStream2 {
+    pub(crate) fn fn_input_param(&self) -> TokenStream {
         let has_into = self.params.into.is_present();
         let norm_ty = &self.norm_ty;
         let ident = &self.ident;
@@ -58,7 +58,7 @@ impl PositionalFnArgMember {
         }
     }
 
-    pub(crate) fn maybe_into_ident_expr(&self) -> TokenStream2 {
+    pub(crate) fn maybe_into_ident_expr(&self) -> TokenStream {
         let has_into = self.params.into.is_present();
         let ident = &self.ident;
 

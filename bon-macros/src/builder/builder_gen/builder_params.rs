@@ -70,7 +70,7 @@ impl Parse for OnParams {
         let type_pattern = input.parse()?;
 
         let _ = input.parse::<syn::Token![,]>()?;
-        let rest: TokenStream2 = input.parse()?;
+        let rest: TokenStream = input.parse()?;
 
         #[derive(FromMeta)]
         struct Parsed {

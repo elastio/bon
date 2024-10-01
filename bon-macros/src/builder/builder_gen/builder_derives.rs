@@ -6,10 +6,10 @@ use darling::ast::GenericParamExt;
 use quote::quote;
 
 impl BuilderGenCtx {
-    pub(crate) fn builder_derives(&self) -> TokenStream2 {
+    pub(crate) fn builder_derives(&self) -> TokenStream {
         let BuilderDerives { clone, debug } = &self.builder_type.derives;
 
-        let mut tokens = TokenStream2::new();
+        let mut tokens = TokenStream::new();
 
         if clone.is_present() {
             tokens.extend(self.derive_clone());
@@ -26,7 +26,7 @@ impl BuilderGenCtx {
     /// They add bounds of their respective traits to every generic type parameter on the struct
     /// without trying to analyze if that bound is actually required for the derive to work, so
     /// it's a conservative approach.
-    fn where_clause_for_derive(&self, target_trait_bounds: &TokenStream2) -> TokenStream2 {
+    fn where_clause_for_derive(&self, target_trait_bounds: &TokenStream) -> TokenStream {
         let target_trait_bounds_predicates = self
             .generics
             .decl_without_defaults
@@ -48,7 +48,7 @@ impl BuilderGenCtx {
         }
     }
 
-    fn derive_clone(&self) -> TokenStream2 {
+    fn derive_clone(&self) -> TokenStream {
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
         let builder_ident = &self.builder_type.ident;
@@ -126,7 +126,7 @@ impl BuilderGenCtx {
         }
     }
 
-    fn derive_debug(&self) -> TokenStream2 {
+    fn derive_debug(&self) -> TokenStream {
         let format_members = self.members.iter().filter_map(|member| {
             match member {
                 Member::Named(member) => {

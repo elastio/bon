@@ -4,7 +4,7 @@ use crate::util::prelude::*;
 use quote::quote;
 use syn::visit_mut::VisitMut;
 
-pub(crate) fn generate(params: FnInputParams, orig_fn: syn::ItemFn) -> Result<TokenStream2> {
+pub(crate) fn generate(params: FnInputParams, orig_fn: syn::ItemFn) -> Result<TokenStream> {
     let mut norm_fn = orig_fn.clone();
 
     crate::normalization::NormalizeLifetimes.visit_item_fn_mut(&mut norm_fn);

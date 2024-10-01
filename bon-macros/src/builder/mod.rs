@@ -12,11 +12,11 @@ use darling::FromMeta;
 use quote::quote;
 use syn::parse::Parser;
 
-pub(crate) fn generate_from_derive(item: TokenStream2) -> TokenStream2 {
+pub(crate) fn generate_from_derive(item: TokenStream) -> TokenStream {
     try_generate_from_derive(item).unwrap_or_else(Error::write_errors)
 }
 
-fn try_generate_from_derive(item: TokenStream2) -> Result<TokenStream2> {
+fn try_generate_from_derive(item: TokenStream) -> Result<TokenStream> {
     match syn::parse2(item)? {
         syn::Item::Struct(item_struct) => item_struct::generate(item_struct),
         _ => bail!(
@@ -26,7 +26,7 @@ fn try_generate_from_derive(item: TokenStream2) -> Result<TokenStream2> {
     }
 }
 
-pub(crate) fn generate_from_attr(params: TokenStream2, item: TokenStream2) -> TokenStream2 {
+pub(crate) fn generate_from_attr(params: TokenStream, item: TokenStream) -> TokenStream {
     try_generate_from_attr(params.clone(), item.clone()).unwrap_or_else(|err| {
         [
             generate_completion_triggers(params),
@@ -36,7 +36,7 @@ pub(crate) fn generate_from_attr(params: TokenStream2, item: TokenStream2) -> To
     })
 }
 
-fn try_generate_from_attr(params: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
+fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<TokenStream> {
     let item: syn::Item = syn::parse2(item)?;
 
     if let syn::Item::Struct(item_struct) = item {
@@ -79,7 +79,7 @@ fn try_generate_from_attr(params: TokenStream2, item: TokenStream2) -> Result<To
     Ok(output)
 }
 
-fn generate_completion_triggers(params: TokenStream2) -> TokenStream2 {
+fn generate_completion_triggers(params: TokenStream) -> TokenStream {
     let meta = util::ide::parse_comma_separated_meta
         .parse2(params)
         .unwrap_or_default();

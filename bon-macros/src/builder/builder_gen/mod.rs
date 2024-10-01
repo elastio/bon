@@ -20,7 +20,7 @@ use setter_methods::MemberSettersCtx;
 
 pub(crate) struct MacroOutput {
     pub(crate) start_fn: syn::ItemFn,
-    pub(crate) other_items: TokenStream2,
+    pub(crate) other_items: TokenStream,
 }
 
 impl BuilderGenCtx {
@@ -96,7 +96,7 @@ impl BuilderGenCtx {
         })
     }
 
-    fn builder_impl(&self) -> TokenStream2 {
+    fn builder_impl(&self) -> TokenStream {
         let finish_fn = self.finish_fn();
         let transition_type_state_fn = self.transition_type_state_fn();
         let setter_methods = self
@@ -134,7 +134,7 @@ impl BuilderGenCtx {
     /// Generates code that has no meaning to the compiler, but it helps
     /// IDEs to provide better code highlighting, completions and other
     /// hints.
-    fn ide_hints(&self) -> TokenStream2 {
+    fn ide_hints(&self) -> TokenStream {
         let type_patterns = self
             .on_params
             .iter()
@@ -166,7 +166,7 @@ impl BuilderGenCtx {
         }
     }
 
-    fn transition_type_state_fn(&self) -> TokenStream2 {
+    fn transition_type_state_fn(&self) -> TokenStream {
         let builder_ident = &self.builder_type.ident;
         let state_mod = &self.state_mod.ident;
 
@@ -297,7 +297,7 @@ impl BuilderGenCtx {
         }
     }
 
-    fn phantom_data(&self) -> TokenStream2 {
+    fn phantom_data(&self) -> TokenStream {
         let member_types = self.members.iter().filter_map(|member| {
             match member {
                 // The types of these members already appear in the struct in the types
@@ -362,7 +362,7 @@ impl BuilderGenCtx {
         }
     }
 
-    fn builder_decl(&self) -> TokenStream2 {
+    fn builder_decl(&self) -> TokenStream {
         let builder_vis = &self.builder_type.vis;
         let builder_ident = &self.builder_type.ident;
         let generics_decl = &self.generics.decl_with_defaults;
@@ -456,7 +456,7 @@ impl BuilderGenCtx {
         }
     }
 
-    fn finish_fn_member_expr(member: &Member) -> TokenStream2 {
+    fn finish_fn_member_expr(member: &Member) -> TokenStream {
         let member = match member {
             Member::Named(member) => member,
             Member::Skipped(member) => {
@@ -523,7 +523,7 @@ impl BuilderGenCtx {
         }
     }
 
-    fn finish_fn(&self) -> TokenStream2 {
+    fn finish_fn(&self) -> TokenStream {
         let members_vars_decls = self.members.iter().map(|member| {
             let expr = Self::finish_fn_member_expr(member);
             let var_ident = member.orig_ident();
@@ -589,7 +589,7 @@ impl BuilderGenCtx {
     }
 }
 
-fn allow_warnings_on_member_types() -> TokenStream2 {
+fn allow_warnings_on_member_types() -> TokenStream {
     quote! {
         // This warning may occur when the original unnormalized syntax was
         // using parens around an `impl Trait` like that:

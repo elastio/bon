@@ -100,7 +100,7 @@ impl Parse for Meta {
 #[derive(Clone, Debug)]
 pub(crate) struct MetaList {
     pub(crate) path: syn::Path,
-    pub(crate) tokens: TokenStream2,
+    pub(crate) tokens: TokenStream,
 }
 
 #[derive(Clone, Debug)]
@@ -135,7 +135,7 @@ fn paths_from_meta(meta: Vec<Meta>) -> Vec<syn::Path> {
 /// By placing these input identifiers in the right places inside of `use` statements
 /// we can hint the IDEs to provide completions for the attributes based on what's
 /// available in the module the use statement references.
-pub(crate) fn generate_completion_triggers(meta: Vec<Meta>) -> TokenStream2 {
+pub(crate) fn generate_completion_triggers(meta: Vec<Meta>) -> TokenStream {
     let completions = CompletionsSchema::with_children(
         "builder_top_level",
         vec![
@@ -195,7 +195,7 @@ impl CompletionsSchema {
         &self,
         mut meta: Vec<Meta>,
         module_prefix: &[&syn::Ident],
-    ) -> TokenStream2 {
+    ) -> TokenStream {
         if let Some(custom_filter) = self.custom_filter {
             custom_filter(&mut meta);
         };

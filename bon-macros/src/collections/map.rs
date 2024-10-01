@@ -18,7 +18,7 @@ fn parse_map_pair(pair: ParseStream<'_>) -> Result<(Expr, Expr), syn::Error> {
     Ok((key, value))
 }
 
-pub(crate) fn generate(entries: Punctuated<(Expr, Expr), Token![,]>) -> TokenStream2 {
+pub(crate) fn generate(entries: Punctuated<(Expr, Expr), Token![,]>) -> TokenStream {
     let error =
         super::validate_expressions_are_unique("key in the map", entries.iter().map(|(k, _)| k));
 

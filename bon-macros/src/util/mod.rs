@@ -15,8 +15,7 @@ pub(crate) mod ide;
 use prelude::*;
 
 pub(crate) mod prelude {
-    /// A handy alias for [`proc_macro2::TokenStream`].
-    pub(crate) use proc_macro2::{Span, TokenStream as TokenStream2};
+    pub(crate) use proc_macro2::{Span, TokenStream};
 
     /// The `Error` type in in this crate is supposed to act like `anyhow::Error`
     /// providing a simple way to create and return errors from format strings.

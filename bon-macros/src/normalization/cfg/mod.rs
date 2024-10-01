@@ -8,15 +8,15 @@ use std::collections::BTreeSet;
 
 pub(crate) enum ExpansionOutput {
     Expanded {
-        params: TokenStream2,
+        params: TokenStream,
         item: syn::Item,
     },
-    Recurse(TokenStream2),
+    Recurse(TokenStream),
 }
 
 pub(crate) struct ExpandCfg {
     pub(crate) macro_path: syn::Path,
-    pub(crate) params: TokenStream2,
+    pub(crate) params: TokenStream,
     pub(crate) item: syn::Item,
 }
 
@@ -65,7 +65,7 @@ impl ExpandCfg {
 
     /// There is no mutation happening here, but we just reuse the same
     /// visitor implementation that works with mutable references.
-    fn collect_predicates(&mut self) -> Result<Vec<TokenStream2>> {
+    fn collect_predicates(&mut self) -> Result<Vec<TokenStream>> {
         let mut predicates = vec![];
         let mut visited = BTreeSet::new();
 
@@ -95,7 +95,7 @@ impl ExpandCfg {
     fn into_recursion(
         self,
         recursion_counter: usize,
-        predicates: &[TokenStream2],
+        predicates: &[TokenStream],
     ) -> Result<ExpansionOutput> {
         let Self {
             params,

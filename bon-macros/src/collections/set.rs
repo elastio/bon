@@ -3,7 +3,7 @@ use quote::quote;
 use syn::punctuated::Punctuated;
 use syn::{Expr, Token};
 
-pub(crate) fn generate(entries: Punctuated<Expr, Token![,]>) -> TokenStream2 {
+pub(crate) fn generate(entries: Punctuated<Expr, Token![,]>) -> TokenStream {
     let error = super::validate_expressions_are_unique("value in the set", &entries);
     let entries = entries.into_iter();
     let output = quote! {

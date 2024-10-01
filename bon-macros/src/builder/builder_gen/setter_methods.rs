@@ -15,7 +15,7 @@ impl<'a> MemberSettersCtx<'a> {
         }
     }
 
-    pub(crate) fn setter_methods(&self) -> TokenStream2 {
+    pub(crate) fn setter_methods(&self) -> TokenStream {
         let member_type = self.member.norm_ty.as_ref();
 
         if let Some(inner_type) = self.member.as_optional_norm_ty() {
@@ -40,7 +40,7 @@ impl<'a> MemberSettersCtx<'a> {
         })
     }
 
-    fn setters_for_optional_member(&self, inner_type: &syn::Type) -> TokenStream2 {
+    fn setters_for_optional_member(&self, inner_type: &syn::Type) -> TokenStream {
         let has_into = self.member.params.into.is_present();
         let (inner_type, maybe_map_conv_call) = if has_into {
             (quote!(impl Into<#inner_type>), quote!(.map(Into::into)))
@@ -94,7 +94,7 @@ impl<'a> MemberSettersCtx<'a> {
             .concat()
     }
 
-    fn setter_method(&self, method: MemberSetterMethod) -> TokenStream2 {
+    fn setter_method(&self, method: MemberSetterMethod) -> TokenStream {
         let MemberSetterMethod {
             method_name,
             fn_params,
@@ -222,13 +222,13 @@ impl<'a> MemberSettersCtx<'a> {
 }
 
 enum SetterBody {
-    Custom(TokenStream2),
-    Default { member_init: TokenStream2 },
+    Custom(TokenStream),
+    Default { member_init: TokenStream },
 }
 
 struct MemberSetterMethod {
     method_name: syn::Ident,
-    fn_params: TokenStream2,
+    fn_params: TokenStream,
     overwrite_docs: Option<String>,
     body: SetterBody,
 }
