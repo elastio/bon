@@ -16,7 +16,7 @@ cargo asm --features "$bench" --no-color "benchmarks::$bench::builder_bench" > b
 cargo asm --features "$bench" --no-color "benchmarks::$bench::regular_bench" > regular.dbg.s || true
 
 # If vscode is present, show diff:
- if command -v code; then
+if command -v code; then
     code --diff regular.dbg.s builder.dbg.s
 fi
 
