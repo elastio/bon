@@ -75,7 +75,7 @@ syn = { version = "2.0.56", features = ["full", "visit-mut", "visit"] }
 #
 # use example_builder::{IsUnset, IsComplete};
 #
-# impl<State: example_builder::State> for ExampleBuilder<State> {
+# impl<State: example_builder::State> ExampleBuilder<State> {
 #     fn build_with_default_b(self) -> Example
 #     where
 #         State: IsComplete,

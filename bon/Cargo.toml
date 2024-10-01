@@ -83,7 +83,7 @@ std     = ["alloc"]
 #
 # use example_builder::{IsUnset, IsComplete};
 #
-# impl<State: example_builder::State> for ExampleBuilder<State> {
+# impl<State: example_builder::State> ExampleBuilder<State> {
 #     fn build_with_default_b(self) -> Example
 #     where
 #         State: IsComplete,
