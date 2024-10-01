@@ -1,7 +1,6 @@
 use super::builder_gen::input_fn::{FnInputCtx, FnInputParams};
 use super::builder_gen::MacroOutput;
 use crate::util::prelude::*;
-use quote::quote;
 use syn::visit_mut::VisitMut;
 
 pub(crate) fn generate(params: FnInputParams, orig_fn: syn::ItemFn) -> Result<TokenStream> {

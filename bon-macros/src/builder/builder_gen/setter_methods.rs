@@ -1,6 +1,5 @@
 use super::{BuilderGenCtx, NamedMember};
 use crate::util::prelude::*;
-use quote::quote;
 
 pub(crate) struct MemberSettersCtx<'a> {
     builder_gen: &'a BuilderGenCtx,
@@ -131,7 +130,7 @@ impl<'a> MemberSettersCtx<'a> {
         let member_pascal = &self.member.norm_ident_pascal;
 
         let state_transition =
-            quote::format_ident!("Set{}", self.member.norm_ident_pascal.raw_name());
+            format_ident!("Set{}", self.member.norm_ident_pascal.raw_name());
 
         let state_mod = &self.builder_gen.state_mod.ident;
         let generic_param = if self.builder_gen.stateful_members().take(2).count() == 1 {

@@ -1,6 +1,5 @@
 use crate::util::prelude::*;
-use proc_macro2::{TokenStream as TokenStream, TokenTree};
-use quote::{quote, ToTokens};
+use proc_macro2::TokenTree;
 use syn::parse::Parse;
 
 /// Handle the error returned from the macro logic. This may be either a syntax

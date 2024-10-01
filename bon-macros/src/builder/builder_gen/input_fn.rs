@@ -9,8 +9,6 @@ use crate::normalization::NormalizeSelfTy;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
 use darling::FromMeta;
-use proc_macro2::Span;
-use quote::quote;
 use std::rc::Rc;
 use syn::punctuated::Punctuated;
 use syn::visit::Visit;
@@ -143,12 +141,12 @@ impl FnInputCtx {
         }
 
         if self.is_method_new() {
-            return quote::format_ident!("{}Builder", self.self_ty_prefix().unwrap_or_default());
+            return format_ident!("{}Builder", self.self_ty_prefix().unwrap_or_default());
         }
 
         let pascal_case_fn = self.norm_fn.sig.ident.snake_to_pascal_case();
 
-        quote::format_ident!(
+        format_ident!(
             "{}{pascal_case_fn}Builder",
             self.self_ty_prefix().unwrap_or_default(),
         )
@@ -207,7 +205,7 @@ impl FnInputCtx {
             })
             // By default we don't want to expose the positional function, so we
             // hide it under a generated name to avoid name conflicts.
-            .unwrap_or_else(|| quote::format_ident!("__orig_{}", orig_ident.raw_name()));
+            .unwrap_or_else(|| format_ident!("__orig_{}", orig_ident.raw_name()));
 
         strip_known_attrs_from_args(&mut orig.sig);
 
@@ -325,7 +323,7 @@ impl FnInputCtx {
         // Special case for `new` methods. We rename them to `builder`
         // since this is the name that is used in the builder pattern
         let start_fn_ident = if is_method_new {
-            quote::format_ident!("builder")
+            format_ident!("builder")
         } else {
             self.norm_fn.sig.ident.clone()
         };
@@ -339,9 +337,9 @@ impl FnInputCtx {
         let finish_fn_ident = finish_fn_ident.unwrap_or_else(|| {
             // For `new` methods the `build` finisher is more conventional
             if is_method_new {
-                quote::format_ident!("build")
+                format_ident!("build")
             } else {
-                quote::format_ident!("call")
+                format_ident!("call")
             }
         });
 

@@ -15,7 +15,6 @@ use member::{
 use models::{
     AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFn, FinishFnBody, Generics,
 };
-use quote::{quote, ToTokens};
 use setter_methods::MemberSettersCtx;
 
 pub(crate) struct MacroOutput {

@@ -10,8 +10,7 @@
 )]
 
 use crate::util::prelude::*;
-use proc_macro2::{Span, TokenTree};
-use quote::quote;
+use proc_macro2::TokenTree;
 use syn::parse::{Parse, ParseStream, Parser};
 use syn::{token, Token};
 

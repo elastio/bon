@@ -6,7 +6,6 @@ use super::{
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
 use crate::util::prelude::*;
 use darling::FromMeta;
-use quote::quote;
 use syn::visit_mut::VisitMut;
 
 #[derive(Debug, FromMeta)]
@@ -206,7 +205,7 @@ impl StructInputCtx {
             let ItemParams { name, vis, docs } = self.params.base.builder_type;
 
             let builder_ident = name.unwrap_or_else(|| {
-                quote::format_ident!("{}Builder", self.norm_struct.ident.raw_name())
+                format_ident!("{}Builder", self.norm_struct.ident.raw_name())
             });
 
             BuilderTypeParams {

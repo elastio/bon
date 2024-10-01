@@ -1,5 +1,5 @@
 use ident_case::RenameRule;
-use proc_macro2::Span;
+use crate::util::prelude::*;
 
 pub(crate) trait IdentExt {
     /// Converts the ident (assumed to be in `snake_case`) to `PascalCase` without

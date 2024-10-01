@@ -2,7 +2,6 @@ use super::builder_gen::input_fn::{FnInputCtx, FnInputParams, ImplCtx};
 use crate::util::prelude::*;
 use darling::ast::NestedMeta;
 use darling::FromMeta;
-use quote::quote;
 use std::rc::Rc;
 use syn::visit_mut::VisitMut;
 

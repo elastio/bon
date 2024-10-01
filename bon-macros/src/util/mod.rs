@@ -16,6 +16,7 @@ use prelude::*;
 
 pub(crate) mod prelude {
     pub(crate) use proc_macro2::{Span, TokenStream};
+    pub(crate) use quote::{quote, format_ident, ToTokens};
 
     /// The `Error` type in in this crate is supposed to act like `anyhow::Error`
     /// providing a simple way to create and return errors from format strings.

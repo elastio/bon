@@ -2,7 +2,6 @@ use super::params::{BlanketParamName, EvalBlanketFlagParam};
 use super::{NamedMember, PositionalFnArgMember};
 use crate::builder::builder_gen::builder_params::OnParams;
 use crate::util::prelude::*;
-use quote::{quote, ToTokens};
 
 impl NamedMember {
     pub(super) fn merge_param_into(&mut self, on_params: &[OnParams]) -> Result {

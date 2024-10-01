@@ -1,7 +1,6 @@
 use crate::util::prelude::*;
 use darling::FromMeta;
 use proc_macro2::Span;
-use quote::quote;
 use syn::parse::Parse;
 use syn::spanned::Spanned;
 use syn::visit::Visit;

@@ -1,6 +1,5 @@
 use crate::builder::builder_gen::member::NamedMember;
 use crate::util::prelude::*;
-use quote::quote;
 
 impl super::BuilderGenCtx {
     fn state_transition_aliases(&self) -> Vec<syn::ItemType> {
@@ -28,7 +27,7 @@ impl super::BuilderGenCtx {
 
                 let member_ident = member.public_ident();
                 let alias_ident =
-                    quote::format_ident!("Set{}", member.norm_ident_pascal.raw_name());
+                    format_ident!("Set{}", member.norm_ident_pascal.raw_name());
 
                 let docs = format!(
                     "Returns a [`State`] that has [`IsSet`] implemented for `{member_ident}`\n\
@@ -95,7 +94,7 @@ impl super::BuilderGenCtx {
             .map(|member| &member.norm_ident_pascal)
             .collect::<Vec<_>>();
 
-        let type_aliases_for_rustdoc = [&quote::format_ident!("AllUnset")];
+        let type_aliases_for_rustdoc = [&format_ident!("AllUnset")];
         let type_aliases_for_rustdoc = state_transition_aliases
             .iter()
             .map(|alias| &alias.ident)

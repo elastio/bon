@@ -1,7 +1,6 @@
 use super::builder_gen::input_struct::StructInputCtx;
 use super::builder_gen::MacroOutput;
 use crate::util::prelude::*;
-use quote::quote;
 
 pub(crate) fn generate(orig_struct: syn::ItemStruct) -> Result<TokenStream> {
     let struct_ident = orig_struct.ident.clone();

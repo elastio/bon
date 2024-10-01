@@ -9,7 +9,6 @@ use crate::normalization::{ExpandCfg, ExpansionOutput};
 use crate::util;
 use crate::util::prelude::*;
 use darling::FromMeta;
-use quote::quote;
 use syn::parse::Parser;
 
 pub(crate) fn generate_from_derive(item: TokenStream) -> TokenStream {

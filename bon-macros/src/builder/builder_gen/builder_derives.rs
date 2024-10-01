@@ -3,7 +3,6 @@ use super::BuilderGenCtx;
 use crate::builder::builder_gen::Member;
 use crate::util::prelude::*;
 use darling::ast::GenericParamExt;
-use quote::quote;
 
 impl BuilderGenCtx {
     pub(crate) fn builder_derives(&self) -> TokenStream {

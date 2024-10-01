@@ -1,5 +1,4 @@
 use crate::util::prelude::*;
-use quote::quote;
 use syn::punctuated::Punctuated;
 use syn::{Expr, Token};
 
