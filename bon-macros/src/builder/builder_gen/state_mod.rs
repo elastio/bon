@@ -101,16 +101,30 @@ impl super::BuilderGenCtx {
             .map(|alias| &alias.ident)
             .chain(type_aliases_for_rustdoc);
 
-        quote! {
-            // This is a workaround for `rustdoc`. Without these `use` statements,
-            // it inlines the type aliases
-            #(
-                #[cfg(doc)]
-                #[doc(hidden)]
-                #builder_vis use self::#state_mod_ident::#type_aliases_for_rustdoc as _;
-            )*
+        let is_complete_assoc_type_bounds = if cfg!(feature = "msrv-1-79-0") {
+            quote! {
+                < #( #required_members_pascal: IsSet, )* >
+            }
+        } else {
+            quote! {}
+        };
 
-            #( #state_mod_docs )*
+        let sealed_method = quote! {
+            // A method without `self` makes the trait non-object safe,
+            // which is convenient, because we want that in this case.
+            #[doc(hidden)]
+            fn __sealed(_: sealed::Sealed);
+        };
+
+        quote! {
+            // This is a workaround for `rustdoc`. Without this `use` statement,
+            // it inlines the type aliases
+            #[cfg(doc)]
+            #[doc(hidden)]
+            #builder_vis use self::#state_mod_ident::{
+                #( #type_aliases_for_rustdoc as _, )*
+            };
+
             // This is intentional. By default, the builder module is private
             // and can't be accessed outside of the module where the builder
             // type is defined. This makes the builder type "anonymous" to
@@ -123,7 +137,7 @@ impl super::BuilderGenCtx {
             // public, and users instead should only reference the traits
             // and state transition type aliases from here.
             #[allow(unnameable_types, unreachable_pub)]
-            #[doc(hidden)]
+            #( #state_mod_docs )*
             #vis_mod mod #state_mod_ident {
                 /// Marker trait implemented by members that are set.
                 #[::bon::private::rustversion::attr(
@@ -134,16 +148,13 @@ impl super::BuilderGenCtx {
                     )
                 )]
                 #vis_child trait IsSet {
-                    // Also a method without `self` makes the trait non-object safe
-                    #[doc(hidden)]
-                    fn __sealed(_: sealed::Sealed);
+                    #sealed_method
                 }
 
                 #[doc(hidden)]
                 impl<Name> IsSet for ::bon::private::Set<Name> {
                     fn __sealed(_: sealed::Sealed) {}
                 }
-
 
                 // use private::sealed::Sealed;
                 //
@@ -210,6 +221,7 @@ impl super::BuilderGenCtx {
                 //     )
                 // )]
                 // pub trait IsSet: Sealed {}
+
                 /// Marker trait implemented by members that are not set.
                 #[::bon::private::rustversion::attr(
                     since(1.78.0),
@@ -219,9 +231,7 @@ impl super::BuilderGenCtx {
                     )
                 )]
                 #vis_child trait IsUnset {
-                    // Also a method without `self` makes the trait non-object safe
-                    #[doc(hidden)]
-                    fn __sealed(_: sealed::Sealed);
+                    #sealed_method
                 }
 
                 #[doc(hidden)]
@@ -236,10 +246,8 @@ impl super::BuilderGenCtx {
                         label = "can't finish building yet; not all required members are set",
                     )
                 )]
-                #vis_child trait IsComplete: State {
-                    // Also a method without `self` makes the trait non-object safe
-                    #[doc(hidden)]
-                    fn __sealed(_: sealed::Sealed);
+                #vis_child trait IsComplete: State #is_complete_assoc_type_bounds {
+                    #sealed_method
                 }
 
                 #[doc(hidden)]
@@ -268,8 +276,7 @@ impl super::BuilderGenCtx {
                         >;
                     )*
 
-                    #[doc(hidden)]
-                    fn __sealed(_: self::sealed::Sealed);
+                    #sealed_method
                 }
 
                 mod sealed {
