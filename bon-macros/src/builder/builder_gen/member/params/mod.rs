@@ -1,6 +1,8 @@
 mod blanket;
+mod setter;
 
 pub(crate) use blanket::{BlanketParamName, EvalBlanketFlagParam};
+pub(crate) use setter::{SetterParenParams, SetterParams};
 
 use super::MemberOrigin;
 use crate::util::prelude::*;
@@ -8,7 +10,7 @@ use darling::util::SpannedValue;
 use std::fmt;
 use syn::spanned::Spanned;
 
-#[derive(Debug, Clone, darling::FromAttributes)]
+#[derive(Debug, darling::FromAttributes)]
 #[darling(attributes(builder))]
 pub(crate) struct MemberParams {
     /// Enables an `Into` conversion for the setter method.
@@ -31,6 +33,9 @@ pub(crate) struct MemberParams {
     /// Rename the name exposed in the builder API.
     pub(crate) name: Option<syn::Ident>,
 
+    /// Configurations for the setter methods.
+    pub(crate) setter: Option<SetterParams>,
+
     /// Where to place the member in the generated builder methods API.
     /// By default the member is treated like a named parameter that
     /// gets its own setter methods.
@@ -49,24 +54,26 @@ pub(crate) struct MemberParams {
 #[derive(PartialEq, Eq, Clone, Copy)]
 enum ParamName {
     Default,
+    FinishFn,
     Into,
     Name,
+    Overwritable,
+    Setter,
     Skip,
     StartFn,
-    FinishFn,
-    Overwritable,
 }
 
 impl fmt::Display for ParamName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let str = match self {
             Self::Default => "default",
+            Self::FinishFn => "finish_fn",
             Self::Into => "into",
             Self::Name => "name",
+            Self::Overwritable => "overwritable",
+            Self::Setter => "setter",
             Self::Skip => "skip",
             Self::StartFn => "start_fn",
-            Self::FinishFn => "finish_fn",
-            Self::Overwritable => "overwritable",
         };
         f.write_str(str)
     }
@@ -101,23 +108,25 @@ impl MemberParams {
 
     fn specified_param_names(&self) -> impl Iterator<Item = ParamName> {
         let Self {
-            into,
             default,
-            skip,
-            name,
             finish_fn,
-            start_fn,
+            into,
+            name,
             overwritable,
+            setter,
+            skip,
+            start_fn,
         } = self;
 
         let attrs = [
             (default.is_some(), ParamName::Default),
-            (name.is_some(), ParamName::Name),
+            (finish_fn.is_present(), ParamName::FinishFn),
             (into.is_present(), ParamName::Into),
+            (name.is_some(), ParamName::Name),
+            (overwritable.is_present(), ParamName::Overwritable),
+            (setter.is_some(), ParamName::Setter),
             (skip.is_some(), ParamName::Skip),
             (start_fn.is_present(), ParamName::StartFn),
-            (finish_fn.is_present(), ParamName::FinishFn),
-            (overwritable.is_present(), ParamName::Overwritable),
         ];
 
         attrs

@@ -46,7 +46,7 @@ pub(crate) enum Member {
 }
 
 /// Regular member for which the builder should have setter methods
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub(crate) struct NamedMember {
     /// Specifies what syntax the member comes from.
     pub(crate) origin: MemberOrigin,
@@ -121,7 +121,10 @@ pub(crate) struct SkippedMember {
 
 impl NamedMember {
     fn validate(&self) -> Result {
-        super::reject_self_mentions_in_docs("builder struct's impl block", &self.docs)?;
+        crate::util::parsing::reject_self_mentions_in_docs(
+            "builder struct's impl block",
+            &self.docs,
+        )?;
 
         if let Some(default) = &self.params.default {
             if self.norm_ty.is_option() {

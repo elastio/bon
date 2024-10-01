@@ -172,7 +172,7 @@ impl ItemParamsParsing<'_> {
 
         if let Some(context) = self.reject_self_mentions {
             if let Some(docs) = &params.docs {
-                super::reject_self_mentions_in_docs(context, docs)?;
+                crate::util::parsing::reject_self_mentions_in_docs(context, docs)?;
             }
         }
 
@@ -215,18 +215,8 @@ impl ItemParamsParsing<'_> {
 
         let docs = full
             .docs
-            .map(|docs| {
-                let docs = docs.require_list()?;
-                let docs = docs.parse_args_with(syn::Attribute::parse_outer)?;
-
-                for attr in &docs {
-                    if !attr.is_doc() {
-                        bail!(attr, "expected a doc comment");
-                    }
-                }
-
-                Ok(docs)
-            })
+            .as_ref()
+            .map(crate::util::parsing::parse_docs)
             .transpose()?;
 
         let params = ItemParams {

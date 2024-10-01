@@ -11,6 +11,7 @@ mod vec;
 mod visibility;
 
 pub(crate) mod ide;
+pub(crate) mod parsing;
 
 use prelude::*;
 

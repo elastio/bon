@@ -4,6 +4,7 @@
 
 pub mod macro_rules_wrapper_test;
 pub mod missing_docs_test;
+pub mod v3_design;
 
 use bon::{bon, builder};
 
