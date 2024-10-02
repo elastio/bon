@@ -129,8 +129,7 @@ impl<'a> MemberSettersCtx<'a> {
 
         let member_pascal = &self.member.norm_ident_pascal;
 
-        let state_transition =
-            format_ident!("Set{}", self.member.norm_ident_pascal.raw_name());
+        let state_transition = format_ident!("Set{}", self.member.norm_ident_pascal.raw_name());
 
         let state_mod = &self.builder_gen.state_mod.ident;
         let generic_param = if self.builder_gen.stateful_members().take(2).count() == 1 {
@@ -154,16 +153,15 @@ impl<'a> MemberSettersCtx<'a> {
             quote! { Self }
         };
 
-        let where_clause = if self.member.is_stateful() && !self.member.params.overwritable.is_present()
-        {
-            quote! {
-                where
-                    BuilderState::#member_pascal: #state_mod::IsUnset,
-            }
-        } else {
-            quote! {}
-        };
-
+        let where_clause =
+            if self.member.is_stateful() && !self.member.params.overwritable.is_present() {
+                quote! {
+                    where
+                        BuilderState::#member_pascal: #state_mod::IsUnset,
+                }
+            } else {
+                quote! {}
+            };
 
         let vis = &self.builder_gen.builder_type.vis;
 

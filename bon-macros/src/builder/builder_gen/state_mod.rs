@@ -26,8 +26,7 @@ impl super::BuilderGenCtx {
                 });
 
                 let member_ident = member.public_ident();
-                let alias_ident =
-                    format_ident!("Set{}", member.norm_ident_pascal.raw_name());
+                let alias_ident = format_ident!("Set{}", member.norm_ident_pascal.raw_name());
 
                 let docs = format!(
                     "Returns a [`State`] that has [`IsSet`] implemented for `{member_ident}`\n\
