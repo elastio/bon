@@ -152,6 +152,12 @@ error: Found multiple #[must_use], but bon only works with exactly one (or less)
 128 | #[must_use]
     | ^
 
+error: expected a closure e.g. `with = |param: T| expression`
+   --> tests/integration/ui/compile_fail/errors.rs:136:15
+    |
+136 |     #[builder(with = 42)]
+    |               ^^^^
+
 warning: unused attribute
    --> tests/integration/ui/compile_fail/errors.rs:128:1
     |
