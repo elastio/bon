@@ -114,7 +114,7 @@ impl MemberParams {
             into,
             name,
             overwritable,
-            setters: setter,
+            setters,
             skip,
             start_fn,
         } = self;
@@ -125,7 +125,7 @@ impl MemberParams {
             (into.is_present(), ParamName::Into),
             (name.is_some(), ParamName::Name),
             (overwritable.is_present(), ParamName::Overwritable),
-            (setter.is_some(), ParamName::Setters),
+            (setters.is_some(), ParamName::Setters),
             (skip.is_some(), ParamName::Skip),
             (start_fn.is_present(), ParamName::StartFn),
         ];
