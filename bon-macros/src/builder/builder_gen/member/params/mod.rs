@@ -20,14 +20,14 @@ pub(crate) struct MemberParams {
     ///
     /// An optional expression can be provided to set the value for the member,
     /// otherwise its  [`Default`] trait impl will be used.
-    #[darling(with = parse_optional_expression, map = Some)]
+    #[darling(with = parse_optional_expr, map = Some)]
     pub(crate) default: Option<SpannedValue<Option<syn::Expr>>>,
 
     /// Skip generating a setter method for this member.
     ///
     /// An optional expression can be provided to set the value for the member,
     /// otherwise its  [`Default`] trait impl will be used.
-    #[darling(with = parse_optional_expression, map = Some)]
+    #[darling(with = parse_optional_expr, map = Some)]
     pub(crate) skip: Option<SpannedValue<Option<syn::Expr>>>,
 
     /// Rename the name exposed in the builder API.
@@ -50,6 +50,9 @@ pub(crate) struct MemberParams {
     /// at compile time. Measure the compilation time before and after enabling
     /// this option to see if it's worth it.
     pub(crate) overwritable: darling::util::Flag,
+
+    #[darling(default, with = parse_expr_closure, map = Some)]
+    pub(crate) with: Option<syn::ExprClosure>,
 }
 
 #[derive(PartialEq, Eq, Clone, Copy)]
@@ -62,6 +65,7 @@ enum ParamName {
     Setters,
     Skip,
     StartFn,
+    With,
 }
 
 impl fmt::Display for ParamName {
@@ -75,6 +79,7 @@ impl fmt::Display for ParamName {
             Self::Setters => "setters",
             Self::Skip => "skip",
             Self::StartFn => "start_fn",
+            Self::With => "with",
         };
         f.write_str(str)
     }
@@ -117,6 +122,7 @@ impl MemberParams {
             setters,
             skip,
             start_fn,
+            with,
         } = self;
 
         let attrs = [
@@ -128,6 +134,7 @@ impl MemberParams {
             (setters.is_some(), ParamName::Setters),
             (skip.is_some(), ParamName::Skip),
             (start_fn.is_present(), ParamName::StartFn),
+            (with.is_some(), ParamName::With),
         ];
 
         attrs
@@ -158,8 +165,8 @@ impl MemberParams {
                 MemberOrigin::FnArg => {
                     bail!(
                         &skip.span(),
-                        "`skip` attribute is not supported on function arguments. \
-                        Use a local variable instead.",
+                        "`skip` attribute is not supported on function arguments; \
+                        use a local variable instead.",
                     );
                 }
                 MemberOrigin::StructField => {}
@@ -168,7 +175,7 @@ impl MemberParams {
             if let Some(Some(_expr)) = self.default.as_deref() {
                 bail!(
                     &skip.span(),
-                    "`skip` attribute can't be specified with `default` attribute; \
+                    "`skip` attribute can't be specified with the `default` attribute; \
                     if you wanted to specify a value for the member, then use \
                     the following syntax instead `#[builder(skip = value)]`",
                 );
@@ -181,10 +188,30 @@ impl MemberParams {
     }
 }
 
-fn parse_optional_expression(meta: &syn::Meta) -> Result<SpannedValue<Option<syn::Expr>>> {
+fn parse_optional_expr(meta: &syn::Meta) -> Result<SpannedValue<Option<syn::Expr>>> {
     match meta {
         syn::Meta::Path(_) => Ok(SpannedValue::new(None, meta.span())),
         syn::Meta::List(_) => Err(Error::unsupported_format("list").with_span(meta)),
         syn::Meta::NameValue(meta) => Ok(SpannedValue::new(Some(meta.value.clone()), meta.span())),
+    }
+}
+
+fn parse_expr_closure(meta: &syn::Meta) -> Result<syn::ExprClosure> {
+    let err = || {
+        let path = darling::util::path_to_string(meta.path());
+        err!(
+            meta,
+            "expected a closure e.g. `{path} = |param: T| expression`"
+        )
+    };
+
+    let meta = match meta {
+        syn::Meta::NameValue(meta) => meta,
+        _ => return Err(err()),
+    };
+
+    match &meta.value {
+        syn::Expr::Closure(closure) => Ok(closure.clone()),
+        _ => Err(err()),
     }
 }

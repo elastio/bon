@@ -106,13 +106,13 @@ error: `skip` attribute can't be specified together with `name`
 96 |     #[builder(skip, name = bar)]
    |               ^^^^
 
-error: `skip` attribute can't be specified with `default` attribute; if you wanted to specify a value for the member, then use the following syntax instead `#[builder(skip = value)]`
+error: `skip` attribute can't be specified with the `default` attribute; if you wanted to specify a value for the member, then use the following syntax instead `#[builder(skip = value)]`
    --> tests/integration/ui/compile_fail/errors.rs:102:15
     |
 102 |     #[builder(skip, default = 42)]
     |               ^^^^
 
-error: `skip` attribute is not supported on function arguments. Use a local variable instead.
+error: `skip` attribute is not supported on function arguments; use a local variable instead.
    --> tests/integration/ui/compile_fail/errors.rs:108:15
     |
 108 |     #[builder(skip)] _x: u32,
