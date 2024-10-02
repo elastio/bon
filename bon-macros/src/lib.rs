@@ -16,6 +16,7 @@ mod builder;
 mod collections;
 mod error;
 mod normalization;
+mod parsing;
 mod util;
 
 /// Generates a builder for the function or method it's placed on.

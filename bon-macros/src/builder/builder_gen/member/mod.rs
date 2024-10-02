@@ -121,7 +121,7 @@ pub(crate) struct SkippedMember {
 
 impl NamedMember {
     fn validate(&self) -> Result {
-        crate::util::parsing::reject_self_mentions_in_docs(
+        crate::parsing::reject_self_mentions_in_docs(
             "builder struct's impl block",
             &self.docs,
         )?;

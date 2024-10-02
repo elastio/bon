@@ -1,9 +1,20 @@
 use crate::util::prelude::*;
 
+pub(crate) fn parse_docs_without_self_mentions(
+    context: &'static str,
+    meta: &syn::Meta,
+) -> Result<Vec<syn::Attribute>> {
+    let docs = parse_docs(meta)?;
+    reject_self_mentions_in_docs(context, &docs)?;
+    Ok(docs)
+}
+
 pub(crate) fn parse_docs(meta: &syn::Meta) -> Result<Vec<syn::Attribute>> {
-    let attrs = meta
-        .require_list()?
-        .parse_args_with(syn::Attribute::parse_outer)?;
+    let meta = meta.require_list()?;
+
+    meta.require_curly_braces_delim()?;
+
+    let attrs = meta.parse_args_with(syn::Attribute::parse_outer)?;
 
     for attr in &attrs {
         if !attr.is_doc() {
@@ -18,7 +29,10 @@ pub(crate) fn parse_docs(meta: &syn::Meta) -> Result<Vec<syn::Attribute>> {
 /// shooting themselves in the foot where they would think that `Self` resolves
 /// to the current item the docs were placed on, when in fact the docs are moved
 /// to a different context where `Self` has a different meaning.
-pub(crate) fn reject_self_mentions_in_docs(context: &'static str, attrs: &[syn::Attribute]) -> Result {
+pub(crate) fn reject_self_mentions_in_docs(
+    context: &'static str,
+    attrs: &[syn::Attribute],
+) -> Result {
     for attr in attrs {
         let doc = match attr.as_doc() {
             Some(doc) => doc,

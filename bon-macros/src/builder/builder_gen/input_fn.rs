@@ -3,9 +3,9 @@ use super::{
     AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFn, FinishFnBody, Generics,
     Member, MemberOrigin, RawMember,
 };
-use crate::builder::builder_gen::builder_params::ItemParams;
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
 use crate::normalization::NormalizeSelfTy;
+use crate::parsing::ItemParams;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
 use darling::FromMeta;

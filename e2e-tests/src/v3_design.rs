@@ -1,11 +1,8 @@
-use bon::{builder, bon};
-
 struct Point {
     x: f64,
     y: f64,
 }
 
-#[derive(bon::Builder, Debug)]
 #[builder(
     builder_type(
         name = ExampleBuilder,
@@ -30,7 +27,7 @@ struct Point {
         // (v3.3)
         //
         // Overrides the setters generated for the `Point` type.
-        setter = |x: f64, y: f64| Point { x, y },
+        with = |x: f64, y: f64| Point { x, y },
     ),
 
     // (v3.4)
@@ -60,49 +57,58 @@ pub struct Example {
         // (v3.0)
         //
         // Override the name in the state
-        state = PointOverride
+        state = PointOverride,
 
-        // (v3.0)
+        // (v3.1+)
         //
         // Advanced state configuration
-        state(
-            name = PointOverride,
+        // state(
+        //     name = PointOverride,
 
-            deprecated = "This state is no longer available, the field is overwritable",
-            assoc_type = NameOverride,
-            assoc_type(
-                name = NameOverride
-                docs {
-                    /// Docs for associated type
-                },
-            ),
-            transition_alias = NameOverride,
-            transition_alias(
-                name = NameOverride,
-                docs {
-                    /// Docs for transition alias
-                },
-            )
-        ),
+        //     deprecated = "This state is no longer available, the field is overwritable",
+        //     assoc_type = NameOverride,
+        //     assoc_type(
+        //         name = NameOverride
+        //         docs {
+        //             /// Docs for associated type
+        //         },
+        //     ),
+        //     transition_alias = NameOverride,
+        //     transition_alias(
+        //         name = NameOverride,
+        //         docs {
+        //             /// Docs for transition alias
+        //         },
+        //     )
+        // ),
+
+        // Closure override
+        //
+        // For optional members, the `maybe_` setter will accept an `Option<(..args)>`
+        // if there is more than one argument.
+        with = |x: f64, y: f64| Point { x, y },
+
+        // Makes the setter fallible
+        with = |x: f64, y: f64| -> Result<_> { Ok(Point { x, y }) }
 
         // (v3.0)
         //
         // Overrides the name, visibility and docs of the default setters
-        setter(
+        setters(
             name = point_internal,
             vis = "",
 
             // By default copied to all members
             docs {
-                /// Docs for the required setter
+                /// Docs for the setters
             }
 
             // (v3.1)
             //
             // Overrides specific to the `{member}` setter that wraps the value with `Some`
             //
-            // Other names: `by_value`
-            arg_some(
+            // Other names: `by_value`, `arg_value`, `plain`
+            some_fn(
                 name = point_internal,
                 vis = "",
                 docs { ... }
@@ -112,58 +118,22 @@ pub struct Example {
             //
             // Overrides specific to the `maybe_{member}` setter.
             //
-            // Other names: `by_option`
-            arg_option(
+            // Other names: `by_option`, `arg_option`
+            option_fn(
                 name = maybe_point_internal,
                 vis = "",
                 docs { ... }
             )
 
-            arg_absent(
+            // Other names: `arg_absent`
+            true_fn(
+                // ...
+            ),
+
+            bool_fn(
                 // ...
             )
         ),
-
-        // (v3.1)
-        //
-        // Shortcut for:
-        // ```
-        // setters {
-        //    {vis} fn {name}(...) -> _ {
-        //        ...
-        //    }
-        // }
-        // ```
-        //
-        // For optional members, the `maybe_` setter will accept an `Option<(..args)>`
-        // if there is more than one argument.
-        setter = |value: Option<f64>| Point { x, y },
-
-        // (v3.1)
-        //
-        // Completely custom overrides for setters.
-        // The function needs to place `_` in the return type and return the
-        // type of the member. It can also be async or unsafe or return a
-        // `Result<_[, Error]>`, in which case the setter will propagate the
-        // error to the caller.
-        //
-        // Access to `BuilderState` must prohibited. The generic params from
-        // the struct should be in scope.
-        setter {
-            /// Docs for `foo`
-            #[deprecated]
-            fn foo(x: f64, y: f64) -> _ { expr }
-
-            /// Docs for `bar`
-            fn bar(val: Option<(f64, f64)>) -> _ { expr }
-
-            /// (v3.2 ??) syntax sugar
-            #[deprecated]
-            foo = |...| expr;
-
-            /// (v3.2 ??) syntax sugar
-            maybe_foo = |...| expr;
-        }
 
         // (v3.2)
         //
@@ -245,20 +215,8 @@ pub struct Example {
         // Custom mutable getter. Accepts a mutable reference and transforms it.
         getter = |value: &mut _| -> Ty { expr }
 
-        // If there are multiple getters, then names must be assigned explicitly.
-        getter {
-            // Long syntax. Full function signature. `_` can be used in place of
-            // the member's type to avoid repeating it.
-
-            /// Docs for getter_name_1
-            fn getter_name_1(value: &_) -> Ty { expr }
-
-            /// Docs for getter_name_2
-            fn getter_name_2(value: &mut _) -> Ty { expr }
-
-            // No short syntax. The syntax savings are minimal compared with the closure style.
-            // getter_name_3 = |value: &mut _| -> Ty { expr };
-        }
+        // Give a name to the getter if there are several getters
+        getter(name = foo, with = |value: &mut _| -> Ty { expr }),
     )]
     point: Point,
 
@@ -269,7 +227,7 @@ pub struct Example {
     #[builder(
         field = vec![],
         field(name = overridden_name, vis = "pub", docs { ... }, init = vec![]),
-        deprecated(reason  = "saasd"),
+        deprecated(reason = "saasd"),
     )]
     #[deprecated = "Use `overridden_name` instead"]
     pub custom_state: Vec<u32>,
@@ -307,45 +265,47 @@ pub struct Example {
 }
 
 // Use cases:
-#[derive(bon::Builder)]
 struct UseCases {
     // (v3.0)
     //
     // Generate private setters with names `[maybe_]point_internal` and
     // preserve the public name in the `state` as `Point`.
-    #[builder(
-        name = point_internal,
-        vis = "",
-        state = Point,
-    )]
+    #[builder(setters(name = point_internal, vis = ""))]
+    point: Point,
+
     // (v3.0)
     #[builder(setters(docs {
-        /// Docs for the setter that accepts the value itself.
-        ///
+        /// Docs for the setters
     }))]
     override_docs_for_default_setters: Option<Point>,
 
+    #[builder(setters(
+        some_fn(docs {
+            /// Docs for the some setter
+        }),
+        maybe_fn(docs {
+            /// Docs for the maybe setter
+        })
+    ))]
+    override_docs_for_maybe_setter: Option<Point>,
+
     // (v3.1)
-    #[builder(setter = |iter: impl IntoIterator<Item = String>| Vec::from_iter(iter))]
+    #[builder(with = |iter: impl IntoIterator<Item = String>| iter.into_iter().collect())]
+    #[builder(with = |iter: impl IntoIterator<Item = String>| Vec::from_iter(iter))]
     take_into_iter: Vec<String>,
 
     // (v3.1)
-    #[builder(setter = |x: f64, y: f64| Point { x, y })]
+    #[builder(
+        setters(
+            name = member_internal,
+            vis = "",
+            docs {
+                /// ...
+            }
+        )
+    )]
     take_several_args: Point,
-
-    // (v3.1)
-    #[builder(setters {
-        fn point(x: f64, y: f64) -> _ {
-            Some(Point { x, y })
-        }
-        fn maybe_point(val: Option<(f64, f64)>) -> _ {
-            let (x, y) = val?;
-            point(x, y)
-        }
-    })]
-    several_setters: Option<Point>,
 }
-
 
 impl<State: example_builder::State> ExampleBuilder<State> {
     pub fn my_point(self, x: f64, y: f64) -> ExampleBuilder<example_builder::SetPoint<State>>

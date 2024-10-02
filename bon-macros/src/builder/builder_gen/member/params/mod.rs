@@ -2,7 +2,7 @@ mod blanket;
 mod setter;
 
 pub(crate) use blanket::{BlanketParamName, EvalBlanketFlagParam};
-pub(crate) use setter::{SetterParenParams, SetterParams};
+pub(crate) use setter::SettersParams;
 
 use super::MemberOrigin;
 use crate::util::prelude::*;
@@ -34,7 +34,8 @@ pub(crate) struct MemberParams {
     pub(crate) name: Option<syn::Ident>,
 
     /// Configurations for the setter methods.
-    pub(crate) setter: Option<SetterParams>,
+    #[darling(with = crate::parsing::require_paren_delim_for_meta_list)]
+    pub(crate) setters: Option<SettersParams>,
 
     /// Where to place the member in the generated builder methods API.
     /// By default the member is treated like a named parameter that
@@ -58,7 +59,7 @@ enum ParamName {
     Into,
     Name,
     Overwritable,
-    Setter,
+    Setters,
     Skip,
     StartFn,
 }
@@ -71,7 +72,7 @@ impl fmt::Display for ParamName {
             Self::Into => "into",
             Self::Name => "name",
             Self::Overwritable => "overwritable",
-            Self::Setter => "setter",
+            Self::Setters => "setters",
             Self::Skip => "skip",
             Self::StartFn => "start_fn",
         };
@@ -113,7 +114,7 @@ impl MemberParams {
             into,
             name,
             overwritable,
-            setter,
+            setters: setter,
             skip,
             start_fn,
         } = self;
@@ -124,7 +125,7 @@ impl MemberParams {
             (into.is_present(), ParamName::Into),
             (name.is_some(), ParamName::Name),
             (overwritable.is_present(), ParamName::Overwritable),
-            (setter.is_some(), ParamName::Setter),
+            (setter.is_some(), ParamName::Setters),
             (skip.is_some(), ParamName::Skip),
             (start_fn.is_present(), ParamName::StartFn),
         ];
@@ -184,6 +185,6 @@ fn parse_optional_expression(meta: &syn::Meta) -> Result<SpannedValue<Option<syn
     match meta {
         syn::Meta::Path(_) => Ok(SpannedValue::new(None, meta.span())),
         syn::Meta::List(_) => Err(Error::unsupported_format("list").with_span(meta)),
-        syn::Meta::NameValue(nv) => Ok(SpannedValue::new(Some(nv.value.clone()), nv.span())),
+        syn::Meta::NameValue(meta) => Ok(SpannedValue::new(Some(meta.value.clone()), meta.span())),
     }
 }

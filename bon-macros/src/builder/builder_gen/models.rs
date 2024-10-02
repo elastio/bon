@@ -1,5 +1,6 @@
-use super::builder_params::{BuilderDerives, ItemParams, OnParams};
+use super::builder_params::{BuilderDerives, OnParams};
 use super::member::Member;
+use crate::parsing::ItemParams;
 use crate::util::prelude::*;
 
 pub(super) trait FinishFnBody {

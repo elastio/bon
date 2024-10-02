@@ -4,6 +4,7 @@ mod generic_param;
 mod ident;
 mod item;
 mod iterator;
+mod meta_list;
 mod path;
 mod punctuated;
 mod ty;
@@ -11,13 +12,12 @@ mod vec;
 mod visibility;
 
 pub(crate) mod ide;
-pub(crate) mod parsing;
 
 use prelude::*;
 
 pub(crate) mod prelude {
     pub(crate) use proc_macro2::{Span, TokenStream};
-    pub(crate) use quote::{quote, format_ident, ToTokens};
+    pub(crate) use quote::{format_ident, quote, ToTokens};
 
     /// The `Error` type in in this crate is supposed to act like `anyhow::Error`
     /// providing a simple way to create and return errors from format strings.
@@ -35,6 +35,7 @@ pub(crate) mod prelude {
     pub(crate) use super::ident::IdentExt;
     pub(crate) use super::item::ItemExt;
     pub(crate) use super::iterator::{IntoIteratorExt, IteratorExt};
+    pub(crate) use super::meta_list::MetaListExt;
     pub(crate) use super::path::PathExt;
     pub(crate) use super::punctuated::PunctuatedExt;
     pub(crate) use super::ty::TypeExt;

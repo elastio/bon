@@ -1,68 +1,40 @@
+use crate::parsing::{ItemParams, ItemParamsParsing};
 use crate::util::prelude::*;
 use darling::FromMeta;
 
-#[derive(Debug)]
-pub(crate) struct SetterParams {
-    pub(crate) name: Option<syn::Ident>,
-    pub(crate) vis: Option<syn::Visibility>,
-    pub(crate) docs: Option<Vec<syn::Attribute>>,
-    pub(crate) with: Option<syn::Expr>,
+const DOCS_CONTEXT: &str = "builder struct's impl block";
+
+fn parse_setter_fn(meta: &syn::Meta) -> Result<ItemParams> {
+    ItemParamsParsing {
+        meta,
+        reject_self_mentions: Some(DOCS_CONTEXT),
+    }
+    .parse()
 }
 
-impl FromMeta for SetterParams {
-    fn from_meta(meta: &syn::Meta) -> Result<Self> {
-        let err = || {
-            err!(
-                meta,
-                "expected a #[builder(setter = {{closure}})], or \
-                #[buidler(setter({{key}} = {{value}}... ))] syntax"
-            )
-        };
+fn parse_docs(meta: &syn::Meta) -> Result<Vec<syn::Attribute>> {
+    crate::parsing::parse_docs_without_self_mentions(DOCS_CONTEXT, meta)
+}
 
-        let meta_list = match meta {
-            syn::Meta::List(meta) => meta,
-            syn::Meta::Path(_) => return Err(err()),
-            syn::Meta::NameValue(meta) => match &meta.value {
-                syn::Expr::Closure(closure) => {
-                    return Ok(Self {
-                        name: None,
-                        vis: None,
-                        docs: None,
-                        with: Some(syn::Expr::Closure(closure.clone())),
-                    })
-                },
-                _ => return Err(err()),
-            },
-        };
+#[derive(Debug, FromMeta)]
+pub(crate) struct SettersParams {
+    pub(crate) name: Option<syn::Ident>,
+    pub(crate) vis: Option<syn::Visibility>,
 
-        #[derive(FromMeta)]
-        struct Parsed {
-            name: Option<syn::Ident>,
-            vis: Option<syn::Visibility>,
+    #[darling(default, with = parse_docs, map = Some)]
+    pub(crate) docs: Option<Vec<syn::Attribute>>,
 
-            #[darling(default, with = crate::util::parsing::parse_docs, map = Some)]
-            docs: Option<Vec<syn::Attribute>>,
-        }
+    /// Config for the setter that accepts the value of type T for a member of
+    /// type `Option<T>` or with `#[builder(default)]`.
+    ///
+    /// By default, it's named `{member}` without any prefix or suffix.
+    #[darling(default, with = parse_setter_fn)]
+    pub(crate) some_fn: ItemParams,
 
-        let Parsed { name, vis, docs } = Parsed::from_meta(meta)?;
-
-        if let Some(docs) = &docs {
-            crate::util::parsing::reject_self_mentions_in_docs(
-                "builder struct's impl block",
-                docs,
-            )?;
-        }
-
-        Ok(Self { name, vis, docs })
-
-        match meta_list.delimiter {
-            syn::MacroDelimiter::Bracket(_) => return Err(err()),
-            syn::MacroDelimiter::Paren(_) => {
-                return SetterParenParams::from_meta(meta).map(Self::Paren)
-            }
-            syn::MacroDelimiter::Brace(_) => {
-
-            },
-        }
-    }
+    /// The setter that accepts the value of type `Option<T>` for a member of
+    /// type `Option<T>` or with `#[builder(default)]`.
+    ///
+    /// By default, it's named `maybe_{member}`.
+    #[darling(default, with = parse_setter_fn)]
+    pub(crate) option_fn: ItemParams,
 }

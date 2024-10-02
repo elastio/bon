@@ -1,9 +1,10 @@
-use super::builder_params::{BuilderParams, ItemParams, ItemParamsParsing};
+use super::builder_params::BuilderParams;
 use super::{
     AssocMethodCtx, BuilderGenCtx, FinishFn, FinishFnBody, Generics, Member, MemberOrigin,
     RawMember,
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
+use crate::parsing::{ItemParams, ItemParamsParsing};
 use crate::util::prelude::*;
 use darling::FromMeta;
 use syn::visit_mut::VisitMut;
@@ -204,9 +205,8 @@ impl StructInputCtx {
         let builder_type = {
             let ItemParams { name, vis, docs } = self.params.base.builder_type;
 
-            let builder_ident = name.unwrap_or_else(|| {
-                format_ident!("{}Builder", self.norm_struct.ident.raw_name())
-            });
+            let builder_ident = name
+                .unwrap_or_else(|| format_ident!("{}Builder", self.norm_struct.ident.raw_name()));
 
             BuilderTypeParams {
                 derives: self.params.base.derive,
