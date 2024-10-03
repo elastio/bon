@@ -1,9 +1,9 @@
 use super::params::MemberParams;
 use super::{params, MemberOrigin};
 use crate::builder::builder_gen::builder_params::OnParams;
-use crate::builder::builder_gen::member::params::{SettersFnParams, SettersParams};
+use crate::builder::builder_gen::member::params::SettersFnParams;
+use crate::parsing::SpannedKey;
 use crate::util::prelude::*;
-use syn::spanned::Spanned;
 
 /// Regular member for which the builder should have setter methods
 #[derive(Debug)]
@@ -88,7 +88,7 @@ impl NamedMember {
                 &setter.key,
                 "`{}` setter function applies only to members with `#[builder(default)]` \
                  or members of `Option<T>` type (if #[builder(transparent)] is not set)",
-                setter.key_to_string()
+                setter.key
             );
         }
 
@@ -97,51 +97,39 @@ impl NamedMember {
             option_fn: Some(option_fn),
         } = &setters.fns
         {
-            Self::validate_unused_config(
-                "name",
-                &setters.name,
-                &[("some_fn", &some_fn.name), ("option_fn", &option_fn.name)],
-            )?;
-
-            Self::validate_unused_config(
-                "vis",
-                &setters.vis,
-                &[("some_fn", &some_fn.vis), ("option_fn", &option_fn.vis)],
-            )?;
-
-            // Self::validate_unused_config(
-            //     "docs",
-            //     &setters.docs,
-            //     &[("some_fn", &some_fn.docs), ("option_fn", &option_fn.docs)],
-            // )?;
+            Self::validate_unused_config(&setters.name, &[&some_fn.name, &option_fn.name])?;
+            Self::validate_unused_config(&setters.vis, &[&some_fn.vis, &option_fn.vis])?;
+            Self::validate_unused_config(&setters.docs, &[&some_fn.docs, &option_fn.docs])?;
         }
 
         Ok(())
     }
 
-    fn validate_unused_config<T: Spanned>(
-        name: &'static str,
-        config: &Option<T>,
-        overrides: &[(&'static str, &Option<T>)],
+    fn validate_unused_config<T>(
+        config: &Option<SpannedKey<T>>,
+        overrides: &[&Option<SpannedKey<T>>],
     ) -> Result {
         let config = match config {
             Some(config) => config,
             None => return Ok(()),
         };
 
-        if !overrides.iter().all(|(_, over)| over.is_some()) {
+        let overrides = overrides.iter().copied().map(Option::as_ref);
+
+        if !overrides.clone().all(|over| over.is_some()) {
             return Ok(());
         }
 
         let setters = overrides
-            .iter()
-            .map(|(name, _)| format!("`{name}`"))
+            .flatten()
+            .map(|over| format!("`{}`", over.key))
             .join(", ");
 
         bail!(
-            config,
-            "this `{name}` configuration is unused because both all of the \
-             {setters} setters contain a `{name}` override"
+            &config.key,
+            "this `{name}` configuration is unused because all of the \
+             {setters} setters contain a `{name}` override",
+            name = config.key,
         );
     }
 

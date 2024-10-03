@@ -5,10 +5,10 @@ pub(crate) use blanket::*;
 pub(crate) use setter::*;
 
 use super::MemberOrigin;
-use crate::parsing::SpannedKey;
+use crate::parsing::{SimpleClosure, SpannedKey};
 use crate::util::prelude::*;
+use darling::FromMeta;
 use std::fmt;
-use syn::spanned::Spanned;
 
 #[derive(Debug, darling::FromAttributes)]
 #[darling(attributes(builder))]
@@ -51,8 +51,11 @@ pub(crate) struct MemberParams {
     /// this option to see if it's worth it.
     pub(crate) overwritable: darling::util::Flag,
 
-    #[darling(default, with = parse_expr_closure, map = Some)]
-    pub(crate) with: Option<SpannedKey<syn::ExprClosure>>,
+    /// Customize the setter signature and body with a custom closure. The closure
+    /// must return the value of the type of the member, or optionally a `Result<_>`
+    /// type where `_` is used to mark the type of the member. In this case the
+    /// generated setters will be fallible (they'll propagate the `Result`).
+    pub(crate) with: Option<SpannedKey<SetterClosure>>,
 
     /// Disables the special handling for a member of type `Option<T>`. The
     /// member no longer has the default on `None`. It also becomes a required
@@ -223,28 +226,99 @@ impl MemberParams {
 
 fn parse_optional_expr(meta: &syn::Meta) -> Result<SpannedKey<Option<syn::Expr>>> {
     match meta {
-        syn::Meta::Path(path) => Ok(SpannedKey::new(path, None)),
+        syn::Meta::Path(path) => SpannedKey::new(path, None),
         syn::Meta::List(_) => Err(Error::unsupported_format("list").with_span(meta)),
-        syn::Meta::NameValue(meta) => Ok(SpannedKey::new(&meta.path, Some(meta.value.clone()))),
+        syn::Meta::NameValue(meta) => SpannedKey::new(&meta.path, Some(meta.value.clone())),
     }
 }
 
-fn parse_expr_closure(meta: &syn::Meta) -> Result<SpannedKey<syn::ExprClosure>> {
-    let err = || {
-        let path = darling::util::path_to_string(meta.path());
-        err!(
-            meta,
-            "expected a closure e.g. `{path} = |param: T| expression`"
-        )
-    };
+#[derive(Debug)]
+pub(crate) struct SetterClosure {
+    pub(crate) inputs: Vec<SetterClosureInput>,
+    pub(crate) body: Box<syn::Expr>,
+    pub(crate) output: Option<SetterClosureOutput>,
+}
 
-    let meta = match meta {
-        syn::Meta::NameValue(meta) => meta,
-        _ => return Err(err()),
-    };
+#[derive(Debug)]
+pub(crate) struct SetterClosureOutput {
+    pub(crate) result_path: syn::Path,
+    pub(crate) err_ty: Option<syn::Type>,
+}
 
-    match &meta.value {
-        syn::Expr::Closure(closure) => Ok(SpannedKey::new(&meta.path, closure.clone())),
-        _ => Err(err()),
+#[derive(Debug)]
+pub(crate) struct SetterClosureInput {
+    pub(crate) pat: syn::PatIdent,
+    pub(crate) ty: Box<syn::Type>,
+}
+
+impl FromMeta for SetterClosure {
+    fn from_meta(item: &syn::Meta) -> Result<Self> {
+        let closure = SimpleClosure::from_meta(item)?;
+
+        let inputs = closure
+            .inputs
+            .into_iter()
+            .map(|input| {
+                Ok(SetterClosureInput {
+                    ty: input.ty.ok_or_else(|| {
+                        err!(&input.pat, "expected a type for the setter input parameter")
+                    })?,
+                    pat: input.pat,
+                })
+            })
+            .collect::<Result<_>>()?;
+
+        let return_type = match closure.output {
+            syn::ReturnType::Default => None,
+            syn::ReturnType::Type(_, ty) => {
+                let err = || {
+                    err!(
+                        &ty,
+                        "expected one of the following syntaxes:\n\
+                        (1) no return type annotation;\n\
+                        (2) `-> Result<_, {{ErrorType}}>` or `-> Result<_>` return type annotation;\n\n\
+                        in the case (1), the closure is expected to return a value \
+                        of the same type as the member's type;\n\n\
+                        in the case (2), the closure is expected to return a `Result` \
+                        where the `Ok` variant is of the same type as the member's type; \
+                        the `_` placeholder must be spelled literally to mark \
+                        the type of the member; an optional second generic parameter \
+                        for the error type is allowed"
+                    )
+                };
+
+                let args = ty.as_generic_angle_bracketed("Result").ok_or_else(err)?;
+
+                if args.len() != 1 && args.len() != 2 {
+                    return Err(err());
+                }
+
+                let mut args = args.into_iter();
+                let ok_ty = args.next().ok_or_else(err)?;
+
+                if !matches!(ok_ty, syn::GenericArgument::Type(syn::Type::Infer(_))) {
+                    return Err(err());
+                }
+
+                let err_ty = args
+                    .next()
+                    .map(|arg| match arg {
+                        syn::GenericArgument::Type(ty) => Ok(ty.clone()),
+                        _ => Err(err()),
+                    })
+                    .transpose()?;
+
+                Some(SetterClosureOutput {
+                    result_path: syn::parse_quote!(Result),
+                    err_ty,
+                })
+            }
+        };
+
+        Ok(Self {
+            inputs,
+            body: closure.body,
+            output: return_type,
+        })
     }
 }

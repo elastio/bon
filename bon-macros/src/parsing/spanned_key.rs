@@ -6,28 +6,29 @@ use std::ops::Deref;
 /// A type that stores the attribute key path information along with the parsed value.
 /// It is useful for error reporting. For example, if some key was unexpected, it's
 /// possible to point to the key's span in the error instead of the attribute's value.
+#[derive(Clone)]
 pub(crate) struct SpannedKey<T> {
-    pub(crate) key: syn::Path,
+    pub(crate) key: syn::Ident,
     pub(crate) value: T,
 }
 
 impl<T> SpannedKey<T> {
-    pub(crate) fn new(path: &syn::Path, value: T) -> Self {
-        Self {
-            key: path.clone(),
+    pub(crate) fn new(path: &syn::Path, value: T) -> Result<Self> {
+        Ok(Self {
+            key: path.require_ident()?.clone(),
             value,
-        }
+        })
     }
-    pub(crate) fn key_to_string(&self) -> String {
-        darling::util::path_to_string(&self.key)
+
+    pub(crate) fn into_value(self) -> T {
+        self.value
     }
 }
 
 impl<T: FromMeta> FromMeta for SpannedKey<T> {
     fn from_meta(meta: &syn::Meta) -> Result<Self> {
-        let key = meta.path().clone();
         let value = T::from_meta(meta)?;
-        Ok(Self { key, value })
+        Self::new(meta.path(), value)
     }
 }
 

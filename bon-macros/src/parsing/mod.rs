@@ -1,10 +1,12 @@
 mod docs;
 mod item_params;
 mod spanned_key;
+mod simple_closure;
 
 pub(crate) use docs::*;
 pub(crate) use item_params::*;
 pub(crate) use spanned_key::*;
+pub(crate) use simple_closure::*;
 
 use crate::util::prelude::*;
 use darling::FromMeta;

@@ -1,15 +1,16 @@
+use super::SpannedKey;
 use crate::util::prelude::*;
 
 pub(crate) fn parse_docs_without_self_mentions(
     context: &'static str,
     meta: &syn::Meta,
-) -> Result<Vec<syn::Attribute>> {
+) -> Result<SpannedKey<Vec<syn::Attribute>>> {
     let docs = parse_docs(meta)?;
     reject_self_mentions_in_docs(context, &docs)?;
     Ok(docs)
 }
 
-pub(crate) fn parse_docs(meta: &syn::Meta) -> Result<Vec<syn::Attribute>> {
+pub(crate) fn parse_docs(meta: &syn::Meta) -> Result<SpannedKey<Vec<syn::Attribute>>> {
     let meta = meta.require_list()?;
 
     meta.require_curly_braces_delim()?;
@@ -22,7 +23,7 @@ pub(crate) fn parse_docs(meta: &syn::Meta) -> Result<Vec<syn::Attribute>> {
         }
     }
 
-    Ok(attrs)
+    SpannedKey::new(&meta.path, attrs)
 }
 
 /// Validates the docs for the presence of `Self` mentions to prevent users from

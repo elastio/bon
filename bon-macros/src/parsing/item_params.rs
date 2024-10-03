@@ -1,11 +1,12 @@
+use super::SpannedKey;
 use crate::util::prelude::*;
 use darling::FromMeta;
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct ItemParams {
-    pub(crate) name: Option<syn::Ident>,
-    pub(crate) vis: Option<syn::Visibility>,
-    pub(crate) docs: Option<Vec<syn::Attribute>>,
+    pub(crate) name: Option<SpannedKey<syn::Ident>>,
+    pub(crate) vis: Option<SpannedKey<syn::Visibility>>,
+    pub(crate) docs: Option<SpannedKey<Vec<syn::Attribute>>>,
 }
 
 pub(crate) struct ItemParamsParsing<'a> {
@@ -29,10 +30,10 @@ impl ItemParamsParsing<'_> {
     fn params_from_meta(meta: &syn::Meta) -> Result<ItemParams> {
         if let syn::Meta::NameValue(meta) = meta {
             let val = &meta.value;
-            let name = syn::parse2(quote!(#val))?;
+            let name = syn::parse2(val.to_token_stream())?;
 
             return Ok(ItemParams {
-                name: Some(name),
+                name: Some(SpannedKey::new(&meta.path, name)?),
                 vis: None,
                 docs: None,
             });
@@ -40,9 +41,9 @@ impl ItemParamsParsing<'_> {
 
         #[derive(Debug, FromMeta)]
         struct Full {
-            name: Option<syn::Ident>,
-            vis: Option<syn::Visibility>,
-            docs: Option<syn::Meta>,
+            name: Option<SpannedKey<syn::Ident>>,
+            vis: Option<SpannedKey<syn::Visibility>>,
+            docs: Option<SpannedKey<syn::Meta>>,
         }
 
         let full = crate::parsing::require_paren_delim_for_meta_list(meta)?;
@@ -60,7 +61,10 @@ impl ItemParamsParsing<'_> {
             bail!(meta, "expected at least one parameter in parentheses");
         }
 
-        let docs = full.docs.as_ref().map(super::parse_docs).transpose()?;
+        let docs = full
+            .docs
+            .map(|docs| super::parse_docs(&docs.value))
+            .transpose()?;
 
         let params = ItemParams {
             name: full.name,

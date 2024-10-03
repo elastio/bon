@@ -1,6 +1,6 @@
 use super::builder_params::{BuilderDerives, OnParams};
 use super::member::Member;
-use crate::parsing::ItemParams;
+use crate::parsing::{ItemParams, SpannedKey};
 use crate::util::prelude::*;
 
 pub(super) trait FinishFnBody {
@@ -197,6 +197,7 @@ impl BuilderGenCtx {
             let ident_overridden = state_mod.name.is_some();
             let ident = state_mod
                 .name
+                .map(SpannedKey::into_value)
                 .unwrap_or_else(|| builder_type.ident.pascal_to_snake_case());
 
             if builder_type.ident == ident {
@@ -224,7 +225,10 @@ impl BuilderGenCtx {
             // is defined. This makes the builder type signature unnamable from outside
             // the module where we output the builder. The users need to explicitly
             // opt-in to make the builder module public.
-            let vis = state_mod.vis.unwrap_or_else(|| syn::Visibility::Inherited);
+            let vis = state_mod
+                .vis
+                .map(SpannedKey::into_value)
+                .unwrap_or_else(|| syn::Visibility::Inherited);
 
             // The visibility for child items is based on the visibility of the
             // builder type itself, because the types and traits from this module
@@ -239,14 +243,17 @@ impl BuilderGenCtx {
 
                 ident,
 
-                docs: state_mod.docs.unwrap_or_else(|| {
-                    let docs = format!(
-                        "Tools for manipulating the type state of the [`{}`].",
-                        builder_type.ident
-                    );
+                docs: state_mod
+                    .docs
+                    .map(SpannedKey::into_value)
+                    .unwrap_or_else(|| {
+                        let docs = format!(
+                            "Tools for manipulating the type state of the [`{}`].",
+                            builder_type.ident
+                        );
 
-                    vec![syn::parse_quote!(#[doc = #docs])]
-                }),
+                        vec![syn::parse_quote!(#[doc = #docs])]
+                    }),
             }
         };
 

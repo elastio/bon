@@ -11,20 +11,20 @@ fn parse_setter_fn(meta: &syn::Meta) -> Result<SpannedKey<ItemParams>> {
     }
     .parse()?;
 
-    Ok(SpannedKey::new(meta.path(), params))
+    SpannedKey::new(meta.path(), params)
 }
 
-fn parse_docs(meta: &syn::Meta) -> Result<Vec<syn::Attribute>> {
+fn parse_docs(meta: &syn::Meta) -> Result<SpannedKey<Vec<syn::Attribute>>> {
     crate::parsing::parse_docs_without_self_mentions(DOCS_CONTEXT, meta)
 }
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct SettersParams {
-    pub(crate) name: Option<syn::Ident>,
-    pub(crate) vis: Option<syn::Visibility>,
+    pub(crate) name: Option<SpannedKey<syn::Ident>>,
+    pub(crate) vis: Option<SpannedKey<syn::Visibility>>,
 
     #[darling(default, with = parse_docs, map = Some)]
-    pub(crate) docs: Option<Vec<syn::Attribute>>,
+    pub(crate) docs: Option<SpannedKey<Vec<syn::Attribute>>>,
 
     #[darling(flatten)]
     pub(crate) fns: SettersFnParams,

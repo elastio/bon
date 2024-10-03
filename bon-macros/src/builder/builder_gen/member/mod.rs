@@ -3,6 +3,7 @@ mod named;
 mod params;
 
 pub(crate) use named::*;
+pub(crate) use params::SetterClosure;
 
 use super::builder_params::OnParams;
 use crate::util::prelude::*;

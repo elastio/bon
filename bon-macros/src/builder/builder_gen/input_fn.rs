@@ -5,7 +5,7 @@ use super::{
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
 use crate::normalization::NormalizeSelfTy;
-use crate::parsing::ItemParams;
+use crate::parsing::{ItemParams, SpannedKey};
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
 use darling::FromMeta;
@@ -83,7 +83,11 @@ impl FnInputCtx {
             .impl_ctx
             .as_deref()?
             .self_ty
-            .last_path_segment_ident()?
+            .as_path()?
+            .path
+            .segments
+            .last()?
+            .ident
             .to_string();
 
         Some(prefix)
@@ -110,7 +114,7 @@ impl FnInputCtx {
         if let [attr, ..] = receiver.attrs.as_slice() {
             bail!(
                 attr,
-                "attributes on the receiver are not supported in the #[builder] macro."
+                "attributes on the receiver are not supported in the #[builder] macro"
             );
         }
 
@@ -153,7 +157,7 @@ impl FnInputCtx {
     }
 
     fn builder_ident(&self) -> syn::Ident {
-        let user_override = self.params.base.builder_type.name.as_ref();
+        let user_override = self.params.base.builder_type.name.as_deref();
 
         if let Some(user_override) = user_override {
             return user_override.clone();
@@ -353,24 +357,28 @@ impl FnInputCtx {
             docs: finish_fn_docs,
         } = self.params.base.finish_fn;
 
-        let finish_fn_ident = finish_fn_ident.unwrap_or_else(|| {
-            // For `new` methods the `build` finisher is more conventional
-            if is_method_new {
-                format_ident!("build")
-            } else {
-                format_ident!("call")
-            }
-        });
+        let finish_fn_ident = finish_fn_ident
+            .map(SpannedKey::into_value)
+            .unwrap_or_else(|| {
+                // For `new` methods the `build` finisher is more conventional
+                if is_method_new {
+                    format_ident!("build")
+                } else {
+                    format_ident!("call")
+                }
+            });
 
-        let finish_fn_docs = finish_fn_docs.unwrap_or_else(|| {
-            vec![syn::parse_quote! {
-                /// Finishes building and performs the requested action.
-            }]
-        });
+        let finish_fn_docs = finish_fn_docs
+            .map(SpannedKey::into_value)
+            .unwrap_or_else(|| {
+                vec![syn::parse_quote! {
+                    /// Finishes building and performs the requested action.
+                }]
+            });
 
         let finish_fn = FinishFn {
             ident: finish_fn_ident,
-            vis: finish_fn_vis,
+            vis: finish_fn_vis.map(SpannedKey::into_value),
             unsafety: self.norm_fn.sig.unsafety,
             asyncness: self.norm_fn.sig.asyncness,
             must_use: get_must_use_attribute(&self.norm_fn.attrs)?,
@@ -414,8 +422,18 @@ impl FnInputCtx {
         let builder_type = BuilderTypeParams {
             ident: builder_ident,
             derives: self.params.base.derive,
-            docs: self.params.base.builder_type.docs,
-            vis: self.params.base.builder_type.vis,
+            docs: self
+                .params
+                .base
+                .builder_type
+                .docs
+                .map(SpannedKey::into_value),
+            vis: self
+                .params
+                .base
+                .builder_type
+                .vis
+                .map(SpannedKey::into_value),
         };
 
         BuilderGenCtx::new(BuilderGenCtxParams {
