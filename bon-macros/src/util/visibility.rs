@@ -10,7 +10,10 @@ pub(crate) trait VisibilityExt {
     /// - `pub(self)` or ` ` (default private visibility) -> `pub(super)`
     /// - `pub(super)` -> `pub(in super::super)`
     /// - `pub(in relative::path)` -> `pub(in super::relative::path)`
-    /// - `pub(in ::absolute::path)` -> `pub(in ::absolute::path)` (unchange)
+    /// - `pub(in ::absolute::path)` -> `pub(in ::absolute::path)` (unchanged)
+    /// - `pub(in crate::path)` -> `pub(in crate::path)` (unchanged)
+    /// - `pub(in self::path)` -> `pub(in super::path)`
+    /// - `pub(in super::path)` -> `pub(in super::super::path)`
     ///
     /// Note that absolute paths in `pub(in ...)` are not supported with Rust 2018+,
     /// according to the [rust reference]:
@@ -68,6 +71,18 @@ impl VisibilityExt for syn::Visibility {
                     return Ok(self);
                 }
 
+                if path.starts_with_segment("crate") {
+                    return Ok(self);
+                }
+
+                if let Some(first_segment) = path.segments.first_mut() {
+                    if first_segment.ident == "self" {
+                        let span = first_segment.ident.span();
+                        *first_segment = syn::parse_quote_spanned!(span=>super);
+                        return Ok(self);
+                    }
+                }
+
                 path.segments.insert(0, syn::parse_quote!(super));
 
                 Ok(self)
@@ -89,7 +104,12 @@ mod tests {
         #[allow(clippy::needless_pass_by_value)]
         fn test(vis: syn::Visibility, expected: syn::Visibility) {
             let actual = vis.into_equivalent_in_child_module().unwrap();
-            assert_eq!(actual, expected);
+            assert!(
+                actual == expected,
+                "got:\nactual: {}\nexpected: {}",
+                actual.to_token_stream(),
+                expected.to_token_stream()
+            );
         }
 
         test(pq!(pub), pq!(pub));
@@ -97,10 +117,15 @@ mod tests {
         test(pq!(pub(self)), pq!(pub(super)));
         test(pq!(), pq!(pub(super)));
         test(pq!(pub(super)), pq!(pub(in super::super)));
+
         test(
             pq!(pub(in relative::path)),
             pq!(pub(in super::relative::path)),
         );
+        test(pq!(pub(in crate::path)), pq!(pub(in crate::path)));
+        test(pq!(pub(in self::path)), pq!(pub(in super::path)));
+        test(pq!(pub(in super::path)), pq!(pub(in super::super::path)));
+
         test(pq!(pub(in ::absolute::path)), pq!(pub(in ::absolute::path)));
     }
 }
