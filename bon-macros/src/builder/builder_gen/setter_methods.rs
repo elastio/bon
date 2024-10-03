@@ -102,7 +102,7 @@ impl<'a> SettersCtx<'a> {
                 let init = self.member_init_from_closure(closure);
                 quote! {
                     match value {
-                        Some(#idents) => #init,
+                        Some(#idents) => Some(#init),
                         None => None,
                     }
                 }
@@ -177,11 +177,7 @@ impl<'a> SettersCtx<'a> {
     fn member_init_from_closure(&self, closure: &SetterClosure) -> TokenStream {
         let body = &closure.body;
 
-        let mut ty = self.member.underlying_norm_ty().to_token_stream();
-
-        if !self.member.is_required() {
-            ty = quote!(Option<#ty>);
-        };
+        let ty = self.member.underlying_norm_ty().to_token_stream();
 
         let output = Self::result_output_from_closure(closure, || &ty)
             .unwrap_or_else(|| ty.to_token_stream());
@@ -235,26 +231,31 @@ impl<'a> SettersCtx<'a> {
             SetterBody::Default { member_init } => {
                 let index = &self.member.index;
 
-                let mut state_transition_call = if self.member.is_stateful() {
+                let mut output = if self.member.is_stateful() {
                     quote! {
                         Self::__private_transition_type_state(self)
                     }
                 } else {
-                    quote! {}
+                    quote! {
+                        self
+                    }
                 };
 
-                if let Some(closure) = &self.member.params.with {
-                    if let Some(output) = &closure.output {
-                        let result_path = &output.result_path;
-                        state_transition_call = quote! {
-                            #result_path::Ok(#state_transition_call)
-                        };
-                    }
+                let result_output = self
+                    .member
+                    .params
+                    .with
+                    .as_ref()
+                    .and_then(|closure| closure.output.as_ref());
+
+                if let Some(result_output) = result_output {
+                    let result_path = &result_output.result_path;
+                    output = quote!(#result_path::Ok(#output));
                 }
 
                 quote! {
                     self.__private_named_members.#index = #member_init;
-                    #state_transition_call
+                    #output
                 }
             }
         };

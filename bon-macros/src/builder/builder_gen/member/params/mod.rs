@@ -1,13 +1,14 @@
 mod blanket;
-mod setter;
+mod setters;
+mod setter_closure;
 
 pub(crate) use blanket::*;
-pub(crate) use setter::*;
+pub(crate) use setters::*;
+pub(crate) use setter_closure::*;
 
 use super::MemberOrigin;
-use crate::parsing::{SimpleClosure, SpannedKey};
+use crate::parsing::SpannedKey;
 use crate::util::prelude::*;
-use darling::FromMeta;
 use std::fmt;
 
 #[derive(Debug, darling::FromAttributes)]
@@ -229,106 +230,5 @@ fn parse_optional_expr(meta: &syn::Meta) -> Result<SpannedKey<Option<syn::Expr>>
         syn::Meta::Path(path) => SpannedKey::new(path, None),
         syn::Meta::List(_) => Err(Error::unsupported_format("list").with_span(meta)),
         syn::Meta::NameValue(meta) => SpannedKey::new(&meta.path, Some(meta.value.clone())),
-    }
-}
-
-#[derive(Debug)]
-pub(crate) struct SetterClosure {
-    pub(crate) inputs: Vec<SetterClosureInput>,
-    pub(crate) body: Box<syn::Expr>,
-    pub(crate) output: Option<SetterClosureOutput>,
-}
-
-#[derive(Debug)]
-pub(crate) struct SetterClosureOutput {
-    pub(crate) result_path: syn::Path,
-    pub(crate) err_ty: Option<syn::Type>,
-}
-
-#[derive(Debug)]
-pub(crate) struct SetterClosureInput {
-    pub(crate) pat: syn::PatIdent,
-    pub(crate) ty: Box<syn::Type>,
-}
-
-impl FromMeta for SetterClosure {
-    fn from_meta(item: &syn::Meta) -> Result<Self> {
-        let closure = SimpleClosure::from_meta(item)?;
-
-        let inputs = closure
-            .inputs
-            .into_iter()
-            .map(|input| {
-                Ok(SetterClosureInput {
-                    ty: input.ty.ok_or_else(|| {
-                        err!(&input.pat, "expected a type for the setter input parameter")
-                    })?,
-                    pat: input.pat,
-                })
-            })
-            .collect::<Result<_>>()?;
-
-        let return_type = match closure.output {
-            syn::ReturnType::Default => None,
-            syn::ReturnType::Type(_, ty) => {
-                let err = || {
-                    err!(
-                        &ty,
-                        "expected one of the following syntaxes:\n\
-                        (1) no return type annotation;\n\
-                        (2) `-> Result<_, {{ErrorType}}>` or `-> Result<_>` return type annotation;\n\n\
-                        in the case (1), the closure is expected to return a value \
-                        of the same type as the member's type;\n\n\
-                        in the case (2), the closure is expected to return a `Result` \
-                        where the `Ok` variant is of the same type as the member's type; \
-                        the `_` placeholder must be spelled literally to mark \
-                        the type of the member; an optional second generic parameter \
-                        for the error type is allowed"
-                    )
-                };
-
-                let ty = ty
-                    .as_generic_angle_bracketed_path("Result")
-                    .ok_or_else(err)?;
-
-                if ty.args.len() != 1 && ty.args.len() != 2 {
-                    return Err(err());
-                }
-
-                let mut args = ty.args.iter();
-                let ok_ty = args.next().ok_or_else(err)?;
-
-                if !matches!(ok_ty, syn::GenericArgument::Type(syn::Type::Infer(_))) {
-                    return Err(err());
-                }
-
-                let err_ty = args
-                    .next()
-                    .map(|arg| match arg {
-                        syn::GenericArgument::Type(ty) => Ok(ty.clone()),
-                        _ => Err(err()),
-                    })
-                    .transpose()?;
-
-                let mut result_path = ty.path.clone();
-
-                result_path
-                    .segments
-                    .last_mut()
-                    .expect("BUG: segments can't be empty")
-                    .arguments = syn::PathArguments::None;
-
-                Some(SetterClosureOutput {
-                    result_path,
-                    err_ty,
-                })
-            }
-        };
-
-        Ok(Self {
-            inputs,
-            body: closure.body,
-            output: return_type,
-        })
     }
 }

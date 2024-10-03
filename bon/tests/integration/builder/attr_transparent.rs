@@ -75,7 +75,7 @@ fn test_free_fn() {
 }
 
 #[test]
-fn test_assoc_method_method() {
+fn test_assoc_method() {
     struct Sut;
 
     #[bon]

@@ -15,11 +15,11 @@ pub(crate) trait TypeExt {
     fn option_type_param(&self) -> Option<&syn::Type>;
 
     /// Validates that this type is a generic type (path without [`syn::QSelf`])
-    /// which ends with the given `desired_last_segment`, and returns its
-    /// angle-bracketed arguments
+    /// which ends with the given last segment that passes the predicate
+    /// `is_desired_last_segment`.
     fn as_generic_angle_bracketed_path(
         &self,
-        desired_last_segment: &str,
+        is_desired_last_segment: impl FnOnce(&syn::Ident) -> bool,
     ) -> Option<GenericAngleBracketedPath<'_>>;
 
     /// Heuristically detects if the type is [`Option`]
@@ -54,7 +54,8 @@ impl TypeExt for syn::Type {
     }
 
     fn option_type_param(&self) -> Option<&syn::Type> {
-        let ty = self.as_generic_angle_bracketed_path("Option")?;
+        let ty = self.as_generic_angle_bracketed_path(|last_segment| last_segment == "Option")?;
+
         if ty.args.len() != 1 {
             return None;
         }
@@ -71,13 +72,13 @@ impl TypeExt for syn::Type {
 
     fn as_generic_angle_bracketed_path(
         &self,
-        desired_last_segment: &str,
+        is_desired_last_segment: impl FnOnce(&syn::Ident) -> bool,
     ) -> Option<GenericAngleBracketedPath<'_>> {
         let path = self.as_path_no_qself()?;
 
         let last_segment = path.segments.last()?;
 
-        if last_segment.ident != desired_last_segment {
+        if !is_desired_last_segment(&last_segment.ident) {
             return None;
         }
 
