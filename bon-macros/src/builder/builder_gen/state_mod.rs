@@ -310,9 +310,9 @@ impl super::BuilderGenCtx {
                     state of members instead"
                 ]
                 #[doc(hidden)]
+                #[allow(non_camel_case_types)]
                 mod members {
                     #(
-                        #[allow(non_camel_case_types)]
                         #vis_child_child enum #stateful_members_idents {}
                     )*
                 }

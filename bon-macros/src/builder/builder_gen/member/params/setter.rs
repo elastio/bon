@@ -26,6 +26,12 @@ pub(crate) struct SettersParams {
     #[darling(default, with = parse_docs, map = Some)]
     pub(crate) docs: Option<Vec<syn::Attribute>>,
 
+    #[darling(flatten)]
+    pub(crate) fns: SettersFnParams,
+}
+
+#[derive(Debug, FromMeta)]
+pub(crate) struct SettersFnParams {
     /// Config for the setter that accepts the value of type T for a member of
     /// type `Option<T>` or with `#[builder(default)]`.
     ///

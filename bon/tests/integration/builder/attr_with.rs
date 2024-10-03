@@ -23,15 +23,15 @@ mod single_arg {
             impl_trait: IpAddr,
         }
 
-        // assert_debug_eq(
-        //     Sut::builder()
-        //         .required(1)
-        //         .optional(2)
-        //         .default(3)
-        //         .generic("hello")
-        //         .impl_trait([127, 0, 0, 1])
-        //         .build(),
-        //     expect![],
-        // )
+        assert_debug_eq(
+            Sut::builder()
+                .required(1)
+                .optional(2)
+                .default(3)
+                .generic("hello")
+                .impl_trait([127, 0, 0, 1])
+                .build(),
+            expect![],
+        )
     }
 }

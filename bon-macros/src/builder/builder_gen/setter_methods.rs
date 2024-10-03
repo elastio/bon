@@ -29,6 +29,16 @@ impl<'a> MemberSettersCtx<'a> {
             (quote!(#member_type), quote!())
         };
 
+        // let fn_params = self.member.params.with.as_deref().map(|closure| {
+        //     closure.lifetimes
+        //     syn::parse_macro_input
+
+        //     quote! {
+        //         value: #fn_param_type,
+        //         with: #closure_params,
+        //     }
+        // });
+
         self.setter_method(MemberSetterMethod {
             method_name: self.member.public_ident().clone(),
             fn_params: quote!(value: #fn_param_type),
