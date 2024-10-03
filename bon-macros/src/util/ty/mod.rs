@@ -17,10 +17,10 @@ pub(crate) trait TypeExt {
     /// Validates that this type is a generic type (path without [`syn::QSelf`])
     /// which ends with the given `desired_last_segment`, and returns its
     /// angle-bracketed arguments
-    fn as_generic_angle_bracketed(
+    fn as_generic_angle_bracketed_path(
         &self,
         desired_last_segment: &str,
-    ) -> Option<&Punctuated<syn::GenericArgument, syn::Token![,]>>;
+    ) -> Option<GenericAngleBracketedPath<'_>>;
 
     /// Heuristically detects if the type is [`Option`]
     fn is_option(&self) -> bool;
@@ -54,12 +54,12 @@ impl TypeExt for syn::Type {
     }
 
     fn option_type_param(&self) -> Option<&syn::Type> {
-        let args = self.as_generic_angle_bracketed("Option")?;
-        if args.len() != 1 {
+        let ty = self.as_generic_angle_bracketed_path("Option")?;
+        if ty.args.len() != 1 {
             return None;
         }
 
-        let arg = args.first()?;
+        let arg = ty.args.first()?;
 
         let arg = match arg {
             syn::GenericArgument::Type(arg) => arg,
@@ -69,10 +69,10 @@ impl TypeExt for syn::Type {
         Some(arg)
     }
 
-    fn as_generic_angle_bracketed(
+    fn as_generic_angle_bracketed_path(
         &self,
         desired_last_segment: &str,
-    ) -> Option<&Punctuated<syn::GenericArgument, syn::Token![,]>> {
+    ) -> Option<GenericAngleBracketedPath<'_>> {
         let path = self.as_path_no_qself()?;
 
         let last_segment = path.segments.last()?;
@@ -81,10 +81,12 @@ impl TypeExt for syn::Type {
             return None;
         }
 
-        match &last_segment.arguments {
-            syn::PathArguments::AngleBracketed(args) => Some(&args.args),
-            _ => None,
-        }
+        let args = match &last_segment.arguments {
+            syn::PathArguments::AngleBracketed(args) => &args.args,
+            _ => return None,
+        };
+
+        Some(GenericAngleBracketedPath { path, args })
     }
 
     fn is_option(&self) -> bool {
@@ -104,4 +106,9 @@ impl TypeExt for syn::Type {
     fn matches(&self, pattern: &syn::Type) -> Result<bool> {
         match_types::match_types(self, pattern)
     }
+}
+
+pub(crate) struct GenericAngleBracketedPath<'a> {
+    pub(crate) path: &'a syn::Path,
+    pub(crate) args: &'a Punctuated<syn::GenericArgument, syn::Token![,]>,
 }

@@ -15,7 +15,7 @@ use member::{
 use models::{
     AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFn, FinishFnBody, Generics,
 };
-use setter_methods::MemberSettersCtx;
+use setter_methods::SettersCtx;
 
 pub(crate) struct MacroOutput {
     pub(crate) start_fn: syn::ItemFn,
@@ -100,7 +100,7 @@ impl BuilderGenCtx {
         let transition_type_state_fn = self.transition_type_state_fn();
         let setter_methods = self
             .named_members()
-            .map(|member| MemberSettersCtx::new(self, member).setter_methods());
+            .map(|member| SettersCtx::new(self, member).setter_methods());
 
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;

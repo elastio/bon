@@ -45,3 +45,37 @@ error: expected one of the following syntaxes:
    |
 41 |     #[builder(with = |x: u32| -> u32 { x + 1 })]
    |                                  ^^^
+
+error[E0308]: mismatched types
+  --> tests/integration/ui/compile_fail/attr_with.rs:48:12
+   |
+48 |         Ok(value)
+   |         -- ^^^^^ expected `u32`, found `&str`
+   |         |
+   |         arguments to this enum variant are incorrect
+   |
+help: the type constructed contains `&str` due to the type of the argument passed
+  --> tests/integration/ui/compile_fail/attr_with.rs:48:9
+   |
+48 |         Ok(value)
+   |         ^^^-----^
+   |            |
+   |            this argument influences the type of `Ok`
+note: tuple variant defined here
+  --> $RUST/core/src/result.rs
+   |
+   |     Ok(#[stable(feature = "rust1", since = "1.0.0")] T),
+   |     ^^
+
+error[E0308]: mismatched types
+  --> tests/integration/ui/compile_fail/attr_with.rs:55:62
+   |
+55 |     #[builder(with = |value: impl Into<::core::net::IpAddr>| value)]
+   |                              ------------------------------  ^^^^^ expected `u32`, found type parameter `impl Into<::core::net::IpAddr>`
+   |                              |
+   |                              found this type parameter
+56 |     value: u32,
+   |            --- expected `u32` because of return type
+   |
+   = note:        expected type `u32`
+           found type parameter `impl Into<::core::net::IpAddr>`

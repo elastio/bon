@@ -42,4 +42,18 @@ struct UnexpectedReturnTypeShape {
     value: u32,
 }
 
+#[derive(Builder)]
+struct InvalidReturnTypeInResultClosure {
+    #[builder(with = |value: &str| -> ::core::result::Result<_, core::num::ParseIntError> {
+        Ok(value)
+    })]
+    value: u32,
+}
+
+#[derive(Builder)]
+struct InvalidReturnTypeInImplTraitClosure {
+    #[builder(with = |value: impl Into<::core::net::IpAddr>| value)]
+    value: u32,
+}
+
 fn main() {}

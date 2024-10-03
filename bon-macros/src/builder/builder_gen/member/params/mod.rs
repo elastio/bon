@@ -287,13 +287,15 @@ impl FromMeta for SetterClosure {
                     )
                 };
 
-                let args = ty.as_generic_angle_bracketed("Result").ok_or_else(err)?;
+                let ty = ty
+                    .as_generic_angle_bracketed_path("Result")
+                    .ok_or_else(err)?;
 
-                if args.len() != 1 && args.len() != 2 {
+                if ty.args.len() != 1 && ty.args.len() != 2 {
                     return Err(err());
                 }
 
-                let mut args = args.into_iter();
+                let mut args = ty.args.iter();
                 let ok_ty = args.next().ok_or_else(err)?;
 
                 if !matches!(ok_ty, syn::GenericArgument::Type(syn::Type::Infer(_))) {
@@ -308,8 +310,16 @@ impl FromMeta for SetterClosure {
                     })
                     .transpose()?;
 
+                let mut result_path = ty.path.clone();
+
+                result_path
+                    .segments
+                    .last_mut()
+                    .expect("BUG: segments can't be empty")
+                    .arguments = syn::PathArguments::None;
+
                 Some(SetterClosureOutput {
-                    result_path: syn::parse_quote!(Result),
+                    result_path,
                     err_ty,
                 })
             }

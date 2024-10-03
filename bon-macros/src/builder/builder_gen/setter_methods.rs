@@ -2,12 +2,12 @@ use super::member::SetterClosure;
 use super::{BuilderGenCtx, NamedMember};
 use crate::util::prelude::*;
 
-pub(crate) struct MemberSettersCtx<'a> {
+pub(crate) struct SettersCtx<'a> {
     builder_gen: &'a BuilderGenCtx,
     member: &'a NamedMember,
 }
 
-impl<'a> MemberSettersCtx<'a> {
+impl<'a> SettersCtx<'a> {
     pub(crate) fn new(builder_gen: &'a BuilderGenCtx, member: &'a NamedMember) -> Self {
         Self {
             builder_gen,
@@ -28,25 +28,25 @@ impl<'a> MemberSettersCtx<'a> {
         let member_init;
 
         if let Some(closure) = &self.member.params.with {
-            fn_inputs = Self::inputs_override(closure);
+            fn_inputs = Self::inputs_from_closure(closure);
 
-            let member_init_override = self.member_init_override(closure);
+            let member_init_override = self.member_init_from_closure(closure);
+
             member_init = quote!(Some(#member_init_override));
         } else {
             let member_type = self.member.norm_ty.as_ref();
             let has_into = self.member.params.into.is_present();
 
-            let (fn_param_type, maybe_into_call) = if has_into {
-                (quote!(impl Into<#member_type>), quote!(.into()))
+            if has_into {
+                fn_inputs = quote!(value: impl Into<#member_type>);
+                member_init = quote!(Some(::core::convert::Into::into(value)));
             } else {
-                (quote!(#member_type), quote!())
-            };
-
-            fn_inputs = quote!(value: #fn_param_type);
-            member_init = quote!(Some(value #maybe_into_call));
+                fn_inputs = quote!(value: #member_type);
+                member_init = quote!(Some(value));
+            }
         }
 
-        self.setter_method(MemberSetterMethod {
+        self.setter_method(Setter {
             method_name: self.member.public_ident().clone(),
             fn_inputs,
             overwrite_docs: None,
@@ -71,51 +71,42 @@ impl<'a> MemberSettersCtx<'a> {
         let option_fn_member_init;
 
         if let Some(closure) = &self.member.params.with {
-            some_fn_inputs = Self::inputs_override(closure);
+            some_fn_inputs = Self::inputs_from_closure(closure);
 
             // If the closure accepts just a single input avoid wrapping it
             // in a tuple in the `option_fn` setter.
-            if let [input] = closure.inputs.as_slice() {
-                let ident = &input.pat.ident;
-                some_fn_body = quote! {
-                    self.#option_fn_name(Some(#ident))
-                };
-
-                let ty = &input.ty;
-                option_fn_inputs = quote!(value: Option<#ty>);
-                option_fn_member_init = {
-                    let init = self.member_init_override(closure);
-                    let question_mark = closure.output.is_some().then(|| quote!(?));
-
-                    quote! {
-                        match value {
-                            Some(#ident) => #init #question_mark,
-                            None => None,
-                        }
-                    }
-                };
-            } else {
-                let idents = closure.inputs.iter().map(|input| &input.pat.ident);
-                some_fn_body = {
-                    let idents = idents.clone();
-                    quote! {
-                        self.#option_fn_name(Some(( #(#idents,)* )))
-                    }
-                };
-
-                option_fn_inputs = quote!(Option<( #some_fn_inputs )>);
-                option_fn_member_init = {
-                    let init = self.member_init_override(closure);
-                    let question_mark = closure.output.is_some().then(|| quote!(?));
-
-                    quote! {
-                        match value {
-                            Some(( #(#idents,)* )) => #init #question_mark,
-                            None => None,
-                        }
-                    }
+            let maybe_wrap_in_tuple = |val: TokenStream| -> TokenStream {
+                if closure.inputs.len() == 1 {
+                    val
+                } else {
+                    quote!((#val))
                 }
             };
+
+            let idents = closure.inputs.iter().map(|input| &input.pat.ident);
+            let idents = maybe_wrap_in_tuple(quote!( #( #idents ),* ));
+
+            some_fn_body = {
+                quote! {
+                    self.#option_fn_name(Some(#idents))
+                }
+            };
+
+            option_fn_inputs = {
+                let inputs = closure.inputs.iter().map(|input| &input.ty);
+                let inputs = maybe_wrap_in_tuple(quote!(#( #inputs, )*));
+                quote!(value: Option<#inputs>)
+            };
+
+            option_fn_member_init = {
+                let init = self.member_init_from_closure(closure);
+                quote! {
+                    match value {
+                        Some(#idents) => #init,
+                        None => None,
+                    }
+                }
+            }
         } else {
             let underlying_ty = self.member.underlying_norm_ty();
             let has_into = self.member.params.into.is_present();
@@ -143,7 +134,7 @@ impl<'a> MemberSettersCtx<'a> {
         }
 
         let methods = [
-            MemberSetterMethod {
+            Setter {
                 method_name: option_fn_name,
                 fn_inputs: option_fn_inputs,
                 overwrite_docs: Some(format!(
@@ -161,7 +152,7 @@ impl<'a> MemberSettersCtx<'a> {
             // of the builder compatible when a required member becomes optional.
             // To be able to explicitly pass an `Option` value to the setter method
             // users need to use the `maybe_{member_ident}` method.
-            MemberSetterMethod {
+            Setter {
                 method_name: member_name,
                 fn_inputs: some_fn_inputs,
                 overwrite_docs: None,
@@ -175,7 +166,7 @@ impl<'a> MemberSettersCtx<'a> {
             .collect()
     }
 
-    fn inputs_override(closure: &SetterClosure) -> TokenStream {
+    fn inputs_from_closure(closure: &SetterClosure) -> TokenStream {
         let pats = closure.inputs.iter().map(|input| &input.pat);
         let types = closure.inputs.iter().map(|input| &input.ty);
         quote! {
@@ -183,22 +174,36 @@ impl<'a> MemberSettersCtx<'a> {
         }
     }
 
-    fn member_init_override(&self, closure: &SetterClosure) -> TokenStream {
+    fn member_init_from_closure(&self, closure: &SetterClosure) -> TokenStream {
         let body = &closure.body;
-        let output = Self::result_output_override(closure, || quote!(_)).into_iter();
 
-        // let mut ty = self.member.underlying_norm_ty().to_token_stream();
+        let mut ty = self.member.underlying_norm_ty().to_token_stream();
 
-        // if !self.member.is_required() {
-        //     ty = quote!(Option<#ty>);
-        // };
+        if !self.member.is_required() {
+            ty = quote!(Option<#ty>);
+        };
+
+        let output =
+            Self::result_output_from_closure(closure, || &ty).unwrap_or_else(|| ty.to_token_stream());
+
+        // Avoid wrapping the body in a block if it's already a block.
+        let body = if matches!(body.as_ref(), syn::Expr::Block(_)) {
+            body.to_token_stream()
+        } else {
+            quote!({ #body })
+        };
+
+        let question_mark = closure
+            .output
+            .is_some()
+            .then(|| syn::Token![?](Span::call_site()));
 
         quote! {
-            (move || #( -> #output )* #body)()
+            (move || -> #output #body)() #question_mark
         }
     }
 
-    fn result_output_override<T: ToTokens>(
+    fn result_output_from_closure<T: ToTokens>(
         closure: &SetterClosure,
         default_ty: impl FnOnce() -> T,
     ) -> Option<TokenStream> {
@@ -211,8 +216,8 @@ impl<'a> MemberSettersCtx<'a> {
         })
     }
 
-    fn setter_method(&self, method: MemberSetterMethod) -> TokenStream {
-        let MemberSetterMethod {
+    fn setter_method(&self, method: Setter) -> TokenStream {
+        let Setter {
             method_name,
             fn_inputs,
             overwrite_docs,
@@ -232,7 +237,7 @@ impl<'a> MemberSettersCtx<'a> {
 
                 let mut state_transition_call = if self.member.is_stateful() {
                     quote! {
-                        .__private_transition_type_state()
+                        Self::__private_transition_type_state(self)
                     }
                 } else {
                     quote! {}
@@ -249,7 +254,7 @@ impl<'a> MemberSettersCtx<'a> {
 
                 quote! {
                     self.__private_named_members.#index = #member_init;
-                    self #state_transition_call
+                    #state_transition_call
                 }
             }
         };
@@ -281,7 +286,7 @@ impl<'a> MemberSettersCtx<'a> {
         };
 
         if let Some(closure) = &self.member.params.with {
-            if let Some(overridden) = Self::result_output_override(closure, || &return_type) {
+            if let Some(overridden) = Self::result_output_from_closure(closure, || &return_type) {
                 return_type = overridden;
             }
         }
@@ -356,7 +361,7 @@ enum SetterBody {
     Default { member_init: TokenStream },
 }
 
-struct MemberSetterMethod {
+struct Setter {
     method_name: syn::Ident,
     fn_inputs: TokenStream,
     overwrite_docs: Option<String>,

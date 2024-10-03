@@ -19,9 +19,18 @@ mod single_arg {
             #[builder(with = |value: &T| value.clone())]
             generic: T,
 
-            #[builder(with = |value: impl Into<IpAddr>| value)]
+            #[builder(with = |value: impl Into<IpAddr>| value.into())]
             impl_trait: IpAddr,
+
+            #[builder(with = |value: &str| -> ::core::result::Result<_, core::num::ParseIntError> {
+                value.parse()
+            })]
+            try_required: u32,
         }
+
+        let foo = |value: &str| -> ::core::result::Result<_, core::num::ParseIntError> {
+            Ok(value.parse::<u32>()? + 1)
+        };
 
         // assert_debug_eq(
         //     Sut::builder()
