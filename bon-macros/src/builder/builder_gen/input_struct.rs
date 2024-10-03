@@ -178,14 +178,16 @@ impl StructInputCtx {
                 }),
         };
 
-        let start_fn_docs = start_fn_docs.map(SpannedKey::into_value).unwrap_or_else(|| {
-            let docs = format!(
-                "Create an instance of [`{}`] using the builder syntax",
-                self.norm_struct.ident
-            );
+        let start_fn_docs = start_fn_docs
+            .map(SpannedKey::into_value)
+            .unwrap_or_else(|| {
+                let docs = format!(
+                    "Create an instance of [`{}`] using the builder syntax",
+                    self.norm_struct.ident
+                );
 
-            vec![syn::parse_quote!(#[doc = #docs])]
-        });
+                vec![syn::parse_quote!(#[doc = #docs])]
+            });
 
         let start_fn = StartFnParams {
             ident: start_fn_ident,
@@ -209,7 +211,8 @@ impl StructInputCtx {
         let builder_type = {
             let ItemParams { name, vis, docs } = self.params.base.builder_type;
 
-            let builder_ident = name.map(SpannedKey::into_value)
+            let builder_ident = name
+                .map(SpannedKey::into_value)
                 .unwrap_or_else(|| format_ident!("{}Builder", self.norm_struct.ident.raw_name()));
 
             BuilderTypeParams {

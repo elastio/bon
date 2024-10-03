@@ -183,8 +183,8 @@ impl<'a> SettersCtx<'a> {
             ty = quote!(Option<#ty>);
         };
 
-        let output =
-            Self::result_output_from_closure(closure, || &ty).unwrap_or_else(|| ty.to_token_stream());
+        let output = Self::result_output_from_closure(closure, || &ty)
+            .unwrap_or_else(|| ty.to_token_stream());
 
         // Avoid wrapping the body in a block if it's already a block.
         let body = if matches!(body.as_ref(), syn::Expr::Block(_)) {
