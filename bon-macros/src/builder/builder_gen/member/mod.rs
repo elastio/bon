@@ -1,5 +1,8 @@
 mod into_conversion;
+mod named;
 mod params;
+
+pub(crate) use named::*;
 
 use super::builder_params::OnParams;
 use crate::util::prelude::*;
@@ -45,42 +48,6 @@ pub(crate) enum Member {
     Skipped(SkippedMember),
 }
 
-/// Regular member for which the builder should have setter methods
-#[derive(Debug)]
-pub(crate) struct NamedMember {
-    /// Specifies what syntax the member comes from.
-    pub(crate) origin: MemberOrigin,
-
-    /// Index of the member relative to other regular members. The index is 0-based.
-    pub(crate) index: syn::Index,
-
-    /// Original name of the member is used as the name of the builder field and
-    /// in its setter methods. Struct field/fn arg names conventionally use `snake_case`
-    /// in Rust, but this isn't enforced, so this member isn't guaranteed to be in
-    /// snake case, but 99% of the time it will be.
-    pub(crate) orig_ident: syn::Ident,
-
-    /// Normalized version of `orig_ident`. Here we stripped the leading `_` from the
-    /// member name.
-    pub(crate) norm_ident: syn::Ident,
-
-    /// `PascalCase` version of the `norm_ident`.
-    pub(crate) norm_ident_pascal: syn::Ident,
-
-    /// Doc comments for the setter methods are copied from the doc comments placed
-    /// on top of the original member
-    pub(crate) docs: Vec<syn::Attribute>,
-
-    /// Normalized type of the member that the builder should have setters for.
-    pub(crate) norm_ty: Box<syn::Type>,
-
-    /// Original type of the member (not normalized)
-    pub(crate) orig_ty: Box<syn::Type>,
-
-    /// Parameters configured by the user explicitly via attributes
-    pub(crate) params: MemberParams,
-}
-
 /// Member that was marked with `#[builder(pos = start_fn)]`
 #[derive(Debug)]
 pub(crate) struct StartFnArgMember {
@@ -117,65 +84,6 @@ pub(crate) struct SkippedMember {
 
     /// Value to assign to the member
     pub(crate) value: SpannedValue<Option<syn::Expr>>,
-}
-
-impl NamedMember {
-    fn validate(&self) -> Result {
-        crate::parsing::reject_self_mentions_in_docs("builder struct's impl block", &self.docs)?;
-
-        if let Some(default) = &self.params.default {
-            if self.norm_ty.is_option() {
-                bail!(
-                    &default.span(),
-                    "`Option<_>` already implies a default of `None`, \
-                    so explicit #[builder(default)] is redundant",
-                );
-            }
-        }
-
-        Ok(())
-    }
-
-    pub(crate) fn public_ident(&self) -> &syn::Ident {
-        self.params.name.as_ref().unwrap_or(&self.norm_ident)
-    }
-
-    fn as_optional_with_ty<'a>(&'a self, ty: &'a syn::Type) -> Option<&'a syn::Type> {
-        ty.option_type_param()
-            .or_else(|| (self.params.default.is_some()).then(|| ty))
-    }
-
-    pub(crate) fn as_optional_norm_ty(&self) -> Option<&syn::Type> {
-        Self::as_optional_with_ty(self, &self.norm_ty)
-    }
-
-    pub(crate) fn is_required(&self) -> bool {
-        self.as_optional_norm_ty().is_none()
-    }
-
-    pub(crate) fn param_default(&self) -> Option<Option<&syn::Expr>> {
-        self.params
-            .default
-            .as_ref()
-            .map(|default| default.as_ref().as_ref())
-    }
-
-    pub(crate) fn is_stateful(&self) -> bool {
-        self.is_required() || !self.params.overwritable.is_present()
-    }
-
-    pub(crate) fn merge_param_overwritable(&mut self, on_params: &[OnParams]) -> Result {
-        self.params.overwritable = params::EvalBlanketFlagParam {
-            on_params,
-            param_name: params::BlanketParamName::Overwritable,
-            member_params: &self.params,
-            scrutinee: &self.norm_ty,
-            origin: self.origin,
-        }
-        .eval()?;
-
-        Ok(())
-    }
 }
 
 pub(crate) struct RawMember<'a> {
@@ -297,8 +205,7 @@ impl Member {
                 docs,
             };
 
-            member.merge_param_into(on_params)?;
-            member.merge_param_overwritable(on_params)?;
+            member.merge_on_params(on_params)?;
             member.validate()?;
 
             output.push(Self::Named(member));

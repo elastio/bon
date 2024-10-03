@@ -84,7 +84,7 @@ impl BuilderGenCtx {
             // The type hints here are necessary to get better error messages
             // that point directly to the types that don't implement `Clone`
             // in the input code using the span info from the type hints.
-            let ty = member.as_optional_norm_ty().unwrap_or(&member.norm_ty);
+            let ty = member.underlying_norm_ty();
 
             quote! {
                 ::bon::private::derives::clone_member::<#ty>(
@@ -131,7 +131,7 @@ impl BuilderGenCtx {
                 Member::Named(member) => {
                     let member_index = &member.index;
                     let member_ident_str = member.public_ident().to_string();
-                    let member_ty = member.as_optional_norm_ty().unwrap_or(&member.norm_ty);
+                    let member_ty = member.underlying_norm_ty();
                     Some(quote! {
                         if let ::core::option::Option::Some(value) = &self.__private_named_members.#member_index {
                             output.field(

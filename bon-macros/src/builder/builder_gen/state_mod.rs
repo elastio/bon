@@ -54,6 +54,8 @@ impl super::BuilderGenCtx {
             .collect()
     }
 
+    // TODO: shame on me, but clippy is right 😳. Ping @Veetaha if he forgot to
+    // refactor this function before merging this code to master.
     #[allow(clippy::cognitive_complexity)]
     pub(super) fn state_mod(&self) -> TokenStream {
         let builder_vis = &self.builder_type.vis;

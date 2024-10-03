@@ -414,12 +414,7 @@ impl BuilderGenCtx {
             }
         });
 
-        let named_members_types = self.named_members().map(|member| {
-            let ty = member.as_optional_norm_ty().unwrap_or(&member.norm_ty);
-            quote! {
-                ::core::option::Option<#ty>
-            }
-        });
+        let named_members_types = self.named_members().map(NamedMember::underlying_norm_ty);
 
         let docs = &self.builder_type.docs;
 
@@ -450,7 +445,11 @@ impl BuilderGenCtx {
                 #start_fn_args_field
 
                 #private_field_attrs
-                __private_named_members: ( #(#named_members_types,)* )
+                __private_named_members: (
+                    #(
+                        ::core::option::Option<#named_members_types>,
+                    )*
+                )
             }
         }
     }
@@ -487,7 +486,13 @@ impl BuilderGenCtx {
             return member_field.to_token_stream();
         }
 
-        match member.param_default() {
+        let param_default = member
+            .params
+            .default
+            .as_ref()
+            .map(|default| default.as_ref().as_ref());
+
+        match param_default {
             Some(Some(default)) => {
                 let has_into = member.params.into.is_present();
                 let default = if has_into {

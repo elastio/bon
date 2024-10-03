@@ -17,8 +17,8 @@ impl<'a> MemberSettersCtx<'a> {
     pub(crate) fn setter_methods(&self) -> TokenStream {
         let member_type = self.member.norm_ty.as_ref();
 
-        if let Some(inner_type) = self.member.as_optional_norm_ty() {
-            return self.setters_for_optional_member(inner_type);
+        if !self.member.is_required() {
+            return self.setters_for_optional_member();
         }
 
         let has_into = self.member.params.into.is_present();
@@ -39,12 +39,14 @@ impl<'a> MemberSettersCtx<'a> {
         })
     }
 
-    fn setters_for_optional_member(&self, inner_type: &syn::Type) -> TokenStream {
+    fn setters_for_optional_member(&self) -> TokenStream {
+        let underlying_ty = self.member.underlying_norm_ty();
+
         let has_into = self.member.params.into.is_present();
         let (inner_type, maybe_map_conv_call) = if has_into {
-            (quote!(impl Into<#inner_type>), quote!(.map(Into::into)))
+            (quote!(impl Into<#underlying_ty>), quote!(.map(Into::into)))
         } else {
-            (quote!(#inner_type), quote!())
+            (quote!(#underlying_ty), quote!())
         };
 
         let setter_method_name = self.member.public_ident().clone();

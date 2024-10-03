@@ -5,13 +5,17 @@ use crate::util::prelude::*;
 
 impl NamedMember {
     pub(super) fn merge_param_into(&mut self, on_params: &[OnParams]) -> Result {
+        // `with` is mutually exclusive with `into`. So there is nothing to merge here
+        // if `with` is present.
+        if self.params.with.is_some() {
+            return Ok(());
+        }
+
         // For optional named members the target of the `Into` conversion is the type
         // inside of the `Option<T>`, not the `Option<T>` itself because we generate
         // a setter that accepts `T` itself. It also makes this logic stable regardless
         // if `Option<T>` is used or the member of type `T` has `#[builder(default)]` on it.
-        let scrutinee = self
-            .as_optional_with_ty(&self.orig_ty)
-            .unwrap_or(&self.orig_ty);
+        let scrutinee = self.underlying_orig_ty();
 
         self.params.into = EvalBlanketFlagParam {
             on_params,

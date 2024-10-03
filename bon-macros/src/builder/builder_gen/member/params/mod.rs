@@ -53,6 +53,12 @@ pub(crate) struct MemberParams {
 
     #[darling(default, with = parse_expr_closure, map = Some)]
     pub(crate) with: Option<syn::ExprClosure>,
+
+    /// Disables the special handling for a member of type `Option<T>`. The
+    /// member no longer has the default on `None`. It also becomes a required
+    /// member unless a separate `#[builder(default = ...)]` attribute is
+    /// also specified.
+    pub(crate) transparent: darling::util::Flag,
 }
 
 #[derive(PartialEq, Eq, Clone, Copy)]
@@ -65,6 +71,7 @@ enum ParamName {
     Setters,
     Skip,
     StartFn,
+    Transparent,
     With,
 }
 
@@ -79,6 +86,7 @@ impl fmt::Display for ParamName {
             Self::Setters => "setters",
             Self::Skip => "skip",
             Self::StartFn => "start_fn",
+            Self::Transparent => "transparent",
             Self::With => "with",
         };
         f.write_str(str)
@@ -86,15 +94,34 @@ impl fmt::Display for ParamName {
 }
 
 impl MemberParams {
+    fn validate_mutually_exclusive(
+        &self,
+        attr_name: ParamName,
+        attr_span: Span,
+        mutually_exclusive: &[ParamName],
+    ) -> Result<()> {
+        self.validate_compat(attr_name, attr_span, mutually_exclusive, true)
+    }
+
     fn validate_mutually_allowed(
         &self,
         attr_name: ParamName,
         attr_span: Span,
-        allowed: &[ParamName],
+        mutually_allowed: &[ParamName],
+    ) -> Result<()> {
+        self.validate_compat(attr_name, attr_span, mutually_allowed, false)
+    }
+
+    fn validate_compat(
+        &self,
+        attr_name: ParamName,
+        attr_span: Span,
+        patterns: &[ParamName],
+        mutually_exclusive: bool,
     ) -> Result<()> {
         let conflicting: Vec<_> = self
             .specified_param_names()
-            .filter(|name| *name != attr_name && !allowed.contains(name))
+            .filter(|name| *name != attr_name && patterns.contains(name) == mutually_exclusive)
             .collect();
 
         if conflicting.is_empty() {
@@ -122,6 +149,7 @@ impl MemberParams {
             setters,
             skip,
             start_fn,
+            transparent,
             with,
         } = self;
 
@@ -134,6 +162,7 @@ impl MemberParams {
             (setters.is_some(), ParamName::Setters),
             (skip.is_some(), ParamName::Skip),
             (start_fn.is_present(), ParamName::StartFn),
+            (transparent.is_present(), ParamName::Transparent),
             (with.is_some(), ParamName::With),
         ];
 
@@ -182,6 +211,10 @@ impl MemberParams {
             }
 
             self.validate_mutually_allowed(ParamName::Skip, skip.span(), &[])?;
+        }
+
+        if let Some(with) = &self.with {
+            self.validate_mutually_exclusive(ParamName::With, with.span(), &[ParamName::Into])?;
         }
 
         Ok(())

@@ -1,8 +1,10 @@
 mod docs;
 mod item_params;
+mod spanned_key;
 
 pub(crate) use docs::*;
 pub(crate) use item_params::*;
+pub(crate) use spanned_key::*;
 
 use crate::util::prelude::*;
 use darling::FromMeta;
