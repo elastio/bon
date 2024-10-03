@@ -434,6 +434,15 @@ impl BuilderGenCtx {
             )]
             #builder_vis struct #builder_ident<
                 #(#generics_decl,)*
+                // Having the `State` trait bound on the struct declaration is important
+                // for future proofing. It will allow us to use this bound in the `Drop`
+                // implementation of the builder if we ever add one. @Veetaha already did
+                // some experiments with `MaybeUninit` that requires a custom drop impl,
+                // so this could be useful in the future.
+                //
+                // On the flip side, if we have a custom `Drop` impl, then partially moving
+                // the builder will be impossible. So.. it's a trade-off, and it's probably
+                // not a big deal to remove this bound from here if we feel like it.
                 BuilderState: #state_mod::State = #state_mod::AllUnset
             >
             #where_clause
@@ -480,12 +489,6 @@ impl BuilderGenCtx {
             self.__private_named_members.#index
         };
 
-        // For `Option` the default value is always `None`. So we can just return
-        // the value of the member field itself (which is already an `Option<T>`).
-        if member.norm_ty.is_option() {
-            return member_field.to_token_stream();
-        }
-
         let param_default = member
             .params
             .default
@@ -511,6 +514,12 @@ impl BuilderGenCtx {
                 }
             }
             None => {
+                // For `Option` the default value is always `None`. So we can just return
+                // the value of the member field itself (which is already an `Option<T>`).
+                if !member.params.transparent.is_present() && member.norm_ty.is_option() {
+                    return member_field.to_token_stream();
+                }
+
                 quote! {
                     unsafe {
                         // SAFETY: we know that the member is set because we are in

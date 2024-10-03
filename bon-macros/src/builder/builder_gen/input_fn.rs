@@ -89,25 +89,44 @@ impl FnInputCtx {
         Some(prefix)
     }
 
-    fn assoc_method_ctx(&self) -> Option<AssocMethodCtx> {
-        Some(AssocMethodCtx {
-            self_ty: self.impl_ctx.as_deref()?.self_ty.clone(),
-            receiver: self.assoc_method_receiver_ctx(),
-        })
+    fn assoc_method_ctx(&self) -> Result<Option<AssocMethodCtx>> {
+        let self_ty = match self.impl_ctx.as_deref() {
+            Some(impl_ctx) => impl_ctx.self_ty.clone(),
+            None => return Ok(None),
+        };
+
+        Ok(Some(AssocMethodCtx {
+            self_ty,
+            receiver: self.assoc_method_receiver_ctx()?,
+        }))
     }
 
-    fn assoc_method_receiver_ctx(&self) -> Option<AssocMethodReceiverCtx> {
-        let receiver = self.norm_fn.sig.receiver()?;
-        let self_ty = &self.impl_ctx.as_deref()?.self_ty;
+    fn assoc_method_receiver_ctx(&self) -> Result<Option<AssocMethodReceiverCtx>> {
+        let receiver = match self.norm_fn.sig.receiver() {
+            Some(receiver) => receiver,
+            None => return Ok(None),
+        };
+
+        if let [attr, ..] = receiver.attrs.as_slice() {
+            bail!(
+                attr,
+                "attributes on the receiver are not supported in the #[builder] macro."
+            );
+        }
+
+        let self_ty = match self.impl_ctx.as_deref() {
+            Some(impl_ctx) => &impl_ctx.self_ty,
+            None => return Ok(None),
+        };
 
         let mut without_self_keyword = receiver.ty.clone();
 
         NormalizeSelfTy { self_ty }.visit_type_mut(&mut without_self_keyword);
 
-        Some(AssocMethodReceiverCtx {
+        Ok(Some(AssocMethodReceiverCtx {
             with_self_keyword: receiver.clone(),
             without_self_keyword,
-        })
+        }))
     }
 
     fn generics(&self) -> Generics {
@@ -255,7 +274,7 @@ impl FnInputCtx {
     }
 
     pub(crate) fn into_builder_gen_ctx(self) -> Result<BuilderGenCtx> {
-        let assoc_method_ctx = self.assoc_method_ctx();
+        let assoc_method_ctx = self.assoc_method_ctx()?;
 
         if self.impl_ctx.is_none() {
             let explanation = "\
