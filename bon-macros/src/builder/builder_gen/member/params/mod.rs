@@ -5,8 +5,10 @@ pub(crate) use blanket::{BlanketParamName, EvalBlanketFlagParam};
 pub(crate) use setter::SettersParams;
 
 use super::MemberOrigin;
+use crate::parsing::SpannedKey;
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
+use darling::FromMeta;
 use std::fmt;
 use syn::spanned::Spanned;
 
@@ -21,14 +23,14 @@ pub(crate) struct MemberParams {
     /// An optional expression can be provided to set the value for the member,
     /// otherwise its  [`Default`] trait impl will be used.
     #[darling(with = parse_optional_expr, map = Some)]
-    pub(crate) default: Option<SpannedValue<Option<syn::Expr>>>,
+    pub(crate) default: Option<SpannedKey<Option<syn::Expr>>>,
 
     /// Skip generating a setter method for this member.
     ///
     /// An optional expression can be provided to set the value for the member,
     /// otherwise its  [`Default`] trait impl will be used.
     #[darling(with = parse_optional_expr, map = Some)]
-    pub(crate) skip: Option<SpannedValue<Option<syn::Expr>>>,
+    pub(crate) skip: Option<SpannedKey<Option<syn::Expr>>>,
 
     /// Rename the name exposed in the builder API.
     pub(crate) name: Option<syn::Ident>,
@@ -52,7 +54,7 @@ pub(crate) struct MemberParams {
     pub(crate) overwritable: darling::util::Flag,
 
     #[darling(default, with = parse_expr_closure, map = Some)]
-    pub(crate) with: Option<syn::ExprClosure>,
+    pub(crate) with: Option<SpannedKey<syn::ExprClosure>>,
 
     /// Disables the special handling for a member of type `Option<T>`. The
     /// member no longer has the default on `None`. It also becomes a required
@@ -193,7 +195,7 @@ impl MemberParams {
             match origin {
                 MemberOrigin::FnArg => {
                     bail!(
-                        &skip.span(),
+                        &skip.key.span(),
                         "`skip` attribute is not supported on function arguments; \
                         use a local variable instead.",
                     );
@@ -203,33 +205,33 @@ impl MemberParams {
 
             if let Some(Some(_expr)) = self.default.as_deref() {
                 bail!(
-                    &skip.span(),
+                    &skip.key.span(),
                     "`skip` attribute can't be specified with the `default` attribute; \
                     if you wanted to specify a value for the member, then use \
                     the following syntax instead `#[builder(skip = value)]`",
                 );
             }
 
-            self.validate_mutually_allowed(ParamName::Skip, skip.span(), &[])?;
+            self.validate_mutually_allowed(ParamName::Skip, skip.key.span(), &[])?;
         }
 
         if let Some(with) = &self.with {
-            self.validate_mutually_exclusive(ParamName::With, with.span(), &[ParamName::Into])?;
+            self.validate_mutually_exclusive(ParamName::With, with.key.span(), &[ParamName::Into])?;
         }
 
         Ok(())
     }
 }
 
-fn parse_optional_expr(meta: &syn::Meta) -> Result<SpannedValue<Option<syn::Expr>>> {
+fn parse_optional_expr(meta: &syn::Meta) -> Result<SpannedKey<Option<syn::Expr>>> {
     match meta {
-        syn::Meta::Path(_) => Ok(SpannedValue::new(None, meta.span())),
+        syn::Meta::Path(path) => Ok(SpannedKey::new(path, None)),
         syn::Meta::List(_) => Err(Error::unsupported_format("list").with_span(meta)),
-        syn::Meta::NameValue(meta) => Ok(SpannedValue::new(Some(meta.value.clone()), meta.span())),
+        syn::Meta::NameValue(meta) => Ok(SpannedKey::new(&meta.path, Some(meta.value.clone()))),
     }
 }
 
-fn parse_expr_closure(meta: &syn::Meta) -> Result<syn::ExprClosure> {
+fn parse_expr_closure(meta: &syn::Meta) -> Result<SpannedKey<syn::ExprClosure>> {
     let err = || {
         let path = darling::util::path_to_string(meta.path());
         err!(
@@ -244,7 +246,7 @@ fn parse_expr_closure(meta: &syn::Meta) -> Result<syn::ExprClosure> {
     };
 
     match &meta.value {
-        syn::Expr::Closure(closure) => Ok(closure.clone()),
+        syn::Expr::Closure(closure) => Ok(SpannedKey::new(&meta.path, closure.clone())),
         _ => Err(err()),
     }
 }

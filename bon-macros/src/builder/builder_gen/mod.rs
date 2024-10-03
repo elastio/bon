@@ -493,7 +493,7 @@ impl BuilderGenCtx {
             .params
             .default
             .as_ref()
-            .map(|default| default.as_ref().as_ref());
+            .map(|default| default.value.as_ref());
 
         match param_default {
             Some(Some(default)) => {

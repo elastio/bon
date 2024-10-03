@@ -18,6 +18,7 @@ impl From<IntoChar> for char {
 
 mod smoke {
     use super::*;
+    use core::fmt;
 
     #[test]
     fn test_struct() {
@@ -70,14 +71,7 @@ mod smoke {
             #[builder(finish_fn)] finisher_1: &'static str,
             #[builder(finish_fn, into)] finisher_2: &'static str,
             named: u32,
-        ) -> (
-            bool,
-            char,
-            Option<&'static str>,
-            u32,
-            &'static str,
-            &'static str,
-        ) {
+        ) -> impl fmt::Debug {
             (
                 starter_1, starter_2, starter_3, named, finisher_1, finisher_2,
             )
@@ -107,14 +101,7 @@ mod smoke {
                 #[builder(finish_fn)] finisher_1: &'static str,
                 #[builder(finish_fn, into)] finisher_2: &'static str,
                 named: u32,
-            ) -> (
-                bool,
-                char,
-                Option<&'static str>,
-                u32,
-                &'static str,
-                &'static str,
-            ) {
+            ) -> impl fmt::Debug {
                 (
                     starter_1, starter_2, starter_3, named, finisher_1, finisher_2,
                 )
@@ -126,7 +113,7 @@ mod smoke {
                 #[builder(start_fn)] starter_1: bool,
                 #[builder(finish_fn)] finisher_1: &'static str,
                 named: u32,
-            ) -> (bool, u32, &'static str) {
+            ) -> impl fmt::Debug {
                 let _ = self;
                 (starter_1, named, finisher_1)
             }
@@ -150,6 +137,7 @@ mod smoke {
 
 mod attr_on {
     use super::*;
+    use core::fmt;
 
     #[test]
     fn test_struct() {
@@ -196,7 +184,7 @@ mod attr_on {
             #[builder(finish_fn)] finisher_1: &'static str,
 
             named: u32,
-        ) -> (bool, Option<&'static str>, &'static str, u32) {
+        ) -> impl fmt::Debug {
             (starter_1, starter_3, finisher_1, named)
         }
 
@@ -221,7 +209,7 @@ mod attr_on {
                 #[builder(finish_fn)] finisher_1: &'static str,
 
                 named: u32,
-            ) -> (bool, Option<&'static str>, &'static str, u32) {
+            ) -> impl fmt::Debug {
                 (starter_1, starter_3, finisher_1, named)
             }
 
@@ -231,7 +219,7 @@ mod attr_on {
                 #[builder(start_fn)] starter_1: bool,
                 #[builder(finish_fn)] finisher_1: &'static str,
                 named: u32,
-            ) -> (bool, &'static str, u32) {
+            ) -> impl fmt::Debug {
                 let _ = self;
                 (starter_1, finisher_1, named)
             }

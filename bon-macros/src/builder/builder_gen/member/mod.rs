@@ -6,10 +6,10 @@ pub(crate) use named::*;
 
 use super::builder_params::OnParams;
 use crate::util::prelude::*;
-use darling::util::SpannedValue;
 use darling::FromAttributes;
 use params::MemberParams;
 use std::fmt;
+use crate::parsing::SpannedKey;
 
 #[derive(Debug, Clone, Copy)]
 pub(crate) enum MemberOrigin {
@@ -83,7 +83,7 @@ pub(crate) struct SkippedMember {
     pub(crate) norm_ty: Box<syn::Type>,
 
     /// Value to assign to the member
-    pub(crate) value: SpannedValue<Option<syn::Expr>>,
+    pub(crate) value: SpannedKey<Option<syn::Expr>>,
 }
 
 pub(crate) struct RawMember<'a> {

@@ -11,7 +11,7 @@ fn parse_setter_fn(meta: &syn::Meta) -> Result<SpannedKey<ItemParams>> {
     }
     .parse()?;
 
-    Ok(SpannedKey::from_parsed(meta, params))
+    Ok(SpannedKey::new(meta.path(), params))
 }
 
 fn parse_docs(meta: &syn::Meta) -> Result<Vec<syn::Attribute>> {

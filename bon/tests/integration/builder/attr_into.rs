@@ -1,14 +1,14 @@
 use crate::prelude::*;
+use core::fmt;
 use core::num::NonZeroU32;
 
 #[cfg(feature = "alloc")]
 #[test]
 fn into_attr_alloc() {
+    use core::fmt;
+
     #[builder]
-    fn sut(
-        #[builder(into)] set: Option<BTreeSet<u32>>,
-        no_into: String,
-    ) -> (Option<BTreeSet<u32>>, String) {
+    fn sut(#[builder(into)] set: Option<BTreeSet<u32>>, no_into: String) -> impl fmt::Debug {
         (set, no_into)
     }
 
@@ -27,7 +27,7 @@ fn into_attr_no_std() {
         /// Some docs
         #[builder(into)]
         u32: u32,
-    ) -> (&str, u32) {
+    ) -> impl fmt::Debug + '_ {
         (str_ref, u32)
     }
 
@@ -52,7 +52,7 @@ fn into_attr_no_std() {
 #[test]
 fn into_string() {
     #[builder(on(String, into))]
-    fn sut(arg1: String, arg2: Option<String>) -> (String, Option<String>) {
+    fn sut(arg1: String, arg2: Option<String>) -> impl fmt::Debug {
         (arg1, arg2)
     }
 

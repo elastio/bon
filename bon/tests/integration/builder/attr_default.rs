@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use core::fmt;
 
 #[cfg(feature = "alloc")]
 #[test]
@@ -8,7 +9,7 @@ fn fn_alloc() {
         #[builder(default = "default".to_owned())] arg1: String,
         #[builder(default = vec![42])] arg2: Vec<u32>,
         #[builder(default = "foo", into)] arg3: String,
-    ) -> (String, Vec<u32>, String) {
+    ) -> impl fmt::Debug {
         (arg1, arg2, arg3)
     }
 
@@ -138,7 +139,7 @@ fn struct_alloc() {
 #[test]
 fn fn_no_std() {
     #[builder]
-    fn sut(#[builder(default)] arg1: u32, #[builder(default = 42)] arg2: u32) -> (u32, u32) {
+    fn sut(#[builder(default)] arg1: u32, #[builder(default = 42)] arg2: u32) -> impl fmt::Debug {
         (arg1, arg2)
     }
 
@@ -212,6 +213,7 @@ fn fn_generic_default() {
 
 mod interaction_with_positional_members {
     use crate::prelude::*;
+    use core::fmt;
 
     #[test]
     fn test_struct() {
@@ -302,7 +304,7 @@ mod interaction_with_positional_members {
             #[builder(default = [starter_1, starter_2, finisher_1, finisher_2])] //
             named_1: [u32; 4],
             #[builder(default = (32, named_1))] named_2: (u32, [u32; 4]),
-        ) -> (u32, u32, u32, u32, [u32; 4], (u32, [u32; 4])) {
+        ) -> impl fmt::Debug {
             (
                 starter_1, starter_2, finisher_1, finisher_2, named_1, named_2,
             )
@@ -335,7 +337,7 @@ mod interaction_with_positional_members {
                 #[builder(default = [starter_1, starter_2, finisher_1, finisher_2])] //
                 named_1: [u32; 4],
                 #[builder(default = (32, named_1))] named_2: (u32, [u32; 4]),
-            ) -> (u32, u32, u32, u32, [u32; 4], (u32, [u32; 4])) {
+            ) -> impl fmt::Debug {
                 (
                     starter_1, starter_2, finisher_1, finisher_2, named_1, named_2,
                 )

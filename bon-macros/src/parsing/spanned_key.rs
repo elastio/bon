@@ -1,6 +1,7 @@
 use crate::util::prelude::*;
 use darling::FromMeta;
 use std::fmt;
+use std::ops::Deref;
 
 /// A type that stores the attribute key path information along with the parsed value.
 /// It is useful for error reporting. For example, if some key was unexpected, it's
@@ -11,9 +12,9 @@ pub(crate) struct SpannedKey<T> {
 }
 
 impl<T> SpannedKey<T> {
-    pub(crate) fn from_parsed(meta: &syn::Meta, value: T) -> Self {
+    pub(crate) fn new(path: &syn::Path, value: T) -> Self {
         Self {
-            key: meta.path().clone(),
+            key: path.clone(),
             value,
         }
     }
@@ -33,5 +34,13 @@ impl<T: FromMeta> FromMeta for SpannedKey<T> {
 impl<T: fmt::Debug> fmt::Debug for SpannedKey<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         fmt::Debug::fmt(&self.value, f)
+    }
+}
+
+impl<T> Deref for SpannedKey<T> {
+    type Target = T;
+
+    fn deref(&self) -> &T {
+        &self.value
     }
 }

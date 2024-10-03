@@ -45,9 +45,9 @@ impl NamedMember {
         crate::parsing::reject_self_mentions_in_docs("builder struct's impl block", &self.docs)?;
 
         if let Some(default) = &self.params.default {
-            if self.norm_ty.is_option() {
+            if !self.params.transparent.is_present() && self.norm_ty.is_option() {
                 bail!(
-                    &default.span(),
+                    &default.key,
                     "`Option<_>` already implies a default of `None`, \
                     so explicit #[builder(default)] is redundant",
                 );
