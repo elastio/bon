@@ -1,15 +1,27 @@
 use bon::Builder;
 
 #[derive(Builder)]
-pub(crate) struct SomeFnSetterRequiredMember {
+struct SomeFnSetterRequiredMember {
     #[builder(setters(some_fn = foo))]
-    pub(crate) member: Option<i32>,
+    member: i32,
 }
 
 #[derive(Builder)]
-pub(crate) struct OptionFnSetterOnRequiredMember {
+struct OptionFnSetterOnRequiredMember {
     #[builder(setters(option_fn = bar))]
-    pub(crate) member: Option<i32>,
+    member: i32,
+}
+
+#[derive(Builder)]
+struct SomeFnSetterWithTransparent {
+    #[builder(transparent, setters(some_fn = foo))]
+    member: Option<i32>,
+}
+
+#[derive(Builder)]
+struct OptionFnSetterWithTransparent {
+    #[builder(transparent, setters(option_fn = bar))]
+    member: Option<i32>,
 }
 
 fn main() {}

@@ -1,0 +1,17 @@
+error: `#[builder(transparent)]` can only be applied to members of type `Option<T>` to disable their special handling
+ --> tests/integration/ui/compile_fail/invalid_transparent_attr.rs:5:15
+  |
+5 |     #[builder(transparent)]
+  |               ^^^^^^^^^^^
+
+error: `start_fn` attribute can't be specified together with `transparent`
+  --> tests/integration/ui/compile_fail/invalid_transparent_attr.rs:11:15
+   |
+11 |     #[builder(start_fn, transparent)]
+   |               ^^^^^^^^
+
+error: `finish_fn` attribute can't be specified together with `transparent`
+  --> tests/integration/ui/compile_fail/invalid_transparent_attr.rs:17:15
+   |
+17 |     #[builder(finish_fn, transparent)]
+   |               ^^^^^^^^^

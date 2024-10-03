@@ -54,9 +54,7 @@ impl NamedMember {
             }
         }
 
-        if !self.is_required() {
-            self.validate_setters_params_for_member_without_default()?;
-        }
+        self.validate_setters_params()?;
 
         if self.params.transparent.is_present() && !self.norm_ty.is_option() {
             bail!(
@@ -69,32 +67,37 @@ impl NamedMember {
         Ok(())
     }
 
-    fn validate_setters_params_for_member_without_default(&self) -> Result {
+    fn validate_setters_params(&self) -> Result {
         let setters = match &self.params.setters {
             Some(setters) => setters,
             None => return Ok(()),
         };
 
-        let SettersParams {
-            name: _,
-            vis: _,
-            docs: _,
-            some_fn,
-            option_fn,
-        } = setters;
+        if self.is_required() {
+            let SettersParams {
+                name: _,
+                vis: _,
+                docs: _,
+                some_fn,
+                option_fn,
+            } = setters;
 
-        let invalid_setter = [option_fn, some_fn].into_iter().flatten().next();
+            let unexpected_setter = [option_fn, some_fn].into_iter().find_map(Option::as_ref);
 
-        let invalid_fn = match invalid_setter {
-            Some(invalid_fn) => invalid_fn,
-            None => return Ok(()),
-        };
+            let setter = match unexpected_setter {
+                Some(setter) => setter,
+                None => return Ok(()),
+            };
 
-        bail!(
-            &invalid_fn.key,
-            "this setter function applies only to members with `#[builder(default)]` \
-            or members of `Option<T>` type",
-        );
+            bail!(
+                &setter.key,
+                "`{}` setter function applies only to members with `#[builder(default)]` \
+                 or members of `Option<T>` type (if #[builder(transparent)] is not set)",
+                setter.key_to_string()
+            );
+        }
+
+        Ok(())
     }
 
     /// Returns the public identifier of the member that should be used in the

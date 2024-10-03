@@ -8,13 +8,13 @@ struct RegularMember {
 
 #[derive(Builder)]
 struct StartFnMember {
-    #[builder(transparent)]
+    #[builder(start_fn, transparent)]
     member: Option<i32>,
 }
 
 #[derive(Builder)]
 struct FinishFnMember {
-    #[builder(transparent)]
+    #[builder(finish_fn, transparent)]
     member: Option<i32>,
 }
 
