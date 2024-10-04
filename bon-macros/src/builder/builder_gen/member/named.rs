@@ -197,6 +197,9 @@ impl NamedMember {
     pub(crate) fn merge_on_params(&mut self, on_params: &[OnParams]) -> Result {
         self.merge_param_into(on_params)?;
 
+        // FIXME: refactor this to make it more consistent with `into`
+        // and allow for non-boolean flags in `OnParams`. E.g. add support
+        // for `with = closure` to `on` as well.
         self.params.overwritable = params::EvalBlanketFlagParam {
             on_params,
             param_name: params::BlanketParamName::Overwritable,
