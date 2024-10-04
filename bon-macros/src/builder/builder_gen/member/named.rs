@@ -201,7 +201,7 @@ impl NamedMember {
             on_params,
             param_name: params::BlanketParamName::Overwritable,
             member_params: &self.params,
-            scrutinee: &self.norm_ty,
+            scrutinee: self.underlying_norm_ty(),
             origin: self.origin,
         }
         .eval()?;

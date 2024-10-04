@@ -267,9 +267,9 @@ error[E0277]: the member `Unset<arg1>` was not set, but this method requires it 
 47 |         let _ = Sut::builder().build();
    |                                ^^^^^ the member `Unset<arg1>` was not set, but this method requires it to be set
    |
-   = help: the trait `sut_builder::IsSet` is not implemented for `Unset<arg1>`, which is required by `(Unset<arg1>,): sut_builder::IsComplete`
+   = help: the trait `sut_builder::IsSet` is not implemented for `Unset<arg1>`, which is required by `sut_builder::AllUnset: sut_builder::IsComplete`
    = help: the trait `sut_builder::IsSet` is implemented for `Set<Name>`
-note: required for `(Unset<arg1>,)` to implement `sut_builder::IsComplete`
+note: required for `sut_builder::AllUnset` to implement `sut_builder::IsComplete`
   --> tests/integration/ui/compile_fail/errors.rs:42:18
    |
 42 |         #[derive(Builder)]
