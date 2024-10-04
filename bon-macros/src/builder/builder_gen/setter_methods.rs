@@ -47,7 +47,7 @@ impl<'a> SettersCtx<'a> {
         }
 
         self.setter_method(Setter {
-            method_name: self.member.public_ident().clone(),
+            method_name: self.member.public_snake().clone(),
             fn_inputs,
             overwrite_docs: None,
             body: SetterBody::Default { member_init },
@@ -55,7 +55,7 @@ impl<'a> SettersCtx<'a> {
     }
 
     fn setters_for_optional_member(&self) -> TokenStream {
-        let member_name = self.member.public_ident().clone();
+        let member_name = self.member.public_snake().clone();
 
         // Preserve the original identifier span to make IDE's "go to definition" work correctly
         let option_fn_name = syn::Ident::new(
@@ -265,14 +265,9 @@ impl<'a> SettersCtx<'a> {
         let state_transition = format_ident!("Set{}", self.member.norm_ident_pascal.raw_name());
 
         let state_mod = &self.builder_gen.state_mod.ident;
-        let generic_param = if self.builder_gen.stateful_members().take(2).count() == 1 {
-            quote!()
-        } else {
-            quote!(<BuilderState>)
-        };
 
         let state_transition = quote! {
-            #state_mod::#state_transition #generic_param
+            #state_mod::#state_transition<BuilderState>
         };
 
         let builder_ident = &self.builder_gen.builder_type.ident;
@@ -325,7 +320,7 @@ impl<'a> SettersCtx<'a> {
     }
 
     fn generate_docs_for_setter(&self) -> Vec<syn::Attribute> {
-        let member_ident = self.member.public_ident();
+        let member_ident = self.member.public_snake();
         let start_fn_ident = &self.builder_gen.start_fn.ident;
 
         let more = |start_fn_path: &std::fmt::Arguments<'_>| {

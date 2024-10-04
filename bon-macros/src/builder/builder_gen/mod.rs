@@ -41,7 +41,7 @@ impl BuilderGenCtx {
 
     pub(crate) fn output(self) -> Result<MacroOutput> {
         let mut start_fn = self.start_fn();
-        let state_mod = self.state_mod();
+        let state_mod = state_mod::StateModGenCtx::new(&self).state_mod();
         let builder_decl = self.builder_decl();
         let builder_impl = self.builder_impl();
         let builder_derives = self.builder_derives();

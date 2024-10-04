@@ -138,9 +138,16 @@ impl NamedMember {
     }
 
     /// Returns the public identifier of the member that should be used in the
-    /// generated builder API.
-    pub(crate) fn public_ident(&self) -> &syn::Ident {
+    /// generated builder API where snake case is expected.
+    pub(crate) fn public_snake(&self) -> &syn::Ident {
         self.params.name.as_ref().unwrap_or(&self.norm_ident)
+    }
+
+    /// Returns the public identifier of the member that should be used in the
+    /// generated builder API where pascal case is expected.
+    pub(crate) fn public_pascal(&self) -> &syn::Ident {
+        // FIXME: this should try to use the pascal case version of the `name` parameter
+        &self.norm_ident_pascal
     }
 
     /// Returns `true` if this member is of `Option<_>` type, but returns `false`

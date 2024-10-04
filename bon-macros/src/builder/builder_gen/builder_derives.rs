@@ -130,7 +130,7 @@ impl BuilderGenCtx {
             match member {
                 Member::Named(member) => {
                     let member_index = &member.index;
-                    let member_ident_str = member.public_ident().to_string();
+                    let member_ident_str = member.public_snake().to_string();
                     let member_ty = member.underlying_norm_ty();
                     Some(quote! {
                         if let ::core::option::Option::Some(value) = &self.__private_named_members.#member_index {

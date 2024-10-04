@@ -1,130 +1,58 @@
+use super::BuilderGenCtx;
 use crate::builder::builder_gen::member::NamedMember;
 use crate::util::prelude::*;
 
-impl super::BuilderGenCtx {
-    fn state_transition_aliases(&self) -> Vec<syn::ItemType> {
-        let vis_child = &self.state_mod.vis_child;
+pub(super) struct StateModGenCtx<'a> {
+    builder_gen: &'a BuilderGenCtx,
+    stateful_members_snake: Vec<&'a syn::Ident>,
+    stateful_members_pascal: Vec<&'a syn::Ident>,
+    sealed_method_decl: TokenStream,
+    sealed_method_impl: TokenStream,
+}
 
-        let stateful_members = self.stateful_members().collect::<Vec<_>>();
-        let is_single_member = stateful_members.len() == 1;
+impl<'a> StateModGenCtx<'a> {
+    pub(super) fn new(builder_gen: &'a BuilderGenCtx) -> Self {
+        Self {
+            builder_gen,
 
-        stateful_members
-            .iter()
-            .map(|member| {
-                let states = stateful_members.iter().map(|other_member| {
-                    if other_member.is(member) {
-                        let ident = member.public_ident();
-                        quote! {
-                            ::bon::private::Set<members::#ident>
-                        }
-                    } else {
-                        let member_pascal = &other_member.norm_ident_pascal;
-                        quote! {
-                            S::#member_pascal
-                        }
-                    }
-                });
+            stateful_members_snake: builder_gen
+                .stateful_members()
+                .map(NamedMember::public_snake)
+                .collect(),
 
-                let member_ident = member.public_ident();
-                let alias_ident = format_ident!("Set{}", member.norm_ident_pascal.raw_name());
+            stateful_members_pascal: builder_gen
+                .stateful_members()
+                .map(NamedMember::public_pascal)
+                .collect(),
 
-                let docs = format!(
-                    "Returns a [`State`] that has [`IsSet`] implemented for `{member_ident}`\n\
-                    \n\
-                    [`State`]: self::State\n\
-                    [`IsSet`]: ::bon::IsSet",
-                );
-
-                if is_single_member {
-                    return syn::parse_quote! {
-                        #[doc = #docs]
-                        #vis_child type #alias_ident = ( #(#states,)* );
-                    };
-                }
-
-                syn::parse_quote! {
-                    #[doc = #docs]
-                    #vis_child type #alias_ident<
-                        S: self::State = self::AllUnset
-                    > = (
-                        #(#states,)*
-                    );
-                }
-            })
-            .collect()
-    }
-
-    // TODO: shame on me, but clippy is right 😳. Ping @Veetaha if he forgot to
-    // refactor this function before merging this code to master.
-    #[allow(clippy::cognitive_complexity)]
-    pub(super) fn state_mod(&self) -> TokenStream {
-        let builder_vis = &self.builder_type.vis;
-        let vis_mod = &self.state_mod.vis;
-        let vis_child = &self.state_mod.vis_child;
-        let vis_child_child = &self.state_mod.vis_child_child;
-
-        let state_mod_docs = &self.state_mod.docs;
-        let state_mod_ident = &self.state_mod.ident;
-        let state_transition_aliases = self.state_transition_aliases();
-
-        let stateful_members_idents = self
-            .stateful_members()
-            .map(NamedMember::public_ident)
-            .collect::<Vec<_>>();
-
-        let assoc_types_docs = self.stateful_members().map(|member| {
-            let ident = &member.public_ident();
-            format!(
-                "Type state of the member `{ident}`.\n\
-                \n\
-                It can implement either [`IsSet`] or [`IsUnset`].\n\
-                \n\
-                [`IsSet`]: ::bon::IsSet\n\
-                [`IsUnset`]: ::bon::IsUnset",
-            )
-        });
-
-        let stateful_members_pascal = self
-            .stateful_members()
-            .map(|member| &member.norm_ident_pascal)
-            .collect::<Vec<_>>();
-
-        let required_members_pascal = self
-            .named_members()
-            .filter(|member| member.is_required())
-            .map(|member| &member.norm_ident_pascal)
-            .collect::<Vec<_>>();
-
-        let type_aliases_for_rustdoc = [&format_ident!("AllUnset")];
-        let type_aliases_for_rustdoc = state_transition_aliases
-            .iter()
-            .map(|alias| &alias.ident)
-            .chain(type_aliases_for_rustdoc);
-
-        let is_complete_assoc_type_bounds = if cfg!(feature = "msrv-1-79-0") {
-            quote! {
-                < #( #required_members_pascal: IsSet, )* >
-            }
-        } else {
-            quote! {}
-        };
-
-        let sealed_method = quote! {
             // A method without `self` makes the trait non-object safe,
             // which is convenient, because we want that in this case.
-            #[doc(hidden)]
-            fn __sealed(_: sealed::Sealed);
-        };
+            sealed_method_decl: quote! {
+                #[doc(hidden)]
+                fn __sealed(_: sealed::Sealed);
+            },
+
+            sealed_method_impl: quote! {
+                fn __sealed(_: sealed::Sealed) {}
+            },
+        }
+    }
+
+    pub(super) fn state_mod(&self) -> TokenStream {
+        let vis_mod = &self.builder_gen.state_mod.vis;
+        let vis_child_child = &self.builder_gen.state_mod.vis_child_child;
+
+        let state_mod_docs = &self.builder_gen.state_mod.docs;
+        let state_mod_ident = &self.builder_gen.state_mod.ident;
+
+        let state_trait = self.state_trait();
+        let is_set_trait = self.is_set_trait();
+        let is_unset_trait = self.is_unset_trait();
+        let is_complete_trait = self.is_complete_trait();
+        let members_names_mod = self.members_names_mod();
+        let state_transitions = self.state_transitions();
 
         quote! {
-            // This is a workaround for `rustdoc`. Without this `use` statement,
-            // it inlines the type aliases
-            #[cfg(doc)]
-            #[doc(hidden)]
-            #builder_vis use self::#state_mod_ident::{
-                #( #type_aliases_for_rustdoc as _, )*
-            };
-
             // This is intentional. By default, the builder module is private
             // and can't be accessed outside of the module where the builder
             // type is defined. This makes the builder type "anonymous" to
@@ -139,186 +67,276 @@ impl super::BuilderGenCtx {
             #[allow(unnameable_types, unreachable_pub, clippy::redundant_pub_crate)]
             #( #state_mod_docs )*
             #vis_mod mod #state_mod_ident {
-                /// Marker trait implemented by members that are set.
-                #[::bon::private::rustversion::attr(
-                    since(1.78.0),
-                    diagnostic::on_unimplemented(
-                        message = "the member `{Self}` was not set, but this method requires it to be set",
-                        label = "the member `{Self}` was not set, but this method requires it to be set",
-                    )
-                )]
-                #vis_child trait IsSet {
-                    #sealed_method
-                }
-
-                #[doc(hidden)]
-                impl<Name> IsSet for ::bon::private::Set<Name> {
-                    fn __sealed(_: sealed::Sealed) {}
-                }
-
-                // use private::sealed::Sealed;
-                //
-                // /// Marker trait that indicates that the member is not set, i.e. none of its setters were called.
-                // ///
-                // /// You should use this trait bound, for example, if you want to extend the builder with custom
-                // /// setters.
-                // ///
-                // /// **Example:**
-                // ///
-                // /// ```
-                // /// #[derive(bon::Builder)]
-                // /// struct Example {
-                // ///     x: i32,
-                // ///     y: i32,
-                // /// }
-                // ///
-                // /// // Import the type aliases for transforming the builder's type state
-                // /// use example_builder::{SetX, SetY};
-                // ///
-                // /// // Add method to the builder
-                // /// impl<State: example_builder::State> ExampleBuilder<State> {
-                // ///     fn x_doubled(self, value: i32) -> ExampleBuilder<SetX<State>>
-                // ///     where
-                // ///         // The code won't compile without this bound
-                // ///         State::X: bon::IsUnset,
-                // ///     {
-                // ///         self.x(value * 2)
-                // ///     }
-                // ///
-                // ///     fn y_doubled(self, value: i32) -> ExampleBuilder<SetY<State>>
-                // ///     where
-                // ///         // The code won't compile without this bound
-                // ///         State::Y: bon::IsUnset,
-                // ///     {
-                // ///        self.y(value * 2)
-                // ///     }
-                // /// }
-                // ///
-                // /// let example = Example::builder()
-                // ///     .x_doubled(2)
-                // ///     .y_doubled(3)
-                // ///     .build();
-                // ///
-                // /// assert_eq!(example.x, 4);
-                // /// assert_eq!(example.y, 6);
-                // /// ```
-                // #[rustversion::attr(
-                //     since(1.78.0),
-                //     diagnostic::on_unimplemented(
-                //         message = "the member `{Self}` was already set, but this method requires it to be unset",
-                //         label = "the member `{Self}` was already set, but this method requires it to be unset",
-                //     )
-                // )]
-                // pub trait IsUnset: Sealed {}
-
-                // /// Marker trait that indicates that the member is set, i.e. at least one of its setters was called.
-                // // TODO: add examples (they would require having custom renames and visibility overrides for default setters)
-                // #[rustversion::attr(
-                //     since(1.78.0),
-                //     diagnostic::on_unimplemented(
-                //         message = "the member `{Self}` was not set, but this method requires it to be set",
-                //         label = "the member `{Self}` was not set, but this method requires it to be set",
-                //     )
-                // )]
-                // pub trait IsSet: Sealed {}
-
-                /// Marker trait implemented by members that are not set.
-                #[::bon::private::rustversion::attr(
-                    since(1.78.0),
-                    diagnostic::on_unimplemented(
-                        message = "the member `{Self}` was already set, but this method requires it to be unset",
-                        label = "the member `{Self}` was already set, but this method requires it to be unset",
-                    )
-                )]
-                #vis_child trait IsUnset {
-                    #sealed_method
-                }
-
-                #[doc(hidden)]
-                impl<Name> IsUnset for ::bon::private::Unset<Name> {
-                    fn __sealed(_: sealed::Sealed) {}
-                }
-
-                #[::bon::private::rustversion::attr(
-                    since(1.78.0),
-                    diagnostic::on_unimplemented(
-                        message = "can't finish building yet; not all required members are set",
-                        label = "can't finish building yet; not all required members are set",
-                    )
-                )]
-                #vis_child trait IsComplete: State #is_complete_assoc_type_bounds {
-                    #sealed_method
-                }
-
-                #[doc(hidden)]
-                impl<State: self::State> IsComplete for State
-                where
-                    #(
-                        State::#required_members_pascal: IsSet,
-                    )*
-                {
-                    fn __sealed(_: sealed::Sealed) {}
-                }
-
-                /// Builder's type state specifies if members are set or not (unset).
-                ///
-                /// You can use the associated types of this trait to control the state of individual members
-                /// with the [`IsSet`] and [`IsUnset`] traits. You can change the state of the members with
-                /// the `Set*` type aliases available in this module.
-                ///
-                /// [`IsSet`]: ::bon::IsSet
-                /// [`IsUnset`]: ::bon::IsUnset
-                #vis_child trait State: ::core::marker::Sized {
-                    #(
-                        #[doc = #assoc_types_docs]
-                        type #stateful_members_pascal: ::bon::private::MemberState<
-                            self::members::#stateful_members_idents
-                        >;
-                    )*
-
-                    #sealed_method
-                }
-
                 mod sealed {
                     #vis_child_child enum Sealed {}
                 }
 
-                // Using `self::State` explicitly to avoid name conflicts with the
-                // members named `state` which would create a generic param named `State`
-                // that would shadow the trait `State` in the same scope.
-                #[doc(hidden)]
-                impl<#(
-                    #stateful_members_pascal: ::bon::private::MemberState<
-                        self::members::#stateful_members_idents
-                    >,
-                )*>
-                self::State for ( #(#stateful_members_pascal,)* )
-                {
-                    #( type #stateful_members_pascal = #stateful_members_pascal; )*
+                #state_trait
+                #is_set_trait
+                #is_unset_trait
+                #is_complete_trait
+                #state_transitions
+                #members_names_mod
+            }
+        }
+    }
 
-                    fn __sealed(_: self::sealed::Sealed) {}
+    fn state_transitions(&self) -> TokenStream {
+        let transition_tuples = self
+            .builder_gen
+            .stateful_members()
+            .map(move |member| {
+                let states = self.builder_gen.stateful_members().map(|other_member| {
+                    if other_member.is(member) {
+                        let ident = member.public_snake();
+                        quote! {
+                            ::bon::private::Set<members::#ident>
+                        }
+                    } else {
+                        let member_pascal = &other_member.norm_ident_pascal;
+                        quote! {
+                            <Self as State>::#member_pascal
+                        }
+                    }
+                });
+
+                quote! {
+                    ( #( #states, )* )
                 }
+            })
+            .collect::<Vec<_>>();
 
-                /// Initial state of the builder where all members are unset
-                #vis_child type AllUnset = (
-                    #(::bon::private::Unset<members::#stateful_members_idents>,)*
+        let (set_member_aliases_docs, set_member_aliases): (Vec<_>, Vec<_>) = self
+            .builder_gen
+            .stateful_members()
+            .map(|member| {
+                let member_snake = member.public_snake();
+                let member_pascal = member.public_pascal();
+                let alias = format_ident!("Set{}", member_pascal.raw_name());
+
+                let docs = format!(
+                    "Returns a [`State`] that has [`IsSet`] implemented for `{member_snake}`\n\
+                    \n\
+                    [`State`]: self::State\n\
+                    [`IsSet`]: ::bon::IsSet",
                 );
 
-                #[deprecated =
-                    "this is an implementation detail and should not be \
-                    used directly; use the Set* type aliases to control the \
-                    state of members instead"
-                ]
-                #[doc(hidden)]
-                #[allow(non_camel_case_types)]
-                mod members {
-                    #(
-                        #vis_child_child enum #stateful_members_idents {}
-                    )*
-                }
+                (docs, alias)
+            })
+            .unzip();
 
-                #( #state_transition_aliases )*
+        let vis_child = &self.builder_gen.state_mod.vis_child;
+        let vis_child_child = &self.builder_gen.state_mod.vis_child_child;
+        let stateful_members_snake = &self.stateful_members_snake;
+        let stateful_members_pascal = &self.stateful_members_pascal;
+        let sealed_method_impl = &self.sealed_method_impl;
+
+        quote! {
+            /// Initial state of the builder where all members are unset
+            #vis_child struct AllUnset {
+                _private: ()
             }
+
+            impl State for AllUnset {
+                #(
+                    type #stateful_members_pascal = ::bon::private::Unset<members::#stateful_members_snake>;
+                )*
+
+                #sealed_method_impl
+            }
+
+            #(
+                #[doc = #set_member_aliases_docs]
+                #vis_child type #set_member_aliases<S: State = AllUnset> =
+                    <S as private::StateExt>::#set_member_aliases;
+            )*
+
+            mod private {
+                #[doc(hidden)]
+                #vis_child_child trait StateExt {
+                    #( type #set_member_aliases; )*
+                }
+            }
+
+            impl<S: State> private::StateExt for S {
+                #(type #set_member_aliases = #transition_tuples; )*
+            }
+        }
+    }
+
+    fn state_trait(&self) -> TokenStream {
+        let assoc_types_docs = self.stateful_members_snake.iter().map(|member_snake| {
+            format!(
+                "Type state of the member `{member_snake}`.\n\
+                \n\
+                It can implement either [`IsSet`] or [`IsUnset`].\n\
+                \n\
+                [`IsSet`]: ::bon::IsSet\n\
+                [`IsUnset`]: ::bon::IsUnset",
+            )
+        });
+
+        let vis_child = &self.builder_gen.state_mod.vis_child;
+        let sealed_method_decl = &self.sealed_method_decl;
+        let sealed_method_impl = &self.sealed_method_impl;
+        let stateful_members_snake = &self.stateful_members_snake;
+        let stateful_members_pascal = &self.stateful_members_pascal;
+
+        quote! {
+            /// Builder's type state specifies if members are set or not (unset).
+            ///
+            /// You can use the associated types of this trait to control the state of individual members
+            /// with the [`IsSet`] and [`IsUnset`] traits. You can change the state of the members with
+            /// the `Set*` type aliases available in this module.
+            ///
+            /// [`IsSet`]: ::bon::IsSet
+            /// [`IsUnset`]: ::bon::IsUnset
+            #vis_child trait State: ::core::marker::Sized {
+                #(
+                    #[doc = #assoc_types_docs]
+                    type #stateful_members_pascal: ::bon::private::MemberState<
+                        self::members::#stateful_members_snake
+                    >;
+                )*
+
+                #sealed_method_decl
+            }
+
+            // Using `self::State` explicitly to avoid name conflicts with the
+            // members named `state` which would create a generic param named `State`
+            // that would shadow the trait `State` in the same scope.
+            #[doc(hidden)]
+            impl<#(
+                #stateful_members_pascal: ::bon::private::MemberState<
+                    self::members::#stateful_members_snake
+                >,
+            )*>
+            self::State for ( #(#stateful_members_pascal,)* )
+            {
+                #( type #stateful_members_pascal = #stateful_members_pascal; )*
+
+                #sealed_method_impl
+            }
+        }
+    }
+
+    fn is_complete_trait(&self) -> TokenStream {
+        let required_members_pascal = self
+            .builder_gen
+            .named_members()
+            .filter(|member| member.is_required())
+            .map(|member| &member.norm_ident_pascal)
+            .collect::<Vec<_>>();
+
+        let maybe_assoc_type_bounds = cfg!(feature = "msrv-1-79-0").then(|| {
+            quote! {
+                < #( #required_members_pascal: IsSet, )* >
+            }
+        });
+
+        let vis_child = &self.builder_gen.state_mod.vis_child;
+        let sealed_method_decl = &self.sealed_method_decl;
+        let sealed_method_impl = &self.sealed_method_impl;
+
+        let on_unimplemented =
+            Self::on_unimplemented("can't finish building yet; not all required members are set");
+
+        quote! {
+            /// Marker trait that indicates that all required members are set.
+            ///
+            /// In this state, the builder
+            #on_unimplemented
+            #vis_child trait IsComplete: State #maybe_assoc_type_bounds {
+                #sealed_method_decl
+            }
+
+            #[doc(hidden)]
+            impl<State: self::State> IsComplete for State
+            where
+                #(
+                    State::#required_members_pascal: IsSet,
+                )*
+            {
+                #sealed_method_impl
+            }
+        }
+    }
+
+    fn is_set_trait(&self) -> TokenStream {
+        let vis_child = &self.builder_gen.state_mod.vis_child;
+        let sealed_method_decl = &self.sealed_method_decl;
+        let sealed_method_impl = &self.sealed_method_impl;
+
+        let on_unimplemented = Self::on_unimplemented(
+            "the member `{Self}` was not set, but this method requires it to be set",
+        );
+
+        quote! {
+            /// Marker trait that indicates that the member is set, i.e. at least
+            /// one of its setters was called.
+            // TODO: add examples (they would require having custom renames and
+            // visibility overrides for default setters)
+            #on_unimplemented
+            #vis_child trait IsSet {
+                #sealed_method_decl
+            }
+
+            #[doc(hidden)]
+            impl<Name> IsSet for ::bon::private::Set<Name> {
+                #sealed_method_impl
+            }
+        }
+    }
+
+    fn is_unset_trait(&self) -> TokenStream {
+        let vis_child = &self.builder_gen.state_mod.vis_child;
+        let sealed_method_decl = &self.sealed_method_decl;
+        let sealed_method_impl = &self.sealed_method_impl;
+
+        let on_unimplemented = Self::on_unimplemented(
+            "the member `{Self}` was already set, but this method requires it to be unset",
+        );
+
+        quote! {
+            /// Marker trait implemented by members that are not set.
+            #on_unimplemented
+            #vis_child trait IsUnset {
+                #sealed_method_decl
+            }
+
+            #[doc(hidden)]
+            impl<Name> IsUnset for ::bon::private::Unset<Name> {
+                #sealed_method_impl
+            }
+        }
+    }
+
+    fn members_names_mod(&self) -> TokenStream {
+        let vis_child_child = &self.builder_gen.state_mod.vis_child_child;
+        let stateful_members_snake = &self.stateful_members_snake;
+
+        quote! {
+            #[deprecated =
+                "this is an implementation detail and should not be \
+                used directly; use the Set* type aliases to control the \
+                state of members instead"
+            ]
+            #[doc(hidden)]
+            #[allow(non_camel_case_types)]
+            mod members {
+                #(
+                    #vis_child_child enum #stateful_members_snake {}
+                )*
+            }
+        }
+    }
+
+    fn on_unimplemented(message: &str) -> TokenStream {
+        quote! {
+            #[::bon::private::rustversion::attr(
+                since(1.78.0),
+                diagnostic::on_unimplemented(message = #message, label = #message)
+            )]
         }
     }
 }
