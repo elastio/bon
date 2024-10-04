@@ -302,7 +302,7 @@ impl BuilderGenCtx {
                 // The types of these members already appear in the struct in the types
                 // of __private_named_members and __private_start_fn_args fields.
                 Member::Named(_) | Member::StartFnArg(_) => None,
-                Member::FinishFnArg(member) => Some(member.norm_ty.as_ref()),
+                Member::FinishFnArg(member) => Some(member.ty.norm.as_ref()),
                 Member::Skipped(member) => Some(member.norm_ty.as_ref()),
             }
         });
@@ -404,7 +404,7 @@ impl BuilderGenCtx {
 
         let mut start_fn_arg_types = self
             .start_fn_args()
-            .map(|member| &member.base.norm_ty)
+            .map(|member| &member.base.ty.norm)
             .peekable();
 
         let start_fn_args_field = start_fn_arg_types.peek().is_some().then(|| {
@@ -516,8 +516,9 @@ impl BuilderGenCtx {
             None => {
                 // For `Option` the default value is always `None`. So we can just return
                 // the value of the member field itself (which is already an `Option<T>`).
-                if !member.params.transparent.is_present() && member.norm_ty.is_option() {
-                    return member_field.to_token_stream();
+
+                if member.is_special_option_ty() {
+                    return member_field;
                 }
 
                 quote! {

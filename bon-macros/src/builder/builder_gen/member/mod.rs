@@ -6,6 +6,7 @@ pub(crate) use named::*;
 pub(crate) use params::SetterClosure;
 
 use super::builder_params::OnParams;
+use crate::normalization::SyntaxVariant;
 use crate::parsing::SpannedKey;
 use crate::util::prelude::*;
 use darling::FromAttributes;
@@ -66,11 +67,8 @@ pub(crate) struct PositionalFnArgMember {
     /// Original identifier of the member
     pub(crate) ident: syn::Ident,
 
-    /// Normalized type of the member
-    pub(crate) norm_ty: Box<syn::Type>,
-
-    /// Original type of the member (not normalized)
-    pub(crate) orig_ty: Box<syn::Type>,
+    /// Type of the member
+    pub(crate) ty: SyntaxVariant<Box<syn::Type>>,
 
     /// Parameters configured by the user explicitly via attributes
     pub(crate) params: MemberParams,
@@ -81,6 +79,7 @@ pub(crate) struct PositionalFnArgMember {
 pub(crate) struct SkippedMember {
     pub(crate) ident: syn::Ident,
 
+    /// Normalized type of the member
     pub(crate) norm_ty: Box<syn::Type>,
 
     /// Value to assign to the member
@@ -90,8 +89,7 @@ pub(crate) struct SkippedMember {
 pub(crate) struct RawMember<'a> {
     pub(crate) attrs: &'a [syn::Attribute],
     pub(crate) ident: syn::Ident,
-    pub(crate) norm_ty: Box<syn::Type>,
-    pub(crate) orig_ty: Box<syn::Type>,
+    pub(crate) ty: SyntaxVariant<Box<syn::Type>>,
 }
 
 impl Member {
@@ -141,17 +139,12 @@ impl Member {
         let mut named_count = 0;
 
         for (member, params) in members {
-            let RawMember {
-                attrs,
-                ident: orig_ident,
-                norm_ty,
-                orig_ty,
-            } = member;
+            let RawMember { attrs, ident, ty } = member;
 
             if let Some(value) = params.skip {
                 output.push(Self::Skipped(SkippedMember {
-                    ident: orig_ident,
-                    norm_ty,
+                    ident,
+                    norm_ty: ty.norm,
                     value,
                 }));
                 continue;
@@ -181,27 +174,11 @@ impl Member {
             // itself which is also useful for people reading the source code.
             let docs = attrs.iter().filter(|attr| attr.is_doc()).cloned().collect();
 
-            let orig_ident_str = orig_ident.to_string();
-            let norm_ident = orig_ident_str
-                // Remove the leading underscore from the member name since it's used
-                // to denote unused symbols in Rust. That doesn't mean the builder
-                // API should expose that knowledge to the caller.
-                .strip_prefix('_')
-                .unwrap_or(&orig_ident_str);
-
-            // Preserve the original identifier span to make IDE's "go to definition" work correctly
-            // and make error messages point to the correct place.
-            let norm_ident = syn::Ident::new_maybe_raw(norm_ident, orig_ident.span());
-            let norm_ident_pascal = norm_ident.snake_to_pascal_case();
-
             let mut member = NamedMember {
                 index: named_count.into(),
                 origin,
-                norm_ident_pascal,
-                orig_ident,
-                norm_ident,
-                norm_ty,
-                orig_ty,
+                name: MemberName::new(ident, &params),
+                ty,
                 params,
                 docs,
             };
@@ -220,16 +197,16 @@ impl Member {
 impl Member {
     pub(crate) fn norm_ty(&self) -> &syn::Type {
         match self {
-            Self::Named(me) => &me.norm_ty,
-            Self::StartFnArg(me) => &me.base.norm_ty,
-            Self::FinishFnArg(me) => &me.norm_ty,
+            Self::Named(me) => &me.ty.norm,
+            Self::StartFnArg(me) => &me.base.ty.norm,
+            Self::FinishFnArg(me) => &me.ty.norm,
             Self::Skipped(me) => &me.norm_ty,
         }
     }
 
     pub(crate) fn orig_ident(&self) -> &syn::Ident {
         match self {
-            Self::Named(me) => &me.orig_ident,
+            Self::Named(me) => &me.name.orig,
             Self::StartFnArg(me) => &me.base.ident,
             Self::FinishFnArg(me) => &me.ident,
             Self::Skipped(me) => &me.ident,
@@ -268,15 +245,13 @@ impl PositionalFnArgMember {
         let RawMember {
             attrs: _,
             ident,
-            norm_ty,
-            orig_ty,
+            ty,
         } = member;
 
         let mut me = Self {
             origin,
             ident,
-            norm_ty,
-            orig_ty,
+            ty,
             params,
         };
 

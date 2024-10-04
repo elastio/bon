@@ -18,6 +18,8 @@ pub(crate) trait IdentExt {
     /// produced identifier won't influence the syntax highlighting of the original
     /// identifier.
     fn snake_to_pascal_case(&self) -> Self;
+
+    /// Same thing as `snake_to_pascal_case` but converts `PascalCase` to `snake_case`.
     fn pascal_to_snake_case(&self) -> Self;
 
     /// Creates a new ident with the given name and span. If the name starts with

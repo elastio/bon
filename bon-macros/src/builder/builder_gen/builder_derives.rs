@@ -63,7 +63,7 @@ impl BuilderGenCtx {
 
         let clone_start_fn_args = self.start_fn_args().next().map(|_| {
             let clone_start_fn_args = self.start_fn_args().map(|arg| {
-                let ty = &arg.base.norm_ty;
+                let ty = &arg.base.ty.norm;
                 let index = &arg.index;
                 quote! {
                     <#ty as #clone>::clone(&self.__private_start_fn_args.#index)
@@ -130,7 +130,7 @@ impl BuilderGenCtx {
             match member {
                 Member::Named(member) => {
                     let member_index = &member.index;
-                    let member_ident_str = member.public_snake().to_string();
+                    let member_ident_str = &member.name.snake_raw_str;
                     let member_ty = member.underlying_norm_ty();
                     Some(quote! {
                         if let ::core::option::Option::Some(value) = &self.__private_named_members.#member_index {
@@ -144,7 +144,7 @@ impl BuilderGenCtx {
                 Member::StartFnArg(member) => {
                     let member_index = &member.index;
                     let member_ident_str = member.base.ident.to_string();
-                    let member_ty = &member.base.norm_ty;
+                    let member_ty = &member.base.ty.norm;
                     Some(quote! {
                         output.field(
                             #member_ident_str,

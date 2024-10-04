@@ -4,6 +4,7 @@ use super::{
     RawMember,
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
+use crate::normalization::SyntaxVariant;
 use crate::parsing::{ItemParams, ItemParamsParsing, SpannedKey};
 use crate::util::prelude::*;
 use darling::FromMeta;
@@ -59,8 +60,7 @@ impl StructInputParams {
 }
 
 pub(crate) struct StructInputCtx {
-    orig_struct: syn::ItemStruct,
-    norm_struct: syn::ItemStruct,
+    struct_item: SyntaxVariant<syn::ItemStruct>,
     params: StructInputParams,
     struct_ty: syn::Type,
 }
@@ -88,26 +88,30 @@ impl StructInputCtx {
         }
         .visit_item_struct_mut(&mut norm_struct);
 
+        let struct_item = SyntaxVariant {
+            orig: orig_struct,
+            norm: norm_struct,
+        };
+
         Ok(Self {
-            orig_struct,
-            norm_struct,
+            struct_item,
             params,
             struct_ty,
         })
     }
 
     pub(crate) fn into_builder_gen_ctx(self) -> Result<BuilderGenCtx> {
-        fn fields(struct_item: &syn::ItemStruct) -> Result<&syn::FieldsNamed> {
-            match &struct_item.fields {
+        let fields = self
+            .struct_item
+            .apply_ref(|struct_item| match &struct_item.fields {
                 syn::Fields::Named(fields) => Ok(fields),
                 _ => {
                     bail!(&struct_item, "Only structs with named fields are supported")
                 }
-            }
-        }
+            });
 
-        let norm_fields = fields(&self.norm_struct)?;
-        let orig_fields = fields(&self.orig_struct)?;
+        let norm_fields = fields.norm?;
+        let orig_fields = fields.orig?;
 
         let members = norm_fields
             .named
@@ -118,11 +122,15 @@ impl StructInputCtx {
                     err!(norm_field, "only structs with named fields are supported")
                 })?;
 
+                let ty = SyntaxVariant {
+                    norm: Box::new(norm_field.ty.clone()),
+                    orig: Box::new(orig_field.ty.clone()),
+                };
+
                 Ok(RawMember {
                     attrs: &norm_field.attrs,
                     ident,
-                    norm_ty: Box::new(norm_field.ty.clone()),
-                    orig_ty: Box::new(orig_field.ty.clone()),
+                    ty,
                 })
             })
             .collect::<Result<Vec<_>>>()?;
@@ -130,12 +138,18 @@ impl StructInputCtx {
         let members = Member::from_raw(&self.params.base.on, MemberOrigin::StructField, members)?;
 
         let generics = Generics::new(
-            self.norm_struct.generics.params.iter().cloned().collect(),
-            self.norm_struct.generics.where_clause.clone(),
+            self.struct_item
+                .norm
+                .generics
+                .params
+                .iter()
+                .cloned()
+                .collect(),
+            self.struct_item.norm.generics.where_clause.clone(),
         );
 
         let finish_fn_body = StructLiteralBody {
-            struct_ident: self.norm_struct.ident.clone(),
+            struct_ident: self.struct_item.norm.ident.clone(),
         };
 
         let ItemParams {
@@ -146,7 +160,7 @@ impl StructInputCtx {
 
         let start_fn_ident = start_fn_ident
             .map(SpannedKey::into_value)
-            .unwrap_or_else(|| syn::Ident::new("builder", self.norm_struct.ident.span()));
+            .unwrap_or_else(|| syn::Ident::new("builder", self.struct_item.norm.ident.span()));
 
         let ItemParams {
             name: finish_fn_ident,
@@ -183,7 +197,7 @@ impl StructInputCtx {
             .unwrap_or_else(|| {
                 let docs = format!(
                     "Create an instance of [`{}`] using the builder syntax",
-                    self.norm_struct.ident
+                    self.struct_item.norm.ident
                 );
 
                 vec![syn::parse_quote!(#[doc = #docs])]
@@ -202,7 +216,8 @@ impl StructInputCtx {
         });
 
         let allow_attrs = self
-            .norm_struct
+            .struct_item
+            .norm
             .attrs
             .iter()
             .filter_map(syn::Attribute::to_allow)
@@ -211,9 +226,9 @@ impl StructInputCtx {
         let builder_type = {
             let ItemParams { name, vis, docs } = self.params.base.builder_type;
 
-            let builder_ident = name
-                .map(SpannedKey::into_value)
-                .unwrap_or_else(|| format_ident!("{}Builder", self.norm_struct.ident.raw_name()));
+            let builder_ident = name.map(SpannedKey::into_value).unwrap_or_else(|| {
+                format_ident!("{}Builder", self.struct_item.norm.ident.raw_name())
+            });
 
             BuilderTypeParams {
                 derives: self.params.base.derive,
@@ -232,7 +247,7 @@ impl StructInputCtx {
 
             assoc_method_ctx,
             generics,
-            orig_item_vis: self.norm_struct.vis,
+            orig_item_vis: self.struct_item.norm.vis,
 
             builder_type,
             state_mod: self.params.base.state_mod,

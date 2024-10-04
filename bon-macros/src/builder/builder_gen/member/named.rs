@@ -2,8 +2,70 @@ use super::params::MemberParams;
 use super::{params, MemberOrigin};
 use crate::builder::builder_gen::builder_params::OnParams;
 use crate::builder::builder_gen::member::params::SettersFnParams;
+use crate::normalization::SyntaxVariant;
 use crate::parsing::{ItemParams, SpannedKey};
 use crate::util::prelude::*;
+
+#[derive(Debug)]
+pub(crate) struct MemberName {
+    /// Original name of the member (unchanged). It's used in the finishing
+    /// function of the builder to create a variable for each member.
+    pub(crate) orig: syn::Ident,
+
+    /// `snake_case` version of the member name. By default it's the `orig` name
+    /// itself with the `_` prefix stripped. Otherwise the user can override it
+    /// via `#[builder(name = custom_name)]`
+    pub(crate) snake: syn::Ident,
+
+    /// `snake_case` version of the member name as a string without the `r#` prefix
+    /// (if there is any in the `snake` representation). It's computed and
+    /// stored separately to avoid recomputing it multiple times. It's used
+    /// to derive names for other identifiers that are based on the `snake_case` name.
+    pub(crate) snake_raw_str: String,
+
+    /// `PascalCase` version of the member name. It's always computed as the
+    /// `snake` variant converted to `PascalCase`. The user doesn't have the
+    /// granular control over this name. It can only specify the snake case
+    /// version of the name, and the pascal case is derived from it.
+    pub(crate) pascal: syn::Ident,
+
+    /// `PascalCase` version of the member name as a string. It's computed and
+    /// stored separately to avoid recomputing it multiple times. It's guaranteed
+    /// to not have the `r#` prefix because:
+    ///
+    /// There are no pascal case keywords in Rust except for `Self`, which
+    /// is anyway not allowed even as a raw identifier:
+    /// <https://internals.rust-lang.org/t/raw-identifiers-dont-work-for-all-identifiers/9094>
+    pub(crate) pascal_str: String,
+}
+
+impl MemberName {
+    pub(crate) fn new(orig: syn::Ident, params: &MemberParams) -> Self {
+        let snake = params.name.clone().unwrap_or_else(|| {
+            let orig_str = orig.to_string();
+            let norm = orig_str
+                // Remove the leading underscore from the member name since it's used
+                // to denote unused symbols in Rust. That doesn't mean the builder
+                // API should expose that knowledge to the caller.
+                .strip_prefix('_')
+                .unwrap_or(&orig_str);
+
+            // Preserve the original identifier span to make IDE's "go to definition" work correctly
+            // and make error messages point to the correct place.
+            syn::Ident::new_maybe_raw(norm, orig.span())
+        });
+
+        let pascal = snake.snake_to_pascal_case();
+
+        Self {
+            orig,
+            snake_raw_str: snake.raw_name(),
+            snake,
+            pascal_str: pascal.to_string(),
+            pascal,
+        }
+    }
+}
 
 /// Regular member for which the builder should have setter methods
 #[derive(Debug)]
@@ -11,29 +73,20 @@ pub(crate) struct NamedMember {
     /// Specifies what syntax the member comes from.
     pub(crate) origin: MemberOrigin,
 
-    /// Index of the member relative to other regular members. The index is 0-based.
+    /// Index of the member relative to other named members. The index is 0-based.
     pub(crate) index: syn::Index,
 
-    /// Original name of the member (unchanged). It's used in the finishing
-    /// function of the builder to create a variable for each member.
-    pub(crate) orig_ident: syn::Ident,
-
-    /// Normalized version of `orig_ident`. Here we stripped the leading `_` from the
-    /// member name. This name is in the builder's API unless a `name` override is present.
-    pub(crate) norm_ident: syn::Ident,
-
-    /// `PascalCase` version of the `norm_ident`.
-    pub(crate) norm_ident_pascal: syn::Ident,
+    /// Name of the member is used to generate names for the setters, names for
+    /// the associated types and type aliases in the builder state, etc.
+    pub(crate) name: MemberName,
 
     /// Doc comments on top of the original syntax. These are copied to the setters
     /// unless there are overrides for them.
     pub(crate) docs: Vec<syn::Attribute>,
 
-    /// Normalized type of the member that the builder should have setters for.
-    pub(crate) norm_ty: Box<syn::Type>,
-
-    /// Original type of the member (not normalized)
-    pub(crate) orig_ty: Box<syn::Type>,
+    /// Type of the member has to be known to generate the types for fields in
+    /// the builder, signatures of the setter methods, etc.
+    pub(crate) ty: SyntaxVariant<Box<syn::Type>>,
 
     /// Parameters configured by the user explicitly via attributes
     pub(crate) params: MemberParams,
@@ -55,7 +108,7 @@ impl NamedMember {
 
         self.validate_setters_params()?;
 
-        if self.params.transparent.is_present() && !self.norm_ty.is_option() {
+        if self.params.transparent.is_present() && !self.ty.norm.is_option() {
             bail!(
                 &self.params.transparent.span(),
                 "`#[builder(transparent)]` can only be applied to members of \
@@ -137,23 +190,10 @@ impl NamedMember {
         );
     }
 
-    /// Returns the public identifier of the member that should be used in the
-    /// generated builder API where snake case is expected.
-    pub(crate) fn public_snake(&self) -> &syn::Ident {
-        self.params.name.as_ref().unwrap_or(&self.norm_ident)
-    }
-
-    /// Returns the public identifier of the member that should be used in the
-    /// generated builder API where pascal case is expected.
-    pub(crate) fn public_pascal(&self) -> &syn::Ident {
-        // FIXME: this should try to use the pascal case version of the `name` parameter
-        &self.norm_ident_pascal
-    }
-
     /// Returns `true` if this member is of `Option<_>` type, but returns `false`
     /// if `#[builder(transparent)]` is set.
-    fn is_special_option_ty(&self) -> bool {
-        !self.params.transparent.is_present() && self.norm_ty.is_option()
+    pub(crate) fn is_special_option_ty(&self) -> bool {
+        !self.params.transparent.is_present() && self.ty.norm.is_option()
     }
 
     /// Returns `false` if the member has a default value. It means this member
@@ -173,13 +213,13 @@ impl NamedMember {
     /// Returns the normalized type of the member stripping the `Option<_>`
     /// wrapper if it's present unless `#[builder(transparent)]` is set.
     pub(crate) fn underlying_norm_ty(&self) -> &syn::Type {
-        self.underlying_ty(&self.norm_ty)
+        self.underlying_ty(&self.ty.norm)
     }
 
     /// Returns the original type of the member stripping the `Option<_>`
     /// wrapper if it's present unless `#[builder(transparent)]` is set.
     pub(crate) fn underlying_orig_ty(&self) -> &syn::Type {
-        self.underlying_ty(&self.orig_ty)
+        self.underlying_ty(&self.ty.orig)
     }
 
     fn underlying_ty<'m>(&'m self, ty: &'m syn::Type) -> &'m syn::Type {

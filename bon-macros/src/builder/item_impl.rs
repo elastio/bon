@@ -1,4 +1,5 @@
 use super::builder_gen::input_fn::{FnInputCtx, FnInputParams, ImplCtx};
+use crate::normalization::SyntaxVariant;
 use crate::util::prelude::*;
 use darling::ast::NestedMeta;
 use darling::FromMeta;
@@ -103,9 +104,13 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
 
             let params = FnInputParams::from_list(&meta)?;
 
+            let fn_item = SyntaxVariant {
+                orig: orig_fn,
+                norm: norm_fn,
+            };
+
             let ctx = FnInputCtx {
-                orig_fn,
-                norm_fn,
+                fn_item,
                 impl_ctx: Some(impl_ctx.clone()),
                 params,
             };

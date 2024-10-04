@@ -1,5 +1,4 @@
 use super::BuilderGenCtx;
-use crate::builder::builder_gen::member::NamedMember;
 use crate::util::prelude::*;
 
 pub(super) struct StateModGenCtx<'a> {
@@ -17,12 +16,12 @@ impl<'a> StateModGenCtx<'a> {
 
             stateful_members_snake: builder_gen
                 .stateful_members()
-                .map(NamedMember::public_snake)
+                .map(|member| &member.name.snake)
                 .collect(),
 
             stateful_members_pascal: builder_gen
                 .stateful_members()
-                .map(NamedMember::public_pascal)
+                .map(|member| &member.name.pascal)
                 .collect(),
 
             // A method without `self` makes the trait non-object safe,
@@ -88,12 +87,12 @@ impl<'a> StateModGenCtx<'a> {
             .map(move |member| {
                 let states = self.builder_gen.stateful_members().map(|other_member| {
                     if other_member.is(member) {
-                        let ident = member.public_snake();
+                        let member_snake = &member.name.snake;
                         quote! {
-                            ::bon::private::Set<members::#ident>
+                            ::bon::private::Set<members::#member_snake>
                         }
                     } else {
-                        let member_pascal = &other_member.norm_ident_pascal;
+                        let member_pascal = &other_member.name.pascal;
                         quote! {
                             <Self as State>::#member_pascal
                         }
@@ -110,9 +109,8 @@ impl<'a> StateModGenCtx<'a> {
             .builder_gen
             .stateful_members()
             .map(|member| {
-                let member_snake = member.public_snake();
-                let member_pascal = member.public_pascal();
-                let alias = format_ident!("Set{}", member_pascal.raw_name());
+                let alias = format_ident!("Set{}", member.name.pascal_str);
+                let member_snake = &member.name.snake;
 
                 let docs = format!(
                     "Returns a [`State`] that has [`IsSet`] implemented for `{member_snake}`\n\
@@ -225,7 +223,7 @@ impl<'a> StateModGenCtx<'a> {
             .builder_gen
             .named_members()
             .filter(|member| member.is_required())
-            .map(|member| &member.norm_ident_pascal)
+            .map(|member| &member.name.pascal)
             .collect::<Vec<_>>();
 
         let maybe_assoc_type_bounds = cfg!(feature = "msrv-1-79-0").then(|| {

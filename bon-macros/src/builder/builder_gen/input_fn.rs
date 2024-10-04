@@ -4,7 +4,7 @@ use super::{
     Member, MemberOrigin, RawMember,
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
-use crate::normalization::NormalizeSelfTy;
+use crate::normalization::{NormalizeSelfTy, SyntaxVariant};
 use crate::parsing::{ItemParams, SpannedKey};
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
@@ -61,8 +61,7 @@ impl FromMeta for ExposePositionalFnParams {
 }
 
 pub(crate) struct FnInputCtx {
-    pub(crate) orig_fn: syn::ItemFn,
-    pub(crate) norm_fn: syn::ItemFn,
+    pub(crate) fn_item: SyntaxVariant<syn::ItemFn>,
     pub(crate) impl_ctx: Option<Rc<ImplCtx>>,
     pub(crate) params: FnInputParams,
 }
@@ -106,7 +105,7 @@ impl FnInputCtx {
     }
 
     fn assoc_method_receiver_ctx(&self) -> Result<Option<AssocMethodReceiverCtx>> {
-        let receiver = match self.norm_fn.sig.receiver() {
+        let receiver = match self.fn_item.norm.sig.receiver() {
             Some(receiver) => receiver,
             None => return Ok(None),
         };
@@ -135,13 +134,13 @@ impl FnInputCtx {
 
     fn generics(&self) -> Generics {
         let impl_ctx = self.impl_ctx.as_ref();
-        let norm_fn_params = &self.norm_fn.sig.generics.params;
+        let norm_fn_params = &self.fn_item.norm.sig.generics.params;
         let params = impl_ctx
             .map(|impl_ctx| merge_generic_params(&impl_ctx.generics.params, norm_fn_params))
             .unwrap_or_else(|| norm_fn_params.iter().cloned().collect());
 
         let where_clauses = [
-            self.norm_fn.sig.generics.where_clause.clone(),
+            self.fn_item.norm.sig.generics.where_clause.clone(),
             impl_ctx.and_then(|impl_ctx| impl_ctx.generics.where_clause.clone()),
         ];
 
@@ -167,7 +166,7 @@ impl FnInputCtx {
             return format_ident!("{}Builder", self.self_ty_prefix().unwrap_or_default());
         }
 
-        let pascal_case_fn = self.norm_fn.sig.ident.snake_to_pascal_case();
+        let pascal_case_fn = self.fn_item.norm.sig.ident.snake_to_pascal_case();
 
         format_ident!(
             "{}{pascal_case_fn}Builder",
@@ -176,7 +175,7 @@ impl FnInputCtx {
     }
 
     pub(crate) fn adapted_fn(&self) -> Result<syn::ItemFn> {
-        let mut orig = self.orig_fn.clone();
+        let mut orig = self.fn_item.orig.clone();
 
         let params = self.params.expose_positional_fn.as_ref();
 
@@ -187,7 +186,7 @@ impl FnInputCtx {
                     .clone()
                     // If exposing of positional fn is enabled without an explicit
                     // visibility, then just use the visibility of the original function.
-                    .unwrap_or_else(|| self.norm_fn.vis.clone())
+                    .unwrap_or_else(|| self.fn_item.norm.vis.clone())
             })
             // By default we change the positional function's visibility to private
             // to avoid exposing it to the surrounding code. The surrounding code is
@@ -274,7 +273,7 @@ impl FnInputCtx {
     }
 
     fn is_method_new(&self) -> bool {
-        self.impl_ctx.is_some() && self.norm_fn.sig.ident == "new"
+        self.impl_ctx.is_some() && self.fn_item.norm.sig.ident == "new"
     }
 
     pub(crate) fn into_builder_gen_ctx(self) -> Result<BuilderGenCtx> {
@@ -282,37 +281,37 @@ impl FnInputCtx {
 
         if self.impl_ctx.is_none() {
             let explanation = "\
-                but #[bon] attribute \
-                is absent on top of the impl block. This additional #[bon] \
-                attribute on the impl block is required for the macro to see \
-                the type of `Self` and properly generate the builder struct \
-                definition adjacently to the impl block.";
+                but #[bon] attribute is absent on top of the impl block; this \
+                additional #[bon] attribute on the impl block is required for \
+                the macro to see the type of `Self` and properly generate
+                the builder struct definition adjacently to the impl block.";
 
-            if let Some(receiver) = &self.orig_fn.sig.receiver() {
+            if let Some(receiver) = &self.fn_item.orig.sig.receiver() {
                 bail!(
                     &receiver.self_token,
-                    "Function contains a `self` parameter {explanation}"
+                    "function contains a `self` parameter {explanation}"
                 );
             }
 
             let mut ctx = FindSelfReference::default();
-            ctx.visit_item_fn(&self.orig_fn);
+            ctx.visit_item_fn(&self.fn_item.orig);
             if let Some(self_span) = ctx.self_span {
                 bail!(
                     &self_span,
-                    "Function contains a `Self` type reference {explanation}"
+                    "function contains a `Self` type reference {explanation}"
                 );
             }
         }
 
         let builder_ident = self.builder_ident();
 
-        fn typed_args(func: &syn::ItemFn) -> impl Iterator<Item = &syn::PatType> {
-            func.sig.inputs.iter().filter_map(syn::FnArg::as_typed)
-        }
+        let typed_args = self
+            .fn_item
+            .apply_ref(|fn_item| fn_item.sig.inputs.iter().filter_map(syn::FnArg::as_typed));
 
-        let members = typed_args(&self.norm_fn)
-            .zip(typed_args(&self.orig_fn))
+        let members = typed_args
+            .norm
+            .zip(typed_args.orig)
             .map(|(norm_arg, orig_arg)| {
                 let pat = match norm_arg.pat.as_ref() {
                     syn::Pat::Ident(pat) => pat,
@@ -323,11 +322,15 @@ impl FnInputCtx {
                     ),
                 };
 
+                let ty = SyntaxVariant {
+                    norm: norm_arg.ty.clone(),
+                    orig: orig_arg.ty.clone(),
+                };
+
                 Ok(RawMember {
                     attrs: &norm_arg.attrs,
                     ident: pat.ident.clone(),
-                    norm_ty: norm_arg.ty.clone(),
-                    orig_ty: orig_arg.ty.clone(),
+                    ty,
                 })
             })
             .collect::<Result<Vec<_>>>()?;
@@ -348,7 +351,7 @@ impl FnInputCtx {
         let start_fn_ident = if is_method_new {
             format_ident!("builder")
         } else {
-            self.norm_fn.sig.ident.clone()
+            self.fn_item.norm.sig.ident.clone()
         };
 
         let ItemParams {
@@ -379,16 +382,17 @@ impl FnInputCtx {
         let finish_fn = FinishFn {
             ident: finish_fn_ident,
             vis: finish_fn_vis.map(SpannedKey::into_value),
-            unsafety: self.norm_fn.sig.unsafety,
-            asyncness: self.norm_fn.sig.asyncness,
-            must_use: get_must_use_attribute(&self.norm_fn.attrs)?,
+            unsafety: self.fn_item.norm.sig.unsafety,
+            asyncness: self.fn_item.norm.sig.asyncness,
+            must_use: get_must_use_attribute(&self.fn_item.norm.attrs)?,
             body: Box::new(finish_fn_body),
-            output: self.norm_fn.sig.output,
+            output: self.fn_item.norm.sig.output,
             attrs: finish_fn_docs,
         };
 
         let fn_allows = self
-            .norm_fn
+            .fn_item
+            .norm
             .attrs
             .iter()
             .filter_map(syn::Attribute::to_allow);
@@ -408,32 +412,29 @@ impl FnInputCtx {
             // It's supposed to be the same as the original function's visibility.
             vis: None,
 
-            attrs: self.norm_fn.attrs.into_iter().filter(<_>::is_doc).collect(),
+            attrs: self
+                .fn_item
+                .norm
+                .attrs
+                .into_iter()
+                .filter(<_>::is_doc)
+                .collect(),
 
             // Override on the start fn to use the the generics from the
             // target function itself. We don't need to duplicate the generics
             // from the impl block here.
             generics: Some(Generics::new(
-                Vec::from_iter(self.norm_fn.sig.generics.params),
-                self.norm_fn.sig.generics.where_clause,
+                Vec::from_iter(self.fn_item.norm.sig.generics.params),
+                self.fn_item.norm.sig.generics.where_clause,
             )),
         };
 
+        let builder_type = self.params.base.builder_type;
         let builder_type = BuilderTypeParams {
             ident: builder_ident,
             derives: self.params.base.derive,
-            docs: self
-                .params
-                .base
-                .builder_type
-                .docs
-                .map(SpannedKey::into_value),
-            vis: self
-                .params
-                .base
-                .builder_type
-                .vis
-                .map(SpannedKey::into_value),
+            docs: builder_type.docs.map(SpannedKey::into_value),
+            vis: builder_type.vis.map(SpannedKey::into_value),
         };
 
         BuilderGenCtx::new(BuilderGenCtxParams {
@@ -445,7 +446,7 @@ impl FnInputCtx {
 
             assoc_method_ctx,
             generics,
-            orig_item_vis: self.norm_fn.vis,
+            orig_item_vis: self.fn_item.norm.vis,
 
             builder_type,
             state_mod: self.params.base.state_mod,

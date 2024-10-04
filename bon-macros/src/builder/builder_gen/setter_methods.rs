@@ -34,7 +34,7 @@ impl<'a> SettersCtx<'a> {
 
             member_init = quote!(Some(#member_init_override));
         } else {
-            let member_type = self.member.norm_ty.as_ref();
+            let member_type = self.member.ty.norm.as_ref();
             let has_into = self.member.params.into.is_present();
 
             if has_into {
@@ -47,7 +47,7 @@ impl<'a> SettersCtx<'a> {
         }
 
         self.setter_method(Setter {
-            method_name: self.member.public_snake().clone(),
+            method_name: self.member.name.snake.clone(),
             fn_inputs,
             overwrite_docs: None,
             body: SetterBody::Default { member_init },
@@ -55,12 +55,12 @@ impl<'a> SettersCtx<'a> {
     }
 
     fn setters_for_optional_member(&self) -> TokenStream {
-        let member_name = self.member.public_snake().clone();
+        let member_snake = self.member.name.snake.clone();
 
         // Preserve the original identifier span to make IDE's "go to definition" work correctly
         let option_fn_name = syn::Ident::new(
-            &format!("maybe_{}", member_name.raw_name()),
-            member_name.span(),
+            &format!("maybe_{}", self.member.name.snake_raw_str),
+            member_snake.span(),
         );
 
         let some_fn_inputs;
@@ -138,7 +138,7 @@ impl<'a> SettersCtx<'a> {
                 method_name: option_fn_name,
                 fn_inputs: option_fn_inputs,
                 overwrite_docs: Some(format!(
-                    "Same as [`Self::{member_name}`], but accepts \
+                    "Same as [`Self::{member_snake}`], but accepts \
                     an `Option` as input. See that method's documentation for \
                     more details.",
                 )),
@@ -153,7 +153,7 @@ impl<'a> SettersCtx<'a> {
             // To be able to explicitly pass an `Option` value to the setter method
             // users need to use the `maybe_{member_ident}` method.
             Setter {
-                method_name: member_name,
+                method_name: member_snake,
                 fn_inputs: some_fn_inputs,
                 overwrite_docs: None,
                 body: SetterBody::Custom(some_fn_body),
@@ -260,9 +260,9 @@ impl<'a> SettersCtx<'a> {
             }
         };
 
-        let member_pascal = &self.member.norm_ident_pascal;
+        let member_pascal = &self.member.name.pascal;
 
-        let state_transition = format_ident!("Set{}", self.member.norm_ident_pascal.raw_name());
+        let state_transition = format_ident!("Set{}", self.member.name.pascal_str);
 
         let state_mod = &self.builder_gen.state_mod.ident;
 
@@ -320,8 +320,8 @@ impl<'a> SettersCtx<'a> {
     }
 
     fn generate_docs_for_setter(&self) -> Vec<syn::Attribute> {
-        let member_ident = self.member.public_snake();
-        let start_fn_ident = &self.builder_gen.start_fn.ident;
+        let member_snake = &self.member.name.snake;
+        let start_fn = &self.builder_gen.start_fn.ident;
 
         let more = |start_fn_path: &std::fmt::Arguments<'_>| {
             format!(" See {start_fn_path} for more info.")
@@ -342,11 +342,11 @@ impl<'a> SettersCtx<'a> {
                 };
 
                 let prefix = darling::util::path_to_string(&ty_path.path);
-                more(&format_args!("[`{prefix}::{start_fn_ident}()`]"))
+                more(&format_args!("[`{prefix}::{start_fn}()`]"))
             })
-            .unwrap_or_else(|| more(&format_args!("[`{start_fn_ident}()`]")));
+            .unwrap_or_else(|| more(&format_args!("[`{start_fn}()`]")));
 
-        let docs = format!("Sets the value of `{member_ident}`.{suffix}");
+        let docs = format!("Sets the value of `{member_snake}`.{suffix}");
 
         vec![syn::parse_quote!(#[doc = #docs])]
     }

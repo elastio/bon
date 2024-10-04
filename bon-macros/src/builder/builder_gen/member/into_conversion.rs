@@ -35,7 +35,7 @@ impl PositionalFnArgMember {
         // Positional members are never optional. Users must always specify them, so there
         // is no need for us to look into the `Option<T>` generic parameter, because the
         // `Option<T>` itself is the target of the into conversion, not the `T` inside it.
-        let scrutinee = self.orig_ty.as_ref();
+        let scrutinee = self.ty.orig.as_ref();
 
         self.params.into = EvalBlanketFlagParam {
             on_params,
@@ -51,13 +51,13 @@ impl PositionalFnArgMember {
 
     pub(crate) fn fn_input_param(&self) -> TokenStream {
         let has_into = self.params.into.is_present();
-        let norm_ty = &self.norm_ty;
+        let ty = &self.ty.norm;
         let ident = &self.ident;
 
         if has_into {
-            quote! { #ident: impl Into<#norm_ty> }
+            quote! { #ident: impl Into<#ty> }
         } else {
-            quote! { #ident: #norm_ty }
+            quote! { #ident: #ty }
         }
     }
 

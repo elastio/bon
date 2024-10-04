@@ -1,5 +1,6 @@
 use super::builder_gen::input_fn::{FnInputCtx, FnInputParams};
 use super::builder_gen::MacroOutput;
+use crate::normalization::SyntaxVariant;
 use crate::util::prelude::*;
 use syn::visit_mut::VisitMut;
 
@@ -9,9 +10,13 @@ pub(crate) fn generate(params: FnInputParams, orig_fn: syn::ItemFn) -> Result<To
     crate::normalization::NormalizeLifetimes.visit_item_fn_mut(&mut norm_fn);
     crate::normalization::NormalizeImplTraits.visit_item_fn_mut(&mut norm_fn);
 
+    let fn_item = SyntaxVariant {
+        orig: orig_fn,
+        norm: norm_fn,
+    };
+
     let ctx = FnInputCtx {
-        orig_fn,
-        norm_fn,
+        fn_item,
         impl_ctx: None,
         params,
     };
