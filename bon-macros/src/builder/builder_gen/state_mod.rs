@@ -12,8 +12,8 @@ impl super::BuilderGenCtx {
             .iter()
             .map(|member| {
                 let states = stateful_members.iter().map(|other_member| {
-                    if other_member.orig_ident == member.orig_ident {
-                        let ident = &member.public_ident();
+                    if other_member.is(member) {
+                        let ident = member.public_ident();
                         quote! {
                             ::bon::private::Set<members::#ident>
                         }
@@ -136,7 +136,7 @@ impl super::BuilderGenCtx {
             // to the module that defines the builder. These APIs are not
             // public, and users instead should only reference the traits
             // and state transition type aliases from here.
-            #[allow(unnameable_types, unreachable_pub)]
+            #[allow(unnameable_types, unreachable_pub, clippy::redundant_pub_crate)]
             #( #state_mod_docs )*
             #vis_mod mod #state_mod_ident {
                 /// Marker trait implemented by members that are set.

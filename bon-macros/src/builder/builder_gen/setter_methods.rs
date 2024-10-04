@@ -325,7 +325,7 @@ impl<'a> SettersCtx<'a> {
     }
 
     fn generate_docs_for_setter(&self) -> Vec<syn::Attribute> {
-        let setter_core_name = self.member.public_ident();
+        let member_ident = self.member.public_ident();
         let start_fn_ident = &self.builder_gen.start_fn.ident;
 
         let more = |start_fn_path: &std::fmt::Arguments<'_>| {
@@ -351,7 +351,7 @@ impl<'a> SettersCtx<'a> {
             })
             .unwrap_or_else(|| more(&format_args!("[`{start_fn_ident}()`]")));
 
-        let docs = format!("Sets the value of `{setter_core_name}`.{suffix}");
+        let docs = format!("Sets the value of `{member_ident}`.{suffix}");
 
         vec![syn::parse_quote!(#[doc = #docs])]
     }

@@ -2,7 +2,7 @@ use super::params::MemberParams;
 use super::{params, MemberOrigin};
 use crate::builder::builder_gen::builder_params::OnParams;
 use crate::builder::builder_gen::member::params::SettersFnParams;
-use crate::parsing::SpannedKey;
+use crate::parsing::{ItemParams, SpannedKey};
 use crate::util::prelude::*;
 
 /// Regular member for which the builder should have setter methods
@@ -14,21 +14,19 @@ pub(crate) struct NamedMember {
     /// Index of the member relative to other regular members. The index is 0-based.
     pub(crate) index: syn::Index,
 
-    /// Original name of the member is used as the name of the builder field and
-    /// in its setter methods. Struct field/fn arg names conventionally use `snake_case`
-    /// in Rust, but this isn't enforced, so this member isn't guaranteed to be in
-    /// snake case, but 99% of the time it will be.
+    /// Original name of the member (unchanged). It's used in the finishing
+    /// function of the builder to create a variable for each member.
     pub(crate) orig_ident: syn::Ident,
 
     /// Normalized version of `orig_ident`. Here we stripped the leading `_` from the
-    /// member name.
+    /// member name. This name is in the builder's API unless a `name` override is present.
     pub(crate) norm_ident: syn::Ident,
 
     /// `PascalCase` version of the `norm_ident`.
     pub(crate) norm_ident_pascal: syn::Ident,
 
-    /// Doc comments for the setter methods are copied from the doc comments placed
-    /// on top of the original member
+    /// Doc comments on top of the original syntax. These are copied to the setters
+    /// unless there are overrides for them.
     pub(crate) docs: Vec<syn::Attribute>,
 
     /// Normalized type of the member that the builder should have setters for.
@@ -46,7 +44,7 @@ impl NamedMember {
         crate::parsing::reject_self_mentions_in_docs("builder struct's impl block", &self.docs)?;
 
         if let Some(default) = &self.params.default {
-            if !self.params.transparent.is_present() && self.norm_ty.is_option() {
+            if self.is_special_option_ty() {
                 bail!(
                     &default.key,
                     "`Option<_>` already implies a default of `None`, \
@@ -97,24 +95,30 @@ impl NamedMember {
             option_fn: Some(option_fn),
         } = &setters.fns
         {
-            Self::validate_unused_config(&setters.name, &[&some_fn.name, &option_fn.name])?;
-            Self::validate_unused_config(&setters.vis, &[&some_fn.vis, &option_fn.vis])?;
-            Self::validate_unused_config(&setters.docs, &[&some_fn.docs, &option_fn.docs])?;
+            let setter_fns = &[some_fn, option_fn];
+
+            Self::validate_unused_setters_cfg(setter_fns, &setters.name, |params| &params.name)?;
+            Self::validate_unused_setters_cfg(setter_fns, &setters.vis, |params| &params.vis)?;
+            Self::validate_unused_setters_cfg(setter_fns, &setters.docs, |params| &params.docs)?;
         }
 
         Ok(())
     }
 
-    fn validate_unused_config<T>(
+    fn validate_unused_setters_cfg<T>(
+        overrides: &[&SpannedKey<ItemParams>],
         config: &Option<SpannedKey<T>>,
-        overrides: &[&Option<SpannedKey<T>>],
+        get_val: impl Fn(&ItemParams) -> &Option<SpannedKey<T>>,
     ) -> Result {
         let config = match config {
             Some(config) => config,
             None => return Ok(()),
         };
 
-        let overrides = overrides.iter().copied().map(Option::as_ref);
+        let overrides = overrides
+            .iter()
+            .copied()
+            .map(|over| get_val(&over.value).as_ref());
 
         if !overrides.clone().all(|over| over.is_some()) {
             return Ok(());
@@ -139,11 +143,16 @@ impl NamedMember {
         self.params.name.as_ref().unwrap_or(&self.norm_ident)
     }
 
+    /// Returns `true` if this member is of `Option<_>` type, but returns `false`
+    /// if `#[builder(transparent)]` is set.
+    fn is_special_option_ty(&self) -> bool {
+        !self.params.transparent.is_present() && self.norm_ty.is_option()
+    }
+
     /// Returns `false` if the member has a default value. It means this member
     /// is required to be set before the building can be finished.
     pub(crate) fn is_required(&self) -> bool {
-        self.params.default.is_none()
-            && (self.params.transparent.is_present() || !self.norm_ty.is_option())
+        self.params.default.is_none() && !self.is_special_option_ty()
     }
 
     /// A stateful member is the one that has a corresponding associated type in
@@ -172,6 +181,10 @@ impl NamedMember {
         } else {
             ty.option_type_param().unwrap_or(ty)
         }
+    }
+
+    pub(crate) fn is(&self, other: &Self) -> bool {
+        self.index == other.index
     }
 
     pub(crate) fn merge_on_params(&mut self, on_params: &[OnParams]) -> Result {

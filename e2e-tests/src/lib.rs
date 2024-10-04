@@ -4,9 +4,13 @@
 
 pub mod macro_rules_wrapper_test;
 pub mod missing_docs_test;
-pub mod v3_design;
+// pub mod v3_design;
 
-use bon::{bon, builder};
+mod reexports;
+
+pub use reexports::{UnexportedBuilder, UnexportedStateMod, UnexportedStateModBuilder};
+
+use bon::{bon, builder, Builder};
 
 #[cfg(doctest)]
 // We use a bunch of Vitepress-specific syntax in the doctests, for example to
@@ -17,8 +21,15 @@ mod website_doctests {
     include!(concat!(env!("OUT_DIR"), "/website_doctests.rs"));
 }
 
+/// Some docs on the private builder
+#[derive(Builder)]
+#[builder(builder_type(vis = ""))]
+pub struct PrivateBuilder {
+    _field: String,
+}
+
 /// Docs on the [`Self`] struct
-#[derive(bon::Builder)]
+#[derive(Builder)]
 #[builder(
     builder_type(
         docs {
