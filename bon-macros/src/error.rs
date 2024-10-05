@@ -43,14 +43,27 @@ impl Parse for Fallback {
                             let fallback: Self = syn::parse2(group.stream())?;
                             let new_group =
                                 proc_macro2::Group::new(group.delimiter(), fallback.output);
-
                             output.extend([TokenTree::Group(new_group)]);
                         }
                         TokenTree::Punct(punct) if punct.as_char() == '#' => {
                             return Ok((true, cursor));
                         }
                         TokenTree::Punct(_) | TokenTree::Ident(_) | TokenTree::Literal(_) => {
-                            output.extend([tt]);
+                            // Workaround for the RA bug where it generates an invalid Punct token tree with
+                            // the character `{`, which is amplified by a bug in `proc_macro2` where its `Punct`
+                            // doesn't panic early on invalid `Punct`.
+                            //
+                            // If this `extend` panics it means there are some invalid token trees in the input.
+                            // We can't do anything about it, and we just ignore them.
+                            //
+                            // ## Issues
+                            //
+                            // - [Bug in RA](https://github.com/rust-lang/rust-analyzer/issues/18244)
+                            // - [Bug in proc-macro2](https://github.com/dtolnay/proc-macro2/issues/470)
+                            let _can_panic =
+                                std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                                    output.extend([tt]);
+                                }));
                         }
                     }
 

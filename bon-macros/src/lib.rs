@@ -19,6 +19,9 @@ mod normalization;
 mod parsing;
 mod util;
 
+#[cfg(test)]
+mod tests;
+
 /// Generates a builder for the function or method it's placed on.
 ///
 /// ## Quick examples
