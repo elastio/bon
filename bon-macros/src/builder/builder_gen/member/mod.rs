@@ -3,7 +3,7 @@ mod named;
 mod params;
 
 pub(crate) use named::*;
-pub(crate) use params::SetterClosure;
+pub(crate) use params::*;
 
 use super::builder_params::OnParams;
 use crate::normalization::SyntaxVariant;

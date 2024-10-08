@@ -8,7 +8,8 @@
     clippy::option_option,
     clippy::option_if_let_else,
     clippy::enum_glob_use,
-    clippy::too_many_lines
+    clippy::too_many_lines,
+    clippy::if_not_else,
 )]
 
 mod bon;

@@ -2,7 +2,7 @@ mod builder_derives;
 mod builder_params;
 mod member;
 mod models;
-mod setter_methods;
+mod setters;
 mod state_mod;
 
 pub(crate) mod input_fn;
@@ -15,7 +15,7 @@ use member::{
 use models::{
     AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFn, FinishFnBody, Generics,
 };
-use setter_methods::SettersCtx;
+use setters::SettersCtx;
 
 pub(crate) struct MacroOutput {
     pub(crate) start_fn: syn::ItemFn,

@@ -9,6 +9,20 @@ pub(crate) struct ItemParams {
     pub(crate) docs: Option<SpannedKey<Vec<syn::Attribute>>>,
 }
 
+impl ItemParams {
+    pub(crate) fn name(&self) -> Option<&syn::Ident> {
+        self.name.as_ref().map(|name| &name.value)
+    }
+
+    pub(crate) fn vis(&self) -> Option<&syn::Visibility> {
+        self.vis.as_ref().map(|vis| &vis.value)
+    }
+
+    pub(crate) fn docs(&self) -> Option<&[syn::Attribute]> {
+        self.docs.as_ref().map(|docs| docs.value.as_slice())
+    }
+}
+
 pub(crate) struct ItemParamsParsing<'a> {
     pub(crate) meta: &'a syn::Meta,
     pub(crate) reject_self_mentions: Option<&'static str>,
