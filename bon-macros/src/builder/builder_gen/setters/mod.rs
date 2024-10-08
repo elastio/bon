@@ -389,11 +389,23 @@ impl SettersItems {
                 )
             });
 
-        let default = member
-            .params
-            .default
-            .as_deref()
-            .map(|default| format!("| Default: ``"));
+        let default = member.params.default.as_deref().and_then(|default| {
+            let default = default
+                .clone()
+                .or_else(|| well_known_default(&member.ty.norm))
+                .unwrap_or_else(|| syn::parse_quote!(Default::default()));
+
+            let file = syn::parse_quote!(const _: () = #default;);
+            let file = prettyplease::unparse(&file);
+
+            let begin = file.find('=')?;
+            let default = file.get(begin + 1..)?.trim();
+            let default = default.strip_suffix(';')?;
+
+            Some(default.to_owned())
+        });
+
+        let default = default.as_deref();
 
         // FIXME: the docs shouldn't reference the companion setter if that
         // setter has a lower visibility.
@@ -403,11 +415,7 @@ impl SettersItems {
             .unwrap_or_else(|| {
                 let base_docs = common_docs.unwrap_or(&member.docs);
 
-                let header = format!(
-                    "| *Optional* |\n\
-                     | -- |\n\n\
-                     See other setter: [`{option_fn_name}()`](Self::{option_fn_name}).\n\n",
-                );
+                let header = optional_setter_docs(default, &option_fn_name);
 
                 doc(&header).chain(base_docs.iter().cloned()).collect()
             });
@@ -418,11 +426,7 @@ impl SettersItems {
             .unwrap_or_else(|| {
                 let base_docs = common_docs.unwrap_or(&member.docs);
 
-                let header = format!(
-                    "| *Optional* |\n\
-                     | -- |\n\n\
-                     See other setter: [`{some_fn_name}()`](Self::{some_fn_name}).\n\n",
-                );
+                let header = optional_setter_docs(default, &some_fn_name);
 
                 doc(&header).chain(base_docs.iter().cloned()).collect()
             });
@@ -453,4 +457,44 @@ impl SettersItems {
 
         Self::Optional(OptionalSettersItems { some_fn, option_fn })
     }
+}
+
+fn optional_setter_docs(default: Option<&str>, other_setter: &syn::Ident) -> String {
+    let default = default
+        .map(|default| {
+            if default.contains('\n') || default.len() > 80 {
+                format!("**Default:**\n````rust,ignore\n{default}\n````\n\n")
+            } else {
+                format!("**Default:** ``{default}``\n\n")
+            }
+        })
+        .unwrap_or_default();
+
+    format!(
+        "**Optional**. **See also:** [`{other_setter}()`](Self::{other_setter}).\
+        \n\n{default}",
+    )
+}
+
+fn well_known_default(ty: &syn::Type) -> Option<syn::Expr> {
+    let path = match ty {
+        syn::Type::Path(syn::TypePath { path, qself: None }) => path,
+        _ => return None,
+    };
+
+    use syn::parse_quote as pq;
+
+    let ident = path.get_ident()?.to_string();
+
+    let value = match ident.as_str() {
+        "u8" | "u16" | "u32" | "u64" | "u128" | "usize" | "i8" | "i16" | "i32" | "i64" | "i128"
+        | "isize" => pq!(0),
+        "f32" | "f64" => pq!(0.0),
+        "bool" => pq!(false),
+        "char" => pq!('\0'),
+        "String" => pq!(""),
+        _ => return None,
+    };
+
+    Some(value)
 }

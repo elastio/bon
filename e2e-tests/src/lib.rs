@@ -104,6 +104,7 @@ pub fn documented(
     /// // Some doc tests as well
     /// assert_eq!(2 + 2, 4);
     /// ```
+    #[builder(default)]
     _arg1: String,
 
     _arg2: &str,
@@ -112,6 +113,18 @@ pub fn documented(
     _arg3: Option<u32>,
 
     _arg4: Vec<String>,
+
+    #[builder(default =
+        Greeter::start_fn_override()
+            .name(
+                "Some intentionally big expression to test the overflow to \
+                a code fence in the default value docs"
+                .to_owned()
+            )
+            .level(42)
+            .finish_fn_override()
+    )]
+    _arg5: Greeter,
 ) {
     eprintln!("Non-const");
 }
