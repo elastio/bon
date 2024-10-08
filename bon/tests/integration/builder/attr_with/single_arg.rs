@@ -1,8 +1,8 @@
 use crate::prelude::*;
 use core::convert::Infallible;
-use core::net::IpAddr;
 use core::{fmt, num};
 type ParseIntResult<T> = Result<T, num::ParseIntError>;
+use super::IntoStrRef;
 
 #[test]
 fn test_struct() {
@@ -28,8 +28,8 @@ fn test_struct() {
         #[builder(with = |value: &T| value.clone(), default)]
         default_generic: T,
 
-        #[builder(with = |value: impl Into<IpAddr>| value.into())]
-        impl_trait: IpAddr,
+        #[builder(with = |value: impl Into<&'static str>| value.into())]
+        impl_trait: &'static str,
 
         #[builder(with = |value: &str| -> Result<_, num::ParseIntError> { value.parse() })]
         try_required: u32,
@@ -46,8 +46,8 @@ fn test_struct() {
         #[builder(with = |value: &T| -> Result<_, Infallible> { Ok(value.clone()) }, default)]
         try_default_generic: T,
 
-        #[builder(with = |value: impl Into<IpAddr>| -> Result<_, Infallible> { Ok(value.into()) })]
-        try_impl_trait: IpAddr,
+        #[builder(with = |value: impl Into<&'static str>| -> Result<_, Infallible> { Ok(value.into()) })]
+        try_impl_trait: &'static str,
     }
 
     let builder = Sut::builder()
@@ -63,7 +63,7 @@ fn test_struct() {
     let builder = builder.maybe_default_generic(Some(&"<3"));
 
     let builder = builder
-        .impl_trait([127, 0, 0, 1])
+        .impl_trait(IntoStrRef("morning glory"))
         .try_required("4")
         .unwrap();
 
@@ -79,7 +79,7 @@ fn test_struct() {
     let _ignore = builder.clone().try_default_generic(&"11").unwrap();
     let builder = builder.maybe_try_default_generic(Some(&"12")).unwrap();
 
-    let builder = builder.try_impl_trait([127, 0, 0, 1]).unwrap();
+    let builder = builder.try_impl_trait(IntoStrRef("morning glory")).unwrap();
 
     assert_debug_eq(
         builder.build(),
@@ -95,7 +95,7 @@ fn test_struct() {
                     "littlepip",
                 ),
                 default_generic: "<3",
-                impl_trait: 127.0.0.1,
+                impl_trait: "morning glory",
                 try_required: 4,
                 try_optional: Some(
                     6,
@@ -105,7 +105,7 @@ fn test_struct() {
                     "10",
                 ),
                 try_default_generic: "12",
-                try_impl_trait: 127.0.0.1,
+                try_impl_trait: "morning glory",
             }"#]],
     );
 }
@@ -120,7 +120,7 @@ fn test_free_fn() {
         #[builder(with = |value: &T| value.clone())] generic: T,
         #[builder(with = |value: &T| value.clone())] optional_generic: Option<T>,
         #[builder(with = |value: &T| value.clone(), default)] default_generic: T,
-        #[builder(with = |value: impl Into<IpAddr>| value.into())] impl_trait: IpAddr,
+        #[builder(with = |value: impl Into<&'static str>| value.into())] impl_trait: &'static str,
 
         #[builder(with = |value: &str| -> Result<_, num::ParseIntError> { value.parse() })]
         try_required: u32,
@@ -137,8 +137,8 @@ fn test_free_fn() {
         #[builder(with = |value: &T| -> Result<_, Infallible> { Ok(value.clone()) }, default)]
         try_default_generic: T,
 
-        #[builder(with = |value: impl Into<IpAddr>| -> Result<_, Infallible> { Ok(value.into()) })]
-        try_impl_trait: IpAddr,
+        #[builder(with = |value: impl Into<&'static str>| -> Result<_, Infallible> { Ok(value.into()) })]
+        try_impl_trait: &'static str,
     ) -> impl fmt::Debug {
         (
             (
@@ -170,7 +170,7 @@ fn test_free_fn() {
     let builder = builder.maybe_default_generic(Some(&"<3"));
 
     let builder = builder
-        .impl_trait([127, 0, 0, 1])
+        .impl_trait(IntoStrRef("morning glory"))
         .try_required("4")
         .unwrap();
 
@@ -186,38 +186,38 @@ fn test_free_fn() {
     let _ignore = builder.clone().try_default_generic(&"11").unwrap();
     let builder = builder.maybe_try_default_generic(Some(&"12")).unwrap();
 
-    let builder = builder.try_impl_trait([127, 0, 0, 1]).unwrap();
+    let builder = builder.try_impl_trait(IntoStrRef("morning glory")).unwrap();
 
     assert_debug_eq(
         builder.call(),
         expect![[r#"
+            (
                 (
-                    (
-                        2,
-                        Some(
-                            3,
-                        ),
-                        4,
-                        "hello",
-                        Some(
-                            "littlepip",
-                        ),
-                        "<3",
-                        127.0.0.1,
+                    2,
+                    Some(
+                        3,
                     ),
-                    (
-                        4,
-                        Some(
-                            6,
-                        ),
-                        8,
-                        Some(
-                            "10",
-                        ),
-                        "12",
-                        127.0.0.1,
+                    4,
+                    "hello",
+                    Some(
+                        "littlepip",
                     ),
-                )"#]],
+                    "<3",
+                    "morning glory",
+                ),
+                (
+                    4,
+                    Some(
+                        6,
+                    ),
+                    8,
+                    Some(
+                        "10",
+                    ),
+                    "12",
+                    "morning glory",
+                ),
+            )"#]],
     );
 }
 
@@ -235,7 +235,8 @@ fn test_assoc_method() {
             #[builder(with = |value: &T| value.clone())] generic: T,
             #[builder(with = |value: &T| value.clone())] optional_generic: Option<T>,
             #[builder(with = |value: &T| value.clone(), default)] default_generic: T,
-            #[builder(with = |value: impl Into<IpAddr>| value.into())] impl_trait: IpAddr,
+            #[builder(with = |value: impl Into<&'static str>| value.into())]
+            impl_trait: &'static str,
 
             #[builder(with = |value: &str| -> Result<_, num::ParseIntError> { value.parse() })]
             try_required: u32,
@@ -252,8 +253,8 @@ fn test_assoc_method() {
             #[builder(with = |value: &T| -> Result<_, Infallible> { Ok(value.clone()) }, default)]
             try_default_generic: T,
 
-            #[builder(with = |value: impl Into<IpAddr>| -> Result<_, Infallible> { Ok(value.into()) })]
-            try_impl_trait: IpAddr,
+            #[builder(with = |value: impl Into<&'static str>| -> Result<_, Infallible> { Ok(value.into()) })]
+            try_impl_trait: &'static str,
         ) -> impl fmt::Debug {
             (
                 (
@@ -285,7 +286,8 @@ fn test_assoc_method() {
             #[builder(with = |value: &T| value.clone())] generic: T,
             #[builder(with = |value: &T| value.clone())] optional_generic: Option<T>,
             #[builder(with = |value: &T| value.clone(), default)] default_generic: T,
-            #[builder(with = |value: impl Into<IpAddr>| value.into())] impl_trait: IpAddr,
+            #[builder(with = |value: impl Into<&'static str>| value.into())]
+            impl_trait: &'static str,
 
             #[builder(with = |value: &str| -> Result<_, num::ParseIntError> { value.parse() })]
             try_required: u32,
@@ -302,8 +304,8 @@ fn test_assoc_method() {
             #[builder(with = |value: &T| -> Result<_, Infallible> { Ok(value.clone()) }, default)]
             try_default_generic: T,
 
-            #[builder(with = |value: impl Into<IpAddr>| -> Result<_, Infallible> { Ok(value.into()) })]
-            try_impl_trait: IpAddr,
+            #[builder(with = |value: impl Into<&'static str>| -> Result<_, Infallible> { Ok(value.into()) })]
+            try_impl_trait: &'static str,
         ) -> impl fmt::Debug {
             let _ = self;
             (
@@ -341,7 +343,7 @@ fn test_assoc_method() {
     let builder = builder.maybe_default_generic(Some(&"<3"));
 
     let builder = builder
-        .impl_trait([127, 0, 0, 1])
+        .impl_trait(IntoStrRef("morning glory"))
         .try_required("4")
         .unwrap();
 
@@ -357,38 +359,38 @@ fn test_assoc_method() {
     let _ignore = builder.clone().try_default_generic(&"11").unwrap();
     let builder = builder.maybe_try_default_generic(Some(&"12")).unwrap();
 
-    let builder = builder.try_impl_trait([127, 0, 0, 1]).unwrap();
+    let builder = builder.try_impl_trait(IntoStrRef("morning glory")).unwrap();
 
     assert_debug_eq(
         builder.call(),
         expect![[r#"
+            (
                 (
-                    (
-                        2,
-                        Some(
-                            3,
-                        ),
-                        4,
-                        "hello",
-                        Some(
-                            "littlepip",
-                        ),
-                        "<3",
-                        127.0.0.1,
+                    2,
+                    Some(
+                        3,
                     ),
-                    (
-                        4,
-                        Some(
-                            6,
-                        ),
-                        8,
-                        Some(
-                            "10",
-                        ),
-                        "12",
-                        127.0.0.1,
+                    4,
+                    "hello",
+                    Some(
+                        "littlepip",
                     ),
-                )"#]],
+                    "<3",
+                    "morning glory",
+                ),
+                (
+                    4,
+                    Some(
+                        6,
+                    ),
+                    8,
+                    Some(
+                        "10",
+                    ),
+                    "12",
+                    "morning glory",
+                ),
+            )"#]],
     );
 
     let builder = Sut
@@ -405,7 +407,7 @@ fn test_assoc_method() {
     let builder = builder.maybe_default_generic(Some(&"<3"));
 
     let builder = builder
-        .impl_trait([127, 0, 0, 1])
+        .impl_trait(IntoStrRef("morning glory"))
         .try_required("4")
         .unwrap();
 
@@ -421,9 +423,11 @@ fn test_assoc_method() {
     let _ignore = builder.clone().try_default_generic(&"11").unwrap();
     let builder = builder.maybe_try_default_generic(Some(&"12")).unwrap();
 
-    let builder = builder.try_impl_trait([127, 0, 0, 1]).unwrap();
+    let builder = builder.try_impl_trait(IntoStrRef("morning glory")).unwrap();
 
-    assert_debug_eq(builder.call(), expect![[r#"
+    assert_debug_eq(
+        builder.call(),
+        expect![[r#"
             (
                 (
                     2,
@@ -436,7 +440,7 @@ fn test_assoc_method() {
                         "littlepip",
                     ),
                     "<3",
-                    127.0.0.1,
+                    "morning glory",
                 ),
                 (
                     4,
@@ -448,7 +452,8 @@ fn test_assoc_method() {
                         "10",
                     ),
                     "12",
-                    127.0.0.1,
+                    "morning glory",
                 ),
-            )"#]]);
+            )"#]],
+    );
 }

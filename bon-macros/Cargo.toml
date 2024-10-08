@@ -54,7 +54,10 @@ quote       = "1"
 # This is the highest version that supports our MSRV
 syn = { version = "2.0.56", features = ["full", "visit-mut", "visit"] }
 
+prettyplease = "0.2"
+
 [features]
+default = []
 # Opts in to the higher MSRV 1.79.0. In this version, Rust stabilized the syntax
 # for bounds in associated type position. See the release announcement for more:
 # https://blog.rust-lang.org/2024/06/13/Rust-1.79.0.htmlbounds-in-associated-type-position
@@ -93,5 +96,4 @@ syn = { version = "2.0.56", features = ["full", "visit-mut", "visit"] }
 msrv-1-79-0 = []
 
 [dev-dependencies]
-prettyplease = "0.2"
 expect-test = "1.4.1"

@@ -389,6 +389,12 @@ impl SettersItems {
                 )
             });
 
+        let default = member
+            .params
+            .default
+            .as_deref()
+            .map(|default| format!("| Default: ``"));
+
         // FIXME: the docs shouldn't reference the companion setter if that
         // setter has a lower visibility.
         let some_fn_docs = some_fn
@@ -398,8 +404,9 @@ impl SettersItems {
                 let base_docs = common_docs.unwrap_or(&member.docs);
 
                 let header = format!(
-                    "| *Optional* | See also [`{option_fn_name}()`](Self::{option_fn_name}) |\n\
-                     | -- | -- |\n\n",
+                    "| *Optional* |\n\
+                     | -- |\n\n\
+                     See other setter: [`{option_fn_name}()`](Self::{option_fn_name}).\n\n",
                 );
 
                 doc(&header).chain(base_docs.iter().cloned()).collect()
@@ -412,8 +419,9 @@ impl SettersItems {
                 let base_docs = common_docs.unwrap_or(&member.docs);
 
                 let header = format!(
-                    "| *Optional* | See also [`{some_fn_name}()`](Self::{some_fn_name})\n\
-                     | -- | -- |\n\n",
+                    "| *Optional* |\n\
+                     | -- |\n\n\
+                     See other setter: [`{some_fn_name}()`](Self::{some_fn_name}).\n\n",
                 );
 
                 doc(&header).chain(base_docs.iter().cloned()).collect()

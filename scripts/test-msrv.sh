@@ -39,10 +39,9 @@ step cargo update -p windows-sys --precise 0.52.0
 
 export RUSTFLAGS="${RUSTFLAGS:-} --allow unknown-lints"
 
-step cargo clippy --all-features --all-targets --locked
+step cargo clippy --all-targets --locked
 
 test_args=(
-    --all-features
     --locked
     --lib
     --tests

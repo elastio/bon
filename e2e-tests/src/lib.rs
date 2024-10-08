@@ -69,7 +69,6 @@ pub struct Counter {
 
 #[bon]
 impl Counter {
-    /// Creates an instance of [`Self`] with an optional provided `initial` value.
     #[builder]
     pub fn new(
         /// Initial value for the counter.
@@ -109,7 +108,8 @@ pub fn documented(
 
     _arg2: &str,
 
-    _arg3: u32,
+    /// Optional member docs
+    _arg3: Option<u32>,
 
     _arg4: Vec<String>,
 ) {
