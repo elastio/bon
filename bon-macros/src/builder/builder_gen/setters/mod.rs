@@ -351,15 +351,15 @@ impl SettersItems {
         let common_vis = params.and_then(|params| params.vis.as_deref());
         let common_docs = params.and_then(|params| params.docs.as_deref());
 
+        let doc = |docs: &str| iter::once(syn::parse_quote!(#[doc = #docs]));
+
         if member.is_required() {
             let docs = common_docs.cloned().unwrap_or_else(|| {
-                if !member.docs.is_empty() {
-                    return member.docs.clone();
-                }
+                let header = "\
+                    | **Required** |\n\
+                    | -- |\n\n";
 
-                let docs = format!("_**Required**_. Sets the value of `{}`.", member.name.snake);
-
-                vec![syn::parse_quote!(#[doc = #docs])]
+                doc(header).chain(member.docs.iter().cloned()).collect()
             });
 
             return Self::Required(SetterItem {
@@ -398,15 +398,11 @@ impl SettersItems {
                 let base_docs = common_docs.unwrap_or(&member.docs);
 
                 let header = format!(
-                    "*Optional*. Sets the value of `{}` to `Some(value)`. \
-                    Use [`{option_fn_name}()`](Self::{option_fn_name}) \
-                    to pass an [`Option`] directly.\n\n",
-                    member.name.snake,
+                    "| *Optional* | See also [`{option_fn_name}()`](Self::{option_fn_name}) |\n\
+                     | -- | -- |\n\n",
                 );
 
-                iter::once(syn::parse_quote!(#[doc = #header]))
-                    .chain(base_docs.iter().cloned())
-                    .collect()
+                doc(&header).chain(base_docs.iter().cloned()).collect()
             });
 
         let option_fn_docs = option_fn
@@ -416,15 +412,11 @@ impl SettersItems {
                 let base_docs = common_docs.unwrap_or(&member.docs);
 
                 let header = format!(
-                    "*Optional*. Sets the value of `{}`. \
-                    Use [`{some_fn_name}()`](Self::{some_fn_name}) to avoid \
-                    wrapping the value in [`Some`].\n\n",
-                    member.name.snake,
+                    "| *Optional* | See also [`{some_fn_name}()`](Self::{some_fn_name})\n\
+                     | -- | -- |\n\n",
                 );
 
-                iter::once(syn::parse_quote!(#[doc = #header]))
-                    .chain(base_docs.iter().cloned())
-                    .collect()
+                doc(&header).chain(base_docs.iter().cloned()).collect()
             });
 
         let some_fn = SetterItem {
