@@ -49,9 +49,11 @@ impl<'a> StateModGenCtx<'a> {
         let is_unset_trait = self.is_unset_trait();
         let is_complete_trait = self.is_complete_trait();
         let members_names_mod = self.members_names_mod();
-        let state_transitions = self.state_transitions();
+        let (state_transitions, parent_state_transition_items) = self.state_transitions();
 
         quote! {
+            #parent_state_transition_items
+
             // This is intentional. By default, the builder module is private
             // and can't be accessed outside of the module where the builder
             // type is defined. This makes the builder type "anonymous" to
@@ -80,7 +82,7 @@ impl<'a> StateModGenCtx<'a> {
         }
     }
 
-    fn state_transitions(&self) -> TokenStream {
+    fn state_transitions(&self) -> (TokenStream, TokenStream) {
         let transition_tuples = self
             .builder_gen
             .stateful_members()
@@ -129,7 +131,7 @@ impl<'a> StateModGenCtx<'a> {
         let stateful_members_pascal = &self.stateful_members_pascal;
         let sealed_method_impl = &self.sealed_method_impl;
 
-        quote! {
+        let mod_items = quote! {
             /// Initial state of the builder where all members are unset
             #vis_child struct AllUnset {
                 _private: ()
@@ -159,7 +161,23 @@ impl<'a> StateModGenCtx<'a> {
             impl<S: State> private::StateExt for S {
                 #(type #set_member_aliases = #transition_tuples; )*
             }
-        }
+        };
+
+        let state_mod = &self.builder_gen.state_mod.ident;
+        let builder_vis = &self.builder_gen.builder_type.vis;
+
+        // This is a workaround for `rustdoc`. Without this `use` statement,
+        // it inlines the type aliases. Although for this workaround to work,
+        // all items from the current module need to be reexported via a `*`
+        // reexport, or the items need to be defined in the root lib.rs file.
+        let parent_items = quote! {
+            #[doc(hidden)]
+            #[cfg(doc)]
+            #[allow(unused_import_braces)]
+            #builder_vis use #state_mod::{ #( #set_member_aliases as _ ,)* };
+        };
+
+        (mod_items, parent_items)
     }
 
     fn state_trait(&self) -> TokenStream {

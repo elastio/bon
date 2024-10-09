@@ -465,7 +465,7 @@ fn optional_setter_docs(default: Option<&str>, other_setter: &syn::Ident) -> Str
             if default.contains('\n') || default.len() > 80 {
                 format!("**Default:**\n````rust,ignore\n{default}\n````\n\n")
             } else {
-                format!("**Default:** ``{default}``\n\n")
+                format!("**Default:** ```{default}```.\n\n")
             }
         })
         .unwrap_or_default();
