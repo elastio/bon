@@ -86,7 +86,7 @@ impl<'a> StateModGenCtx<'a> {
         let transition_tuples = self
             .builder_gen
             .stateful_members()
-            .map(move |member| {
+            .map(|member| {
                 let states = self.builder_gen.stateful_members().map(|other_member| {
                     if other_member.is(member) {
                         let member_snake = &member.name.snake;
