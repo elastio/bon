@@ -4,8 +4,13 @@
 
 pub mod macro_rules_wrapper_test;
 pub mod missing_docs_test;
+// pub mod v3_design;
 
-use bon::{bon, builder};
+mod reexports;
+
+pub use reexports::{UnexportedBuilder, UnexportedStateMod, UnexportedStateModBuilder};
+
+use bon::{bon, builder, Builder};
 
 #[cfg(doctest)]
 // We use a bunch of Vitepress-specific syntax in the doctests, for example to
@@ -16,8 +21,15 @@ mod website_doctests {
     include!(concat!(env!("OUT_DIR"), "/website_doctests.rs"));
 }
 
+/// Some docs on the private builder
+#[derive(Builder)]
+#[builder(builder_type(vis = ""))]
+pub struct PrivateBuilder {
+    _field: String,
+}
+
 /// Docs on the [`Self`] struct
-#[derive(bon::Builder)]
+#[derive(Builder)]
 #[builder(
     builder_type(
         docs {
@@ -57,7 +69,6 @@ pub struct Counter {
 
 #[bon]
 impl Counter {
-    /// Creates an instance of [`Self`] with an optional provided `initial` value.
     #[builder]
     pub fn new(
         /// Initial value for the counter.
@@ -93,13 +104,27 @@ pub fn documented(
     /// // Some doc tests as well
     /// assert_eq!(2 + 2, 4);
     /// ```
+    #[builder(default)]
     _arg1: String,
 
     _arg2: &str,
 
-    _arg3: u32,
+    /// Optional member docs
+    _arg3: Option<u32>,
 
     _arg4: Vec<String>,
+
+    #[builder(default =
+        Greeter::start_fn_override()
+            .name(
+                "Some intentionally big expression to test the overflow to \
+                a code fence in the default value docs"
+                .to_owned()
+            )
+            .level(42)
+            .finish_fn_override()
+    )]
+    _arg5: Greeter,
 ) {
     eprintln!("Non-const");
 }
@@ -120,6 +145,13 @@ pub fn greet(
 ) -> String {
     eprintln!("Non-const");
     format!("Hello {name} with age {age}!")
+}
+
+#[builder]
+pub fn fn_with_impl_trait(
+    #[builder] _arg1: impl std::fmt::Debug + Clone,
+    #[builder] _arg2: impl std::fmt::Debug,
+) {
 }
 
 #[builder]

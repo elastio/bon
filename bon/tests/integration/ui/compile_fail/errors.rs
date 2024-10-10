@@ -130,3 +130,9 @@ fn double_must_use() {}
 
 #[builder]
 struct BuilderProcMacroAttrOnAStruct {}
+
+#[derive(Builder)]
+struct InvalidWithExpr {
+    #[builder(with = 42)]
+    x: u32,
+}

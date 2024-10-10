@@ -2,12 +2,12 @@ use crate::builder;
 use crate::normalization::{ExpandCfg, ExpansionOutput};
 use crate::util::prelude::*;
 
-pub(crate) fn generate(params: TokenStream2, item: TokenStream2) -> TokenStream2 {
+pub(crate) fn generate(params: TokenStream, item: TokenStream) -> TokenStream {
     try_generate(params, item.clone())
         .unwrap_or_else(|err| crate::error::error_into_token_stream(err, item))
 }
 
-pub(crate) fn try_generate(params: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
+pub(crate) fn try_generate(params: TokenStream, item: TokenStream) -> Result<TokenStream> {
     let item: syn::Item = syn::parse2(item)?;
     let macro_path = syn::parse_quote!(::bon::bon);
 

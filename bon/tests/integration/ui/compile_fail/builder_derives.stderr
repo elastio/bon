@@ -1,50 +1,199 @@
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
- --> tests/integration/ui/compile_fail/builder_derives.rs:8:16
+ --> tests/integration/ui/compile_fail/builder_derives.rs:9:23
   |
-8 |     non_debug: NoTraitImpls,
-  |                ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
+9 |     no_impl_start_fn: NoTraitImpls,
+  |                       ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
   |
-note: required by a bound in `assert_clone`
- --> src/private/mod.rs
-  |
-  | pub fn assert_clone<T: Clone>() {}
-  |                        ^^^^^ required by this bound in `assert_clone`
 help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
   |
+3 + #[derive(Clone)]
+4 | struct NoTraitImpls;
+  |
+
+error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/builder_derives.rs:11:24
+   |
+11 |     no_impls_required: NoTraitImpls,
+   |                        ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
+   |
+note: required by a bound in `clone_member`
+  --> src/private/derives.rs
+   |
+   | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
+   |                        ^^^^^ required by this bound in `clone_member`
+help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
+   |
+3  + #[derive(Clone)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/builder_derives.rs:13:30
+   |
+13 |     no_impl_optional: Option<NoTraitImpls>,
+   |                              ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
+   |
+note: required by a bound in `clone_member`
+  --> src/private/derives.rs
+   |
+   | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
+   |                        ^^^^^ required by this bound in `clone_member`
+help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
+   |
+3  + #[derive(Clone)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/builder_derives.rs:16:25
+   |
+16 |     no_impl_optional_2: NoTraitImpls,
+   |                         ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
+   |
+note: required by a bound in `clone_member`
+  --> src/private/derives.rs
+   |
+   | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
+   |                        ^^^^^ required by this bound in `clone_member`
+help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
+   |
 3  + #[derive(Clone)]
 4  | struct NoTraitImpls;
    |
 
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
- --> tests/integration/ui/compile_fail/builder_derives.rs:8:16
+ --> tests/integration/ui/compile_fail/builder_derives.rs:9:23
   |
-8 |     non_debug: NoTraitImpls,
-  |                ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+9 |     no_impl_start_fn: NoTraitImpls,
+  |                       ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
   |
   = help: the trait `Debug` is not implemented for `NoTraitImpls`
   = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
-note: required by a bound in `assert_debug`
- --> src/private/mod.rs
+note: required by a bound in `as_dyn_debug`
+ --> src/private/derives.rs
   |
-  | pub fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
-  |                                 ^^^^^^^^^^^^^^^^ required by this bound in `assert_debug`
+  | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
+  |                        ^^^^^ required by this bound in `as_dyn_debug`
 help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
   |
 3  + #[derive(Debug)]
 4  | struct NoTraitImpls;
    |
 
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+  --> tests/integration/ui/compile_fail/builder_derives.rs:11:24
+   |
+11 |     no_impls_required: NoTraitImpls,
+   |                        ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+   |
+   = help: the trait `Debug` is not implemented for `NoTraitImpls`
+   = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
+note: required by a bound in `as_dyn_debug`
+  --> src/private/derives.rs
+   |
+   | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
+   |                        ^^^^^ required by this bound in `as_dyn_debug`
+help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
+   |
+3  + #[derive(Debug)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+  --> tests/integration/ui/compile_fail/builder_derives.rs:13:30
+   |
+13 |     no_impl_optional: Option<NoTraitImpls>,
+   |                              ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+   |
+   = help: the trait `Debug` is not implemented for `NoTraitImpls`
+   = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
+note: required by a bound in `as_dyn_debug`
+  --> src/private/derives.rs
+   |
+   | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
+   |                        ^^^^^ required by this bound in `as_dyn_debug`
+help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
+   |
+3  + #[derive(Debug)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+  --> tests/integration/ui/compile_fail/builder_derives.rs:16:25
+   |
+16 |     no_impl_optional_2: NoTraitImpls,
+   |                         ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+   |
+   = help: the trait `Debug` is not implemented for `NoTraitImpls`
+   = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
+note: required by a bound in `as_dyn_debug`
+  --> src/private/derives.rs
+   |
+   | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
+   |                        ^^^^^ required by this bound in `as_dyn_debug`
+help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
+   |
+3  + #[derive(Debug)]
+4  | struct NoTraitImpls;
+   |
+
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/builder_derives.rs:13:38
+  --> tests/integration/ui/compile_fail/builder_derives.rs:24:24
    |
-13 | fn fn_contains_non_trait(_non_debug: NoTraitImpls, _x: u32) {}
-   |                                      ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
+24 |     _no_impl_start_fn: NoTraitImpls,
+   |                        ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
    |
-note: required by a bound in `assert_clone`
-  --> src/private/mod.rs
+help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
-   | pub fn assert_clone<T: Clone>() {}
-   |                        ^^^^^ required by this bound in `assert_clone`
+3  + #[derive(Clone)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/builder_derives.rs:26:25
+   |
+26 |     _no_impls_required: NoTraitImpls,
+   |                         ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
+   |
+note: required by a bound in `clone_member`
+  --> src/private/derives.rs
+   |
+   | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
+   |                        ^^^^^ required by this bound in `clone_member`
+help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
+   |
+3  + #[derive(Clone)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/builder_derives.rs:28:31
+   |
+28 |     _no_impl_optional: Option<NoTraitImpls>,
+   |                               ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
+   |
+note: required by a bound in `clone_member`
+  --> src/private/derives.rs
+   |
+   | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
+   |                        ^^^^^ required by this bound in `clone_member`
+help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
+   |
+3  + #[derive(Clone)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/builder_derives.rs:31:26
+   |
+31 |     _no_impl_optional_2: NoTraitImpls,
+   |                          ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
+   |
+note: required by a bound in `clone_member`
+  --> src/private/derives.rs
+   |
+   | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
+   |                        ^^^^^ required by this bound in `clone_member`
 help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 3  + #[derive(Clone)]
@@ -52,54 +201,234 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
-  --> tests/integration/ui/compile_fail/builder_derives.rs:13:38
+  --> tests/integration/ui/compile_fail/builder_derives.rs:24:24
    |
-13 | fn fn_contains_non_trait(_non_debug: NoTraitImpls, _x: u32) {}
-   |                                      ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+24 |     _no_impl_start_fn: NoTraitImpls,
+   |                        ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
    |
    = help: the trait `Debug` is not implemented for `NoTraitImpls`
    = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
-note: required by a bound in `assert_debug`
-  --> src/private/mod.rs
+note: required by a bound in `as_dyn_debug`
+  --> src/private/derives.rs
    |
-   | pub fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
-   |                                 ^^^^^^^^^^^^^^^^ required by this bound in `assert_debug`
+   | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
+   |                        ^^^^^ required by this bound in `as_dyn_debug`
 help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 3  + #[derive(Debug)]
 4  | struct NoTraitImpls;
    |
 
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+  --> tests/integration/ui/compile_fail/builder_derives.rs:26:25
+   |
+26 |     _no_impls_required: NoTraitImpls,
+   |                         ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+   |
+   = help: the trait `Debug` is not implemented for `NoTraitImpls`
+   = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
+note: required by a bound in `as_dyn_debug`
+  --> src/private/derives.rs
+   |
+   | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
+   |                        ^^^^^ required by this bound in `as_dyn_debug`
+help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
+   |
+3  + #[derive(Debug)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+  --> tests/integration/ui/compile_fail/builder_derives.rs:28:31
+   |
+28 |     _no_impl_optional: Option<NoTraitImpls>,
+   |                               ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+   |
+   = help: the trait `Debug` is not implemented for `NoTraitImpls`
+   = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
+note: required by a bound in `as_dyn_debug`
+  --> src/private/derives.rs
+   |
+   | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
+   |                        ^^^^^ required by this bound in `as_dyn_debug`
+help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
+   |
+3  + #[derive(Debug)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+  --> tests/integration/ui/compile_fail/builder_derives.rs:31:26
+   |
+31 |     _no_impl_optional_2: NoTraitImpls,
+   |                          ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+   |
+   = help: the trait `Debug` is not implemented for `NoTraitImpls`
+   = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
+note: required by a bound in `as_dyn_debug`
+  --> src/private/derives.rs
+   |
+   | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
+   |                        ^^^^^ required by this bound in `as_dyn_debug`
+help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
+   |
+3  + #[derive(Debug)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: the trait bound `StructContainsNonTrait: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/builder_derives.rs:38:6
+   |
+38 | impl StructContainsNonTrait {
+   |      ^^^^^^^^^^^^^^^^^^^^^^ the trait `Clone` is not implemented for `StructContainsNonTrait`
+
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/builder_derives.rs:18:46
+  --> tests/integration/ui/compile_fail/builder_derives.rs:44:28
    |
-18 |     fn method_contains_non_trait(_non_debug: NoTraitImpls, _x: u32) {}
-   |                                              ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
+44 |         _no_impl_start_fn: NoTraitImpls,
+   |                            ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
    |
-note: required by a bound in `assert_clone`
-  --> src/private/mod.rs
-   |
-   | pub fn assert_clone<T: Clone>() {}
-   |                        ^^^^^ required by this bound in `assert_clone`
 help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 3  + #[derive(Clone)]
 4  | struct NoTraitImpls;
    |
 
-error[E0277]: `NoTraitImpls` doesn't implement `Debug`
-  --> tests/integration/ui/compile_fail/builder_derives.rs:18:46
+error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/builder_derives.rs:46:29
    |
-18 |     fn method_contains_non_trait(_non_debug: NoTraitImpls, _x: u32) {}
-   |                                              ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+46 |         _no_impls_required: NoTraitImpls,
+   |                             ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
+   |
+note: required by a bound in `clone_member`
+  --> src/private/derives.rs
+   |
+   | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
+   |                        ^^^^^ required by this bound in `clone_member`
+help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
+   |
+3  + #[derive(Clone)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/builder_derives.rs:48:35
+   |
+48 |         _no_impl_optional: Option<NoTraitImpls>,
+   |                                   ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
+   |
+note: required by a bound in `clone_member`
+  --> src/private/derives.rs
+   |
+   | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
+   |                        ^^^^^ required by this bound in `clone_member`
+help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
+   |
+3  + #[derive(Clone)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/builder_derives.rs:51:30
+   |
+51 |         _no_impl_optional_2: NoTraitImpls,
+   |                              ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
+   |
+note: required by a bound in `clone_member`
+  --> src/private/derives.rs
+   |
+   | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
+   |                        ^^^^^ required by this bound in `clone_member`
+help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
+   |
+3  + #[derive(Clone)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: `StructContainsNonTrait` doesn't implement `Debug`
+  --> tests/integration/ui/compile_fail/builder_derives.rs:38:6
+   |
+38 | impl StructContainsNonTrait {
+   |      ^^^^^^^^^^^^^^^^^^^^^^ `StructContainsNonTrait` cannot be formatted using `{:?}`
+   |
+   = help: the trait `Debug` is not implemented for `StructContainsNonTrait`
+   = note: add `#[derive(Debug)]` to `StructContainsNonTrait` or manually `impl Debug for StructContainsNonTrait`
+note: required by a bound in `as_dyn_debug`
+  --> src/private/derives.rs
+   |
+   | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
+   |                        ^^^^^ required by this bound in `as_dyn_debug`
+
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+  --> tests/integration/ui/compile_fail/builder_derives.rs:44:28
+   |
+44 |         _no_impl_start_fn: NoTraitImpls,
+   |                            ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
    |
    = help: the trait `Debug` is not implemented for `NoTraitImpls`
    = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
-note: required by a bound in `assert_debug`
-  --> src/private/mod.rs
+note: required by a bound in `as_dyn_debug`
+  --> src/private/derives.rs
    |
-   | pub fn assert_debug<T: ?Sized + core::fmt::Debug>() {}
-   |                                 ^^^^^^^^^^^^^^^^ required by this bound in `assert_debug`
+   | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
+   |                        ^^^^^ required by this bound in `as_dyn_debug`
+help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
+   |
+3  + #[derive(Debug)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+  --> tests/integration/ui/compile_fail/builder_derives.rs:46:29
+   |
+46 |         _no_impls_required: NoTraitImpls,
+   |                             ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+   |
+   = help: the trait `Debug` is not implemented for `NoTraitImpls`
+   = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
+note: required by a bound in `as_dyn_debug`
+  --> src/private/derives.rs
+   |
+   | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
+   |                        ^^^^^ required by this bound in `as_dyn_debug`
+help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
+   |
+3  + #[derive(Debug)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+  --> tests/integration/ui/compile_fail/builder_derives.rs:48:35
+   |
+48 |         _no_impl_optional: Option<NoTraitImpls>,
+   |                                   ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+   |
+   = help: the trait `Debug` is not implemented for `NoTraitImpls`
+   = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
+note: required by a bound in `as_dyn_debug`
+  --> src/private/derives.rs
+   |
+   | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
+   |                        ^^^^^ required by this bound in `as_dyn_debug`
+help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
+   |
+3  + #[derive(Debug)]
+4  | struct NoTraitImpls;
+   |
+
+error[E0277]: `NoTraitImpls` doesn't implement `Debug`
+  --> tests/integration/ui/compile_fail/builder_derives.rs:51:30
+   |
+51 |         _no_impl_optional_2: NoTraitImpls,
+   |                              ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
+   |
+   = help: the trait `Debug` is not implemented for `NoTraitImpls`
+   = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
+note: required by a bound in `as_dyn_debug`
+  --> src/private/derives.rs
+   |
+   | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
+   |                        ^^^^^ required by this bound in `as_dyn_debug`
 help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 3  + #[derive(Debug)]

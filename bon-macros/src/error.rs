@@ -1,12 +1,11 @@
 use crate::util::prelude::*;
-use proc_macro2::{TokenStream as TokenStream2, TokenTree};
-use quote::{quote, ToTokens};
+use proc_macro2::TokenTree;
 use syn::parse::Parse;
 
 /// Handle the error returned from the macro logic. This may be either a syntax
-/// error or a logic error. In either case, we want to return a [`TokenStream2`]
+/// error or a logic error. In either case, we want to return a [`TokenStream`]
 /// that still provides good IDE experience. See [`Fallback`] for details.
-pub(crate) fn error_into_token_stream(err: Error, item: TokenStream2) -> TokenStream2 {
+pub(crate) fn error_into_token_stream(err: Error, item: TokenStream) -> TokenStream {
     let compile_error = err.write_errors();
 
     syn::parse2::<Fallback>(item)
@@ -28,12 +27,12 @@ pub(crate) fn error_into_token_stream(err: Error, item: TokenStream2) -> TokenSt
 /// attributes that need to be processed by this macro to avoid the IDE from
 /// reporting those as well.
 struct Fallback {
-    output: TokenStream2,
+    output: TokenStream,
 }
 
 impl Parse for Fallback {
     fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
-        let mut output = TokenStream2::new();
+        let mut output = TokenStream::new();
 
         loop {
             let found_attr = input.step(|cursor| {
@@ -44,14 +43,27 @@ impl Parse for Fallback {
                             let fallback: Self = syn::parse2(group.stream())?;
                             let new_group =
                                 proc_macro2::Group::new(group.delimiter(), fallback.output);
-
                             output.extend([TokenTree::Group(new_group)]);
                         }
                         TokenTree::Punct(punct) if punct.as_char() == '#' => {
                             return Ok((true, cursor));
                         }
                         TokenTree::Punct(_) | TokenTree::Ident(_) | TokenTree::Literal(_) => {
-                            output.extend([tt]);
+                            // Workaround for the RA bug where it generates an invalid Punct token tree with
+                            // the character `{`, which is amplified by a bug in `proc_macro2` where its `Punct`
+                            // doesn't panic early on invalid `Punct`.
+                            //
+                            // If this `extend` panics it means there are some invalid token trees in the input.
+                            // We can't do anything about it, and we just ignore them.
+                            //
+                            // ## Issues
+                            //
+                            // - [Bug in RA](https://github.com/rust-lang/rust-analyzer/issues/18244)
+                            // - [Bug in proc-macro2](https://github.com/dtolnay/proc-macro2/issues/470)
+                            let _can_panic =
+                                std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                                    output.extend([tt]);
+                                }));
                         }
                     }
 
@@ -75,7 +87,7 @@ impl Parse for Fallback {
 }
 
 impl ToTokens for Fallback {
-    fn to_tokens(&self, tokens: &mut TokenStream2) {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
         self.output.to_tokens(tokens);
     }
 }

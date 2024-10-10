@@ -274,7 +274,7 @@ If you can't figure something out, consult the docs and maybe use that search `ð
             <div style="display: flex; align-items: center">
                 <VPSocialLink
                     icon="discord"
-                    link="https://discord.gg/8VJ8J3c"
+                    link="https://discord.gg/QcBYSamw4c"
                 />
                 <a href="https://discord.gg/QcBYSamw4c">Discord</a>
             </div>

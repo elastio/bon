@@ -2,13 +2,13 @@ use super::builder_params::BuilderDerives;
 use super::BuilderGenCtx;
 use crate::builder::builder_gen::Member;
 use crate::util::prelude::*;
-use quote::quote;
+use darling::ast::GenericParamExt;
 
 impl BuilderGenCtx {
-    pub(crate) fn builder_derives(&self) -> TokenStream2 {
+    pub(crate) fn builder_derives(&self) -> TokenStream {
         let BuilderDerives { clone, debug } = &self.builder_type.derives;
 
-        let mut tokens = TokenStream2::new();
+        let mut tokens = TokenStream::new();
 
         if clone.is_present() {
             tokens.extend(self.derive_clone());
@@ -21,103 +21,122 @@ impl BuilderGenCtx {
         tokens
     }
 
-    fn builder_component_types(&self) -> impl Iterator<Item = &'_ syn::Type> {
-        let receiver_ty = self
-            .receiver()
-            .map(|receiver| &receiver.without_self_keyword);
+    /// We follow the logic of the standard `#[derive(...)]` macros such as `Clone` and `Debug`.
+    /// They add bounds of their respective traits to every generic type parameter on the struct
+    /// without trying to analyze if that bound is actually required for the derive to work, so
+    /// it's a conservative approach.
+    fn where_clause_for_derive(&self, target_trait_bounds: &TokenStream) -> TokenStream {
+        let target_trait_bounds_predicates = self
+            .generics
+            .decl_without_defaults
+            .iter()
+            .filter_map(syn::GenericParam::as_type_param)
+            .map(|param| {
+                let ident = &param.ident;
+                quote! {
+                    #ident: #target_trait_bounds
+                }
+            });
 
-        let member_types = self.named_members().map(|member| &member.norm_ty);
+        let base_predicates = self.generics.where_clause_predicates();
 
-        std::iter::empty()
-            .chain(receiver_ty)
-            .chain(member_types)
-            .map(Box::as_ref)
+        quote! {
+            where
+                #( #base_predicates, )*
+                #( #target_trait_bounds_predicates, )*
+        }
     }
 
-    fn derive_clone(&self) -> TokenStream2 {
+    fn derive_clone(&self) -> TokenStream {
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
         let builder_ident = &self.builder_type.ident;
 
         let clone = quote!(::core::clone::Clone);
 
-        let clone_receiver = self.receiver().map(|_| {
+        let clone_receiver = self.receiver().map(|receiver| {
+            let ty = &receiver.without_self_keyword;
             quote! {
-                __private_receiver: #clone::clone(&self.__private_receiver),
+                __private_receiver: <#ty as #clone>::clone(&self.__private_receiver),
             }
         });
 
         let clone_start_fn_args = self.start_fn_args().next().map(|_| {
+            let clone_start_fn_args = self.start_fn_args().map(|arg| {
+                let ty = &arg.base.ty.norm;
+                let index = &arg.index;
+                quote! {
+                    <#ty as #clone>::clone(&self.__private_start_fn_args.#index)
+                }
+            });
+
             quote! {
-                __private_start_fn_args: #clone::clone(&self.__private_start_fn_args),
+                __private_start_fn_args: ( #(#clone_start_fn_args,)* ),
             }
         });
 
-        let builder_where_clause_predicates = self.generics.where_clause_predicates();
+        let where_clause = self.where_clause_for_derive(&clone);
+        let state_mod = &self.state_mod.ident;
 
-        let builder_component_types = self.builder_component_types();
+        let clone_named_members = self.named_members().map(|member| {
+            let member_index = &member.index;
+
+            // The type hints here are necessary to get better error messages
+            // that point directly to the types that don't implement `Clone`
+            // in the input code using the span info from the type hints.
+            let ty = member.underlying_norm_ty();
+
+            quote! {
+                ::bon::private::derives::clone_member::<#ty>(
+                    &self.__private_named_members.#member_index
+                )
+            }
+        });
 
         quote! {
             #[automatically_derived]
-            impl <
+            impl<
                 #(#generics_decl,)*
-                ___State
+                BuilderState: #state_mod::State
             >
-            #clone for #builder_ident <
+            #clone for #builder_ident<
                 #(#generic_args,)*
-                ___State
+                BuilderState
             >
-            where
-                #(#builder_where_clause_predicates,)*
-                ___State: #clone,
+            #where_clause
             {
                 fn clone(&self) -> Self {
-                    #(::bon::private::assert_clone::<#builder_component_types>();)*
                     Self {
                         __private_phantom: ::core::marker::PhantomData,
                         #clone_receiver
                         #clone_start_fn_args
-                        __private_named_members: self.__private_named_members.clone(),
+
+                        // We clone named members individually instead of cloning
+                        // the entire tuple to improve error messages in case if
+                        // one of the members doesn't implement `Clone`. This avoids
+                        // a sentence that say smth like
+                        // ```
+                        // required for `(...huge tuple type...)` to implement `Clone`
+                        // ```
+                        __private_named_members: ( #( #clone_named_members, )* ),
                     }
                 }
             }
         }
     }
 
-    fn derive_debug(&self) -> TokenStream2 {
-        let generics_decl = &self.generics.decl_without_defaults;
-        let generic_args = &self.generics.args;
-        let builder_ident = &self.builder_type.ident;
-
-        let debug = quote!(::core::fmt::Debug);
-
-        let format_receiver = self.receiver().map(|_| {
-            quote! {
-                output.field("self", &self.__private_receiver);
-            }
-        });
-
-        let builder_where_clause_predicates = self.generics.where_clause_predicates();
-        let builder_component_types = self.builder_component_types();
-
-        let builder_ident_str = builder_ident.to_string();
-
-        let state_type_vars = self
-            .named_members()
-            .map(|member| &member.generic_var_ident)
-            .collect::<Vec<_>>();
-
+    fn derive_debug(&self) -> TokenStream {
         let format_members = self.members.iter().filter_map(|member| {
             match member {
                 Member::Named(member) => {
                     let member_index = &member.index;
-                    let member_ident_str = member.orig_ident.to_string();
+                    let member_ident_str = &member.name.snake_raw_str;
+                    let member_ty = member.underlying_norm_ty();
                     Some(quote! {
-                        // Skip members that are not set to reduce noise
-                        if self.__private_named_members.#member_index.is_set() {
+                        if let ::core::option::Option::Some(value) = &self.__private_named_members.#member_index {
                             output.field(
                                 #member_ident_str,
-                                &self.__private_named_members.#member_index
+                                ::bon::private::derives::as_dyn_debug::<#member_ty>(value)
                             );
                         }
                     })
@@ -125,10 +144,13 @@ impl BuilderGenCtx {
                 Member::StartFnArg(member) => {
                     let member_index = &member.index;
                     let member_ident_str = member.base.ident.to_string();
+                    let member_ty = &member.base.ty.norm;
                     Some(quote! {
                         output.field(
                             #member_ident_str,
-                            &self.__private_start_fn_args.#member_index
+                            ::bon::private::derives::as_dyn_debug::<#member_ty>(
+                                &self.__private_start_fn_args.#member_index
+                            )
                         );
                     })
                 }
@@ -140,23 +162,39 @@ impl BuilderGenCtx {
             }
         });
 
+        let format_receiver = self.receiver().map(|receiver| {
+            let ty = &receiver.without_self_keyword;
+            quote! {
+                output.field(
+                    "self",
+                    ::bon::private::derives::as_dyn_debug::<#ty>(
+                        &self.__private_receiver
+                    )
+                );
+            }
+        });
+
+        let debug = quote!(::core::fmt::Debug);
+        let where_clause = self.where_clause_for_derive(&debug);
+        let state_mod = &self.state_mod.ident;
+        let generics_decl = &self.generics.decl_without_defaults;
+        let generic_args = &self.generics.args;
+        let builder_ident = &self.builder_type.ident;
+        let builder_ident_str = builder_ident.to_string();
+
         quote! {
             #[automatically_derived]
-            impl <
+            impl<
                 #(#generics_decl,)*
-                #(#state_type_vars,)*
+                BuilderState: #state_mod::State
             >
-            #debug for #builder_ident <
+            #debug for #builder_ident<
                 #(#generic_args,)*
-                (#(#state_type_vars,)*)
+                BuilderState
             >
-            where
-                #(#builder_where_clause_predicates,)*
-                #(#state_type_vars: ::bon::private::MemberState + ::core::fmt::Debug,)*
+            #where_clause
             {
                 fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                    #(::bon::private::assert_debug::<#builder_component_types>();)*
-
                     let mut output = f.debug_struct(#builder_ident_str);
 
                     #format_receiver

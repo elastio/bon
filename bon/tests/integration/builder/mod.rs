@@ -1,8 +1,11 @@
 mod attr_default;
+mod attr_overwritable;
 mod attr_expose_positional_fn;
 mod attr_into;
 mod attr_on;
 mod attr_skip;
+mod attr_transparent;
+mod attr_with;
 mod builder_derives;
 mod cfgs;
 mod generics;
@@ -43,7 +46,7 @@ fn lifetime_elision() {
 
 #[cfg(feature = "std")]
 #[tokio::test]
-async fn async_func() {
+async fn async_fn() {
     #[builder]
     async fn sut(arg: u32) -> u32 {
         std::future::ready(arg).await
@@ -55,7 +58,7 @@ async fn async_func() {
 
 #[cfg(feature = "std")]
 #[tokio::test]
-async fn async_func_with_future_arg() {
+async fn async_fn_with_future_arg() {
     #[builder]
     async fn sut<Fut: std::future::Future + Send>(fut: Fut) -> Fut::Output {
         fut.await
@@ -73,7 +76,7 @@ async fn async_func_with_future_arg() {
 
 #[test]
 #[allow(unsafe_code)]
-fn unsafe_func() {
+fn unsafe_fn() {
     #[builder]
     unsafe fn sut(arg: bool) {
         let _ = arg;
