@@ -108,7 +108,7 @@ impl Member {
             .map(|member| {
                 for attr in member.attrs {
                     if attr.meta.path().is_ident("builder") {
-                        crate::parsing::require_non_empty_paren_if_meta_list(&attr.meta)?;
+                        crate::parsing::require_non_empty_paren_meta_list(&attr.meta)?;
                     }
                 }
 

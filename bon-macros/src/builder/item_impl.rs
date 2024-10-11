@@ -94,7 +94,9 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
                 .iter()
                 .filter(|attr| attr.path().is_ident("builder"))
                 .map(|attr| {
-                    crate::parsing::require_non_empty_paren_if_meta_list(&attr.meta)?;
+                    if let syn::Meta::List(_) = attr.meta {
+                        crate::parsing::require_non_empty_paren_meta_list(&attr.meta)?;
+                    }
                     let meta_list = darling::util::parse_attribute_to_meta_list(attr)?;
                     NestedMeta::parse_meta_list(meta_list.tokens).map_err(Into::into)
                 })

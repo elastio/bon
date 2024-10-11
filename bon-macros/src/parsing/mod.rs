@@ -12,11 +12,11 @@ use crate::util::prelude::*;
 use darling::FromMeta;
 
 pub(crate) fn parse_non_empty_paren_meta_list<T: FromMeta>(meta: &syn::Meta) -> Result<T> {
-    require_non_empty_paren_if_meta_list(meta)?;
+    require_non_empty_paren_meta_list(meta)?;
     T::from_meta(meta)
 }
 
-pub(crate) fn require_non_empty_paren_if_meta_list(meta: &syn::Meta) -> Result {
+pub(crate) fn require_non_empty_paren_meta_list(meta: &syn::Meta) -> Result {
     match meta {
         syn::Meta::List(meta) => {
             meta.require_parens_delim()?;
@@ -35,7 +35,7 @@ pub(crate) fn require_non_empty_paren_if_meta_list(meta: &syn::Meta) -> Result {
             `#[{0}(...)]`",
             darling::util::path_to_string(path)
         ),
-        _ => {}
+        syn::Meta::NameValue(_) => {}
     }
 
     Ok(())

@@ -149,8 +149,8 @@ pub fn greet(
 
 #[builder]
 pub fn fn_with_impl_trait(
-    #[builder] _arg1: impl std::fmt::Debug + Clone,
-    #[builder] _arg2: impl std::fmt::Debug,
+    _arg1: impl std::fmt::Debug + Clone,
+    _arg2: impl std::fmt::Debug,
 ) {
 }
 
