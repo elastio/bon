@@ -1,3 +1,7 @@
+#![doc(
+    html_logo_url = "https://elastio.github.io/bon/bon-logo-thumb.png",
+    html_favicon_url = "https://elastio.github.io/bon/bon-logo-medium.png"
+)]
 #![doc = include_str!("../README.md")]
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
