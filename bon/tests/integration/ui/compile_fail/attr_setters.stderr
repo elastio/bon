@@ -47,7 +47,7 @@ error: `option_fn` setter function applies only to members with `#[builder(defau
    |                                    ^^^^^^^^^
 
 error: expected at least one parameter in parentheses
-  --> tests/integration/ui/compile_fail/attr_setters.rs:71:15
+  --> tests/integration/ui/compile_fail/attr_setters.rs:71:22
    |
 71 |     #[builder(setters())]
-   |               ^^^^^^^
+   |                      ^^

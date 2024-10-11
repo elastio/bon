@@ -106,6 +106,12 @@ impl Member {
         let mut members = members
             .into_iter()
             .map(|member| {
+                for attr in member.attrs {
+                    if attr.meta.path().is_ident("builder") {
+                        crate::parsing::require_non_empty_paren_if_meta_list(&attr.meta)?;
+                    }
+                }
+
                 let params = MemberParams::from_attributes(member.attrs)?;
                 params.validate(origin)?;
                 Ok((member, params))

@@ -13,9 +13,6 @@
     deprecated,
 )]
 
-/// Used to trigger deprecation warnings from the macros.
-pub mod deprecations;
-
 /// Used for providing better IDE hints (completions and syntax highlighting).
 pub mod ide;
 

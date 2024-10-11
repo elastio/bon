@@ -1,8 +1,8 @@
 error: expected at least one parameter in parentheses
-  --> tests/integration/ui/compile_fail/attr_derive.rs:59:11
+  --> tests/integration/ui/compile_fail/attr_derive.rs:59:17
    |
 59 | #[builder(derive())]
-   |           ^^^^^^
+   |                 ^^
 
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
  --> tests/integration/ui/compile_fail/attr_derive.rs:9:23

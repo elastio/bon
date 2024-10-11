@@ -60,7 +60,7 @@ impl ItemParamsParsing<'_> {
             docs: Option<SpannedKey<syn::Meta>>,
         }
 
-        let full = crate::parsing::require_non_empty_paren_meta_list(meta)?;
+        let full = crate::parsing::parse_non_empty_paren_meta_list(meta)?;
 
         let is_empty = matches!(
             full,

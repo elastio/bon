@@ -91,7 +91,7 @@ impl FromMeta for OnParams {
             syn::Meta::List(meta) => meta,
             _ => bail!(
                 meta,
-                "Expected an attribute of form `on(type_pattern, ...)`"
+                "expected an attribute of form `on(type_pattern, ...)`"
             ),
         };
 

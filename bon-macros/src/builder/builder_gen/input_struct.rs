@@ -36,7 +36,14 @@ impl StructInputParams {
             .map(|attr| {
                 let meta = match &attr.meta {
                     syn::Meta::List(meta) => meta,
-                    _ => bail!(attr, "expected `#[builder(...)]` syntax"),
+                    syn::Meta::Path(_) => bail!(
+                        &attr.meta,
+                        "this empty `#[builder]` attribute is redundant; remove it"
+                    ),
+                    syn::Meta::NameValue(_) => bail!(
+                        &attr.meta,
+                        "`#[builder = ...]` syntax is unsupported; use `#[builder(...)]` instead"
+                    ),
                 };
 
                 if !matches!(meta.delimiter, syn::MacroDelimiter::Paren(_)) {
@@ -45,6 +52,10 @@ impl StructInputParams {
                         "wrong delimiter {:?}, expected `#[builder(...)]` syntax",
                         meta.delimiter
                     );
+                }
+
+                if meta.tokens.is_empty() {
+                    bail!(&meta, "this empty `#[builder()]` attribute is redundant; remove it");
                 }
 
                 let meta = darling::ast::NestedMeta::parse_meta_list(meta.tokens.clone())?;

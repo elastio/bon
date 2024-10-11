@@ -1,0 +1,53 @@
+error: this empty `#[builder]` attribute is redundant; remove it
+ --> tests/integration/ui/compile_fail/attr_builder.rs:4:3
+  |
+4 | #[builder]
+  |   ^^^^^^^
+
+error: this empty `#[builder()]` attribute is redundant; remove it
+ --> tests/integration/ui/compile_fail/attr_builder.rs:8:3
+  |
+8 | #[builder()]
+  |   ^^^^^^^
+
+error: this empty `#[builder]` attribute is unexpected; remove it or pass some parameters in parentheses: `#[builder(...)]`
+  --> tests/integration/ui/compile_fail/attr_builder.rs:13:7
+   |
+13 |     #[builder]
+   |       ^^^^^^^
+
+error: expected at least one parameter in parentheses
+  --> tests/integration/ui/compile_fail/attr_builder.rs:19:14
+   |
+19 |     #[builder()]
+   |              ^^
+
+error: this empty `#[builder]` attribute is unexpected; remove it or pass some parameters in parentheses: `#[builder(...)]`
+  --> tests/integration/ui/compile_fail/attr_builder.rs:24:41
+   |
+24 | fn fn_empty_member_level_builder_attr(#[builder] _x: u32) {}
+   |                                         ^^^^^^^
+
+error: expected at least one parameter in parentheses
+  --> tests/integration/ui/compile_fail/attr_builder.rs:27:60
+   |
+27 | fn fn_empty_member_level_builder_attr_with_parens(#[builder()] _x: u32) {}
+   |                                                            ^^
+
+error: this empty `#[builder]` attribute is unexpected; remove it or pass some parameters in parentheses: `#[builder(...)]`
+  --> tests/integration/ui/compile_fail/attr_builder.rs:34:42
+   |
+34 |     fn empty_member_level_builder_attr(#[builder] _x: u32) {}
+   |                                          ^^^^^^^
+
+error: expected at least one parameter in parentheses
+  --> tests/integration/ui/compile_fail/attr_builder.rs:40:61
+   |
+40 |     fn empty_member_level_builder_attr_with_parens(#[builder()] _x: u32) {}
+   |                                                             ^^
+
+error: to generate a builder for a struct, use `#[derive(bon::Builder)]` instead; `#[bon::builder]` syntax is supported only for functions
+  --> tests/integration/ui/compile_fail/attr_builder.rs:50:1
+   |
+50 | struct LegacyBuilderProcMacroAttrOnStruct {}
+   | ^^^^^^

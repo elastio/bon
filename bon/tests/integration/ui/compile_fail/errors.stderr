@@ -58,17 +58,17 @@ error: nested attributes are not allowed in the type pattern of #[builder(on(typ
 69 | #[builder(on(fn(#[attr] a: u32), into))]
    |                 ^
 
-error: Expected an attribute of form `on(type_pattern, ...)`
+error: this empty `#[on]` attribute is unexpected; remove it or pass some parameters in parentheses: `#[on(...)]`
   --> tests/integration/ui/compile_fail/errors.rs:72:11
    |
 72 | #[builder(on)]
    |           ^^
 
 error: expected at least one parameter in parentheses
-  --> tests/integration/ui/compile_fail/errors.rs:75:11
+  --> tests/integration/ui/compile_fail/errors.rs:75:13
    |
 75 | #[builder(on())]
-   |           ^^
+   |             ^^
 
 error: expected `,`
   --> tests/integration/ui/compile_fail/errors.rs:78:1
@@ -87,10 +87,10 @@ error: this #[builder(on(type_pattern, ...))] contains no options to override th
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error: expected at least one parameter in parentheses
-  --> tests/integration/ui/compile_fail/errors.rs:85:11
+  --> tests/integration/ui/compile_fail/errors.rs:85:19
    |
 85 | #[builder(start_fn())]
-   |           ^^^^^^^^
+   |                   ^^
 
 error: `skip` attribute can't be specified together with `into`
   --> tests/integration/ui/compile_fail/errors.rs:90:15
@@ -151,9 +151,9 @@ error: Found multiple #[must_use], but bon only works with exactly one (or less)
     | ^
 
 error: expected a closure e.g. `with = |param: T| expression`
-   --> tests/integration/ui/compile_fail/errors.rs:136:15
+   --> tests/integration/ui/compile_fail/errors.rs:133:15
     |
-136 |     #[builder(with = 42)]
+133 |     #[builder(with = 42)]
     |               ^^^^
 
 warning: unused attribute
@@ -169,15 +169,6 @@ note: attribute also specified here
     | ^^^^^^^^^^^
     = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
     = note: `#[warn(unused_attributes)]` on by default
-
-warning: use of deprecated module `bon::private::deprecations::builder_attribute_on_a_struct`: #[bon::builder] on top of a struct is deprecated; use `#[derive(bon::Builder)]` instead; see more details at https://elastio.github.io/bon/blog/bon-builder-v2-2-release#derive-builder-syntax-for-structs
-   --> tests/integration/ui/compile_fail/errors.rs:131:1
-    |
-131 | #[builder]
-    | ^^^^^^^^^^
-    |
-    = note: `#[warn(deprecated)]` on by default
-    = note: this warning originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0599]: no method named `x` found for struct `SkipGeneratesNoSetterBuilder` in the current scope
   --> tests/integration/ui/compile_fail/errors.rs:21:38

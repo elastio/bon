@@ -40,18 +40,6 @@ pub(crate) fn generate_from_attr(params: TokenStream, item: TokenStream) -> Toke
 fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<TokenStream> {
     let item: syn::Item = syn::parse2(item)?;
 
-    if let syn::Item::Struct(item_struct) = item {
-        return Ok(quote! {
-            // Triggers a deprecation warning if the user is using the old attribute
-            // syntax on the structs instead of the derive syntax.
-            use ::bon::private::deprecations::builder_attribute_on_a_struct as _;
-
-            #[derive(::bon::Builder)]
-            #[builder(#params)]
-            #item_struct
-        });
-    }
-
     let macro_path = syn::parse_quote!(::bon::builder);
 
     let ctx = ExpandCfg {
@@ -69,6 +57,13 @@ fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<Toke
 
     let main_output = match item {
         syn::Item::Fn(item_fn) => item_fn::generate(FromMeta::from_list(nested_meta)?, item_fn)?,
+        syn::Item::Struct(struct_item) => {
+            bail!(
+                &struct_item.struct_token,
+                "to generate a builder for a struct, use `#[derive(bon::Builder)]` instead; \
+                 `#[bon::builder]` syntax is supported only for functions"
+            )
+        }
         _ => bail!(
             &Span::call_site(),
             "only `fn` items are supported by the `#[bon::builder]` attribute"
