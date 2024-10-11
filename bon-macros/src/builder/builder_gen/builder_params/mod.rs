@@ -41,11 +41,11 @@ pub(crate) struct BuilderParams {
     #[darling(default, with = parse_state_mod)]
     pub(crate) state_mod: ItemParams,
 
-    #[darling(multiple, with = crate::parsing::require_paren_delim_for_meta_list)]
+    #[darling(multiple, with = crate::parsing::require_non_empty_paren_meta_list)]
     pub(crate) on: Vec<OnParams>,
 
     /// Specifies the derives to apply to the builder.
-    #[darling(default, with = crate::parsing::require_paren_delim_for_meta_list)]
+    #[darling(default, with = crate::parsing::require_non_empty_paren_meta_list)]
     pub(crate) derive: BuilderDerives,
 }
 

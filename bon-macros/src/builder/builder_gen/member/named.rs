@@ -1,5 +1,5 @@
 use super::params::MemberParams;
-use super::{params, MemberOrigin};
+use super::{params, MemberOrigin, SettersParams};
 use crate::builder::builder_gen::builder_params::OnParams;
 use crate::builder::builder_gen::member::params::SettersFnParams;
 use crate::normalization::SyntaxVariant;

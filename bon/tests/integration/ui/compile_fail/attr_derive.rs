@@ -55,4 +55,8 @@ impl StructContainsNonTrait {
     }
 }
 
+#[derive(Builder)]
+#[builder(derive())]
+struct EmptyDerives {}
+
 fn main() {}

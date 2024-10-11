@@ -35,7 +35,7 @@ pub(crate) struct MemberParams {
     pub(crate) name: Option<syn::Ident>,
 
     /// Configurations for the setter methods.
-    #[darling(with = crate::parsing::require_paren_delim_for_meta_list)]
+    #[darling(with = crate::parsing::require_non_empty_paren_meta_list)]
     pub(crate) setters: Option<SettersParams>,
 
     /// Where to place the member in the generated builder methods API.

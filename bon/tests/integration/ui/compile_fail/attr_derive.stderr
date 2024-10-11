@@ -1,5 +1,11 @@
+error: expected at least one parameter in parentheses
+  --> tests/integration/ui/compile_fail/attr_derive.rs:59:11
+   |
+59 | #[builder(derive())]
+   |           ^^^^^^
+
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
- --> tests/integration/ui/compile_fail/builder_derives.rs:9:23
+ --> tests/integration/ui/compile_fail/attr_derive.rs:9:23
   |
 9 |     no_impl_start_fn: NoTraitImpls,
   |                       ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
@@ -11,7 +17,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
   |
 
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/builder_derives.rs:11:24
+  --> tests/integration/ui/compile_fail/attr_derive.rs:11:24
    |
 11 |     no_impls_required: NoTraitImpls,
    |                        ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
@@ -28,7 +34,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/builder_derives.rs:13:30
+  --> tests/integration/ui/compile_fail/attr_derive.rs:13:30
    |
 13 |     no_impl_optional: Option<NoTraitImpls>,
    |                              ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
@@ -45,7 +51,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/builder_derives.rs:16:25
+  --> tests/integration/ui/compile_fail/attr_derive.rs:16:25
    |
 16 |     no_impl_optional_2: NoTraitImpls,
    |                         ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
@@ -62,7 +68,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
- --> tests/integration/ui/compile_fail/builder_derives.rs:9:23
+ --> tests/integration/ui/compile_fail/attr_derive.rs:9:23
   |
 9 |     no_impl_start_fn: NoTraitImpls,
   |                       ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
@@ -81,7 +87,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
-  --> tests/integration/ui/compile_fail/builder_derives.rs:11:24
+  --> tests/integration/ui/compile_fail/attr_derive.rs:11:24
    |
 11 |     no_impls_required: NoTraitImpls,
    |                        ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
@@ -100,7 +106,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
-  --> tests/integration/ui/compile_fail/builder_derives.rs:13:30
+  --> tests/integration/ui/compile_fail/attr_derive.rs:13:30
    |
 13 |     no_impl_optional: Option<NoTraitImpls>,
    |                              ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
@@ -119,7 +125,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
-  --> tests/integration/ui/compile_fail/builder_derives.rs:16:25
+  --> tests/integration/ui/compile_fail/attr_derive.rs:16:25
    |
 16 |     no_impl_optional_2: NoTraitImpls,
    |                         ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
@@ -138,7 +144,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/builder_derives.rs:24:24
+  --> tests/integration/ui/compile_fail/attr_derive.rs:24:24
    |
 24 |     _no_impl_start_fn: NoTraitImpls,
    |                        ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
@@ -150,7 +156,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/builder_derives.rs:26:25
+  --> tests/integration/ui/compile_fail/attr_derive.rs:26:25
    |
 26 |     _no_impls_required: NoTraitImpls,
    |                         ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
@@ -167,7 +173,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/builder_derives.rs:28:31
+  --> tests/integration/ui/compile_fail/attr_derive.rs:28:31
    |
 28 |     _no_impl_optional: Option<NoTraitImpls>,
    |                               ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
@@ -184,7 +190,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/builder_derives.rs:31:26
+  --> tests/integration/ui/compile_fail/attr_derive.rs:31:26
    |
 31 |     _no_impl_optional_2: NoTraitImpls,
    |                          ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
@@ -201,7 +207,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
-  --> tests/integration/ui/compile_fail/builder_derives.rs:24:24
+  --> tests/integration/ui/compile_fail/attr_derive.rs:24:24
    |
 24 |     _no_impl_start_fn: NoTraitImpls,
    |                        ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
@@ -220,7 +226,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
-  --> tests/integration/ui/compile_fail/builder_derives.rs:26:25
+  --> tests/integration/ui/compile_fail/attr_derive.rs:26:25
    |
 26 |     _no_impls_required: NoTraitImpls,
    |                         ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
@@ -239,7 +245,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
-  --> tests/integration/ui/compile_fail/builder_derives.rs:28:31
+  --> tests/integration/ui/compile_fail/attr_derive.rs:28:31
    |
 28 |     _no_impl_optional: Option<NoTraitImpls>,
    |                               ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
@@ -258,7 +264,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
-  --> tests/integration/ui/compile_fail/builder_derives.rs:31:26
+  --> tests/integration/ui/compile_fail/attr_derive.rs:31:26
    |
 31 |     _no_impl_optional_2: NoTraitImpls,
    |                          ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
@@ -277,13 +283,13 @@ help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 
 error[E0277]: the trait bound `StructContainsNonTrait: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/builder_derives.rs:38:6
+  --> tests/integration/ui/compile_fail/attr_derive.rs:38:6
    |
 38 | impl StructContainsNonTrait {
    |      ^^^^^^^^^^^^^^^^^^^^^^ the trait `Clone` is not implemented for `StructContainsNonTrait`
 
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/builder_derives.rs:44:28
+  --> tests/integration/ui/compile_fail/attr_derive.rs:44:28
    |
 44 |         _no_impl_start_fn: NoTraitImpls,
    |                            ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
@@ -295,7 +301,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/builder_derives.rs:46:29
+  --> tests/integration/ui/compile_fail/attr_derive.rs:46:29
    |
 46 |         _no_impls_required: NoTraitImpls,
    |                             ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
@@ -312,7 +318,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/builder_derives.rs:48:35
+  --> tests/integration/ui/compile_fail/attr_derive.rs:48:35
    |
 48 |         _no_impl_optional: Option<NoTraitImpls>,
    |                                   ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
@@ -329,7 +335,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/builder_derives.rs:51:30
+  --> tests/integration/ui/compile_fail/attr_derive.rs:51:30
    |
 51 |         _no_impl_optional_2: NoTraitImpls,
    |                              ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
@@ -346,7 +352,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Clone)]`
    |
 
 error[E0277]: `StructContainsNonTrait` doesn't implement `Debug`
-  --> tests/integration/ui/compile_fail/builder_derives.rs:38:6
+  --> tests/integration/ui/compile_fail/attr_derive.rs:38:6
    |
 38 | impl StructContainsNonTrait {
    |      ^^^^^^^^^^^^^^^^^^^^^^ `StructContainsNonTrait` cannot be formatted using `{:?}`
@@ -360,7 +366,7 @@ note: required by a bound in `as_dyn_debug`
    |                        ^^^^^ required by this bound in `as_dyn_debug`
 
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
-  --> tests/integration/ui/compile_fail/builder_derives.rs:44:28
+  --> tests/integration/ui/compile_fail/attr_derive.rs:44:28
    |
 44 |         _no_impl_start_fn: NoTraitImpls,
    |                            ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
@@ -379,7 +385,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
-  --> tests/integration/ui/compile_fail/builder_derives.rs:46:29
+  --> tests/integration/ui/compile_fail/attr_derive.rs:46:29
    |
 46 |         _no_impls_required: NoTraitImpls,
    |                             ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
@@ -398,7 +404,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
-  --> tests/integration/ui/compile_fail/builder_derives.rs:48:35
+  --> tests/integration/ui/compile_fail/attr_derive.rs:48:35
    |
 48 |         _no_impl_optional: Option<NoTraitImpls>,
    |                                   ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`
@@ -417,7 +423,7 @@ help: consider annotating `NoTraitImpls` with `#[derive(Debug)]`
    |
 
 error[E0277]: `NoTraitImpls` doesn't implement `Debug`
-  --> tests/integration/ui/compile_fail/builder_derives.rs:51:30
+  --> tests/integration/ui/compile_fail/attr_derive.rs:51:30
    |
 51 |         _no_impl_optional_2: NoTraitImpls,
    |                              ^^^^^^^^^^^^ `NoTraitImpls` cannot be formatted using `{:?}`

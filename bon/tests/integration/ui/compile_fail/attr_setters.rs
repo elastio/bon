@@ -66,4 +66,10 @@ struct OptionFnSetterWithTransparent {
     member: Option<i32>,
 }
 
+#[derive(Builder)]
+struct EmptySettersConfig {
+    #[builder(setters())]
+    member: i32,
+}
+
 fn main() {}

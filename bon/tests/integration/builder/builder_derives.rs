@@ -80,17 +80,6 @@ fn builder_with_receiver() {
 }
 
 #[test]
-fn empty_derives() {
-    #[derive(Builder)]
-    #[builder(derive())]
-    struct Sut {
-        _arg1: bool,
-    }
-
-    let _ = Sut::builder().arg1(true).build();
-}
-
-#[test]
 fn skipped_members() {
     struct NoDebug;
 

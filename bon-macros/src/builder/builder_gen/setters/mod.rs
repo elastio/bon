@@ -388,12 +388,10 @@ impl SettersItems {
             .and_then(ItemParams::name)
             .cloned()
             .unwrap_or_else(|| {
+                let base_name = common_name.unwrap_or(&member.name.snake);
                 // Preserve the original identifier span to make IDE's
                 // "go to definition" works correctly
-                syn::Ident::new(
-                    &format!("maybe_{}", member.name.snake_raw_str),
-                    member.name.snake.span(),
-                )
+                format_ident!("maybe_{}", base_name)
             });
 
         let default = member.params.default.as_deref().and_then(|default| {
@@ -422,11 +420,7 @@ impl SettersItems {
             .unwrap_or_else(|| {
                 let base_docs = common_docs.unwrap_or(&member.docs);
 
-                let header = optional_setter_docs(
-                    default,
-                    &option_fn_name,
-                    "accepts an `Option`"
-                );
+                let header = optional_setter_docs(default, &option_fn_name, "accepts an `Option`");
 
                 doc(&header).chain(base_docs.iter().cloned()).collect()
             });

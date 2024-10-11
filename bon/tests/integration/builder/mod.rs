@@ -16,6 +16,7 @@ mod name_conflicts;
 mod positional_members;
 mod raw_idents;
 mod smoke;
+mod attr_setters;
 
 /// Tests for the deprecated features that we still support, but that we'll
 /// eventually remove in the future in a new major version release.
