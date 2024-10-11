@@ -3,6 +3,7 @@ mod attr_expose_positional_fn;
 mod attr_into;
 mod attr_on;
 mod attr_overwritable;
+mod attr_setters;
 mod attr_skip;
 mod attr_transparent;
 mod attr_with;
@@ -16,7 +17,6 @@ mod name_conflicts;
 mod positional_members;
 mod raw_idents;
 mod smoke;
-mod attr_setters;
 
 use crate::prelude::*;
 

@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[test]
-fn test_struct() {
+fn test_name() {
     #[derive(Builder)]
     #[builder(derive(Clone))]
     #[allow(dead_code)]

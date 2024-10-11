@@ -55,7 +55,10 @@ impl StructInputParams {
                 }
 
                 if meta.tokens.is_empty() {
-                    bail!(&meta, "this empty `#[builder()]` attribute is redundant; remove it");
+                    bail!(
+                        &meta,
+                        "this empty `#[builder()]` attribute is redundant; remove it"
+                    );
                 }
 
                 let meta = darling::ast::NestedMeta::parse_meta_list(meta.tokens.clone())?;

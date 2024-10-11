@@ -69,8 +69,8 @@ impl<'a> StateModGenCtx<'a> {
             )]
             #( #state_mod_docs )*
             #vis_mod mod #state_mod_ident {
-                #vis_child use ::bon::private::{IsSet, IsUnset};
                 #[doc(inline)]
+                #vis_child use ::bon::private::{IsSet, IsUnset};
                 use ::bon::private::{Set, Unset};
 
                 mod sealed {
