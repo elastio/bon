@@ -422,7 +422,11 @@ impl SettersItems {
             .unwrap_or_else(|| {
                 let base_docs = common_docs.unwrap_or(&member.docs);
 
-                let header = optional_setter_docs(default, &option_fn_name);
+                let header = optional_setter_docs(
+                    default,
+                    &option_fn_name,
+                    "accepts an `Option`"
+                );
 
                 doc(&header).chain(base_docs.iter().cloned()).collect()
             });
@@ -433,7 +437,11 @@ impl SettersItems {
             .unwrap_or_else(|| {
                 let base_docs = common_docs.unwrap_or(&member.docs);
 
-                let header = optional_setter_docs(default, &some_fn_name);
+                let header = optional_setter_docs(
+                    default,
+                    &some_fn_name,
+                    "wraps the value with `Some` internally",
+                );
 
                 doc(&header).chain(base_docs.iter().cloned()).collect()
             });
@@ -466,7 +474,11 @@ impl SettersItems {
     }
 }
 
-fn optional_setter_docs(default: Option<&str>, other_setter: &syn::Ident) -> String {
+fn optional_setter_docs(
+    default: Option<&str>,
+    other_setter: &syn::Ident,
+    description: &str,
+) -> String {
     let default = default
         .map(|default| {
             if default.contains('\n') || default.len() > 80 {
@@ -478,7 +490,10 @@ fn optional_setter_docs(default: Option<&str>, other_setter: &syn::Ident) -> Str
         .unwrap_or_default();
 
     format!(
-        "**Optional**. **See also:** [`{other_setter}()`](Self::{other_setter}).\
+        "| **Optional** |\n\
+         | -- |\n\n\
+         **See also** a companion setter that {description}: \
+         [`{other_setter}()`](Self::{other_setter}).\
         \n\n{default}",
     )
 }
