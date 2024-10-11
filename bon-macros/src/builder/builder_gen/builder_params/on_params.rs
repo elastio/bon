@@ -1,8 +1,8 @@
 use crate::util::prelude::*;
+use darling::FromMeta;
 use syn::parse::Parse;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
-use darling::FromMeta;
 
 #[derive(Debug)]
 pub(crate) struct OnParams {

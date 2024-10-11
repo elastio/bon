@@ -23,6 +23,11 @@ pub mod derives;
 
 mod cfg_eval;
 
+// This reexport is a private implementation detail and should not be used
+// directly! This reexport may change or be removed at any time between
+// patch releases. Use the export from the builder's state module directly
+// instead of using this reexport from `bon::private`.
+pub use crate::builder_state::{IsSet, IsUnset};
 pub use bon_macros::__prettier_type_aliases_docs;
 pub use rustversion;
 
@@ -35,7 +40,7 @@ pub(crate) mod sealed {
     impl<Name> Sealed for super::Set<Name> {}
 }
 
-use sealed::Sealed;
+pub(crate) use sealed::Sealed;
 
 /// Used to implement the `alloc` feature.
 #[cfg(feature = "alloc")]
@@ -58,17 +63,3 @@ pub trait MemberState<Name>: Sealed {}
 
 impl<Name> MemberState<Name> for Unset<Name> {}
 impl<Name> MemberState<Name> for Set<Name> {}
-
-#[doc = r" Marker trait that indicates that the member is set, i.e. at least"]
-#[doc = r" one of its setters was called."]
-#[rustversion::attr(since(1.78.0),diagnostic::on_unimplemented(message = "the member `{Self}` was not set, but this method requires it to be set",label = "the member `{Self}` was not set, but this method requires it to be set"))]
-pub trait IsSet: Sealed {}
-
-#[doc(hidden)]
-impl<Name> IsSet for Set<Name> {}
-
-#[doc = r" Marker trait implemented by members that are not set."]
-#[rustversion::attr(since(1.78.0),diagnostic::on_unimplemented(message = "the member `{Self}` was already set, but this method requires it to be unset",label = "the member `{Self}` was already set, but this method requires it to be unset"))]
-pub trait IsUnset: Sealed {}
-#[doc(hidden)]
-impl<Name> IsUnset for Unset<Name> {}

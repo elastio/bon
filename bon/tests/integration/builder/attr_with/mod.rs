@@ -1,6 +1,6 @@
 mod multi_arg;
-mod single_arg;
 mod overwritable;
+mod single_arg;
 
 struct IntoStrRef<'a>(&'a str);
 

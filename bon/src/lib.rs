@@ -15,6 +15,8 @@
     (https://discord.gg/QcBYSamw4c)"]
 pub mod private;
 
+mod builder_state;
+
 /// Small utility declarative macros for creating colletions with [`Into`] conversions.
 mod collections;
 

@@ -1,10 +1,10 @@
 mod blanket;
-mod setters;
 mod setter_closure;
+mod setters;
 
 pub(crate) use blanket::*;
-pub(crate) use setters::*;
 pub(crate) use setter_closure::*;
+pub(crate) use setters::*;
 
 use super::MemberOrigin;
 use crate::parsing::SpannedKey;

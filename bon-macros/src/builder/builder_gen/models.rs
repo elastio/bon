@@ -248,7 +248,7 @@ impl BuilderGenCtx {
                     .map(SpannedKey::into_value)
                     .unwrap_or_else(|| {
                         let docs = format!(
-                            "Tools for manipulating the type state of the [`{}`].",
+                            "Tools for manipulating the type state of [`{}`].",
                             builder_type.ident
                         );
 
