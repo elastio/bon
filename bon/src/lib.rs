@@ -19,4 +19,4 @@ pub mod private;
 mod collections;
 
 /// Rexport all macros from the proc-macro crate.
-pub use bon_macros::*;
+pub use bon_macros::{bon, builder, map, set, Builder};

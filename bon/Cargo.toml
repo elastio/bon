@@ -98,4 +98,6 @@ std     = ["alloc"]
 # wouldn't automatically imply `State::A: IsSet`, so the builder type state returned
 # after the `self.b()` doesn't imply that the member `a` is set, and thus `build()`
 # can't be called.
-msrv-1-79-0 = ["bon-macros/msrv-1-79-0"]
+#
+# Huge thanks to @harudagondi for suggesting the name of this feature!
+implied-bounds = ["bon-macros/implied-bounds"]

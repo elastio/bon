@@ -8,6 +8,8 @@ mod state_mod;
 pub(crate) mod input_fn;
 pub(crate) mod input_struct;
 
+pub(crate) use state_mod::prettier_type_aliases_docs;
+
 use crate::util::prelude::*;
 use member::{
     Member, MemberOrigin, NamedMember, PositionalFnArgMember, RawMember, StartFnArgMember,
@@ -594,6 +596,7 @@ impl BuilderGenCtx {
             #must_use
             #finish_fn_vis #asyncness #unsafety fn #finish_fn_ident(self, #(#finish_fn_params,)*) #output
             where
+                // #( #where_bounds, )*
                 BuilderState: #state_mod::IsComplete
             {
                 #(#members_vars_decls)*

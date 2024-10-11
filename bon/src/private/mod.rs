@@ -23,6 +23,9 @@ pub mod derives;
 
 mod cfg_eval;
 
+pub use bon_macros::__prettier_type_aliases_docs;
+pub use rustversion;
+
 pub(crate) mod sealed {
     // The purpose of the `Sealed` trait **is** to be unnameable from outside the crate.
     #[allow(unnameable_types)]
@@ -56,4 +59,16 @@ pub trait MemberState<Name>: Sealed {}
 impl<Name> MemberState<Name> for Unset<Name> {}
 impl<Name> MemberState<Name> for Set<Name> {}
 
-pub use rustversion;
+#[doc = r" Marker trait that indicates that the member is set, i.e. at least"]
+#[doc = r" one of its setters was called."]
+#[rustversion::attr(since(1.78.0),diagnostic::on_unimplemented(message = "the member `{Self}` was not set, but this method requires it to be set",label = "the member `{Self}` was not set, but this method requires it to be set"))]
+pub trait IsSet: Sealed {}
+
+#[doc(hidden)]
+impl<Name> IsSet for Set<Name> {}
+
+#[doc = r" Marker trait implemented by members that are not set."]
+#[rustversion::attr(since(1.78.0),diagnostic::on_unimplemented(message = "the member `{Self}` was already set, but this method requires it to be unset",label = "the member `{Self}` was already set, but this method requires it to be unset"))]
+pub trait IsUnset: Sealed {}
+#[doc(hidden)]
+impl<Name> IsUnset for Unset<Name> {}

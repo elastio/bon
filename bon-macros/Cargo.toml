@@ -58,6 +58,7 @@ prettyplease = "0.2"
 
 [features]
 default = []
+
 # Opts in to the higher MSRV 1.79.0. In this version, Rust stabilized the syntax
 # for bounds in associated type position. See the release announcement for more:
 # https://blog.rust-lang.org/2024/06/13/Rust-1.79.0.htmlbounds-in-associated-type-position
@@ -93,7 +94,9 @@ default = []
 # wouldn't automatically imply `State::A: IsSet`, so the builder type state returned
 # after the `self.b()` doesn't imply that the member `a` is set, and thus `build()`
 # can't be called.
-msrv-1-79-0 = []
+#
+# Huge thanks to @harudagondi for suggesting the name of this feature!
+implied-bounds = []
 
 [dev-dependencies]
 expect-test = "1.4.1"

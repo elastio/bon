@@ -304,3 +304,12 @@ pub fn set(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
 
     collections::set::generate(entries).into()
 }
+
+#[doc(hidden)]
+#[proc_macro_attribute]
+pub fn __prettier_type_aliases_docs(
+    _: proc_macro::TokenStream,
+    module: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    builder::prettier_type_aliases_docs(module.into()).into()
+}

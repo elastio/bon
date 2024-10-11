@@ -130,8 +130,7 @@ wildcard_dependencies             = "warn"
 zero_sized_map_values             = "warn"
 
 # Priorities are used not because we override lints from these lint groups
-# but just to order them in order from the less noisy to the more noisy in
-# the output
+# but just to order them from the less noisy to the more noisy in the output
 nursery  = { level = "warn", priority = -2 }
 pedantic = { level = "warn", priority = -1 }
 
@@ -176,5 +175,5 @@ rust_2024_compatibility = { level = "warn", priority = 1 }
 # [workspace.lints.rust]
 # must_not_suspend           = "warn"
 # rust_2024_incompatible_pat = "warn"
-# lossy_provenance_casts         = "warn"
-# fuzzy_provenance_casts         = "warn"
+# lossy_provenance_casts     = "warn"
+# fuzzy_provenance_casts     = "warn"
