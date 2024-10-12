@@ -11,6 +11,12 @@
 // suppress this lint for the entire crate.
 #![allow(deprecated)]
 
+// Rexport all macros from the proc-macro crate.
+pub use bon_macros::{bon, builder, map, set, Builder};
+
+/// Small utility declarative macros for creating colletions with [`Into`] conversions.
+mod collections;
+
 #[doc(hidden)]
 #[deprecated = "the items from the `bon::private` module are an implementation detail; \
     they should not be used directly; if you found a need for this, then you are probably \
@@ -20,9 +26,3 @@
 pub mod private;
 
 mod builder_state;
-
-/// Small utility declarative macros for creating colletions with [`Into`] conversions.
-mod collections;
-
-/// Rexport all macros from the proc-macro crate.
-pub use bon_macros::{bon, builder, map, set, Builder};
