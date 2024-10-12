@@ -86,7 +86,7 @@ impl<'a> StateModGenCtx<'a> {
     }
 
     fn state_transitions(&self) -> (TokenStream, TokenStream) {
-        let transition_tuples = self
+        let transitions_bodies = self
             .builder_gen
             .stateful_members()
             .map(|member| {
@@ -121,7 +121,7 @@ impl<'a> StateModGenCtx<'a> {
                     "Returns a [`State`] that has [`IsSet`] implemented for `{member_snake}`\n\
                     \n\
                     [`State`]: self::State\n\
-                    [`IsSet`]: ::bon::IsSet",
+                    [`IsSet`]: self::IsSet",
                 );
 
                 (docs, alias)
@@ -132,6 +132,13 @@ impl<'a> StateModGenCtx<'a> {
         let vis_child_child = &self.builder_gen.state_mod.vis_child_child;
         let stateful_members_snake = &self.stateful_members_snake;
 
+        // In a special case of 1 stateful member the generic `S` parameter
+        // is unused in the alias body, which triggers a compile error, because
+        // all generic type parameters must be used. This special case is
+        // unfortunate, but it's not the end of the world because it's rare
+        // that a builder has only one stateful member and the user wants to
+        // use the state transition type alias and expect it to have a generic
+        // type parameter.
         let state_param = (self.stateful_members_snake.len() > 1).then(|| {
             quote! {
                 <S: State = AllUnset>
@@ -176,7 +183,7 @@ impl<'a> StateModGenCtx<'a> {
 
                 #(
                     #[doc = #set_member_aliases_docs]
-                    #vis_child_child type #set_member_aliases #state_param = #transition_tuples;
+                    #vis_child_child type #set_member_aliases #state_param = #transitions_bodies;
                 )*
             }
         };
@@ -233,7 +240,7 @@ impl<'a> StateModGenCtx<'a> {
                 #(
                     #[doc = #assoc_types_docs]
                     type #stateful_members_pascal: ::bon::private::MemberState<
-                        self::members::#stateful_members_snake
+                        members::#stateful_members_snake
                     >;
                 )*
 
@@ -289,10 +296,10 @@ impl<'a> StateModGenCtx<'a> {
             }
 
             #[doc(hidden)]
-            impl<State: self::State> IsComplete for State
+            impl<S: State> IsComplete for S
             where
                 #(
-                    State::#required_members_pascal: IsSet,
+                    S::#required_members_pascal: IsSet,
                 )*
             {
                 #sealed_method_impl
