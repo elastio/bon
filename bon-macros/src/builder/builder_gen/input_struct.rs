@@ -276,11 +276,11 @@ struct StructLiteralBody {
 }
 
 impl FinishFnBody for StructLiteralBody {
-    fn generate(&self, member_exprs: &[Member]) -> TokenStream {
+    fn generate(&self, ctx: &BuilderGenCtx) -> TokenStream {
         let Self { struct_ident } = self;
 
         // The variables with values of members are in scope for this expression.
-        let member_vars = member_exprs.iter().map(Member::orig_ident);
+        let member_vars = ctx.members.iter().map(Member::orig_ident);
 
         quote! {
             #struct_ident {

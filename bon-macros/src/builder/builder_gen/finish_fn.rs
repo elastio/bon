@@ -2,7 +2,10 @@ use super::member::{Member, PositionalFnArgMember};
 use crate::util::prelude::*;
 
 impl super::BuilderGenCtx {
-    fn finish_fn_member_expr(member: &Member) -> TokenStream {
+    fn finish_fn_member_expr(&self, member: &Member) -> TokenStream {
+        let start_fn_args_field = &self.private_builder_fields.start_fn_args;
+        let named_members_field = &self.private_builder_fields.named_members;
+
         let member = match member {
             Member::Named(member) => member,
             Member::Skipped(member) => {
@@ -15,7 +18,7 @@ impl super::BuilderGenCtx {
             }
             Member::StartFnArg(member) => {
                 let index = &member.index;
-                return quote! { self.__private_start_fn_args.#index };
+                return quote! { self.#start_fn_args_field.#index };
             }
             Member::FinishFnArg(member) => {
                 return member.maybe_into_ident_expr();
@@ -25,7 +28,7 @@ impl super::BuilderGenCtx {
         let index = &member.index;
 
         let member_field = quote! {
-            self.__private_named_members.#index
+            self.#named_members_field.#index
         };
 
         let param_default = member
@@ -78,7 +81,7 @@ impl super::BuilderGenCtx {
 
     pub(super) fn finish_fn(&self) -> TokenStream {
         let members_vars_decls = self.members.iter().map(|member| {
-            let expr = Self::finish_fn_member_expr(member);
+            let expr = self.finish_fn_member_expr(member);
             let var_ident = member.orig_ident();
 
             // The type hint is necessary in some cases to assist the compiler
@@ -104,7 +107,7 @@ impl super::BuilderGenCtx {
             .filter_map(Member::as_finish_fn_arg)
             .map(PositionalFnArgMember::fn_input_param);
 
-        let body = &self.finish_fn.body.generate(&self.members);
+        let body = &self.finish_fn.body.generate(self);
         let asyncness = &self.finish_fn.asyncness;
         let unsafety = &self.finish_fn.unsafety;
         let must_use = &self.finish_fn.must_use;

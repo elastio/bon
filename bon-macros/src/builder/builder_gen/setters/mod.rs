@@ -5,16 +5,13 @@ use crate::util::prelude::*;
 use std::iter;
 
 pub(crate) struct SettersCtx<'a> {
-    builder_gen: &'a BuilderGenCtx,
+    base: &'a BuilderGenCtx,
     member: &'a NamedMember,
 }
 
 impl<'a> SettersCtx<'a> {
-    pub(crate) fn new(builder_gen: &'a BuilderGenCtx, member: &'a NamedMember) -> Self {
-        Self {
-            builder_gen,
-            member,
-        }
+    pub(crate) fn new(base: &'a BuilderGenCtx, member: &'a NamedMember) -> Self {
+        Self { base, member }
     }
 
     pub(crate) fn setter_methods(&self) -> TokenStream {
@@ -224,30 +221,34 @@ impl<'a> SettersCtx<'a> {
             SetterBody::SetMember { value } => {
                 let index = &self.member.index;
 
-                let mut output = if self.member.is_stateful() {
-                    let builder_ident = &self.builder_gen.builder_type.ident;
-                    let maybe_receiver_field = self
-                        .builder_gen
-                        .receiver()
-                        .map(|_| quote!(__private_receiver: self.__private_receiver,));
+                let fields = &self.base.private_builder_fields;
+                let phantom_field = &fields.phantom;
+                let receiver_field = &fields.receiver;
+                let start_fn_args_field = &fields.start_fn_args;
+                let named_members_field = &fields.named_members;
 
-                    let maybe_start_fn_args_field =
-                        self.builder_gen.start_fn_args().next().map(
-                            |_| quote!(__private_start_fn_args: self.__private_start_fn_args,),
-                        );
+                let mut output = if self.member.is_stateful() {
+                    let builder_ident = &self.base.builder_type.ident;
+
+                    let maybe_receiver_field = self
+                        .base
+                        .receiver()
+                        .map(|_| quote!(#receiver_field: self.#receiver_field,));
+
+                    let maybe_start_fn_args_field = self
+                        .base
+                        .start_fn_args()
+                        .next()
+                        .map(|_| quote!(#start_fn_args_field: self.#start_fn_args_field,));
 
                     quote! {
                         #builder_ident {
-                            __private_phantom: ::core::marker::PhantomData,
+                            #phantom_field: ::core::marker::PhantomData,
                             #maybe_receiver_field
                             #maybe_start_fn_args_field
-                            __private_named_members: self.__private_named_members,
+                            #named_members_field: self.#named_members_field,
                         }
                     }
-
-                    // quote! {
-                    //     Self::__private_transition_type_state(self)
-                    // }
                 } else {
                     quote! {
                         self
@@ -267,20 +268,20 @@ impl<'a> SettersCtx<'a> {
                 }
 
                 quote! {
-                    self.__private_named_members.#index = #value;
+                    self.#named_members_field.#index = #value;
                     #output
                 }
             }
         };
 
-        let state_mod = &self.builder_gen.state_mod.ident;
+        let state_mod = &self.base.state_mod.ident;
 
         let mut return_type = if !self.member.is_stateful() {
             quote! { Self }
         } else {
             let state_transition = format_ident!("Set{}", self.member.name.pascal_str);
-            let builder_ident = &self.builder_gen.builder_type.ident;
-            let generic_args = &self.builder_gen.generics.args;
+            let builder_ident = &self.base.builder_type.ident;
+            let generic_args = &self.base.generics.args;
 
             quote! {
                 #builder_ident<#(#generic_args,)* #state_mod::#state_transition<BuilderState>>
@@ -361,7 +362,7 @@ impl SettersItems {
     fn new(ctx: &SettersCtx<'_>) -> Self {
         let SettersCtx {
             member,
-            builder_gen,
+            base: builder_gen,
         } = ctx;
         let builder_type = &builder_gen.builder_type;
 

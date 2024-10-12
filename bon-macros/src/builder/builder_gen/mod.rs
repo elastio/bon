@@ -182,12 +182,17 @@ impl BuilderGenCtx {
         let where_clause = &generics.where_clause;
         let generic_args = &self.generics.args;
 
+        let phantom_field = &self.private_builder_fields.phantom;
+        let receiver_field = &self.private_builder_fields.receiver;
+        let start_fn_args_field = &self.private_builder_fields.start_fn_args;
+        let named_members_field = &self.private_builder_fields.named_members;
+
         let receiver = self.receiver();
 
         let receiver_field_init = receiver.map(|receiver| {
             let self_token = &receiver.with_self_keyword.self_token;
             quote! {
-                __private_receiver: #self_token,
+                #receiver_field: #self_token,
             }
         });
 
@@ -207,7 +212,7 @@ impl BuilderGenCtx {
 
         let start_fn_args_field_init = start_fn_arg_exprs.peek().is_some().then(|| {
             quote! {
-                __private_start_fn_args: (#(#start_fn_arg_exprs,)*),
+                #start_fn_args_field: (#(#start_fn_arg_exprs,)*),
             }
         });
 
@@ -247,10 +252,10 @@ impl BuilderGenCtx {
                 #ide_hints
 
                 #builder_ident {
-                    __private_phantom: ::core::marker::PhantomData,
+                    #phantom_field: ::core::marker::PhantomData,
                     #receiver_field_init
                     #start_fn_args_field_init
-                    __private_named_members: #named_members_field_init,
+                    #named_members_field: #named_members_field_init,
                 }
             }
         }
@@ -260,7 +265,7 @@ impl BuilderGenCtx {
         let member_types = self.members.iter().filter_map(|member| {
             match member {
                 // The types of these members already appear in the struct in the types
-                // of __private_named_members and __private_start_fn_args fields.
+                // of named_members and start_fn_args fields.
                 Member::Named(_) | Member::StartFnArg(_) => None,
                 Member::FinishFnArg(member) => Some(member.ty.norm.as_ref()),
                 Member::Skipped(member) => Some(member.norm_ty.as_ref()),
@@ -328,6 +333,10 @@ impl BuilderGenCtx {
         let where_clause = &self.generics.where_clause;
         let phantom_data = self.phantom_data();
         let state_mod = &self.state_mod.ident;
+        let phantom_field = &self.private_builder_fields.phantom;
+        let receiver_field = &self.private_builder_fields.receiver;
+        let start_fn_args_field = &self.private_builder_fields.start_fn_args;
+        let named_members_field = &self.private_builder_fields.named_members;
 
         let private_field_attrs = quote! {
             // The fields can't be hidden using Rust's privacy syntax.
@@ -351,7 +360,7 @@ impl BuilderGenCtx {
             let ty = &receiver.without_self_keyword;
             quote! {
                 #private_field_attrs
-                __private_receiver: #ty,
+                #receiver_field: #ty,
             }
         });
 
@@ -370,7 +379,7 @@ impl BuilderGenCtx {
         let start_fn_args_field = start_fn_arg_types.peek().is_some().then(|| {
             quote! {
                 #private_field_attrs
-                __private_start_fn_args: (#(#start_fn_arg_types,)*),
+                #start_fn_args_field: (#(#start_fn_arg_types,)*),
             }
         });
 
@@ -408,13 +417,13 @@ impl BuilderGenCtx {
             #where_clause
             {
                 #private_field_attrs
-                __private_phantom: #phantom_data,
+                #phantom_field: #phantom_data,
 
                 #receiver_field
                 #start_fn_args_field
 
                 #private_field_attrs
-                __private_named_members: (
+                #named_members_field: (
                     #(
                         ::core::option::Option<#named_members_types>,
                     )*

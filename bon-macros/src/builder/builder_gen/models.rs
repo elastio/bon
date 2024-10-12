@@ -7,7 +7,7 @@ pub(super) trait FinishFnBody {
     /// Generate the `finish` function body from the ready-made variables.
     /// The generated function body may assume that there are variables
     /// named the same as the members in scope.
-    fn generate(&self, members: &[Member]) -> TokenStream;
+    fn generate(&self, ctx: &BuilderGenCtx) -> TokenStream;
 }
 
 pub(super) struct AssocMethodReceiverCtx {
@@ -119,6 +119,7 @@ pub(super) struct Generics {
 }
 
 pub(crate) struct BuilderGenCtx {
+    pub(super) private_builder_fields: BuilderPrivateFields,
     pub(super) members: Vec<Member>,
 
     /// Lint suppressions from the original item that will be inherited by all items
@@ -135,6 +136,13 @@ pub(crate) struct BuilderGenCtx {
     pub(super) state_mod: StateMod,
     pub(super) start_fn: StartFn,
     pub(super) finish_fn: FinishFn,
+}
+
+pub(super) struct BuilderPrivateFields {
+    pub(super) phantom: syn::Ident,
+    pub(super) receiver: syn::Ident,
+    pub(super) start_fn_args: syn::Ident,
+    pub(super) named_members: syn::Ident,
 }
 
 pub(super) struct BuilderGenCtxParams {
@@ -265,6 +273,7 @@ impl BuilderGenCtx {
         };
 
         Ok(Self {
+            private_builder_fields: BuilderPrivateFields::new(),
             members,
             allow_attrs,
             on_params,
@@ -275,6 +284,67 @@ impl BuilderGenCtx {
             start_fn,
             finish_fn,
         })
+    }
+}
+
+impl BuilderPrivateFields {
+    fn new() -> Self {
+        use std::collections::hash_map::RandomState;
+        use std::hash::{BuildHasher, Hasher};
+
+        // Thanks @orhun for the article https://blog.orhun.dev/zero-deps-random-in-rust/
+        let random = RandomState::new().build_hasher().finish();
+
+        let random_words = [
+            "amethyst",
+            "applejack",
+            "blackjack",
+            "bon",
+            "cadance",
+            "celestia",
+            "cheerilee",
+            "derpy",
+            "fleetfoot",
+            "flitter",
+            "fluttershy",
+            "izzy",
+            "lilly",
+            "littlepip",
+            "luna",
+            "lyra",
+            "maud",
+            "minuette",
+            "octavia",
+            "pinkie",
+            "pipp",
+            "rainbow",
+            "rarity",
+            "roseluck",
+            "scootaloo",
+            "seaswirl",
+            "spitfire",
+            "starlight",
+            "sunset",
+            "sweetie",
+            "trixie",
+            "twilight",
+            "twinkleshine",
+            "twist",
+            "velvet",
+            "vinyl",
+        ];
+
+        #[allow(clippy::cast_possible_truncation)]
+        let random_word = random_words[(random % (random_words.len() as u64)) as usize];
+
+        let ident = |name: &str| format_ident!("__private_{random_word}_{name}");
+
+        Self {
+            phantom: ident("phantom"),
+            receiver: ident("receiver"),
+            start_fn_args: ident("start_fn_args"),
+            named_members: ident("named_members"),
+        }
     }
 }
 

@@ -462,7 +462,7 @@ struct FnCallBody {
 }
 
 impl FinishFnBody for FnCallBody {
-    fn generate(&self, members: &[Member]) -> TokenStream {
+    fn generate(&self, ctx: &BuilderGenCtx) -> TokenStream {
         let asyncness = &self.sig.asyncness;
         let maybe_await = asyncness.is_some().then(|| quote!(.await));
 
@@ -482,7 +482,10 @@ impl FinishFnBody for FnCallBody {
         let prefix = self
             .sig
             .receiver()
-            .map(|_| quote!(self.__private_receiver.))
+            .map(|_| {
+                let receiver_field = &ctx.private_builder_fields.receiver;
+                quote!(self.#receiver_field.)
+            })
             .or_else(|| {
                 let self_ty = &self.impl_ctx.as_deref()?.self_ty;
                 Some(quote!(<#self_ty>::))
@@ -491,7 +494,7 @@ impl FinishFnBody for FnCallBody {
         let fn_ident = &self.sig.ident;
 
         // The variables with values of members are in scope for this expression.
-        let member_vars = members.iter().map(Member::orig_ident);
+        let member_vars = ctx.members.iter().map(Member::orig_ident);
 
         quote! {
             #prefix #fn_ident::<#(#generic_args,)*>(

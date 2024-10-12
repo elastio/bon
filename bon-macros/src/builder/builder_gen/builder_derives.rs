@@ -52,12 +52,17 @@ impl BuilderGenCtx {
         let generic_args = &self.generics.args;
         let builder_ident = &self.builder_type.ident;
 
+        let phantom_field = &self.private_builder_fields.phantom;
+        let receiver_field = &self.private_builder_fields.receiver;
+        let start_fn_args_field = &self.private_builder_fields.start_fn_args;
+        let named_members_field = &self.private_builder_fields.named_members;
+
         let clone = quote!(::core::clone::Clone);
 
         let clone_receiver = self.receiver().map(|receiver| {
             let ty = &receiver.without_self_keyword;
             quote! {
-                __private_receiver: <#ty as #clone>::clone(&self.__private_receiver),
+                #receiver_field: <#ty as #clone>::clone(&self.#receiver_field),
             }
         });
 
@@ -66,12 +71,12 @@ impl BuilderGenCtx {
                 let ty = &arg.base.ty.norm;
                 let index = &arg.index;
                 quote! {
-                    <#ty as #clone>::clone(&self.__private_start_fn_args.#index)
+                    <#ty as #clone>::clone(&self.#start_fn_args_field.#index)
                 }
             });
 
             quote! {
-                __private_start_fn_args: ( #(#clone_start_fn_args,)* ),
+                #start_fn_args_field: ( #(#clone_start_fn_args,)* ),
             }
         });
 
@@ -88,7 +93,7 @@ impl BuilderGenCtx {
 
             quote! {
                 ::bon::private::derives::clone_member::<#ty>(
-                    &self.__private_named_members.#member_index
+                    &self.#named_members_field.#member_index
                 )
             }
         });
@@ -107,7 +112,7 @@ impl BuilderGenCtx {
             {
                 fn clone(&self) -> Self {
                     Self {
-                        __private_phantom: ::core::marker::PhantomData,
+                        #phantom_field: ::core::marker::PhantomData,
                         #clone_receiver
                         #clone_start_fn_args
 
@@ -118,7 +123,7 @@ impl BuilderGenCtx {
                         // ```
                         // required for `(...huge tuple type...)` to implement `Clone`
                         // ```
-                        __private_named_members: ( #( #clone_named_members, )* ),
+                        #named_members_field: ( #( #clone_named_members, )* ),
                     }
                 }
             }
@@ -126,6 +131,10 @@ impl BuilderGenCtx {
     }
 
     fn derive_debug(&self) -> TokenStream {
+        let receiver_field = &self.private_builder_fields.receiver;
+        let start_fn_args_field = &self.private_builder_fields.start_fn_args;
+        let named_members_field = &self.private_builder_fields.named_members;
+
         let format_members = self.members.iter().filter_map(|member| {
             match member {
                 Member::Named(member) => {
@@ -133,7 +142,7 @@ impl BuilderGenCtx {
                     let member_ident_str = &member.name.snake_raw_str;
                     let member_ty = member.underlying_norm_ty();
                     Some(quote! {
-                        if let ::core::option::Option::Some(value) = &self.__private_named_members.#member_index {
+                        if let Some(value) = &self.#named_members_field.#member_index {
                             output.field(
                                 #member_ident_str,
                                 ::bon::private::derives::as_dyn_debug::<#member_ty>(value)
@@ -149,7 +158,7 @@ impl BuilderGenCtx {
                         output.field(
                             #member_ident_str,
                             ::bon::private::derives::as_dyn_debug::<#member_ty>(
-                                &self.__private_start_fn_args.#member_index
+                                &self.#start_fn_args_field.#member_index
                             )
                         );
                     })
@@ -168,7 +177,7 @@ impl BuilderGenCtx {
                 output.field(
                     "self",
                     ::bon::private::derives::as_dyn_debug::<#ty>(
-                        &self.__private_receiver
+                        &self.#receiver_field
                     )
                 );
             }
