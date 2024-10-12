@@ -26,7 +26,7 @@ fn test_name() {
     let _ = Sut::builder().maybe_arg3_renamed(Some(42));
 
     // The name in the state must remain the same
-    let _: SutBuilder<SetArg1<SetArg3<SetArg2>>> = Sut::builder()
+    let _: SutBuilder<SetArg3<SetArg2<SetArg1>>> = Sut::builder()
         .arg1_renamed(true)
         .arg2_renamed(())
         .arg3_renamed(42);
@@ -97,14 +97,15 @@ fn test_option_fn_name_and_some_fn_name() {
     let _ = Sut::builder().arg8_some(());
     let _ = Sut::builder().arg8_option(Some(()));
 
-    // let builder: SutBuilder<SetArg1<SetArg2<SetArg3<SetArg4<SetArg5<SetArg6<SetArg7>>>>>>> =
-    //     Sut::builder()
-    //         .arg1_some(())
-    //         .arg2(())
-    //         .arg3_some(())
-    //         .arg4_some(())
-    //         .arg5_some(())
-    //         .arg6(())
-    //         .arg7_some(());
-    // .arg8_some(());
+    #[allow(clippy::type_complexity)]
+    let _: SutBuilder<SetArg8<SetArg7<SetArg6<SetArg5<SetArg4<SetArg3<SetArg2<SetArg1>>>>>>>> =
+        Sut::builder()
+            .arg1_some(())
+            .arg2(())
+            .arg3_some(())
+            .arg4_some(())
+            .arg5_some(())
+            .arg6(())
+            .arg7_some(())
+            .arg8_some(());
 }

@@ -5,8 +5,6 @@ pub(crate) mod item_impl;
 mod item_fn;
 mod item_struct;
 
-pub(crate) use builder_gen::prettier_type_aliases_docs;
-
 use crate::normalization::{ExpandCfg, ExpansionOutput};
 use crate::util;
 use crate::util::prelude::*;

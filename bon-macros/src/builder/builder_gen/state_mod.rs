@@ -48,11 +48,9 @@ impl<'a> StateModGenCtx<'a> {
         let state_trait = self.state_trait();
         let is_complete_trait = self.is_complete_trait();
         let members_names_mod = self.members_names_mod();
-        let (state_transitions, parent_state_transition_items) = self.state_transitions();
+        let state_transitions = self.state_transitions();
 
         quote! {
-            #parent_state_transition_items
-
             #[allow(
                 // These are intentional. By default, the builder module is private
                 // and can't be accessed outside of the module where the builder
@@ -79,134 +77,88 @@ impl<'a> StateModGenCtx<'a> {
 
                 #state_trait
                 #is_complete_trait
-                #state_transitions
                 #members_names_mod
+                #state_transitions
             }
         }
     }
 
-    fn state_transitions(&self) -> (TokenStream, TokenStream) {
-        let transitions_bodies = self
-            .builder_gen
-            .stateful_members()
-            .map(|member| {
-                let states = self.builder_gen.stateful_members().map(|other_member| {
-                    if other_member.is(member) {
-                        let member_snake = &member.name.snake;
-                        quote! {
-                            Set<members::#member_snake>
-                        }
-                    } else {
-                        let member_pascal = &other_member.name.pascal;
-                        quote! {
-                            <S as State>::#member_pascal
-                        }
-                    }
-                });
-
-                quote! {
-                    ( #( #states, )* )
-                }
-            })
-            .collect::<Vec<_>>();
-
-        let (set_member_aliases_docs, set_member_aliases): (Vec<_>, Vec<_>) = self
-            .builder_gen
-            .stateful_members()
-            .map(|member| {
-                let alias = format_ident!("Set{}", member.name.pascal_str);
-                let member_snake = &member.name.snake;
-
-                let docs = format!(
-                    "Returns a [`State`] that has [`IsSet`] implemented for `{member_snake}`\n\
-                    \n\
-                    [`State`]: self::State\n\
-                    [`IsSet`]: self::IsSet",
-                );
-
-                (docs, alias)
-            })
-            .unzip();
+    fn state_transitions(&self) -> TokenStream {
+        let mut set_members_structs = Vec::with_capacity(self.stateful_members_snake.len());
+        let mut state_impls = Vec::with_capacity(self.stateful_members_snake.len());
 
         let vis_child = &self.builder_gen.state_mod.vis_child;
-        let vis_child_child = &self.builder_gen.state_mod.vis_child_child;
+        let sealed_method_impl = &self.sealed_method_impl;
+
+        for member in self.builder_gen.stateful_members() {
+            let member_pascal = &member.name.pascal;
+
+            let docs = format!(
+                "Returns a [`State`] that has [`IsSet`] implemented for [`State::{member_pascal}`]\n\n\
+                The state for all other members is left the same as in the input state.\n\n\
+                [`State`]: self::State\n\
+                [`IsSet`]: self::IsSet\n\
+                [`State::{member_pascal}`]: self::State::{member_pascal}",
+            );
+
+
+            let struct_ident = format_ident!("Set{}", member.name.pascal_str);
+
+            set_members_structs.push(quote! {
+                #[doc = #docs]
+                #vis_child struct #struct_ident<S: State = Empty>(S);
+            });
+
+            let states = self.builder_gen.stateful_members().map(|other_member| {
+                if other_member.is(member) {
+                    let member_snake = &member.name.snake;
+                    quote! {
+                        Set<members::#member_snake>
+                    }
+                } else {
+                    let member_pascal = &other_member.name.pascal;
+                    quote! {
+                        <S as State>::#member_pascal
+                    }
+                }
+            });
+
+            let stateful_members_pascal = &self.stateful_members_pascal;
+
+            state_impls.push(quote! {
+                #[doc(hidden)]
+                impl <S: State> State for #struct_ident<S> {
+                    #(
+                        type #stateful_members_pascal = #states;
+                    )*
+                    #sealed_method_impl
+                }
+            });
+        }
+
         let stateful_members_snake = &self.stateful_members_snake;
+        let stateful_members_pascal = &self.stateful_members_pascal;
 
-        // In a special case of 1 stateful member the generic `S` parameter
-        // is unused in the alias body, which triggers a compile error, because
-        // all generic type parameters must be used. This special case is
-        // unfortunate, but it's not the end of the world because it's rare
-        // that a builder has only one stateful member and the user wants to
-        // use the state transition type alias and expect it to have a generic
-        // type parameter.
-        let state_param = (self.stateful_members_snake.len() > 1).then(|| {
-            quote! {
-                <S: State = AllUnset>
-            }
-        });
+        quote! {
+            /// Initial state of the builder where all members are unset
+            #vis_child struct Empty(());
 
-        // This code is a bit overcomplicated for a reason. We could avoid
-        // defining the `mod type_aliases` and a `use type_aliases::*` but
-        // we do this to have prettier documentation generated by `rustdoc`.
-        //
-        // The problem is that `rustdoc` inlines the type aliases if they
-        // are unreachable from outside of the crate. It means that even if
-        // the type alias is declared as `pub` but it resides in a private
-        // module, `rustdoc` will inline it. This is not what we want, because
-        // the type aliases grow very large and make the documentation noisy.
-        //
-        // As a workaround we generate a bit different code for `rustdoc`
-        // that uses indirection via an associated type of a trait. The
-        // macro `__prettier_type_aliases_docs` does that if `doc` cfg
-        // is enabled. That macro modifies the contents of the module
-        // to add that indirection.
-        //
-        // It's implemented this way to optimize the compilation perf. for
-        // the case when `doc` cfg is disabled. In this case, we pay only
-        // for a single `#[cfg_attr(doc, ...)]` that expands to nothing.
-        //
-        // We could just generate the code that `__prettier_type_aliases_docs`
-        // generates eagerly and put it under `#[cfg(doc)]` but that increases
-        // the compile time, because the compiler needs to parse all that code
-        // even if it's not used and it's a lot of code.
-        let mod_items = quote! {
-            #vis_child use type_aliases::*;
+            #( #set_members_structs )*
 
-            #[cfg_attr(doc, ::bon::private::__prettier_type_aliases_docs)]
-            mod type_aliases {
-                use super::{members, State, Unset, Set};
+            // Put it under an anonymous const to make it possible to collapse
+            // all this boilerplate when viewing the generated code.
+            #[allow(non_local_definitions)]
+            const _: () = {
+                impl State for Empty {
+                    #(
+                        type #stateful_members_pascal = Unset<members::#stateful_members_snake>;
+                    )*
+                    #sealed_method_impl
+                }
 
-                /// Initial state of the builder where all members are unset
-                #vis_child_child type AllUnset = (
-                    #( Unset<members::#stateful_members_snake>, )*
-                );
-
-                #(
-                    #[doc = #set_member_aliases_docs]
-                    #vis_child_child type #set_member_aliases #state_param = #transitions_bodies;
-                )*
-            }
-        };
-
-        let state_mod = &self.builder_gen.state_mod.ident;
-        let builder_vis = &self.builder_gen.builder_type.vis;
-
-        // This is a workaround for `rustdoc`. Without this `use` statement,
-        // it inlines the type aliases. Although for this workaround to work,
-        // all items from the current module need to be reexported via a `*`
-        // reexport, or the items need to be defined in the root lib.rs file.
-        //
-        // Therefore we use a `#[prettier_type_aliases_docs]` attribute to
-        // hide the internals of the type aliases from the documentation
-        // in all other cases.
-        let parent_items = quote! {
-            #[doc(hidden)]
-            #[cfg(doc)]
-            #[allow(unused_import_braces)]
-            #builder_vis use #state_mod::{ AllUnset as _ #(, #set_member_aliases as _)* };
-        };
-
-        (mod_items, parent_items)
+                #( #state_impls )*
+            };
+        }
     }
 
     fn state_trait(&self) -> TokenStream {
@@ -223,8 +175,6 @@ impl<'a> StateModGenCtx<'a> {
 
         let vis_child = &self.builder_gen.state_mod.vis_child;
         let sealed_method_decl = &self.sealed_method_decl;
-        let sealed_method_impl = &self.sealed_method_impl;
-        let stateful_members_snake = &self.stateful_members_snake;
         let stateful_members_pascal = &self.stateful_members_pascal;
 
         quote! {
@@ -239,28 +189,9 @@ impl<'a> StateModGenCtx<'a> {
             #vis_child trait State: ::core::marker::Sized {
                 #(
                     #[doc = #assoc_types_docs]
-                    type #stateful_members_pascal: ::bon::private::MemberState<
-                        members::#stateful_members_snake
-                    >;
+                    type #stateful_members_pascal;
                 )*
-
                 #sealed_method_decl
-            }
-
-            // Using `self::State` explicitly to avoid name conflicts with the
-            // members named `state` which would create a generic param named `State`
-            // that would shadow the trait `State` in the same scope.
-            #[doc(hidden)]
-            impl<#(
-                #stateful_members_pascal: ::bon::private::MemberState<
-                    self::members::#stateful_members_snake
-                >,
-            )*>
-            self::State for ( #(#stateful_members_pascal,)* )
-            {
-                #( type #stateful_members_pascal = #stateful_members_pascal; )*
-
-                #sealed_method_impl
             }
         }
     }
@@ -334,104 +265,5 @@ impl<'a> StateModGenCtx<'a> {
                 diagnostic::on_unimplemented(message = #message, label = #message)
             )]
         }
-    }
-}
-
-pub(crate) fn prettier_type_aliases_docs(module: TokenStream) -> TokenStream {
-    try_prettier_type_aliases_docs(module.clone())
-        .unwrap_or_else(|err| [module, err.write_errors()].concat())
-}
-
-fn try_prettier_type_aliases_docs(module: TokenStream) -> Result<TokenStream> {
-    let mut module: syn::ItemMod = syn::parse2(module)?;
-    let (_, module_items) = module.content.as_mut().ok_or_else(|| {
-        err!(
-            &Span::call_site(),
-            "expected an inline module with type aliases inside"
-        )
-    })?;
-
-    let mut aliases = module_items
-        .iter_mut()
-        .filter(|item| !matches!(item, syn::Item::Use(_)))
-        .map(require_type_alias)
-        .collect::<Result<Vec<_>>>()?;
-
-    if aliases.is_empty() {
-        bail!(
-            &Span::call_site(),
-            "expected at least one type alias inside the module (e.g. AllUnset)"
-        )
-    };
-
-    let all_unset = aliases.remove(0);
-    let set_members = aliases;
-
-    // This is the case where there is one or zero stateful members. In this
-    // case type aliases don't have any generic parameters to avoid the error
-    // that the generic parameter is unused in the type alias definition.
-    // This case is small and rare enough that we may just avoid doing any
-    // special handling for it.
-    if set_members.len() <= 1 {
-        for alias in set_members {
-            assert!(alias.generics.params.is_empty());
-        }
-
-        return Ok(module.into_token_stream());
-    }
-
-    let vis = all_unset.vis.clone().into_equivalent_in_child_module()?;
-
-    let set_members_idents = set_members.iter().map(|alias| &alias.ident);
-    let set_members_idents2 = set_members_idents.clone();
-    let set_members_bodies = set_members.iter().map(|alias| &alias.ty);
-
-    let all_unset_body = &all_unset.ty;
-
-    let trait_module: syn::Item = syn::parse_quote! {
-        mod private {
-            use super::*;
-
-            #vis trait OpaqueConst {
-                type AllUnset;
-            }
-
-            impl OpaqueConst for () {
-                type AllUnset = #all_unset_body;
-            }
-
-            #vis trait Opaque {
-                #( type #set_members_idents; )*
-            }
-
-            impl<S: State> Opaque for S {
-                #( type #set_members_idents2 = #set_members_bodies; )*
-            }
-        }
-    };
-
-    all_unset.ty = syn::parse_quote! {
-        <() as private::OpaqueConst>::AllUnset
-    };
-
-    for alias in set_members {
-        let alias_ident = &alias.ident;
-        alias.ty = syn::parse_quote! {
-            <S as private::Opaque>::#alias_ident
-        };
-    }
-
-    module_items.push(trait_module);
-
-    Ok(module.into_token_stream())
-}
-
-fn require_type_alias(item: &mut syn::Item) -> Result<&mut syn::ItemType> {
-    match item {
-        syn::Item::Type(item_type) => Ok(item_type),
-        _ => bail!(
-            &item,
-            "expected a type alias inside the module, but found a different item"
-        ),
     }
 }

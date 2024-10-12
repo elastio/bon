@@ -25,7 +25,6 @@ mod cfg_eval;
 // patch releases. Use the export from the builder's state module directly
 // instead of using this reexport from `bon::private`.
 pub use crate::builder_state::{IsSet, IsUnset};
-pub use bon_macros::__prettier_type_aliases_docs;
 pub use rustversion;
 
 pub(crate) mod sealed {

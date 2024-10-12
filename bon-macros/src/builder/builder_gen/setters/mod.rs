@@ -262,15 +262,8 @@ impl<'a> SettersCtx<'a> {
             let builder_ident = &self.builder_gen.builder_type.ident;
             let generic_args = &self.builder_gen.generics.args;
 
-            let state_param =
-                (self.builder_gen.stateful_members().take(2).count() > 1).then(|| {
-                    quote! {
-                        <BuilderState>
-                    }
-                });
-
             quote! {
-                #builder_ident<#(#generic_args,)* #state_mod::#state_transition #state_param>
+                #builder_ident<#(#generic_args,)* #state_mod::#state_transition<BuilderState>>
             }
         };
 

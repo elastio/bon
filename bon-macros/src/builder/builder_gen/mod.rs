@@ -8,8 +8,6 @@ mod state_mod;
 pub(crate) mod input_fn;
 pub(crate) mod input_struct;
 
-pub(crate) use state_mod::prettier_type_aliases_docs;
-
 use crate::util::prelude::*;
 use member::{
     Member, MemberOrigin, NamedMember, PositionalFnArgMember, RawMember, StartFnArgMember,
@@ -445,7 +443,7 @@ impl BuilderGenCtx {
                 // On the flip side, if we have a custom `Drop` impl, then partially moving
                 // the builder will be impossible. So.. it's a trade-off, and it's probably
                 // not a big deal to remove this bound from here if we feel like it.
-                BuilderState: #state_mod::State = #state_mod::AllUnset
+                BuilderState: #state_mod::State = #state_mod::Empty
             >
             #where_clause
             {
