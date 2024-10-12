@@ -38,7 +38,7 @@ impl<'a> StateModGenCtx<'a> {
     }
 
     pub(super) fn state_mod(&self) -> TokenStream {
-        let vis_mod = &self.builder_gen.state_mod.vis;
+        let vis = &self.builder_gen.state_mod.vis;
         let vis_child = &self.builder_gen.state_mod.vis_child;
         let vis_child_child = &self.builder_gen.state_mod.vis_child_child;
 
@@ -66,7 +66,7 @@ impl<'a> StateModGenCtx<'a> {
                 unnameable_types, unreachable_pub, clippy::redundant_pub_crate
             )]
             #( #state_mod_docs )*
-            #vis_mod mod #state_mod_ident {
+            #vis mod #state_mod_ident {
                 #[doc(inline)]
                 #vis_child use ::bon::private::{IsSet, IsUnset};
                 use ::bon::private::{Set, Unset};
