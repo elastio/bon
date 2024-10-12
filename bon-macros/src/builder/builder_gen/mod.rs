@@ -96,7 +96,6 @@ impl BuilderGenCtx {
 
     fn builder_impl(&self) -> TokenStream {
         let finish_fn = self.finish_fn();
-        let transition_type_state_fn = self.transition_type_state_fn();
         let setter_methods = self
             .named_members()
             .map(|member| SettersCtx::new(self, member).setter_methods());
@@ -124,7 +123,6 @@ impl BuilderGenCtx {
             {
                 #finish_fn
                 #(#setter_methods)*
-                #transition_type_state_fn
             }
         }
     }
@@ -160,43 +158,6 @@ impl BuilderGenCtx {
                 // type patterns by placing them in the context where type patterns
                 // are expected.
                 let _: (#(#type_patterns,)*);
-            }
-        }
-    }
-
-    fn transition_type_state_fn(&self) -> TokenStream {
-        let builder_ident = &self.builder_type.ident;
-        let state_mod = &self.state_mod.ident;
-
-        let maybe_receiver_field = self
-            .receiver()
-            .map(|_| quote!(__private_receiver: self.__private_receiver,));
-
-        let maybe_start_fn_args_field = self
-            .start_fn_args()
-            .next()
-            .map(|_| quote!(__private_start_fn_args: self.__private_start_fn_args,));
-
-        let generic_args = &self.generics.args;
-
-        quote! {
-            #[deprecated =
-                "this method is an implementation detail; it should not be used directly; \
-                if you found yourself needing it, then you are probably doing something wrong; \
-                feel free to open an issue/discussion in our GitHub repository \
-                (https://github.com/elastio/bon) or ask for help in our Discord server \
-                (https://discord.gg/QcBYSamw4c)"
-            ]
-            #[inline(always)]
-            fn __private_transition_type_state<__NewBuilderState: #state_mod::State>(self)
-            -> #builder_ident<#(#generic_args,)* __NewBuilderState>
-            {
-                #builder_ident {
-                    __private_phantom: ::core::marker::PhantomData,
-                    #maybe_receiver_field
-                    #maybe_start_fn_args_field
-                    __private_named_members: self.__private_named_members,
-                }
             }
         }
     }
@@ -255,10 +216,10 @@ impl BuilderGenCtx {
         // `Default` trait implementation is provided only for tuples up to 12
         // elements in the standard library 😳:
         // https://github.com/rust-lang/rust/blob/67bb749c2e1cf503fee64842963dd3e72a417a3f/library/core/src/tuple.rs#L213
-        let named_members_field_init = if self.named_members().take(13).count() <= 12 {
+        let named_members_field_init = if false {
             quote!(::core::default::Default::default())
         } else {
-            let none = quote!(::core::option::Option::None);
+            let none = format_ident!("None");
             let nones = self.named_members().map(|_| &none);
             quote! {
                 (#(#nones,)*)
