@@ -101,7 +101,6 @@ impl<'a> StateModGenCtx<'a> {
                 [`State::{member_pascal}`]: self::State::{member_pascal}",
             );
 
-
             let struct_ident = format_ident!("Set{}", member.name.pascal_str);
 
             set_members_structs.push(quote! {
@@ -118,7 +117,7 @@ impl<'a> StateModGenCtx<'a> {
                 } else {
                     let member_pascal = &other_member.name.pascal;
                     quote! {
-                        <S as State>::#member_pascal
+                        S::#member_pascal
                     }
                 }
             });
