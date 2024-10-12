@@ -5,8 +5,8 @@ pub(super) struct StateModGenCtx<'a> {
     builder_gen: &'a BuilderGenCtx,
     stateful_members_snake: Vec<&'a syn::Ident>,
     stateful_members_pascal: Vec<&'a syn::Ident>,
-    sealed_method_decl: TokenStream,
-    sealed_method_impl: TokenStream,
+    sealed_item_decl: TokenStream,
+    sealed_item_impl: TokenStream,
 }
 
 impl<'a> StateModGenCtx<'a> {
@@ -26,13 +26,13 @@ impl<'a> StateModGenCtx<'a> {
 
             // A method without `self` makes the trait non-object safe,
             // which is convenient, because we want that in this case.
-            sealed_method_decl: quote! {
+            sealed_item_decl: quote! {
                 #[doc(hidden)]
-                fn __sealed(_: sealed::Sealed);
+                const SEALED: sealed::Sealed;
             },
 
-            sealed_method_impl: quote! {
-                fn __sealed(_: sealed::Sealed) {}
+            sealed_item_impl: quote! {
+                const SEALED: sealed::Sealed = sealed::Sealed;
             },
         }
     }
@@ -72,7 +72,7 @@ impl<'a> StateModGenCtx<'a> {
                 use ::bon::private::{Set, Unset};
 
                 mod sealed {
-                    #vis_child_child enum Sealed {}
+                    #vis_child_child struct Sealed;
                 }
 
                 #state_trait
@@ -88,7 +88,7 @@ impl<'a> StateModGenCtx<'a> {
         let mut state_impls = Vec::with_capacity(self.stateful_members_snake.len());
 
         let vis_child = &self.builder_gen.state_mod.vis_child;
-        let sealed_method_impl = &self.sealed_method_impl;
+        let sealed_item_impl = &self.sealed_item_impl;
 
         for member in self.builder_gen.stateful_members() {
             let member_pascal = &member.name.pascal;
@@ -130,7 +130,7 @@ impl<'a> StateModGenCtx<'a> {
                     #(
                         type #stateful_members_pascal = #states;
                     )*
-                    #sealed_method_impl
+                    #sealed_item_impl
                 }
             });
         }
@@ -146,17 +146,15 @@ impl<'a> StateModGenCtx<'a> {
 
             // Put it under an anonymous const to make it possible to collapse
             // all this boilerplate when viewing the generated code.
-            #[allow(non_local_definitions)]
-            const _: () = {
-                impl State for Empty {
-                    #(
-                        type #stateful_members_pascal = Unset<members::#stateful_members_snake>;
-                    )*
-                    #sealed_method_impl
-                }
+            impl State for Empty {
+                #(
+                    type #stateful_members_pascal = Unset<members::#stateful_members_snake>;
+                )*
+                #sealed_item_impl
+            }
 
-                #( #state_impls )*
-            };
+            #( #state_impls )*
+
         }
     }
 
@@ -173,7 +171,7 @@ impl<'a> StateModGenCtx<'a> {
         });
 
         let vis_child = &self.builder_gen.state_mod.vis_child;
-        let sealed_method_decl = &self.sealed_method_decl;
+        let sealed_item_decl = &self.sealed_item_decl;
         let stateful_members_pascal = &self.stateful_members_pascal;
 
         quote! {
@@ -190,7 +188,7 @@ impl<'a> StateModGenCtx<'a> {
                     #[doc = #assoc_types_docs]
                     type #stateful_members_pascal;
                 )*
-                #sealed_method_decl
+                #sealed_item_decl
             }
         }
     }
@@ -210,19 +208,15 @@ impl<'a> StateModGenCtx<'a> {
         });
 
         let vis_child = &self.builder_gen.state_mod.vis_child;
-        let sealed_method_decl = &self.sealed_method_decl;
-        let sealed_method_impl = &self.sealed_method_impl;
-
-        let on_unimplemented =
-            Self::on_unimplemented("can't finish building yet; not all required members are set");
+        let sealed_item_decl = &self.sealed_item_decl;
+        let sealed_item_impl = &self.sealed_item_impl;
 
         quote! {
             /// Marker trait that indicates that all required members are set.
             ///
             /// In this state, the builder
-            #on_unimplemented
             #vis_child trait IsComplete: State #maybe_assoc_type_bounds {
-                #sealed_method_decl
+                #sealed_item_decl
             }
 
             #[doc(hidden)]
@@ -232,7 +226,7 @@ impl<'a> StateModGenCtx<'a> {
                     S::#required_members_pascal: IsSet,
                 )*
             {
-                #sealed_method_impl
+                #sealed_item_impl
             }
         }
     }
@@ -254,15 +248,6 @@ impl<'a> StateModGenCtx<'a> {
                     #vis_child_child enum #stateful_members_snake {}
                 )*
             }
-        }
-    }
-
-    fn on_unimplemented(message: &str) -> TokenStream {
-        quote! {
-            #[::bon::private::rustversion::attr(
-                since(1.78.0),
-                diagnostic::on_unimplemented(message = #message, label = #message)
-            )]
         }
     }
 }
