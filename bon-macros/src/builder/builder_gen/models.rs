@@ -1,7 +1,9 @@
 use super::builder_params::{BuilderDerives, OnParams};
 use super::member::Member;
+use crate::normalization::GenericsNamespace;
 use crate::parsing::{ItemParams, SpannedKey};
 use crate::util::prelude::*;
+use std::borrow::Cow;
 
 pub(super) trait FinishFnBody {
     /// Generate the `finish` function body from the ready-made variables.
@@ -119,7 +121,13 @@ pub(super) struct Generics {
 }
 
 pub(crate) struct BuilderGenCtx {
-    pub(super) private_builder_fields: BuilderPrivateFields,
+    /// Private identifiers that are used in the builder implementation.
+    /// They are intentionally randomized to prevent users from accessing them.
+    pub(super) idents_pool: PrivateIdentsPool,
+
+    /// Name of the generic variable that holds the builder's state.
+    pub(super) state_var: syn::Ident,
+
     pub(super) members: Vec<Member>,
 
     /// Lint suppressions from the original item that will be inherited by all items
@@ -138,14 +146,15 @@ pub(crate) struct BuilderGenCtx {
     pub(super) finish_fn: FinishFn,
 }
 
-pub(super) struct BuilderPrivateFields {
+pub(super) struct PrivateIdentsPool {
     pub(super) phantom: syn::Ident,
     pub(super) receiver: syn::Ident,
     pub(super) start_fn_args: syn::Ident,
     pub(super) named_members: syn::Ident,
 }
 
-pub(super) struct BuilderGenCtxParams {
+pub(super) struct BuilderGenCtxParams<'a> {
+    pub(super) namespace: Cow<'a, GenericsNamespace>,
     pub(super) members: Vec<Member>,
 
     pub(super) allow_attrs: Vec<syn::Attribute>,
@@ -170,9 +179,10 @@ pub(super) struct BuilderGenCtxParams {
     pub(super) finish_fn: FinishFn,
 }
 
-impl BuilderGenCtx {
-    pub(super) fn new(params: BuilderGenCtxParams) -> Result<Self> {
+impl<'a> BuilderGenCtx {
+    pub(super) fn new(params: BuilderGenCtxParams<'a>) -> Result<Self> {
         let BuilderGenCtxParams {
+            namespace,
             members,
             allow_attrs,
             on_params,
@@ -272,8 +282,26 @@ impl BuilderGenCtx {
             vis: start_fn.vis.unwrap_or_else(|| builder_type.vis.clone()),
         };
 
+        let state_var = {
+            let possible_names = ["S", "State", "BuilderState"];
+            possible_names
+                .iter()
+                .find(|&&candidate| !namespace.idents.contains(candidate))
+                .map(|&name| syn::Ident::new(name, Span::call_site()))
+                .unwrap_or_else(|| {
+                    let mut name = format!("{}_", possible_names[0]);
+
+                    while namespace.idents.contains(&name) {
+                        name.push('_');
+                    }
+
+                    syn::Ident::new(&name, Span::call_site())
+                })
+        };
+
         Ok(Self {
-            private_builder_fields: BuilderPrivateFields::new(),
+            state_var,
+            idents_pool: PrivateIdentsPool::new(),
             members,
             allow_attrs,
             on_params,
@@ -287,7 +315,7 @@ impl BuilderGenCtx {
     }
 }
 
-impl BuilderPrivateFields {
+impl PrivateIdentsPool {
     fn new() -> Self {
         use std::collections::hash_map::RandomState;
         use std::hash::{BuildHasher, Hasher};

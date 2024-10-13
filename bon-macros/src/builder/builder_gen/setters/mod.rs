@@ -221,7 +221,7 @@ impl<'a> SettersCtx<'a> {
             SetterBody::SetMember { value } => {
                 let index = &self.member.index;
 
-                let fields = &self.base.private_builder_fields;
+                let fields = &self.base.idents_pool;
                 let phantom_field = &fields.phantom;
                 let receiver_field = &fields.receiver;
                 let start_fn_args_field = &fields.start_fn_args;
@@ -282,9 +282,10 @@ impl<'a> SettersCtx<'a> {
             let state_transition = format_ident!("Set{}", self.member.name.pascal_str);
             let builder_ident = &self.base.builder_type.ident;
             let generic_args = &self.base.generics.args;
+            let state_var = &self.base.state_var;
 
             quote! {
-                #builder_ident<#(#generic_args,)* #state_mod::#state_transition<BuilderState>>
+                #builder_ident<#(#generic_args,)* #state_mod::#state_transition<#state_var>>
             }
         };
 
@@ -292,11 +293,13 @@ impl<'a> SettersCtx<'a> {
             return_type = Self::maybe_wrap_in_result(closure, return_type);
         }
 
+        let state_var = &self.base.state_var;
+
         let where_clause = (!self.member.params.overwritable.is_present()).then(|| {
             let member_pascal = &self.member.name.pascal;
             quote! {
                 where
-                    BuilderState::#member_pascal: #state_mod::IsUnset,
+                    #state_var::#member_pascal: #state_mod::IsUnset,
             }
         });
 

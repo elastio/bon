@@ -1,9 +1,11 @@
 mod cfg;
+mod generics_namespace;
 mod impl_traits;
 mod lifetimes;
 mod self_ty;
 
 pub(crate) use cfg::*;
+pub(crate) use generics_namespace::GenericsNamespace;
 pub(crate) use impl_traits::NormalizeImplTraits;
 pub(crate) use lifetimes::NormalizeLifetimes;
 pub(crate) use self_ty::NormalizeSelfTy;

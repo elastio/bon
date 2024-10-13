@@ -4,11 +4,15 @@ use crate::normalization::SyntaxVariant;
 use crate::util::prelude::*;
 use syn::visit_mut::VisitMut;
 
-pub(crate) fn generate(params: FnInputParams, orig_fn: syn::ItemFn) -> Result<TokenStream> {
+pub(crate) fn generate(
+    params: FnInputParams,
+    orig_fn: syn::ItemFn,
+    namespace: &crate::normalization::GenericsNamespace,
+) -> Result<TokenStream> {
     let mut norm_fn = orig_fn.clone();
 
-    crate::normalization::NormalizeLifetimes.visit_item_fn_mut(&mut norm_fn);
-    crate::normalization::NormalizeImplTraits.visit_item_fn_mut(&mut norm_fn);
+    crate::normalization::NormalizeLifetimes::new(namespace).visit_item_fn_mut(&mut norm_fn);
+    crate::normalization::NormalizeImplTraits::new(namespace).visit_item_fn_mut(&mut norm_fn);
 
     let fn_item = SyntaxVariant {
         orig: orig_fn,
@@ -16,6 +20,7 @@ pub(crate) fn generate(params: FnInputParams, orig_fn: syn::ItemFn) -> Result<To
     };
 
     let ctx = FnInputCtx {
+        namespace,
         fn_item,
         impl_ctx: None,
         params,

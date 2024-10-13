@@ -5,11 +5,12 @@ pub(crate) mod item_impl;
 mod item_fn;
 mod item_struct;
 
-use crate::normalization::{ExpandCfg, ExpansionOutput};
+use crate::normalization::{ExpandCfg, ExpansionOutput, GenericsNamespace};
 use crate::util;
 use crate::util::prelude::*;
 use darling::FromMeta;
 use syn::parse::Parser;
+use syn::visit::Visit;
 
 pub(crate) fn generate_from_derive(item: TokenStream) -> TokenStream {
     try_generate_from_derive(item).unwrap_or_else(Error::write_errors)
@@ -54,7 +55,12 @@ fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<Toke
     let nested_meta = &darling::ast::NestedMeta::parse_meta_list(params.clone())?;
 
     let main_output = match item {
-        syn::Item::Fn(item_fn) => item_fn::generate(FromMeta::from_list(nested_meta)?, item_fn)?,
+        syn::Item::Fn(item_fn) => {
+            let mut namespace = GenericsNamespace::default();
+            namespace.visit_item_fn(&item_fn);
+
+            item_fn::generate(FromMeta::from_list(nested_meta)?, item_fn, &namespace)?
+        }
         syn::Item::Struct(struct_item) => {
             bail!(
                 &struct_item.struct_token,

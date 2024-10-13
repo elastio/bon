@@ -1,26 +1,40 @@
+use super::GenericsNamespace;
 use crate::util::prelude::*;
 use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
 
-#[derive(Default)]
-pub(crate) struct NormalizeLifetimes;
+pub(crate) struct NormalizeLifetimes<'a> {
+    namespace: &'a GenericsNamespace,
+}
 
-impl VisitMut for NormalizeLifetimes {
+impl<'a> NormalizeLifetimes<'a> {
+    pub(crate) fn new(namespace: &'a GenericsNamespace) -> Self {
+        Self { namespace }
+    }
+}
+
+impl VisitMut for NormalizeLifetimes<'_> {
     fn visit_item_impl_mut(&mut self, impl_block: &mut syn::ItemImpl) {
-        syn::visit_mut::visit_item_impl_mut(self, impl_block);
+        for item in &mut impl_block.items {
+            self.visit_impl_item_mut(item);
+        }
 
-        AssignLifetimes::new("impl", &mut impl_block.generics)
+        AssignLifetimes::new(self, "impl", &mut impl_block.generics)
             .visit_type_mut(&mut impl_block.self_ty);
     }
 
-    fn visit_impl_item_fn_mut(&mut self, fn_item: &mut syn::ImplItemFn) {
-        // We are interested only in signatures of functions. Don't recurse
-        // into the function's block.
+    fn visit_impl_item_mut(&mut self, item: &mut syn::ImplItem) {
+        if let syn::ImplItem::Fn(fn_item) = item {
+            self.visit_signature_mut(&mut fn_item.sig);
+        }
+    }
+
+    fn visit_item_fn_mut(&mut self, fn_item: &mut syn::ItemFn) {
         self.visit_signature_mut(&mut fn_item.sig);
     }
 
     fn visit_signature_mut(&mut self, signature: &mut syn::Signature) {
-        let mut visitor = AssignLifetimes::new("fn", &mut signature.generics);
+        let mut visitor = AssignLifetimes::new(self, "fn", &mut signature.generics);
         for arg in &mut signature.inputs {
             visitor.visit_fn_arg_mut(arg);
         }
@@ -70,14 +84,24 @@ impl VisitMut for NormalizeLifetimes {
 }
 
 struct AssignLifetimes<'a> {
+    base: &'a NormalizeLifetimes<'a>,
+
     prefix: &'static str,
+
+    /// Generics where the assigned lifetimes should be stored.
     generics: &'a mut syn::Generics,
+
     next_lifetime_index: usize,
 }
 
 impl<'a> AssignLifetimes<'a> {
-    fn new(prefix: &'static str, generics: &'a mut syn::Generics) -> Self {
+    fn new(
+        base: &'a NormalizeLifetimes<'a>,
+        prefix: &'static str,
+        generics: &'a mut syn::Generics,
+    ) -> Self {
         Self {
+            base,
             prefix,
             generics,
             next_lifetime_index: 1,
@@ -153,7 +177,13 @@ impl AssignLifetimes<'_> {
         let index = self.next_lifetime_index;
         self.next_lifetime_index += 1;
 
-        let lifetime = format!("'{}{index}", self.prefix);
+        let mut lifetime = format!("'{}{index}", self.prefix);
+
+        // Add `_` suffix to the lifetime to avoid conflicts with existing lifetimes
+        while self.base.namespace.lifetimes.contains(&lifetime) {
+            lifetime.push('_');
+        }
+
         let lifetime = syn::Lifetime::new(&lifetime, Span::call_site());
 
         let lifetime_param = syn::LifetimeParam::new(lifetime.clone());

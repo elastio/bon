@@ -3,8 +3,8 @@ use crate::util::prelude::*;
 
 impl super::BuilderGenCtx {
     fn finish_fn_member_expr(&self, member: &Member) -> TokenStream {
-        let start_fn_args_field = &self.private_builder_fields.start_fn_args;
-        let named_members_field = &self.private_builder_fields.named_members;
+        let start_fn_args_field = &self.idents_pool.start_fn_args;
+        let named_members_field = &self.idents_pool.named_members;
 
         let member = match member {
             Member::Named(member) => member,
@@ -119,6 +119,7 @@ impl super::BuilderGenCtx {
             .unwrap_or(&self.builder_type.vis);
         let finish_fn_ident = &self.finish_fn.ident;
         let output = &self.finish_fn.output;
+        let state_var = &self.state_var;
 
         quote! {
             #(#attrs)*
@@ -136,7 +137,7 @@ impl super::BuilderGenCtx {
             #must_use
             #finish_fn_vis #asyncness #unsafety fn #finish_fn_ident(self, #(#finish_fn_params,)*) #output
             where
-                BuilderState: #state_mod::IsComplete
+                #state_var: #state_mod::IsComplete
             {
                 #(#members_vars_decls)*
                 #body

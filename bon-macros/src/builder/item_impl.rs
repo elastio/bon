@@ -1,12 +1,16 @@
 use super::builder_gen::input_fn::{FnInputCtx, FnInputParams, ImplCtx};
-use crate::normalization::SyntaxVariant;
+use crate::normalization::{GenericsNamespace, SyntaxVariant};
 use crate::util::prelude::*;
 use darling::ast::NestedMeta;
 use darling::FromMeta;
 use std::rc::Rc;
+use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
 
 pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream> {
+    let mut namespace = GenericsNamespace::default();
+    namespace.visit_item_impl(&orig_impl_block);
+
     if let Some((_, trait_path, _)) = &orig_impl_block.trait_ {
         bail!(trait_path, "Impls of traits are not supported yet");
     }
@@ -48,8 +52,11 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
     // the input. It would highlight `Self` as an "unresolved symbol"
     let mut norm_impl_block = orig_impl_block.clone();
 
-    crate::normalization::NormalizeLifetimes.visit_item_impl_mut(&mut norm_impl_block);
-    crate::normalization::NormalizeImplTraits.visit_item_impl_mut(&mut norm_impl_block);
+    crate::normalization::NormalizeLifetimes::new(&namespace)
+        .visit_item_impl_mut(&mut norm_impl_block);
+
+    crate::normalization::NormalizeImplTraits::new(&namespace)
+        .visit_item_impl_mut(&mut norm_impl_block);
 
     // Retain a variant of the impl block without the normalized `Self` mentions.
     // This way we preserve the original code that the user wrote with `Self` mentions
@@ -113,6 +120,7 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
             };
 
             let ctx = FnInputCtx {
+                namespace: &namespace,
                 fn_item,
                 impl_ctx: Some(impl_ctx.clone()),
                 params,

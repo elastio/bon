@@ -52,10 +52,10 @@ impl BuilderGenCtx {
         let generic_args = &self.generics.args;
         let builder_ident = &self.builder_type.ident;
 
-        let phantom_field = &self.private_builder_fields.phantom;
-        let receiver_field = &self.private_builder_fields.receiver;
-        let start_fn_args_field = &self.private_builder_fields.start_fn_args;
-        let named_members_field = &self.private_builder_fields.named_members;
+        let phantom_field = &self.idents_pool.phantom;
+        let receiver_field = &self.idents_pool.receiver;
+        let start_fn_args_field = &self.idents_pool.start_fn_args;
+        let named_members_field = &self.idents_pool.named_members;
 
         let clone = quote!(::core::clone::Clone);
 
@@ -98,15 +98,17 @@ impl BuilderGenCtx {
             }
         });
 
+        let state_var = &self.state_var;
+
         quote! {
             #[automatically_derived]
             impl<
                 #(#generics_decl,)*
-                BuilderState: #state_mod::State
+                #state_var: #state_mod::State
             >
             #clone for #builder_ident<
                 #(#generic_args,)*
-                BuilderState
+                #state_var
             >
             #where_clause
             {
@@ -131,9 +133,9 @@ impl BuilderGenCtx {
     }
 
     fn derive_debug(&self) -> TokenStream {
-        let receiver_field = &self.private_builder_fields.receiver;
-        let start_fn_args_field = &self.private_builder_fields.start_fn_args;
-        let named_members_field = &self.private_builder_fields.named_members;
+        let receiver_field = &self.idents_pool.receiver;
+        let start_fn_args_field = &self.idents_pool.start_fn_args;
+        let named_members_field = &self.idents_pool.named_members;
 
         let format_members = self.members.iter().filter_map(|member| {
             match member {
@@ -189,17 +191,18 @@ impl BuilderGenCtx {
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
         let builder_ident = &self.builder_type.ident;
+        let state_var = &self.state_var;
         let builder_ident_str = builder_ident.to_string();
 
         quote! {
             #[automatically_derived]
             impl<
                 #(#generics_decl,)*
-                BuilderState: #state_mod::State
+                #state_var: #state_mod::State
             >
             #debug for #builder_ident<
                 #(#generic_args,)*
-                BuilderState
+                #state_var
             >
             #where_clause
             {

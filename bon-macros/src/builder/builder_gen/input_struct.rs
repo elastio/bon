@@ -4,11 +4,12 @@ use super::{
     RawMember,
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
-use crate::normalization::SyntaxVariant;
+use crate::normalization::{GenericsNamespace, SyntaxVariant};
 use crate::parsing::{ItemParams, ItemParamsParsing, SpannedKey};
 use crate::util::prelude::*;
 use darling::FromMeta;
 use syn::visit_mut::VisitMut;
+use std::borrow::Cow;
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct StructInputParams {
@@ -253,6 +254,7 @@ impl StructInputCtx {
         };
 
         BuilderGenCtx::new(BuilderGenCtxParams {
+            namespace: Cow::Owned(GenericsNamespace::default()),
             members,
 
             allow_attrs,

@@ -4,7 +4,7 @@ use super::{
     Member, MemberOrigin, RawMember,
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
-use crate::normalization::{NormalizeSelfTy, SyntaxVariant};
+use crate::normalization::{GenericsNamespace, NormalizeSelfTy, SyntaxVariant};
 use crate::parsing::{ItemParams, SpannedKey};
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
@@ -13,6 +13,7 @@ use std::rc::Rc;
 use syn::punctuated::Punctuated;
 use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
+use std::borrow::Cow;
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct FnInputParams {
@@ -60,7 +61,8 @@ impl FromMeta for ExposePositionalFnParams {
     }
 }
 
-pub(crate) struct FnInputCtx {
+pub(crate) struct FnInputCtx<'a> {
+    pub(crate) namespace: &'a GenericsNamespace,
     pub(crate) fn_item: SyntaxVariant<syn::ItemFn>,
     pub(crate) impl_ctx: Option<Rc<ImplCtx>>,
     pub(crate) params: FnInputParams,
@@ -76,7 +78,7 @@ pub(crate) struct ImplCtx {
     pub(crate) allow_attrs: Vec<syn::Attribute>,
 }
 
-impl FnInputCtx {
+impl FnInputCtx<'_> {
     fn self_ty_prefix(&self) -> Option<String> {
         let prefix = self
             .impl_ctx
@@ -438,6 +440,7 @@ impl FnInputCtx {
         };
 
         BuilderGenCtx::new(BuilderGenCtxParams {
+            namespace: Cow::Borrowed(self.namespace),
             members,
 
             allow_attrs,
@@ -483,7 +486,7 @@ impl FinishFnBody for FnCallBody {
             .sig
             .receiver()
             .map(|_| {
-                let receiver_field = &ctx.private_builder_fields.receiver;
+                let receiver_field = &ctx.idents_pool.receiver;
                 quote!(self.#receiver_field.)
             })
             .or_else(|| {

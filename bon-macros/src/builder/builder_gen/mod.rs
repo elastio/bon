@@ -105,6 +105,7 @@ impl BuilderGenCtx {
         let where_clause = &self.generics.where_clause;
         let builder_ident = &self.builder_type.ident;
         let state_mod = &self.state_mod.ident;
+        let state_var = &self.state_var;
 
         let allows = allow_warnings_on_member_types();
 
@@ -113,11 +114,11 @@ impl BuilderGenCtx {
             #[automatically_derived]
             impl<
                 #(#generics_decl,)*
-                BuilderState: #state_mod::State
+                #state_var: #state_mod::State
             >
             #builder_ident<
                 #(#generic_args,)*
-                BuilderState
+                #state_var
             >
             #where_clause
             {
@@ -182,10 +183,10 @@ impl BuilderGenCtx {
         let where_clause = &generics.where_clause;
         let generic_args = &self.generics.args;
 
-        let phantom_field = &self.private_builder_fields.phantom;
-        let receiver_field = &self.private_builder_fields.receiver;
-        let start_fn_args_field = &self.private_builder_fields.start_fn_args;
-        let named_members_field = &self.private_builder_fields.named_members;
+        let phantom_field = &self.idents_pool.phantom;
+        let receiver_field = &self.idents_pool.receiver;
+        let start_fn_args_field = &self.idents_pool.start_fn_args;
+        let named_members_field = &self.idents_pool.named_members;
 
         let receiver = self.receiver();
 
@@ -294,6 +295,9 @@ impl BuilderGenCtx {
                 quote!(fn() -> ::core::marker::PhantomData<#ty>)
             });
 
+
+        let state_var = &self.state_var;
+
         quote! {
             ::core::marker::PhantomData<(
                 // There is an interesting quirk with lifetimes in Rust, which is the
@@ -319,9 +323,9 @@ impl BuilderGenCtx {
                 // explanation for it, I just didn't care to research it yet ¯\_(ツ)_/¯.
                 #(#types,)*
 
-                // A special case of zero members requires storing `BuilderState` in
+                // A special case of zero members requires storing the builder state in
                 // phantom data otherwise it would be reported as an unused type parameter.
-                fn() -> ::core::marker::PhantomData<BuilderState>,
+                fn() -> ::core::marker::PhantomData<#state_var>,
             )>
         }
     }
@@ -333,10 +337,10 @@ impl BuilderGenCtx {
         let where_clause = &self.generics.where_clause;
         let phantom_data = self.phantom_data();
         let state_mod = &self.state_mod.ident;
-        let phantom_field = &self.private_builder_fields.phantom;
-        let receiver_field = &self.private_builder_fields.receiver;
-        let start_fn_args_field = &self.private_builder_fields.start_fn_args;
-        let named_members_field = &self.private_builder_fields.named_members;
+        let phantom_field = &self.idents_pool.phantom;
+        let receiver_field = &self.idents_pool.receiver;
+        let start_fn_args_field = &self.idents_pool.start_fn_args;
+        let named_members_field = &self.idents_pool.named_members;
 
         let private_field_attrs = quote! {
             // The fields can't be hidden using Rust's privacy syntax.
@@ -386,6 +390,7 @@ impl BuilderGenCtx {
         let named_members_types = self.named_members().map(NamedMember::underlying_norm_ty);
 
         let docs = &self.builder_type.docs;
+        let state_var = &self.state_var;
 
         quote! {
             #[must_use = #must_use_message]
@@ -412,7 +417,7 @@ impl BuilderGenCtx {
                 // On the flip side, if we have a custom `Drop` impl, then partially moving
                 // the builder will be impossible. So.. it's a trade-off, and it's probably
                 // not a big deal to remove this bound from here if we feel like it.
-                BuilderState: #state_mod::State = #state_mod::Empty
+                #state_var: #state_mod::State = #state_mod::Empty
             >
             #where_clause
             {
