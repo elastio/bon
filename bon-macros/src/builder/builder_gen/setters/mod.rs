@@ -370,18 +370,18 @@ impl SettersItems {
 
         let common_name = params.and_then(|params| params.name.as_deref());
         let common_vis = params.and_then(|params| params.vis.as_deref());
-        let common_docs = params.and_then(|params| params.docs.as_deref());
+        let common_docs = params.and_then(|params| params.docs.as_deref().map(Vec::as_slice));
 
         let doc = |docs: &str| iter::once(syn::parse_quote!(#[doc = #docs]));
 
         if member.is_required() {
-            let docs = common_docs.cloned().unwrap_or_else(|| {
-                let header = "\
-                    | **Required** |\n\
-                    | -- |\n\n";
+            let docs = common_docs.unwrap_or(&member.docs);
 
-                doc(header).chain(member.docs.iter().cloned()).collect()
-            });
+            let header = "\
+                | **Required** |\n\
+                | -- |\n\n";
+
+            let docs = doc(header).chain(docs.iter().cloned()).collect();
 
             return Self::Required(SetterItem {
                 name: common_name.unwrap_or(&member.name.snake).clone(),
@@ -430,29 +430,29 @@ impl SettersItems {
         // setter has a lower visibility.
         let some_fn_docs = some_fn
             .and_then(ItemParams::docs)
-            .map(ToOwned::to_owned)
-            .unwrap_or_else(|| {
-                let base_docs = common_docs.unwrap_or(&member.docs);
+            .or(common_docs)
+            .unwrap_or(&member.docs);
 
-                let header = optional_setter_docs(default, &option_fn_name, "accepts an `Option`");
+        let some_fn_docs = {
+            let header = optional_setter_docs(default, &option_fn_name, "accepts an `Option`");
 
-                doc(&header).chain(base_docs.iter().cloned()).collect()
-            });
+            doc(&header).chain(some_fn_docs.iter().cloned()).collect()
+        };
 
         let option_fn_docs = option_fn
             .and_then(ItemParams::docs)
-            .map(ToOwned::to_owned)
-            .unwrap_or_else(|| {
-                let base_docs = common_docs.unwrap_or(&member.docs);
+            .or(common_docs)
+            .unwrap_or(&member.docs);
 
-                let header = optional_setter_docs(
-                    default,
-                    &some_fn_name,
-                    "wraps the value with `Some` internally",
-                );
+        let option_fn_docs = {
+            let header = optional_setter_docs(
+                default,
+                &some_fn_name,
+                "wraps the value with `Some` internally",
+            );
 
-                doc(&header).chain(base_docs.iter().cloned()).collect()
-            });
+            doc(&header).chain(option_fn_docs.iter().cloned()).collect()
+        };
 
         let some_fn = SetterItem {
             name: some_fn_name,

@@ -1,5 +1,5 @@
+use super::snapshot;
 use crate::util::prelude::*;
-use expect_test::expect_file;
 
 #[allow(non_camel_case_types)]
 #[derive(Copy, Clone)]
@@ -27,13 +27,7 @@ fn assert_builder_codegen(
         // There is a syntax error, so we can't prettify it
         .unwrap_or_else(|_err| actual.to_string());
 
-    let snapshot_path = format!(
-        "{}/tests/snapshots/{test_name}.rs",
-        env!("CARGO_MANIFEST_DIR")
-    );
-    let expected = expect_file![snapshot_path];
-
-    expected.assert_eq(&actual);
+    snapshot(test_name).assert_eq(&actual);
 }
 
 macro_rules! test_codegen {
