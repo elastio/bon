@@ -221,7 +221,7 @@ impl BuilderGenCtx {
         // `Default` trait implementation is provided only for tuples up to 12
         // elements in the standard library 😳:
         // https://github.com/rust-lang/rust/blob/67bb749c2e1cf503fee64842963dd3e72a417a3f/library/core/src/tuple.rs#L213
-        let named_members_field_init = if false {
+        let named_members_field_init = if self.named_members().take(13).count() > 12 {
             quote!(::core::default::Default::default())
         } else {
             let none = format_ident!("None");

@@ -41,7 +41,7 @@ impl super::BuilderGenCtx {
             Some(Some(default)) => {
                 let has_into = member.params.into.is_present();
                 let default = if has_into {
-                    quote! { ::core::convert::Into::into((|| #default)()) }
+                    quote! { Into::into((|| #default)()) }
                 } else {
                     quote! { #default }
                 };
