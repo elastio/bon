@@ -21,7 +21,7 @@ use crate::private::{Sealed, Set, Unset};
 pub trait IsSet: Sealed {}
 
 /// Marker trait that indicates that the member is unset, i.e. none
-/// of its setters were called.
+/// of its setters was called.
 #[rustversion::attr(
     since(1.78.0),
     diagnostic::on_unimplemented(

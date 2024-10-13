@@ -2,7 +2,7 @@ use super::BuilderGenCtx;
 use crate::util::prelude::*;
 
 pub(super) struct StateModGenCtx<'a> {
-    builder_gen: &'a BuilderGenCtx,
+    base: &'a BuilderGenCtx,
     stateful_members_snake: Vec<&'a syn::Ident>,
     stateful_members_pascal: Vec<&'a syn::Ident>,
     sealed_item_decl: TokenStream,
@@ -12,7 +12,7 @@ pub(super) struct StateModGenCtx<'a> {
 impl<'a> StateModGenCtx<'a> {
     pub(super) fn new(builder_gen: &'a BuilderGenCtx) -> Self {
         Self {
-            builder_gen,
+            base: builder_gen,
 
             stateful_members_snake: builder_gen
                 .stateful_members()
@@ -38,12 +38,12 @@ impl<'a> StateModGenCtx<'a> {
     }
 
     pub(super) fn state_mod(&self) -> TokenStream {
-        let vis = &self.builder_gen.state_mod.vis;
-        let vis_child = &self.builder_gen.state_mod.vis_child;
-        let vis_child_child = &self.builder_gen.state_mod.vis_child_child;
+        let vis = &self.base.state_mod.vis;
+        let vis_child = &self.base.state_mod.vis_child;
+        let vis_child_child = &self.base.state_mod.vis_child_child;
 
-        let state_mod_docs = &self.builder_gen.state_mod.docs;
-        let state_mod_ident = &self.builder_gen.state_mod.ident;
+        let state_mod_docs = &self.base.state_mod.docs;
+        let state_mod_ident = &self.base.state_mod.ident;
 
         let state_trait = self.state_trait();
         let is_complete_trait = self.is_complete_trait();
@@ -87,28 +87,26 @@ impl<'a> StateModGenCtx<'a> {
         let mut set_members_structs = Vec::with_capacity(self.stateful_members_snake.len());
         let mut state_impls = Vec::with_capacity(self.stateful_members_snake.len());
 
-        let vis_child = &self.builder_gen.state_mod.vis_child;
+        let vis_child = &self.base.state_mod.vis_child;
         let sealed_item_impl = &self.sealed_item_impl;
 
-        for member in self.builder_gen.stateful_members() {
+        for member in self.base.stateful_members() {
             let member_pascal = &member.name.pascal;
 
             let docs = format!(
-                "Returns a [`State`] that has [`IsSet`] implemented for [`State::{member_pascal}`]\n\n\
+                "Represents a [`State`] that has [`IsSet`] implemented for [`State::{member_pascal}`].\n\n\
                 The state for all other members is left the same as in the input state.\n\n\
-                [`State`]: self::State\n\
-                [`IsSet`]: self::IsSet\n\
-                [`State::{member_pascal}`]: self::State::{member_pascal}",
+                [`State::{member_pascal}`]: State::{member_pascal}",
             );
 
             let struct_ident = format_ident!("Set{}", member.name.pascal_str);
 
             set_members_structs.push(quote! {
                 #[doc = #docs]
-                #vis_child struct #struct_ident<S: State = Empty>(S);
+                #vis_child struct #struct_ident<S: State = Empty>(::core::marker::PhantomData<fn() -> S>);
             });
 
-            let states = self.builder_gen.stateful_members().map(|other_member| {
+            let states = self.base.stateful_members().map(|other_member| {
                 if other_member.is(member) {
                     let member_snake = &member.name.snake;
                     quote! {
@@ -139,13 +137,16 @@ impl<'a> StateModGenCtx<'a> {
         let stateful_members_pascal = &self.stateful_members_pascal;
 
         quote! {
-            /// Initial state of the builder where all members are unset
+            /// Represents a [`State`] that has [`IsUnset`] implemented for all members.
+            ///
+            /// This is the initial state of the builder before any setters are called.
             #vis_child struct Empty(());
 
             #( #set_members_structs )*
 
             // Put it under an anonymous const to make it possible to collapse
             // all this boilerplate when viewing the generated code.
+            #[doc(hidden)]
             impl State for Empty {
                 #(
                     type #stateful_members_pascal = Unset<members::#stateful_members_snake>;
@@ -170,19 +171,30 @@ impl<'a> StateModGenCtx<'a> {
             )
         });
 
-        let vis_child = &self.builder_gen.state_mod.vis_child;
+        let vis_child = &self.base.state_mod.vis_child;
         let sealed_item_decl = &self.sealed_item_decl;
         let stateful_members_pascal = &self.stateful_members_pascal;
 
+        let docs_suffix = if stateful_members_pascal.is_empty() {
+            ""
+        } else {
+            "\
+                \n\
+                \n\
+                You can use the associated types of this trait to control the state of individual members \
+                with the [`IsSet`] and [`IsUnset`] traits. You can change the state of the members with \
+                the `Set*` structs available in this module.\n\
+                \n\
+                [`IsSet`]: ::bon::IsSet
+                [`IsUnset`]: ::bon::IsUnset"
+        };
+
+        let docs = format!(
+            "Builder's type state specifies if members are set or not (unset).{docs_suffix}"
+        );
+
         quote! {
-            /// Builder's type state specifies if members are set or not (unset).
-            ///
-            /// You can use the associated types of this trait to control the state of individual members
-            /// with the [`IsSet`] and [`IsUnset`] traits. You can change the state of the members with
-            /// the `Set*` type aliases available in this module.
-            ///
-            /// [`IsSet`]: ::bon::IsSet
-            /// [`IsUnset`]: ::bon::IsUnset
+            #[doc = #docs]
             #vis_child trait State: ::core::marker::Sized {
                 #(
                     #[doc = #assoc_types_docs]
@@ -195,7 +207,7 @@ impl<'a> StateModGenCtx<'a> {
 
     fn is_complete_trait(&self) -> TokenStream {
         let required_members_pascal = self
-            .builder_gen
+            .base
             .named_members()
             .filter(|member| member.is_required())
             .map(|member| &member.name.pascal)
@@ -207,14 +219,21 @@ impl<'a> StateModGenCtx<'a> {
             }
         });
 
-        let vis_child = &self.builder_gen.state_mod.vis_child;
+        let vis_child = &self.base.state_mod.vis_child;
         let sealed_item_decl = &self.sealed_item_decl;
         let sealed_item_impl = &self.sealed_item_impl;
 
+        let builder_ident = &self.base.builder_type.ident;
+        let finish_fn = &self.base.finish_fn.ident;
+
+        let docs = format!(
+            "Marker trait that indicates that all required members are set.\n\n\
+            In this state, you can finish the building by calling the method \
+            [`{builder_ident}::{finish_fn}()`]",
+        );
+
         quote! {
-            /// Marker trait that indicates that all required members are set.
-            ///
-            /// In this state, the builder
+            #[doc = #docs]
             #vis_child trait IsComplete: State #maybe_assoc_type_bounds {
                 #sealed_item_decl
             }
@@ -232,7 +251,7 @@ impl<'a> StateModGenCtx<'a> {
     }
 
     fn members_names_mod(&self) -> TokenStream {
-        let vis_child_child = &self.builder_gen.state_mod.vis_child_child;
+        let vis_child_child = &self.base.state_mod.vis_child_child;
         let stateful_members_snake = &self.stateful_members_snake;
 
         quote! {
