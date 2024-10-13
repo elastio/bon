@@ -1,7 +1,7 @@
 #[allow(unused_parens)]
 #[automatically_derived]
 #[allow(deprecated)]
-impl<BuilderState: sut_builder::State> SutBuilder<BuilderState> {
+impl<S: sut_builder::State> SutBuilder<S> {
     /**| **Required** |
 | -- |
 
@@ -13,9 +13,9 @@ impl<BuilderState: sut_builder::State> SutBuilder<BuilderState> {
     pub(in overridden) fn required_field(
         mut self,
         value: u32,
-    ) -> SutBuilder<sut_builder::SetRequiredField<BuilderState>>
+    ) -> SutBuilder<sut_builder::SetRequiredField<S>>
     where
-        BuilderState::RequiredField: sut_builder::IsUnset,
+        S::RequiredField: sut_builder::IsUnset,
     {}
     /**| **Optional** |
 | -- |
@@ -30,9 +30,9 @@ impl<BuilderState: sut_builder::State> SutBuilder<BuilderState> {
     pub(in overridden) fn optional_field(
         self,
         value: u32,
-    ) -> SutBuilder<sut_builder::SetOptionalField<BuilderState>>
+    ) -> SutBuilder<sut_builder::SetOptionalField<S>>
     where
-        BuilderState::OptionalField: sut_builder::IsUnset,
+        S::OptionalField: sut_builder::IsUnset,
     {}
     /**| **Optional** |
 | -- |
@@ -47,9 +47,9 @@ impl<BuilderState: sut_builder::State> SutBuilder<BuilderState> {
     pub(in overridden) fn maybe_optional_field(
         mut self,
         value: Option<u32>,
-    ) -> SutBuilder<sut_builder::SetOptionalField<BuilderState>>
+    ) -> SutBuilder<sut_builder::SetOptionalField<S>>
     where
-        BuilderState::OptionalField: sut_builder::IsUnset,
+        S::OptionalField: sut_builder::IsUnset,
     {}
     /**| **Optional** |
 | -- |
@@ -66,9 +66,9 @@ impl<BuilderState: sut_builder::State> SutBuilder<BuilderState> {
     pub(in overridden) fn default_field(
         self,
         value: u32,
-    ) -> SutBuilder<sut_builder::SetDefaultField<BuilderState>>
+    ) -> SutBuilder<sut_builder::SetDefaultField<S>>
     where
-        BuilderState::DefaultField: sut_builder::IsUnset,
+        S::DefaultField: sut_builder::IsUnset,
     {}
     /**| **Optional** |
 | -- |
@@ -85,9 +85,9 @@ impl<BuilderState: sut_builder::State> SutBuilder<BuilderState> {
     pub(in overridden) fn maybe_default_field(
         mut self,
         value: Option<u32>,
-    ) -> SutBuilder<sut_builder::SetDefaultField<BuilderState>>
+    ) -> SutBuilder<sut_builder::SetDefaultField<S>>
     where
-        BuilderState::DefaultField: sut_builder::IsUnset,
+        S::DefaultField: sut_builder::IsUnset,
     {}
     /**| **Optional** |
 | -- |
@@ -102,9 +102,9 @@ impl<BuilderState: sut_builder::State> SutBuilder<BuilderState> {
     pub(in some_fn_overridden) fn optional_field_with_specific_overrides(
         self,
         value: u32,
-    ) -> SutBuilder<sut_builder::SetOptionalFieldWithSpecificOverrides<BuilderState>>
+    ) -> SutBuilder<sut_builder::SetOptionalFieldWithSpecificOverrides<S>>
     where
-        BuilderState::OptionalFieldWithSpecificOverrides: sut_builder::IsUnset,
+        S::OptionalFieldWithSpecificOverrides: sut_builder::IsUnset,
     {}
     /**| **Optional** |
 | -- |
@@ -119,9 +119,9 @@ impl<BuilderState: sut_builder::State> SutBuilder<BuilderState> {
     pub(in option_fn_overridden) fn maybe_optional_field_with_specific_overrides(
         mut self,
         value: Option<u32>,
-    ) -> SutBuilder<sut_builder::SetOptionalFieldWithSpecificOverrides<BuilderState>>
+    ) -> SutBuilder<sut_builder::SetOptionalFieldWithSpecificOverrides<S>>
     where
-        BuilderState::OptionalFieldWithSpecificOverrides: sut_builder::IsUnset,
+        S::OptionalFieldWithSpecificOverrides: sut_builder::IsUnset,
     {}
     /**| **Optional** |
 | -- |
@@ -138,9 +138,9 @@ impl<BuilderState: sut_builder::State> SutBuilder<BuilderState> {
     pub(in some_fn_overridden) fn default_field_with_specific_overrides(
         self,
         value: u32,
-    ) -> SutBuilder<sut_builder::SetDefaultFieldWithSpecificOverrides<BuilderState>>
+    ) -> SutBuilder<sut_builder::SetDefaultFieldWithSpecificOverrides<S>>
     where
-        BuilderState::DefaultFieldWithSpecificOverrides: sut_builder::IsUnset,
+        S::DefaultFieldWithSpecificOverrides: sut_builder::IsUnset,
     {}
     /**| **Optional** |
 | -- |
@@ -157,9 +157,9 @@ impl<BuilderState: sut_builder::State> SutBuilder<BuilderState> {
     pub(in option_fn_overridden) fn maybe_default_field_with_specific_overrides(
         mut self,
         value: Option<u32>,
-    ) -> SutBuilder<sut_builder::SetDefaultFieldWithSpecificOverrides<BuilderState>>
+    ) -> SutBuilder<sut_builder::SetDefaultFieldWithSpecificOverrides<S>>
     where
-        BuilderState::DefaultFieldWithSpecificOverrides: sut_builder::IsUnset,
+        S::DefaultFieldWithSpecificOverrides: sut_builder::IsUnset,
     {}
     /**| **Optional** |
 | -- |
@@ -174,9 +174,9 @@ impl<BuilderState: sut_builder::State> SutBuilder<BuilderState> {
     pub(in overridden) fn optional_field_with_inherited_overrides(
         self,
         value: u32,
-    ) -> SutBuilder<sut_builder::SetOptionalFieldWithInheritedOverrides<BuilderState>>
+    ) -> SutBuilder<sut_builder::SetOptionalFieldWithInheritedOverrides<S>>
     where
-        BuilderState::OptionalFieldWithInheritedOverrides: sut_builder::IsUnset,
+        S::OptionalFieldWithInheritedOverrides: sut_builder::IsUnset,
     {}
     /**| **Optional** |
 | -- |
@@ -191,9 +191,9 @@ impl<BuilderState: sut_builder::State> SutBuilder<BuilderState> {
     pub(in option_fn_overridden) fn maybe_optional_field_with_inherited_overrides(
         mut self,
         value: Option<u32>,
-    ) -> SutBuilder<sut_builder::SetOptionalFieldWithInheritedOverrides<BuilderState>>
+    ) -> SutBuilder<sut_builder::SetOptionalFieldWithInheritedOverrides<S>>
     where
-        BuilderState::OptionalFieldWithInheritedOverrides: sut_builder::IsUnset,
+        S::OptionalFieldWithInheritedOverrides: sut_builder::IsUnset,
     {}
     /**| **Optional** |
 | -- |
@@ -210,9 +210,9 @@ impl<BuilderState: sut_builder::State> SutBuilder<BuilderState> {
     pub(in overridden) fn default_field_with_inherited_overrides(
         self,
         value: u32,
-    ) -> SutBuilder<sut_builder::SetDefaultFieldWithInheritedOverrides<BuilderState>>
+    ) -> SutBuilder<sut_builder::SetDefaultFieldWithInheritedOverrides<S>>
     where
-        BuilderState::DefaultFieldWithInheritedOverrides: sut_builder::IsUnset,
+        S::DefaultFieldWithInheritedOverrides: sut_builder::IsUnset,
     {}
     /**| **Optional** |
 | -- |
@@ -229,8 +229,8 @@ impl<BuilderState: sut_builder::State> SutBuilder<BuilderState> {
     pub(in option_fn_overridden) fn maybe_default_field_with_inherited_overrides(
         mut self,
         value: Option<u32>,
-    ) -> SutBuilder<sut_builder::SetDefaultFieldWithInheritedOverrides<BuilderState>>
+    ) -> SutBuilder<sut_builder::SetDefaultFieldWithInheritedOverrides<S>>
     where
-        BuilderState::DefaultFieldWithInheritedOverrides: sut_builder::IsUnset,
+        S::DefaultFieldWithInheritedOverrides: sut_builder::IsUnset,
     {}
 }

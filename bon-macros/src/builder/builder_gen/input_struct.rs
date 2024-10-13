@@ -8,8 +8,9 @@ use crate::normalization::{GenericsNamespace, SyntaxVariant};
 use crate::parsing::{ItemParams, ItemParamsParsing, SpannedKey};
 use crate::util::prelude::*;
 use darling::FromMeta;
-use syn::visit_mut::VisitMut;
 use std::borrow::Cow;
+use syn::visit_mut::VisitMut;
+use syn::visit::Visit;
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct StructInputParams {
@@ -253,8 +254,11 @@ impl StructInputCtx {
             }
         };
 
+        let mut namespace = GenericsNamespace::default();
+        namespace.visit_item_struct(&self.struct_item.orig);
+
         BuilderGenCtx::new(BuilderGenCtxParams {
-            namespace: Cow::Owned(GenericsNamespace::default()),
+            namespace: Cow::Owned(namespace),
             members,
 
             allow_attrs,
