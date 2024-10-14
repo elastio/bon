@@ -8,8 +8,6 @@ impl<S: sut_builder::State> SutBuilder<S> {
 */
     /// Docs on the required field setters.
     /// Multiline.
-    #[allow(clippy::inline_always, clippy::impl_trait_in_params)]
-    #[inline(always)]
     pub(in overridden) fn required_field(
         mut self,
         value: u32,
@@ -25,8 +23,6 @@ impl<S: sut_builder::State> SutBuilder<S> {
 */
     /// Docs on the optional field setters.
     /// Multiline.
-    #[allow(clippy::inline_always, clippy::impl_trait_in_params)]
-    #[inline(always)]
     pub(in overridden) fn optional_field(
         self,
         value: u32,
@@ -42,8 +38,6 @@ impl<S: sut_builder::State> SutBuilder<S> {
 */
     /// Docs on the optional field setters.
     /// Multiline.
-    #[allow(clippy::inline_always, clippy::impl_trait_in_params)]
-    #[inline(always)]
     pub(in overridden) fn maybe_optional_field(
         mut self,
         value: Option<u32>,
@@ -61,8 +55,6 @@ impl<S: sut_builder::State> SutBuilder<S> {
 */
     /// Docs on the default field setters.
     /// Multiline.
-    #[allow(clippy::inline_always, clippy::impl_trait_in_params)]
-    #[inline(always)]
     pub(in overridden) fn default_field(
         self,
         value: u32,
@@ -80,8 +72,6 @@ impl<S: sut_builder::State> SutBuilder<S> {
 */
     /// Docs on the default field setters.
     /// Multiline.
-    #[allow(clippy::inline_always, clippy::impl_trait_in_params)]
-    #[inline(always)]
     pub(in overridden) fn maybe_default_field(
         mut self,
         value: Option<u32>,
@@ -97,8 +87,6 @@ impl<S: sut_builder::State> SutBuilder<S> {
 */
     /// Docs on some_fn
     /// Multiline.
-    #[allow(clippy::inline_always, clippy::impl_trait_in_params)]
-    #[inline(always)]
     pub(in some_fn_overridden) fn optional_field_with_specific_overrides(
         self,
         value: u32,
@@ -114,8 +102,6 @@ impl<S: sut_builder::State> SutBuilder<S> {
 */
     /// Docs on option_fn
     /// Multiline.
-    #[allow(clippy::inline_always, clippy::impl_trait_in_params)]
-    #[inline(always)]
     pub(in option_fn_overridden) fn maybe_optional_field_with_specific_overrides(
         mut self,
         value: Option<u32>,
@@ -133,8 +119,6 @@ impl<S: sut_builder::State> SutBuilder<S> {
 */
     /// Docs on some_fn
     /// Multiline.
-    #[allow(clippy::inline_always, clippy::impl_trait_in_params)]
-    #[inline(always)]
     pub(in some_fn_overridden) fn default_field_with_specific_overrides(
         self,
         value: u32,
@@ -152,8 +136,6 @@ impl<S: sut_builder::State> SutBuilder<S> {
 */
     /// Docs on option_fn
     /// Multiline.
-    #[allow(clippy::inline_always, clippy::impl_trait_in_params)]
-    #[inline(always)]
     pub(in option_fn_overridden) fn maybe_default_field_with_specific_overrides(
         mut self,
         value: Option<u32>,
@@ -169,8 +151,6 @@ impl<S: sut_builder::State> SutBuilder<S> {
 */
     /// Common docs
     /// Multiline.
-    #[allow(clippy::inline_always, clippy::impl_trait_in_params)]
-    #[inline(always)]
     pub(in overridden) fn optional_field_with_inherited_overrides(
         self,
         value: u32,
@@ -186,8 +166,6 @@ impl<S: sut_builder::State> SutBuilder<S> {
 */
     /// Docs on option_fn
     /// Multiline.
-    #[allow(clippy::inline_always, clippy::impl_trait_in_params)]
-    #[inline(always)]
     pub(in option_fn_overridden) fn maybe_optional_field_with_inherited_overrides(
         mut self,
         value: Option<u32>,
@@ -205,8 +183,6 @@ impl<S: sut_builder::State> SutBuilder<S> {
 */
     /// Common docs
     /// Multiline.
-    #[allow(clippy::inline_always, clippy::impl_trait_in_params)]
-    #[inline(always)]
     pub(in overridden) fn default_field_with_inherited_overrides(
         self,
         value: u32,
@@ -224,8 +200,6 @@ impl<S: sut_builder::State> SutBuilder<S> {
 */
     /// Docs on option_fn
     /// Multiline.
-    #[allow(clippy::inline_always, clippy::impl_trait_in_params)]
-    #[inline(always)]
     pub(in option_fn_overridden) fn maybe_default_field_with_inherited_overrides(
         mut self,
         value: Option<u32>,

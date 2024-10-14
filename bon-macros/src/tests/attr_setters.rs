@@ -140,6 +140,13 @@ fn setters_docs_and_vis() {
                 return false;
             }
 
+            // Remove noise attributes
+            fn_item.attrs.retain(|attr| {
+                ["allow", "inline"]
+                    .iter()
+                    .all(|ident| !attr.path().is_ident(ident))
+            });
+
             fn_item.block = syn::parse_quote!({});
 
             true
