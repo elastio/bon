@@ -61,6 +61,8 @@ impl FromMeta for SimpleClosure {
     }
 }
 
+// Lint from nightly. `&Option<T>` is used to reduce syntax at the callsite
+#[allow(unknown_lints, clippy::ref_option)]
 fn reject_syntax<T: Spanned>(name: &'static str, syntax: &Option<T>) -> Result {
     if let Some(syntax) = syntax {
         bail!(syntax, "{name} is not allowed here")

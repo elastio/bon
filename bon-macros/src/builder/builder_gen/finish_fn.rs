@@ -133,6 +133,7 @@ impl super::BuilderGenCtx {
                 // `Send` if the generic parameters are `Send` as well, so we just suppress
                 // this lint. See the issue: https://github.com/rust-lang/rust-clippy/issues/6947
                 clippy::future_not_send,
+                clippy::missing_const_for_fn,
             )]
             #must_use
             #finish_fn_vis #asyncness #unsafety fn #finish_fn_ident(self, #(#finish_fn_params,)*) #output

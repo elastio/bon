@@ -179,8 +179,8 @@ pub(super) struct BuilderGenCtxParams<'a> {
     pub(super) finish_fn: FinishFn,
 }
 
-impl<'a> BuilderGenCtx {
-    pub(super) fn new(params: BuilderGenCtxParams<'a>) -> Result<Self> {
+impl BuilderGenCtx {
+    pub(super) fn new(params: BuilderGenCtxParams<'_>) -> Result<Self> {
         let BuilderGenCtxParams {
             namespace,
             members,

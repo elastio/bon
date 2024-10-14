@@ -315,7 +315,8 @@ impl<'a> SettersCtx<'a> {
                 // the setter signature is easier to read, and anyway if you want to
                 // specify a type hint for the method that accepts an `impl Into`, then
                 // your design of this setter already went wrong.
-                clippy::impl_trait_in_params
+                clippy::impl_trait_in_params,
+                clippy::missing_const_for_fn,
             )]
             #[inline(always)]
             #vis fn #name(#maybe_mut self, #input) -> #return_type

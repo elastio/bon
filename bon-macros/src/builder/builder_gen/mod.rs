@@ -242,7 +242,7 @@ impl BuilderGenCtx {
                 clippy::use_self,
                 // Let's keep it as non-const for now to avoid restricting ourselfves to only
                 // const operations.
-                clippy::missing_const_for_fn
+                clippy::missing_const_for_fn,
             )]
             #vis fn #start_fn_ident<#(#generics_decl),*>(
                 #receiver

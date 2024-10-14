@@ -127,14 +127,9 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           components: clippy
 
-      - run: cargo +${{ matrix.toolchain }} clippy --all-features --all-targets --locked
-        env:
-          # There is no need for us to stick with the edition 2021 meaning for
-          # the `expr` fragment in macro rules.
-          RUSTFLAGS: >-
-            --deny warnings
-            --allow unknown-lints
-            --allow edition-2024-expr-fragment-specifier
+      - run: |
+          cargo +${{ matrix.toolchain }} clippy --all-features --all-targets --locked \
+            --allow edition-2024-expr-fragment-specifier \
             --allow impl-trait-overcaptures
 
   cargo-doc:
