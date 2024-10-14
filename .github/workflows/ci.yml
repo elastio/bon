@@ -88,8 +88,8 @@ jobs:
       - run: cargo test --locked --all-features --doc
       - run: cd bon && cargo test --locked --no-default-features --features=
       - run: cd bon && cargo test --locked --no-default-features --features=alloc
-      - run: cd bon && cargo test --locked --no-default-features --features=msrv-1-79-0
-      - run: cd bon && cargo test --locked --no-default-features --features=alloc,msrv-1-79-0
+      - run: cd bon && cargo test --locked --no-default-features --features=implied-bounds
+      - run: cd bon && cargo test --locked --no-default-features --features=alloc,implied-bounds
 
   test-msrv:
     runs-on: ${{ matrix.os }}-latest
