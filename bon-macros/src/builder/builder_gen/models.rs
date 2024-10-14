@@ -288,15 +288,7 @@ impl<'a> BuilderGenCtx {
                 .iter()
                 .find(|&&candidate| !namespace.idents.contains(candidate))
                 .map(|&name| syn::Ident::new(name, Span::call_site()))
-                .unwrap_or_else(|| {
-                    let mut name = format!("{}_", possible_names[0]);
-
-                    while namespace.idents.contains(&name) {
-                        name.push('_');
-                    }
-
-                    syn::Ident::new(&name, Span::call_site())
-                })
+                .unwrap_or_else(|| namespace.unique_ident(format!("{}_", possible_names[0])))
         };
 
         Ok(Self {

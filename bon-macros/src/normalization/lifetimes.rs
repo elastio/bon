@@ -177,12 +177,14 @@ impl AssignLifetimes<'_> {
         let index = self.next_lifetime_index;
         self.next_lifetime_index += 1;
 
-        let mut lifetime = format!("'{}{index}", self.prefix);
+        let mut lifetime = self
+            .base
+            .namespace
+            .unique_lifetime(format!("{}{index}", self.prefix));
 
-        // Add `_` suffix to the lifetime to avoid conflicts with existing lifetimes
-        while self.base.namespace.lifetimes.contains(&lifetime) {
-            lifetime.push('_');
-        }
+        // `syn::Lifetime::new` requires the string to start with the `'` character,
+        // which is just discarded in that method's impl 🗿.
+        lifetime.insert(0, '\'');
 
         let lifetime = syn::Lifetime::new(&lifetime, Span::call_site());
 

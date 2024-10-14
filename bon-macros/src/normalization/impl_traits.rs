@@ -65,13 +65,10 @@ impl VisitMut for AssignTypeParams<'_> {
         let index = self.next_type_param_index;
         self.next_type_param_index += 1;
 
-        let mut type_param = format!("ImplTrait{index}");
-
-        while self.base.namespace.idents.contains(&type_param) {
-            type_param.push('_');
-        }
-
-        let type_param = syn::Ident::new(&type_param, Span::call_site());
+        let type_param = self
+            .base
+            .namespace
+            .unique_ident(format!("I{index}"));
 
         let impl_trait = std::mem::replace(ty, syn::Type::Path(syn::parse_quote!(#type_param)));
 
