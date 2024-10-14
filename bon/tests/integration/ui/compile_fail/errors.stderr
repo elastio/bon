@@ -156,6 +156,12 @@ error: expected a closure e.g. `with = |param: T| expression`
 133 |     #[builder(with = 42)]
     |               ^^^^
 
+error: `#[bon]` attribute does not accept any parameters yet, but it will in the future releases
+   --> tests/integration/ui/compile_fail/errors.rs:139:7
+    |
+139 | #[bon(attrs)]
+    |       ^^^^^
+
 warning: unused attribute
    --> tests/integration/ui/compile_fail/errors.rs:128:1
     |
@@ -201,11 +207,11 @@ note: required for `SetX` to implement `example_builder::IsComplete`
    |
 24 |     #[derive(Builder)]
    |              ^^^^^^^ unsatisfied trait bound introduced in this `derive` macro
-note: required by a bound in `ExampleBuilder::<BuilderState>::build`
+note: required by a bound in `ExampleBuilder::<S>::build`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
 24 |     #[derive(Builder)]
-   |              ^^^^^^^ required by this bound in `ExampleBuilder::<BuilderState>::build`
+   |              ^^^^^^^ required by this bound in `ExampleBuilder::<S>::build`
 25 |     struct Example {
    |            ------- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
@@ -223,11 +229,11 @@ note: required for `SetX` to implement `example_builder::IsComplete`
    |
 24 |     #[derive(Builder)]
    |              ^^^^^^^ unsatisfied trait bound introduced in this `derive` macro
-note: required by a bound in `ExampleBuilder::<BuilderState>::build`
+note: required by a bound in `ExampleBuilder::<S>::build`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
 24 |     #[derive(Builder)]
-   |              ^^^^^^^ required by this bound in `ExampleBuilder::<BuilderState>::build`
+   |              ^^^^^^^ required by this bound in `ExampleBuilder::<S>::build`
 25 |     struct Example {
    |            ------- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
@@ -240,11 +246,11 @@ error[E0277]: the member `Set<y>` was already set, but this method requires it t
    |
    = help: the trait `IsUnset` is not implemented for `Set<y>`
    = help: the trait `IsUnset` is implemented for `Unset<Name>`
-note: required by a bound in `ExampleBuilder::<BuilderState>::y`
+note: required by a bound in `ExampleBuilder::<S>::y`
   --> tests/integration/ui/compile_fail/errors.rs:24:14
    |
 24 |     #[derive(Builder)]
-   |              ^^^^^^^ required by this bound in `ExampleBuilder::<BuilderState>::y`
+   |              ^^^^^^^ required by this bound in `ExampleBuilder::<S>::y`
 ...
 27 |         y: u32,
    |         - required by a bound in this associated function
@@ -263,11 +269,11 @@ note: required for `sut_builder::Empty` to implement `sut_builder::IsComplete`
    |
 42 |         #[derive(Builder)]
    |                  ^^^^^^^ unsatisfied trait bound introduced in this `derive` macro
-note: required by a bound in `SutBuilder::<BuilderState>::build`
+note: required by a bound in `SutBuilder::<S>::build`
   --> tests/integration/ui/compile_fail/errors.rs:42:18
    |
 42 |         #[derive(Builder)]
-   |                  ^^^^^^^ required by this bound in `SutBuilder::<BuilderState>::build`
+   |                  ^^^^^^^ required by this bound in `SutBuilder::<S>::build`
 43 |         struct Sut {
    |                --- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)

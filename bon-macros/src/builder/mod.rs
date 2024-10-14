@@ -57,6 +57,7 @@ fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<Toke
     let main_output = match item {
         syn::Item::Fn(item_fn) => {
             let mut namespace = GenericsNamespace::default();
+            namespace.visit_token_stream(params.clone());
             namespace.visit_item_fn(&item_fn);
 
             item_fn::generate(FromMeta::from_list(nested_meta)?, item_fn, &namespace)?

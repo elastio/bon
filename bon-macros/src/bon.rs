@@ -17,10 +17,18 @@ pub(crate) fn try_generate(params: TokenStream, item: TokenStream) -> Result<Tok
         item,
     };
 
-    let item = match ctx.expand_cfg()? {
-        ExpansionOutput::Expanded { params: _, item } => item,
+    let (params, item) = match ctx.expand_cfg()? {
+        ExpansionOutput::Expanded { params, item } => (params, item),
         ExpansionOutput::Recurse(output) => return Ok(output),
     };
+
+    if !params.is_empty() {
+        bail!(
+            &params,
+            "`#[bon]` attribute does not accept any parameters yet, \
+            but it will in the future releases"
+        );
+    }
 
     match item {
         syn::Item::Impl(item_impl) => builder::item_impl::generate(item_impl),

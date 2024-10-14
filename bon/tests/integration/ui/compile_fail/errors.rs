@@ -1,4 +1,4 @@
-use bon::{builder, Builder};
+use bon::{bon, builder, Builder};
 use std::collections::{BTreeMap, BTreeSet};
 
 fn main() {
@@ -133,3 +133,8 @@ struct InvalidWithExpr {
     #[builder(with = 42)]
     x: u32,
 }
+
+struct InvalidAttrsForBonMacro;
+
+#[bon(attrs)]
+impl InvalidAttrsForBonMacro {}
