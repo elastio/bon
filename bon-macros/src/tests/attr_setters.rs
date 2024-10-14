@@ -125,9 +125,9 @@ fn setters_docs_and_vis() {
         .items
         .iter_mut()
         .find_map(|item| match item {
-            syn::Item::Impl(impl_item) => (impl_item.self_ty
-                == syn::parse_quote!(SutBuilder<S>))
-            .then(|| impl_item),
+            syn::Item::Impl(impl_item) => {
+                (impl_item.self_ty == syn::parse_quote!(SutBuilder<S>)).then(|| impl_item)
+            }
             _ => None,
         })
         .unwrap_or_else(|| {

@@ -9,11 +9,11 @@ use crate::parsing::{ItemParams, SpannedKey};
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
 use darling::FromMeta;
+use std::borrow::Cow;
 use std::rc::Rc;
 use syn::punctuated::Punctuated;
 use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
-use std::borrow::Cow;
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct FnInputParams {

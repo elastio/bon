@@ -295,7 +295,6 @@ impl BuilderGenCtx {
                 quote!(fn() -> ::core::marker::PhantomData<#ty>)
             });
 
-
         let state_var = &self.state_var;
 
         quote! {

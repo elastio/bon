@@ -1,5 +1,5 @@
-mod syntax_errors;
 mod attr_setters;
+mod syntax_errors;
 
 use crate::util::prelude::*;
 use expect_test::{expect_file, ExpectFile};

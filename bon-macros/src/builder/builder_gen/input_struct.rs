@@ -9,8 +9,8 @@ use crate::parsing::{ItemParams, ItemParamsParsing, SpannedKey};
 use crate::util::prelude::*;
 use darling::FromMeta;
 use std::borrow::Cow;
-use syn::visit_mut::VisitMut;
 use syn::visit::Visit;
+use syn::visit_mut::VisitMut;
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct StructInputParams {

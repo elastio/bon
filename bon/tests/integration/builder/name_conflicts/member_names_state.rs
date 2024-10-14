@@ -41,10 +41,5 @@ fn test_assoc_method() {
         }
     }
 
-    Sut::sut()
-        .state(1)
-        .member_state(2)
-        .unset(3)
-        .empty(4)
-        .call();
+    Sut::sut().state(1).member_state(2).unset(3).empty(4).call();
 }
