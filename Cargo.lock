@@ -1094,7 +1094,7 @@ dependencies = [
 [[package]]
 name = "trybuild"
 version = "1.0.99"
-source = "git+https://github.com/Veetaha/trybuild?branch=feat/ci-env-enum-snippet-difference#ea3d6ca2a338b66887fecbfedb8b38f8fc927346"
+source = "git+https://github.com/Veetaha/trybuild?branch=feat/ci-env-enum-snippet-difference#1047f757d3976c4db375eda4c8aa6e9041ab3231"
 dependencies = [
  "glob",
  "serde",
