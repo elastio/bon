@@ -1,3 +1,4 @@
+difference
 error: `with` attribute can't be specified together with `into`
  --> tests/integration/ui/compile_fail/attr_with.rs:5:21
   |

@@ -56,7 +56,8 @@ expect-test = "1.4.1"
 tokio = { version = "1.29.1", features = ["macros", "rt-multi-thread"] }
 
 # Using a bit older version that supports our MSRV
-trybuild = "1.0.89"
+# trybuild = { version = "1.0.89", path = "../../../dev/trybuild" }
+trybuild = { version = "1.0.89", git = "https://github.com/Veetaha/trybuild", branch = "feat/ci-env-enum-snippet-difference" }
 
 [features]
 alloc   = []

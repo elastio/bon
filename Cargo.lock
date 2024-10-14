@@ -1094,8 +1094,7 @@ dependencies = [
 [[package]]
 name = "trybuild"
 version = "1.0.99"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "207aa50d36c4be8d8c6ea829478be44a372c6a77669937bb39c698e52f1491e8"
+source = "git+https://github.com/Veetaha/trybuild?branch=feat/ci-env-enum-snippet-difference#3ade9d4ce52683a484227ea6d2d6ca77d64d6f4c"
 dependencies = [
  "glob",
  "serde",

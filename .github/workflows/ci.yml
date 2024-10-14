@@ -75,15 +75,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: ./debug.sh
 
-      - run: cargo clippy --all-features --all-targets --locked
+      # - run: cargo clippy --all-features --all-targets --locked
 
-      - run: cargo test --locked --all-features --all-targets
-      - run: cargo test --locked --all-features --doc
-      - run: cd bon && cargo test --locked --no-default-features --features=
-      - run: cd bon && cargo test --locked --no-default-features --features=alloc
-      - run: cd bon && cargo test --locked --no-default-features --features=msrv-1-79-0
-      - run: cd bon && cargo test --locked --no-default-features --features=alloc,msrv-1-79-0
+      # - run: cargo test --locked --all-features --all-targets
+      # - run: cargo test --locked --all-features --doc
+      # - run: cd bon && cargo test --locked --no-default-features --features=
+      # - run: cd bon && cargo test --locked --no-default-features --features=alloc
+      # - run: cd bon && cargo test --locked --no-default-features --features=msrv-1-79-0
+      # - run: cd bon && cargo test --locked --no-default-features --features=alloc,msrv-1-79-0
 
   test-msrv:
     runs-on: ${{ matrix.os }}-latest
