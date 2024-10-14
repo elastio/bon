@@ -75,6 +75,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          # rust-src is required to make sure compile errors on CI are rendered
+          # the same as locally. The `rust-src` component is installed by default
+          # locally, and with its presence compile error messages can show snippets
+          # of rust standard library code.
+          components: rust-src
 
       - run: cargo clippy --all-features --all-targets --locked
 
