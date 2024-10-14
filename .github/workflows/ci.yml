@@ -129,6 +129,7 @@ jobs:
 
       - run: |
           cargo +${{ matrix.toolchain }} clippy --all-features --all-targets --locked \
+            -- \
             --allow edition-2024-expr-fragment-specifier \
             --allow impl-trait-overcaptures
 
