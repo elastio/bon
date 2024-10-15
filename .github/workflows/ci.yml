@@ -133,6 +133,18 @@ jobs:
             --allow edition-2024-expr-fragment-specifier \
             --allow impl-trait-overcaptures
 
+  cargo-miri:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: nightly-2024-10-16
+          components: miri
+
+      - run: cargo miri test --locked --all-features --all-targets --workspace --exclude benchmarks
+
   cargo-doc:
     runs-on: ${{ matrix.os }}-latest
 
