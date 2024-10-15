@@ -143,7 +143,14 @@ jobs:
           toolchain: nightly-2024-10-14
           components: miri
 
-      - run: cargo miri test --locked --all-features --all-targets --workspace --exclude benchmarks
+      - run: |
+          cargo miri test --locked --all-features --all-targets \
+            --workspace --exclude benchmarks
+        env:
+          RUSTFLAGS: >-
+            --deny warnings \
+            --allow edition-2024-expr-fragment-specifier \
+            --allow impl-trait-overcaptures
 
   cargo-doc:
     runs-on: ${{ matrix.os }}-latest
