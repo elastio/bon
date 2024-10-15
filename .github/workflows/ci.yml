@@ -148,8 +148,8 @@ jobs:
             --workspace --exclude benchmarks
         env:
           RUSTFLAGS: >-
-            --deny warnings \
-            --allow edition-2024-expr-fragment-specifier \
+            --deny warnings
+            --allow edition-2024-expr-fragment-specifier
             --allow impl-trait-overcaptures
 
   cargo-doc:
