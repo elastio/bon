@@ -1,5 +1,13 @@
 [workspace]
-members  = ["benchmarks", "bon", "bon-cli", "bon-macros", "e2e-tests"]
+members = [
+  "benchmarks/compilation",
+  "benchmarks/compilation/codegen",
+  "benchmarks/runtime",
+  "bon",
+  "bon-cli",
+  "bon-macros",
+  "e2e-tests",
+]
 resolver = "2"
 
 # This config is used for the benchmarks
