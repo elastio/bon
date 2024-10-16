@@ -4,15 +4,14 @@ set -euxo pipefail
 
 macros=(
     bon
-    # bon-overwritable
+    bon-overwritable
     typed-builder
     derive_builder
 )
 
 suites=(
     structs_100_fields_10
-    # structs_10_fields_50
-    # structs_200_fields_20
+    structs_10_fields_50
 )
 
 hyperfine \

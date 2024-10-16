@@ -15,6 +15,3 @@ pub mod structs_100_fields_10;
 
 #[cfg(feature = "structs_10_fields_50")]
 pub mod structs_10_fields_50;
-
-#[cfg(feature = "structs_200_fields_20")]
-pub mod structs_200_fields_20;
