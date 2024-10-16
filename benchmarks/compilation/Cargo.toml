@@ -12,6 +12,7 @@ edition = "2021"
 version = "0.1.0"
 
 [dependencies]
+# bon            = { version = "2.3", optional = true }
 bon            = { path = "../../bon", optional = true }
 cfg-if         = "1.0"
 derive_builder = { version = "0.20", optional = true }
@@ -21,5 +22,9 @@ typed-builder  = { version = "0.20", optional = true }
 workspace = true
 
 [features]
-bon-overwritable = ["bon"]
 default          = []
+bon-overwritable = ["bon"]
+
+structs_100_fields_10 = []
+structs_10_fields_50 = []
+structs_200_fields_20 = []

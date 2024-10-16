@@ -1,7 +1,6 @@
 | Command | Mean [s] | Min [s] | Max [s] | Relative |
 |:---|---:|---:|---:|---:|
-| `cargo build -p compilation-benchmarks --features=bon` | 2.522 ± 0.069 | 2.467 | 2.710 | 8.13 ± 0.58 |
-| `cargo build -p compilation-benchmarks --features=bon-overwritable` | 2.413 ± 0.021 | 2.383 | 2.439 | 7.78 ± 0.52 |
-| `cargo build -p compilation-benchmarks --features=typed-builder` | 2.076 ± 0.022 | 2.042 | 2.107 | 6.69 ± 0.45 |
-| `cargo build -p compilation-benchmarks --features=derive_builder` | 1.243 ± 0.021 | 1.194 | 1.262 | 4.01 ± 0.27 |
-| `cargo build -p compilation-benchmarks --features=` | 0.310 ± 0.020 | 0.258 | 0.332 | 1.00 |
+| `cargo build -p compilation-benchmarks --features=structs_100_fields_10,bon` | 2.316 ± 0.022 | 2.278 | 2.352 | 18.55 ± 0.98 |
+| `cargo build -p compilation-benchmarks --features=structs_100_fields_10,typed-builder` | 1.882 ± 0.014 | 1.866 | 1.912 | 15.08 ± 0.79 |
+| `cargo build -p compilation-benchmarks --features=structs_100_fields_10,derive_builder` | 1.055 ± 0.019 | 1.023 | 1.094 | 8.45 ± 0.47 |
+| `cargo build -p compilation-benchmarks --features=structs_100_fields_10,` | 0.125 ± 0.007 | 0.107 | 0.135 | 1.00 |

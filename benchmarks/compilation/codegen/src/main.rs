@@ -10,8 +10,8 @@ fn main() -> anyhow::Result<()> {
 
     let src_dir = bench_dir.join("src");
 
-    let structs_number = 100;
-    let fields_number = 10;
+    let structs_number = 200;
+    let fields_number = 20;
 
     std::fs::write(
         src_dir.join(format!(
@@ -19,6 +19,8 @@ fn main() -> anyhow::Result<()> {
         )),
         structs_n_fields_n(structs_number, fields_number).to_string(),
     )?;
+
+    println!("Running cargo fmt in {}", bench_dir.display());
 
     let status = std::process::Command::new("cargo")
         .arg("fmt")
