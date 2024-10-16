@@ -178,7 +178,11 @@ impl Member {
             // then these docs will just be removed from the output function.
             // It's probably fine since the doc comments are there in the code
             // itself which is also useful for people reading the source code.
-            let docs = attrs.iter().filter(|attr| attr.is_doc()).cloned().collect();
+            let docs = attrs
+                .iter()
+                .filter(|attr| attr.is_doc_expr())
+                .cloned()
+                .collect();
 
             let mut member = NamedMember {
                 index: named_count.into(),

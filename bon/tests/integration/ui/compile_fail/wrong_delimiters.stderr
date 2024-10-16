@@ -31,25 +31,25 @@ error: wrong delimiter, expected parentheses e.g. `setters(...)`, but got curly 
 error: wrong delimiter, expected parentheses e.g. `start_fn(...)`, but got square brackets: `start_fn[...]`
   --> tests/integration/ui/compile_fail/wrong_delimiters.rs:20:5
    |
-20 |     start_fn[docs[]],
+20 |     start_fn[doc[]],
    |     ^^^^^^^^
 
 error: wrong delimiter, expected parentheses e.g. `builder_type(...)`, but got square brackets: `builder_type[...]`
   --> tests/integration/ui/compile_fail/wrong_delimiters.rs:18:5
    |
-18 |     builder_type[docs[]],
+18 |     builder_type[doc[]],
    |     ^^^^^^^^^^^^
 
 error: wrong delimiter, expected parentheses e.g. `state_mod(...)`, but got square brackets: `state_mod[...]`
   --> tests/integration/ui/compile_fail/wrong_delimiters.rs:19:5
    |
-19 |     state_mod[docs[]],
+19 |     state_mod[doc[]],
    |     ^^^^^^^^^
 
 error: wrong delimiter, expected parentheses e.g. `finish_fn(...)`, but got square brackets: `finish_fn[...]`
   --> tests/integration/ui/compile_fail/wrong_delimiters.rs:21:5
    |
-21 |     finish_fn[docs[]],
+21 |     finish_fn[doc[]],
    |     ^^^^^^^^^
 
 error: wrong delimiter, expected parentheses e.g. `setters(...)`, but got square brackets: `setters[...]`
@@ -58,50 +58,50 @@ error: wrong delimiter, expected parentheses e.g. `setters(...)`, but got square
 30 |     #[builder(setters[])]
    |               ^^^^^^^
 
-error: wrong delimiter, expected curly braces e.g. `docs{...}`, but got square brackets: `docs[...]`
+error: Unknown field: `docs`. Did you mean `doc`?
   --> tests/integration/ui/compile_fail/wrong_delimiters.rs:38:14
    |
 38 |     start_fn(docs[]),
    |              ^^^^
 
-error: wrong delimiter, expected curly braces e.g. `docs{...}`, but got square brackets: `docs[...]`
+error: Unknown field: `docs`. Did you mean `doc`?
   --> tests/integration/ui/compile_fail/wrong_delimiters.rs:36:18
    |
 36 |     builder_type(docs[]),
    |                  ^^^^
 
-error: wrong delimiter, expected curly braces e.g. `docs{...}`, but got square brackets: `docs[...]`
+error: Unknown field: `docs`. Did you mean `doc`?
   --> tests/integration/ui/compile_fail/wrong_delimiters.rs:37:15
    |
 37 |     state_mod(docs[]),
    |               ^^^^
 
-error: wrong delimiter, expected curly braces e.g. `docs{...}`, but got square brackets: `docs[...]`
+error: Unknown field: `docs`. Did you mean `doc`?
   --> tests/integration/ui/compile_fail/wrong_delimiters.rs:39:15
    |
 39 |     finish_fn(docs[]),
    |               ^^^^
 
-error: wrong delimiter, expected curly braces e.g. `docs{...}`, but got parentheses: `docs(...)`
+error: wrong delimiter, expected curly braces e.g. `doc{...}`, but got parentheses: `doc(...)`
   --> tests/integration/ui/compile_fail/wrong_delimiters.rs:50:14
    |
-50 |     start_fn(docs()),
-   |              ^^^^
+50 |     start_fn(doc()),
+   |              ^^^
 
-error: wrong delimiter, expected curly braces e.g. `docs{...}`, but got parentheses: `docs(...)`
+error: wrong delimiter, expected curly braces e.g. `doc{...}`, but got parentheses: `doc(...)`
   --> tests/integration/ui/compile_fail/wrong_delimiters.rs:48:18
    |
-48 |     builder_type(docs()),
-   |                  ^^^^
+48 |     builder_type(doc()),
+   |                  ^^^
 
-error: wrong delimiter, expected curly braces e.g. `docs{...}`, but got parentheses: `docs(...)`
+error: wrong delimiter, expected curly braces e.g. `doc{...}`, but got parentheses: `doc(...)`
   --> tests/integration/ui/compile_fail/wrong_delimiters.rs:49:15
    |
-49 |     state_mod(docs()),
-   |               ^^^^
+49 |     state_mod(doc()),
+   |               ^^^
 
-error: wrong delimiter, expected curly braces e.g. `docs{...}`, but got parentheses: `docs(...)`
+error: wrong delimiter, expected curly braces e.g. `doc{...}`, but got parentheses: `doc(...)`
   --> tests/integration/ui/compile_fail/wrong_delimiters.rs:51:15
    |
-51 |     finish_fn(docs())
-   |               ^^^^
+51 |     finish_fn(doc())
+   |               ^^^

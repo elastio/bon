@@ -18,7 +18,7 @@ pub(crate) fn parse_docs(meta: &syn::Meta) -> Result<SpannedKey<Vec<syn::Attribu
     let attrs = meta.parse_args_with(syn::Attribute::parse_outer)?;
 
     for attr in &attrs {
-        if !attr.is_doc() {
+        if !attr.is_doc_expr() {
             bail!(attr, "expected a doc comment");
         }
     }
@@ -35,7 +35,7 @@ pub(crate) fn reject_self_mentions_in_docs(
     attrs: &[syn::Attribute],
 ) -> Result {
     for attr in attrs {
-        let doc = match attr.as_doc() {
+        let doc = match attr.as_doc_expr() {
             Some(doc) => doc,
             _ => continue,
         };

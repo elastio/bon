@@ -145,7 +145,7 @@ jobs:
 
       - run: |
           cargo miri test --locked --all-features --all-targets \
-            --workspace --exclude benchmarks
+            --workspace --exclude runtime-benchmarks
         env:
           RUSTFLAGS: >-
             --deny warnings

@@ -33,21 +33,21 @@ pub struct PrivateBuilder {
 #[derive(Builder)]
 #[builder(
     builder_type(
-        docs {
+        doc {
             /// Docs on [`GreeterOverriddenBuilder`]
             /// the builder type
         },
         name = GreeterOverriddenBuilder,
     ),
     start_fn(
-        docs {
+        doc {
             /// Docs on
             /// [`Self::start_fn_override`]
         },
         name = start_fn_override,
     ),
     finish_fn(
-        docs {
+        doc {
             /// Docs on
             /// [`GreeterOverriddenBuilder::finish_fn_override()`]
         },

@@ -1,4 +1,9 @@
-#![allow(missing_docs, missing_debug_implementations, dead_code)]
+#![allow(
+    missing_docs,
+    missing_debug_implementations,
+    dead_code,
+    rustdoc::missing_crate_level_docs
+)]
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "bon")] {

@@ -239,7 +239,7 @@ impl FnInputCtx<'_> {
         //
         // Also remove any `#[builder]` attributes that were meant for this proc macro.
         orig.attrs
-            .retain(|attr| !attr.is_doc() && !attr.path().is_ident("builder"));
+            .retain(|attr| !attr.is_doc_expr() && !attr.path().is_ident("builder"));
 
         let prefix = self
             .self_ty_prefix()
@@ -419,7 +419,7 @@ impl FnInputCtx<'_> {
                 .norm
                 .attrs
                 .into_iter()
-                .filter(<_>::is_doc)
+                .filter(<_>::is_doc_expr)
                 .collect(),
 
             // Override on the start fn to use the the generics from the
@@ -519,7 +519,7 @@ impl FinishFnBody for FnCallBody {
 fn strip_known_attrs_from_args(sig: &mut syn::Signature) {
     for arg in &mut sig.inputs {
         arg.attrs_mut()
-            .retain(|attr| !attr.is_doc() && !attr.path().is_ident("builder"));
+            .retain(|attr| !attr.is_doc_expr() && !attr.path().is_ident("builder"));
     }
 }
 

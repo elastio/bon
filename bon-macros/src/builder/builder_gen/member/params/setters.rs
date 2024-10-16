@@ -23,7 +23,7 @@ pub(crate) struct SettersParams {
     pub(crate) name: Option<SpannedKey<syn::Ident>>,
     pub(crate) vis: Option<SpannedKey<syn::Visibility>>,
 
-    #[darling(default, with = parse_docs, map = Some)]
+    #[darling(rename = "doc", default, with = parse_docs, map = Some)]
     pub(crate) docs: Option<SpannedKey<Vec<syn::Attribute>>>,
 
     #[darling(flatten)]

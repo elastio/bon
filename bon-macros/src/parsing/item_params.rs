@@ -57,7 +57,7 @@ impl ItemParamsParsing<'_> {
         struct Full {
             name: Option<SpannedKey<syn::Ident>>,
             vis: Option<SpannedKey<syn::Visibility>>,
-            docs: Option<SpannedKey<syn::Meta>>,
+            doc: Option<SpannedKey<syn::Meta>>,
         }
 
         let full = crate::parsing::parse_non_empty_paren_meta_list(meta)?;
@@ -67,7 +67,7 @@ impl ItemParamsParsing<'_> {
             Full {
                 name: None,
                 vis: None,
-                docs: None,
+                doc: None,
             }
         );
 
@@ -75,15 +75,15 @@ impl ItemParamsParsing<'_> {
             bail!(meta, "expected at least one parameter in parentheses");
         }
 
-        let docs = full
-            .docs
-            .map(|docs| super::parse_docs(&docs.value))
+        let doc = full
+            .doc
+            .map(|doc| super::parse_docs(&doc.value))
             .transpose()?;
 
         let params = ItemParams {
             name: full.name,
             vis: full.vis,
-            docs,
+            docs: doc,
         };
 
         Ok(params)

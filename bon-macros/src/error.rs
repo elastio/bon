@@ -80,7 +80,7 @@ impl Parse for Fallback {
             input
                 .call(syn::Attribute::parse_outer)?
                 .into_iter()
-                .filter(|attr| !attr.is_doc() && !attr.path().is_ident("builder"))
+                .filter(|attr| !attr.is_doc_expr() && !attr.path().is_ident("builder"))
                 .for_each(|attr| attr.to_tokens(&mut output));
         }
     }

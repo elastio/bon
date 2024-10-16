@@ -170,17 +170,17 @@ impl NamedMember {
             None => return Ok(()),
         };
 
-        let overrides = overrides
+        let overrides_values = overrides
             .iter()
             .copied()
             .map(|over| get_val(&over.value).as_ref());
 
-        if !overrides.clone().all(|over| over.is_some()) {
+        if !overrides_values.clone().all(|over| over.is_some()) {
             return Ok(());
         }
 
         let setters = overrides
-            .flatten()
+            .iter()
             .map(|over| format!("`{}`", over.key))
             .join(", ");
 

@@ -29,13 +29,13 @@ struct UnusedVisConfig {
 #[derive(Builder)]
 struct UnusedDocsConfig {
     #[builder(setters(
-        docs {
+        doc {
             /// Unused
         },
-        some_fn(docs {
+        some_fn(doc {
             /// some_fn docs
         }),
-        option_fn(docs {
+        option_fn(doc {
             /// option_fn docs
         }),
     ))]

@@ -15,10 +15,10 @@ struct CurlyBracesInField {
 
 #[derive(bon::Builder)]
 #[builder(
-    builder_type[docs[]],
-    state_mod[docs[]],
-    start_fn[docs[]],
-    finish_fn[docs[]],
+    builder_type[doc[]],
+    state_mod[doc[]],
+    start_fn[doc[]],
+    finish_fn[doc[]],
 )]
 struct SquareBrackets {
     #[builder(setters[])]
@@ -26,7 +26,7 @@ struct SquareBrackets {
 }
 
 #[derive(bon::Builder)]
-struct SquareBracketsInField {
+struct SquareBracketsInFieldSetters {
     #[builder(setters[])]
     x: u32,
 }
@@ -38,20 +38,20 @@ struct SquareBracketsInField {
     start_fn(docs[]),
     finish_fn(docs[]),
 )]
-struct SquareBracketsDocs {
-    #[builder(setters(docs[]))]
+struct SquareBracketsInFieldDoc {
+    #[builder(setters(doc[]))]
     x: u32,
 }
 
 #[derive(bon::Builder)]
 #[builder(
-    builder_type(docs()),
-    state_mod(docs()),
-    start_fn(docs()),
-    finish_fn(docs())
+    builder_type(doc()),
+    state_mod(doc()),
+    start_fn(doc()),
+    finish_fn(doc())
 )]
 struct Parentheses {
-    #[builder(setters(docs()))]
+    #[builder(setters(doc()))]
     x: u32,
 }
 
