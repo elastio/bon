@@ -1,4 +1,4 @@
-#![allow(missing_docs, missing_debug_implementations)]
+#![allow(missing_docs, missing_debug_implementations, dead_code)]
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "bon")] {
