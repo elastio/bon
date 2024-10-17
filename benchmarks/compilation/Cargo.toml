@@ -22,9 +22,9 @@ typed-builder  = { version = "0.20", optional = true }
 workspace = true
 
 [features]
-default          = []
 bon-overwritable = ["bon"]
+default          = []
 
 structs_100_fields_10 = []
-structs_10_fields_50 = []
+structs_10_fields_50  = []
 structs_200_fields_20 = []

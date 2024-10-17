@@ -4,7 +4,7 @@ name = "compilation-benchmarks-codegen"
 publish = false
 
 description = """
-  Generates code for the compliation benchmarks.
+  Generates code for the compilation benchmarks.
 """
 
 edition = "2021"

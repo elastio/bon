@@ -24,7 +24,7 @@ env:
 
 jobs:
   # Sanity-check that benchmarks work
-  benchmarks:
+  runtime-benchmarks:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -41,7 +41,16 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - run: sudo apt-get install -y valgrind
-      - run: ./benchmarks/run.sh ${{ matrix.benchmark }}
+      - run: cd ./benchmarks/runtime && ./run.sh ${{ matrix.benchmark }}
+
+  compilation-benchmarks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: ./scripts/install/hyperfine.sh
+
+      - run: cd ./benchmarks/compilation && ./run.sh
 
   cargo-lock:
     runs-on: ubuntu-latest
