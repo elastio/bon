@@ -8,7 +8,7 @@ fn setters_docs_and_vis() {
             /// Docs on the required field itself
             #[builder(setters(
                 vis = "pub(in overridden)",
-                docs {
+                doc {
                     /// Docs on the required field setters.
                     /// Multiline.
                 }
@@ -18,7 +18,7 @@ fn setters_docs_and_vis() {
             /// Docs on the optional field itself
             #[builder(setters(
                 vis = "pub(in overridden)",
-                docs {
+                doc {
                     /// Docs on the optional field setters.
                     /// Multiline.
                 }
@@ -29,7 +29,7 @@ fn setters_docs_and_vis() {
             #[builder(
                 setters(
                     vis = "pub(in overridden)",
-                    docs {
+                    doc {
                         /// Docs on the default field setters.
                         /// Multiline.
                     }
@@ -43,14 +43,14 @@ fn setters_docs_and_vis() {
                 setters(
                     some_fn(
                         vis = "pub(in some_fn_overridden)",
-                        docs {
+                        doc {
                             /// Docs on some_fn
                             /// Multiline.
                         }
                     ),
                     option_fn(
                         vis = "pub(in option_fn_overridden)",
-                        docs {
+                        doc {
                             /// Docs on option_fn
                             /// Multiline.
                         }
@@ -63,14 +63,14 @@ fn setters_docs_and_vis() {
                 setters(
                     some_fn(
                         vis = "pub(in some_fn_overridden)",
-                        docs {
+                        doc {
                             /// Docs on some_fn
                             /// Multiline.
                         }
                     ),
                     option_fn(
                         vis = "pub(in option_fn_overridden)",
-                        docs {
+                        doc {
                             /// Docs on option_fn
                             /// Multiline.
                         }
@@ -81,14 +81,14 @@ fn setters_docs_and_vis() {
             default_field_with_specific_overrides: u32,
 
             #[builder(setters(
-                docs {
+                doc {
                     /// Common docs
                     /// Multiline.
                 },
                 vis = "pub(in overridden)",
                 option_fn(
                     vis = "pub(in option_fn_overridden)",
-                    docs {
+                    doc {
                         /// Docs on option_fn
                         /// Multiline.
                     }
@@ -99,14 +99,14 @@ fn setters_docs_and_vis() {
 
             #[builder(
                 setters(
-                    docs {
+                    doc {
                         /// Common docs
                         /// Multiline.
                     },
                     vis = "pub(in overridden)",
                     option_fn(
                         vis = "pub(in option_fn_overridden)",
-                        docs {
+                        doc {
                             /// Docs on option_fn
                             /// Multiline.
                         }
