@@ -8,7 +8,11 @@
     clippy::option_option,
     clippy::option_if_let_else,
     clippy::enum_glob_use,
-    clippy::too_many_lines
+    clippy::too_many_lines,
+    clippy::if_not_else,
+
+    // We can't use the explicit captures syntax due to the MSRV
+    impl_trait_overcaptures,
 )]
 
 mod bon;
@@ -16,10 +20,11 @@ mod builder;
 mod collections;
 mod error;
 mod normalization;
+mod parsing;
 mod util;
 
-use proc_macro::TokenStream;
-use quote::ToTokens;
+#[cfg(test)]
+mod tests;
 
 /// Generates a builder for the function or method it's placed on.
 ///
@@ -97,7 +102,10 @@ use quote::ToTokens;
 /// - [Guide](https://elastio.github.io/bon/guide/overview)
 /// - [Attributes reference](https://elastio.github.io/bon/reference/builder)
 #[proc_macro_attribute]
-pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
+pub fn builder(
+    params: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
     builder::generate_from_attr(params.into(), item.into()).into()
 }
 
@@ -137,7 +145,7 @@ pub fn builder(params: TokenStream, item: TokenStream) -> TokenStream {
 /// - [Guide](https://elastio.github.io/bon/guide/overview)
 /// - [Attributes reference](https://elastio.github.io/bon/reference/builder)
 #[proc_macro_derive(Builder, attributes(builder))]
-pub fn derive_builder(item: TokenStream) -> TokenStream {
+pub fn derive_builder(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
     builder::generate_from_derive(item.into()).into()
 }
 
@@ -199,7 +207,10 @@ pub fn derive_builder(item: TokenStream) -> TokenStream {
 ///
 /// [`builder`]: macro@builder
 #[proc_macro_attribute]
-pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
+pub fn bon(
+    params: proc_macro::TokenStream,
+    item: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
     bon::generate(params.into(), item.into()).into()
 }
 
@@ -243,7 +254,7 @@ pub fn bon(params: TokenStream, item: TokenStream) -> TokenStream {
 /// [`BTreeMap`]: https://doc.rust-lang.org/stable/std/collections/struct.BTreeMap.html
 /// [`HashMap`]: https://doc.rust-lang.org/stable/std/collections/struct.HashMap.html
 #[proc_macro]
-pub fn map(input: TokenStream) -> TokenStream {
+pub fn map(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let entries = syn::parse_macro_input!(input with collections::map::parse_macro_input);
 
     collections::map::generate(entries).into()
@@ -289,30 +300,10 @@ pub fn map(input: TokenStream) -> TokenStream {
 /// [`BTreeSet`]: https://doc.rust-lang.org/stable/std/collections/struct.BTreeSet.html
 /// [`HashSet`]: https://doc.rust-lang.org/stable/std/collections/struct.HashSet.html
 #[proc_macro]
-pub fn set(input: TokenStream) -> TokenStream {
+pub fn set(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     use syn::punctuated::Punctuated;
 
     let entries = syn::parse_macro_input!(input with Punctuated::parse_terminated);
 
     collections::set::generate(entries).into()
-}
-
-/// Private proc macro! Don't use it directly, it's an implementation detail.
-///
-/// This macro takes a function and overrides its return type with the provided one.
-/// It's used in combination with `cfg_attr` to conditionally change the return type
-/// of a function based on the `cfg(doc)` value.
-#[doc(hidden)]
-#[proc_macro_attribute]
-pub fn __return_type(ret_ty: TokenStream, item: TokenStream) -> TokenStream {
-    let mut func: syn::ItemFn = match syn::parse(item.clone()) {
-        Ok(func) => func,
-        Err(err) => return error::error_into_token_stream(err.into(), item.into()).into(),
-    };
-
-    let ret_ty = proc_macro2::TokenStream::from(ret_ty);
-
-    func.sig.output = syn::parse_quote!(-> #ret_ty);
-
-    func.into_token_stream().into()
 }

@@ -152,12 +152,12 @@ export default defineConfig({
                     text: "Reference",
                     items: [
                         {
-                            text: "Builder macros",
+                            text: "#[derive(Builder)] / #[builder]",
                             link: "/reference/builder",
                             items: [
                                 {
-                                    text: "Top-Level Attributes",
-                                    link: "/reference/builder#top-level-attributes",
+                                    text: "Item attributes",
+                                    link: "/reference/builder#item-attributes",
                                     items: [
                                         {
                                             text: "builder_type",
@@ -186,8 +186,8 @@ export default defineConfig({
                                     ],
                                 },
                                 {
-                                    text: "Member-Level Attributes",
-                                    link: "/reference/builder#member-level-attributes",
+                                    text: "Member attributes",
+                                    link: "/reference/builder#member-attributes",
                                     items: [
                                         {
                                             text: "default",

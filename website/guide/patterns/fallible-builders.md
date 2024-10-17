@@ -2,7 +2,7 @@
 
 With `bon`, you can write a builder that validates its inputs and returns a `Result`. It's possible to do this only via the function or associated method syntax.
 
-If you need to build a struct and do some validation, you won't be able to use the `#[builder]` annotation on the struct for that. You'll *have to* define your logic in the associated constructor method (e.g. `new`).
+If you need to build a struct and do some validation, you won't be able to use the `#[derive(Builder)]` annotation on the struct for that. You'll *have to* define your logic in the associated constructor method (e.g. `new`).
 
 **Example:**
 
@@ -38,4 +38,4 @@ if let Err(error) = result {
 }
 ```
 
-If you have a use case for some convenience attributes to do automatic validations using the `#[builder]` macro with the struct syntax, then add a 👍 reaction to [this Github issue](https://github.com/elastio/bon/issues/34).
+If you have a use case for some convenience attributes to do automatic validations using the `#[derive(Builder)]` macro with the struct syntax, then add a 👍 reaction to [this Github issue](https://github.com/elastio/bon/issues/34).

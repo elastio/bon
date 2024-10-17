@@ -1,0 +1,37 @@
+error: `#[builder(transparent)]` can only be applied to members of type `Option<T>` to disable their special handling
+ --> tests/integration/ui/compile_fail/attr_transparent.rs:5:15
+  |
+5 |     #[builder(transparent)]
+  |               ^^^^^^^^^^^
+
+error: `start_fn` attribute can't be specified together with `transparent`
+  --> tests/integration/ui/compile_fail/attr_transparent.rs:11:15
+   |
+11 |     #[builder(start_fn, transparent)]
+   |               ^^^^^^^^
+
+error: `finish_fn` attribute can't be specified together with `transparent`
+  --> tests/integration/ui/compile_fail/attr_transparent.rs:17:15
+   |
+17 |     #[builder(finish_fn, transparent)]
+   |               ^^^^^^^^^
+
+error: `skip` attribute can't be specified together with `transparent`
+  --> tests/integration/ui/compile_fail/attr_transparent.rs:23:15
+   |
+23 |     #[builder(skip, transparent)]
+   |               ^^^^
+
+error[E0599]: no method named `maybe_member` found for struct `ValidBuilder` in the current scope
+  --> tests/integration/ui/compile_fail/attr_transparent.rs:35:30
+   |
+27 | #[derive(Builder)]
+   |          ------- method `maybe_member` not found for this struct
+...
+35 |     let _ = Valid::builder().maybe_member(Some(42));
+   |                              ^^^^^^^^^^^^
+   |
+help: there is a method `member` with a similar name
+   |
+35 |     let _ = Valid::builder().member(Some(42));
+   |                              ~~~~~~

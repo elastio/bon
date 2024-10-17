@@ -24,7 +24,7 @@ env:
 
 jobs:
   # Sanity-check that benchmarks work
-  benchmarks:
+  runtime-benchmarks:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -41,7 +41,16 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - run: sudo apt-get install -y valgrind
-      - run: ./benchmarks/run.sh ${{ matrix.benchmark }}
+      - run: cd ./benchmarks/runtime && ./run.sh ${{ matrix.benchmark }}
+
+  compilation-benchmarks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: ./scripts/install/hyperfine.sh
+
+      - run: cd ./benchmarks/compilation && ./run.sh
 
   cargo-lock:
     runs-on: ubuntu-latest
@@ -75,6 +84,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          # rust-src is required to make sure compile errors on CI are rendered
+          # the same as locally. The `rust-src` component is installed by default
+          # locally, and with its presence compile error messages can show snippets
+          # of rust standard library code.
+          components: rust-src
 
       - run: cargo clippy --all-features --all-targets --locked
 
@@ -82,6 +97,8 @@ jobs:
       - run: cargo test --locked --all-features --doc
       - run: cd bon && cargo test --locked --no-default-features --features=
       - run: cd bon && cargo test --locked --no-default-features --features=alloc
+      - run: cd bon && cargo test --locked --no-default-features --features=implied-bounds
+      - run: cd bon && cargo test --locked --no-default-features --features=alloc,implied-bounds
 
   test-msrv:
     runs-on: ${{ matrix.os }}-latest
@@ -119,13 +136,28 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
           components: clippy
 
-      - run: cargo +${{ matrix.toolchain }} clippy --all-features --all-targets --locked
+      - run: |
+          cargo +${{ matrix.toolchain }} clippy --all-features --all-targets --locked \
+            -- \
+            --allow edition-2024-expr-fragment-specifier \
+            --allow impl-trait-overcaptures
+
+  cargo-miri:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: nightly-2024-10-14
+          components: miri
+
+      - run: |
+          cargo miri test --locked --all-features --all-targets \
+            --workspace --exclude runtime-benchmarks
         env:
-          # There is no need for us to stick with the edition 2021 meaning for
-          # the `expr` fragment in macro rules.
           RUSTFLAGS: >-
             --deny warnings
-            --allow unknown-lints
             --allow edition-2024-expr-fragment-specifier
             --allow impl-trait-overcaptures
 

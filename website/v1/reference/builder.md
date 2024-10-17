@@ -546,7 +546,7 @@ struct Example {
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
 
-Overrdies the name for the setters generated for the member. This is most useful when `#[builder]` is placed on a struct where you'd like to use a different name for the field internally. For functions this attribute makes less sense since it's easy to just create a variable named differently `let new_name = param_name;`. However, this attribute is still supported for functions.
+Overrides the name of the member in the builder's setters and type state. This is most useful when `#[derive(Builder)]` is placed on a struct where you'd like to use a different name for the field internally. For functions this attribute makes less sense since it's easy to just create a variable named differently `let new_name = param_name;`. However, this attribute is still supported for functions.
 
 **Example:**
 

@@ -8,6 +8,7 @@
     clippy::needless_raw_string_hashes,
     non_local_definitions,
     missing_docs,
+    impl_trait_overcaptures,
 )]
 
 #[cfg(feature = "alloc")]

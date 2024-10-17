@@ -1,5 +1,5 @@
+use crate::util::prelude::*;
 use ident_case::RenameRule;
-use proc_macro2::Span;
 
 pub(crate) trait IdentExt {
     /// Converts the ident (assumed to be in `snake_case`) to `PascalCase` without
@@ -18,6 +18,9 @@ pub(crate) trait IdentExt {
     /// produced identifier won't influence the syntax highlighting of the original
     /// identifier.
     fn snake_to_pascal_case(&self) -> Self;
+
+    /// Same thing as `snake_to_pascal_case` but converts `PascalCase` to `snake_case`.
+    fn pascal_to_snake_case(&self) -> Self;
 
     /// Creates a new ident with the given name and span. If the name starts with
     /// `r#` then automatically creates a raw ident.
@@ -38,12 +41,33 @@ impl IdentExt for syn::Ident {
         Self::new(&renamed, Span::call_site())
     }
 
+    fn pascal_to_snake_case(&self) -> Self {
+        let renamed = RenameRule::SnakeCase.apply_to_variant(self.raw_name());
+        Self::new_maybe_raw(&renamed, Span::call_site())
+    }
+
     fn new_maybe_raw(name: &str, span: Span) -> Self {
+        // If the ident is already raw (starts with `r#`) then just create a raw ident.
         if let Some(name) = name.strip_prefix("r#") {
-            Self::new_raw(name, span)
-        } else {
-            Self::new(name, span)
+            return Self::new_raw(name, span);
         }
+
+        // ..otherwise validate if it is a valid identifier.
+        // The `parse_str` method will return an error if the name is not a valid
+        // identifier.
+        if syn::parse_str::<Self>(name).is_ok() {
+            return Self::new(name, span);
+        }
+
+        // Try to make it a raw ident by adding `r#` prefix.
+        // This won't work for some keywords such as `super`, `crate`,
+        // `Self`, which are not allowed as raw identifiers
+        if syn::parse_str::<Self>(&format!("r#{name}")).is_ok() {
+            return Self::new_raw(name, span);
+        }
+
+        // As the final fallback add a trailing `_` to create a valid identifier
+        Self::new(&format!("{name}_"), span)
     }
 
     fn raw_name(&self) -> String {
