@@ -57,3 +57,20 @@ pub(crate) struct BuilderDerives {
     #[darling(rename = "Debug")]
     pub(crate) debug: darling::util::Flag,
 }
+
+// #[derive(Debug, Clone, Default)]
+// pub(crate) struct BuilderDerive {
+//     pub(crate) bounds: Vec<syn::WherePredicate>,
+// }
+
+// impl FromMeta for BuilderDerive {
+//     fn from_meta(meta: &syn::Meta) -> Result<Self> {
+
+//         struct Parsed {
+
+//             bounds: Vec<syn::WherePredicate>,
+//         }
+
+
+//     }
+// }

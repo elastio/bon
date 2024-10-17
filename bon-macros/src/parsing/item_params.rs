@@ -30,18 +30,8 @@ pub(crate) struct ItemParamsParsing<'a> {
 
 impl ItemParamsParsing<'_> {
     pub(crate) fn parse(self) -> Result<ItemParams> {
-        let params = Self::params_from_meta(self.meta)?;
+        let meta = self.meta;
 
-        if let Some(context) = self.reject_self_mentions {
-            if let Some(docs) = &params.docs {
-                crate::parsing::reject_self_mentions_in_docs(context, docs)?;
-            }
-        }
-
-        Ok(params)
-    }
-
-    fn params_from_meta(meta: &syn::Meta) -> Result<ItemParams> {
         if let syn::Meta::NameValue(meta) = meta {
             let val = &meta.value;
             let name = syn::parse2(val.to_token_stream())?;
@@ -57,7 +47,9 @@ impl ItemParamsParsing<'_> {
         struct Full {
             name: Option<SpannedKey<syn::Ident>>,
             vis: Option<SpannedKey<syn::Visibility>>,
-            doc: Option<SpannedKey<syn::Meta>>,
+
+            #[darling(default, with = super::parse_docs, map = Some)]
+            doc: Option<SpannedKey<Vec<syn::Attribute>>>,
         }
 
         let full = crate::parsing::parse_non_empty_paren_meta_list(meta)?;
@@ -75,15 +67,17 @@ impl ItemParamsParsing<'_> {
             bail!(meta, "expected at least one parameter in parentheses");
         }
 
-        let doc = full
-            .doc
-            .map(|doc| super::parse_docs(&doc.value))
-            .transpose()?;
+        if let Some(context) = self.reject_self_mentions {
+            if let Some(docs) = &full.doc {
+                crate::parsing::reject_self_mentions_in_docs(context, docs)?;
+            }
+        }
+
 
         let params = ItemParams {
             name: full.name,
             vis: full.vis,
-            docs: doc,
+            docs: full.doc,
         };
 
         Ok(params)
