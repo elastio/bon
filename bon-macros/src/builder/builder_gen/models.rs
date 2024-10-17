@@ -123,7 +123,7 @@ pub(super) struct Generics {
 pub(crate) struct BuilderGenCtx {
     /// Private identifiers that are used in the builder implementation.
     /// They are intentionally randomized to prevent users from accessing them.
-    pub(super) idents_pool: PrivateIdentsPool,
+    pub(super) ident_pool: PrivateIdentsPool,
 
     /// Name of the generic variable that holds the builder's state.
     pub(super) state_var: syn::Ident,
@@ -293,7 +293,7 @@ impl BuilderGenCtx {
 
         Ok(Self {
             state_var,
-            idents_pool: PrivateIdentsPool::new(),
+            ident_pool: PrivateIdentsPool::new(),
             members,
             allow_attrs,
             on_params,

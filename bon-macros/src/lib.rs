@@ -9,7 +9,10 @@
     clippy::option_if_let_else,
     clippy::enum_glob_use,
     clippy::too_many_lines,
-    clippy::if_not_else
+    clippy::if_not_else,
+
+    // We can't use the explicit captures syntax due to the MSRV
+    impl_trait_overcaptures,
 )]
 
 mod bon;

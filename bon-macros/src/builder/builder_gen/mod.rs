@@ -183,10 +183,10 @@ impl BuilderGenCtx {
         let where_clause = &generics.where_clause;
         let generic_args = &self.generics.args;
 
-        let phantom_field = &self.idents_pool.phantom;
-        let receiver_field = &self.idents_pool.receiver;
-        let start_fn_args_field = &self.idents_pool.start_fn_args;
-        let named_members_field = &self.idents_pool.named_members;
+        let phantom_field = &self.ident_pool.phantom;
+        let receiver_field = &self.ident_pool.receiver;
+        let start_fn_args_field = &self.ident_pool.start_fn_args;
+        let named_members_field = &self.ident_pool.named_members;
 
         let receiver = self.receiver();
 
@@ -336,10 +336,10 @@ impl BuilderGenCtx {
         let where_clause = &self.generics.where_clause;
         let phantom_data = self.phantom_data();
         let state_mod = &self.state_mod.ident;
-        let phantom_field = &self.idents_pool.phantom;
-        let receiver_field = &self.idents_pool.receiver;
-        let start_fn_args_field = &self.idents_pool.start_fn_args;
-        let named_members_field = &self.idents_pool.named_members;
+        let phantom_field = &self.ident_pool.phantom;
+        let receiver_field = &self.ident_pool.receiver;
+        let start_fn_args_field = &self.ident_pool.start_fn_args;
+        let named_members_field = &self.ident_pool.named_members;
 
         let private_field_attrs = quote! {
             // The fields can't be hidden using Rust's privacy syntax.

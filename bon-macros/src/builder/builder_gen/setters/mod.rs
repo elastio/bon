@@ -221,7 +221,7 @@ impl<'a> SettersCtx<'a> {
             SetterBody::SetMember { value } => {
                 let index = &self.member.index;
 
-                let fields = &self.base.idents_pool;
+                let fields = &self.base.ident_pool;
                 let phantom_field = &fields.phantom;
                 let receiver_field = &fields.receiver;
                 let start_fn_args_field = &fields.start_fn_args;

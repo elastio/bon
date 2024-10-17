@@ -3,8 +3,8 @@ use crate::util::prelude::*;
 
 impl super::BuilderGenCtx {
     fn finish_fn_member_expr(&self, member: &Member) -> TokenStream {
-        let start_fn_args_field = &self.idents_pool.start_fn_args;
-        let named_members_field = &self.idents_pool.named_members;
+        let start_fn_args_field = &self.ident_pool.start_fn_args;
+        let named_members_field = &self.ident_pool.named_members;
 
         let member = match member {
             Member::Named(member) => member,

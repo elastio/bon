@@ -26,7 +26,7 @@ pub(crate) fn try_generate(params: TokenStream, item: TokenStream) -> Result<Tok
         bail!(
             &params,
             "`#[bon]` attribute does not accept any parameters yet, \
-            but it will in the future releases"
+            but it will in future releases"
         );
     }
 

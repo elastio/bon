@@ -10,8 +10,8 @@ fn main() -> anyhow::Result<()> {
 
     let src_dir = bench_dir.join("src");
 
-    let structs_number = 200;
-    let fields_number = 20;
+    let structs_number = 100;
+    let fields_number = 10;
 
     std::fs::write(
         src_dir.join(format!(

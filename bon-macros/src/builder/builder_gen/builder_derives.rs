@@ -52,10 +52,10 @@ impl BuilderGenCtx {
         let generic_args = &self.generics.args;
         let builder_ident = &self.builder_type.ident;
 
-        let phantom_field = &self.idents_pool.phantom;
-        let receiver_field = &self.idents_pool.receiver;
-        let start_fn_args_field = &self.idents_pool.start_fn_args;
-        let named_members_field = &self.idents_pool.named_members;
+        let phantom_field = &self.ident_pool.phantom;
+        let receiver_field = &self.ident_pool.receiver;
+        let start_fn_args_field = &self.ident_pool.start_fn_args;
+        let named_members_field = &self.ident_pool.named_members;
 
         let clone = quote!(::core::clone::Clone);
 
@@ -133,9 +133,9 @@ impl BuilderGenCtx {
     }
 
     fn derive_debug(&self) -> TokenStream {
-        let receiver_field = &self.idents_pool.receiver;
-        let start_fn_args_field = &self.idents_pool.start_fn_args;
-        let named_members_field = &self.idents_pool.named_members;
+        let receiver_field = &self.ident_pool.receiver;
+        let start_fn_args_field = &self.ident_pool.start_fn_args;
+        let named_members_field = &self.ident_pool.named_members;
 
         let format_members = self.members.iter().filter_map(|member| {
             match member {

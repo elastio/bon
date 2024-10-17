@@ -486,7 +486,7 @@ impl FinishFnBody for FnCallBody {
             .sig
             .receiver()
             .map(|_| {
-                let receiver_field = &ctx.idents_pool.receiver;
+                let receiver_field = &ctx.ident_pool.receiver;
                 quote!(self.#receiver_field.)
             })
             .or_else(|| {
