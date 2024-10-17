@@ -7,7 +7,7 @@ mod attr_setters;
 mod attr_skip;
 mod attr_transparent;
 mod attr_with;
-mod builder_derives;
+mod attr_derive;
 mod cfgs;
 mod generics;
 mod init_order;

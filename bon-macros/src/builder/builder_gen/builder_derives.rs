@@ -1,4 +1,4 @@
-use super::builder_params::BuilderDerives;
+use super::builder_params::{BuilderDerive, BuilderDerives};
 use super::BuilderGenCtx;
 use crate::builder::builder_gen::Member;
 use crate::util::prelude::*;
@@ -10,12 +10,12 @@ impl BuilderGenCtx {
 
         let mut tokens = TokenStream::new();
 
-        if clone.is_present() {
-            tokens.extend(self.derive_clone());
+        if let Some(derive) = clone {
+            tokens.extend(self.derive_clone(derive));
         }
 
-        if debug.is_present() {
-            tokens.extend(self.derive_debug());
+        if let Some(derive) = debug {
+            tokens.extend(self.derive_debug(derive));
         }
 
         tokens
@@ -25,16 +25,30 @@ impl BuilderGenCtx {
     /// They add bounds of their respective traits to every generic type parameter on the struct
     /// without trying to analyze if that bound is actually required for the derive to work, so
     /// it's a conservative approach.
-    fn where_clause_for_derive(&self, target_trait_bounds: &TokenStream) -> TokenStream {
-        let target_trait_bounds_predicates = self
-            .generics
-            .decl_without_defaults
-            .iter()
-            .filter_map(syn::GenericParam::as_type_param)
-            .map(|param| {
-                let ident = &param.ident;
+    fn where_clause_for_derive(
+        &self,
+        target_trait_bounds: &TokenStream,
+        derive: &BuilderDerive,
+    ) -> TokenStream {
+        let additional_predicates = derive
+            .bounds
+            .as_ref()
+            .map(ToTokens::to_token_stream)
+            .unwrap_or_else(|| {
+                let bounds = self
+                    .generics
+                    .decl_without_defaults
+                    .iter()
+                    .filter_map(syn::GenericParam::as_type_param)
+                    .map(|param| {
+                        let ident = &param.ident;
+                        quote! {
+                            #ident: #target_trait_bounds
+                        }
+                    });
+
                 quote! {
-                    #ident: #target_trait_bounds
+                    #( #bounds, )*
                 }
             });
 
@@ -43,11 +57,11 @@ impl BuilderGenCtx {
         quote! {
             where
                 #( #base_predicates, )*
-                #( #target_trait_bounds_predicates, )*
+                #additional_predicates
         }
     }
 
-    fn derive_clone(&self) -> TokenStream {
+    fn derive_clone(&self, derive: &BuilderDerive) -> TokenStream {
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
         let builder_ident = &self.builder_type.ident;
@@ -80,7 +94,7 @@ impl BuilderGenCtx {
             }
         });
 
-        let where_clause = self.where_clause_for_derive(&clone);
+        let where_clause = self.where_clause_for_derive(&clone, derive);
         let state_mod = &self.state_mod.ident;
 
         let clone_named_members = self.named_members().map(|member| {
@@ -132,7 +146,7 @@ impl BuilderGenCtx {
         }
     }
 
-    fn derive_debug(&self) -> TokenStream {
+    fn derive_debug(&self, derive: &BuilderDerive) -> TokenStream {
         let receiver_field = &self.ident_pool.receiver;
         let start_fn_args_field = &self.ident_pool.start_fn_args;
         let named_members_field = &self.ident_pool.named_members;
@@ -186,7 +200,7 @@ impl BuilderGenCtx {
         });
 
         let debug = quote!(::core::fmt::Debug);
-        let where_clause = self.where_clause_for_derive(&debug);
+        let where_clause = self.where_clause_for_derive(&debug, derive);
         let state_mod = &self.state_mod.ident;
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;

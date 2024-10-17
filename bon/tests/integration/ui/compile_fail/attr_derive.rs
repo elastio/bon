@@ -40,8 +40,7 @@ impl StructContainsNonTrait {
     fn method_contains_non_trait(
         self,
 
-        #[builder(start_fn)]
-        _no_impl_start_fn: NoTraitImpls,
+        #[builder(start_fn)] _no_impl_start_fn: NoTraitImpls,
 
         _no_impls_required: NoTraitImpls,
 
@@ -58,5 +57,13 @@ impl StructContainsNonTrait {
 #[derive(Builder)]
 #[builder(derive())]
 struct EmptyDerives {}
+
+#[derive(Builder)]
+#[builder(derive(Clone()))]
+struct EmptyParamsForDerive {}
+
+#[derive(Builder)]
+#[builder(derive(Clone(bounds {})))]
+struct WrongDelimInBounds {}
 
 fn main() {}

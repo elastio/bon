@@ -268,3 +268,83 @@ mod positional_members {
         );
     }
 }
+
+mod attr_bounds_empty {
+    use crate::prelude::*;
+
+    struct NoTraitImpls;
+
+    #[test]
+    fn test_struct() {
+        #[derive(Builder)]
+        #[builder(derive(Clone(bounds()), Debug))]
+        struct Sut<'a, T> {
+            _arg: &'a T,
+        }
+
+        let _ = Sut::builder().arg(&NoTraitImpls).clone();
+    }
+
+    #[test]
+    fn test_free_fn() {
+        #[builder(derive(Clone(bounds()), Debug))]
+        fn sut<T>(_arg: &T) {}
+
+        let _ = sut::<NoTraitImpls>().arg(&NoTraitImpls).clone();
+    }
+
+    #[test]
+    fn test_assoc_method() {
+        #[derive(Clone, Debug)]
+        struct Sut;
+
+        #[bon]
+        impl Sut {
+            #[builder(derive(Clone(bounds()), Debug))]
+            fn sut<T>(_arg: &T) {}
+        }
+
+        let _ = Sut::sut::<NoTraitImpls>().arg(&NoTraitImpls).clone();
+    }
+}
+
+mod attr_bounds_non_empty {
+    use crate::prelude::*;
+
+    struct NoTraitImpls;
+
+    #[test]
+    fn test_struct() {
+        #[derive(Builder)]
+        #[builder(derive(Clone(bounds(&'a T: Clone, &'a &'a T: Clone)), Debug))]
+        struct Sut<'a, T> {
+            _arg: &'a T,
+        }
+
+        let _ = Sut::builder().arg(&NoTraitImpls).clone();
+    }
+
+    #[test]
+    fn test_free_fn() {
+        #[builder(derive(Clone(bounds(&'a T: Clone, &'a &'a T: Clone)), Debug))]
+        #[allow(clippy::needless_lifetimes, single_use_lifetimes)]
+        fn sut<'a, T>(_arg: &'a T) {}
+
+        let _ = sut::<NoTraitImpls>().arg(&NoTraitImpls).clone();
+    }
+
+    #[test]
+    fn test_assoc_method() {
+        #[derive(Clone, Debug)]
+        struct Sut;
+
+        #[bon]
+        impl Sut {
+            #[builder(derive(Clone(bounds(&'a T: Clone, &'a &'a T: Clone)), Debug))]
+            #[allow(clippy::needless_lifetimes, single_use_lifetimes)]
+            fn sut<'a, T>(_arg: &'a T) {}
+        }
+
+        let _ = Sut::sut::<NoTraitImpls>().arg(&NoTraitImpls).clone();
+    }
+}

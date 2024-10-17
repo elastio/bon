@@ -5,6 +5,7 @@ pub(crate) use on_params::OnParams;
 use crate::parsing::{ItemParams, ItemParamsParsing};
 use crate::util::prelude::*;
 use darling::FromMeta;
+use syn::punctuated::Punctuated;
 
 fn parse_finish_fn(meta: &syn::Meta) -> Result<ItemParams> {
     ItemParamsParsing {
@@ -52,25 +53,35 @@ pub(crate) struct BuilderParams {
 #[derive(Debug, Clone, Default, FromMeta)]
 pub(crate) struct BuilderDerives {
     #[darling(rename = "Clone")]
-    pub(crate) clone: darling::util::Flag,
+    pub(crate) clone: Option<BuilderDerive>,
 
     #[darling(rename = "Debug")]
-    pub(crate) debug: darling::util::Flag,
+    pub(crate) debug: Option<BuilderDerive>,
 }
 
-// #[derive(Debug, Clone, Default)]
-// pub(crate) struct BuilderDerive {
-//     pub(crate) bounds: Vec<syn::WherePredicate>,
-// }
+#[derive(Debug, Clone, Default)]
+pub(crate) struct BuilderDerive {
+    pub(crate) bounds: Option<Punctuated<syn::WherePredicate, syn::Token![,]>>,
+}
 
-// impl FromMeta for BuilderDerive {
-//     fn from_meta(meta: &syn::Meta) -> Result<Self> {
+impl FromMeta for BuilderDerive {
+    fn from_meta(meta: &syn::Meta) -> Result<Self> {
+        if let syn::Meta::Path(_) = meta {
+            return Ok(Self { bounds: None });
+        }
 
-//         struct Parsed {
+        #[derive(FromMeta)]
+        struct Parsed {
+            #[darling(with = crate::parsing::parse_paren_meta_list_with_terminated)]
+            bounds: Punctuated<syn::WherePredicate, syn::Token![,]>,
+        }
 
-//             bounds: Vec<syn::WherePredicate>,
-//         }
+        meta.require_list()?.require_parens_delim()?;
 
+        let Parsed { bounds } = Parsed::from_meta(meta)?;
 
-//     }
-// }
+        Ok(Self {
+            bounds: Some(bounds),
+        })
+    }
+}
