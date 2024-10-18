@@ -105,7 +105,7 @@ It became possible after adopting the new design for the generated code (see [op
 
 We added `#[must_use]` to the `build()` method for struct builders. Now this produces a warning because the result of `#[build]` is not used:
 
-```rust
+```rust compile_fail
 #[bon::builder]
 struct Point {
     x: u32

@@ -1,4 +1,4 @@
-use bon::{builder, Builder};
+use bon::{bon, builder, Builder};
 use std::collections::{BTreeMap, BTreeSet};
 
 fn main() {
@@ -128,5 +128,13 @@ fn destructuring_in_fn_is_unsupported((_, _): (u32, u32)) {}
 #[must_use]
 fn double_must_use() {}
 
-#[builder]
-struct BuilderProcMacroAttrOnAStruct {}
+#[derive(Builder)]
+struct InvalidWithExpr {
+    #[builder(with = 42)]
+    x: u32,
+}
+
+struct InvalidAttrsForBonMacro;
+
+#[bon(attrs)]
+impl InvalidAttrsForBonMacro {}

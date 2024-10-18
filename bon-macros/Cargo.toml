@@ -53,3 +53,14 @@ quote       = "1"
 
 # This is the highest version that supports our MSRV
 syn = { version = "2.0.56", features = ["full", "visit-mut", "visit"] }
+
+prettyplease = "0.2"
+
+[features]
+default = []
+
+# See the docs on this feature in the `bon`'s crate `Cargo.toml`
+implied-bounds = []
+
+[dev-dependencies]
+expect-test = "1.4.1"

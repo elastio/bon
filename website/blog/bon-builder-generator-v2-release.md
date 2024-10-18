@@ -27,7 +27,7 @@ The way this is implemented is a big topic that deserves a separate blog post. H
 
 It's now possible to reference other members in `skip` and `default` expressions. Only the members declared higher in code are accessible to these expressions. Here is an example of how it works with `skip`:
 
-```rust
+```rust compile_fail
 use bon::builder;
 
 #[builder]
@@ -100,7 +100,7 @@ Example::builder()
 
 Now, to preserve the same behavior, you need to do this:
 
-```rust
+```rust compile_fail
 use bon::builder;
 
 #[builder(on(String, into))] // Only this line needs to change
@@ -128,7 +128,7 @@ Alternatively, you can add `#[builder(into)]` on top of each field that requires
 
 **Example:**
 
-```rust
+```rust compile_fail
 use bon::builder;
 
 #[builder]

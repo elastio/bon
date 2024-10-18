@@ -1,9 +1,18 @@
+use super::GenericsNamespace;
 use crate::util::prelude::*;
 use syn::visit_mut::VisitMut;
 
-pub(crate) struct NormalizeImplTraits;
+pub(crate) struct NormalizeImplTraits<'a> {
+    namespace: &'a GenericsNamespace,
+}
 
-impl VisitMut for NormalizeImplTraits {
+impl<'a> NormalizeImplTraits<'a> {
+    pub(crate) fn new(namespace: &'a GenericsNamespace) -> Self {
+        Self { namespace }
+    }
+}
+
+impl VisitMut for NormalizeImplTraits<'_> {
     fn visit_impl_item_fn_mut(&mut self, fn_item: &mut syn::ImplItemFn) {
         // We are interested only in signatures of functions. Don't recurse
         // into the function's block.
@@ -11,7 +20,7 @@ impl VisitMut for NormalizeImplTraits {
     }
 
     fn visit_signature_mut(&mut self, signature: &mut syn::Signature) {
-        let mut visitor = AssignTypeParams::new(&mut signature.generics);
+        let mut visitor = AssignTypeParams::new(self, &mut signature.generics);
 
         for arg in &mut signature.inputs {
             visitor.visit_fn_arg_mut(arg);
@@ -20,15 +29,17 @@ impl VisitMut for NormalizeImplTraits {
 }
 
 struct AssignTypeParams<'a> {
+    base: &'a NormalizeImplTraits<'a>,
     generics: &'a mut syn::Generics,
     next_type_param_index: usize,
 }
 
 impl<'a> AssignTypeParams<'a> {
-    fn new(generics: &'a mut syn::Generics) -> Self {
+    fn new(base: &'a NormalizeImplTraits<'a>, generics: &'a mut syn::Generics) -> Self {
         Self {
+            base,
             generics,
-            next_type_param_index: 0,
+            next_type_param_index: 1,
         }
     }
 }
@@ -54,7 +65,8 @@ impl VisitMut for AssignTypeParams<'_> {
         let index = self.next_type_param_index;
         self.next_type_param_index += 1;
 
-        let type_param = quote::format_ident!("__{index}");
+        let type_param = self.base.namespace.unique_ident(format!("I{index}"));
+
         let impl_trait = std::mem::replace(ty, syn::Type::Path(syn::parse_quote!(#type_param)));
 
         let impl_trait = match impl_trait {
