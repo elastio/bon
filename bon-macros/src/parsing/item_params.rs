@@ -73,7 +73,6 @@ impl ItemParamsParsing<'_> {
             }
         }
 
-
         let params = ItemParams {
             name: full.name,
             vis: full.vis,

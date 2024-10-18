@@ -504,8 +504,7 @@ fn optional_setter_docs(
     format!(
         "| **Optional** |\n\
          | -- |\n\n\
-         **See also** a companion setter that {description}: \
-         [`{other_setter}()`](Self::{other_setter}).\
+         **See also** [`{other_setter}()`](Self::{other_setter}), which is a companion setter that {description}.
         \n\n{default}",
     )
 }
