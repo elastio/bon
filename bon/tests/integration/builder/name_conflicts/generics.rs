@@ -1,32 +1,52 @@
-use crate::prelude::*;
+mod lifetimes {
+    use crate::prelude::*;
 
-#[test]
-fn lifetimes() {
-    #[derive(Default)]
-    #[allow(dead_code)]
-    struct Sut<'a, 'b, 'c, 'd, 'e, 'f, 'g, 'h>(
-        &'a str,
-        &'b str,
-        &'c str,
-        &'d str,
-        &'e str,
-        &'f str,
-        &'g str,
-        &'h str,
-    );
-
-    #[bon]
-    impl<'impl1, 'impl1_, 'impl2, 'fn1, 'fn1_, 'fn2>
-        Sut<'_, '_, 'impl1, 'impl1_, 'impl2, 'fn1, 'fn1_, 'fn2>
-    {
+    #[test]
+    fn test_free_fn() {
         #[builder]
-        #[allow(clippy::trivially_copy_pass_by_ref)]
-        fn sut(_val: &u32, _val2: &u32) {}
+        #[allow(
+            single_use_lifetimes,
+            clippy::needless_lifetimes,
+            clippy::trivially_copy_pass_by_ref
+        )]
+        fn sut<'f1, 'f1_, 'f2>(
+            _x1: &u32,
+            _x2: &'f1 u32,
+            _x3: &'f1_ u32,
+            _x4: &'f2 u32,
+            _x5: &u32,
+        ) -> u32 {
+            32
+        }
+
+        sut().x1(&32).x2(&32).x3(&32).x4(&32).x5(&32).call();
     }
 
-    Sut::sut().val(&32).val2(&32).call();
-}
+    #[test]
+    fn test_assoc_method() {
+        #[derive(Default)]
+        #[allow(dead_code)]
+        struct Sut<'a, 'b, 'c, 'd, 'e, 'f, 'g, 'h>(
+            &'a str,
+            &'b str,
+            &'c str,
+            &'d str,
+            &'e str,
+            &'f str,
+            &'g str,
+            &'h str,
+        );
 
+        #[bon]
+        impl<'i1, 'i1_, 'i2, 'f1, 'f1_, 'f2> Sut<'_, '_, 'i1, 'i1_, 'i2, 'f1, 'f1_, 'f2> {
+            #[builder]
+            #[allow(clippy::trivially_copy_pass_by_ref)]
+            fn sut(_val: &u32, _val2: &u32) {}
+        }
+
+        Sut::sut().val(&32).val2(&32).call();
+    }
+}
 mod impl_trait {
     use crate::prelude::*;
 

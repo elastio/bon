@@ -2,6 +2,9 @@ use crate::util::prelude::*;
 use darling::FromMeta;
 use syn::spanned::Spanned;
 
+/// Utility type for parsing simple closure syntax that only allows [`syn::PatIdent`]
+/// inputs and rejects any attributes and prefix keywords like `async`, `move`, `for`
+/// on the closure.
 #[derive(Debug)]
 pub(crate) struct SimpleClosure {
     pub(crate) inputs: Vec<SimpleClosureInput>,

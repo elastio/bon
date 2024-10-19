@@ -49,7 +49,7 @@ impl StructInputParams {
                     ),
                 };
 
-                crate::parsing::require_non_empty_paren_meta_list(&attr.meta)?;
+                crate::parsing::require_non_empty_paren_meta_list_or_name_value(&attr.meta)?;
 
                 let meta = darling::ast::NestedMeta::parse_meta_list(meta.tokens.clone())?;
 

@@ -91,9 +91,7 @@ impl TypeExt for syn::Type {
     }
 
     fn is_option(&self) -> bool {
-        self.as_path_no_qself()
-            .map(|path| path.ends_with_segment("Option"))
-            .unwrap_or(false)
+        self.option_type_param().is_some()
     }
 
     fn peel(&self) -> &Self {

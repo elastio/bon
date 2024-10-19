@@ -19,7 +19,7 @@ impl VisitMut for NormalizeLifetimes<'_> {
             self.visit_impl_item_mut(item);
         }
 
-        AssignLifetimes::new(self, "impl", &mut impl_block.generics)
+        AssignLifetimes::new(self, "i", &mut impl_block.generics)
             .visit_type_mut(&mut impl_block.self_ty);
     }
 
@@ -34,7 +34,7 @@ impl VisitMut for NormalizeLifetimes<'_> {
     }
 
     fn visit_signature_mut(&mut self, signature: &mut syn::Signature) {
-        let mut visitor = AssignLifetimes::new(self, "fn", &mut signature.generics);
+        let mut visitor = AssignLifetimes::new(self, "f", &mut signature.generics);
         for arg in &mut signature.inputs {
             visitor.visit_fn_arg_mut(arg);
         }

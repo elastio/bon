@@ -52,20 +52,7 @@ impl ItemParamsParsing<'_> {
             doc: Option<SpannedKey<Vec<syn::Attribute>>>,
         }
 
-        let full = crate::parsing::parse_non_empty_paren_meta_list(meta)?;
-
-        let is_empty = matches!(
-            full,
-            Full {
-                name: None,
-                vis: None,
-                doc: None,
-            }
-        );
-
-        if is_empty {
-            bail!(meta, "expected at least one parameter in parentheses");
-        }
+        let full: Full = crate::parsing::parse_non_empty_paren_meta_list(meta)?;
 
         if let Some(context) = self.reject_self_mentions {
             if let Some(docs) = &full.doc {

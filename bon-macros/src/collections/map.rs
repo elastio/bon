@@ -23,8 +23,8 @@ pub(crate) fn generate(entries: Punctuated<(Expr, Expr), Token![,]>) -> TokenStr
 
     let items = entries.into_iter().map(|(key, value)| {
         quote!((
-            Into::into(#key),
-            Into::into(#value),
+            ::core::convert::Into::into(#key),
+            ::core::convert::Into::into(#value),
         ))
     });
 

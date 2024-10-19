@@ -5,10 +5,10 @@ use syn::visit::Visit;
 
 #[derive(Debug, Default, Clone)]
 pub(crate) struct GenericsNamespace {
-    /// Set of identifiers referenced in the syntax element.
+    /// Set of identifiers referenced in the syntax node.
     pub(crate) idents: BTreeSet<String>,
 
-    /// Set of lifetimes referenced in the syntax element.
+    /// Set of lifetimes referenced in the syntax node.
     pub(crate) lifetimes: BTreeSet<String>,
 }
 
