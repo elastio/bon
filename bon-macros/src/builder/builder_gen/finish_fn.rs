@@ -20,7 +20,7 @@ impl super::BuilderGenCtx {
                 return quote! { self.#start_fn_args_field.#index };
             }
             Member::FinishFnArg(member) => {
-                return member.maybe_into_ident_expr();
+                return member.init_expr();
             }
         };
 
@@ -118,11 +118,7 @@ impl super::BuilderGenCtx {
         let unsafety = &self.finish_fn.unsafety;
         let must_use = &self.finish_fn.must_use;
         let attrs = &self.finish_fn.attrs;
-        let finish_fn_vis = self
-            .finish_fn
-            .vis
-            .as_ref()
-            .unwrap_or(&self.builder_type.vis);
+        let finish_fn_vis = &self.finish_fn.vis;
         let finish_fn_ident = &self.finish_fn.ident;
         let output = &self.finish_fn.output;
         let state_var = &self.state_var;

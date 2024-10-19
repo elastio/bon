@@ -1,6 +1,6 @@
 use super::builder_params::BuilderParams;
 use super::{
-    AssocMethodCtx, BuilderGenCtx, FinishFn, FinishFnBody, Generics, Member, MemberOrigin,
+    AssocMethodCtx, BuilderGenCtx, FinishFnBody, Generics, Member, MemberOrigin,
     RawMember,
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
@@ -11,6 +11,7 @@ use darling::FromMeta;
 use std::borrow::Cow;
 use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
+use super::models::FinishFnParams;
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct StructInputParams {
@@ -48,20 +49,7 @@ impl StructInputParams {
                     ),
                 };
 
-                if !matches!(meta.delimiter, syn::MacroDelimiter::Paren(_)) {
-                    bail!(
-                        &meta,
-                        "wrong delimiter {:?}, expected `#[builder(...)]` syntax",
-                        meta.delimiter
-                    );
-                }
-
-                if meta.tokens.is_empty() {
-                    bail!(
-                        &meta,
-                        "this empty `#[builder()]` attribute is redundant; remove it"
-                    );
-                }
+                crate::parsing::require_non_empty_paren_meta_list(&attr.meta)?;
 
                 let meta = darling::ast::NestedMeta::parse_meta_list(meta.tokens.clone())?;
 
@@ -189,7 +177,7 @@ impl StructInputCtx {
             .unwrap_or_else(|| syn::Ident::new("build", start_fn_ident.span()));
 
         let struct_ty = &self.struct_ty;
-        let finish_fn = FinishFn {
+        let finish_fn = FinishFnParams {
             ident: finish_fn_ident,
             vis: finish_fn_vis.map(SpannedKey::into_value),
             unsafety: None,
@@ -203,7 +191,7 @@ impl StructInputCtx {
                 .map(SpannedKey::into_value)
                 .unwrap_or_else(|| {
                     vec![syn::parse_quote! {
-                        /// Finishes building and returns the requested object
+                        /// Finish building and return the requested object
                     }]
                 }),
         };

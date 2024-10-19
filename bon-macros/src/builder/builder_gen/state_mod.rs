@@ -24,8 +24,8 @@ impl<'a> StateModGenCtx<'a> {
                 .map(|member| &member.name.pascal)
                 .collect(),
 
-            // A method without `self` makes the trait non-object safe,
-            // which is convenient, because we want that in this case.
+            // A const item in a trait makes it non-object safe, which is convenient,
+            // because we want that restriction in this case.
             sealed_item_decl: quote! {
                 #[doc(hidden)]
                 const SEALED: sealed::Sealed;
@@ -84,6 +84,9 @@ impl<'a> StateModGenCtx<'a> {
     }
 
     fn state_transitions(&self) -> TokenStream {
+        // Not using `Iterator::zip` here to make it possible to scale this in
+        // case if we add more vecs here. We are not using `Itertools`, so
+        // its `multiunzip` is not available.
         let mut set_members_structs = Vec::with_capacity(self.stateful_members_snake.len());
         let mut state_impls = Vec::with_capacity(self.stateful_members_snake.len());
 
@@ -95,15 +98,20 @@ impl<'a> StateModGenCtx<'a> {
 
             let docs = format!(
                 "Represents a [`State`] that has [`IsSet`] implemented for [`State::{member_pascal}`].\n\n\
-                The state for all other members is left the same as in the input state.\n\n\
-                [`State::{member_pascal}`]: State::{member_pascal}",
+                The state for all other members is left the same as in the input state.",
             );
 
             let struct_ident = format_ident!("Set{}", member.name.pascal_str);
 
             set_members_structs.push(quote! {
                 #[doc = #docs]
-                #vis_child struct #struct_ident<S: State = Empty>(::core::marker::PhantomData<fn() -> S>);
+                #vis_child struct #struct_ident<S: State = Empty>(
+                    // We `S` in an `fn() -> ...` to make the compiler think
+                    // that the builder doesn't "own" an instance of `S`.
+                    // This removes unnecessary requirements when evaluating the
+                    // applicability of the auto traits.
+                    ::core::marker::PhantomData<fn() -> S>
+                );
             });
 
             let states = self.base.stateful_members().map(|other_member| {
@@ -124,7 +132,7 @@ impl<'a> StateModGenCtx<'a> {
 
             state_impls.push(quote! {
                 #[doc(hidden)]
-                impl <S: State> State for #struct_ident<S> {
+                impl<S: State> State for #struct_ident<S> {
                     #(
                         type #stateful_members_pascal = #states;
                     )*
@@ -144,8 +152,6 @@ impl<'a> StateModGenCtx<'a> {
 
             #( #set_members_structs )*
 
-            // Put it under an anonymous const to make it possible to collapse
-            // all this boilerplate when viewing the generated code.
             #[doc(hidden)]
             impl State for Empty {
                 #(
@@ -164,10 +170,7 @@ impl<'a> StateModGenCtx<'a> {
             format!(
                 "Type state of the member `{member_snake}`.\n\
                 \n\
-                It can implement either [`IsSet`] or [`IsUnset`].\n\
-                \n\
-                [`IsSet`]: ::bon::IsSet\n\
-                [`IsUnset`]: ::bon::IsUnset",
+                It can implement either [`IsSet`] or [`IsUnset`]",
             )
         });
 
@@ -183,10 +186,7 @@ impl<'a> StateModGenCtx<'a> {
                 \n\
                 You can use the associated types of this trait to control the state of individual members \
                 with the [`IsSet`] and [`IsUnset`] traits. You can change the state of the members with \
-                the `Set*` structs available in this module.\n\
-                \n\
-                [`IsSet`]: ::bon::IsSet
-                [`IsUnset`]: ::bon::IsUnset"
+                the `Set*` structs available in this module."
         };
 
         let docs = format!(
@@ -213,6 +213,10 @@ impl<'a> StateModGenCtx<'a> {
             .map(|member| &member.name.pascal)
             .collect::<Vec<_>>();
 
+        // Associated types bounds syntax that provides implied bounds for them
+        // is available only since Rust 1.79.0. So this is an opt-in feature that
+        // bumps the MSRV of the crate. See more details in the comment on this
+        // cargo feature's declaration in `bon/Cargo.toml`.
         let maybe_assoc_type_bounds = cfg!(feature = "implied-bounds").then(|| {
             quote! {
                 < #( #required_members_pascal: IsSet, )* >
@@ -254,12 +258,16 @@ impl<'a> StateModGenCtx<'a> {
         let vis_child_child = &self.base.state_mod.vis_child_child;
         let stateful_members_snake = &self.stateful_members_snake;
 
+        // The message is defined separately to make it single-line in the
+        // generated code. This simplifies the task of removing unnecessary
+        // attributes from the generated code when preparing for demo purposes.
+        let deprecated_msg = "\
+            this should not be used directly; it is an implementation detail; \
+            use the Set* type aliases to control the \
+            state of members instead";
+
         quote! {
-            #[deprecated =
-                "this is an implementation detail and should not be \
-                used directly; use the Set* type aliases to control the \
-                state of members instead"
-            ]
+            #[deprecated = #deprecated_msg]
             #[doc(hidden)]
             #[allow(non_camel_case_types)]
             mod members {

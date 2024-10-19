@@ -93,8 +93,8 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
                 _ => unreachable!(),
             };
 
-            let norm_fn = impl_item_fn_into_fn_item(norm_fn)?;
-            let orig_fn = impl_item_fn_into_fn_item(orig_fn)?;
+            let norm_fn = conv_impl_item_fn_into_fn_item(norm_fn)?;
+            let orig_fn = conv_impl_item_fn_into_fn_item(orig_fn)?;
 
             let meta = orig_fn
                 .attrs
@@ -146,7 +146,7 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
     })
 }
 
-fn impl_item_fn_into_fn_item(func: syn::ImplItemFn) -> Result<syn::ItemFn> {
+fn conv_impl_item_fn_into_fn_item(func: syn::ImplItemFn) -> Result<syn::ItemFn> {
     let syn::ImplItemFn {
         attrs,
         vis,

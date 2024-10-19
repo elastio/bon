@@ -11,9 +11,7 @@ pub(crate) mod input_struct;
 
 use crate::util::prelude::*;
 use member::{Member, MemberOrigin, NamedMember, RawMember, StartFnArgMember};
-use models::{
-    AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFn, FinishFnBody, Generics,
-};
+use models::{AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFnBody, Generics};
 use setters::SettersCtx;
 
 pub(crate) struct MacroOutput {
@@ -46,7 +44,7 @@ impl BuilderGenCtx {
         let builder_derives = self.builder_derives();
 
         let default_allows = syn::parse_quote!(#[allow(
-            // We have a `deprecated` lint on any `bon::private` items which we
+            // We have a `deprecated` lint on all `bon::private` items which we
             // use in the generated code extensively
             deprecated
         )]);
@@ -208,7 +206,7 @@ impl BuilderGenCtx {
 
         let mut start_fn_arg_exprs = self
             .start_fn_args()
-            .map(|member| member.base.maybe_into_ident_expr())
+            .map(|member| member.base.init_expr())
             .peekable();
 
         let start_fn_args_field_init = start_fn_arg_exprs.peek().is_some().then(|| {
@@ -278,8 +276,7 @@ impl BuilderGenCtx {
             .as_ref()
             .map(|ctx| ctx.self_ty.as_ref());
 
-        let generic_args = &self.generics.args;
-        let generic_types = generic_args.iter().filter_map(|arg| match arg {
+        let generic_types = self.generics.args.iter().filter_map(|arg| match arg {
             syn::GenericArgument::Type(ty) => Some(ty),
             _ => None,
         });
@@ -291,7 +288,12 @@ impl BuilderGenCtx {
             .map(|ty| {
                 // Wrap `ty` in another phantom data because it can be `?Sized`,
                 // and simply using it as a type of the tuple member would
-                // be wrong, because tuple's members must be sized
+                // be wrong, because tuple's members must be sized.
+                //
+                // We also wrap this in an `fn() -> ...` to make the compiler think
+                // that the builder doesn't "own" an instance of the given type.
+                // This removes unnecessary requirements when evaluating the
+                // applicability of the auto traits.
                 quote!(fn() -> ::core::marker::PhantomData<#ty>)
             });
 
@@ -299,12 +301,21 @@ impl BuilderGenCtx {
 
         quote! {
             ::core::marker::PhantomData<(
+                // We have to store the builder state in phantom data otherwise it
+                // would be reported as an unused type parameter.
+                //
+                // We also wrap this in an `fn() -> ...` to make the compiler think
+                // that the builder doesn't "own" an instance of the given type.
+                // This removes unnecessary requirements when evaluating the
+                // applicability of the auto traits.
+                fn() -> #state_var,
+
                 // There is an interesting quirk with lifetimes in Rust, which is the
                 // reason why we thoughtlessly store all the function parameter types
                 // in phantom data here.
                 //
                 // Suppose a function was defined with an argument of type `&'a T`
-                // and we then generate an impl block (simplified):
+                // and then we generate an impl block (simplified):
                 //
                 // ```
                 // impl<'a, T, U> for Foo<U>
@@ -321,10 +332,6 @@ impl BuilderGenCtx {
                 // That's a weird implicit behavior in Rust, I suppose there is a reasonable
                 // explanation for it, I just didn't care to research it yet ¯\_(ツ)_/¯.
                 #(#types,)*
-
-                // A special case of zero members requires storing the builder state in
-                // phantom data otherwise it would be reported as an unused type parameter.
-                fn() -> ::core::marker::PhantomData<#state_var>,
             )>
         }
     }
@@ -341,22 +348,29 @@ impl BuilderGenCtx {
         let start_fn_args_field = &self.ident_pool.start_fn_args;
         let named_members_field = &self.ident_pool.named_members;
 
-        let private_field_attrs = quote! {
-            // The fields can't be hidden using Rust's privacy syntax.
-            // The details about this are described in [the blog post]
-            // (https://elastio.github.io/bon/blog/the-weird-of-function-local-types-in-rust).
-            //
-            // We could use `#[cfg(not(rust_analyzer))]` to hide the private fields in IDE.
-            // However, RA would then not be able to type-check the generated
-            // code, which may or may not be a problem, because the main thing
-            // is that the type signatures would still work in RA.
-            #[doc(hidden)]
-            #[deprecated =
-                "this field is an implementation detail; it should not be used directly; \
+        // The fields can't be hidden using Rust's privacy syntax.
+        // The details about this are described in the blog post:
+        // https://elastio.github.io/bon/blog/the-weird-of-function-local-types-in-rust.
+        //
+        // We could use `#[cfg(not(rust_analyzer))]` to hide the private fields in IDE.
+        // However, RA would then not be able to type-check the generated code, which
+        // may or may not be a problem, because the main thing is that the type signatures
+        // would still work in RA.
+        let private_field_attrs = {
+            // The message is defined separately to make it single-line in the
+            // generated code. This simplifies the task of removing unnecessary
+            // attributes from the generated code when preparing for demo purposes.
+            let deprecated_msg = "\
+                this field should not be used directly; it's an implementation detail \
                 if you found yourself needing it, then you are probably doing something wrong; \
                 feel free to open an issue/discussion in our GitHub repository \
                 (https://github.com/elastio/bon) or ask for help in our Discord server \
-                (https://discord.gg/QcBYSamw4c)"]
+                (https://discord.gg/QcBYSamw4c)";
+
+            quote! {
+                #[doc(hidden)]
+                #[deprecated = #deprecated_msg]
+            }
         };
 
         let receiver_field = self.receiver().map(|receiver| {

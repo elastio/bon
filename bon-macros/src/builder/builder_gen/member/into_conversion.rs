@@ -60,7 +60,7 @@ impl PositionalFnArgMember {
         }
     }
 
-    pub(crate) fn maybe_into_ident_expr(&self) -> TokenStream {
+    pub(crate) fn init_expr(&self) -> TokenStream {
         let ident = &self.ident;
 
         if self.params.into.is_present() {

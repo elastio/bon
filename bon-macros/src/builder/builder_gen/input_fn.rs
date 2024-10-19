@@ -1,7 +1,8 @@
 use super::builder_params::BuilderParams;
+use super::models::FinishFnParams;
 use super::{
-    AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFn, FinishFnBody, Generics,
-    Member, MemberOrigin, RawMember,
+    AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFnBody, Generics, Member,
+    MemberOrigin, RawMember,
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
 use crate::normalization::{GenericsNamespace, NormalizeSelfTy, SyntaxVariant};
@@ -234,9 +235,28 @@ impl FnInputCtx<'_> {
             })
             // By default we don't want to expose the positional function, so we
             // hide it under a generated name to avoid name conflicts.
+            //
+            // We don't use a random name here because the name of this function
+            // can be used by other macros that may need a stable identifier.
+            // For example, if `#[tracing::instrument]` is placed on the function,
+            // the function name will be used as a span name. The name of the span
+            // may be indexed in some logs database (e.g. Grafana Loki). If the name
+            // of the span changes the DB index may grow and also log queries won't
+            // be stable.
             .unwrap_or_else(|| format_ident!("__orig_{}", orig_ident.raw_name()));
 
-        strip_known_attrs_from_args(&mut orig.sig);
+        // Remove all doc comments attributes from function arguments, because they are
+        // not valid in that position in regular Rust code. The cool trick is that they
+        // are still valid syntactically when a proc macro like this one pre-processes
+        // them and removes them from the expanded code. We use the doc comments to put
+        // them on the generated setter methods.
+        //
+        // We also strip all `builder(...)` attributes because this macro processes them
+        // and they aren't needed in the output.
+        for arg in &mut orig.sig.inputs {
+            arg.attrs_mut()
+                .retain(|attr| !attr.is_doc_expr() && !attr.path().is_ident("builder"));
+        }
 
         // Remove all doc comments from the function itself to avoid docs duplication
         // which may lead to duplicating doc tests, which in turn implies repeated doc
@@ -312,30 +332,27 @@ impl FnInputCtx<'_> {
 
         let builder_ident = self.builder_ident();
 
-        let typed_args = self
+        let members = self
             .fn_item
-            .apply_ref(|fn_item| fn_item.sig.inputs.iter().filter_map(syn::FnArg::as_typed));
-
-        let members = typed_args
-            .norm
-            .zip(typed_args.orig)
-            .map(|(norm_arg, orig_arg)| {
-                let pat = match norm_arg.pat.as_ref() {
+            .apply_ref(|fn_item| fn_item.sig.inputs.iter().filter_map(syn::FnArg::as_typed))
+            .into_iter()
+            .map(|arg| {
+                let pat = match arg.norm.pat.as_ref() {
                     syn::Pat::Ident(pat) => pat,
                     _ => bail!(
-                        &orig_arg.pat,
+                        &arg.orig.pat,
                         "use a simple `identifier: type` syntax for the function argument; \
                         destructuring patterns in arguments aren't supported by the `#[builder]`",
                     ),
                 };
 
                 let ty = SyntaxVariant {
-                    norm: norm_arg.ty.clone(),
-                    orig: orig_arg.ty.clone(),
+                    norm: arg.norm.ty.clone(),
+                    orig: arg.orig.ty.clone(),
                 };
 
                 Ok(RawMember {
-                    attrs: &norm_arg.attrs,
+                    attrs: &arg.norm.attrs,
                     ident: pat.ident.clone(),
                     ty,
                 })
@@ -386,7 +403,7 @@ impl FnInputCtx<'_> {
                 }]
             });
 
-        let finish_fn = FinishFn {
+        let finish_fn = FinishFnParams {
             ident: finish_fn_ident,
             vis: finish_fn_vis.map(SpannedKey::into_value),
             unsafety: self.fn_item.norm.sig.unsafety,
@@ -510,21 +527,6 @@ impl FinishFnBody for FnCallBody {
             )
             #maybe_await
         }
-    }
-}
-
-/// Remove all doc comments attributes from function arguments, because they are
-/// not valid in that position in regular Rust code. The cool trick is that they
-/// are still valid syntactically when a proc macro like this one pre-processes
-/// them and removes them from the expanded code. We use the doc comments to put
-/// them on the generated setter methods.
-///
-/// We also strip all `builder(...)` attributes because this macro processes them
-/// and they aren't needed in the output.
-fn strip_known_attrs_from_args(sig: &mut syn::Signature) {
-    for arg in &mut sig.inputs {
-        arg.attrs_mut()
-            .retain(|attr| !attr.is_doc_expr() && !attr.path().is_ident("builder"));
     }
 }
 

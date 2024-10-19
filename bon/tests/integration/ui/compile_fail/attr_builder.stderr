@@ -4,11 +4,11 @@ error: this empty `#[builder]` attribute is redundant; remove it
 4 | #[builder]
   |   ^^^^^^^
 
-error: this empty `#[builder()]` attribute is redundant; remove it
- --> tests/integration/ui/compile_fail/attr_builder.rs:8:3
+error: expected parameters in parentheses
+ --> tests/integration/ui/compile_fail/attr_builder.rs:8:10
   |
 8 | #[builder()]
-  |   ^^^^^^^
+  |          ^^
 
 error: this empty `#[builder]` attribute is unexpected; remove it or pass parameters in parentheses: `#[builder(...)]`
   --> tests/integration/ui/compile_fail/attr_builder.rs:13:7
@@ -52,7 +52,7 @@ error: expected parameters in parentheses
 45 |     #[builder()]
    |              ^^
 
-error: to generate a builder for a struct, use `#[derive(bon::Builder)]` instead; `#[bon::builder]` syntax is supported only for functions
+error: to generate a builder for a struct, use `#[derive(bon::Builder)]` instead; `#[bon::builder]` syntax is supported only for functions starting with bon v3
   --> tests/integration/ui/compile_fail/attr_builder.rs:50:1
    |
 50 | struct LegacyBuilderProcMacroAttrOnStruct {}

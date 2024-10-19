@@ -66,7 +66,7 @@ fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<Toke
             bail!(
                 &struct_item.struct_token,
                 "to generate a builder for a struct, use `#[derive(bon::Builder)]` instead; \
-                 `#[bon::builder]` syntax is supported only for functions"
+                 `#[bon::builder]` syntax is supported only for functions starting with bon v3"
             )
         }
         _ => bail!(

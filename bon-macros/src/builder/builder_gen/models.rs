@@ -31,7 +31,7 @@ pub(super) struct FinishFn {
     pub(super) ident: syn::Ident,
 
     /// Visibility override specified by the user
-    pub(super) vis: Option<syn::Visibility>,
+    pub(super) vis: syn::Visibility,
 
     /// Additional attributes to apply to the item
     pub(super) attrs: Vec<syn::Attribute>,
@@ -39,6 +39,20 @@ pub(super) struct FinishFn {
     pub(super) unsafety: Option<syn::Token![unsafe]>,
     pub(super) asyncness: Option<syn::Token![async]>,
     /// <https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute>
+    pub(super) must_use: Option<syn::Attribute>,
+    pub(super) body: Box<dyn FinishFnBody>,
+    pub(super) output: syn::ReturnType,
+}
+
+pub(super) struct FinishFnParams {
+    pub(super) ident: syn::Ident,
+
+    /// Visibility override specified by the user
+    pub(super) vis: Option<syn::Visibility>,
+
+    pub(super) attrs: Vec<syn::Attribute>,
+    pub(super) unsafety: Option<syn::Token![unsafe]>,
+    pub(super) asyncness: Option<syn::Token![async]>,
     pub(super) must_use: Option<syn::Attribute>,
     pub(super) body: Box<dyn FinishFnBody>,
     pub(super) output: syn::ReturnType,
@@ -58,8 +72,7 @@ pub(super) struct StartFn {
 pub(super) struct StartFnParams {
     pub(super) ident: syn::Ident,
 
-    /// If present overrides the default visibility taken from the original item
-    /// the builder is generated for
+    /// If present overrides the default visibility derived from the builder's type.
     pub(super) vis: Option<syn::Visibility>,
 
     /// Additional attributes to apply to the item
@@ -146,6 +159,15 @@ pub(crate) struct BuilderGenCtx {
     pub(super) finish_fn: FinishFn,
 }
 
+/// Identifiers that are private to the builder implementation. The users should
+/// not use them directly. They are randomly generated to prevent users from
+/// using them. Even if they try to reference them, they won't be able to re-compile
+/// their code because the names of these identifiers are regenerated on every
+/// macro run.
+///
+/// This is an unfortunate workaround due to the limitations of defining the
+/// builder type inside of a nested module. See more details on this problem in
+/// <https://elastio.github.io/bon/blog/the-weird-of-function-local-types-in-rust>
 pub(super) struct PrivateIdentsPool {
     pub(super) phantom: syn::Ident,
     pub(super) receiver: syn::Ident,
@@ -176,7 +198,7 @@ pub(super) struct BuilderGenCtxParams<'a> {
     pub(super) builder_type: BuilderTypeParams,
     pub(super) state_mod: ItemParams,
     pub(super) start_fn: StartFnParams,
-    pub(super) finish_fn: FinishFn,
+    pub(super) finish_fn: FinishFnParams,
 }
 
 impl BuilderGenCtx {
@@ -201,7 +223,7 @@ impl BuilderGenCtx {
             derives: builder_type.derives,
             docs: builder_type.docs.unwrap_or_else(|| {
                 let doc = format!(
-                    "Use builder syntax to set the inputs and finish with [`Self::{}()`].",
+                    "Use builder syntax to set the inputs and finish with [`{0}()`](Self::{0}()).",
                     finish_fn.ident
                 );
 
@@ -212,14 +234,14 @@ impl BuilderGenCtx {
         };
 
         let state_mod = {
-            let ident_overridden = state_mod.name.is_some();
+            let is_ident_overridden = state_mod.name.is_some();
             let ident = state_mod
                 .name
                 .map(SpannedKey::into_value)
                 .unwrap_or_else(|| builder_type.ident.pascal_to_snake_case());
 
             if builder_type.ident == ident {
-                if ident_overridden {
+                if is_ident_overridden {
                     bail!(
                         &ident,
                         "the builder module name must be different from the builder type name"
@@ -234,7 +256,7 @@ impl BuilderGenCtx {
                     conversion doesn't produce a different name for this builder type \
                     name; consider using PascalCase for the builder type name or specify \
                     a separate name for the builder module explicitly via \
-                    `#[builder(state_mod = ...)]`"
+                    `#[builder(state_mod = {{new_name}})]`"
                 );
             }
 
@@ -250,7 +272,7 @@ impl BuilderGenCtx {
 
             // The visibility for child items is based on the visibility of the
             // builder type itself, because the types and traits from this module
-            // are part of the builder type generic type state parameter signature.
+            // are part of the builder's generic type state parameter signature.
             let vis_child = builder_type.vis.clone().into_equivalent_in_child_module()?;
             let vis_child_child = vis_child.clone().into_equivalent_in_child_module()?;
 
@@ -277,9 +299,20 @@ impl BuilderGenCtx {
 
         let start_fn = StartFn {
             ident: start_fn.ident,
+            vis: start_fn.vis.unwrap_or_else(|| builder_type.vis.clone()),
             attrs: start_fn.attrs,
             generics: start_fn.generics,
-            vis: start_fn.vis.unwrap_or_else(|| builder_type.vis.clone()),
+        };
+
+        let finish_fn = FinishFn {
+            ident: finish_fn.ident,
+            vis: finish_fn.vis.unwrap_or_else(|| builder_type.vis.clone()),
+            attrs: finish_fn.attrs,
+            unsafety: finish_fn.unsafety,
+            asyncness: finish_fn.asyncness,
+            must_use: finish_fn.must_use,
+            body: finish_fn.body,
+            output: finish_fn.output,
         };
 
         let state_var = {
@@ -315,6 +348,7 @@ impl PrivateIdentsPool {
         // Thanks @orhun for the article https://blog.orhun.dev/zero-deps-random-in-rust/
         let random = RandomState::new().build_hasher().finish();
 
+        // Totally random words. All coincidences are purely accidental 😸
         let random_words = [
             "amethyst",
             "applejack",
@@ -338,6 +372,7 @@ impl PrivateIdentsPool {
             "pinkie",
             "pipp",
             "rainbow",
+            "rampage",
             "rarity",
             "roseluck",
             "scootaloo",
