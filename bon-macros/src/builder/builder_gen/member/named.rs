@@ -94,8 +94,6 @@ pub(crate) struct NamedMember {
 
 impl NamedMember {
     pub(super) fn validate(&self) -> Result {
-        crate::parsing::reject_self_mentions_in_docs("builder struct's impl block", &self.docs)?;
-
         if let Some(default) = &self.params.default {
             if self.is_special_option_ty() {
                 bail!(
@@ -104,6 +102,33 @@ impl NamedMember {
                     so explicit #[builder(default)] is redundant",
                 );
             }
+        }
+
+        let member_docs_not_copied = self
+            .params
+            .setters
+            .as_ref()
+            .map(|setters| {
+                if setters.docs.is_some() {
+                    return true;
+                }
+
+                let SettersFnParams { some_fn, option_fn } = &setters.fns;
+                matches!(
+                    (some_fn.as_deref(), option_fn.as_deref()),
+                    (
+                        Some(ItemParams { docs: Some(_), .. }),
+                        Some(ItemParams { docs: Some(_), .. })
+                    )
+                )
+            })
+            .unwrap_or(false);
+
+        if !member_docs_not_copied {
+            crate::parsing::reject_self_mentions_in_docs(
+                "builder struct's impl block",
+                &self.docs,
+            )?;
         }
 
         self.validate_setters_params()?;

@@ -1,4 +1,4 @@
-error: expected at least one parameter in parentheses
+error: expected parameters in parentheses
   --> tests/integration/ui/compile_fail/attr_derive.rs:58:17
    |
 58 | #[builder(derive())]

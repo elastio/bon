@@ -26,7 +26,7 @@ fn parse_builder_type(meta: &syn::Meta) -> Result<ItemParams> {
 fn parse_state_mod(meta: &syn::Meta) -> Result<ItemParams> {
     ItemParamsParsing {
         meta,
-        reject_self_mentions: Some("builder module"),
+        reject_self_mentions: Some("builder's state module"),
     }
     .parse()
 }

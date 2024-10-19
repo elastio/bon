@@ -37,8 +37,8 @@ impl Parse for OnParams {
                 return Err(syn::Error::new_spanned(
                     &rest,
                     "this #[builder(on(type_pattern, ...))] contains no options to override \
-                    the default behavior for the selected setters like `into`, so it \
-                    does nothing",
+                    the default behavior for the selected setters like `into`, `overwritable`, \
+                    so it does nothing",
                 ));
             }
         }

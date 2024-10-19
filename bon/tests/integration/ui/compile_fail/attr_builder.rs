@@ -49,4 +49,21 @@ impl EmptyBuilderAttr {
 #[builder]
 struct LegacyBuilderProcMacroAttrOnStruct {}
 
+#[builder]
+enum EnumsAreUnsupported {}
+
 fn main() {}
+
+#[builder]
+#[must_use]
+#[must_use]
+fn double_must_use() {}
+
+#[builder]
+fn destructuring1((x, y): (u32, u32)) {
+    let _ = x;
+    let _ = y;
+}
+
+#[builder]
+fn destructuring2((_, _): (u32, u32)) {}

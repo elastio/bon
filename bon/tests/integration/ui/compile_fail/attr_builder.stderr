@@ -10,43 +10,43 @@ error: this empty `#[builder()]` attribute is redundant; remove it
 8 | #[builder()]
   |   ^^^^^^^
 
-error: this empty `#[builder]` attribute is unexpected; remove it or pass some parameters in parentheses: `#[builder(...)]`
+error: this empty `#[builder]` attribute is unexpected; remove it or pass parameters in parentheses: `#[builder(...)]`
   --> tests/integration/ui/compile_fail/attr_builder.rs:13:7
    |
 13 |     #[builder]
    |       ^^^^^^^
 
-error: expected at least one parameter in parentheses
+error: expected parameters in parentheses
   --> tests/integration/ui/compile_fail/attr_builder.rs:19:14
    |
 19 |     #[builder()]
    |              ^^
 
-error: this empty `#[builder]` attribute is unexpected; remove it or pass some parameters in parentheses: `#[builder(...)]`
+error: this empty `#[builder]` attribute is unexpected; remove it or pass parameters in parentheses: `#[builder(...)]`
   --> tests/integration/ui/compile_fail/attr_builder.rs:24:41
    |
 24 | fn fn_empty_member_level_builder_attr(#[builder] _x: u32) {}
    |                                         ^^^^^^^
 
-error: expected at least one parameter in parentheses
+error: expected parameters in parentheses
   --> tests/integration/ui/compile_fail/attr_builder.rs:27:60
    |
 27 | fn fn_empty_member_level_builder_attr_with_parens(#[builder()] _x: u32) {}
    |                                                            ^^
 
-error: this empty `#[builder]` attribute is unexpected; remove it or pass some parameters in parentheses: `#[builder(...)]`
+error: this empty `#[builder]` attribute is unexpected; remove it or pass parameters in parentheses: `#[builder(...)]`
   --> tests/integration/ui/compile_fail/attr_builder.rs:34:42
    |
 34 |     fn empty_member_level_builder_attr(#[builder] _x: u32) {}
    |                                          ^^^^^^^
 
-error: expected at least one parameter in parentheses
+error: expected parameters in parentheses
   --> tests/integration/ui/compile_fail/attr_builder.rs:40:61
    |
 40 |     fn empty_member_level_builder_attr_with_parens(#[builder()] _x: u32) {}
    |                                                             ^^
 
-error: expected at least one parameter in parentheses
+error: expected parameters in parentheses
   --> tests/integration/ui/compile_fail/attr_builder.rs:45:14
    |
 45 |     #[builder()]
@@ -57,3 +57,43 @@ error: to generate a builder for a struct, use `#[derive(bon::Builder)]` instead
    |
 50 | struct LegacyBuilderProcMacroAttrOnStruct {}
    | ^^^^^^
+
+error: only `fn` items are supported by the `#[bon::builder]` attribute
+  --> tests/integration/ui/compile_fail/attr_builder.rs:52:1
+   |
+52 | #[builder]
+   | ^^^^^^^^^^
+   |
+   = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: Found multiple #[must_use], but bon only works with exactly one or zero.
+  --> tests/integration/ui/compile_fail/attr_builder.rs:59:1
+   |
+59 | #[must_use]
+   | ^
+
+error: use a simple `identifier: type` syntax for the function argument; destructuring patterns in arguments aren't supported by the `#[builder]`
+  --> tests/integration/ui/compile_fail/attr_builder.rs:63:19
+   |
+63 | fn destructuring1((x, y): (u32, u32)) {
+   |                   ^^^^^^
+
+error: use a simple `identifier: type` syntax for the function argument; destructuring patterns in arguments aren't supported by the `#[builder]`
+  --> tests/integration/ui/compile_fail/attr_builder.rs:69:19
+   |
+69 | fn destructuring2((_, _): (u32, u32)) {}
+   |                   ^^^^^^
+
+warning: unused attribute
+  --> tests/integration/ui/compile_fail/attr_builder.rs:59:1
+   |
+59 | #[must_use]
+   | ^^^^^^^^^^^ help: remove this attribute
+   |
+note: attribute also specified here
+  --> tests/integration/ui/compile_fail/attr_builder.rs:58:1
+   |
+58 | #[must_use]
+   | ^^^^^^^^^^^
+   = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
+   = note: `#[warn(unused_attributes)]` on by default

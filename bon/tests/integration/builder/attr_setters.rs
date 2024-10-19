@@ -396,3 +396,41 @@ mod option_fn_name_and_some_fn_name {
         }
     }
 }
+
+mod self_references_in_docs {
+    use crate::prelude::*;
+
+    #[test]
+    fn test_struct() {
+        /// [`Self`] link
+        #[derive(Builder)]
+        struct Sut {
+            /// [`Self`] link
+            #[builder(setters(doc {}))]
+            _arg1: u32,
+
+            /// [`Self`] link
+            #[builder(setters(
+                option_fn(doc {}),
+                some_fn(doc {})
+            ))]
+            _arg2: Option<u32>,
+        }
+
+        let _ = Sut::builder().arg1(42);
+    }
+
+    #[test]
+    fn test_free_fn() {
+        /// [`Self`] link
+        #[builder]
+        fn sut(
+            /// [`Self`] link
+            #[builder(setters(doc {}))]
+            _arg1: u32,
+        ) {
+        }
+
+        let _ = sut().arg1(42);
+    }
+}

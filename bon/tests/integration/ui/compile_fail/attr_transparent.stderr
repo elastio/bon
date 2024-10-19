@@ -35,3 +35,25 @@ help: there is a method `member` with a similar name
    |
 35 |     let _ = Valid::builder().member(Some(42));
    |                              ~~~~~~
+
+error[E0277]: the member `Unset<arg1>` was not set, but this method requires it to be set
+  --> tests/integration/ui/compile_fail/attr_transparent.rs:47:32
+   |
+47 |         let _ = Sut::builder().build();
+   |                                ^^^^^ the member `Unset<arg1>` was not set, but this method requires it to be set
+   |
+   = help: the trait `IsSet` is not implemented for `Unset<arg1>`, which is required by `sut_builder::Empty: sut_builder::IsComplete`
+   = help: the trait `IsSet` is implemented for `Set<Name>`
+note: required for `sut_builder::Empty` to implement `sut_builder::IsComplete`
+  --> tests/integration/ui/compile_fail/attr_transparent.rs:41:18
+   |
+41 |         #[derive(Builder)]
+   |                  ^^^^^^^ unsatisfied trait bound introduced in this `derive` macro
+note: required by a bound in `SutBuilder::<S>::build`
+  --> tests/integration/ui/compile_fail/attr_transparent.rs:41:18
+   |
+41 |         #[derive(Builder)]
+   |                  ^^^^^^^ required by this bound in `SutBuilder::<S>::build`
+42 |         struct Sut {
+   |                --- required by a bound in this associated function
+   = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)

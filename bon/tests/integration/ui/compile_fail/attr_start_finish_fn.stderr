@@ -1,0 +1,11 @@
+error: expected parameters in parentheses
+ --> tests/integration/ui/compile_fail/attr_start_finish_fn.rs:4:19
+  |
+4 | #[builder(start_fn())]
+  |                   ^^
+
+error: expected parameters in parentheses
+ --> tests/integration/ui/compile_fail/attr_start_finish_fn.rs:8:20
+  |
+8 | #[builder(finish_fn())]
+  |                    ^^

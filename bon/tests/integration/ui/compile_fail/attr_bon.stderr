@@ -1,0 +1,5 @@
+error: `#[bon]` attribute does not accept any parameters yet, but it will in future releases
+ --> tests/integration/ui/compile_fail/attr_bon.rs:5:7
+  |
+5 | #[bon(attrs)]
+  |       ^^^^^

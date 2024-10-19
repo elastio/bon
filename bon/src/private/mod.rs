@@ -7,10 +7,6 @@
     // Especially, this doesn't play well with our MSRV. Trait bounds
     // aren't allowed on const functions in older Rust versions.
     clippy::missing_const_for_fn,
-
-    // We use `deprecated` as a sign to the user that they shouldn't use
-    // the type as it's an internal implementation detail.
-    deprecated,
 )]
 
 /// Used for providing better IDE hints (completions and syntax highlighting).
@@ -22,8 +18,8 @@ mod cfg_eval;
 
 // This reexport is a private implementation detail and should not be used
 // directly! This reexport may change or be removed at any time between
-// patch releases. Use the export from the builder's state module directly
-// instead of using this reexport from `bon::private`.
+// patch releases. Use the export from your generated  builder's state module
+// directly instead of using this reexport from `bon::__private`.
 pub use crate::builder_state::{IsSet, IsUnset};
 pub use rustversion;
 
@@ -51,8 +47,8 @@ pub struct Set<Name>(Name);
 #[rustversion::attr(
     since(1.78.0),
     diagnostic::on_unimplemented(
-        message = "expected the type state for the member `{Name}`, but found `{Self}`",
-        label = "expected the type state for the member `{Name}`, but found `{Self}`",
+        message = "expected type state for the member `{Name}`, but got `{Self}`",
+        label = "expected type state for the member `{Name}`, but got `{Self}`",
     )
 )]
 pub trait MemberState<Name>: Sealed {}

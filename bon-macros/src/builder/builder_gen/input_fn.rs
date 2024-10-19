@@ -581,7 +581,7 @@ fn get_must_use_attribute(attrs: &[syn::Attribute]) -> Result<Option<syn::Attrib
     if let Some(second) = iter.next() {
         bail!(
             second,
-            "Found multiple #[must_use], but bon only works with exactly one (or less)."
+            "Found multiple #[must_use], but bon only works with exactly one or zero."
         );
     }
 

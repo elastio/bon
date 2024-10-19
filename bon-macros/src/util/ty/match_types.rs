@@ -139,7 +139,7 @@ fn match_generic_args(
                 && match_exprs(&scrutinee.value, &pattern.value)
         }
 
-        _ => return Err(unsupported_syntax_error(&pattern, "This syntax")),
+        _ => return Err(unsupported_syntax_error(&pattern, "this syntax")),
     };
 
     Ok(verdict)
@@ -228,7 +228,7 @@ pub(crate) fn match_types(scrutinee: &syn::Type, pattern: &syn::Type) -> Result<
 
         Never(_) => matches!(scrutinee, Never(_)),
 
-        _ => return Err(unsupported_syntax_error(&pattern, "This syntax")),
+        _ => return Err(unsupported_syntax_error(&pattern, "this syntax")),
     };
 
     Ok(verdict)

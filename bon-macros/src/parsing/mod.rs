@@ -26,14 +26,14 @@ pub(crate) fn require_non_empty_paren_meta_list(meta: &syn::Meta) -> Result {
             if meta.tokens.is_empty() {
                 bail!(
                     &meta.delimiter.span().join(),
-                    "expected at least one parameter in parentheses"
+                    "expected parameters in parentheses"
                 );
             }
         }
         syn::Meta::Path(path) => bail!(
             &meta,
             "this empty `#[{0}]` attribute is unexpected; \
-            remove it or pass some parameters in parentheses: \
+            remove it or pass parameters in parentheses: \
             `#[{0}(...)]`",
             darling::util::path_to_string(path)
         ),

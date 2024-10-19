@@ -1,37 +1,43 @@
-error: `with` attribute can't be specified together with `into`
- --> tests/integration/ui/compile_fail/attr_with.rs:5:21
+error: expected a closure e.g. `with = |param: T| expression`
+ --> tests/integration/ui/compile_fail/attr_with.rs:5:15
   |
-5 |     #[builder(into, with = |x: u32| x + 1)]
-  |                     ^^^^
+5 |     #[builder(with = 42)]
+  |               ^^^^
+
+error: `with` attribute can't be specified together with `into`
+  --> tests/integration/ui/compile_fail/attr_with.rs:11:21
+   |
+11 |     #[builder(into, with = |x: u32| x + 1)]
+   |                     ^^^^
 
 error: `for<...>` syntax is not allowed here
-  --> tests/integration/ui/compile_fail/attr_with.rs:11:22
+  --> tests/integration/ui/compile_fail/attr_with.rs:17:22
    |
-11 |     #[builder(with = for<'a> |x: &'a u32| -> u32 { x + 1 })]
+17 |     #[builder(with = for<'a> |x: &'a u32| -> u32 { x + 1 })]
    |                      ^^^
 
 error: `const` keyword is not allowed here
-  --> tests/integration/ui/compile_fail/attr_with.rs:17:22
+  --> tests/integration/ui/compile_fail/attr_with.rs:23:22
    |
-17 |     #[builder(with = const || 1)]
+23 |     #[builder(with = const || 1)]
    |                      ^^^^^
 
 error: `static` keyword is not allowed here
-  --> tests/integration/ui/compile_fail/attr_with.rs:23:22
+  --> tests/integration/ui/compile_fail/attr_with.rs:29:22
    |
-23 |     #[builder(with = static || 1)]
+29 |     #[builder(with = static || 1)]
    |                      ^^^^^^
 
 error: `async` keyword is not allowed here
-  --> tests/integration/ui/compile_fail/attr_with.rs:29:22
+  --> tests/integration/ui/compile_fail/attr_with.rs:35:22
    |
-29 |     #[builder(with = async || 1)]
+35 |     #[builder(with = async || 1)]
    |                      ^^^^^
 
 error: `move` keyword is not allowed here
-  --> tests/integration/ui/compile_fail/attr_with.rs:35:22
+  --> tests/integration/ui/compile_fail/attr_with.rs:41:22
    |
-35 |     #[builder(with = move || 1)]
+41 |     #[builder(with = move || 1)]
    |                      ^^^^
 
 error: expected one of the following:
@@ -54,23 +60,23 @@ error: expected one of the following:
 
        *underlying type is the type of the member stripped from the `Option<T>` wrapper
        if this member has an `Option<T>` type and no `#[builder(transparent)]` annotation
-  --> tests/integration/ui/compile_fail/attr_with.rs:41:34
+  --> tests/integration/ui/compile_fail/attr_with.rs:47:34
    |
-41 |     #[builder(with = |x: u32| -> u32 { x + 1 })]
+47 |     #[builder(with = |x: u32| -> u32 { x + 1 })]
    |                                  ^^^
 
 error[E0308]: mismatched types
-  --> tests/integration/ui/compile_fail/attr_with.rs:48:12
+  --> tests/integration/ui/compile_fail/attr_with.rs:54:12
    |
-48 |         Ok(value)
+54 |         Ok(value)
    |         -- ^^^^^ expected `u32`, found `&str`
    |         |
    |         arguments to this enum variant are incorrect
    |
 help: the type constructed contains `&str` due to the type of the argument passed
-  --> tests/integration/ui/compile_fail/attr_with.rs:48:9
+  --> tests/integration/ui/compile_fail/attr_with.rs:54:9
    |
-48 |         Ok(value)
+54 |         Ok(value)
    |         ^^^-----^
    |            |
    |            this argument influences the type of `Ok`
@@ -81,13 +87,13 @@ note: tuple variant defined here
    |     ^^
 
 error[E0308]: mismatched types
-  --> tests/integration/ui/compile_fail/attr_with.rs:55:62
+  --> tests/integration/ui/compile_fail/attr_with.rs:61:62
    |
-55 |     #[builder(with = |value: impl Into<::core::net::IpAddr>| value)]
+61 |     #[builder(with = |value: impl Into<::core::net::IpAddr>| value)]
    |                              ------------------------------  ^^^^^ expected `u32`, found type parameter `impl Into<::core::net::IpAddr>`
    |                              |
    |                              found this type parameter
-56 |     value: u32,
+62 |     value: u32,
    |            --- expected `u32` because of return type
    |
    = note:        expected type `u32`

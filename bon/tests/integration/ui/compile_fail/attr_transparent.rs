@@ -33,4 +33,17 @@ struct Valid {
 fn main() {
     // Make sure there is no `maybe_` setter generated
     let _ = Valid::builder().maybe_member(Some(42));
+
+    // Another way to get transparency
+    {
+        type OpaqueOption<T> = Option<T>;
+
+        #[derive(Builder)]
+        struct Sut {
+            arg1: OpaqueOption<u32>,
+        }
+
+        // Should not be allowed `OpaqueOption` is required
+        let _ = Sut::builder().build();
+    }
 }
