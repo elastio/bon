@@ -59,7 +59,7 @@ pub(crate) struct MemberParams {
     pub(crate) with: Option<SpannedKey<SetterClosure>>,
 
     /// Disables the special handling for a member of type `Option<T>`. The
-    /// member no longer has the default on `None`. It also becomes a required
+    /// member no longer has the default of `None`. It also becomes a required
     /// member unless a separate `#[builder(default = ...)]` attribute is
     /// also specified.
     pub(crate) transparent: darling::util::Flag,

@@ -32,14 +32,17 @@ impl Parse for OnParams {
             // field is added to `Parsed` and unused here, then a compiler
             // warning is emitted.
             let Parsed { into, overwritable } = &parsed;
+            let flags = [("into", into), ("overwritable", overwritable)];
 
-            if !into.is_present() && !overwritable.is_present() {
-                return Err(syn::Error::new_spanned(
-                    &rest,
-                    "this #[builder(on(type_pattern, ...))] contains no options to override \
-                    the default behavior for the selected setters like `into`, `overwritable`, \
-                    so it does nothing",
-                ));
+            if flags.iter().all(|(_, flag)| !flag.is_present()) {
+                let flags = flags.iter().map(|(name, _)| format!("`{name}`")).join(", ");
+                let err = format!(
+                    "this #[builder(on(type_pattern, ...))] contains no options \
+                    to override the default behavior for the selected setters \
+                    like {flags}, so it does nothing"
+                );
+
+                return Err(syn::Error::new_spanned(&rest, err));
             }
         }
 
@@ -55,9 +58,8 @@ impl Parse for OnParams {
 
         let mut find_attr = FindAttr { attr: None };
         find_attr.visit_type(&type_pattern);
-        let attr_in_type_pattern = find_attr.attr;
 
-        if let Some(attr) = attr_in_type_pattern {
+        if let Some(attr) = find_attr.attr {
             return Err(syn::Error::new(
                 attr,
                 "nested attributes are not allowed in the type pattern of \
@@ -65,9 +67,8 @@ impl Parse for OnParams {
             ));
         }
 
-        // Validate that the pattern. The validation is done in the process
-        // of matching the types. To make sure that matching traverses the
-        // full pattern we match it with itself.
+        // The validation is done in the process of matching the types. To make
+        // sure that matching traverses the full pattern we match it with itself.
         let type_pattern_matches_itself = type_pattern.matches(&type_pattern)?;
 
         assert!(
