@@ -23,23 +23,23 @@ impl<'a> SettersCtx<'a> {
 
     fn setter_for_required_member(&self, item: SetterItem) -> TokenStream {
         let input;
-        let value;
+        let expr;
 
         let member_type = self.member.ty.norm.as_ref();
 
         if let Some(closure) = &self.member.params.with {
             input = Self::underlying_input_from_closure(closure);
-            value = self.member_value_from_closure(closure);
+            expr = self.member_expr_from_closure(closure);
         } else if self.member.params.into.is_present() {
             input = quote!(value: impl Into<#member_type>);
-            value = quote!(Into::into(value));
+            expr = quote!(Into::into(value));
         } else {
             input = quote!(value: #member_type);
-            value = quote!(value);
+            expr = quote!(value);
         };
 
         let body = SetterBody::SetMember {
-            value: quote!(Some(#value)),
+            expr: quote!(::core::option::Option::Some(#expr)),
         };
 
         self.setter_method(Setter {
@@ -80,7 +80,7 @@ impl<'a> SettersCtx<'a> {
             imp: SetterImpl {
                 input: quote!(value: Option<#underlying_ty>),
                 body: SetterBody::SetMember {
-                    value: if self.member.params.into.is_present() {
+                    expr: if self.member.params.into.is_present() {
                         quote! {
                             Option::map(value, Into::into)
                         }
@@ -111,7 +111,7 @@ impl<'a> SettersCtx<'a> {
             }
         };
 
-        let idents = tuple_if_many(quote!( #( #idents ),* ));
+        let ident_maybe_tuple = tuple_if_many(quote!( #( #idents ),* ));
 
         let some_fn = Setter {
             item: items.some_fn,
@@ -121,7 +121,7 @@ impl<'a> SettersCtx<'a> {
                     body: {
                         let option_fn_name = &items.option_fn.name;
                         quote! {
-                            self.#option_fn_name(Some(#idents))
+                            self.#option_fn_name(Some(#ident_maybe_tuple))
                         }
                     },
                 },
@@ -135,11 +135,13 @@ impl<'a> SettersCtx<'a> {
                 quote!(value: Option<#input_types>)
             },
             body: SetterBody::SetMember {
-                value: {
-                    let value = self.member_value_from_closure(closure);
+                expr: {
+                    let expr = self.member_expr_from_closure(closure);
                     quote! {
+                        // Not using `Option::map` here because the `#expr`
+                        // can contain a `?` operator for a fallible operation.
                         match value {
-                            Some(#idents) => Some(#value),
+                            Some(#ident_maybe_tuple) => Some(#expr),
                             None => None,
                         }
                     }
@@ -172,12 +174,12 @@ impl<'a> SettersCtx<'a> {
         }
     }
 
-    fn member_value_from_closure(&self, closure: &SetterClosure) -> TokenStream {
+    fn member_expr_from_closure(&self, closure: &SetterClosure) -> TokenStream {
         let body = &closure.body;
 
         let ty = self.member.underlying_norm_ty().to_token_stream();
 
-        let output = Self::maybe_wrap_in_result(closure, ty.to_token_stream());
+        let output = Self::maybe_wrap_in_result(closure, ty);
 
         // Avoid wrapping the body in a block if it's already a block.
         let body = if matches!(body.as_ref(), syn::Expr::Block(_)) {
@@ -218,16 +220,18 @@ impl<'a> SettersCtx<'a> {
 
         let body = match imp.body {
             SetterBody::Forward { body } => body,
-            SetterBody::SetMember { value } => {
-                let index = &self.member.index;
+            SetterBody::SetMember { expr } => {
+                let idents = &self.base.ident_pool;
+                let phantom_field = &idents.phantom;
+                let receiver_field = &idents.receiver;
+                let start_fn_args_field = &idents.start_fn_args;
+                let named_members_field = &idents.named_members;
 
-                let fields = &self.base.ident_pool;
-                let phantom_field = &fields.phantom;
-                let receiver_field = &fields.receiver;
-                let start_fn_args_field = &fields.start_fn_args;
-                let named_members_field = &fields.named_members;
-
-                let mut output = if self.member.is_stateful() {
+                let mut output = if !self.member.is_stateful() {
+                    quote! {
+                        self
+                    }
+                } else {
                     let builder_ident = &self.base.builder_type.ident;
 
                     let maybe_receiver_field = self
@@ -249,10 +253,6 @@ impl<'a> SettersCtx<'a> {
                             #named_members_field: self.#named_members_field,
                         }
                     }
-                } else {
-                    quote! {
-                        self
-                    }
                 };
 
                 let result_output = self
@@ -267,8 +267,9 @@ impl<'a> SettersCtx<'a> {
                     output = quote!(#result_path::Ok(#output));
                 }
 
+                let index = &self.member.index;
                 quote! {
-                    self.#named_members_field.#index = #value;
+                    self.#named_members_field.#index = #expr;
                     #output
                 }
             }
@@ -293,13 +294,11 @@ impl<'a> SettersCtx<'a> {
             return_type = Self::maybe_wrap_in_result(closure, return_type);
         }
 
-        let state_var = &self.base.state_var;
-
         let where_clause = (!self.member.params.overwritable.is_present()).then(|| {
+            let state_var = &self.base.state_var;
             let member_pascal = &self.member.name.pascal;
             quote! {
-                where
-                    #state_var::#member_pascal: #state_mod::IsUnset,
+                where #state_var::#member_pascal: #state_mod::IsUnset,
             }
         });
 
@@ -343,7 +342,7 @@ enum SetterBody {
     Forward { body: TokenStream },
 
     /// The setter sets the member as usual and transitions the builder state.
-    SetMember { value: TokenStream },
+    SetMember { expr: TokenStream },
 }
 
 enum SettersItems {
@@ -364,11 +363,8 @@ struct SetterItem {
 
 impl SettersItems {
     fn new(ctx: &SettersCtx<'_>) -> Self {
-        let SettersCtx {
-            member,
-            base: builder_gen,
-        } = ctx;
-        let builder_type = &builder_gen.builder_type;
+        let SettersCtx { member, base } = ctx;
+        let builder_type = &base.builder_type;
 
         let params = member.params.setters.as_ref();
 
@@ -407,16 +403,21 @@ impl SettersItems {
             .cloned()
             .unwrap_or_else(|| {
                 let base_name = common_name.unwrap_or(&member.name.snake);
-                // Preserve the original identifier span to make IDE's
-                // "go to definition" works correctly
-                format_ident!("maybe_{}", base_name)
+                // It's important to preserve the original identifier span
+                // to make IDE's "go to definition" work correctly. It's so
+                // important that this doesn't use `format_ident!`, but rather
+                // `syn::Ident::new` to set the span of the `Ident` explicitly.
+                syn::Ident::new(&format!("maybe_{base_name}"), base_name.span())
             });
 
         let default = member.params.default.as_deref().and_then(|default| {
             let default = default
                 .clone()
                 .or_else(|| well_known_default(&member.ty.norm))
-                .unwrap_or_else(|| syn::parse_quote!(Default::default()));
+                .unwrap_or_else(|| {
+                    let ty = &member.ty.norm;
+                    syn::parse_quote!(<#ty as Default>::default())
+                });
 
             let file = syn::parse_quote!(const _: () = #default;);
             let file = prettyplease::unparse(&file);

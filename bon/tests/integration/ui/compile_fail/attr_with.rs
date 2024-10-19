@@ -62,4 +62,23 @@ struct InvalidReturnTypeInImplTraitClosure {
     value: u32,
 }
 
+#[derive(Builder)]
+struct NoGenericArgsResultReturnType1 {
+    #[builder(with = |value: u32| -> Result {})]
+    value: u32,
+}
+
+#[derive(Builder)]
+struct NoGenericArgsResultReturnType2 {
+    #[builder(with = |value: u32| -> Result<> {})]
+    value: u32,
+}
+
+#[derive(Builder)]
+struct ThreeGenericArgsResultReturnType {
+    #[builder(with = |value: u32| -> ::core::result::Result<A, B, C> {})]
+    value: u32,
+}
+
+
 fn main() {}

@@ -25,7 +25,7 @@ pub(crate) struct MemberName {
 
     /// `PascalCase` version of the member name. It's always computed as the
     /// `snake` variant converted to `PascalCase`. The user doesn't have the
-    /// granular control over this name. It can only specify the snake case
+    /// granular control over this name. Users can only specify the snake case
     /// version of the name, and the pascal case is derived from it.
     pub(crate) pascal: syn::Ident,
 
@@ -153,19 +153,16 @@ impl NamedMember {
         if self.is_required() {
             let SettersFnParams { some_fn, option_fn } = &setters.fns;
 
-            let unexpected_setter = [option_fn, some_fn].into_iter().find_map(Option::as_ref);
+            let unexpected_setter = option_fn.as_ref().or(some_fn.as_ref());
 
-            let setter = match unexpected_setter {
-                Some(setter) => setter,
-                None => return Ok(()),
-            };
-
-            bail!(
-                &setter.key,
-                "`{}` setter function applies only to members with `#[builder(default)]` \
-                 or members of `Option<T>` type (if #[builder(transparent)] is not set)",
-                setter.key
-            );
+            if let Some(setter) = unexpected_setter {
+                bail!(
+                    &setter.key,
+                    "`{}` setter function applies only to members with `#[builder(default)]` \
+                     or members of `Option<T>` type (if #[builder(transparent)] is not set)",
+                    setter.key
+                );
+            }
         }
 
         if let SettersFnParams {
@@ -183,7 +180,7 @@ impl NamedMember {
         Ok(())
     }
 
-    // Lint from nightly. `&Option<T>` is used to reduce syntax at the callsite
+    // Lint from nightly. `&Option<T>` is used to reduce syntax at the call site
     #[allow(unknown_lints, clippy::ref_option)]
     fn validate_unused_setters_cfg<T>(
         overrides: &[&SpannedKey<ItemParams>],
@@ -224,7 +221,7 @@ impl NamedMember {
     }
 
     /// Returns `false` if the member has a default value. It means this member
-    /// is required to be set before the building can be finished.
+    /// is required to be set before building can be finished.
     pub(crate) fn is_required(&self) -> bool {
         self.params.default.is_none() && !self.is_special_option_ty()
     }
@@ -232,7 +229,7 @@ impl NamedMember {
     /// A stateful member is the one that has a corresponding associated type in
     /// the builder's type state trait. This is used to track the fact that the
     /// member was set or not. This is necessary to make sure all members without
-    /// default values are set before the building can be finished.
+    /// default values are set before building can be finished.
     pub(crate) fn is_stateful(&self) -> bool {
         self.is_required() || !self.params.overwritable.is_present()
     }

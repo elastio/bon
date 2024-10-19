@@ -3,9 +3,6 @@ use crate::util::prelude::*;
 
 impl super::BuilderGenCtx {
     fn finish_fn_member_expr(&self, member: &Member) -> TokenStream {
-        let start_fn_args_field = &self.ident_pool.start_fn_args;
-        let named_members_field = &self.ident_pool.named_members;
-
         let member = match member {
             Member::Named(member) => member,
             Member::Skipped(member) => {
@@ -18,6 +15,8 @@ impl super::BuilderGenCtx {
             }
             Member::StartFnArg(member) => {
                 let index = &member.index;
+                let start_fn_args_field = &self.ident_pool.start_fn_args;
+
                 return quote! { self.#start_fn_args_field.#index };
             }
             Member::FinishFnArg(member) => {
@@ -27,6 +26,7 @@ impl super::BuilderGenCtx {
 
         let index = &member.index;
 
+        let named_members_field = &self.ident_pool.named_members;
         let member_field = quote! {
             self.#named_members_field.#index
         };
@@ -58,7 +58,6 @@ impl super::BuilderGenCtx {
             None => {
                 // For `Option` the default value is always `None`. So we can just return
                 // the value of the member field itself (which is already an `Option<T>`).
-
                 if member.is_special_option_ty() {
                     return member_field;
                 }
@@ -66,12 +65,16 @@ impl super::BuilderGenCtx {
                 quote! {
                     unsafe {
                         // SAFETY: we know that the member is set because we are in
-                        // the `finish` function because this method uses the trait
-                        // bounds of `IsSet` for every required member. It's also
+                        // the `finish` function where this method uses the trait
+                        // bound of `IsSet` for every required member. It's also
                         // not possible to intervene with the builder's state from
                         // the outside because all members of the builder are considered
                         // private (we even generate random names for them to make it
                         // impossible to access them from the outside in the same module).
+                        //
+                        // We also make sure to use fully qualified paths to methods
+                        // involved in setting the value for the required member to make
+                        // sure no trait/function in scope can override the behavior.
                         ::core::option::Option::unwrap_unchecked(#member_field)
                     }
                 }
@@ -92,6 +95,9 @@ impl super::BuilderGenCtx {
             // like `Default::default()`. In this case nothing hints to the compiler
             // the resulting type of the expression, so we add a type hint via an
             // intermediate variable here.
+            //
+            // This variable can also be accessed by other member's `default`
+            // or `skip` expressions.
             let ty = member.norm_ty();
 
             quote! {

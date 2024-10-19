@@ -8,4 +8,13 @@ impl InvalidAttrsForBonMacro {
     fn sut() {}
 }
 
+struct BuilderAttrOnReceiver;
+
+#[bon]
+impl BuilderAttrOnReceiver {
+    #[builder]
+    fn sut(#[builder] &self) {}
+}
+
+
 fn main() {}

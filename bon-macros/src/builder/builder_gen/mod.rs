@@ -244,10 +244,10 @@ impl BuilderGenCtx {
                 // const operations.
                 clippy::missing_const_for_fn,
             )]
-            #vis fn #start_fn_ident<#(#generics_decl),*>(
+            #vis fn #start_fn_ident< #(#generics_decl),* >(
                 #receiver
                 #(#start_fn_params,)*
-            ) -> #builder_ident<#(#generic_args,)*>
+            ) -> #builder_ident< #(#generic_args,)* >
             #where_clause
             {
                 #ide_hints

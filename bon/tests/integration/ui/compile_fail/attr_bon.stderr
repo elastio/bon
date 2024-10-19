@@ -3,3 +3,9 @@ error: `#[bon]` attribute does not accept any parameters yet, but it will in fut
   |
 5 | #[bon(attrs)]
   |       ^^^^^
+
+error: #[builder] attributes on the receiver are not supported
+  --> tests/integration/ui/compile_fail/attr_bon.rs:16:12
+   |
+16 |     fn sut(#[builder] &self) {}
+   |            ^

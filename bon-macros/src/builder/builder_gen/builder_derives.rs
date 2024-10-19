@@ -25,12 +25,15 @@ impl BuilderGenCtx {
     /// They add bounds of their respective traits to every generic type parameter on the struct
     /// without trying to analyze if that bound is actually required for the derive to work, so
     /// it's a conservative approach.
+    ///
+    /// However, the user can also override these bounds using the `bounds(...)` attribute for
+    /// the specific derive.
     fn where_clause_for_derive(
         &self,
         target_trait_bounds: &TokenStream,
         derive: &BuilderDerive,
     ) -> TokenStream {
-        let additional_predicates = derive
+        let derive_specific_predicates = derive
             .bounds
             .as_ref()
             .map(ToTokens::to_token_stream)
@@ -52,12 +55,12 @@ impl BuilderGenCtx {
                 }
             });
 
-        let base_predicates = self.generics.where_clause_predicates();
+        let inherent_item_predicates = self.generics.where_clause_predicates();
 
         quote! {
             where
-                #( #base_predicates, )*
-                #additional_predicates
+                #( #inherent_item_predicates, )*
+                #derive_specific_predicates
         }
     }
 
@@ -81,16 +84,20 @@ impl BuilderGenCtx {
         });
 
         let clone_start_fn_args = self.start_fn_args().next().map(|_| {
-            let clone_start_fn_args = self.start_fn_args().map(|arg| {
-                let ty = &arg.base.ty.norm;
-                let index = &arg.index;
-                quote! {
-                    <#ty as #clone>::clone(&self.#start_fn_args_field.#index)
-                }
-            });
+            let types = self.start_fn_args().map(|arg| &arg.base.ty.norm);
+            let indices = self.start_fn_args().map(|arg| &arg.index);
 
             quote! {
-                #start_fn_args_field: ( #(#clone_start_fn_args,)* ),
+                // We clone named members individually instead of cloning
+                // the entire tuple to improve error messages in case if
+                // one of the members doesn't implement `Clone`. This avoids
+                // a sentence that say smth like
+                // ```
+                // required for `(...big type...)` to implement `Clone`
+                // ```
+                #start_fn_args_field: (
+                    #( <#types as #clone>::clone(&self.#start_fn_args_field.#indices), )*
+                ),
             }
         });
 
@@ -100,9 +107,9 @@ impl BuilderGenCtx {
         let clone_named_members = self.named_members().map(|member| {
             let member_index = &member.index;
 
-            // The type hints here are necessary to get better error messages
-            // that point directly to the types that don't implement `Clone`
-            // in the input code using the span info from the type hints.
+            // The type hint here is necessary to get better error messages
+            // that point directly to the type that doesn't implement `Clone`
+            // in the input code using the span info from the type hint.
             let ty = member.underlying_norm_ty();
 
             quote! {
@@ -137,7 +144,7 @@ impl BuilderGenCtx {
                         // one of the members doesn't implement `Clone`. This avoids
                         // a sentence that say smth like
                         // ```
-                        // required for `(...huge tuple type...)` to implement `Clone`
+                        // required for `(...big type...)` to implement `Clone`
                         // ```
                         #named_members_field: ( #( #clone_named_members, )* ),
                     }

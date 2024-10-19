@@ -112,10 +112,15 @@ impl FnInputCtx<'_> {
             None => return Ok(None),
         };
 
-        if let [attr, ..] = receiver.attrs.as_slice() {
+        let builder_attr_on_receiver = receiver
+            .attrs
+            .iter()
+            .find(|attr| attr.path().is_ident("builder"));
+
+        if let Some(attr) = builder_attr_on_receiver {
             bail!(
                 attr,
-                "attributes on the receiver are not supported in the #[builder] macro"
+                "#[builder] attributes on the receiver are not supported"
             );
         }
 
@@ -581,7 +586,7 @@ fn get_must_use_attribute(attrs: &[syn::Attribute]) -> Result<Option<syn::Attrib
     if let Some(second) = iter.next() {
         bail!(
             second,
-            "Found multiple #[must_use], but bon only works with exactly one or zero."
+            "found multiple #[must_use], but bon only works with exactly one or zero."
         );
     }
 
@@ -589,7 +594,7 @@ fn get_must_use_attribute(attrs: &[syn::Attribute]) -> Result<Option<syn::Attrib
         if let syn::AttrStyle::Inner(_) = attr.style {
             bail!(
                 attr,
-                "The #[must_use] attribute must be placed on the function itself, \
+                "#[must_use] attribute must be placed on the function itself, \
                 not inside it."
             );
         }

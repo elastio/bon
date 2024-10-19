@@ -70,13 +70,13 @@ impl FromMeta for BuilderDerive {
             return Ok(Self { bounds: None });
         }
 
+        meta.require_list()?.require_parens_delim()?;
+
         #[derive(FromMeta)]
         struct Parsed {
             #[darling(with = crate::parsing::parse_paren_meta_list_with_terminated)]
             bounds: Punctuated<syn::WherePredicate, syn::Token![,]>,
         }
-
-        meta.require_list()?.require_parens_delim()?;
 
         let Parsed { bounds } = Parsed::from_meta(meta)?;
 

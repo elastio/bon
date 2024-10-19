@@ -50,11 +50,10 @@ impl PositionalFnArgMember {
     }
 
     pub(crate) fn fn_input_param(&self) -> TokenStream {
-        let has_into = self.params.into.is_present();
         let ty = &self.ty.norm;
         let ident = &self.ident;
 
-        if has_into {
+        if self.params.into.is_present() {
             quote! { #ident: impl Into<#ty> }
         } else {
             quote! { #ident: #ty }
@@ -62,12 +61,11 @@ impl PositionalFnArgMember {
     }
 
     pub(crate) fn maybe_into_ident_expr(&self) -> TokenStream {
-        let has_into = self.params.into.is_present();
         let ident = &self.ident;
 
-        if has_into {
+        if self.params.into.is_present() {
             quote! {
-                ::core::convert::Into::into(#ident)
+                Into::into(#ident)
             }
         } else {
             ident.to_token_stream()

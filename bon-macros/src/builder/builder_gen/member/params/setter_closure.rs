@@ -7,22 +7,23 @@ expected one of the following:
 
 (1) no return type annotation;
     this means the closure is expected to return a value of the same type
-    as the member's underlying type*;
+    as the member's underlying type(*);
 
 (2) `-> *Result<_, {{ErrorType}}>` or `-> *Result<_>` return type annotation;
     this means the closure is expected to return a `Result` where the `Ok`
-    variant is of the same type as the member's underlying type*; this syntax
+    variant is of the same type as the member's underlying type(*); this syntax
     allows you to define a fallbile setter (one that returns a `Result<Builder>`);
 
-    the `_` placeholder must be spelled literally to mark the underlying type*
+    the `_` placeholder must be spelled literally to mark the underlying type(*)
     of the member; an optional second generic parameter for the error type is allowed;
 
-    the type doesn't have to be named `Result` exactly, the only requirement is
+    the return type doesn't have to be named `Result` exactly, the only requirement is
     that it must have the `Result` suffix; for example if you have a type alias
     `ApiResult<_>`, then it'll work fine;
 
-*underlying type is the type of the member stripped from the `Option<T>` wrapper
-if this member has an `Option<T>` type and no `#[builder(transparent)]` annotation";
+(*) underlying type is the type of the member stripped from the `Option<T>` wrapper
+    if this member is of `Option<T>` type and no `#[builder(transparent)]` annotation
+    is present";
 
 #[derive(Debug)]
 pub(crate) struct SetterClosure {
@@ -68,12 +69,12 @@ impl FromMeta for SetterClosure {
                 let ty = ty
                     .as_generic_angle_bracketed_path(|last_segment| {
                         // We allow for arbitrary `Result` type variations
-                        // including
+                        // including custom type aliases like `ApiResult<_>`
                         last_segment.to_string().ends_with("Result")
                     })
                     .ok_or_else(err)?;
 
-                if ty.args.len() != 1 && ty.args.len() != 2 {
+                if !(1..=2).contains(&ty.args.len()) {
                     return Err(err());
                 }
 
@@ -94,6 +95,9 @@ impl FromMeta for SetterClosure {
 
                 let mut result_path = ty.path.clone();
 
+                // We store the error type of the result separately.
+                // Strip the generic arguments, because we only care
+                // about the path of the `Result` in `result_path` field.
                 result_path
                     .segments
                     .last_mut()

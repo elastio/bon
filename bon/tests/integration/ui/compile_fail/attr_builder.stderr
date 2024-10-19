@@ -66,7 +66,7 @@ error: only `fn` items are supported by the `#[bon::builder]` attribute
    |
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: Found multiple #[must_use], but bon only works with exactly one or zero.
+error: found multiple #[must_use], but bon only works with exactly one or zero.
   --> tests/integration/ui/compile_fail/attr_builder.rs:59:1
    |
 59 | #[must_use]
