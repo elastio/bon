@@ -1,4 +1,4 @@
-use super::builder_params::BuilderParams;
+use super::top_level_params::TopLevelParams;
 use super::models::FinishFnParams;
 use super::{
     AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFnBody, Generics, Member,
@@ -6,7 +6,7 @@ use super::{
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
 use crate::normalization::{GenericsNamespace, NormalizeSelfTy, SyntaxVariant};
-use crate::parsing::{ItemParams, SpannedKey};
+use crate::parsing::{SymbolParams, SpannedKey};
 use crate::util::prelude::*;
 use darling::util::SpannedValue;
 use darling::FromMeta;
@@ -21,7 +21,7 @@ pub(crate) struct FnInputParams {
     expose_positional_fn: Option<SpannedValue<ExposePositionalFnParams>>,
 
     #[darling(flatten)]
-    base: BuilderParams,
+    base: TopLevelParams,
 }
 
 #[derive(Debug, Default)]
@@ -378,7 +378,7 @@ impl FnInputCtx<'_> {
             self.fn_item.norm.sig.ident.clone()
         };
 
-        let ItemParams {
+        let SymbolParams {
             name: finish_fn_ident,
             vis: finish_fn_vis,
             docs: finish_fn_docs,

@@ -3,13 +3,13 @@ use crate::util::prelude::*;
 use darling::FromMeta;
 
 #[derive(Debug, Clone, Default)]
-pub(crate) struct ItemParams {
+pub(crate) struct SymbolParams {
     pub(crate) name: Option<SpannedKey<syn::Ident>>,
     pub(crate) vis: Option<SpannedKey<syn::Visibility>>,
     pub(crate) docs: Option<SpannedKey<Vec<syn::Attribute>>>,
 }
 
-impl ItemParams {
+impl SymbolParams {
     pub(crate) fn name(&self) -> Option<&syn::Ident> {
         self.name.as_ref().map(|name| &name.value)
     }
@@ -29,14 +29,14 @@ pub(crate) struct ItemParamsParsing<'a> {
 }
 
 impl ItemParamsParsing<'_> {
-    pub(crate) fn parse(self) -> Result<ItemParams> {
+    pub(crate) fn parse(self) -> Result<SymbolParams> {
         let meta = self.meta;
 
         if let syn::Meta::NameValue(meta) = meta {
             let val = &meta.value;
             let name = syn::parse2(val.to_token_stream())?;
 
-            return Ok(ItemParams {
+            return Ok(SymbolParams {
                 name: Some(SpannedKey::new(&meta.path, name)?),
                 vis: None,
                 docs: None,
@@ -60,7 +60,7 @@ impl ItemParamsParsing<'_> {
             }
         }
 
-        let params = ItemParams {
+        let params = SymbolParams {
             name: full.name,
             vis: full.vis,
             docs: full.doc,

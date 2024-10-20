@@ -1,6 +1,6 @@
 use super::params::{BlanketParamName, EvalBlanketFlagParam};
 use super::{NamedMember, PositionalFnArgMember};
-use crate::builder::builder_gen::builder_params::OnParams;
+use crate::builder::builder_gen::top_level_params::OnParams;
 use crate::util::prelude::*;
 
 impl NamedMember {

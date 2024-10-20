@@ -2,12 +2,12 @@ mod on_params;
 
 pub(crate) use on_params::OnParams;
 
-use crate::parsing::{ItemParams, ItemParamsParsing};
+use crate::parsing::{SymbolParams, ItemParamsParsing};
 use crate::util::prelude::*;
 use darling::FromMeta;
 use syn::punctuated::Punctuated;
 
-fn parse_finish_fn(meta: &syn::Meta) -> Result<ItemParams> {
+fn parse_finish_fn(meta: &syn::Meta) -> Result<SymbolParams> {
     ItemParamsParsing {
         meta,
         reject_self_mentions: Some("builder struct's impl block"),
@@ -15,7 +15,7 @@ fn parse_finish_fn(meta: &syn::Meta) -> Result<ItemParams> {
     .parse()
 }
 
-fn parse_builder_type(meta: &syn::Meta) -> Result<ItemParams> {
+fn parse_builder_type(meta: &syn::Meta) -> Result<SymbolParams> {
     ItemParamsParsing {
         meta,
         reject_self_mentions: Some("builder struct"),
@@ -23,7 +23,7 @@ fn parse_builder_type(meta: &syn::Meta) -> Result<ItemParams> {
     .parse()
 }
 
-fn parse_state_mod(meta: &syn::Meta) -> Result<ItemParams> {
+fn parse_state_mod(meta: &syn::Meta) -> Result<SymbolParams> {
     ItemParamsParsing {
         meta,
         reject_self_mentions: Some("builder's state module"),
@@ -32,15 +32,15 @@ fn parse_state_mod(meta: &syn::Meta) -> Result<ItemParams> {
 }
 
 #[derive(Debug, FromMeta)]
-pub(crate) struct BuilderParams {
+pub(crate) struct TopLevelParams {
     #[darling(default, with = parse_finish_fn)]
-    pub(crate) finish_fn: ItemParams,
+    pub(crate) finish_fn: SymbolParams,
 
     #[darling(default, with = parse_builder_type)]
-    pub(crate) builder_type: ItemParams,
+    pub(crate) builder_type: SymbolParams,
 
     #[darling(default, with = parse_state_mod)]
-    pub(crate) state_mod: ItemParams,
+    pub(crate) state_mod: SymbolParams,
 
     #[darling(multiple, with = crate::parsing::parse_non_empty_paren_meta_list)]
     pub(crate) on: Vec<OnParams>,

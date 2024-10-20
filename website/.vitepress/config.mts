@@ -156,8 +156,8 @@ export default defineConfig({
                             link: "/reference/builder",
                             items: [
                                 {
-                                    text: "Item attributes",
-                                    link: "/reference/builder#item-attributes",
+                                    text: "Top-level attributes",
+                                    link: "/reference/builder#top-level-attributes",
                                     items: [
                                         {
                                             text: "builder_type",
@@ -176,12 +176,12 @@ export default defineConfig({
                                             link: "/reference/builder#finish-fn",
                                         },
                                         {
-                                            text: "start_fn",
-                                            link: "/reference/builder#start-fn",
-                                        },
-                                        {
                                             text: "on",
                                             link: "/reference/builder#on",
+                                        },
+                                        {
+                                            text: "start_fn",
+                                            link: "/reference/builder#start-fn",
                                         },
                                     ],
                                 },
@@ -192,6 +192,10 @@ export default defineConfig({
                                         {
                                             text: "default",
                                             link: "/reference/builder#default",
+                                        },
+                                        {
+                                            text: "finish_fn",
+                                            link: "/reference/builder#finish-fn-1",
                                         },
                                         {
                                             text: "into",
@@ -209,11 +213,6 @@ export default defineConfig({
                                             text: "start_fn",
                                             link: "/reference/builder#start-fn-1",
                                         },
-                                        {
-                                            text: "finish_fn",
-                                            link: "/reference/builder#finish-fn-1",
-                                        },
-
                                     ],
                                 },
                             ],
