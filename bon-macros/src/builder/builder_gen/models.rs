@@ -1,7 +1,7 @@
-use super::builder_params::{BuilderDerives, OnParams};
+use super::top_level_params::{BuilderDerives, OnParams};
 use super::member::Member;
 use crate::normalization::GenericsNamespace;
-use crate::parsing::{ItemParams, SpannedKey};
+use crate::parsing::{SymbolParams, SpannedKey};
 use crate::util::prelude::*;
 use std::borrow::Cow;
 
@@ -196,7 +196,7 @@ pub(super) struct BuilderGenCtxParams<'a> {
     pub(super) assoc_method_ctx: Option<AssocMethodCtx>,
 
     pub(super) builder_type: BuilderTypeParams,
-    pub(super) state_mod: ItemParams,
+    pub(super) state_mod: SymbolParams,
     pub(super) start_fn: StartFnParams,
     pub(super) finish_fn: FinishFnParams,
 }

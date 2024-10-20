@@ -1,11 +1,11 @@
-use super::builder_params::BuilderParams;
+use super::top_level_params::TopLevelParams;
 use super::models::FinishFnParams;
 use super::{
     AssocMethodCtx, BuilderGenCtx, FinishFnBody, Generics, Member, MemberOrigin, RawMember,
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
 use crate::normalization::{GenericsNamespace, SyntaxVariant};
-use crate::parsing::{ItemParams, ItemParamsParsing, SpannedKey};
+use crate::parsing::{SymbolParams, ItemParamsParsing, SpannedKey};
 use crate::util::prelude::*;
 use darling::FromMeta;
 use std::borrow::Cow;
@@ -15,13 +15,13 @@ use syn::visit_mut::VisitMut;
 #[derive(Debug, FromMeta)]
 pub(crate) struct StructInputParams {
     #[darling(flatten)]
-    base: BuilderParams,
+    base: TopLevelParams,
 
     #[darling(default, with = parse_start_fn)]
-    start_fn: ItemParams,
+    start_fn: SymbolParams,
 }
 
-fn parse_start_fn(meta: &syn::Meta) -> Result<ItemParams> {
+fn parse_start_fn(meta: &syn::Meta) -> Result<SymbolParams> {
     ItemParamsParsing {
         meta,
         reject_self_mentions: None,
@@ -155,7 +155,7 @@ impl StructInputCtx {
             struct_ident: self.struct_item.norm.ident.clone(),
         };
 
-        let ItemParams {
+        let SymbolParams {
             name: start_fn_ident,
             vis: start_fn_vis,
             docs: start_fn_docs,
@@ -165,7 +165,7 @@ impl StructInputCtx {
             .map(SpannedKey::into_value)
             .unwrap_or_else(|| syn::Ident::new("builder", self.struct_item.norm.ident.span()));
 
-        let ItemParams {
+        let SymbolParams {
             name: finish_fn_ident,
             vis: finish_fn_vis,
             docs: finish_fn_docs,
@@ -227,7 +227,7 @@ impl StructInputCtx {
             .collect();
 
         let builder_type = {
-            let ItemParams { name, vis, docs } = self.params.base.builder_type;
+            let SymbolParams { name, vis, docs } = self.params.base.builder_type;
 
             let builder_ident = name.map(SpannedKey::into_value).unwrap_or_else(|| {
                 format_ident!("{}Builder", self.struct_item.norm.ident.raw_name())

@@ -1,9 +1,9 @@
 use super::params::MemberParams;
 use super::{params, MemberOrigin};
-use crate::builder::builder_gen::builder_params::OnParams;
+use crate::builder::builder_gen::top_level_params::OnParams;
 use crate::builder::builder_gen::member::params::SettersFnParams;
 use crate::normalization::SyntaxVariant;
-use crate::parsing::{ItemParams, SpannedKey};
+use crate::parsing::{SymbolParams, SpannedKey};
 use crate::util::prelude::*;
 
 #[derive(Debug)]
@@ -117,8 +117,8 @@ impl NamedMember {
                 matches!(
                     (some_fn.as_deref(), option_fn.as_deref()),
                     (
-                        Some(ItemParams { docs: Some(_), .. }),
-                        Some(ItemParams { docs: Some(_), .. })
+                        Some(SymbolParams { docs: Some(_), .. }),
+                        Some(SymbolParams { docs: Some(_), .. })
                     )
                 )
             })
@@ -183,9 +183,9 @@ impl NamedMember {
     // Lint from nightly. `&Option<T>` is used to reduce syntax at the call site
     #[allow(unknown_lints, clippy::ref_option)]
     fn validate_unused_setters_cfg<T>(
-        overrides: &[&SpannedKey<ItemParams>],
+        overrides: &[&SpannedKey<SymbolParams>],
         config: &Option<SpannedKey<T>>,
-        get_val: impl Fn(&ItemParams) -> &Option<SpannedKey<T>>,
+        get_val: impl Fn(&SymbolParams) -> &Option<SpannedKey<T>>,
     ) -> Result {
         let config = match config {
             Some(config) => config,

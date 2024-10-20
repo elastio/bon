@@ -1,6 +1,6 @@
 use super::member::SetterClosure;
 use super::{BuilderGenCtx, NamedMember};
-use crate::parsing::ItemParams;
+use crate::parsing::SymbolParams;
 use crate::util::prelude::*;
 use std::iter;
 
@@ -392,14 +392,14 @@ impl SettersItems {
 
         let some_fn = params.and_then(|params| params.fns.some_fn.as_deref());
         let some_fn_name = some_fn
-            .and_then(ItemParams::name)
+            .and_then(SymbolParams::name)
             .or(common_name)
             .unwrap_or(&member.name.snake)
             .clone();
 
         let option_fn = params.and_then(|params| params.fns.option_fn.as_deref());
         let option_fn_name = option_fn
-            .and_then(ItemParams::name)
+            .and_then(SymbolParams::name)
             .cloned()
             .unwrap_or_else(|| {
                 let base_name = common_name.unwrap_or(&member.name.snake);
@@ -434,7 +434,7 @@ impl SettersItems {
         // FIXME: the docs shouldn't reference the companion setter if that
         // setter has a lower visibility.
         let some_fn_docs = some_fn
-            .and_then(ItemParams::docs)
+            .and_then(SymbolParams::docs)
             .or(common_docs)
             .unwrap_or(&member.docs);
 
@@ -445,7 +445,7 @@ impl SettersItems {
         };
 
         let option_fn_docs = option_fn
-            .and_then(ItemParams::docs)
+            .and_then(SymbolParams::docs)
             .or(common_docs)
             .unwrap_or(&member.docs);
 
@@ -462,7 +462,7 @@ impl SettersItems {
         let some_fn = SetterItem {
             name: some_fn_name,
             vis: some_fn
-                .and_then(ItemParams::vis)
+                .and_then(SymbolParams::vis)
                 .or(common_vis)
                 .unwrap_or(&builder_type.vis)
                 .clone(),
@@ -475,7 +475,7 @@ impl SettersItems {
             name: option_fn_name,
 
             vis: option_fn
-                .and_then(ItemParams::vis)
+                .and_then(SymbolParams::vis)
                 .or(common_vis)
                 .unwrap_or(&builder_type.vis)
                 .clone(),

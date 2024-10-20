@@ -1,5 +1,5 @@
 use super::MemberParams;
-use crate::builder::builder_gen::builder_params::OnParams;
+use crate::builder::builder_gen::top_level_params::OnParams;
 use crate::builder::builder_gen::member::MemberOrigin;
 use crate::util::prelude::*;
 use std::fmt;

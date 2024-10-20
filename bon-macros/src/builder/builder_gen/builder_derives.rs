@@ -1,4 +1,4 @@
-use super::builder_params::{BuilderDerive, BuilderDerives};
+use super::top_level_params::{BuilderDerive, BuilderDerives};
 use super::BuilderGenCtx;
 use crate::builder::builder_gen::Member;
 use crate::util::prelude::*;
