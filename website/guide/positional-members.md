@@ -64,8 +64,10 @@ We can use a similar combination of the [top-level `#[builder(finish_fn = ...)]`
 use bon::Builder;
 
 #[derive(Builder)]
-#[builder(start_fn = with_coordinates)]
-#[builder(finish_fn = claim)]  // [!code highlight]
+#[builder(
+    start_fn = with_coordinates,
+    finish_fn = claim  // [!code highlight]
+)]
 struct Treasure {
     #[builder(start_fn)]
     x: u32,
@@ -101,8 +103,10 @@ You may also combine these attributes with [`#[builder(into)]`](../reference/bui
 use bon::Builder;
 
 #[derive(Builder)]
-#[builder(start_fn = with_coordinates)]
-#[builder(finish_fn = claim)]
+#[builder(
+    start_fn = with_coordinates,
+    finish_fn = claim // [!code focus]
+)]
 struct Treasure {
     #[builder(start_fn)]
     x: u32,

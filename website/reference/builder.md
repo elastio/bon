@@ -2,59 +2,50 @@
 outline: [2, 3]
 ---
 
-# Builder macros
+# `#[derive(Builder)]` / `#[builder]`
 
-There are several ways to generate a builder depending on the syntax you place the builder macro on.
+You can generate a builder using three different kinds of syntax (struct, free function, associated method). They all share two common groups of attributes.
 
-**Structs:**
+- [Item attributes](#item-attributes) - apply to a `struct` or `fn` declaration itself.
+- [Member attributes](#member-attributes) - apply to a `struct` field or `fn` argument.
 
-Use `#[derive(bon::Builder)]`
+See examples. Make sure to click through the tabs:
 
-```rust
+:::code-group
+
+```rust [Struct]
 use bon::Builder;
 
 #[derive(Builder)]
-#[builder(/* Top-Level Attributes */)]
+#[builder(finish_fn = finish)] // <-- this is an item attribute // [!code highlight]
 struct Example {
-    #[builder(/* Member-Level Attributes */)]
+    #[builder(default)] // <-- this is a member attribute // [!code highlight]
     field: u32
 }
 ```
 
-**Free functions:**
-
-Use `#[bon::builder]`
-
-```rust
+```rust [Free function]
 use bon::builder;
 
-#[builder(/* Top-Level Attributes */)]
+#[builder(finish_fn = finish)] // <-- this is an item attribute // [!code highlight]
 fn example(
-    #[builder(/* Member-Level Attributes */)]
+    #[builder(default)] // <-- this is a member attribute // [!code highlight]
     arg: u32
-) {
-    // body
-}
+) { }
 ```
 
-**Associated methods:**
-
-Use `#[bon::bon]` + `#[builder]` on individual methods
-
-```rust
+```rust [Associated method]
 use bon::bon;
 
 struct Example;
 
 #[bon]
 impl Example {
-    #[builder(/* Top-Level Attributes */)]
+    #[builder(finish_fn = finish)] // <-- this is an item attribute // [!code highlight]
     fn example(
-        #[builder(/* Member-Level Attributes */)]
+        #[builder(default)]  // <-- this is a member attribute // [!code highlight]
         arg: u32
-    ) {
-        // body
-    }
+    ) { }
 }
 ```
 
@@ -68,7 +59,7 @@ Most of the attributes apply to all kinds of syntax. However, some of them are o
 
 :::
 
-## Top-Level Attributes
+## Item attributes
 
 ### `builder_type`
 
@@ -649,13 +640,13 @@ struct Example {
 Example::builder()
     .name("accepts `impl Into<String>`")
     .path("accepts/impl/into/PathBuf")
-    // This member doesn't match neither `String` nor `PathBuf`,
+    // This member doesn't match either `String` or `PathBuf`,
     // and thus #[builder(into)] was not applied to it
     .level(100)
     .build();
 ```
 
-## Member-Level Attributes
+## Member attributes
 
 ### `default`
 
@@ -887,9 +878,9 @@ See the ["Into Conversions In-Depth"](../guide/patterns/into-conversions-in-dept
 ::: code-group
 
 ```rust [Struct field]
-use bon::builder;
+use bon::Builder;
 
-#[builder]
+#[derive(Builder)]
 struct Example {
     #[builder(into)] // [!code highlight]
     name: String,
@@ -975,7 +966,7 @@ Example::example()
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
 
-Overrides the name of the setters generated for the member. This is most useful with the struct syntax where you'd like to use a different name for the field internally. For functions this attribute makes less sense since it's easy to just create a variable named differently `let new_name = param_name;`. However, this attribute is still supported for functions.
+Overrides the name of the member in the builder's setters and type state. This is most useful when with struct syntax (`#[derive(Builder)]`) where you'd like to use a different name for the field internally. For functions this attribute makes less sense since it's easy to just create a variable named differently `let new_name = param_name;`. However, this attribute is still supported on function arguments.
 
 **Example:**
 

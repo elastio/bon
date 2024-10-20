@@ -2,12 +2,12 @@ use crate::builder;
 use crate::normalization::{ExpandCfg, ExpansionOutput};
 use crate::util::prelude::*;
 
-pub(crate) fn generate(params: TokenStream2, item: TokenStream2) -> TokenStream2 {
-    try_generate(params, item.clone())
-        .unwrap_or_else(|err| crate::error::error_into_token_stream(err, item))
+pub(crate) fn generate(params: TokenStream, item: TokenStream) -> TokenStream {
+    crate::error::with_fallback(item.clone(), || try_generate(params, item))
+        .unwrap_or_else(std::convert::identity)
 }
 
-pub(crate) fn try_generate(params: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
+pub(crate) fn try_generate(params: TokenStream, item: TokenStream) -> Result<TokenStream> {
     let item: syn::Item = syn::parse2(item)?;
     let macro_path = syn::parse_quote!(::bon::bon);
 
@@ -17,10 +17,18 @@ pub(crate) fn try_generate(params: TokenStream2, item: TokenStream2) -> Result<T
         item,
     };
 
-    let item = match ctx.expand_cfg()? {
-        ExpansionOutput::Expanded { params: _, item } => item,
+    let (params, item) = match ctx.expand_cfg()? {
+        ExpansionOutput::Expanded { params, item } => (params, item),
         ExpansionOutput::Recurse(output) => return Ok(output),
     };
+
+    if !params.is_empty() {
+        bail!(
+            &params,
+            "`#[bon]` attribute does not accept any parameters yet, \
+            but it will in future releases"
+        );
+    }
 
     match item {
         syn::Item::Impl(item_impl) => builder::item_impl::generate(item_impl),

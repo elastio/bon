@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use core::fmt;
 
 // Functions don't support `skip` attributes
 #[test]
@@ -8,7 +9,7 @@ fn fn_init_order() {
         #[builder(default = 1)] arg1: u32,
         #[builder(default = 2)] arg2: u32,
         #[builder(default = [arg1, arg2, 3])] arg3: [u32; 3],
-    ) -> (u32, u32, [u32; 3]) {
+    ) -> impl fmt::Debug {
         (arg1, arg2, arg3)
     }
 

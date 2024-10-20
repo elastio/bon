@@ -2,21 +2,21 @@ mod builder_gen;
 
 pub(crate) mod item_impl;
 
-mod item_func;
+mod item_fn;
 mod item_struct;
 
-use crate::normalization::{ExpandCfg, ExpansionOutput};
+use crate::normalization::{ExpandCfg, ExpansionOutput, GenericsNamespace};
 use crate::util;
 use crate::util::prelude::*;
 use darling::FromMeta;
-use quote::quote;
 use syn::parse::Parser;
+use syn::visit::Visit;
 
-pub(crate) fn generate_from_derive(item: TokenStream2) -> TokenStream2 {
+pub(crate) fn generate_from_derive(item: TokenStream) -> TokenStream {
     try_generate_from_derive(item).unwrap_or_else(Error::write_errors)
 }
 
-fn try_generate_from_derive(item: TokenStream2) -> Result<TokenStream2> {
+fn try_generate_from_derive(item: TokenStream) -> Result<TokenStream> {
     match syn::parse2(item)? {
         syn::Item::Struct(item_struct) => item_struct::generate(item_struct),
         _ => bail!(
@@ -26,30 +26,15 @@ fn try_generate_from_derive(item: TokenStream2) -> Result<TokenStream2> {
     }
 }
 
-pub(crate) fn generate_from_attr(params: TokenStream2, item: TokenStream2) -> TokenStream2 {
-    try_generate_from_attr(params.clone(), item.clone()).unwrap_or_else(|err| {
-        [
-            generate_completion_triggers(params),
-            crate::error::error_into_token_stream(err, item),
-        ]
-        .concat()
+pub(crate) fn generate_from_attr(params: TokenStream, item: TokenStream) -> TokenStream {
+    crate::error::with_fallback(item.clone(), || {
+        try_generate_from_attr(params.clone(), item)
     })
+    .unwrap_or_else(|fallback| [generate_completion_triggers(params), fallback].concat())
 }
 
-fn try_generate_from_attr(params: TokenStream2, item: TokenStream2) -> Result<TokenStream2> {
+fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<TokenStream> {
     let item: syn::Item = syn::parse2(item)?;
-
-    if let syn::Item::Struct(item_struct) = item {
-        return Ok(quote! {
-            // Triggers a deprecation warning if the user is using the old attribute
-            // syntax on the structs instead of the derive syntax.
-            use ::bon::private::deprecations::builder_attribute_on_a_struct as _;
-
-            #[derive(::bon::Builder)]
-            #[builder(#params)]
-            #item_struct
-        });
-    }
 
     let macro_path = syn::parse_quote!(::bon::builder);
 
@@ -67,7 +52,21 @@ fn try_generate_from_attr(params: TokenStream2, item: TokenStream2) -> Result<To
     let nested_meta = &darling::ast::NestedMeta::parse_meta_list(params.clone())?;
 
     let main_output = match item {
-        syn::Item::Fn(item_fn) => item_func::generate(FromMeta::from_list(nested_meta)?, item_fn)?,
+        syn::Item::Fn(item_fn) => {
+            let mut namespace = GenericsNamespace::default();
+
+            namespace.visit_token_stream(params.clone());
+            namespace.visit_item_fn(&item_fn);
+
+            item_fn::generate(FromMeta::from_list(nested_meta)?, item_fn, &namespace)?
+        }
+        syn::Item::Struct(struct_item) => {
+            bail!(
+                &struct_item.struct_token,
+                "to generate a builder for a struct, use `#[derive(bon::Builder)]` instead; \
+                 `#[bon::builder]` syntax is supported only for functions starting with bon v3"
+            )
+        }
         _ => bail!(
             &Span::call_site(),
             "only `fn` items are supported by the `#[bon::builder]` attribute"
@@ -79,7 +78,7 @@ fn try_generate_from_attr(params: TokenStream2, item: TokenStream2) -> Result<To
     Ok(output)
 }
 
-fn generate_completion_triggers(params: TokenStream2) -> TokenStream2 {
+fn generate_completion_triggers(params: TokenStream) -> TokenStream {
     let meta = util::ide::parse_comma_separated_meta
         .parse2(params)
         .unwrap_or_default();

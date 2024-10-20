@@ -1,12 +1,15 @@
-use super::builder_params::{BuilderParams, ItemParams, ItemParamsParsing};
+use super::builder_params::BuilderParams;
+use super::models::FinishFnParams;
 use super::{
-    AssocMethodCtx, BuilderGenCtx, FinishFunc, FinishFuncBody, Generics, Member, MemberOrigin,
-    RawMember, StartFunc,
+    AssocMethodCtx, BuilderGenCtx, FinishFnBody, Generics, Member, MemberOrigin, RawMember,
 };
-use crate::builder::builder_gen::BuilderType;
+use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
+use crate::normalization::{GenericsNamespace, SyntaxVariant};
+use crate::parsing::{ItemParams, ItemParamsParsing, SpannedKey};
 use crate::util::prelude::*;
 use darling::FromMeta;
-use quote::quote;
+use std::borrow::Cow;
+use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
 
 #[derive(Debug, FromMeta)]
@@ -21,7 +24,6 @@ pub(crate) struct StructInputParams {
 fn parse_start_fn(meta: &syn::Meta) -> Result<ItemParams> {
     ItemParamsParsing {
         meta,
-        allow_vis: true,
         reject_self_mentions: None,
     }
     .parse()
@@ -36,16 +38,17 @@ impl StructInputParams {
             .map(|attr| {
                 let meta = match &attr.meta {
                     syn::Meta::List(meta) => meta,
-                    _ => bail!(attr, "expected `#[builder(...)]` syntax"),
+                    syn::Meta::Path(_) => bail!(
+                        &attr.meta,
+                        "this empty `#[builder]` attribute is redundant; remove it"
+                    ),
+                    syn::Meta::NameValue(_) => bail!(
+                        &attr.meta,
+                        "`#[builder = ...]` syntax is unsupported; use `#[builder(...)]` instead"
+                    ),
                 };
 
-                if !matches!(meta.delimiter, syn::MacroDelimiter::Paren(_)) {
-                    bail!(
-                        &meta,
-                        "wrong delimiter {:?}, expected `#[builder(...)]` syntax",
-                        meta.delimiter
-                    );
-                }
+                crate::parsing::require_non_empty_paren_meta_list_or_name_value(&attr.meta)?;
 
                 let meta = darling::ast::NestedMeta::parse_meta_list(meta.tokens.clone())?;
 
@@ -60,8 +63,7 @@ impl StructInputParams {
 }
 
 pub(crate) struct StructInputCtx {
-    orig_struct: syn::ItemStruct,
-    norm_struct: syn::ItemStruct,
+    struct_item: SyntaxVariant<syn::ItemStruct>,
     params: StructInputParams,
     struct_ty: syn::Type,
 }
@@ -74,7 +76,7 @@ impl StructInputCtx {
             .generics
             .params
             .iter()
-            .map(super::generic_param_to_arg);
+            .map(syn::GenericParam::to_generic_argument);
         let struct_ident = &orig_struct.ident;
         let struct_ty = syn::parse_quote!(#struct_ident<#(#generic_args),*>);
 
@@ -89,40 +91,30 @@ impl StructInputCtx {
         }
         .visit_item_struct_mut(&mut norm_struct);
 
+        let struct_item = SyntaxVariant {
+            orig: orig_struct,
+            norm: norm_struct,
+        };
+
         Ok(Self {
-            orig_struct,
-            norm_struct,
+            struct_item,
             params,
             struct_ty,
         })
     }
 
     pub(crate) fn into_builder_gen_ctx(self) -> Result<BuilderGenCtx> {
-        let builder_type = {
-            let ItemParams { name, vis: _, docs } = self.params.base.builder_type;
-
-            let builder_ident = name.unwrap_or_else(|| {
-                quote::format_ident!("{}Builder", self.norm_struct.ident.raw_name())
-            });
-
-            BuilderType {
-                derives: self.params.base.derive.clone(),
-                ident: builder_ident,
-                docs,
-            }
-        };
-
-        fn fields(struct_item: &syn::ItemStruct) -> Result<&syn::FieldsNamed> {
-            match &struct_item.fields {
+        let fields = self
+            .struct_item
+            .apply_ref(|struct_item| match &struct_item.fields {
                 syn::Fields::Named(fields) => Ok(fields),
                 _ => {
                     bail!(&struct_item, "Only structs with named fields are supported")
                 }
-            }
-        }
+            });
 
-        let norm_fields = fields(&self.norm_struct)?;
-        let orig_fields = fields(&self.orig_struct)?;
+        let norm_fields = fields.norm?;
+        let orig_fields = fields.orig?;
 
         let members = norm_fields
             .named
@@ -133,74 +125,91 @@ impl StructInputCtx {
                     err!(norm_field, "only structs with named fields are supported")
                 })?;
 
+                let ty = SyntaxVariant {
+                    norm: Box::new(norm_field.ty.clone()),
+                    orig: Box::new(orig_field.ty.clone()),
+                };
+
                 Ok(RawMember {
                     attrs: &norm_field.attrs,
                     ident,
-                    norm_ty: Box::new(norm_field.ty.clone()),
-                    orig_ty: Box::new(orig_field.ty.clone()),
+                    ty,
                 })
             })
             .collect::<Result<Vec<_>>>()?;
 
-        let members = Member::from_raw(MemberOrigin::StructField, members)?;
+        let members = Member::from_raw(&self.params.base.on, MemberOrigin::StructField, members)?;
 
         let generics = Generics::new(
-            self.norm_struct.generics.params.iter().cloned().collect(),
-            self.norm_struct.generics.where_clause.clone(),
+            self.struct_item
+                .norm
+                .generics
+                .params
+                .iter()
+                .cloned()
+                .collect(),
+            self.struct_item.norm.generics.where_clause.clone(),
         );
 
-        let finish_func_body = StructLiteralBody {
-            struct_ident: self.norm_struct.ident.clone(),
+        let finish_fn_body = StructLiteralBody {
+            struct_ident: self.struct_item.norm.ident.clone(),
         };
 
         let ItemParams {
-            name: start_func_ident,
-            vis: start_func_vis,
-            docs: start_func_docs,
+            name: start_fn_ident,
+            vis: start_fn_vis,
+            docs: start_fn_docs,
         } = self.params.start_fn;
 
-        let start_func_ident = start_func_ident
-            .unwrap_or_else(|| syn::Ident::new("builder", self.norm_struct.ident.span()));
+        let start_fn_ident = start_fn_ident
+            .map(SpannedKey::into_value)
+            .unwrap_or_else(|| syn::Ident::new("builder", self.struct_item.norm.ident.span()));
 
         let ItemParams {
-            name: finish_func_ident,
-            vis: _,
-            docs: finish_func_docs,
+            name: finish_fn_ident,
+            vis: finish_fn_vis,
+            docs: finish_fn_docs,
         } = self.params.base.finish_fn;
 
-        let finish_func_ident =
-            finish_func_ident.unwrap_or_else(|| syn::Ident::new("build", start_func_ident.span()));
+        let finish_fn_ident = finish_fn_ident
+            .map(SpannedKey::into_value)
+            .unwrap_or_else(|| syn::Ident::new("build", start_fn_ident.span()));
 
         let struct_ty = &self.struct_ty;
-        let finish_func = FinishFunc {
-            ident: finish_func_ident,
+        let finish_fn = FinishFnParams {
+            ident: finish_fn_ident,
+            vis: finish_fn_vis.map(SpannedKey::into_value),
             unsafety: None,
             asyncness: None,
             must_use: Some(syn::parse_quote! {
                 #[must_use = "building a struct without using it is likely a bug"]
             }),
-            body: Box::new(finish_func_body),
+            body: Box::new(finish_fn_body),
             output: syn::parse_quote!(-> #struct_ty),
-            attrs: finish_func_docs.unwrap_or_else(|| {
-                vec![syn::parse_quote! {
-                    /// Finishes building and returns the requested object
-                }]
-            }),
+            attrs: finish_fn_docs
+                .map(SpannedKey::into_value)
+                .unwrap_or_else(|| {
+                    vec![syn::parse_quote! {
+                        /// Finish building and return the requested object
+                    }]
+                }),
         };
 
-        let start_func_docs = start_func_docs.unwrap_or_else(|| {
-            let docs = format!(
-                "Create an instance of [`{}`] using the builder syntax",
-                self.norm_struct.ident
-            );
+        let start_fn_docs = start_fn_docs
+            .map(SpannedKey::into_value)
+            .unwrap_or_else(|| {
+                let docs = format!(
+                    "Create an instance of [`{}`] using the builder syntax",
+                    self.struct_item.norm.ident
+                );
 
-            vec![syn::parse_quote!(#[doc = #docs])]
-        });
+                vec![syn::parse_quote!(#[doc = #docs])]
+            });
 
-        let start_func = StartFunc {
-            ident: start_func_ident,
-            vis: start_func_vis,
-            attrs: start_func_docs,
+        let start_fn = StartFnParams {
+            ident: start_fn_ident,
+            vis: start_fn_vis.map(SpannedKey::into_value),
+            attrs: start_fn_docs,
             generics: None,
         };
 
@@ -210,13 +219,33 @@ impl StructInputCtx {
         });
 
         let allow_attrs = self
-            .norm_struct
+            .struct_item
+            .norm
             .attrs
             .iter()
             .filter_map(syn::Attribute::to_allow)
             .collect();
 
-        let ctx = BuilderGenCtx {
+        let builder_type = {
+            let ItemParams { name, vis, docs } = self.params.base.builder_type;
+
+            let builder_ident = name.map(SpannedKey::into_value).unwrap_or_else(|| {
+                format_ident!("{}Builder", self.struct_item.norm.ident.raw_name())
+            });
+
+            BuilderTypeParams {
+                derives: self.params.base.derive,
+                ident: builder_ident,
+                docs: docs.map(SpannedKey::into_value),
+                vis: vis.map(SpannedKey::into_value),
+            }
+        };
+
+        let mut namespace = GenericsNamespace::default();
+        namespace.visit_item_struct(&self.struct_item.orig);
+
+        BuilderGenCtx::new(BuilderGenCtxParams {
+            namespace: Cow::Owned(namespace),
             members,
 
             allow_attrs,
@@ -225,14 +254,13 @@ impl StructInputCtx {
 
             assoc_method_ctx,
             generics,
-            vis: self.norm_struct.vis,
+            orig_item_vis: self.struct_item.norm.vis,
 
             builder_type,
-            start_func,
-            finish_func,
-        };
-
-        Ok(ctx)
+            state_mod: self.params.base.state_mod,
+            start_fn,
+            finish_fn,
+        })
     }
 }
 
@@ -240,12 +268,12 @@ struct StructLiteralBody {
     struct_ident: syn::Ident,
 }
 
-impl FinishFuncBody for StructLiteralBody {
-    fn generate(&self, member_exprs: &[Member]) -> TokenStream2 {
+impl FinishFnBody for StructLiteralBody {
+    fn generate(&self, ctx: &BuilderGenCtx) -> TokenStream {
         let Self { struct_ident } = self;
 
         // The variables with values of members are in scope for this expression.
-        let member_vars = member_exprs.iter().map(Member::orig_ident);
+        let member_vars = ctx.members.iter().map(Member::orig_ident);
 
         quote! {
             #struct_ident {

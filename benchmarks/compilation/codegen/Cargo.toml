@@ -1,0 +1,16 @@
+[package]
+name = "compilation-benchmarks-codegen"
+
+publish = false
+
+description = """
+  Generates code for the compilation benchmarks.
+"""
+
+edition = "2021"
+version = "0.1.0"
+
+[dependencies]
+anyhow      = "1.0"
+proc-macro2 = "1.0"
+quote       = "1.0"

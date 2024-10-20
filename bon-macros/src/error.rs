@@ -1,17 +1,55 @@
 use crate::util::prelude::*;
-use proc_macro2::{TokenStream as TokenStream2, TokenTree};
-use quote::{quote, ToTokens};
+use proc_macro2::{Group, TokenTree};
+use std::panic::AssertUnwindSafe;
 use syn::parse::Parse;
 
-/// Handle the error returned from the macro logic. This may be either a syntax
-/// error or a logic error. In either case, we want to return a [`TokenStream2`]
-/// that still provides good IDE experience. See [`Fallback`] for details.
-pub(crate) fn error_into_token_stream(err: Error, item: TokenStream2) -> TokenStream2 {
-    let compile_error = err.write_errors();
+/// Handle the error or panic returned from the macro logic.
+///
+/// The error may be either a syntax error or a logic error. In either case, we
+/// want to return a [`TokenStream`] that still provides good IDE experience.
+/// See [`Fallback`] for details.
+///
+/// This function also catches panics. Importantly, we don't use panics for error
+/// handling! A panic is always a bug! However, we still handle it to provide
+/// better IDE experience even if there are some bugs in the macro implementation.
+///
+/// One known bug that may cause panics when using Rust Analyzer is the following one:
+/// <https://github.com/rust-lang/rust-analyzer/issues/18244>
+pub(crate) fn with_fallback(
+    item: TokenStream,
+    imp: impl FnOnce() -> Result<TokenStream>,
+) -> Result<TokenStream, TokenStream> {
+    std::panic::catch_unwind(AssertUnwindSafe(imp))
+        .unwrap_or_else(|err| {
+            let msg = err
+                .downcast::<&str>()
+                .map(|msg| msg.to_string())
+                .or_else(|err| err.downcast::<String>().map(|msg| *msg))
+                .unwrap_or_else(|_| "<unknown error message>".to_owned());
 
-    syn::parse2::<Fallback>(item)
-        .map(|fallback| quote!(#compile_error #fallback))
-        .unwrap_or_else(|_| compile_error)
+            let msg = if msg.contains("unsupported proc macro punctuation character") {
+                format!(
+                    "known bug in rust-analyzer: `{msg}`;\n\
+                    Github issue: https://github.com/rust-lang/rust-analyzer/issues/18244"
+                )
+            } else {
+                format!(
+                    "bug in the crate `bon` (proc-macro panicked): `{msg}`;\n\
+                    please report this issue at our Github repository: \
+                    https://github.com/elastio/bon"
+                )
+            };
+
+            Err(err!(&Span::call_site(), "{msg}"))
+        })
+        .map_err(|err| {
+            let compile_error = err.write_errors();
+            let item = strip_invalid_tt(item);
+
+            syn::parse2::<Fallback>(item)
+                .map(|fallback| quote!(#compile_error #fallback))
+                .unwrap_or_else(|_| compile_error)
+        })
 }
 
 /// This is used in error handling for better IDE experience. For example, while
@@ -28,12 +66,12 @@ pub(crate) fn error_into_token_stream(err: Error, item: TokenStream2) -> TokenSt
 /// attributes that need to be processed by this macro to avoid the IDE from
 /// reporting those as well.
 struct Fallback {
-    output: TokenStream2,
+    output: TokenStream,
 }
 
 impl Parse for Fallback {
     fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
-        let mut output = TokenStream2::new();
+        let mut output = TokenStream::new();
 
         loop {
             let found_attr = input.step(|cursor| {
@@ -42,9 +80,7 @@ impl Parse for Fallback {
                     match &tt {
                         TokenTree::Group(group) => {
                             let fallback: Self = syn::parse2(group.stream())?;
-                            let new_group =
-                                proc_macro2::Group::new(group.delimiter(), fallback.output);
-
+                            let new_group = Group::new(group.delimiter(), fallback.output);
                             output.extend([TokenTree::Group(new_group)]);
                         }
                         TokenTree::Punct(punct) if punct.as_char() == '#' => {
@@ -68,14 +104,52 @@ impl Parse for Fallback {
             input
                 .call(syn::Attribute::parse_outer)?
                 .into_iter()
-                .filter(|attr| !attr.is_doc() && !attr.path().is_ident("builder"))
+                .filter(|attr| !attr.is_doc_expr() && !attr.path().is_ident("builder"))
                 .for_each(|attr| attr.to_tokens(&mut output));
         }
     }
 }
 
 impl ToTokens for Fallback {
-    fn to_tokens(&self, tokens: &mut TokenStream2) {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
         self.output.to_tokens(tokens);
     }
+}
+
+/// Workaround for the RA bug where it generates an invalid Punct token tree with
+/// the character `{`.
+///
+/// ## Issues
+///
+/// - [Bug in RA](https://github.com/rust-lang/rust-analyzer/issues/18244)
+/// - [Bug in proc-macro2](https://github.com/dtolnay/proc-macro2/issues/470) (already fixed)
+fn strip_invalid_tt(tokens: TokenStream) -> TokenStream {
+    fn recurse(tt: TokenTree) -> TokenTree {
+        match &tt {
+            TokenTree::Group(group) => {
+                let mut group = Group::new(group.delimiter(), strip_invalid_tt(group.stream()));
+                group.set_span(group.span());
+
+                TokenTree::Group(group)
+            }
+            _ => tt,
+        }
+    }
+
+    let mut tokens = tokens.into_iter();
+
+    std::iter::from_fn(|| {
+        // In newer versions of `proc-macro2` this code panics here (earlier)
+        loop {
+            // If this panics it means the next token tree is invalid.
+            // We can't do anything about it, and we just ignore it.
+            // Luckily, `proc-macro2` consumes the invalid token tree
+            // so this doesn't cause an infinite loop.
+            match std::panic::catch_unwind(AssertUnwindSafe(|| tokens.next())) {
+                Ok(tt) => return tt.map(recurse),
+                Err(_) => continue,
+            }
+        }
+    })
+    .collect()
 }

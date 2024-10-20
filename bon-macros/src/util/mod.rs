@@ -1,20 +1,23 @@
 mod attrs;
 mod fn_arg;
+mod generic_param;
 mod ident;
 mod item;
 mod iterator;
+mod meta_list;
 mod path;
 mod punctuated;
 mod ty;
 mod vec;
+mod visibility;
 
 pub(crate) mod ide;
 
 use prelude::*;
 
 pub(crate) mod prelude {
-    /// A handy alias for [`proc_macro2::TokenStream`].
-    pub(crate) use proc_macro2::{Span, TokenStream as TokenStream2};
+    pub(crate) use proc_macro2::{Span, TokenStream};
+    pub(crate) use quote::{format_ident, quote, ToTokens};
 
     /// The `Error` type in in this crate is supposed to act like `anyhow::Error`
     /// providing a simple way to create and return errors from format strings.
@@ -28,13 +31,16 @@ pub(crate) mod prelude {
 
     pub(crate) use super::attrs::AttributeExt;
     pub(crate) use super::fn_arg::FnArgExt;
+    pub(crate) use super::generic_param::GenericParamExt;
     pub(crate) use super::ident::IdentExt;
     pub(crate) use super::item::ItemExt;
     pub(crate) use super::iterator::{IntoIteratorExt, IteratorExt};
+    pub(crate) use super::meta_list::MetaListExt;
     pub(crate) use super::path::PathExt;
     pub(crate) use super::punctuated::PunctuatedExt;
     pub(crate) use super::ty::TypeExt;
     pub(crate) use super::vec::VecExt;
+    pub(crate) use super::visibility::VisibilityExt;
     pub(crate) use super::{bail, err};
 }
 

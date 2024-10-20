@@ -1,15 +1,15 @@
 pub(crate) trait AttributeExt {
-    fn is_doc(&self) -> bool;
-    fn as_doc(&self) -> Option<&syn::Expr>;
+    fn is_doc_expr(&self) -> bool;
+    fn as_doc_expr(&self) -> Option<&syn::Expr>;
     fn to_allow(&self) -> Option<syn::Attribute>;
 }
 
 impl AttributeExt for syn::Attribute {
-    fn is_doc(&self) -> bool {
-        self.as_doc().is_some()
+    fn is_doc_expr(&self) -> bool {
+        self.as_doc_expr().is_some()
     }
 
-    fn as_doc(&self) -> Option<&syn::Expr> {
+    fn as_doc_expr(&self) -> Option<&syn::Expr> {
         let attr = match &self.meta {
             syn::Meta::NameValue(attr) => attr,
             _ => return None,

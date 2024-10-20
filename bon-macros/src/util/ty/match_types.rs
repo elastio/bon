@@ -67,8 +67,8 @@ fn match_angle_bracketed_generic_args(
 }
 
 fn match_option<T>(
-    scrutinee: &Option<T>,
-    pattern: &Option<T>,
+    scrutinee: Option<&T>,
+    pattern: Option<&T>,
     compare: impl Fn(&T, &T) -> Result<bool>,
 ) -> Result<bool> {
     match (scrutinee, &pattern) {
@@ -119,8 +119,8 @@ fn match_generic_args(
             scrutinee.ident == pattern.ident
                 && match_types(&scrutinee.ty, &pattern.ty)?
                 && match_option(
-                    &scrutinee.generics,
-                    &pattern.generics,
+                    scrutinee.generics.as_ref(),
+                    pattern.generics.as_ref(),
                     match_angle_bracketed_generic_args,
                 )?
         }
@@ -132,14 +132,14 @@ fn match_generic_args(
 
             scrutinee.ident == pattern.ident
                 && match_option(
-                    &scrutinee.generics,
-                    &pattern.generics,
+                    scrutinee.generics.as_ref(),
+                    pattern.generics.as_ref(),
                     match_angle_bracketed_generic_args,
                 )?
                 && match_exprs(&scrutinee.value, &pattern.value)
         }
 
-        _ => return Err(unsupported_syntax_error(&pattern, "This syntax")),
+        _ => return Err(unsupported_syntax_error(&pattern, "this syntax")),
     };
 
     Ok(verdict)
@@ -228,7 +228,7 @@ pub(crate) fn match_types(scrutinee: &syn::Type, pattern: &syn::Type) -> Result<
 
         Never(_) => matches!(scrutinee, Never(_)),
 
-        _ => return Err(unsupported_syntax_error(&pattern, "This syntax")),
+        _ => return Err(unsupported_syntax_error(&pattern, "this syntax")),
     };
 
     Ok(verdict)

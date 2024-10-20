@@ -6,7 +6,7 @@ mod kw {
     syn::custom_keyword!(__cfgs);
 }
 
-pub(crate) fn parse_predicate_results(tokens: TokenStream2) -> Result<Option<PredicateResults>> {
+pub(crate) fn parse_predicate_results(tokens: TokenStream) -> Result<Option<PredicateResults>> {
     let results: WrapOption<PredicateResults> = syn::parse2(tokens)?;
     Ok(results.0)
 }
@@ -22,14 +22,14 @@ struct WrapOption<T>(Option<T>);
 pub(crate) struct PredicateResults {
     pub(crate) results: Vec<bool>,
     pub(crate) recursion_counter: usize,
-    pub(crate) rest: TokenStream2,
+    pub(crate) rest: TokenStream,
 }
 
 impl Parse for WrapOption<PredicateResults> {
     fn parse(input: ParseStream<'_>) -> syn::Result<Self> {
         if !input.peek(kw::__cfgs) {
             // We need to exhaust the input stream to avoid a "unexpected token" error
-            input.parse::<TokenStream2>()?;
+            input.parse::<TokenStream>()?;
 
             return Ok(Self(None));
         }
@@ -61,7 +61,7 @@ impl Parse for WrapOption<PredicateResults> {
 }
 
 pub(crate) enum CfgSyntax {
-    Cfg(TokenStream2),
+    Cfg(TokenStream),
     CfgAttr(CfgAttr),
 }
 

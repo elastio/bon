@@ -1,17 +1,21 @@
-use super::builder_gen::input_func::{FuncInputCtx, FuncInputParams, ImplCtx};
+use super::builder_gen::input_fn::{FnInputCtx, FnInputParams, ImplCtx};
+use crate::normalization::{GenericsNamespace, SyntaxVariant};
 use crate::util::prelude::*;
 use darling::ast::NestedMeta;
 use darling::FromMeta;
-use quote::quote;
 use std::rc::Rc;
+use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
 
-pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream2> {
+pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream> {
+    let mut namespace = GenericsNamespace::default();
+    namespace.visit_item_impl(&orig_impl_block);
+
     if let Some((_, trait_path, _)) = &orig_impl_block.trait_ {
         bail!(trait_path, "Impls of traits are not supported yet");
     }
 
-    let (builder_funcs, other_items): (Vec<_>, Vec<_>) =
+    let (builder_fns, other_items): (Vec<_>, Vec<_>) =
         orig_impl_block.items.into_iter().partition(|item| {
             let fn_item = match item {
                 syn::ImplItem::Fn(fn_item) => fn_item,
@@ -24,7 +28,7 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
                 .any(|attr| attr.path().is_ident("builder"))
         });
 
-    if builder_funcs.is_empty() {
+    if builder_fns.is_empty() {
         bail!(
             &Span::call_site(),
             "There are no #[builder] functions in the impl block, so there is no \
@@ -32,7 +36,7 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
         );
     }
 
-    orig_impl_block.items = builder_funcs;
+    orig_impl_block.items = builder_fns;
 
     // We do this back-and-forth with normalizing various syntax and saving original
     // to provide cleaner code generation that is easier to consume for IDEs and for
@@ -48,8 +52,11 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
     // the input. It would highlight `Self` as an "unresolved symbol"
     let mut norm_impl_block = orig_impl_block.clone();
 
-    crate::normalization::NormalizeLifetimes.visit_item_impl_mut(&mut norm_impl_block);
-    crate::normalization::NormalizeImplTraits.visit_item_impl_mut(&mut norm_impl_block);
+    crate::normalization::NormalizeLifetimes::new(&namespace)
+        .visit_item_impl_mut(&mut norm_impl_block);
+
+    crate::normalization::NormalizeImplTraits::new(&namespace)
+        .visit_item_impl_mut(&mut norm_impl_block);
 
     // Retain a variant of the impl block without the normalized `Self` mentions.
     // This way we preserve the original code that the user wrote with `Self` mentions
@@ -77,23 +84,28 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
         .into_iter()
         .zip(norm_impl_block.items)
         .map(|(orig_item, norm_item)| {
-            let norm_func = match norm_item {
-                syn::ImplItem::Fn(norm_func) => norm_func,
+            let norm_fn = match norm_item {
+                syn::ImplItem::Fn(norm_fn) => norm_fn,
                 _ => unreachable!(),
             };
-            let orig_func = match orig_item {
-                syn::ImplItem::Fn(orig_func) => orig_func,
+            let orig_fn = match orig_item {
+                syn::ImplItem::Fn(orig_fn) => orig_fn,
                 _ => unreachable!(),
             };
 
-            let norm_func = impl_item_fn_into_fn_item(norm_func)?;
-            let orig_func = impl_item_fn_into_fn_item(orig_func)?;
+            let norm_fn = conv_impl_item_fn_into_fn_item(norm_fn)?;
+            let orig_fn = conv_impl_item_fn_into_fn_item(orig_fn)?;
 
-            let meta = orig_func
+            let meta = orig_fn
                 .attrs
                 .iter()
                 .filter(|attr| attr.path().is_ident("builder"))
                 .map(|attr| {
+                    if let syn::Meta::List(_) = attr.meta {
+                        crate::parsing::require_non_empty_paren_meta_list_or_name_value(
+                            &attr.meta,
+                        )?;
+                    }
                     let meta_list = darling::util::parse_attribute_to_meta_list(attr)?;
                     NestedMeta::parse_meta_list(meta_list.tokens).map_err(Into::into)
                 })
@@ -102,25 +114,27 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
                 .flatten()
                 .collect::<Vec<_>>();
 
-            let params = FuncInputParams::from_list(&meta)?;
+            let params = FnInputParams::from_list(&meta)?;
 
-            let ctx = FuncInputCtx {
-                orig_func,
-                norm_func,
+            let fn_item = SyntaxVariant {
+                orig: orig_fn,
+                norm: norm_fn,
+            };
+
+            let ctx = FnInputCtx {
+                namespace: &namespace,
+                fn_item,
                 impl_ctx: Some(impl_ctx.clone()),
                 params,
             };
 
-            Result::<_>::Ok((ctx.adapted_func()?, ctx.into_builder_gen_ctx()?.output()?))
+            Result::<_>::Ok((ctx.adapted_fn()?, ctx.into_builder_gen_ctx()?.output()?))
         })
         .collect::<Result<Vec<_>>>()?;
 
-    let new_impl_items = outputs.iter().flat_map(|(adapted_func, output)| {
-        let start_func = &output.start_func;
-        [
-            syn::parse_quote!(#start_func),
-            syn::parse_quote!(#adapted_func),
-        ]
+    let new_impl_items = outputs.iter().flat_map(|(adapted_fn, output)| {
+        let start_fn = &output.start_fn;
+        [syn::parse_quote!(#start_fn), syn::parse_quote!(#adapted_fn)]
     });
 
     norm_selfful_impl_block.items = other_items;
@@ -134,7 +148,7 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
     })
 }
 
-fn impl_item_fn_into_fn_item(func: syn::ImplItemFn) -> Result<syn::ItemFn> {
+fn conv_impl_item_fn_into_fn_item(func: syn::ImplItemFn) -> Result<syn::ItemFn> {
     let syn::ImplItemFn {
         attrs,
         vis,

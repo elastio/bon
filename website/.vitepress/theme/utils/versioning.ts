@@ -1,4 +1,4 @@
-import { useRouter, withBase } from "vitepress";
+import { withBase } from "vitepress";
 
 export const latestVersion = "v2";
 export const versions = ["v2", "v1"];

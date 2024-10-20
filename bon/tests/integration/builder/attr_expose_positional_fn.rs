@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use core::fmt;
 
 #[test]
 fn method_new_doesnt_require_a_value_for_name() {
@@ -33,7 +34,7 @@ fn method_new_doesnt_require_a_value_for_name() {
 #[test]
 fn with_nested_params() {
     #[builder(expose_positional_fn(name = positional))]
-    fn sut(arg1: bool, arg2: u32) -> (bool, u32) {
+    fn sut(arg1: bool, arg2: u32) -> impl fmt::Debug {
         (arg1, arg2)
     }
 
