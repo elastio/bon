@@ -118,7 +118,7 @@ pub fn documented(
     #[builder(default =
         Greeter::start_fn_override()
             .name(
-                "Some intentionally big expression to test the overflow to \
+                "Some intentionally big expression to test the fallback to \
                 a code fence in the default value docs"
                 .to_owned()
             )

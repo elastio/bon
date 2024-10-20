@@ -6,14 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-
-All the breaking changes are very unlikely to actually break your code using the `v2` version of `bon` unless you've been doing some crimes like using `#[doc(hidden)]` or  unconventional macro delimiters like `#[builder{}/[]]` instead of `#[builder()]`. See also the "Removed" section about removed/replaced deprecated APIs.
+All the breaking changes are very unlikely to actually break your code that was written against the `v2` version of `bon` unless you've been doing some crimes like using items marked as `#[doc(hidden)]` or using unconventional macro delimiters like `#[builder{}/[]]` instead of `#[builder()]`. See also the "Removed" section about removed/replaced deprecated APIs that you most likely never used.
 
 ### Changed
 
 - Reject unnecessary empty attributes e.g. `#[builder()]` or `#[builder]` with no parameters on a member ([#145](https://github.com/elastio/bon/pull/145))
 - Reject non-empty `#[bon(...)]` attribute. This attribute will accept some parameters in future releases ([#145](https://github.com/elastio/bon/pull/145))
 - Reject square brackets and curly braces delimiters for `builder_type`, `finish_fn`, `start_fn` and `on` attributes syntax. Only parentheses are accepted e.g. `#[builder(finish_fn(...))]` or `#[builder(on(...))]`. This no longer works: `#[builder(finish_fn[...])]` or `#[builder(on{...})]` ([#145](https://github.com/elastio/bon/pull/145))
+- `#[builder(derive(Clone, Debug))]` now generates impl blocks that follow the behavior of standard `Clone` and `Debug` derives in that it conservatively adds `Clone/Debug` trait bounds for all the generic types declared on the original item (struct or function). See the *Added* section for details on the way to override these bounds with `#[builder(derive(Clone/Debug(bounds(...))))]`.
 
 ### Removed
 - Removed support for `#[bon::builder]` proc-macro attribute on top of a `struct`. Use `#[derive(bon::Builder)]` for that instead. This syntax has been deprecated since `2.1` and it is now removed as part of a major version cleanup ([#145](https://github.com/elastio/bon/pull/145))
