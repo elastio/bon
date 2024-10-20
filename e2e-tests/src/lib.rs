@@ -2,10 +2,10 @@
 //! We don't need all the aggressive lints that we use for public crates.
 #![allow(missing_debug_implementations, missing_docs)]
 
+pub mod attr_with;
 pub mod macro_rules_wrapper_test;
 pub mod missing_docs_test;
 pub mod state_mod_pub;
-// pub mod v3_design;
 
 mod reexports;
 

@@ -27,13 +27,10 @@ fn try_generate_from_derive(item: TokenStream) -> Result<TokenStream> {
 }
 
 pub(crate) fn generate_from_attr(params: TokenStream, item: TokenStream) -> TokenStream {
-    try_generate_from_attr(params.clone(), item.clone()).unwrap_or_else(|err| {
-        [
-            generate_completion_triggers(params),
-            crate::error::error_into_token_stream(err, item),
-        ]
-        .concat()
+    crate::error::with_fallback(item.clone(), || {
+        try_generate_from_attr(params.clone(), item)
     })
+    .unwrap_or_else(|fallback| [generate_completion_triggers(params), fallback].concat())
 }
 
 fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<TokenStream> {
@@ -57,6 +54,7 @@ fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<Toke
     let main_output = match item {
         syn::Item::Fn(item_fn) => {
             let mut namespace = GenericsNamespace::default();
+
             namespace.visit_token_stream(params.clone());
             namespace.visit_item_fn(&item_fn);
 

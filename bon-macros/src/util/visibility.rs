@@ -16,7 +16,7 @@ pub(crate) trait VisibilityExt {
     /// - `pub(in super::path)` -> `pub(in super::super::path)`
     ///
     /// Note that absolute paths in `pub(in ...)` are not supported with Rust 2018+,
-    /// according to the [rust reference]:
+    /// according to the [Rust reference]:
     ///
     /// > Edition Differences: Starting with the 2018 edition, paths for pub(in path)
     /// > must start with crate, self, or super. The 2015 edition may also use paths
@@ -28,7 +28,7 @@ pub(crate) trait VisibilityExt {
     /// For example, some syntax that isn't known to the latest version of Rust
     /// this code was written for.
     ///
-    /// [rust reference]: https://doc.rust-lang.org/reference/visibility-and-privacy.html#pubin-path-pubcrate-pubsuper-and-pubself
+    /// [Rust reference]: https://doc.rust-lang.org/reference/visibility-and-privacy.html#pubin-path-pubcrate-pubsuper-and-pubself
     fn into_equivalent_in_child_module(self) -> Result<syn::Visibility>;
 }
 

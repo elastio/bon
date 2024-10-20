@@ -1,7 +1,7 @@
 use super::builder_params::BuilderParams;
+use super::models::FinishFnParams;
 use super::{
-    AssocMethodCtx, BuilderGenCtx, FinishFnBody, Generics, Member, MemberOrigin,
-    RawMember,
+    AssocMethodCtx, BuilderGenCtx, FinishFnBody, Generics, Member, MemberOrigin, RawMember,
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
 use crate::normalization::{GenericsNamespace, SyntaxVariant};
@@ -11,7 +11,6 @@ use darling::FromMeta;
 use std::borrow::Cow;
 use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
-use super::models::FinishFnParams;
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct StructInputParams {

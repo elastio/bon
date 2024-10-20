@@ -83,17 +83,3 @@ error: use a simple `identifier: type` syntax for the function argument; destruc
    |
 69 | fn destructuring2((_, _): (u32, u32)) {}
    |                   ^^^^^^
-
-warning: unused attribute
-  --> tests/integration/ui/compile_fail/attr_builder.rs:59:1
-   |
-59 | #[must_use]
-   | ^^^^^^^^^^^ help: remove this attribute
-   |
-note: attribute also specified here
-  --> tests/integration/ui/compile_fail/attr_builder.rs:58:1
-   |
-58 | #[must_use]
-   | ^^^^^^^^^^^
-   = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
-   = note: `#[warn(unused_attributes)]` on by default

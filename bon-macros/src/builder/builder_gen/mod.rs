@@ -67,8 +67,8 @@ impl BuilderGenCtx {
                 &Span::call_site(),
                 "bug in the `bon` crate: the macro generated code that contains syntax errors; \
                 please report this issue at our Github repository: \
-                https://github.com/elastio/bon.\n\
-                syntax error in generated code: {err:#?}.\n\
+                https://github.com/elastio/bon;\n\
+                syntax error in generated code: {err:#?};\n\
                 generated code:\n\
                 ```rust
                 {other_items_str}\n\

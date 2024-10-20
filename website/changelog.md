@@ -33,12 +33,16 @@ All the breaking changes are very unlikely to actually break your code using the
   - For members with defaults values show the default value in the docs.
   - For optional members provide a link to a companion setter. The docs for `{member}(T)` setter mention the `maybe_{member}(Option<T>)` setter and vice versa.
   - Remove `__` prefixes for generic types and lifetimes from internal symbols. Instead, the prefixes added only if the macro detects a name collision.
-- Add inheritance of `#[allow()]` and `#[expect()]` lint attributes to all generated items. This is useful to suppress any lints coming from the generated code. Although, lints coming from the generated code are generally considered defects in `bon` and should be reported via a Github issue but this provides an easy temporary workaround the problem  ([#145](https://github.com/elastio/bon/pull/145))
+- Add inheritance of `#[allow()]` and `#[expect()]` lint attributes to all generated items. This is useful to suppress any lints coming from the generated code. Although, lints coming from the generated code are generally considered defects in `bon` and should be reported via a Github issue but this provides an easy temporary workaround the problem ([#145](https://github.com/elastio/bon/pull/145))
 
 ### Fixed
 
 - Fixed `#[cfg/cfg_attr()]` not being expanded when used on function arguments with doc comments or other attributes.
 
+
+### Other
+
+- Added graceful internal panic handling. If some `bon` macro panics due to an internal bug, the macro will try to still generate a fallback for IDEs to still provide intellisense ([#145](https://github.com/elastio/bon/pull/145))
 
 ## [2.3.0](https://github.com/elastio/bon/compare/v2.2.1...v2.3.0) - 2024-09-14
 

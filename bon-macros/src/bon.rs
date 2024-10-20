@@ -3,8 +3,8 @@ use crate::normalization::{ExpandCfg, ExpansionOutput};
 use crate::util::prelude::*;
 
 pub(crate) fn generate(params: TokenStream, item: TokenStream) -> TokenStream {
-    try_generate(params, item.clone())
-        .unwrap_or_else(|err| crate::error::error_into_token_stream(err, item))
+    crate::error::with_fallback(item.clone(), || try_generate(params, item))
+        .unwrap_or_else(std::convert::identity)
 }
 
 pub(crate) fn try_generate(params: TokenStream, item: TokenStream) -> Result<TokenStream> {
