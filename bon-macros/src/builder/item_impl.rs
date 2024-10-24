@@ -1,4 +1,5 @@
-use super::builder_gen::input_fn::{FnInputCtx, FnInputParams, ImplCtx};
+use super::builder_gen::input_fn::{FnInputCtx, FnInputCtxParams, ImplCtx};
+use super::builder_gen::TopLevelConfig;
 use crate::normalization::{GenericsNamespace, SyntaxVariant};
 use crate::util::prelude::*;
 use darling::ast::NestedMeta;
@@ -7,7 +8,19 @@ use std::rc::Rc;
 use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
 
-pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream> {
+#[derive(FromMeta)]
+pub(crate) struct ImplInputParams {
+    /// Overrides the path to the `bon` crate.
+    #[darling(rename = "crate", default, map = Some, with = crate::parsing::parse_path_mod_style)]
+    bon: Option<syn::Path>,
+}
+
+// ImplInputParams will evolve in the future where we'll probably want to move from it
+#[allow(clippy::needless_pass_by_value)]
+pub(crate) fn generate(
+    impl_params: ImplInputParams,
+    mut orig_impl_block: syn::ItemImpl,
+) -> Result<TokenStream> {
     let mut namespace = GenericsNamespace::default();
     namespace.visit_item_impl(&orig_impl_block);
 
@@ -114,19 +127,30 @@ pub(crate) fn generate(mut orig_impl_block: syn::ItemImpl) -> Result<TokenStream
                 .flatten()
                 .collect::<Vec<_>>();
 
-            let params = FnInputParams::from_list(&meta)?;
+            let mut config = TopLevelConfig::parse_for_fn(&meta)?;
+
+            if let Some(bon) = config.bon {
+                bail!(
+                    &bon,
+                    "`crate` parameter should be specified via `#[bon(crate = path::to::bon)]` \
+                    when impl block syntax is used; no need to specify it in the method's \
+                    `#[builder]` attribute"
+                );
+            }
+
+            config.bon.clone_from(&impl_params.bon);
 
             let fn_item = SyntaxVariant {
                 orig: orig_fn,
                 norm: norm_fn,
             };
 
-            let ctx = FnInputCtx {
+            let ctx = FnInputCtx::new(FnInputCtxParams {
                 namespace: &namespace,
                 fn_item,
                 impl_ctx: Some(impl_ctx.clone()),
-                params,
-            };
+                config,
+            });
 
             Result::<_>::Ok((ctx.adapted_fn()?, ctx.into_builder_gen_ctx()?.output()?))
         })

@@ -20,6 +20,9 @@ pub mod builder_top_level {
 
         /// See the docs at <https://elastio.github.io/bon/reference/builder#start-fn>
         pub const vis: VisibilityString = VisibilityString;
+
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#start-fn>
+        pub const doc: DocComments = DocComments;
     }
 
     /// See the docs at <https://elastio.github.io/bon/reference/builder#finish-fn>
@@ -76,3 +79,8 @@ pub struct Identifier;
 
 /// The presence of this attribute enables the behavior. The attribute has no value.
 pub struct Flag;
+
+/// Documentation comments using the syntax `/// doc comment here`.
+///
+/// [Rust reference](https://doc.rust-lang.org/reference/comments.html#doc-comments)
+pub struct DocComments;

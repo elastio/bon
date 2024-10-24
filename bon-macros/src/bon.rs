@@ -1,39 +1,35 @@
 use crate::builder;
-use crate::normalization::{ExpandCfg, ExpansionOutput};
+use crate::normalization::{ExpandCfg, Expansion};
 use crate::util::prelude::*;
+use darling::ast::NestedMeta;
+use darling::FromMeta;
 
 pub(crate) fn generate(params: TokenStream, item: TokenStream) -> TokenStream {
-    crate::error::with_fallback(item.clone(), || try_generate(params, item))
+    crate::error::handle_errors(item.clone(), || try_generate(params, item))
         .unwrap_or_else(std::convert::identity)
 }
 
 pub(crate) fn try_generate(params: TokenStream, item: TokenStream) -> Result<TokenStream> {
     let item: syn::Item = syn::parse2(item)?;
-    let macro_path = syn::parse_quote!(::bon::bon);
 
     let ctx = ExpandCfg {
-        macro_path,
+        current_macro: format_ident!("bon"),
         params,
         item,
     };
 
-    let (params, item) = match ctx.expand_cfg()? {
-        ExpansionOutput::Expanded { params, item } => (params, item),
-        ExpansionOutput::Recurse(output) => return Ok(output),
+    let input = match ctx.expand_cfg()? {
+        Expansion::Expanded(input) => input,
+        Expansion::Recurse(output) => return Ok(output),
     };
 
-    if !params.is_empty() {
-        bail!(
-            &params,
-            "`#[bon]` attribute does not accept any parameters yet, \
-            but it will in future releases"
-        );
-    }
+    let params = NestedMeta::parse_meta_list(input.params)?;
+    let params = FromMeta::from_list(&params)?;
 
-    match item {
-        syn::Item::Impl(item_impl) => builder::item_impl::generate(item_impl),
+    match input.item {
+        syn::Item::Impl(item_impl) => builder::item_impl::generate(params, item_impl),
         _ => bail!(
-            &item,
+            &input.item,
             "`#[bon]` attribute is expected to be placed on an `impl` block \
              but it was placed on other syntax instead"
         ),

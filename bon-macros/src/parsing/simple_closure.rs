@@ -1,6 +1,6 @@
+use super::reject_syntax;
 use crate::util::prelude::*;
 use darling::FromMeta;
-use syn::spanned::Spanned;
 
 /// Utility type for parsing simple closure syntax that only allows [`syn::PatIdent`]
 /// inputs and rejects any attributes and prefix keywords like `async`, `move`, `for`
@@ -62,16 +62,6 @@ impl FromMeta for SimpleClosure {
             output: closure.output.clone(),
         })
     }
-}
-
-// Lint from nightly. `&Option<T>` is used to reduce syntax at the callsite
-#[allow(unknown_lints, clippy::ref_option)]
-fn reject_syntax<T: Spanned>(name: &'static str, syntax: &Option<T>) -> Result {
-    if let Some(syntax) = syntax {
-        bail!(syntax, "{name} is not allowed here")
-    }
-
-    Ok(())
 }
 
 impl SimpleClosureInput {

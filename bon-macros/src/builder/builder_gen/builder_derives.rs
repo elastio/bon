@@ -1,4 +1,4 @@
-use super::top_level_params::{BuilderDerive, BuilderDerives};
+use super::top_level_config::{DeriveConfig, DerivesConfig};
 use super::BuilderGenCtx;
 use crate::builder::builder_gen::Member;
 use crate::util::prelude::*;
@@ -6,7 +6,7 @@ use darling::ast::GenericParamExt;
 
 impl BuilderGenCtx {
     pub(crate) fn builder_derives(&self) -> TokenStream {
-        let BuilderDerives { clone, debug } = &self.builder_type.derives;
+        let DerivesConfig { clone, debug } = &self.builder_type.derives;
 
         let mut tokens = TokenStream::new();
 
@@ -31,7 +31,7 @@ impl BuilderGenCtx {
     fn where_clause_for_derive(
         &self,
         target_trait_bounds: &TokenStream,
-        derive: &BuilderDerive,
+        derive: &DeriveConfig,
     ) -> TokenStream {
         let derive_specific_predicates = derive
             .bounds
@@ -64,7 +64,8 @@ impl BuilderGenCtx {
         }
     }
 
-    fn derive_clone(&self, derive: &BuilderDerive) -> TokenStream {
+    fn derive_clone(&self, derive: &DeriveConfig) -> TokenStream {
+        let bon = &self.bon;
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
         let builder_ident = &self.builder_type.ident;
@@ -113,7 +114,7 @@ impl BuilderGenCtx {
             let ty = member.underlying_norm_ty();
 
             quote! {
-                ::bon::private::derives::clone_member::<#ty>(
+                #bon::__private::derives::clone_member::<#ty>(
                     &self.#named_members_field.#member_index
                 )
             }
@@ -153,10 +154,11 @@ impl BuilderGenCtx {
         }
     }
 
-    fn derive_debug(&self, derive: &BuilderDerive) -> TokenStream {
+    fn derive_debug(&self, derive: &DeriveConfig) -> TokenStream {
         let receiver_field = &self.ident_pool.receiver;
         let start_fn_args_field = &self.ident_pool.start_fn_args;
         let named_members_field = &self.ident_pool.named_members;
+        let bon = &self.bon;
 
         let format_members = self.members.iter().filter_map(|member| {
             match member {
@@ -168,7 +170,7 @@ impl BuilderGenCtx {
                         if let Some(value) = &self.#named_members_field.#member_index {
                             output.field(
                                 #member_ident_str,
-                                ::bon::private::derives::as_dyn_debug::<#member_ty>(value)
+                                #bon::__private::derives::as_dyn_debug::<#member_ty>(value)
                             );
                         }
                     })
@@ -180,7 +182,7 @@ impl BuilderGenCtx {
                     Some(quote! {
                         output.field(
                             #member_ident_str,
-                            ::bon::private::derives::as_dyn_debug::<#member_ty>(
+                            #bon::__private::derives::as_dyn_debug::<#member_ty>(
                                 &self.#start_fn_args_field.#member_index
                             )
                         );
@@ -199,7 +201,7 @@ impl BuilderGenCtx {
             quote! {
                 output.field(
                     "self",
-                    ::bon::private::derives::as_dyn_debug::<#ty>(
+                    #bon::__private::derives::as_dyn_debug::<#ty>(
                         &self.#receiver_field
                     )
                 );

@@ -1,16 +1,16 @@
 mod into_conversion;
+mod config;
 mod named;
-mod params;
 
+pub(crate) use config::*;
 pub(crate) use named::*;
-pub(crate) use params::*;
 
-use super::top_level_params::OnParams;
+use super::top_level_config::OnConfig;
 use crate::normalization::SyntaxVariant;
 use crate::parsing::SpannedKey;
 use crate::util::prelude::*;
 use darling::FromAttributes;
-use params::MemberParams;
+use config::MemberConfig;
 use std::fmt;
 
 #[derive(Debug, Clone, Copy)]
@@ -71,7 +71,7 @@ pub(crate) struct PositionalFnArgMember {
     pub(crate) ty: SyntaxVariant<Box<syn::Type>>,
 
     /// Parameters configured by the user explicitly via attributes
-    pub(crate) params: MemberParams,
+    pub(crate) meta: MemberConfig,
 }
 
 /// Member that was skipped by the user with `#[builder(skip)]`
@@ -99,7 +99,7 @@ impl Member {
     // (there is an other lint that checks for this).
     #[allow(single_use_lifetimes)]
     pub(crate) fn from_raw<'a>(
-        on_params: &[OnParams],
+        on: &[OnConfig],
         origin: MemberOrigin,
         members: impl IntoIterator<Item = RawMember<'a>>,
     ) -> Result<Vec<Self>> {
@@ -114,7 +114,7 @@ impl Member {
                     }
                 }
 
-                let params = MemberParams::from_attributes(member.attrs)?;
+                let params = MemberConfig::from_attributes(member.attrs)?;
                 params.validate(origin)?;
                 Ok((member, params))
             })
@@ -125,12 +125,12 @@ impl Member {
         let mut output = vec![];
 
         for index in 0.. {
-            let next = members.next_if(|(_, params)| params.start_fn.is_present());
-            let (member, params) = match next {
+            let next = members.next_if(|(_, meta)| meta.start_fn.is_present());
+            let (member, meta) = match next {
                 Some(item) => item,
                 None => break,
             };
-            let base = PositionalFnArgMember::new(origin, member, on_params, params)?;
+            let base = PositionalFnArgMember::new(origin, member, on, meta)?;
             output.push(Self::StartFnArg(StartFnArgMember {
                 base,
                 index: index.into(),
@@ -140,7 +140,7 @@ impl Member {
         while let Some((member, params)) =
             members.next_if(|(_, params)| params.finish_fn.is_present())
         {
-            let member = PositionalFnArgMember::new(origin, member, on_params, params)?;
+            let member = PositionalFnArgMember::new(origin, member, on, params)?;
             output.push(Self::FinishFnArg(member));
         }
 
@@ -191,11 +191,11 @@ impl Member {
                 origin,
                 name: MemberName::new(ident, &params),
                 ty,
-                params,
+                config: params,
                 docs,
             };
 
-            member.merge_on_params(on_params)?;
+            member.merge_on_params(on)?;
             member.validate()?;
 
             output.push(Self::Named(member));
@@ -251,8 +251,8 @@ impl PositionalFnArgMember {
     fn new(
         origin: MemberOrigin,
         member: RawMember<'_>,
-        on_params: &[OnParams],
-        params: MemberParams,
+        on_params: &[OnConfig],
+        params: MemberConfig,
     ) -> Result<Self> {
         let RawMember {
             attrs: _,
@@ -264,7 +264,7 @@ impl PositionalFnArgMember {
             origin,
             ident,
             ty,
-            params,
+            meta: params,
         };
 
         me.merge_param_into(on_params)?;

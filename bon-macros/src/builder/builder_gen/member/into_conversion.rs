@@ -1,13 +1,13 @@
-use super::params::{BlanketParamName, EvalBlanketFlagParam};
+use super::config::{BlanketParamName, EvalBlanketFlagParam};
 use super::{NamedMember, PositionalFnArgMember};
-use crate::builder::builder_gen::top_level_params::OnParams;
+use crate::builder::builder_gen::top_level_config::OnConfig;
 use crate::util::prelude::*;
 
 impl NamedMember {
-    pub(super) fn merge_param_into(&mut self, on_params: &[OnParams]) -> Result {
+    pub(super) fn merge_param_into(&mut self, on: &[OnConfig]) -> Result {
         // `with` is mutually exclusive with `into`. So there is nothing to merge here
         // if `with` is present.
-        if self.params.with.is_some() {
+        if self.config.with.is_some() {
             return Ok(());
         }
 
@@ -17,10 +17,10 @@ impl NamedMember {
         // if `Option<T>` is used or the member of type `T` has `#[builder(default)]` on it.
         let scrutinee = self.underlying_orig_ty();
 
-        self.params.into = EvalBlanketFlagParam {
-            on_params,
+        self.config.into = EvalBlanketFlagParam {
+            on,
             param_name: BlanketParamName::Into,
-            member_params: &self.params,
+            member_config: &self.config,
             scrutinee,
             origin: self.origin,
         }
@@ -31,16 +31,16 @@ impl NamedMember {
 }
 
 impl PositionalFnArgMember {
-    pub(crate) fn merge_param_into(&mut self, on_params: &[OnParams]) -> Result {
+    pub(crate) fn merge_param_into(&mut self, on: &[OnConfig]) -> Result {
         // Positional members are never optional. Users must always specify them, so there
         // is no need for us to look into the `Option<T>` generic parameter, because the
         // `Option<T>` itself is the target of the into conversion, not the `T` inside it.
         let scrutinee = self.ty.orig.as_ref();
 
-        self.params.into = EvalBlanketFlagParam {
-            on_params,
+        self.meta.into = EvalBlanketFlagParam {
+            on,
             param_name: BlanketParamName::Into,
-            member_params: &self.params,
+            member_config: &self.meta,
             scrutinee,
             origin: self.origin,
         }
@@ -53,7 +53,7 @@ impl PositionalFnArgMember {
         let ty = &self.ty.norm;
         let ident = &self.ident;
 
-        if self.params.into.is_present() {
+        if self.meta.into.is_present() {
             quote! { #ident: impl Into<#ty> }
         } else {
             quote! { #ident: #ty }
@@ -63,7 +63,7 @@ impl PositionalFnArgMember {
     pub(crate) fn init_expr(&self) -> TokenStream {
         let ident = &self.ident;
 
-        if self.params.into.is_present() {
+        if self.meta.into.is_present() {
             quote! {
                 Into::into(#ident)
             }

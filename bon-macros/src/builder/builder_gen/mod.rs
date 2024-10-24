@@ -1,5 +1,5 @@
 mod builder_derives;
-mod top_level_params;
+mod top_level_config;
 mod finish_fn;
 mod member;
 mod models;
@@ -8,6 +8,8 @@ mod state_mod;
 
 pub(crate) mod input_fn;
 pub(crate) mod input_struct;
+
+pub(crate) use top_level_config::TopLevelConfig;
 
 use crate::util::prelude::*;
 use member::{Member, MemberOrigin, NamedMember, RawMember, StartFnArgMember};
@@ -44,7 +46,7 @@ impl BuilderGenCtx {
         let builder_derives = self.builder_derives();
 
         let default_allows = syn::parse_quote!(#[allow(
-            // We have a `deprecated` lint on all `bon::private` items which we
+            // We have a `deprecated` lint on all `bon::__private` items which we
             // use in the generated code extensively
             deprecated
         )]);
@@ -131,7 +133,7 @@ impl BuilderGenCtx {
     /// hints.
     fn ide_hints(&self) -> TokenStream {
         let type_patterns = self
-            .on_params
+            .on
             .iter()
             .map(|params| &params.type_pattern)
             .collect::<Vec<_>>();
@@ -163,7 +165,7 @@ impl BuilderGenCtx {
 
     fn start_fn(&self) -> syn::ItemFn {
         let builder_ident = &self.builder_type.ident;
-        let attrs = &self.start_fn.attrs;
+        let docs = &self.start_fn.docs;
         let vis = &self.start_fn.vis;
 
         let start_fn_ident = &self.start_fn.ident;
@@ -231,7 +233,7 @@ impl BuilderGenCtx {
         };
 
         syn::parse_quote! {
-            #(#attrs)*
+            #(#docs)*
             #[inline(always)]
             #[allow(
                 // This is intentional. We want the builder syntax to compile away

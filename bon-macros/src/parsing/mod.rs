@@ -1,10 +1,10 @@
 mod docs;
-mod item_params;
+mod item_sig;
 mod simple_closure;
 mod spanned_key;
 
 pub(crate) use docs::*;
-pub(crate) use item_params::*;
+pub(crate) use item_sig::*;
 pub(crate) use simple_closure::*;
 pub(crate) use spanned_key::*;
 
@@ -12,6 +12,7 @@ use crate::util::prelude::*;
 use darling::FromMeta;
 use syn::parse::Parser;
 use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
 
 pub(crate) fn parse_non_empty_paren_meta_list<T: FromMeta>(meta: &syn::Meta) -> Result<T> {
     require_non_empty_paren_meta_list_or_name_value(meta)?;
@@ -80,4 +81,35 @@ where
     let punctuated = Punctuated::parse_terminated.parse2(meta.tokens.clone())?;
 
     Ok(punctuated)
+}
+
+pub(crate) fn parse_path_mod_style(meta: &syn::Meta) -> Result<syn::Path> {
+    let err = |span: Span| err!(&span, "expected a bare path, like `foo::bar`");
+
+    let expr = match meta {
+        syn::Meta::NameValue(meta) => &meta.value,
+        _ => return Err(err(meta.span())),
+    };
+
+    let expr = match expr {
+        syn::Expr::Path(expr) => expr,
+        _ => return Err(err(expr.span())),
+    };
+
+    reject_syntax("attribute", &expr.attrs.first())?;
+    reject_syntax("<T as Trait> syntax", &expr.qself)?;
+
+    expr.path.require_mod_style()?;
+
+    Ok(expr.path.clone())
+}
+
+// Lint from nightly. `&Option<T>` is used to reduce syntax at the callsite
+#[allow(unknown_lints, clippy::ref_option)]
+fn reject_syntax<T: Spanned>(name: &'static str, syntax: &Option<T>) -> Result {
+    if let Some(syntax) = syntax {
+        bail!(syntax, "{name} is not allowed here")
+    }
+
+    Ok(())
 }

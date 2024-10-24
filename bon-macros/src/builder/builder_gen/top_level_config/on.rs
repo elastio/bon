@@ -5,13 +5,13 @@ use syn::spanned::Spanned;
 use syn::visit::Visit;
 
 #[derive(Debug)]
-pub(crate) struct OnParams {
+pub(crate) struct OnConfig {
     pub(crate) type_pattern: syn::Type,
     pub(crate) into: darling::util::Flag,
     pub(crate) overwritable: darling::util::Flag,
 }
 
-impl Parse for OnParams {
+impl Parse for OnConfig {
     fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
         let type_pattern = input.parse()?;
 
@@ -86,7 +86,7 @@ impl Parse for OnParams {
     }
 }
 
-impl FromMeta for OnParams {
+impl FromMeta for OnConfig {
     fn from_meta(meta: &syn::Meta) -> Result<Self> {
         let meta = match meta {
             syn::Meta::List(meta) => meta,

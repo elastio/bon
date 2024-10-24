@@ -1,3 +1,5 @@
+mod panic_context;
+
 use crate::util::prelude::*;
 use proc_macro2::{Group, TokenTree};
 use std::panic::AssertUnwindSafe;
@@ -15,17 +17,16 @@ use syn::parse::Parse;
 ///
 /// One known bug that may cause panics when using Rust Analyzer is the following one:
 /// <https://github.com/rust-lang/rust-analyzer/issues/18244>
-pub(crate) fn with_fallback(
+pub(crate) fn handle_errors(
     item: TokenStream,
     imp: impl FnOnce() -> Result<TokenStream>,
 ) -> Result<TokenStream, TokenStream> {
+    let panic_listener = panic_context::PanicListener::register();
+
     std::panic::catch_unwind(AssertUnwindSafe(imp))
         .unwrap_or_else(|err| {
-            let msg = err
-                .downcast::<&str>()
-                .map(|msg| msg.to_string())
-                .or_else(|err| err.downcast::<String>().map(|msg| *msg))
-                .unwrap_or_else(|_| "<unknown error message>".to_owned());
+            let msg = panic_context::message_from_panic_payload(err.as_ref())
+                .unwrap_or_else(|| "<unknown error message>".to_owned());
 
             let msg = if msg.contains("unsupported proc macro punctuation character") {
                 format!(
@@ -33,10 +34,15 @@ pub(crate) fn with_fallback(
                     Github issue: https://github.com/rust-lang/rust-analyzer/issues/18244"
                 )
             } else {
+                let context = panic_listener
+                    .get_last_panic()
+                    .map(|ctx| format!("\n\n{ctx}"))
+                    .unwrap_or_default();
+
                 format!(
-                    "bug in the crate `bon` (proc-macro panicked): `{msg}`;\n\
+                    "proc-macro panicked (may be a bug in the crate `bon`): `{msg}`;\n\
                     please report this issue at our Github repository: \
-                    https://github.com/elastio/bon"
+                    https://github.com/elastio/bon{context}"
                 )
             };
 

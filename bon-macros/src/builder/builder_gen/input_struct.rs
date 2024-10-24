@@ -1,76 +1,57 @@
-use super::top_level_params::TopLevelParams;
 use super::models::FinishFnParams;
+use super::top_level_config::TopLevelConfig;
 use super::{
     AssocMethodCtx, BuilderGenCtx, FinishFnBody, Generics, Member, MemberOrigin, RawMember,
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
 use crate::normalization::{GenericsNamespace, SyntaxVariant};
-use crate::parsing::{SymbolParams, ItemParamsParsing, SpannedKey};
+use crate::parsing::{SpannedKey, ItemSigConfig};
 use crate::util::prelude::*;
 use darling::FromMeta;
 use std::borrow::Cow;
 use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
 
-#[derive(Debug, FromMeta)]
-pub(crate) struct StructInputParams {
-    #[darling(flatten)]
-    base: TopLevelParams,
+fn parse_top_level_params(item_struct: &syn::ItemStruct) -> Result<TopLevelConfig> {
+    let meta = item_struct
+        .attrs
+        .iter()
+        .filter(|attr| attr.path().is_ident("builder"))
+        .map(|attr| {
+            let meta = match &attr.meta {
+                syn::Meta::List(meta) => meta,
+                syn::Meta::Path(_) => bail!(
+                    &attr.meta,
+                    "this empty `#[builder]` attribute is redundant; remove it"
+                ),
+                syn::Meta::NameValue(_) => bail!(
+                    &attr.meta,
+                    "`#[builder = ...]` syntax is unsupported; use `#[builder(...)]` instead"
+                ),
+            };
 
-    #[darling(default, with = parse_start_fn)]
-    start_fn: SymbolParams,
-}
+            crate::parsing::require_non_empty_paren_meta_list_or_name_value(&attr.meta)?;
 
-fn parse_start_fn(meta: &syn::Meta) -> Result<SymbolParams> {
-    ItemParamsParsing {
-        meta,
-        reject_self_mentions: None,
-    }
-    .parse()
-}
+            let meta = darling::ast::NestedMeta::parse_meta_list(meta.tokens.clone())?;
 
-impl StructInputParams {
-    fn parse(item_struct: &syn::ItemStruct) -> Result<Self> {
-        let meta = item_struct
-            .attrs
-            .iter()
-            .filter(|attr| attr.path().is_ident("builder"))
-            .map(|attr| {
-                let meta = match &attr.meta {
-                    syn::Meta::List(meta) => meta,
-                    syn::Meta::Path(_) => bail!(
-                        &attr.meta,
-                        "this empty `#[builder]` attribute is redundant; remove it"
-                    ),
-                    syn::Meta::NameValue(_) => bail!(
-                        &attr.meta,
-                        "`#[builder = ...]` syntax is unsupported; use `#[builder(...)]` instead"
-                    ),
-                };
+            Ok(meta)
+        })
+        .collect::<Result<Vec<_>>>()?
+        .into_iter()
+        .concat();
 
-                crate::parsing::require_non_empty_paren_meta_list_or_name_value(&attr.meta)?;
-
-                let meta = darling::ast::NestedMeta::parse_meta_list(meta.tokens.clone())?;
-
-                Ok(meta)
-            })
-            .collect::<Result<Vec<_>>>()?
-            .into_iter()
-            .concat();
-
-        Self::from_list(&meta)
-    }
+    TopLevelConfig::from_list(&meta)
 }
 
 pub(crate) struct StructInputCtx {
     struct_item: SyntaxVariant<syn::ItemStruct>,
-    params: StructInputParams,
+    params: TopLevelConfig,
     struct_ty: syn::Type,
 }
 
 impl StructInputCtx {
     pub(crate) fn new(orig_struct: syn::ItemStruct) -> Result<Self> {
-        let params = StructInputParams::parse(&orig_struct)?;
+        let params = parse_top_level_params(&orig_struct)?;
 
         let generic_args = orig_struct
             .generics
@@ -138,7 +119,7 @@ impl StructInputCtx {
             })
             .collect::<Result<Vec<_>>>()?;
 
-        let members = Member::from_raw(&self.params.base.on, MemberOrigin::StructField, members)?;
+        let members = Member::from_raw(&self.params.on, MemberOrigin::StructField, members)?;
 
         let generics = Generics::new(
             self.struct_item
@@ -155,7 +136,7 @@ impl StructInputCtx {
             struct_ident: self.struct_item.norm.ident.clone(),
         };
 
-        let SymbolParams {
+        let ItemSigConfig {
             name: start_fn_ident,
             vis: start_fn_vis,
             docs: start_fn_docs,
@@ -165,11 +146,11 @@ impl StructInputCtx {
             .map(SpannedKey::into_value)
             .unwrap_or_else(|| syn::Ident::new("builder", self.struct_item.norm.ident.span()));
 
-        let SymbolParams {
+        let ItemSigConfig {
             name: finish_fn_ident,
             vis: finish_fn_vis,
             docs: finish_fn_docs,
-        } = self.params.base.finish_fn;
+        } = self.params.finish_fn;
 
         let finish_fn_ident = finish_fn_ident
             .map(SpannedKey::into_value)
@@ -209,7 +190,7 @@ impl StructInputCtx {
         let start_fn = StartFnParams {
             ident: start_fn_ident,
             vis: start_fn_vis.map(SpannedKey::into_value),
-            attrs: start_fn_docs,
+            docs: start_fn_docs,
             generics: None,
         };
 
@@ -227,14 +208,14 @@ impl StructInputCtx {
             .collect();
 
         let builder_type = {
-            let SymbolParams { name, vis, docs } = self.params.base.builder_type;
+            let ItemSigConfig { name, vis, docs } = self.params.builder_type;
 
             let builder_ident = name.map(SpannedKey::into_value).unwrap_or_else(|| {
                 format_ident!("{}Builder", self.struct_item.norm.ident.raw_name())
             });
 
             BuilderTypeParams {
-                derives: self.params.base.derive,
+                derives: self.params.derive,
                 ident: builder_ident,
                 docs: docs.map(SpannedKey::into_value),
                 vis: vis.map(SpannedKey::into_value),
@@ -245,19 +226,20 @@ impl StructInputCtx {
         namespace.visit_item_struct(&self.struct_item.orig);
 
         BuilderGenCtx::new(BuilderGenCtxParams {
+            bon: self.params.bon,
             namespace: Cow::Owned(namespace),
             members,
 
             allow_attrs,
 
-            on_params: self.params.base.on,
+            on: self.params.on,
 
             assoc_method_ctx,
             generics,
             orig_item_vis: self.struct_item.norm.vis,
 
             builder_type,
-            state_mod: self.params.base.state_mod,
+            state_mod: self.params.state_mod,
             start_fn,
             finish_fn,
         })
