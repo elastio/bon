@@ -8,6 +8,39 @@
 pub mod builder_top_level {
     use super::*;
 
+    /// See the docs at <https://elastio.github.io/bon/reference/builder#builder-type>
+    pub const builder_type: Option<Identifier> = None;
+
+    pub mod builder_type {
+        use super::*;
+
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#builder-type>
+        pub const name: Identifier = Identifier;
+
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#builder-type>
+        pub const vis: VisibilityString = VisibilityString;
+
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#builder-type>
+        pub const doc: DocComments = DocComments;
+    }
+
+    /// See the docs at <https://elastio.github.io/bon/reference/builder#finish-fn>
+    pub const finish_fn: Option<Identifier> = None;
+
+    /// See the docs at <https://elastio.github.io/bon/reference/builder#finish-fn>
+    pub mod finish_fn {
+        use super::*;
+
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#finish-fn>
+        pub const name: Identifier = Identifier;
+
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#finish-fn>
+        pub const vis: VisibilityString = VisibilityString;
+
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#finish-fn>
+        pub const doc: DocComments = DocComments;
+    }
+
     /// See the docs at <https://elastio.github.io/bon/reference/builder#start-fn>
     pub const start_fn: Option<Identifier> = None;
 
@@ -25,24 +58,21 @@ pub mod builder_top_level {
         pub const doc: DocComments = DocComments;
     }
 
-    /// See the docs at <https://elastio.github.io/bon/reference/builder#finish-fn>
-    pub const finish_fn: Option<Identifier> = None;
+    /// See the docs at <https://elastio.github.io/bon/reference/builder#state-mod>
+    pub const state_mod: Option<Identifier> = None;
 
-    /// See the docs at <https://elastio.github.io/bon/reference/builder#builder-type>
-    pub const builder_type: Option<Identifier> = None;
-
-    /// See the docs at <https://elastio.github.io/bon/reference/builder#expose-positional-fn>
-    pub const expose_positional_fn: Option<Identifier> = None;
-
-    /// See the docs at <https://elastio.github.io/bon/reference/builder#expose-positional-fn>
-    pub mod expose_positional_fn {
+    /// See the docs at <https://elastio.github.io/bon/reference/builder#state-mod>
+    pub mod state_mod {
         use super::*;
 
-        /// See the docs at <https://elastio.github.io/bon/reference/builder#expose-positional-fn>
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#state-mod>
         pub const name: Identifier = Identifier;
 
-        /// See the docs at <https://elastio.github.io/bon/reference/builder#expose-positional-fn>
-        pub const vis: Option<VisibilityString> = None;
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#state-mod>
+        pub const vis: VisibilityString = VisibilityString;
+
+        /// See the docs at <https://elastio.github.io/bon/reference/builder#state-mod>
+        pub const doc: DocComments = DocComments;
     }
 
     /// See the docs at <https://elastio.github.io/bon/reference/builder#on>
@@ -61,6 +91,13 @@ pub mod builder_top_level {
         /// See the docs at <https://elastio.github.io/bon/reference/builder#derive>
         pub use core::clone::Clone;
     }
+
+    /// The real name of this parameter is `crate` (without the underscore).
+    /// It's hinted with an underscore due to the limitations of the current
+    /// completions limitation. This will be fixed in the future.
+    ///
+    /// See the docs at <https://elastio.github.io/bon/reference/builder#crate>
+    pub const crate_: Option<Path> = None;
 }
 
 /// Visibility inside of a string literal. Empty string means private visibility.
@@ -84,3 +121,8 @@ pub struct Flag;
 ///
 /// [Rust reference](https://doc.rust-lang.org/reference/comments.html#doc-comments)
 pub struct DocComments;
+
+/// Simple path that is valid in a `use` statement. Example: `foo::bar::baz`.
+///
+/// [Rust reference](https://doc.rust-lang.org/reference/paths.html?highlight=path#simple-paths)
+pub struct Path;

@@ -21,33 +21,54 @@ fn empty_paren_start_fn_on_free_function() {}
 #[builder(start_fn(vis = ""))]
 fn missing_name_for_start_fn_on_free_function1() {}
 
-#[builder(start_fn(docs {}))]
+#[builder(start_fn(doc {}))]
 fn missing_name_for_start_fn_on_free_function2() {}
 
 struct AssocCtx;
+struct AssocCtx2;
+struct AssocCtx3;
+struct AssocCtx4;
 
 #[bon]
 impl AssocCtx {
     #[builder(start_fn)]
-    fn bare_start_fn_on_non_new_method() {}
+    fn new() {}
 }
 
 #[bon]
-impl AssocCtx {
+impl AssocCtx2 {
     #[builder(start_fn())]
     fn new() {}
 }
 
 #[bon]
-impl AssocCtx {
+impl AssocCtx3 {
     #[builder(start_fn(vis = ""))]
-    fn missing_name_for_start_fn_on_non_new_method1() {}
+    fn new() {}
+}
+
+#[bon]
+impl AssocCtx4 {
+    #[builder(start_fn(doc {}))]
+    fn new() {}
 }
 
 #[bon]
 impl AssocCtx {
-    #[builder(start_fn(docs {}))]
-    fn missing_name_for_start_fn_on_non_new_method2() {}
+    #[builder(start_fn)]
+    fn bare_start_fn_on_method() {}
+}
+
+#[bon]
+impl AssocCtx {
+    #[builder(start_fn(vis = ""))]
+    fn missing_name_for_start_fn_on_method1() {}
+}
+
+#[bon]
+impl AssocCtx {
+    #[builder(start_fn(doc {}))]
+    fn missing_name_for_start_fn_on_method2() {}
 }
 
 fn main() {}

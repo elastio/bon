@@ -33,10 +33,10 @@ struct SquareBracketsInFieldSetters {
 
 #[derive(bon::Builder)]
 #[builder(
-    builder_type(docs[]),
-    state_mod(docs[]),
-    start_fn(docs[]),
-    finish_fn(docs[]),
+    builder_type(doc[]),
+    state_mod(doc[]),
+    start_fn(doc[]),
+    finish_fn(doc[]),
 )]
 struct SquareBracketsInFieldDoc {
     #[builder(setters(doc[]))]

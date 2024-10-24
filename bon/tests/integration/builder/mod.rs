@@ -1,5 +1,6 @@
 mod attr_default;
 mod attr_derive;
+mod attr_crate;
 mod attr_into;
 mod attr_on;
 mod attr_overwritable;

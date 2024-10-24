@@ -1,4 +1,4 @@
-error: `#[bon]` attribute does not accept any parameters yet, but it will in future releases
+error: Unknown field: `attrs`
  --> tests/integration/ui/compile_fail/attr_bon.rs:5:7
   |
 5 | #[bon(attrs)]

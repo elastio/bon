@@ -138,8 +138,10 @@ pub(crate) fn generate_completion_triggers(meta: Vec<Meta>) -> TokenStream {
     let completions = CompletionsSchema::with_children(
         "builder_top_level",
         vec![
-            CompletionsSchema::leaf("expose_positional_fn"),
+            CompletionsSchema::leaf("builder_type"),
             CompletionsSchema::leaf("start_fn"),
+            CompletionsSchema::leaf("finish_fn"),
+            CompletionsSchema::leaf("state_mod"),
             CompletionsSchema::leaf("on").set_custom_filter(|meta| {
                 if !meta.is_empty() {
                     meta.remove(0);

@@ -33,7 +33,7 @@ pub(crate) fn require_non_empty_paren_meta_list_or_name_value(meta: &syn::Meta) 
         }
         syn::Meta::Path(path) => bail!(
             &meta,
-            "this empty `#[{0}]` attribute is unexpected; \
+            "this empty `{0}` attribute is unexpected; \
             remove it or pass parameters in parentheses: \
             `#[{0}(...)]`",
             darling::util::path_to_string(path)
