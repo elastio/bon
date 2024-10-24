@@ -1,3 +1,5 @@
+use syn::spanned::Spanned;
+
 pub(crate) trait AttributeExt {
     fn is_doc_expr(&self) -> bool;
     fn as_doc_expr(&self) -> Option<&syn::Expr>;
@@ -43,7 +45,7 @@ impl AttributeExt for syn::Attribute {
             syn::Meta::NameValue(meta) => &mut meta.path,
         };
 
-        *path = syn::parse_quote!(allow);
+        *path = syn::parse_quote_spanned!(path.span()=> allow);
 
         Some(attr)
     }

@@ -32,14 +32,14 @@ impl super::BuilderGenCtx {
         };
 
         let param_default = member
-            .params
+            .config
             .default
             .as_ref()
             .map(|default| default.value.as_ref());
 
         match param_default {
             Some(Some(default)) => {
-                let has_into = member.params.into.is_present();
+                let has_into = member.config.into.is_present();
                 let default = if has_into {
                     quote! { Into::into((|| #default)()) }
                 } else {

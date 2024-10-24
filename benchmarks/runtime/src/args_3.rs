@@ -13,8 +13,8 @@ pub fn builder_bench() -> u32 {
     builder().arg1(arg1).arg2(arg2).maybe_arg3(arg3).call()
 }
 
-#[builder(expose_positional_fn = regular)]
-fn builder(arg1: &str, arg2: u32, arg3: Option<&str>) -> u32 {
+#[builder(start_fn = builder)]
+fn regular(arg1: &str, arg2: u32, arg3: Option<&str>) -> u32 {
     let x = arg1.parse::<u32>().unwrap() + arg2;
     let x = x + arg3.map(|x| x.parse::<u32>().unwrap()).unwrap_or(0);
     x

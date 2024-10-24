@@ -87,8 +87,8 @@ pub fn builder_bench() -> u32 {
         .call()
 }
 
-#[builder(expose_positional_fn = regular)]
-fn builder(
+#[builder(start_fn = builder)]
+fn regular(
     arg1: Point3D,
     arg2: u32,
     arg3: bool,

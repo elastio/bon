@@ -22,7 +22,7 @@ error: nested attributes are not allowed in the type pattern of #[builder(on(typ
 12 | #[builder(on(fn(#[attr] a: u32), into))]
    |                 ^
 
-error: this empty `#[on]` attribute is unexpected; remove it or pass parameters in parentheses: `#[on(...)]`
+error: this empty `on` attribute is unexpected; remove it or pass parameters in parentheses: `#[on(...)]`
   --> tests/integration/ui/compile_fail/attr_on.rs:15:11
    |
 15 | #[builder(on)]

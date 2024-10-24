@@ -38,6 +38,7 @@ impl<'a> StateModGenCtx<'a> {
     }
 
     pub(super) fn state_mod(&self) -> TokenStream {
+        let bon = &self.base.bon;
         let vis = &self.base.state_mod.vis;
         let vis_child = &self.base.state_mod.vis_child;
         let vis_child_child = &self.base.state_mod.vis_child_child;
@@ -68,8 +69,8 @@ impl<'a> StateModGenCtx<'a> {
             #( #state_mod_docs )*
             #vis mod #state_mod_ident {
                 #[doc(inline)]
-                #vis_child use ::bon::private::{IsSet, IsUnset};
-                use ::bon::private::{Set, Unset};
+                #vis_child use #bon::__private::{IsSet, IsUnset};
+                use #bon::__private::{Set, Unset};
 
                 mod sealed {
                     #vis_child_child struct Sealed;

@@ -1,11 +1,12 @@
 mod attr_default;
 mod attr_derive;
-mod attr_expose_positional_fn;
+mod attr_crate;
 mod attr_into;
 mod attr_on;
 mod attr_overwritable;
 mod attr_setters;
 mod attr_skip;
+mod attr_top_level_start_fn;
 mod attr_transparent;
 mod attr_with;
 mod cfgs;
@@ -109,7 +110,7 @@ fn constructor() {
 
     #[bon]
     impl Counter {
-        #[builder(expose_positional_fn = new)]
+        #[builder(start_fn = builder)]
         fn new(initial: Option<u32>) -> Self {
             Self {
                 val: initial.unwrap_or_default(),

@@ -1,5 +1,5 @@
 //! The items here are intentionally defined in a private module not inside of the
-//! [`crate::private`] module. This is because that module is marked with `#[deprecated]`
+//! [`crate::__private`] module. This is because that module is marked with `#[deprecated]`
 //! which makes all items defined in that module also deprecated.
 //!
 //! This is not the desired behavior for the items defined here. They are not deprecated,
@@ -7,7 +7,7 @@
 //! them through the `bon` crate. Instead, they should use the re-exports from the state
 //! module generated for the builder.
 
-use crate::private::{Sealed, Set, Unset};
+use crate::__private::{Sealed, Set, Unset};
 
 /// Marker trait that indicates that the member is set, i.e. at least
 /// one of its setters was called.
