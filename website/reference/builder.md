@@ -315,7 +315,7 @@ If `vis` parameter is not specified, then the visibility of the exposed position
 
 ::: code-group
 
-```rust [Free function]
+```rust ignore [Free function]
 use bon::builder;
 
 #[builder(expose_positional_fn = example_positional)] // [!code highlight]
@@ -331,7 +331,7 @@ example()
     .call();
 ```
 
-```rust [Associated method]
+```rust ignore [Associated method]
 use bon::bon;
 
 struct Example;
@@ -365,7 +365,7 @@ So when `#[builder]` is placed on a method called `new`, it'll generate a method
 
 **Example:**
 
-```rust
+```rust ignore
 use bon::bon;
 
 struct Example {
@@ -968,10 +968,6 @@ In general, it's not recommended to annotate optional members with `#[builder(fi
 
 :::
 
-*[Member]: Struct field or a function argument
-*[member]: Struct field or a function argument
-*[members]: Struct fields or function arguments
-
 ### `into`
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
@@ -1311,3 +1307,7 @@ Importantly, `Into` conversions for such members work slightly differently from 
 In general, it's not recommended to annotate optional members with `#[builder(start_fn)]` because you can't omit setting them using the positional function call syntax.
 
 :::
+
+*[Member]: Struct field or a function argument
+*[member]: Struct field or a function argument
+*[members]: Struct fields or function arguments
