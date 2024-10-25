@@ -82,7 +82,7 @@ fn test_free_fn() {
 
         assert_debug_eq(
             &sut,
-            expect![[r#"(Some(99), Some(()), Some(2), Some("impl Trait"), Some(22))"#]],
+            expect!["(Some(99), Some(()), Some(2), Some(22))"],
         );
     }
     {
@@ -93,7 +93,7 @@ fn test_free_fn() {
             impl_trait
         }
 
-        assert_debug_eq(sut().impl_trait("impl Trait").call(), expect![]);
+        assert_debug_eq(sut().impl_trait("impl Trait").call(), expect![[r#"Some("impl Trait")"#]]);
     }
 }
 
@@ -158,7 +158,7 @@ fn test_assoc_method() {
 
     assert_debug_eq(
         &sut,
-        expect![[r#"(Some(99), Some(()), Some(2), Some("impl Trait"), Some(22))"#]],
+        expect!["(Some(99), Some(()), Some(2), Some(22))"],
     );
 
     let builder = Sut.with_self();
@@ -177,15 +177,15 @@ fn test_assoc_method() {
 
     assert_debug_eq(
         &sut,
-        expect![[r#"(Some(99), Some(()), Some(2), Some("impl Trait"), Some(22))"#]],
+        expect!["(Some(99), Some(()), Some(2), Some(22))"],
     );
 
     assert_debug_eq(
         Sut::sut_impl_trait().impl_trait("impl Trait").call(),
-        expect![],
+        expect![[r#"Some("impl Trait")"#]],
     );
     assert_debug_eq(
         Sut.with_self_impl_trait().impl_trait("impl Trait").call(),
-        expect![],
+        expect![[r#"Some("impl Trait")"#]],
     );
 }
