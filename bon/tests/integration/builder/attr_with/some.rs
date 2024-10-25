@@ -55,36 +55,46 @@ fn test_struct() {
 
 #[test]
 fn test_free_fn() {
-    #[builder(derive(Clone))]
-    fn sut<T: fmt::Debug>(
-        #[builder(transparent, with = Some)] required: Option<i32>,
-        #[builder(transparent, with = Some, default = Some(()))] optional: Option<()>,
-        #[builder(transparent, with = Some)] generic: Option<T>,
-        #[builder(transparent, with = Some)] impl_trait: Option<impl fmt::Debug>,
-        #[builder(transparent, with = Some, default = None)] optional_generic: Option<T>,
-    ) -> impl fmt::Debug {
-        (required, optional, generic, impl_trait, optional_generic)
+    {
+        #[builder(derive(Clone))]
+        fn sut<T: fmt::Debug>(
+            #[builder(transparent, with = Some)] required: Option<i32>,
+            #[builder(transparent, with = Some, default = Some(()))] optional: Option<()>,
+            #[builder(transparent, with = Some)] generic: Option<T>,
+            #[builder(transparent, with = Some, default = None)] optional_generic: Option<T>,
+        ) -> impl fmt::Debug {
+            (required, optional, generic, optional_generic)
+        }
+
+        let builder = sut();
+
+        let builder = builder.required(99);
+
+        let _ignore = builder.clone().optional(());
+        let builder = builder.maybe_optional(None);
+
+        let builder = builder.generic(2);
+
+        let _ignore = builder.clone().optional_generic(21);
+        let builder = builder.maybe_optional_generic(Some(22));
+
+        let sut = builder.call();
+
+        assert_debug_eq(
+            &sut,
+            expect![[r#"(Some(99), Some(()), Some(2), Some("impl Trait"), Some(22))"#]],
+        );
     }
+    {
+        #[builder]
+        fn sut(
+            #[builder(transparent, with = Some)] impl_trait: Option<impl fmt::Debug>,
+        ) -> impl fmt::Debug {
+            impl_trait
+        }
 
-    let builder = sut();
-
-    let builder = builder.required(99);
-
-    let _ignore = builder.clone().optional(());
-    let builder = builder.maybe_optional(None);
-
-    let builder = builder.generic(2);
-    let builder = builder.impl_trait("impl Trait");
-
-    let _ignore = builder.clone().optional_generic(21);
-    let builder = builder.maybe_optional_generic(Some(22));
-
-    let sut = builder.call();
-
-    assert_debug_eq(
-        &sut,
-        expect![[r#"(Some(99), Some(()), Some(2), Some("impl Trait"), Some(22))"#]],
-    );
+        assert_debug_eq(sut().impl_trait("impl Trait").call(), expect![]);
+    }
 }
 
 #[test]
@@ -98,10 +108,9 @@ fn test_assoc_method() {
             #[builder(transparent, with = Some)] required: Option<i32>,
             #[builder(transparent, with = Some, default = Some(()))] optional: Option<()>,
             #[builder(transparent, with = Some)] generic: Option<T>,
-            #[builder(transparent, with = Some)] impl_trait: Option<impl fmt::Debug>,
             #[builder(transparent, with = Some, default = None)] optional_generic: Option<T>,
         ) -> impl fmt::Debug {
-            (required, optional, generic, impl_trait, optional_generic)
+            (required, optional, generic, optional_generic)
         }
 
         #[builder(derive(Clone))]
@@ -110,11 +119,26 @@ fn test_assoc_method() {
             #[builder(transparent, with = Some)] required: Option<i32>,
             #[builder(transparent, with = Some, default = Some(()))] optional: Option<()>,
             #[builder(transparent, with = Some)] generic: Option<T>,
-            #[builder(transparent, with = Some)] impl_trait: Option<impl fmt::Debug>,
             #[builder(transparent, with = Some, default = None)] optional_generic: Option<T>,
         ) -> impl fmt::Debug {
             let _ = self;
-            (required, optional, generic, impl_trait, optional_generic)
+            (required, optional, generic, optional_generic)
+        }
+
+        #[builder]
+        fn sut_impl_trait(
+            #[builder(transparent, with = Some)] impl_trait: Option<impl fmt::Debug>,
+        ) -> impl fmt::Debug {
+            impl_trait
+        }
+
+        #[builder]
+        fn with_self_impl_trait(
+            &self,
+            #[builder(transparent, with = Some)] impl_trait: Option<impl fmt::Debug>,
+        ) -> impl fmt::Debug {
+            let _ = self;
+            impl_trait
         }
     }
 
@@ -126,7 +150,6 @@ fn test_assoc_method() {
     let builder = builder.maybe_optional(None);
 
     let builder = builder.generic(2);
-    let builder = builder.impl_trait("impl Trait");
 
     let _ignore = builder.clone().optional_generic(21);
     let builder = builder.maybe_optional_generic(Some(22));
@@ -146,7 +169,6 @@ fn test_assoc_method() {
     let builder = builder.maybe_optional(None);
 
     let builder = builder.generic(2);
-    let builder = builder.impl_trait("impl Trait");
 
     let _ignore = builder.clone().optional_generic(21);
     let builder = builder.maybe_optional_generic(Some(22));
@@ -156,5 +178,14 @@ fn test_assoc_method() {
     assert_debug_eq(
         &sut,
         expect![[r#"(Some(99), Some(()), Some(2), Some("impl Trait"), Some(22))"#]],
+    );
+
+    assert_debug_eq(
+        Sut::sut_impl_trait().impl_trait("impl Trait").call(),
+        expect![],
+    );
+    assert_debug_eq(
+        Sut.with_self_impl_trait().impl_trait("impl Trait").call(),
+        expect![],
     );
 }
