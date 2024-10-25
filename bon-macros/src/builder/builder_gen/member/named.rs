@@ -259,6 +259,15 @@ impl NamedMember {
     }
 
     pub(crate) fn merge_on_config(&mut self, on: &[OnConfig]) -> Result {
+        // This is a temporary hack. We only allow `on(_, transparent)` as the
+        // first `on(...)` clause. Instead we should implement the extended design:
+        // https://github.com/elastio/bon/issues/152
+        if let Some(on) = on.first().filter(|on| on.transparent.is_present()) {
+            if self.is_special_option_ty() {
+                self.config.transparent = on.transparent;
+            }
+        }
+
         self.merge_config_into(on)?;
 
         // FIXME: refactor this to make it more consistent with `into`

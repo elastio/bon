@@ -7,7 +7,6 @@ use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams
 use crate::normalization::{GenericsNamespace, SyntaxVariant};
 use crate::parsing::{ItemSigConfig, SpannedKey};
 use crate::util::prelude::*;
-use darling::FromMeta;
 use std::borrow::Cow;
 use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
@@ -40,7 +39,7 @@ fn parse_top_level_config(item_struct: &syn::ItemStruct) -> Result<TopLevelConfi
         .into_iter()
         .concat();
 
-    TopLevelConfig::from_list(&meta)
+    TopLevelConfig::parse_for_struct(&meta)
 }
 
 pub(crate) struct StructInputCtx {

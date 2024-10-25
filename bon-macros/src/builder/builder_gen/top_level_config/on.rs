@@ -9,6 +9,7 @@ pub(crate) struct OnConfig {
     pub(crate) type_pattern: syn::Type,
     pub(crate) into: darling::util::Flag,
     pub(crate) overwritable: darling::util::Flag,
+    pub(crate) transparent: darling::util::Flag,
 }
 
 impl Parse for OnConfig {
@@ -22,6 +23,7 @@ impl Parse for OnConfig {
         struct Parsed {
             into: darling::util::Flag,
             overwritable: darling::util::Flag,
+            transparent: darling::util::Flag,
         }
 
         let parsed = Parsed::from_meta(&syn::parse_quote!(on(#rest)))?;
@@ -31,8 +33,16 @@ impl Parse for OnConfig {
             // This lives in a separate block to make sure that if a new
             // field is added to `Parsed` and unused here, then a compiler
             // warning is emitted.
-            let Parsed { into, overwritable } = &parsed;
-            let flags = [("into", into), ("overwritable", overwritable)];
+            let Parsed {
+                into,
+                overwritable,
+                transparent,
+            } = &parsed;
+            let flags = [
+                ("into", into),
+                ("overwritable", overwritable),
+                ("transparent", transparent),
+            ];
 
             if flags.iter().all(|(_, flag)| !flag.is_present()) {
                 let flags = flags.iter().map(|(name, _)| format!("`{name}`")).join(", ");
@@ -76,12 +86,17 @@ impl Parse for OnConfig {
             "BUG: the type pattern does not match itself: {type_pattern:#?}"
         );
 
-        let Parsed { into, overwritable } = parsed;
+        let Parsed {
+            into,
+            overwritable,
+            transparent,
+        } = parsed;
 
         Ok(Self {
             type_pattern,
             into,
             overwritable,
+            transparent,
         })
     }
 }
