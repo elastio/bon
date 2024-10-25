@@ -1,10 +1,10 @@
 mod blanket;
-mod with;
 mod setters;
+mod with;
 
 pub(crate) use blanket::*;
-pub(crate) use with::*;
 pub(crate) use setters::*;
+pub(crate) use with::*;
 
 use super::MemberOrigin;
 use crate::parsing::SpannedKey;

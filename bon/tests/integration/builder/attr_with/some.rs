@@ -33,7 +33,9 @@ fn test_struct() {
 
     let sut = builder.build();
 
-    assert_debug_eq(&sut, expect![[r#"
+    assert_debug_eq(
+        &sut,
+        expect![[r#"
         Sut {
             _required: Some(
                 99,
@@ -47,7 +49,8 @@ fn test_struct() {
             _optional_generic: Some(
                 22,
             ),
-        }"#]]);
+        }"#]],
+    );
 }
 
 #[test]
@@ -78,7 +81,10 @@ fn test_free_fn() {
 
     let sut = builder.call();
 
-    assert_debug_eq(&sut, expect![[r#"(Some(99), Some(()), Some(2), Some("impl Trait"), Some(22))"#]]);
+    assert_debug_eq(
+        &sut,
+        expect![[r#"(Some(99), Some(()), Some(2), Some("impl Trait"), Some(22))"#]],
+    );
 }
 
 #[test]
@@ -127,7 +133,10 @@ fn test_assoc_method() {
 
     let sut = builder.call();
 
-    assert_debug_eq(&sut, expect![[r#"(Some(99), Some(()), Some(2), Some("impl Trait"), Some(22))"#]]);
+    assert_debug_eq(
+        &sut,
+        expect![[r#"(Some(99), Some(()), Some(2), Some("impl Trait"), Some(22))"#]],
+    );
 
     let builder = Sut.with_self();
 
@@ -144,5 +153,8 @@ fn test_assoc_method() {
 
     let sut = builder.call();
 
-    assert_debug_eq(&sut, expect![[r#"(Some(99), Some(()), Some(2), Some("impl Trait"), Some(22))"#]]);
+    assert_debug_eq(
+        &sut,
+        expect![[r#"(Some(99), Some(()), Some(2), Some("impl Trait"), Some(22))"#]],
+    );
 }

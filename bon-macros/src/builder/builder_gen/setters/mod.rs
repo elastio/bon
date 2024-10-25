@@ -272,7 +272,10 @@ impl<'a> SettersCtx<'a> {
                     return Err(err());
                 };
 
-                vec![(pat_ident("iter"), syn::parse_quote!(impl IntoIterator<Item = #item_ty>))]
+                vec![(
+                    pat_ident("iter"),
+                    syn::parse_quote!(impl IntoIterator<Item = #item_ty>),
+                )]
             }
         };
 
