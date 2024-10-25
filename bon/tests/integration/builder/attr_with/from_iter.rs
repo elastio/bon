@@ -1,4 +1,4 @@
-#![cfg(feature = "alloc")]
+#![cfg(feature = "std")]
 #![allow(clippy::linkedlist)]
 
 use crate::prelude::*;
