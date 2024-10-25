@@ -1,7 +1,7 @@
 use super::config::MemberConfig;
 use super::{config, MemberOrigin};
-use crate::builder::builder_gen::top_level_config::OnConfig;
 use crate::builder::builder_gen::member::config::SettersFnParams;
+use crate::builder::builder_gen::top_level_config::OnConfig;
 use crate::normalization::SyntaxVariant;
 use crate::parsing::{ItemSigConfig, SpannedKey};
 use crate::util::prelude::*;

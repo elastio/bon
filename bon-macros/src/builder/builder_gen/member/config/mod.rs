@@ -218,11 +218,7 @@ impl MemberConfig {
         }
 
         if let Some(with) = &self.with {
-            self.validate_mutually_exclusive(
-                ParamName::With,
-                with.key.span(),
-                &[ParamName::Into],
-            )?;
+            self.validate_mutually_exclusive(ParamName::With, with.key.span(), &[ParamName::Into])?;
         }
 
         Ok(())

@@ -1,10 +1,10 @@
 mod builder_derives;
-mod top_level_config;
 mod finish_fn;
 mod member;
 mod models;
 mod setters;
 mod state_mod;
+mod top_level_config;
 
 pub(crate) mod input_fn;
 pub(crate) mod input_struct;

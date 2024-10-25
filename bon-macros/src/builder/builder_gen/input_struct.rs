@@ -5,7 +5,7 @@ use super::{
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
 use crate::normalization::{GenericsNamespace, SyntaxVariant};
-use crate::parsing::{SpannedKey, ItemSigConfig};
+use crate::parsing::{ItemSigConfig, SpannedKey};
 use crate::util::prelude::*;
 use darling::FromMeta;
 use std::borrow::Cow;

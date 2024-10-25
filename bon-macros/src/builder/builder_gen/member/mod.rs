@@ -1,5 +1,5 @@
-mod into_conversion;
 mod config;
+mod into_conversion;
 mod named;
 
 pub(crate) use config::*;
@@ -9,8 +9,8 @@ use super::top_level_config::OnConfig;
 use crate::normalization::SyntaxVariant;
 use crate::parsing::SpannedKey;
 use crate::util::prelude::*;
-use darling::FromAttributes;
 use config::MemberConfig;
+use darling::FromAttributes;
 use std::fmt;
 
 #[derive(Debug, Clone, Copy)]
