@@ -28,11 +28,15 @@ struct InvalidOnSkippedMember {
 struct Valid {
     #[builder(transparent)]
     member: Option<u32>,
+
+    #[builder(transparent, with = Some)]
+    some_member: Option<()>,
 }
 
 fn main() {
     // Make sure there is no `maybe_` setter generated
     let _ = Valid::builder().maybe_member(Some(42));
+    let _ = Valid::builder().maybe_some_member(Some(()));
 
     // Another way to get transparency
     {
