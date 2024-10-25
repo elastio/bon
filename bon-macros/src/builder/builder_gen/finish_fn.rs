@@ -31,16 +31,15 @@ impl super::BuilderGenCtx {
             self.#named_members_field.#index
         };
 
-        let param_default = member
+        let default = member
             .config
             .default
             .as_ref()
             .map(|default| default.value.as_ref());
 
-        match param_default {
+        match default {
             Some(Some(default)) => {
-                let has_into = member.config.into.is_present();
-                let default = if has_into {
+                let default = if member.config.into.is_present() {
                     quote! { Into::into((|| #default)()) }
                 } else {
                     quote! { #default }

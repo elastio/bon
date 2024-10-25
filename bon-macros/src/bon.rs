@@ -14,7 +14,7 @@ pub(crate) fn try_generate(params: TokenStream, item: TokenStream) -> Result<Tok
 
     let ctx = ExpandCfg {
         current_macro: format_ident!("bon"),
-        params,
+        config: params,
         item,
     };
 
@@ -23,7 +23,7 @@ pub(crate) fn try_generate(params: TokenStream, item: TokenStream) -> Result<Tok
         Expansion::Recurse(output) => return Ok(output),
     };
 
-    let params = NestedMeta::parse_meta_list(input.params)?;
+    let params = NestedMeta::parse_meta_list(input.config)?;
     let params = FromMeta::from_list(&params)?;
 
     match input.item {

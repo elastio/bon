@@ -17,7 +17,8 @@ fn test_assoc_method() {
             fn regular() {}
         }
 
-        let _: Sut = Sut::builder().build();
+        let builder: SutBuilder = Sut::builder();
+        let _: Sut = builder.build();
         let _: Sut = Sut::new();
 
         Sut::regular_builder().call();
@@ -38,7 +39,8 @@ fn test_assoc_method() {
             pub(crate) fn regular() {}
         }
 
-        let _: Sut = Sut::builder().build();
+        let builder: SutBuilder = Sut::builder();
+        let _: Sut = builder.build();
         let _: Sut = Sut::new();
 
         Sut::regular_builder().call();

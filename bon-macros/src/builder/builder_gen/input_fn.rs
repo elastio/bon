@@ -82,7 +82,7 @@ impl<'a> FnInputCtx<'a> {
                         .collect()
                 }),
 
-            // Override on the start fn to use the the generics from the
+            // Override on the start fn to use the generics from the
             // target function itself. We must not duplicate the generics
             // from the impl block here
             generics: Some(Generics::new(
@@ -226,7 +226,7 @@ impl<'a> FnInputCtx<'a> {
             orig.attrs.extend([syn::parse_quote!(#[doc(hidden)])]);
         }
 
-        // Also remove any `#[builder]` attributes that were meant for this proc macro.
+        // Remove any `#[builder]` attributes that were meant for this proc macro.
         orig.attrs.retain(|attr| !attr.path().is_ident("builder"));
 
         // Remove all doc comments attributes from function arguments, because they are
@@ -383,10 +383,10 @@ impl<'a> FnInputCtx<'a> {
 
             // A special case for the starting function named `builder`.
             // We don't insert the `Builder` suffix in this case because
-            // we this special case should be compatible with deriving
+            // this special case should be compatible with deriving
             // a builder from a struct.
             //
-            // We can arrive inside of this if only if the function under
+            // We can arrive inside of this branch only if the function under
             // the macro is called `new` or `builder` without `start_fn`
             // name override, or if the `start_fn = builder/start_fn(name = builder)`
             // is specified in the macro invocation explicitly.

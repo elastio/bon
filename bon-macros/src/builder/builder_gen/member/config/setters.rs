@@ -19,7 +19,7 @@ fn parse_docs(meta: &syn::Meta) -> Result<SpannedKey<Vec<syn::Attribute>>> {
 }
 
 #[derive(Debug, FromMeta)]
-pub(crate) struct SettersMeta {
+pub(crate) struct SettersConfig {
     pub(crate) name: Option<SpannedKey<syn::Ident>>,
     pub(crate) vis: Option<SpannedKey<syn::Visibility>>,
 
@@ -27,11 +27,11 @@ pub(crate) struct SettersMeta {
     pub(crate) docs: Option<SpannedKey<Vec<syn::Attribute>>>,
 
     #[darling(flatten)]
-    pub(crate) fns: SettersFnParams,
+    pub(crate) fns: SettersFnsConfig,
 }
 
 #[derive(Debug, FromMeta)]
-pub(crate) struct SettersFnParams {
+pub(crate) struct SettersFnsConfig {
     /// Config for the setter that accepts the value of type T for a member of
     /// type `Option<T>` or with `#[builder(default)]`.
     ///

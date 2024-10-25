@@ -1,6 +1,6 @@
 use super::config::MemberConfig;
 use super::{config, MemberOrigin};
-use crate::builder::builder_gen::member::config::SettersFnParams;
+use crate::builder::builder_gen::member::config::SettersFnsConfig;
 use crate::builder::builder_gen::top_level_config::OnConfig;
 use crate::normalization::SyntaxVariant;
 use crate::parsing::{ItemSigConfig, SpannedKey};
@@ -40,8 +40,8 @@ pub(crate) struct MemberName {
 }
 
 impl MemberName {
-    pub(crate) fn new(orig: syn::Ident, params: &MemberConfig) -> Self {
-        let snake = params.name.clone().unwrap_or_else(|| {
+    pub(crate) fn new(orig: syn::Ident, config: &MemberConfig) -> Self {
+        let snake = config.name.clone().unwrap_or_else(|| {
             let orig_str = orig.to_string();
             let norm = orig_str
                 // Remove the leading underscore from the member name since it's used
@@ -113,7 +113,7 @@ impl NamedMember {
                     return true;
                 }
 
-                let SettersFnParams { some_fn, option_fn } = &setters.fns;
+                let SettersFnsConfig { some_fn, option_fn } = &setters.fns;
                 matches!(
                     (some_fn.as_deref(), option_fn.as_deref()),
                     (
@@ -131,7 +131,7 @@ impl NamedMember {
             )?;
         }
 
-        self.validate_setters_params()?;
+        self.validate_setters_config()?;
 
         if self.config.transparent.is_present() && !self.ty.norm.is_option() {
             bail!(
@@ -144,14 +144,14 @@ impl NamedMember {
         Ok(())
     }
 
-    fn validate_setters_params(&self) -> Result {
+    fn validate_setters_config(&self) -> Result {
         let setters = match &self.config.setters {
             Some(setters) => setters,
             None => return Ok(()),
         };
 
         if self.is_required() {
-            let SettersFnParams { some_fn, option_fn } = &setters.fns;
+            let SettersFnsConfig { some_fn, option_fn } = &setters.fns;
 
             let unexpected_setter = option_fn.as_ref().or(some_fn.as_ref());
 
@@ -165,16 +165,16 @@ impl NamedMember {
             }
         }
 
-        if let SettersFnParams {
+        if let SettersFnsConfig {
             some_fn: Some(some_fn),
             option_fn: Some(option_fn),
         } = &setters.fns
         {
             let setter_fns = &[some_fn, option_fn];
 
-            Self::validate_unused_setters_cfg(setter_fns, &setters.name, |params| &params.name)?;
-            Self::validate_unused_setters_cfg(setter_fns, &setters.vis, |params| &params.vis)?;
-            Self::validate_unused_setters_cfg(setter_fns, &setters.docs, |params| &params.docs)?;
+            Self::validate_unused_setters_cfg(setter_fns, &setters.name, |config| &config.name)?;
+            Self::validate_unused_setters_cfg(setter_fns, &setters.vis, |config| &config.vis)?;
+            Self::validate_unused_setters_cfg(setter_fns, &setters.docs, |config| &config.docs)?;
         }
 
         Ok(())
@@ -258,14 +258,14 @@ impl NamedMember {
         self.index == other.index
     }
 
-    pub(crate) fn merge_on_params(&mut self, on_params: &[OnConfig]) -> Result {
-        self.merge_param_into(on_params)?;
+    pub(crate) fn merge_on_config(&mut self, on: &[OnConfig]) -> Result {
+        self.merge_config_into(on)?;
 
         // FIXME: refactor this to make it more consistent with `into`
-        // and allow for non-boolean flags in `OnParams`. E.g. add support
+        // and allow for non-boolean flags in `OnConfig`. E.g. add support
         // for `with = closure` to `on` as well.
         self.config.overwritable = config::EvalBlanketFlagParam {
-            on: on_params,
+            on,
             param_name: config::BlanketParamName::Overwritable,
             member_config: &self.config,
             scrutinee: self.underlying_norm_ty(),

@@ -1,4 +1,16 @@
-use bon::{bon, builder};
+use bon::{bon, builder, Builder};
+
+#[derive(Builder)]
+#[builder(crate = self::bon)]
+struct Relative1 {}
+
+#[derive(Builder)]
+#[builder(crate = super::bon)]
+struct Relative2 {}
+
+#[derive(Builder)]
+#[builder(crate = bon)]
+struct Relative3 {}
 
 #[builder(crate = self::bon)]
 fn relative_1() {}
@@ -36,7 +48,5 @@ impl Relative {
     #[builder]
     fn method3() {}
 }
-
-
 
 fn main() {}

@@ -35,7 +35,7 @@ pub(crate) fn require_non_empty_paren_meta_list_or_name_value(meta: &syn::Meta) 
             &meta,
             "this empty `{0}` attribute is unexpected; \
             remove it or pass parameters in parentheses: \
-            `#[{0}(...)]`",
+            `{0}(...)`",
             darling::util::path_to_string(path)
         ),
         syn::Meta::NameValue(_) => {}
@@ -84,11 +84,9 @@ where
 }
 
 fn parse_path_mod_style(meta: &syn::Meta) -> Result<syn::Path> {
-    let err = |span: Span| err!(&span, "expected a simple path, like `foo::bar`");
-
     let expr = match meta {
         syn::Meta::NameValue(meta) => &meta.value,
-        _ => return Err(err(meta.span())),
+        _ => bail!(meta, "expected a simple path, like `foo::bar`"),
     };
 
     Ok(expr.require_path_mod_style()?.clone())

@@ -38,7 +38,7 @@ fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<Toke
 
     let ctx = ExpandCfg {
         current_macro: format_ident!("builder"),
-        params,
+        config: params,
         item,
     };
 
@@ -51,10 +51,10 @@ fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<Toke
         syn::Item::Fn(item_fn) => {
             let mut namespace = GenericsNamespace::default();
 
-            namespace.visit_token_stream(input.params.clone());
+            namespace.visit_token_stream(input.config.clone());
             namespace.visit_item_fn(&item_fn);
 
-            let meta_list = darling::ast::NestedMeta::parse_meta_list(input.params.clone())?;
+            let meta_list = darling::ast::NestedMeta::parse_meta_list(input.config.clone())?;
             let config = TopLevelConfig::parse_for_fn(&meta_list)?;
 
             item_fn::generate(config, item_fn, &namespace)?
@@ -72,7 +72,7 @@ fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<Toke
         ),
     };
 
-    let output = [generate_completion_triggers(input.params), main_output].concat();
+    let output = [generate_completion_triggers(input.config), main_output].concat();
 
     Ok(output)
 }

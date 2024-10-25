@@ -13,13 +13,13 @@ pub(crate) enum Expansion {
 }
 
 pub(crate) struct Expanded {
-    pub(crate) params: TokenStream,
+    pub(crate) config: TokenStream,
     pub(crate) item: syn::Item,
 }
 
 pub(crate) struct ExpandCfg {
     pub(crate) current_macro: syn::Ident,
-    pub(crate) params: TokenStream,
+    pub(crate) config: TokenStream,
     pub(crate) item: syn::Item,
 }
 
@@ -29,18 +29,18 @@ impl ExpandCfg {
 
         if predicates.is_empty() {
             return Ok(Expansion::Expanded(Expanded {
-                params: self.params,
+                config: self.config,
                 item: self.item,
             }));
         }
 
-        let predicate_results = match parse::parse_predicate_results(self.params.clone())? {
+        let predicate_results = match parse::parse_predicate_results(self.config.clone())? {
             Some(predicate_results) => predicate_results,
             None => return self.into_recursion(0, &predicates),
         };
 
-        // Update the parameters to remove the `@cfgs(...)` prefix from them
-        self.params = predicate_results.rest;
+        // Update the config to remove the `@cfgs(...)` prefix from them
+        self.config = predicate_results.rest;
 
         let true_predicates: BTreeSet<_> = predicates
             .iter()
@@ -58,7 +58,7 @@ impl ExpandCfg {
 
         if predicates.is_empty() {
             return Ok(Expansion::Expanded(Expanded {
-                params: self.params,
+                config: self.config,
                 item: self.item,
             }));
         }
@@ -101,16 +101,14 @@ impl ExpandCfg {
         predicates: &[TokenStream],
     ) -> Result<Expansion> {
         let Self {
-            params,
+            config,
             item,
             current_macro,
         } = self;
 
-        let parsed_params = NestedMeta::parse_meta_list(params.clone())?;
-
-        let bon = parsed_params
+        let bon = NestedMeta::parse_meta_list(config.clone())?
             .iter()
-            .find_map(|param| match param {
+            .find_map(|meta| match meta {
                 NestedMeta::Meta(syn::Meta::NameValue(meta)) if meta.path.is_ident("crate") => {
                     let path = &meta.value;
                     Some(syn::Path::parse_mod_style.parse2(quote!(#path)))
@@ -137,7 +135,7 @@ impl ExpandCfg {
                 #((#predicates))*
                 #current_macro,
                 #recursion_counter,
-                ( #params )
+                ( #config )
                 #item
             }
         };

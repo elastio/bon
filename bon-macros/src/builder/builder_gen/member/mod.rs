@@ -71,7 +71,7 @@ pub(crate) struct PositionalFnArgMember {
     pub(crate) ty: SyntaxVariant<Box<syn::Type>>,
 
     /// Parameters configured by the user explicitly via attributes
-    pub(crate) meta: MemberConfig,
+    pub(crate) config: MemberConfig,
 }
 
 /// Member that was skipped by the user with `#[builder(skip)]`
@@ -114,9 +114,9 @@ impl Member {
                     }
                 }
 
-                let params = MemberConfig::from_attributes(member.attrs)?;
-                params.validate(origin)?;
-                Ok((member, params))
+                let config = MemberConfig::from_attributes(member.attrs)?;
+                config.validate(origin)?;
+                Ok((member, config))
             })
             .collect::<Result<Vec<_>>>()?
             .into_iter()
@@ -126,30 +126,30 @@ impl Member {
 
         for index in 0.. {
             let next = members.next_if(|(_, meta)| meta.start_fn.is_present());
-            let (member, meta) = match next {
+            let (member, config) = match next {
                 Some(item) => item,
                 None => break,
             };
-            let base = PositionalFnArgMember::new(origin, member, on, meta)?;
+            let base = PositionalFnArgMember::new(origin, member, on, config)?;
             output.push(Self::StartFnArg(StartFnArgMember {
                 base,
                 index: index.into(),
             }));
         }
 
-        while let Some((member, params)) =
-            members.next_if(|(_, params)| params.finish_fn.is_present())
+        while let Some((member, config)) =
+            members.next_if(|(_, config)| config.finish_fn.is_present())
         {
-            let member = PositionalFnArgMember::new(origin, member, on, params)?;
+            let member = PositionalFnArgMember::new(origin, member, on, config)?;
             output.push(Self::FinishFnArg(member));
         }
 
         let mut named_count = 0;
 
-        for (member, params) in members {
+        for (member, config) in members {
             let RawMember { attrs, ident, ty } = member;
 
-            if let Some(value) = params.skip {
+            if let Some(value) = config.skip {
                 output.push(Self::Skipped(SkippedMember {
                     ident,
                     norm_ty: ty.norm,
@@ -161,7 +161,7 @@ impl Member {
             let active_flag = |flag: darling::util::Flag| flag.is_present().then(|| flag);
 
             let incorrect_order =
-                active_flag(params.finish_fn).or_else(|| active_flag(params.start_fn));
+                active_flag(config.finish_fn).or_else(|| active_flag(config.start_fn));
 
             if let Some(attr) = incorrect_order {
                 bail!(
@@ -189,13 +189,13 @@ impl Member {
             let mut member = NamedMember {
                 index: named_count.into(),
                 origin,
-                name: MemberName::new(ident, &params),
+                name: MemberName::new(ident, &config),
                 ty,
-                config: params,
+                config,
                 docs,
             };
 
-            member.merge_on_params(on)?;
+            member.merge_on_config(on)?;
             member.validate()?;
 
             output.push(Self::Named(member));
@@ -251,8 +251,8 @@ impl PositionalFnArgMember {
     fn new(
         origin: MemberOrigin,
         member: RawMember<'_>,
-        on_params: &[OnConfig],
-        params: MemberConfig,
+        on: &[OnConfig],
+        config: MemberConfig,
     ) -> Result<Self> {
         let RawMember {
             attrs: _,
@@ -264,10 +264,10 @@ impl PositionalFnArgMember {
             origin,
             ident,
             ty,
-            meta: params,
+            config,
         };
 
-        me.merge_param_into(on_params)?;
+        me.merge_config_into(on)?;
 
         Ok(me)
     }

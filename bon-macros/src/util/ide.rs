@@ -138,7 +138,7 @@ pub(crate) fn generate_completion_triggers(meta: Vec<Meta>) -> TokenStream {
     let bon = meta
         .iter()
         .find_map(|meta| match meta {
-            Meta::NameValue(meta) => Some(meta.value.as_ref()),
+            Meta::NameValue(meta) if meta.path.is_ident("crate") => Some(meta.value.as_ref()),
             _ => None,
         })
         .flatten()

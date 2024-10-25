@@ -63,12 +63,12 @@ impl ItemSigConfigParsing<'_> {
             }
         }
 
-        let params = ItemSigConfig {
+        let config = ItemSigConfig {
             name: full.name,
             vis: full.vis,
             docs: full.doc,
         };
 
-        Ok(params)
+        Ok(config)
     }
 }

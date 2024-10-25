@@ -10,13 +10,13 @@ error: expected parameters in parentheses
 8 | #[builder(finish_fn())]
   |                    ^^
 
-error: this empty `start_fn` attribute is unexpected; remove it or pass parameters in parentheses: `#[start_fn(...)]`
+error: this empty `start_fn` attribute is unexpected; remove it or pass parameters in parentheses: `start_fn(...)`
   --> tests/integration/ui/compile_fail/attr_top_level_start_finish_fn.rs:12:11
    |
 12 | #[builder(start_fn)]
    |           ^^^^^^^^
 
-error: this empty `start_fn` attribute is unexpected; remove it or pass parameters in parentheses: `#[start_fn(...)]`
+error: this empty `start_fn` attribute is unexpected; remove it or pass parameters in parentheses: `start_fn(...)`
   --> tests/integration/ui/compile_fail/attr_top_level_start_finish_fn.rs:15:11
    |
 15 | #[builder(start_fn)]
@@ -40,7 +40,7 @@ error: #[builder(start_fn(doc))] requires that you also specify #[builder(start_
 24 | #[builder(start_fn(doc {}))]
    |                    ^^^
 
-error: this empty `start_fn` attribute is unexpected; remove it or pass parameters in parentheses: `#[start_fn(...)]`
+error: this empty `start_fn` attribute is unexpected; remove it or pass parameters in parentheses: `start_fn(...)`
   --> tests/integration/ui/compile_fail/attr_top_level_start_finish_fn.rs:34:15
    |
 34 |     #[builder(start_fn)]
@@ -64,7 +64,7 @@ error: #[builder(start_fn(doc))] requires that you also specify #[builder(start_
 52 |     #[builder(start_fn(doc {}))]
    |                        ^^^
 
-error: this empty `start_fn` attribute is unexpected; remove it or pass parameters in parentheses: `#[start_fn(...)]`
+error: this empty `start_fn` attribute is unexpected; remove it or pass parameters in parentheses: `start_fn(...)`
   --> tests/integration/ui/compile_fail/attr_top_level_start_finish_fn.rs:58:15
    |
 58 |     #[builder(start_fn)]

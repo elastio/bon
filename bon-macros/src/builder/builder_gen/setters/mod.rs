@@ -366,11 +366,11 @@ impl SettersItems {
         let SettersCtx { member, base } = ctx;
         let builder_type = &base.builder_type;
 
-        let params = member.config.setters.as_ref();
+        let config = member.config.setters.as_ref();
 
-        let common_name = params.and_then(|params| params.name.as_deref());
-        let common_vis = params.and_then(|params| params.vis.as_deref());
-        let common_docs = params.and_then(|params| params.docs.as_deref().map(Vec::as_slice));
+        let common_name = config.and_then(|config| config.name.as_deref());
+        let common_vis = config.and_then(|config| config.vis.as_deref());
+        let common_docs = config.and_then(|config| config.docs.as_deref().map(Vec::as_slice));
 
         let doc = |docs: &str| iter::once(syn::parse_quote!(#[doc = #docs]));
 
@@ -390,14 +390,14 @@ impl SettersItems {
             });
         }
 
-        let some_fn = params.and_then(|params| params.fns.some_fn.as_deref());
+        let some_fn = config.and_then(|config| config.fns.some_fn.as_deref());
         let some_fn_name = some_fn
             .and_then(ItemSigConfig::name)
             .or(common_name)
             .unwrap_or(&member.name.snake)
             .clone();
 
-        let option_fn = params.and_then(|params| params.fns.option_fn.as_deref());
+        let option_fn = config.and_then(|config| config.fns.option_fn.as_deref());
         let option_fn_name = option_fn
             .and_then(ItemSigConfig::name)
             .cloned()
@@ -470,7 +470,7 @@ impl SettersItems {
             docs: some_fn_docs,
         };
 
-        let option_fn = params.and_then(|params| params.fns.option_fn.as_deref());
+        let option_fn = config.and_then(|config| config.fns.option_fn.as_deref());
         let option_fn = SetterItem {
             name: option_fn_name,
 

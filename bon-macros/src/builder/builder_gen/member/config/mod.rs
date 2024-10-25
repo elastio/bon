@@ -36,7 +36,7 @@ pub(crate) struct MemberConfig {
 
     /// Configurations for the setter methods.
     #[darling(with = crate::parsing::parse_non_empty_paren_meta_list)]
-    pub(crate) setters: Option<SettersMeta>,
+    pub(crate) setters: Option<SettersConfig>,
 
     /// Where to place the member in the generated builder methods API.
     /// By default the member is treated like a named parameter that

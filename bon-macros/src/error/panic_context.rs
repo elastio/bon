@@ -1,17 +1,19 @@
-use std::fmt;
-
-#[rustversion::since(1.65.0)]
+// The new name is used on newer rust versions
+#[rustversion::since(1.81.0)]
 use std::panic::PanicHookInfo as StdPanicHookInfo;
+
+// The deprecated name for is used on older rust versions
+#[rustversion::before(1.81.0)]
+use std::panic::PanicInfo as StdPanicHookInfo;
 
 use std::any::Any;
 use std::cell::RefCell;
-#[rustversion::before(1.81.0)]
-use std::panic::PanicInfo as StdPanicHookInfo;
+use std::fmt;
 use std::rc::Rc;
 
 fn with_global_panic_context<T>(f: impl FnOnce(&mut GlobalPanicContext) -> T) -> T {
     thread_local! {
-        /// A lazily initialized global panic log. It aggregates the panics from the
+        /// A lazily initialized global panic context. It aggregates the panics from the
         /// current thread. This is used to capture info about the panic after the
         /// `catch_unwind` call and observe the context of the panic that happened.
         ///
@@ -59,10 +61,10 @@ impl PanicListener {
 
         std::panic::set_hook(Box::new(move |panic_info| {
             with_global_panic_context(|global| {
-                let panic_number = global.last_panic.as_ref().map(|p| p.0.panic_number);
-                let panic_number = panic_number.unwrap_or(0) + 1;
+                let panics_count = global.last_panic.as_ref().map(|p| p.0.panics_count);
+                let panics_count = panics_count.unwrap_or(0) + 1;
 
-                global.last_panic = Some(PanicContext::from_std(panic_info, panic_number));
+                global.last_panic = Some(PanicContext::from_std(panic_info, panics_count));
             });
 
             prev_panic_hook(panic_info);
@@ -95,11 +97,11 @@ struct PanicContextShared {
     /// Defines the number of panics that happened before this one. Each panic
     /// increments this counter. This is useful to know how many panics happened
     /// before the current one.
-    panic_number: usize,
+    panics_count: usize,
 }
 
 impl PanicContext {
-    fn from_std(std_panic_info: &StdPanicHookInfo<'_>, panic_number: usize) -> Self {
+    fn from_std(std_panic_info: &StdPanicHookInfo<'_>, panics_count: usize) -> Self {
         let location = std_panic_info.location();
         let current_thread = std::thread::current();
         let thread_ = current_thread
@@ -111,7 +113,7 @@ impl PanicContext {
             backtrace: backtrace::Backtrace::capture(),
             location: location.map(PanicLocation::from_std),
             thread: thread_,
-            panic_number,
+            panics_count,
         }))
     }
 }
@@ -128,7 +130,7 @@ impl fmt::Display for PanicContext {
             location,
             backtrace,
             thread,
-            panic_number,
+            panics_count,
         } = &*self.0;
 
         write!(f, "panic occurred")?;
@@ -139,8 +141,8 @@ impl fmt::Display for PanicContext {
 
         write!(f, " in thread '{thread}'")?;
 
-        if *panic_number > 1 {
-            write!(f, " (total panics observed: {panic_number})")?;
+        if *panics_count > 1 {
+            write!(f, " (total panics observed: {panics_count})")?;
         }
 
         // #[rustversion::attr(before(1.65.0), allow(clippy::irrefutable_let_patterns))]
@@ -190,7 +192,6 @@ impl fmt::Display for PanicLocation {
 }
 
 #[rustversion::since(1.65.0)]
-#[allow(clippy::module_name_repetitions)]
 mod backtrace {
     pub(super) use std::backtrace::{Backtrace, BacktraceStatus};
 }

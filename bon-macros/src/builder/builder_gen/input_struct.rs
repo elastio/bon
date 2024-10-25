@@ -12,7 +12,7 @@ use std::borrow::Cow;
 use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
 
-fn parse_top_level_params(item_struct: &syn::ItemStruct) -> Result<TopLevelConfig> {
+fn parse_top_level_config(item_struct: &syn::ItemStruct) -> Result<TopLevelConfig> {
     let meta = item_struct
         .attrs
         .iter()
@@ -45,13 +45,13 @@ fn parse_top_level_params(item_struct: &syn::ItemStruct) -> Result<TopLevelConfi
 
 pub(crate) struct StructInputCtx {
     struct_item: SyntaxVariant<syn::ItemStruct>,
-    params: TopLevelConfig,
+    config: TopLevelConfig,
     struct_ty: syn::Type,
 }
 
 impl StructInputCtx {
     pub(crate) fn new(orig_struct: syn::ItemStruct) -> Result<Self> {
-        let params = parse_top_level_params(&orig_struct)?;
+        let params = parse_top_level_config(&orig_struct)?;
 
         let generic_args = orig_struct
             .generics
@@ -79,7 +79,7 @@ impl StructInputCtx {
 
         Ok(Self {
             struct_item,
-            params,
+            config: params,
             struct_ty,
         })
     }
@@ -119,7 +119,7 @@ impl StructInputCtx {
             })
             .collect::<Result<Vec<_>>>()?;
 
-        let members = Member::from_raw(&self.params.on, MemberOrigin::StructField, members)?;
+        let members = Member::from_raw(&self.config.on, MemberOrigin::StructField, members)?;
 
         let generics = Generics::new(
             self.struct_item
@@ -140,7 +140,7 @@ impl StructInputCtx {
             name: start_fn_ident,
             vis: start_fn_vis,
             docs: start_fn_docs,
-        } = self.params.start_fn;
+        } = self.config.start_fn;
 
         let start_fn_ident = start_fn_ident
             .map(SpannedKey::into_value)
@@ -150,7 +150,7 @@ impl StructInputCtx {
             name: finish_fn_ident,
             vis: finish_fn_vis,
             docs: finish_fn_docs,
-        } = self.params.finish_fn;
+        } = self.config.finish_fn;
 
         let finish_fn_ident = finish_fn_ident
             .map(SpannedKey::into_value)
@@ -208,14 +208,14 @@ impl StructInputCtx {
             .collect();
 
         let builder_type = {
-            let ItemSigConfig { name, vis, docs } = self.params.builder_type;
+            let ItemSigConfig { name, vis, docs } = self.config.builder_type;
 
             let builder_ident = name.map(SpannedKey::into_value).unwrap_or_else(|| {
                 format_ident!("{}Builder", self.struct_item.norm.ident.raw_name())
             });
 
             BuilderTypeParams {
-                derives: self.params.derive,
+                derives: self.config.derive,
                 ident: builder_ident,
                 docs: docs.map(SpannedKey::into_value),
                 vis: vis.map(SpannedKey::into_value),
@@ -226,20 +226,20 @@ impl StructInputCtx {
         namespace.visit_item_struct(&self.struct_item.orig);
 
         BuilderGenCtx::new(BuilderGenCtxParams {
-            bon: self.params.bon,
+            bon: self.config.bon,
             namespace: Cow::Owned(namespace),
             members,
 
             allow_attrs,
 
-            on: self.params.on,
+            on: self.config.on,
 
             assoc_method_ctx,
             generics,
             orig_item_vis: self.struct_item.norm.vis,
 
             builder_type,
-            state_mod: self.params.state_mod,
+            state_mod: self.config.state_mod,
             start_fn,
             finish_fn,
         })
