@@ -2,6 +2,7 @@ mod multi_arg;
 mod overwritable;
 mod single_arg;
 mod some;
+mod from_iter;
 
 struct IntoStrRef<'a>(&'a str);
 

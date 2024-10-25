@@ -214,7 +214,7 @@ impl<'a> SettersCtx<'a> {
             WithConfig::FromIter(from_iter) => {
                 let collection_ty = self.member.underlying_norm_ty();
 
-                let well_known_single_arg_suffixes = ["Vec", "Set", "Deque", "Heap"];
+                let well_known_single_arg_suffixes = ["Vec", "Set", "Deque", "Heap", "List"];
 
                 let err = || {
                     err!(
@@ -243,34 +243,36 @@ impl<'a> SettersCtx<'a> {
 
                 let last_segment_ident_str = last_segment.ident.to_string();
 
-                let item_ty =
-                    if well_known_single_arg_suffixes.contains(&last_segment_ident_str.as_str()) {
-                        // We don't compare for `len == 1` because there may be an optional last
-                        // type argument for the allocator
-                        if args.len() < 1 {
-                            return Err(err());
-                        }
-
-                        let arg = args.first().ok_or_else(err)?;
-
-                        syn::parse_quote!(#arg)
-                    } else if last_segment_ident_str == "Map" {
-                        // We don't compare for `len == 2` because there may be an optional last
-                        // type argument for the allocator
-                        if args.len() < 2 {
-                            return Err(err());
-                        }
-
-                        let mut args = args.iter();
-                        let key = args.next().ok_or_else(err)?;
-                        let value = args.next().ok_or_else(err)?;
-
-                        syn::parse_quote!((#key, #value))
-                    } else {
+                let item_ty = if well_known_single_arg_suffixes
+                    .iter()
+                    .any(|suffix| last_segment_ident_str.ends_with(suffix))
+                {
+                    // We don't compare for `len == 1` because there may be an optional last
+                    // type argument for the allocator
+                    if args.is_empty() {
                         return Err(err());
-                    };
+                    }
 
-                vec![(pat_ident("iter"), item_ty)]
+                    let arg = args.first().ok_or_else(err)?;
+
+                    quote!(#arg)
+                } else if last_segment_ident_str.ends_with("Map") {
+                    // We don't compare for `len == 2` because there may be an optional last
+                    // type argument for the allocator
+                    if args.len() < 2 {
+                        return Err(err());
+                    }
+
+                    let mut args = args.iter();
+                    let key = args.next().ok_or_else(err)?;
+                    let value = args.next().ok_or_else(err)?;
+
+                    quote!((#key, #value))
+                } else {
+                    return Err(err());
+                };
+
+                vec![(pat_ident("iter"), syn::parse_quote!(impl IntoIterator<Item = #item_ty>))]
             }
         };
 
