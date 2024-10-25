@@ -68,7 +68,7 @@ pub(crate) struct TopLevelConfig {
 
 impl TopLevelConfig {
     pub(crate) fn parse_for_fn(meta_list: &[darling::ast::NestedMeta]) -> Result<Self> {
-        let me = Self::from_list(meta_list)?;
+        let me = Self::parse_for_any(meta_list)?;
 
         if me.start_fn.name.is_none() {
             let ItemSigConfig { name: _, vis, docs } = &me.start_fn;
@@ -89,6 +89,63 @@ impl TopLevelConfig {
                     function under the #[builder] attribute becomes private with \
                     #[doc(hidden)] and it's renamed (the name is not guaranteed \
                     to be stable) to make it inaccessible even within the current module",
+                );
+            }
+        }
+
+        Ok(me)
+    }
+
+    pub(crate) fn parse_for_struct(meta_list: &[darling::ast::NestedMeta]) -> Result<Self> {
+        Self::parse_for_any(meta_list)
+    }
+
+    fn parse_for_any(meta_list: &[darling::ast::NestedMeta]) -> Result<Self> {
+        // This is a temporary hack. We only allow `on(_, transparent)` as the
+        // first `on(...)` clause. Instead we should implement an extended design:
+        // https://github.com/elastio/bon/issues/152
+        let mut on_configs = meta_list
+            .iter()
+            .enumerate()
+            .filter_map(|(i, meta)| match meta {
+                darling::ast::NestedMeta::Meta(syn::Meta::List(meta))
+                    if meta.path.is_ident("on") =>
+                {
+                    Some((i, meta))
+                }
+                _ => None,
+            })
+            .peekable();
+
+        while let Some((i, _)) = on_configs.next() {
+            if let Some((j, next_on)) = on_configs.peek() {
+                if *j != i + 1 {
+                    bail!(
+                        next_on,
+                        "this `on(...)` clause is out of order; all `on(...)` \
+                        clauses must be consecutive; there shouldn't be any \
+                        other parameters between them",
+                    )
+                }
+            }
+        }
+
+        let me = Self::from_list(meta_list)?;
+
+        if let Some(on) = me.on.iter().skip(1).find(|on| on.transparent.is_present()) {
+            bail!(
+                &on.transparent.span(),
+                "`transparent` can only be specified in the first `on(...)` clause; \
+                this restriction may be lifted in the future",
+            );
+        }
+
+        if let Some(first_on) = me.on.first().filter(|on| on.transparent.is_present()) {
+            if !matches!(first_on.type_pattern, syn::Type::Infer(_)) {
+                bail!(
+                    &first_on.type_pattern,
+                    "`transparent` can only be used with the wildcard type pattern \
+                    i.e. `on(_, transparent)`; this restriction may be lifted in the future",
                 );
             }
         }

@@ -24,4 +24,34 @@ fn incomplete_on3() {}
 #[builder(on(_,))]
 fn incomplete_on4() {}
 
+#[builder(
+    on(_, transparent),
+    finish_fn = finish,
+    on(String, into),
+)]
+fn non_consecutive_on1() {}
+
+#[builder(
+    start_fn = start,
+    on(_, transparent),
+    finish_fn = finish,
+    on(String, into),
+)]
+fn non_consecutive_on2() {}
+
+#[builder(
+    start_fn = start,
+    on(_, transparent),
+    finish_fn = finish,
+    on(String, into),
+    builder_type = Builder,
+)]
+fn non_consecutive_on3() {}
+
+#[builder(on(_, into), on(_, transparent))]
+fn non_first_transparent() {}
+
+#[builder(on(u8, transparent))]
+fn non_wildcard_transparent() {}
+
 fn main() {}

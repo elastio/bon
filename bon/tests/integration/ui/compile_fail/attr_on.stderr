@@ -42,10 +42,40 @@ error: expected `,`
    |
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: this #[builder(on(type_pattern, ...))] contains no options to override the default behavior for the selected setters like `into`, `overwritable`, so it does nothing
+error: this #[builder(on(type_pattern, ...))] contains no options to override the default behavior for the selected setters like `into`, `overwritable`, `transparent`, so it does nothing
   --> tests/integration/ui/compile_fail/attr_on.rs:24:1
    |
 24 | #[builder(on(_,))]
    | ^^^^^^^^^^^^^^^^^^
    |
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error: this `on(...)` clause is out of order; all `on(...)` clauses must be consecutive; there shouldn't be any other parameters between them
+  --> tests/integration/ui/compile_fail/attr_on.rs:30:5
+   |
+30 |     on(String, into),
+   |     ^^
+
+error: this `on(...)` clause is out of order; all `on(...)` clauses must be consecutive; there shouldn't be any other parameters between them
+  --> tests/integration/ui/compile_fail/attr_on.rs:38:5
+   |
+38 |     on(String, into),
+   |     ^^
+
+error: this `on(...)` clause is out of order; all `on(...)` clauses must be consecutive; there shouldn't be any other parameters between them
+  --> tests/integration/ui/compile_fail/attr_on.rs:46:5
+   |
+46 |     on(String, into),
+   |     ^^
+
+error: `transparent` can only be specified in the first `on(...)` clause; this restriction may be lifted in the future
+  --> tests/integration/ui/compile_fail/attr_on.rs:51:30
+   |
+51 | #[builder(on(_, into), on(_, transparent))]
+   |                              ^^^^^^^^^^^
+
+error: `transparent` can only be used with the wildcard type pattern i.e. `on(_, transparent)`; this restriction may be lifted in the future
+  --> tests/integration/ui/compile_fail/attr_on.rs:54:14
+   |
+54 | #[builder(on(u8, transparent))]
+   |              ^^
