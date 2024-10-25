@@ -1,4 +1,5 @@
 mod attrs;
+mod expr;
 mod fn_arg;
 mod generic_param;
 mod ident;
@@ -30,6 +31,7 @@ pub(crate) mod prelude {
     pub(crate) type Result<T = (), E = Error> = std::result::Result<T, E>;
 
     pub(crate) use super::attrs::AttributeExt;
+    pub(crate) use super::expr::ExprExt;
     pub(crate) use super::fn_arg::FnArgExt;
     pub(crate) use super::generic_param::GenericParamExt;
     pub(crate) use super::ident::IdentExt;

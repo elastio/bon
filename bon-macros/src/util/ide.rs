@@ -135,6 +135,16 @@ fn paths_from_meta(meta: Vec<Meta>) -> Vec<syn::Path> {
 /// we can hint the IDEs to provide completions for the attributes based on what's
 /// available in the module the use statement references.
 pub(crate) fn generate_completion_triggers(meta: Vec<Meta>) -> TokenStream {
+    let bon = meta
+        .iter()
+        .find_map(|meta| match meta {
+            Meta::NameValue(meta) => Some(meta.value.as_ref()),
+            _ => None,
+        })
+        .flatten()
+        .and_then(|expr| Some(expr.require_path_mod_style().ok()?.clone()))
+        .unwrap_or_else(|| syn::parse_quote!(::bon));
+
     let completions = CompletionsSchema::with_children(
         "builder_top_level",
         vec![
@@ -151,7 +161,7 @@ pub(crate) fn generate_completion_triggers(meta: Vec<Meta>) -> TokenStream {
         ],
     );
 
-    let completion_triggers = completions.generate_completion_triggers(meta, &[]);
+    let completion_triggers = completions.generate_completion_triggers(&bon, meta, &[]);
 
     quote! {
         // The special `rust_analyzer` CFG is enabled only when Rust Analyzer is
@@ -194,6 +204,7 @@ impl CompletionsSchema {
 
     fn generate_completion_triggers(
         &self,
+        bon: &syn::Path,
         mut meta: Vec<Meta>,
         module_prefix: &[&syn::Ident],
     ) -> TokenStream {
@@ -228,7 +239,7 @@ impl CompletionsSchema {
                     })
                     .concat();
 
-                child.generate_completion_triggers(child_metas, &module_name)
+                child.generate_completion_triggers(bon, child_metas, &module_name)
             })
             .collect::<Vec<_>>();
 
@@ -243,7 +254,7 @@ impl CompletionsSchema {
                 // to avoid Rust Analyzer from providing completions for the
                 // `self` keyword in the `use` statement. It works because
                 // `use self::self` is not a valid syntax.
-                use ::bon::__private::ide #(::#module_name)* ::*;
+                use #bon::__private::ide #(::#module_name)* ::*;
                 use self::{ #( #paths as _, )* };
             }
 

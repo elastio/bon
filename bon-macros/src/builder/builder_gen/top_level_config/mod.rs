@@ -41,7 +41,7 @@ fn parse_start_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct TopLevelConfig {
-    #[darling(rename = "crate", default, map = Some, with = crate::parsing::parse_path_mod_style)]
+    #[darling(rename = "crate", default, map = Some, with = crate::parsing::parse_bon_crate_path)]
     pub(crate) bon: Option<syn::Path>,
 
     #[darling(default, with = parse_start_fn)]

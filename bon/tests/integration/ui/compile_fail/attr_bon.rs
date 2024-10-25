@@ -16,5 +16,15 @@ impl BuilderAttrOnReceiver {
     fn sut(#[builder] &self) {}
 }
 
+struct NoBuilderMethods;
+
+#[bon]
+impl NoBuilderMethods {
+    fn not_builder1() {}
+    fn not_builder2(&self) {}
+
+    const NOT_BUILDER: () = ();
+}
+
 
 fn main() {}

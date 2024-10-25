@@ -83,30 +83,55 @@ where
     Ok(punctuated)
 }
 
-pub(crate) fn parse_path_mod_style(meta: &syn::Meta) -> Result<syn::Path> {
-    let err = |span: Span| err!(&span, "expected a bare path, like `foo::bar`");
+fn parse_path_mod_style(meta: &syn::Meta) -> Result<syn::Path> {
+    let err = |span: Span| err!(&span, "expected a simple path, like `foo::bar`");
 
     let expr = match meta {
         syn::Meta::NameValue(meta) => &meta.value,
         _ => return Err(err(meta.span())),
     };
 
-    let expr = match expr {
-        syn::Expr::Path(expr) => expr,
-        _ => return Err(err(expr.span())),
-    };
+    Ok(expr.require_path_mod_style()?.clone())
+}
 
-    reject_syntax("attribute", &expr.attrs.first())?;
-    reject_syntax("<T as Trait> syntax", &expr.qself)?;
+pub(crate) fn parse_bon_crate_path(meta: &syn::Meta) -> Result<syn::Path> {
+    let path = parse_path_mod_style(meta)?;
 
-    expr.path.require_mod_style()?;
+    let prefix = &path
+        .segments
+        .first()
+        .ok_or_else(|| err!(&path, "path must have at least one segment"))?
+        .ident;
 
-    Ok(expr.path.clone())
+    let is_absolute = path.leading_colon.is_some() || prefix == "crate" || prefix == "$crate";
+
+    if is_absolute {
+        return Ok(path);
+    }
+
+    if prefix == "super" || prefix == "self" {
+        bail!(
+            &path,
+            "path must not be relative; specify the path that starts with `crate::` \
+            instead; if you want to refer to a reexport from an external crate then \
+            use a leading colon like `::crate_name::reexport::path::bon`"
+        )
+    }
+
+    let path_str = darling::util::path_to_string(&path);
+
+    bail!(
+        &path,
+        "path must be absolute; if you want to refer to a reexport from an external \
+        crate then add a leading colon like `::{path_str}`; if the path leads to a module \
+        in the current crate, then specify the absolute path with `crate` like \
+        `crate::reexport::path::bon` or `$crate::reexport::path::bon` (if within a macro)"
+    )
 }
 
 // Lint from nightly. `&Option<T>` is used to reduce syntax at the callsite
 #[allow(unknown_lints, clippy::ref_option)]
-fn reject_syntax<T: Spanned>(name: &'static str, syntax: &Option<T>) -> Result {
+pub(crate) fn reject_syntax<T: Spanned>(name: &'static str, syntax: &Option<T>) -> Result {
     if let Some(syntax) = syntax {
         bail!(syntax, "{name} is not allowed here")
     }

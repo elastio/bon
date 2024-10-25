@@ -11,7 +11,7 @@ use syn::visit_mut::VisitMut;
 #[derive(FromMeta)]
 pub(crate) struct ImplInputParams {
     /// Overrides the path to the `bon` crate.
-    #[darling(rename = "crate", default, map = Some, with = crate::parsing::parse_path_mod_style)]
+    #[darling(rename = "crate", default, map = Some, with = crate::parsing::parse_bon_crate_path)]
     bon: Option<syn::Path>,
 }
 
@@ -44,8 +44,8 @@ pub(crate) fn generate(
     if builder_fns.is_empty() {
         bail!(
             &Span::call_site(),
-            "There are no #[builder] functions in the impl block, so there is no \
-            need for a #[bon] attribute on the impl block"
+            "there are no #[builder] functions in the impl block, so there is no \
+            need for a #[bon] attribute here"
         );
     }
 

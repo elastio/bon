@@ -1,7 +1,7 @@
 use super::member::Member;
 use super::top_level_config::{DerivesConfig, OnConfig};
 use crate::normalization::GenericsNamespace;
-use crate::parsing::{SpannedKey, ItemSigConfig};
+use crate::parsing::{ItemSigConfig, SpannedKey};
 use crate::util::prelude::*;
 use std::borrow::Cow;
 
