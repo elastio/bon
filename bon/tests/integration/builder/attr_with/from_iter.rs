@@ -69,7 +69,9 @@ fn test_struct() {
         .btree_map([(34, 35), (34, 36), (37, 38)])
         .build();
 
-    assert_debug_eq(&sut, expect![[r#"
+    assert_debug_eq(
+        &sut,
+        expect![[r#"
         Sut {
             _vec: [
                 13,
@@ -123,7 +125,8 @@ fn test_struct() {
                 34: 36,
                 37: 38,
             },
-        }"#]]);
+        }"#]],
+    );
 }
 
 #[test]
@@ -180,7 +183,9 @@ fn test_free_fn() {
         .btree_map([(34, 35), (34, 36), (37, 38)])
         .call();
 
-    assert_debug_eq(&sut, expect![[r#"
+    assert_debug_eq(
+        &sut,
+        expect![[r#"
         (
             [
                 13,
@@ -234,7 +239,8 @@ fn test_free_fn() {
                 34: 36,
                 37: 38,
             },
-        )"#]]);
+        )"#]],
+    );
 }
 
 #[test]
@@ -327,7 +333,9 @@ fn test_assoc_method() {
         .btree_map([(34, 35), (34, 36), (37, 38)])
         .call();
 
-    assert_debug_eq(&sut, expect![[r#"
+    assert_debug_eq(
+        &sut,
+        expect![[r#"
         (
             [
                 13,
@@ -381,7 +389,8 @@ fn test_assoc_method() {
                 34: 36,
                 37: 38,
             },
-        )"#]]);
+        )"#]],
+    );
 
     let builder = Sut.with_self();
 
@@ -406,7 +415,9 @@ fn test_assoc_method() {
         .btree_map([(34, 35), (34, 36), (37, 38)])
         .call();
 
-    assert_debug_eq(&sut, expect![[r#"
+    assert_debug_eq(
+        &sut,
+        expect![[r#"
         (
             [
                 13,
@@ -460,5 +471,6 @@ fn test_assoc_method() {
                 34: 36,
                 37: 38,
             },
-        )"#]]);
+        )"#]],
+    );
 }
