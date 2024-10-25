@@ -23,7 +23,7 @@ All the breaking changes are very unlikely to actually break your code that was 
 - Add `#[builder(builder_type(vis = "..."))]` that allows overriding the visibility of the builder struct ([#145](https://github.com/elastio/bon/pull/145))
 - Add `#[builder(finish_fn(vis = "..."))]` that allows overriding the visibility of the finishing function ([#145](https://github.com/elastio/bon/pull/145))
 - Add `#[builder(with = closure)]` syntax to customize setters with a custom closure. If the closure returns a `Result<_, E>` the setters become fallible ([#145](https://github.com/elastio/bon/pull/145))
-- Add `#[builder(transparent)]` for `Option` fields to opt out from their special handling which makes `bon` treat them as regular required fields ([#145](https://github.com/elastio/bon/pull/145))
+- Add `#[builder(transparent)]` for `Option` fields to opt out from their special handling which makes `bon` treat them as regular required fields. It's also available at the top-level via `#[builder(on(_, transparent))]` ([#145](https://github.com/elastio/bon/pull/145), [#155](https://github.com/elastio/bon/pull/155))
 - Add `#[builder(state_mod)]` to configure the builder's type state API module name, visibility and docs ([#145](https://github.com/elastio/bon/pull/145))
 - Add `#[builder(overwritable)]` and `#[builder(on(..., overwritable)]` to make it possible to call setters multiple times for the same member ([#145](https://github.com/elastio/bon/pull/145))
 - Add `#[builder(setters)]` to fine-tune the setters names, visibility and docs ([#145](https://github.com/elastio/bon/pull/145))
