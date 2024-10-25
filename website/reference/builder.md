@@ -6,7 +6,7 @@ outline: [2, 3]
 
 You can generate a builder using three different kinds of syntax (struct, free function, associated method). They all share two common groups of attributes.
 
-- [Top-level attributes](#item-attributes) - placed on a `struct` or `fn` declaration.
+- [Top-level attributes](#top-level-attributes) - placed on a `struct` or `fn` declaration.
 - [Member attributes](#member-attributes) - placed on a `struct` field or `fn` argument.
 
 See examples. Make sure to click through the tabs:
