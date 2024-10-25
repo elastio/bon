@@ -1,6 +1,6 @@
 use super::member::SetterClosure;
 use super::{BuilderGenCtx, NamedMember};
-use crate::parsing::ItemParams;
+use crate::parsing::ItemSigConfig;
 use crate::util::prelude::*;
 use std::iter;
 
@@ -27,10 +27,10 @@ impl<'a> SettersCtx<'a> {
 
         let member_type = self.member.ty.norm.as_ref();
 
-        if let Some(closure) = &self.member.params.with {
+        if let Some(closure) = &self.member.config.with {
             input = Self::underlying_input_from_closure(closure);
             expr = self.member_expr_from_closure(closure);
-        } else if self.member.params.into.is_present() {
+        } else if self.member.config.into.is_present() {
             input = quote!(value: impl Into<#member_type>);
             expr = quote!(Into::into(value));
         } else {
@@ -49,12 +49,12 @@ impl<'a> SettersCtx<'a> {
     }
 
     fn setters_for_optional_member(&self, items: OptionalSettersItems) -> TokenStream {
-        if let Some(closure) = &self.member.params.with {
+        if let Some(closure) = &self.member.config.with {
             return self.setters_for_optional_member_with_closure(closure, items);
         }
 
         let underlying_ty = self.member.underlying_norm_ty();
-        let underlying_ty = if self.member.params.into.is_present() {
+        let underlying_ty = if self.member.config.into.is_present() {
             quote!(impl Into<#underlying_ty>)
         } else {
             quote!(#underlying_ty)
@@ -80,7 +80,7 @@ impl<'a> SettersCtx<'a> {
             imp: SetterImpl {
                 input: quote!(value: Option<#underlying_ty>),
                 body: SetterBody::SetMember {
-                    expr: if self.member.params.into.is_present() {
+                    expr: if self.member.config.into.is_present() {
                         quote! {
                             Option::map(value, Into::into)
                         }
@@ -257,7 +257,7 @@ impl<'a> SettersCtx<'a> {
 
                 let result_output = self
                     .member
-                    .params
+                    .config
                     .with
                     .as_ref()
                     .and_then(|closure| closure.output.as_ref());
@@ -290,11 +290,11 @@ impl<'a> SettersCtx<'a> {
             }
         };
 
-        if let Some(closure) = &self.member.params.with {
+        if let Some(closure) = &self.member.config.with {
             return_type = Self::maybe_wrap_in_result(closure, return_type);
         }
 
-        let where_clause = (!self.member.params.overwritable.is_present()).then(|| {
+        let where_clause = (!self.member.config.overwritable.is_present()).then(|| {
             let state_var = &self.base.state_var;
             let member_pascal = &self.member.name.pascal;
             quote! {
@@ -366,11 +366,11 @@ impl SettersItems {
         let SettersCtx { member, base } = ctx;
         let builder_type = &base.builder_type;
 
-        let params = member.params.setters.as_ref();
+        let config = member.config.setters.as_ref();
 
-        let common_name = params.and_then(|params| params.name.as_deref());
-        let common_vis = params.and_then(|params| params.vis.as_deref());
-        let common_docs = params.and_then(|params| params.docs.as_deref().map(Vec::as_slice));
+        let common_name = config.and_then(|config| config.name.as_deref());
+        let common_vis = config.and_then(|config| config.vis.as_deref());
+        let common_docs = config.and_then(|config| config.docs.as_deref().map(Vec::as_slice));
 
         let doc = |docs: &str| iter::once(syn::parse_quote!(#[doc = #docs]));
 
@@ -390,16 +390,16 @@ impl SettersItems {
             });
         }
 
-        let some_fn = params.and_then(|params| params.fns.some_fn.as_deref());
+        let some_fn = config.and_then(|config| config.fns.some_fn.as_deref());
         let some_fn_name = some_fn
-            .and_then(ItemParams::name)
+            .and_then(ItemSigConfig::name)
             .or(common_name)
             .unwrap_or(&member.name.snake)
             .clone();
 
-        let option_fn = params.and_then(|params| params.fns.option_fn.as_deref());
+        let option_fn = config.and_then(|config| config.fns.option_fn.as_deref());
         let option_fn_name = option_fn
-            .and_then(ItemParams::name)
+            .and_then(ItemSigConfig::name)
             .cloned()
             .unwrap_or_else(|| {
                 let base_name = common_name.unwrap_or(&member.name.snake);
@@ -410,7 +410,7 @@ impl SettersItems {
                 syn::Ident::new(&format!("maybe_{base_name}"), base_name.span())
             });
 
-        let default = member.params.default.as_deref().and_then(|default| {
+        let default = member.config.default.as_deref().and_then(|default| {
             let default = default
                 .clone()
                 .or_else(|| well_known_default(&member.ty.norm))
@@ -434,7 +434,7 @@ impl SettersItems {
         // FIXME: the docs shouldn't reference the companion setter if that
         // setter has a lower visibility.
         let some_fn_docs = some_fn
-            .and_then(ItemParams::docs)
+            .and_then(ItemSigConfig::docs)
             .or(common_docs)
             .unwrap_or(&member.docs);
 
@@ -445,7 +445,7 @@ impl SettersItems {
         };
 
         let option_fn_docs = option_fn
-            .and_then(ItemParams::docs)
+            .and_then(ItemSigConfig::docs)
             .or(common_docs)
             .unwrap_or(&member.docs);
 
@@ -462,7 +462,7 @@ impl SettersItems {
         let some_fn = SetterItem {
             name: some_fn_name,
             vis: some_fn
-                .and_then(ItemParams::vis)
+                .and_then(ItemSigConfig::vis)
                 .or(common_vis)
                 .unwrap_or(&builder_type.vis)
                 .clone(),
@@ -470,12 +470,12 @@ impl SettersItems {
             docs: some_fn_docs,
         };
 
-        let option_fn = params.and_then(|params| params.fns.option_fn.as_deref());
+        let option_fn = config.and_then(|config| config.fns.option_fn.as_deref());
         let option_fn = SetterItem {
             name: option_fn_name,
 
             vis: option_fn
-                .and_then(ItemParams::vis)
+                .and_then(ItemSigConfig::vis)
                 .or(common_vis)
                 .unwrap_or(&builder_type.vis)
                 .clone(),

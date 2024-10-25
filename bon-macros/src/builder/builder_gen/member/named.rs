@@ -1,9 +1,9 @@
-use super::params::MemberParams;
-use super::{params, MemberOrigin};
-use crate::builder::builder_gen::builder_params::OnParams;
-use crate::builder::builder_gen::member::params::SettersFnParams;
+use super::config::MemberConfig;
+use super::{config, MemberOrigin};
+use crate::builder::builder_gen::member::config::SettersFnsConfig;
+use crate::builder::builder_gen::top_level_config::OnConfig;
 use crate::normalization::SyntaxVariant;
-use crate::parsing::{ItemParams, SpannedKey};
+use crate::parsing::{ItemSigConfig, SpannedKey};
 use crate::util::prelude::*;
 
 #[derive(Debug)]
@@ -40,8 +40,8 @@ pub(crate) struct MemberName {
 }
 
 impl MemberName {
-    pub(crate) fn new(orig: syn::Ident, params: &MemberParams) -> Self {
-        let snake = params.name.clone().unwrap_or_else(|| {
+    pub(crate) fn new(orig: syn::Ident, config: &MemberConfig) -> Self {
+        let snake = config.name.clone().unwrap_or_else(|| {
             let orig_str = orig.to_string();
             let norm = orig_str
                 // Remove the leading underscore from the member name since it's used
@@ -89,12 +89,12 @@ pub(crate) struct NamedMember {
     pub(crate) ty: SyntaxVariant<Box<syn::Type>>,
 
     /// Parameters configured by the user explicitly via attributes
-    pub(crate) params: MemberParams,
+    pub(crate) config: MemberConfig,
 }
 
 impl NamedMember {
     pub(super) fn validate(&self) -> Result {
-        if let Some(default) = &self.params.default {
+        if let Some(default) = &self.config.default {
             if self.is_special_option_ty() {
                 bail!(
                     &default.key,
@@ -105,7 +105,7 @@ impl NamedMember {
         }
 
         let member_docs_not_copied = self
-            .params
+            .config
             .setters
             .as_ref()
             .map(|setters| {
@@ -113,12 +113,12 @@ impl NamedMember {
                     return true;
                 }
 
-                let SettersFnParams { some_fn, option_fn } = &setters.fns;
+                let SettersFnsConfig { some_fn, option_fn } = &setters.fns;
                 matches!(
                     (some_fn.as_deref(), option_fn.as_deref()),
                     (
-                        Some(ItemParams { docs: Some(_), .. }),
-                        Some(ItemParams { docs: Some(_), .. })
+                        Some(ItemSigConfig { docs: Some(_), .. }),
+                        Some(ItemSigConfig { docs: Some(_), .. })
                     )
                 )
             })
@@ -131,11 +131,11 @@ impl NamedMember {
             )?;
         }
 
-        self.validate_setters_params()?;
+        self.validate_setters_config()?;
 
-        if self.params.transparent.is_present() && !self.ty.norm.is_option() {
+        if self.config.transparent.is_present() && !self.ty.norm.is_option() {
             bail!(
-                &self.params.transparent.span(),
+                &self.config.transparent.span(),
                 "`#[builder(transparent)]` can only be applied to members of \
                 type `Option<T>` to disable their special handling",
             );
@@ -144,14 +144,14 @@ impl NamedMember {
         Ok(())
     }
 
-    fn validate_setters_params(&self) -> Result {
-        let setters = match &self.params.setters {
+    fn validate_setters_config(&self) -> Result {
+        let setters = match &self.config.setters {
             Some(setters) => setters,
             None => return Ok(()),
         };
 
         if self.is_required() {
-            let SettersFnParams { some_fn, option_fn } = &setters.fns;
+            let SettersFnsConfig { some_fn, option_fn } = &setters.fns;
 
             let unexpected_setter = option_fn.as_ref().or(some_fn.as_ref());
 
@@ -165,16 +165,16 @@ impl NamedMember {
             }
         }
 
-        if let SettersFnParams {
+        if let SettersFnsConfig {
             some_fn: Some(some_fn),
             option_fn: Some(option_fn),
         } = &setters.fns
         {
             let setter_fns = &[some_fn, option_fn];
 
-            Self::validate_unused_setters_cfg(setter_fns, &setters.name, |params| &params.name)?;
-            Self::validate_unused_setters_cfg(setter_fns, &setters.vis, |params| &params.vis)?;
-            Self::validate_unused_setters_cfg(setter_fns, &setters.docs, |params| &params.docs)?;
+            Self::validate_unused_setters_cfg(setter_fns, &setters.name, |config| &config.name)?;
+            Self::validate_unused_setters_cfg(setter_fns, &setters.vis, |config| &config.vis)?;
+            Self::validate_unused_setters_cfg(setter_fns, &setters.docs, |config| &config.docs)?;
         }
 
         Ok(())
@@ -183,9 +183,9 @@ impl NamedMember {
     // Lint from nightly. `&Option<T>` is used to reduce syntax at the call site
     #[allow(unknown_lints, clippy::ref_option)]
     fn validate_unused_setters_cfg<T>(
-        overrides: &[&SpannedKey<ItemParams>],
+        overrides: &[&SpannedKey<ItemSigConfig>],
         config: &Option<SpannedKey<T>>,
-        get_val: impl Fn(&ItemParams) -> &Option<SpannedKey<T>>,
+        get_val: impl Fn(&ItemSigConfig) -> &Option<SpannedKey<T>>,
     ) -> Result {
         let config = match config {
             Some(config) => config,
@@ -217,13 +217,13 @@ impl NamedMember {
     /// Returns `true` if this member is of `Option<_>` type, but returns `false`
     /// if `#[builder(transparent)]` is set.
     pub(crate) fn is_special_option_ty(&self) -> bool {
-        !self.params.transparent.is_present() && self.ty.norm.is_option()
+        !self.config.transparent.is_present() && self.ty.norm.is_option()
     }
 
     /// Returns `false` if the member has a default value. It means this member
     /// is required to be set before building can be finished.
     pub(crate) fn is_required(&self) -> bool {
-        self.params.default.is_none() && !self.is_special_option_ty()
+        self.config.default.is_none() && !self.is_special_option_ty()
     }
 
     /// A stateful member is the one that has a corresponding associated type in
@@ -231,7 +231,7 @@ impl NamedMember {
     /// member was set or not. This is necessary to make sure all members without
     /// default values are set before building can be finished.
     pub(crate) fn is_stateful(&self) -> bool {
-        self.is_required() || !self.params.overwritable.is_present()
+        self.is_required() || !self.config.overwritable.is_present()
     }
 
     /// Returns the normalized type of the member stripping the `Option<_>`
@@ -247,7 +247,7 @@ impl NamedMember {
     }
 
     fn underlying_ty<'m>(&'m self, ty: &'m syn::Type) -> &'m syn::Type {
-        if self.params.transparent.is_present() || self.params.default.is_some() {
+        if self.config.transparent.is_present() || self.config.default.is_some() {
             ty
         } else {
             ty.option_type_param().unwrap_or(ty)
@@ -258,16 +258,16 @@ impl NamedMember {
         self.index == other.index
     }
 
-    pub(crate) fn merge_on_params(&mut self, on_params: &[OnParams]) -> Result {
-        self.merge_param_into(on_params)?;
+    pub(crate) fn merge_on_config(&mut self, on: &[OnConfig]) -> Result {
+        self.merge_config_into(on)?;
 
         // FIXME: refactor this to make it more consistent with `into`
-        // and allow for non-boolean flags in `OnParams`. E.g. add support
+        // and allow for non-boolean flags in `OnConfig`. E.g. add support
         // for `with = closure` to `on` as well.
-        self.params.overwritable = params::EvalBlanketFlagParam {
-            on_params,
-            param_name: params::BlanketParamName::Overwritable,
-            member_params: &self.params,
+        self.config.overwritable = config::EvalBlanketFlagParam {
+            on,
+            param_name: config::BlanketParamName::Overwritable,
+            member_config: &self.config,
             scrutinee: self.underlying_norm_ty(),
             origin: self.origin,
         }

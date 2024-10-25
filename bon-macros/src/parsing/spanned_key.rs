@@ -23,6 +23,10 @@ impl<T> SpannedKey<T> {
     pub(crate) fn into_value(self) -> T {
         self.value
     }
+
+    pub(crate) fn key(&self) -> &syn::Ident {
+        &self.key
+    }
 }
 
 impl<T: FromMeta> FromMeta for SpannedKey<T> {

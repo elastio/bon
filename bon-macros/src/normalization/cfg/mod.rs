@@ -2,41 +2,45 @@ mod parse;
 mod visit;
 
 use crate::util::prelude::*;
+use darling::ast::NestedMeta;
 use parse::CfgSyntax;
 use std::collections::BTreeSet;
+use syn::parse::Parser;
 
-pub(crate) enum ExpansionOutput {
-    Expanded {
-        params: TokenStream,
-        item: syn::Item,
-    },
+pub(crate) enum Expansion {
+    Expanded(Expanded),
     Recurse(TokenStream),
 }
 
+pub(crate) struct Expanded {
+    pub(crate) config: TokenStream,
+    pub(crate) item: syn::Item,
+}
+
 pub(crate) struct ExpandCfg {
-    pub(crate) macro_path: syn::Path,
-    pub(crate) params: TokenStream,
+    pub(crate) current_macro: syn::Ident,
+    pub(crate) config: TokenStream,
     pub(crate) item: syn::Item,
 }
 
 impl ExpandCfg {
-    pub(crate) fn expand_cfg(mut self) -> Result<ExpansionOutput> {
+    pub(crate) fn expand_cfg(mut self) -> Result<Expansion> {
         let predicates = self.collect_predicates()?;
 
         if predicates.is_empty() {
-            return Ok(ExpansionOutput::Expanded {
-                params: self.params,
+            return Ok(Expansion::Expanded(Expanded {
+                config: self.config,
                 item: self.item,
-            });
+            }));
         }
 
-        let predicate_results = match parse::parse_predicate_results(self.params.clone())? {
+        let predicate_results = match parse::parse_predicate_results(self.config.clone())? {
             Some(predicate_results) => predicate_results,
             None => return self.into_recursion(0, &predicates),
         };
 
-        // Update the parameters to remove the `@cfgs(...)` prefix from them
-        self.params = predicate_results.rest;
+        // Update the config to remove the `@cfgs(...)` prefix from them
+        self.config = predicate_results.rest;
 
         let true_predicates: BTreeSet<_> = predicates
             .iter()
@@ -53,10 +57,10 @@ impl ExpandCfg {
         let predicates = self.collect_predicates()?;
 
         if predicates.is_empty() {
-            return Ok(ExpansionOutput::Expanded {
-                params: self.params,
+            return Ok(Expansion::Expanded(Expanded {
+                config: self.config,
                 item: self.item,
-            });
+            }));
         }
 
         self.into_recursion(predicate_results.recursion_counter + 1, &predicates)
@@ -95,14 +99,28 @@ impl ExpandCfg {
         self,
         recursion_counter: usize,
         predicates: &[TokenStream],
-    ) -> Result<ExpansionOutput> {
+    ) -> Result<Expansion> {
         let Self {
-            params,
+            config,
             item,
-            macro_path,
-        } = &self;
+            current_macro,
+        } = self;
 
-        let invocation_name = self.unique_invocation_name()?;
+        let bon = NestedMeta::parse_meta_list(config.clone())?
+            .iter()
+            .find_map(|meta| match meta {
+                NestedMeta::Meta(syn::Meta::NameValue(meta)) if meta.path.is_ident("crate") => {
+                    let path = &meta.value;
+                    Some(syn::Path::parse_mod_style.parse2(quote!(#path)))
+                }
+                _ => None,
+            })
+            .transpose()?
+            .unwrap_or_else(|| syn::parse_quote!(::bon));
+
+        let current_macro = syn::parse_quote!(#bon::#current_macro);
+
+        let invocation_name = Self::unique_invocation_name(&item, &current_macro)?;
 
         let predicates = predicates.iter().enumerate().map(|(i, predicate)| {
             // We need to insert the recursion counter into the name so that
@@ -112,17 +130,17 @@ impl ExpandCfg {
         });
 
         let expansion = quote! {
-            ::bon::__eval_cfg_callback! {
+            #bon::__eval_cfg_callback! {
                 {}
                 #((#predicates))*
-                #macro_path,
+                #current_macro,
                 #recursion_counter,
-                ( #params )
+                ( #config )
                 #item
             }
         };
 
-        Ok(ExpansionOutput::Recurse(expansion))
+        Ok(Expansion::Recurse(expansion))
     }
 
     /// The macro `__eval_cfg_callback` needs to generate a use statement for
@@ -151,16 +169,16 @@ impl ExpandCfg {
     ///
     /// However, in most of the cases it will be a simple path, so its combination
     /// with the name of the first function in the `impl` block should be unique enough.
-    fn unique_invocation_name(&self) -> Result<String> {
+    fn unique_invocation_name(item: &syn::Item, current_macro: &syn::Path) -> Result<String> {
         let path_to_ident =
             |path: &syn::Path| path.segments.iter().map(|segment| &segment.ident).join("_");
 
         // Include the name of the proc macro in the unique name to avoid
         // collisions when different proc macros are placed on the same item
         // and they use this code to generate unique names.
-        let macro_path_str = path_to_ident(&self.macro_path);
+        let macro_path_str = path_to_ident(current_macro);
 
-        let item_name = match &self.item {
+        let item_name = match item {
             syn::Item::Fn(item) => item.sig.ident.to_string(),
             syn::Item::Impl(item) => {
                 let self_ty = item

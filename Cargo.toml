@@ -147,6 +147,12 @@ missing_crate_level_docs = "warn"
 unescaped_backticks      = "warn"
 
 [workspace.lints.rust]
+# This lint is used only to warn about the changes in drop order during the
+# transition from Rust 2021 to Rust 2024. There are too many instances of this
+# lint in our code base and some of them may be false positives. So we just allow
+# this lint globally.
+tail_expr_drop_order = { level = "allow", priority = 2 }
+
 unsafe_code       = "warn"
 unstable_features = "warn"
 

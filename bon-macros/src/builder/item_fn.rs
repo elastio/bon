@@ -1,11 +1,11 @@
-use super::builder_gen::input_fn::{FnInputCtx, FnInputParams};
-use super::builder_gen::MacroOutput;
+use super::builder_gen::input_fn::{FnInputCtx, FnInputCtxParams};
+use super::builder_gen::{MacroOutput, TopLevelConfig};
 use crate::normalization::SyntaxVariant;
 use crate::util::prelude::*;
 use syn::visit_mut::VisitMut;
 
 pub(crate) fn generate(
-    params: FnInputParams,
+    config: TopLevelConfig,
     orig_fn: syn::ItemFn,
     namespace: &crate::normalization::GenericsNamespace,
 ) -> Result<TokenStream> {
@@ -19,12 +19,12 @@ pub(crate) fn generate(
         norm: norm_fn,
     };
 
-    let ctx = FnInputCtx {
+    let ctx = FnInputCtx::new(FnInputCtxParams {
         namespace,
         fn_item,
         impl_ctx: None,
-        params,
-    };
+        config,
+    });
 
     let adapted_fn = ctx.adapted_fn()?;
 

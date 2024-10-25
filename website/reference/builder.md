@@ -6,8 +6,8 @@ outline: [2, 3]
 
 You can generate a builder using three different kinds of syntax (struct, free function, associated method). They all share two common groups of attributes.
 
-- [Item attributes](#item-attributes) - apply to a `struct` or `fn` declaration itself.
-- [Member attributes](#member-attributes) - apply to a `struct` field or `fn` argument.
+- [Top-level attributes](#top-level-attributes) - placed on a `struct` or `fn` declaration.
+- [Member attributes](#member-attributes) - placed on a `struct` field or `fn` argument.
 
 See examples. Make sure to click through the tabs:
 
@@ -17,7 +17,7 @@ See examples. Make sure to click through the tabs:
 use bon::Builder;
 
 #[derive(Builder)]
-#[builder(finish_fn = finish)] // <-- this is an item attribute // [!code highlight]
+#[builder(finish_fn = finish)] // <-- this is a top-level attribute // [!code highlight]
 struct Example {
     #[builder(default)] // <-- this is a member attribute // [!code highlight]
     field: u32
@@ -27,7 +27,7 @@ struct Example {
 ```rust [Free function]
 use bon::builder;
 
-#[builder(finish_fn = finish)] // <-- this is an item attribute // [!code highlight]
+#[builder(finish_fn = finish)] // <-- this is a top-level attribute // [!code highlight]
 fn example(
     #[builder(default)] // <-- this is a member attribute // [!code highlight]
     arg: u32
@@ -41,7 +41,7 @@ struct Example;
 
 #[bon]
 impl Example {
-    #[builder(finish_fn = finish)] // <-- this is an item attribute // [!code highlight]
+    #[builder(finish_fn = finish)] // <-- this is a top-level attribute // [!code highlight]
     fn example(
         #[builder(default)]  // <-- this is a member attribute // [!code highlight]
         arg: u32
@@ -59,7 +59,7 @@ Most of the attributes apply to all kinds of syntax. However, some of them are o
 
 :::
 
-## Item attributes
+## Top-level attributes
 
 ### `builder_type`
 
@@ -315,7 +315,7 @@ If `vis` parameter is not specified, then the visibility of the exposed position
 
 ::: code-group
 
-```rust [Free function]
+```rust ignore [Free function]
 use bon::builder;
 
 #[builder(expose_positional_fn = example_positional)] // [!code highlight]
@@ -331,7 +331,7 @@ example()
     .call();
 ```
 
-```rust [Associated method]
+```rust ignore [Associated method]
 use bon::bon;
 
 struct Example;
@@ -365,7 +365,7 @@ So when `#[builder]` is placed on a method called `new`, it'll generate a method
 
 **Example:**
 
-```rust
+```rust ignore
 use bon::bon;
 
 struct Example {
@@ -453,57 +453,6 @@ let response = ArticlesClient
     .send(); // [!code highlight]
 
 assert_eq!(response, "Some article with id 42");
-```
-
-:::
-
-### `start_fn`
-
-**Applies to:** <Badge text="structs"/>
-
-Overrides the name and visibility of the associated method that starts the building process, i.e. returns the builder for the struct.
-
-The default name for this method is `builder`, and the default visibility is the same as the visibility of the struct itself.
-
-This attribute can take several forms.
-
--   Simple: `#[builder(start_fn = identifier)]`. Overrides only the name of the "start" method.
--   Verbose: `#[builder(start_fn(name = identifier, vis = "visibility"))]`.
-    Allows overriding both the name and the visibility of the "start" method.
-    Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
-
-**Example:**
-
-::: code-group
-
-```rust [Simple form]
-use bon::Builder;
-
-#[derive(Builder)]
-#[builder(start_fn = init)] // [!code highlight]
-struct User {
-    id: u32
-}
-
-User::init() // [!code highlight]
-    .id(42)
-    .build();
-```
-
-```rust [Verbose form]
-use bon::Builder;
-
-// `User::init()` method will have `pub(crate)` visibility // [!code highlight]
-// Use `vis = ""` to make it fully private instead         // [!code highlight]
-#[derive(Builder)]
-#[builder(start_fn(name = init, vis = "pub(crate)"))]      // [!code highlight]
-pub struct User {
-    id: u32
-}
-
-User::init() // [!code highlight]
-    .id(42)
-    .build();
 ```
 
 :::
@@ -645,6 +594,57 @@ Example::builder()
     .level(100)
     .build();
 ```
+
+### `start_fn`
+
+**Applies to:** <Badge text="structs"/>
+
+Overrides the name and visibility of the associated method that starts the building process, i.e. returns the builder for the struct.
+
+The default name for this method is `builder`, and the default visibility is the same as the visibility of the struct itself.
+
+This attribute can take several forms.
+
+-   Simple: `#[builder(start_fn = identifier)]`. Overrides only the name of the "start" method.
+-   Verbose: `#[builder(start_fn(name = identifier, vis = "visibility"))]`.
+    Allows overriding both the name and the visibility of the "start" method.
+    Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
+
+**Example:**
+
+::: code-group
+
+```rust [Simple form]
+use bon::Builder;
+
+#[derive(Builder)]
+#[builder(start_fn = init)] // [!code highlight]
+struct User {
+    id: u32
+}
+
+User::init() // [!code highlight]
+    .id(42)
+    .build();
+```
+
+```rust [Verbose form]
+use bon::Builder;
+
+// `User::init()` method will have `pub(crate)` visibility // [!code highlight]
+// Use `vis = ""` to make it fully private instead         // [!code highlight]
+#[derive(Builder)]
+#[builder(start_fn(name = init, vis = "pub(crate)"))]      // [!code highlight]
+pub struct User {
+    id: u32
+}
+
+User::init() // [!code highlight]
+    .id(42)
+    .build();
+```
+
+:::
 
 ## Member attributes
 
@@ -858,6 +858,115 @@ The `self` parameter in associated methods is not available to the `default` exp
 #### Compile errors
 
 This attribute is incompatible with members of `Option` type, since `Option` already implies the default value of `None`.
+
+### `finish_fn`
+
+**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
+
+Makes the member a positional argument on the finishing function that consumes the builder and returns the resulting object (for struct syntax) or performs the requested action (for function/method syntax).
+
+The ordering of members annotated with `#[builder(finish_fn)]` matters! They will appear in the same order relative to each other in the finishing function signature. They must also be declared at the top of the members list strictly after members annotated with [`#[builder(start_fn)]`](#start-fn-1) (if any).
+
+This ensures a consistent initialization order, and it makes these members available for expressions in `#[builder(default/skip = ...)]` for regular members that follow them.
+
+::: tip
+
+Don't confuse this with the top-level [`#[builder(finish_fn = ...)]`](#finish-fn) attribute that can be used to configure the name and visibility of the finishing function. You'll likely want to use it in combination with this member-level attribute to define a better name for the finishing function.
+
+:::
+
+**Example:**
+
+::: code-group
+
+```rust [Struct field]
+use bon::Builder;
+
+#[derive(Builder)]
+// Top-level attribute to give a better name for the finishing function // [!code highlight]
+#[builder(finish_fn = sign)]                                            // [!code highlight]
+struct Message {
+    // Member-level attribute to mark the member as a parameter of `sign()` // [!code highlight]
+    #[builder(finish_fn)] // [!code highlight]
+    author_first_name: String,
+
+    #[builder(finish_fn)] // [!code highlight]
+    author_last_name: String,
+
+    payload: String,
+}
+
+let message = Message::builder()
+    .payload("Bon is great! Give it a ⭐".to_owned())
+    .sign("Sweetie".to_owned(), "Drops".to_owned());
+
+assert_eq!(message.payload, "Bon is great! Give it a ⭐");
+assert_eq!(message.author_first_name, "Sweetie");
+assert_eq!(message.author_last_name, "Drops");
+```
+
+```rust [Free function]
+use bon::builder;
+
+// Top-level attribute to give a better name for the finishing function // [!code highlight]
+#[builder(finish_fn = send)]                                            // [!code highlight]
+fn message(
+    // Member-level attribute to mark the member as a parameter of `sign()` // [!code highlight]
+    #[builder(finish_fn)] // [!code highlight]
+    receiver_first_name: String,
+
+    #[builder(finish_fn)] // [!code highlight]
+    receiver_last_name: String,
+
+    payload: String,
+) {}
+
+message()
+    .payload("Bon is great! Give it a ⭐".to_owned())
+    .send("Sweetie".to_owned(), "Drops".to_owned());
+```
+
+```rust [Associated method]
+use bon::bon;
+
+struct Chat {}
+
+#[bon]
+impl Chat {
+    // Top-level attribute to give a better name for the finishing function // [!code highlight]
+    #[builder(finish_fn = send)]                                            // [!code highlight]
+    fn message(
+        &self,
+
+        // Member-level attribute to mark the member as a parameter of `sign()` // [!code highlight]
+        #[builder(finish_fn)] // [!code highlight]
+        receiver_first_name: String,
+
+        #[builder(finish_fn)] // [!code highlight]
+        receiver_last_name: String,
+
+        payload: String,
+    ) {}
+}
+
+let chat = Chat {};
+
+chat.message()
+    .payload("Bon is great! Give it a ⭐".to_owned())
+    .send("Sweetie".to_owned(), "Drops".to_owned());
+```
+
+:::
+
+You can also combine this attribute with [`#[builder(into)]`](#into) or [`#[builder(on(..., into))]`](#on) to add an into conversion for the parameter.
+
+Importantly, `Into` conversions for such members work slightly differently from the regular (named) members in regard to the `Option` type. The `Option` type gives no additional meaning to the member annotated with `#[builder(finish_fn)]`. Thus, it is matched by the type pattern of `on(..., into)` and wrapped with `impl Into<Option<T>>` as any other type.
+
+::: tip
+
+In general, it's not recommended to annotate optional members with `#[builder(finish_fn)]` because you can't omit setting them using the positional function call syntax.
+
+:::
 
 ### `into`
 
@@ -1196,115 +1305,6 @@ Importantly, `Into` conversions for such members work slightly differently from 
 ::: tip
 
 In general, it's not recommended to annotate optional members with `#[builder(start_fn)]` because you can't omit setting them using the positional function call syntax.
-
-:::
-
-### `finish_fn`
-
-**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
-
-Makes the member a positional argument on the finishing function that consumes the builder and returns the resulting object (for struct syntax) or performs the requested action (for function/method syntax).
-
-The ordering of members annotated with `#[builder(finish_fn)]` matters! They will appear in the same order relative to each other in the finishing function signature. They must also be declared at the top of the members list strictly after members annotated with [`#[builder(start_fn)]`](#start-fn-1) (if any).
-
-This ensures a consistent initialization order, and it makes these members available for expressions in `#[builder(default/skip = ...)]` for regular members that follow them.
-
-::: tip
-
-Don't confuse this with the top-level [`#[builder(finish_fn = ...)]`](#finish-fn) attribute that can be used to configure the name and visibility of the finishing function. You'll likely want to use it in combination with this member-level attribute to define a better name for the finishing function.
-
-:::
-
-**Example:**
-
-::: code-group
-
-```rust [Struct field]
-use bon::Builder;
-
-#[derive(Builder)]
-// Top-level attribute to give a better name for the finishing function // [!code highlight]
-#[builder(finish_fn = sign)]                                            // [!code highlight]
-struct Message {
-    // Member-level attribute to mark the member as a parameter of `sign()` // [!code highlight]
-    #[builder(finish_fn)] // [!code highlight]
-    author_first_name: String,
-
-    #[builder(finish_fn)] // [!code highlight]
-    author_last_name: String,
-
-    payload: String,
-}
-
-let message = Message::builder()
-    .payload("Bon is great! Give it a ⭐".to_owned())
-    .sign("Sweetie".to_owned(), "Drops".to_owned());
-
-assert_eq!(message.payload, "Bon is great! Give it a ⭐");
-assert_eq!(message.author_first_name, "Sweetie");
-assert_eq!(message.author_last_name, "Drops");
-```
-
-```rust [Free function]
-use bon::builder;
-
-// Top-level attribute to give a better name for the finishing function // [!code highlight]
-#[builder(finish_fn = send)]                                            // [!code highlight]
-fn message(
-    // Member-level attribute to mark the member as a parameter of `sign()` // [!code highlight]
-    #[builder(finish_fn)] // [!code highlight]
-    receiver_first_name: String,
-
-    #[builder(finish_fn)] // [!code highlight]
-    receiver_last_name: String,
-
-    payload: String,
-) {}
-
-message()
-    .payload("Bon is great! Give it a ⭐".to_owned())
-    .send("Sweetie".to_owned(), "Drops".to_owned());
-```
-
-```rust [Associated method]
-use bon::bon;
-
-struct Chat {}
-
-#[bon]
-impl Chat {
-    // Top-level attribute to give a better name for the finishing function // [!code highlight]
-    #[builder(finish_fn = send)]                                            // [!code highlight]
-    fn message(
-        &self,
-
-        // Member-level attribute to mark the member as a parameter of `sign()` // [!code highlight]
-        #[builder(finish_fn)] // [!code highlight]
-        receiver_first_name: String,
-
-        #[builder(finish_fn)] // [!code highlight]
-        receiver_last_name: String,
-
-        payload: String,
-    ) {}
-}
-
-let chat = Chat {};
-
-chat.message()
-    .payload("Bon is great! Give it a ⭐".to_owned())
-    .send("Sweetie".to_owned(), "Drops".to_owned());
-```
-
-:::
-
-You can also combine this attribute with [`#[builder(into)]`](#into) or [`#[builder(on(..., into))]`](#on) to add an into conversion for the parameter.
-
-Importantly, `Into` conversions for such members work slightly differently from the regular (named) members in regard to the `Option` type. The `Option` type gives no additional meaning to the member annotated with `#[builder(finish_fn)]`. Thus, it is matched by the type pattern of `on(..., into)` and wrapped with `impl Into<Option<T>>` as any other type.
-
-::: tip
-
-In general, it's not recommended to annotate optional members with `#[builder(finish_fn)]` because you can't omit setting them using the positional function call syntax.
 
 :::
 

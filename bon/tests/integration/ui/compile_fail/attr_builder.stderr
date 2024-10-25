@@ -10,7 +10,7 @@ error: expected parameters in parentheses
 8 | #[builder()]
   |          ^^
 
-error: this empty `#[builder]` attribute is unexpected; remove it or pass parameters in parentheses: `#[builder(...)]`
+error: this empty `builder` attribute is unexpected; remove it or pass parameters in parentheses: `builder(...)`
   --> tests/integration/ui/compile_fail/attr_builder.rs:13:7
    |
 13 |     #[builder]
@@ -22,7 +22,7 @@ error: expected parameters in parentheses
 19 |     #[builder()]
    |              ^^
 
-error: this empty `#[builder]` attribute is unexpected; remove it or pass parameters in parentheses: `#[builder(...)]`
+error: this empty `builder` attribute is unexpected; remove it or pass parameters in parentheses: `builder(...)`
   --> tests/integration/ui/compile_fail/attr_builder.rs:24:41
    |
 24 | fn fn_empty_member_level_builder_attr(#[builder] _x: u32) {}
@@ -34,7 +34,7 @@ error: expected parameters in parentheses
 27 | fn fn_empty_member_level_builder_attr_with_parens(#[builder()] _x: u32) {}
    |                                                            ^^
 
-error: this empty `#[builder]` attribute is unexpected; remove it or pass parameters in parentheses: `#[builder(...)]`
+error: this empty `builder` attribute is unexpected; remove it or pass parameters in parentheses: `builder(...)`
   --> tests/integration/ui/compile_fail/attr_builder.rs:34:42
    |
 34 |     fn empty_member_level_builder_attr(#[builder] _x: u32) {}

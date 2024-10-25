@@ -1,76 +1,57 @@
-use super::builder_params::BuilderParams;
 use super::models::FinishFnParams;
+use super::top_level_config::TopLevelConfig;
 use super::{
     AssocMethodCtx, BuilderGenCtx, FinishFnBody, Generics, Member, MemberOrigin, RawMember,
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
 use crate::normalization::{GenericsNamespace, SyntaxVariant};
-use crate::parsing::{ItemParams, ItemParamsParsing, SpannedKey};
+use crate::parsing::{ItemSigConfig, SpannedKey};
 use crate::util::prelude::*;
 use darling::FromMeta;
 use std::borrow::Cow;
 use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
 
-#[derive(Debug, FromMeta)]
-pub(crate) struct StructInputParams {
-    #[darling(flatten)]
-    base: BuilderParams,
+fn parse_top_level_config(item_struct: &syn::ItemStruct) -> Result<TopLevelConfig> {
+    let meta = item_struct
+        .attrs
+        .iter()
+        .filter(|attr| attr.path().is_ident("builder"))
+        .map(|attr| {
+            let meta = match &attr.meta {
+                syn::Meta::List(meta) => meta,
+                syn::Meta::Path(_) => bail!(
+                    &attr.meta,
+                    "this empty `#[builder]` attribute is redundant; remove it"
+                ),
+                syn::Meta::NameValue(_) => bail!(
+                    &attr.meta,
+                    "`#[builder = ...]` syntax is unsupported; use `#[builder(...)]` instead"
+                ),
+            };
 
-    #[darling(default, with = parse_start_fn)]
-    start_fn: ItemParams,
-}
+            crate::parsing::require_non_empty_paren_meta_list_or_name_value(&attr.meta)?;
 
-fn parse_start_fn(meta: &syn::Meta) -> Result<ItemParams> {
-    ItemParamsParsing {
-        meta,
-        reject_self_mentions: None,
-    }
-    .parse()
-}
+            let meta = darling::ast::NestedMeta::parse_meta_list(meta.tokens.clone())?;
 
-impl StructInputParams {
-    fn parse(item_struct: &syn::ItemStruct) -> Result<Self> {
-        let meta = item_struct
-            .attrs
-            .iter()
-            .filter(|attr| attr.path().is_ident("builder"))
-            .map(|attr| {
-                let meta = match &attr.meta {
-                    syn::Meta::List(meta) => meta,
-                    syn::Meta::Path(_) => bail!(
-                        &attr.meta,
-                        "this empty `#[builder]` attribute is redundant; remove it"
-                    ),
-                    syn::Meta::NameValue(_) => bail!(
-                        &attr.meta,
-                        "`#[builder = ...]` syntax is unsupported; use `#[builder(...)]` instead"
-                    ),
-                };
+            Ok(meta)
+        })
+        .collect::<Result<Vec<_>>>()?
+        .into_iter()
+        .concat();
 
-                crate::parsing::require_non_empty_paren_meta_list_or_name_value(&attr.meta)?;
-
-                let meta = darling::ast::NestedMeta::parse_meta_list(meta.tokens.clone())?;
-
-                Ok(meta)
-            })
-            .collect::<Result<Vec<_>>>()?
-            .into_iter()
-            .concat();
-
-        Self::from_list(&meta)
-    }
+    TopLevelConfig::from_list(&meta)
 }
 
 pub(crate) struct StructInputCtx {
     struct_item: SyntaxVariant<syn::ItemStruct>,
-    params: StructInputParams,
+    config: TopLevelConfig,
     struct_ty: syn::Type,
 }
 
 impl StructInputCtx {
     pub(crate) fn new(orig_struct: syn::ItemStruct) -> Result<Self> {
-        let params = StructInputParams::parse(&orig_struct)?;
+        let params = parse_top_level_config(&orig_struct)?;
 
         let generic_args = orig_struct
             .generics
@@ -98,7 +79,7 @@ impl StructInputCtx {
 
         Ok(Self {
             struct_item,
-            params,
+            config: params,
             struct_ty,
         })
     }
@@ -138,7 +119,7 @@ impl StructInputCtx {
             })
             .collect::<Result<Vec<_>>>()?;
 
-        let members = Member::from_raw(&self.params.base.on, MemberOrigin::StructField, members)?;
+        let members = Member::from_raw(&self.config.on, MemberOrigin::StructField, members)?;
 
         let generics = Generics::new(
             self.struct_item
@@ -155,21 +136,21 @@ impl StructInputCtx {
             struct_ident: self.struct_item.norm.ident.clone(),
         };
 
-        let ItemParams {
+        let ItemSigConfig {
             name: start_fn_ident,
             vis: start_fn_vis,
             docs: start_fn_docs,
-        } = self.params.start_fn;
+        } = self.config.start_fn;
 
         let start_fn_ident = start_fn_ident
             .map(SpannedKey::into_value)
             .unwrap_or_else(|| syn::Ident::new("builder", self.struct_item.norm.ident.span()));
 
-        let ItemParams {
+        let ItemSigConfig {
             name: finish_fn_ident,
             vis: finish_fn_vis,
             docs: finish_fn_docs,
-        } = self.params.base.finish_fn;
+        } = self.config.finish_fn;
 
         let finish_fn_ident = finish_fn_ident
             .map(SpannedKey::into_value)
@@ -209,7 +190,7 @@ impl StructInputCtx {
         let start_fn = StartFnParams {
             ident: start_fn_ident,
             vis: start_fn_vis.map(SpannedKey::into_value),
-            attrs: start_fn_docs,
+            docs: start_fn_docs,
             generics: None,
         };
 
@@ -227,14 +208,14 @@ impl StructInputCtx {
             .collect();
 
         let builder_type = {
-            let ItemParams { name, vis, docs } = self.params.base.builder_type;
+            let ItemSigConfig { name, vis, docs } = self.config.builder_type;
 
             let builder_ident = name.map(SpannedKey::into_value).unwrap_or_else(|| {
                 format_ident!("{}Builder", self.struct_item.norm.ident.raw_name())
             });
 
             BuilderTypeParams {
-                derives: self.params.base.derive,
+                derives: self.config.derive,
                 ident: builder_ident,
                 docs: docs.map(SpannedKey::into_value),
                 vis: vis.map(SpannedKey::into_value),
@@ -245,19 +226,20 @@ impl StructInputCtx {
         namespace.visit_item_struct(&self.struct_item.orig);
 
         BuilderGenCtx::new(BuilderGenCtxParams {
+            bon: self.config.bon,
             namespace: Cow::Owned(namespace),
             members,
 
             allow_attrs,
 
-            on_params: self.params.base.on,
+            on: self.config.on,
 
             assoc_method_ctx,
             generics,
             orig_item_vis: self.struct_item.norm.vis,
 
             builder_type,
-            state_mod: self.params.base.state_mod,
+            state_mod: self.config.state_mod,
             start_fn,
             finish_fn,
         })

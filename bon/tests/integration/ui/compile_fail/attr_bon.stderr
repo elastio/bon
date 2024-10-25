@@ -1,4 +1,4 @@
-error: `#[bon]` attribute does not accept any parameters yet, but it will in future releases
+error: Unknown field: `attrs`
  --> tests/integration/ui/compile_fail/attr_bon.rs:5:7
   |
 5 | #[bon(attrs)]
@@ -9,3 +9,11 @@ error: #[builder] attributes on the receiver are not supported
    |
 16 |     fn sut(#[builder] &self) {}
    |            ^
+
+error: there are no #[builder] functions in the impl block, so there is no need for a #[bon] attribute here
+  --> tests/integration/ui/compile_fail/attr_bon.rs:21:1
+   |
+21 | #[bon]
+   | ^^^^^^
+   |
+   = note: this error originates in the attribute macro `bon` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -13,7 +13,7 @@ use std::fmt;
 
 #[derive(Debug, darling::FromAttributes)]
 #[darling(attributes(builder))]
-pub(crate) struct MemberParams {
+pub(crate) struct MemberConfig {
     /// Enables an `Into` conversion for the setter method.
     pub(crate) into: darling::util::Flag,
 
@@ -36,7 +36,7 @@ pub(crate) struct MemberParams {
 
     /// Configurations for the setter methods.
     #[darling(with = crate::parsing::parse_non_empty_paren_meta_list)]
-    pub(crate) setters: Option<SettersParams>,
+    pub(crate) setters: Option<SettersConfig>,
 
     /// Where to place the member in the generated builder methods API.
     /// By default the member is treated like a named parameter that
@@ -97,7 +97,7 @@ impl fmt::Display for ParamName {
     }
 }
 
-impl MemberParams {
+impl MemberConfig {
     fn validate_mutually_exclusive(
         &self,
         attr_name: ParamName,

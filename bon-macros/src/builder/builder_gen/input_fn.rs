@@ -1,72 +1,34 @@
-use super::builder_params::BuilderParams;
 use super::models::FinishFnParams;
+use super::top_level_config::TopLevelConfig;
 use super::{
     AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFnBody, Generics, Member,
     MemberOrigin, RawMember,
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
 use crate::normalization::{GenericsNamespace, NormalizeSelfTy, SyntaxVariant};
-use crate::parsing::{ItemParams, SpannedKey};
+use crate::parsing::{ItemSigConfig, SpannedKey};
 use crate::util::prelude::*;
-use darling::util::SpannedValue;
-use darling::FromMeta;
 use std::borrow::Cow;
 use std::rc::Rc;
 use syn::punctuated::Punctuated;
 use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
 
-#[derive(Debug, FromMeta)]
-pub(crate) struct FnInputParams {
-    expose_positional_fn: Option<SpannedValue<ExposePositionalFnParams>>,
-
-    #[darling(flatten)]
-    base: BuilderParams,
-}
-
-#[derive(Debug, Default)]
-struct ExposePositionalFnParams {
-    name: Option<syn::Ident>,
-    vis: Option<syn::Visibility>,
-}
-
-impl FromMeta for ExposePositionalFnParams {
-    fn from_meta(meta: &syn::Meta) -> Result<Self> {
-        match meta {
-            syn::Meta::Path(_) => {
-                return Ok(Self::default());
-            }
-            syn::Meta::NameValue(meta) => {
-                let val = &meta.value;
-                let name = syn::parse2(quote!(#val))?;
-
-                return Ok(Self { name, vis: None });
-            }
-            syn::Meta::List(_) => {}
-        }
-
-        #[derive(Debug, FromMeta)]
-        struct Full {
-            name: Option<syn::Ident>,
-            vis: Option<syn::Visibility>,
-        }
-
-        let full = Full::from_meta(meta)?;
-
-        let me = Self {
-            name: full.name,
-            vis: full.vis,
-        };
-
-        Ok(me)
-    }
-}
-
 pub(crate) struct FnInputCtx<'a> {
+    namespace: &'a GenericsNamespace,
+    fn_item: SyntaxVariant<syn::ItemFn>,
+    impl_ctx: Option<Rc<ImplCtx>>,
+    config: TopLevelConfig,
+
+    start_fn: StartFnParams,
+    self_ty_prefix: Option<String>,
+}
+
+pub(crate) struct FnInputCtxParams<'a> {
     pub(crate) namespace: &'a GenericsNamespace,
     pub(crate) fn_item: SyntaxVariant<syn::ItemFn>,
     pub(crate) impl_ctx: Option<Rc<ImplCtx>>,
-    pub(crate) params: FnInputParams,
+    pub(crate) config: TopLevelConfig,
 }
 
 pub(crate) struct ImplCtx {
@@ -79,20 +41,85 @@ pub(crate) struct ImplCtx {
     pub(crate) allow_attrs: Vec<syn::Attribute>,
 }
 
-impl FnInputCtx<'_> {
-    fn self_ty_prefix(&self) -> Option<String> {
-        let prefix = self
-            .impl_ctx
-            .as_deref()?
-            .self_ty
-            .as_path()?
-            .path
-            .segments
-            .last()?
-            .ident
-            .to_string();
+impl<'a> FnInputCtx<'a> {
+    pub(crate) fn new(params: FnInputCtxParams<'a>) -> Self {
+        let start_fn = params.config.start_fn.clone();
 
-        Some(prefix)
+        let start_fn_ident = start_fn
+            .name
+            .map(SpannedKey::into_value)
+            .unwrap_or_else(|| {
+                let fn_ident = &params.fn_item.norm.sig.ident;
+
+                // Special case for the method named `new`. We rename it to `builder`
+                // since this is the name that is conventionally used by starting
+                // function in the builder pattern. We also want to make
+                // the `#[builder]` attribute on the method `new` fully compatible
+                // with deriving a builder from a struct.
+                if params.impl_ctx.is_some() && fn_ident == "new" {
+                    syn::Ident::new("builder", fn_ident.span())
+                } else {
+                    fn_ident.clone()
+                }
+            });
+
+        let start_fn = StartFnParams {
+            ident: start_fn_ident,
+
+            vis: start_fn.vis.map(SpannedKey::into_value),
+
+            docs: start_fn
+                .docs
+                .map(SpannedKey::into_value)
+                .unwrap_or_else(|| {
+                    params
+                        .fn_item
+                        .norm
+                        .attrs
+                        .iter()
+                        .filter(|attr| attr.is_doc_expr())
+                        .cloned()
+                        .collect()
+                }),
+
+            // Override on the start fn to use the generics from the
+            // target function itself. We must not duplicate the generics
+            // from the impl block here
+            generics: Some(Generics::new(
+                params
+                    .fn_item
+                    .norm
+                    .sig
+                    .generics
+                    .params
+                    .iter()
+                    .cloned()
+                    .collect(),
+                params.fn_item.norm.sig.generics.where_clause.clone(),
+            )),
+        };
+
+        let self_ty_prefix = params.impl_ctx.as_deref().and_then(|impl_ctx| {
+            let prefix = impl_ctx
+                .self_ty
+                .as_path()?
+                .path
+                .segments
+                .last()?
+                .ident
+                .to_string();
+
+            Some(prefix)
+        });
+
+        Self {
+            namespace: params.namespace,
+            fn_item: params.fn_item,
+            impl_ctx: params.impl_ctx,
+            config: params.config,
+            self_ty_prefix,
+            start_fn,
+        }
     }
 
     fn assoc_method_ctx(&self) -> Result<Option<AssocMethodCtx>> {
@@ -163,79 +190,21 @@ impl FnInputCtx<'_> {
         Generics::new(params, where_clause)
     }
 
-    fn builder_ident(&self) -> syn::Ident {
-        let user_override = self.params.base.builder_type.name.as_deref();
-
-        if let Some(user_override) = user_override {
-            return user_override.clone();
-        }
-
-        if self.is_method_new() {
-            return format_ident!("{}Builder", self.self_ty_prefix().unwrap_or_default());
-        }
-
-        let pascal_case_fn = self.fn_item.norm.sig.ident.snake_to_pascal_case();
-
-        format_ident!(
-            "{}{pascal_case_fn}Builder",
-            self.self_ty_prefix().unwrap_or_default(),
-        )
-    }
-
     pub(crate) fn adapted_fn(&self) -> Result<syn::ItemFn> {
         let mut orig = self.fn_item.orig.clone();
 
-        let params = self.params.expose_positional_fn.as_ref();
-
-        orig.vis = params
-            .map(|params| {
-                params
-                    .vis
-                    .clone()
-                    // If exposing of positional fn is enabled without an explicit
-                    // visibility, then just use the visibility of the original function.
-                    .unwrap_or_else(|| self.fn_item.norm.vis.clone())
-            })
-            // By default we change the positional function's visibility to private
-            // to avoid exposing it to the surrounding code. The surrounding code is
-            // supposed to use this function through the builder only.
-            //
-            // Not that this doesn't guarantee that adjacent code in this module can't
-            // access the function, therefore we rename it below.
-            .unwrap_or(syn::Visibility::Inherited);
-
-        let orig_ident = orig.sig.ident.clone();
-
-        if let Some(params) = params {
-            let has_no_value = matches!(
-                params.as_ref(),
-                ExposePositionalFnParams {
-                    name: None,
-                    vis: None,
-                }
-            );
-
-            if has_no_value && !self.is_method_new() {
+        if let Some(name) = self.config.start_fn.name.as_deref() {
+            if *name == orig.sig.ident {
                 bail!(
-                    &params.span(),
-                    "Positional function identifier is required. It must be \
-                    specified with `#[builder(expose_positional_fn = function_name_here)]`"
+                    &name,
+                    "the starting function name must be different from the name \
+                    of the positional function under the #[builder] attribute"
                 )
             }
-        }
+        } else {
+            // By default the original positional function becomes hidden.
+            orig.vis = syn::Visibility::Inherited;
 
-        orig.sig.ident = params
-            .and_then(|params| {
-                params
-                    .name
-                    .clone()
-                    // We treat `new` method specially. In this case we already know the best
-                    // default name for the positional function, which is `new` itself.
-                    .or_else(|| self.is_method_new().then(|| orig.sig.ident))
-            })
-            // By default we don't want to expose the positional function, so we
-            // hide it under a generated name to avoid name conflicts.
-            //
             // We don't use a random name here because the name of this function
             // can be used by other macros that may need a stable identifier.
             // For example, if `#[tracing::instrument]` is placed on the function,
@@ -243,7 +212,22 @@ impl FnInputCtx<'_> {
             // may be indexed in some logs database (e.g. Grafana Loki). If the name
             // of the span changes the DB index may grow and also log queries won't
             // be stable.
-            .unwrap_or_else(|| format_ident!("__orig_{}", orig_ident.raw_name()));
+            orig.sig.ident = format_ident!("__orig_{}", orig.sig.ident.raw_name());
+
+            // Remove all doc comments from the function itself to avoid docs duplication
+            // which may lead to duplicating doc tests, which in turn implies repeated doc
+            // tests execution, which means worse tests performance.
+            //
+            // We don't do this for the case when the positional function is exposed
+            // alongside the builder which implies that the docs should be visible
+            // as the function itself is visible.
+            orig.attrs.retain(|attr| !attr.is_doc_expr());
+
+            orig.attrs.extend([syn::parse_quote!(#[doc(hidden)])]);
+        }
+
+        // Remove any `#[builder]` attributes that were meant for this proc macro.
+        orig.attrs.retain(|attr| !attr.path().is_ident("builder"));
 
         // Remove all doc comments attributes from function arguments, because they are
         // not valid in that position in regular Rust code. The cool trick is that they
@@ -258,31 +242,6 @@ impl FnInputCtx<'_> {
                 .retain(|attr| !attr.is_doc_expr() && !attr.path().is_ident("builder"));
         }
 
-        // Remove all doc comments from the function itself to avoid docs duplication
-        // which may lead to duplicating doc tests, which in turn implies repeated doc
-        // tests execution, which means worse tests performance.
-        //
-        // Also remove any `#[builder]` attributes that were meant for this proc macro.
-        orig.attrs
-            .retain(|attr| !attr.is_doc_expr() && !attr.path().is_ident("builder"));
-
-        let prefix = self
-            .self_ty_prefix()
-            .map(|self_ty_prefix| format!("{self_ty_prefix}::"))
-            .unwrap_or_default();
-
-        let builder_entry_fn_link = format!("{prefix}{orig_ident}",);
-
-        let doc = format!(
-            "Positional function equivalent of [`{builder_entry_fn_link}()`].\n\
-            See its docs for details.",
-        );
-
-        orig.attrs.push(syn::parse_quote!(#[doc = #doc]));
-
-        if self.params.expose_positional_fn.is_none() {
-            orig.attrs.extend([syn::parse_quote!(#[doc(hidden)])]);
-        }
         orig.attrs.push(syn::parse_quote!(#[allow(
             // It's fine if there are too many positional arguments in the function
             // because the whole purpose of this macro is to fight with this problem
@@ -299,10 +258,6 @@ impl FnInputCtx<'_> {
         Ok(orig)
     }
 
-    fn is_method_new(&self) -> bool {
-        self.impl_ctx.is_some() && self.fn_item.norm.sig.ident == "new"
-    }
-
     pub(crate) fn into_builder_gen_ctx(self) -> Result<BuilderGenCtx> {
         let assoc_method_ctx = self.assoc_method_ctx()?;
 
@@ -310,7 +265,7 @@ impl FnInputCtx<'_> {
             let explanation = "\
                 but #[bon] attribute is absent on top of the impl block; this \
                 additional #[bon] attribute on the impl block is required for \
-                the macro to see the type of `Self` and properly generate
+                the macro to see the type of `Self` and properly generate \
                 the builder struct definition adjacently to the impl block.";
 
             if let Some(receiver) = &self.fn_item.orig.sig.receiver() {
@@ -329,8 +284,6 @@ impl FnInputCtx<'_> {
                 );
             }
         }
-
-        let builder_ident = self.builder_ident();
 
         let members = self
             .fn_item
@@ -359,7 +312,7 @@ impl FnInputCtx<'_> {
             })
             .collect::<Result<Vec<_>>>()?;
 
-        let members = Member::from_raw(&self.params.base.on, MemberOrigin::FnArg, members)?;
+        let members = Member::from_raw(&self.config.on, MemberOrigin::FnArg, members)?;
 
         let generics = self.generics();
 
@@ -368,27 +321,17 @@ impl FnInputCtx<'_> {
             impl_ctx: self.impl_ctx.clone(),
         };
 
-        let is_method_new = self.is_method_new();
-
-        // Special case for `new` methods. We rename them to `builder`
-        // since this is the name that is used in the builder pattern
-        let start_fn_ident = if is_method_new {
-            format_ident!("builder")
-        } else {
-            self.fn_item.norm.sig.ident.clone()
-        };
-
-        let ItemParams {
+        let ItemSigConfig {
             name: finish_fn_ident,
             vis: finish_fn_vis,
             docs: finish_fn_docs,
-        } = self.params.base.finish_fn;
+        } = self.config.finish_fn;
 
         let finish_fn_ident = finish_fn_ident
             .map(SpannedKey::into_value)
             .unwrap_or_else(|| {
-                // For `new` methods the `build` finisher is more conventional
-                if is_method_new {
+                // For `builder` methods the `build` finisher is more conventional
+                if self.impl_ctx.is_some() && self.start_fn.ident == "builder" {
                     format_ident!("build")
                 } else {
                     format_ident!("call")
@@ -429,53 +372,56 @@ impl FnInputCtx<'_> {
             .chain(fn_allows)
             .collect();
 
-        let start_fn = StartFnParams {
-            ident: start_fn_ident,
+        let builder_ident = || {
+            let user_override = self.config.builder_type.name.map(SpannedKey::into_value);
 
-            // No override for visibility for the start fn is provided here.
-            // It's supposed to be the same as the original function's visibility.
-            vis: None,
+            if let Some(user_override) = user_override {
+                return user_override;
+            }
 
-            attrs: self
-                .fn_item
-                .norm
-                .attrs
-                .into_iter()
-                .filter(<_>::is_doc_expr)
-                .collect(),
+            let ty_prefix = self.self_ty_prefix.unwrap_or_default();
 
-            // Override on the start fn to use the the generics from the
-            // target function itself. We don't need to duplicate the generics
-            // from the impl block here.
-            generics: Some(Generics::new(
-                Vec::from_iter(self.fn_item.norm.sig.generics.params),
-                self.fn_item.norm.sig.generics.where_clause,
-            )),
+            // A special case for the starting function named `builder`.
+            // We don't insert the `Builder` suffix in this case because
+            // this special case should be compatible with deriving
+            // a builder from a struct.
+            //
+            // We can arrive inside of this branch only if the function under
+            // the macro is called `new` or `builder` without `start_fn`
+            // name override, or if the `start_fn = builder/start_fn(name = builder)`
+            // is specified in the macro invocation explicitly.
+            if self.impl_ctx.is_some() && self.start_fn.ident == "builder" {
+                return format_ident!("{ty_prefix}Builder");
+            }
+
+            let pascal_case_fn = self.fn_item.norm.sig.ident.snake_to_pascal_case();
+
+            format_ident!("{ty_prefix}{pascal_case_fn}Builder")
         };
 
-        let builder_type = self.params.base.builder_type;
         let builder_type = BuilderTypeParams {
-            ident: builder_ident,
-            derives: self.params.base.derive,
-            docs: builder_type.docs.map(SpannedKey::into_value),
-            vis: builder_type.vis.map(SpannedKey::into_value),
+            ident: builder_ident(),
+            derives: self.config.derive,
+            docs: self.config.builder_type.docs.map(SpannedKey::into_value),
+            vis: self.config.builder_type.vis.map(SpannedKey::into_value),
         };
 
         BuilderGenCtx::new(BuilderGenCtxParams {
+            bon: self.config.bon,
             namespace: Cow::Borrowed(self.namespace),
             members,
 
             allow_attrs,
 
-            on_params: self.params.base.on,
+            on: self.config.on,
 
             assoc_method_ctx,
             generics,
             orig_item_vis: self.fn_item.norm.vis,
 
             builder_type,
-            state_mod: self.params.base.state_mod,
-            start_fn,
+            state_mod: self.config.state_mod,
+            start_fn: self.start_fn,
             finish_fn,
         })
     }
