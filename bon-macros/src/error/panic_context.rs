@@ -1,23 +1,34 @@
 use std::fmt;
-use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 
 #[rustversion::since(1.65.0)]
 use std::panic::PanicHookInfo as StdPanicHookInfo;
 
 use std::any::Any;
+use std::cell::RefCell;
 #[rustversion::before(1.81.0)]
 use std::panic::PanicInfo as StdPanicHookInfo;
+use std::rc::Rc;
 
-fn lock_global_panic_info() -> MutexGuard<'static, GlobalPanicContext> {
-    /// A lazily initialized global panic log. It aggregates the panics from all threads.
-    /// This is used to find the info about the panic after the `catch_unwind` call
-    /// to observe the context of the panic that happened.
-    static GLOBAL: Mutex<GlobalPanicContext> = Mutex::new(GlobalPanicContext {
-        last_panic: None,
-        initialized: false,
-    });
+fn with_global_panic_context<T>(f: impl FnOnce(&mut GlobalPanicContext) -> T) -> T {
+    thread_local! {
+        /// A lazily initialized global panic log. It aggregates the panics from the
+        /// current thread. This is used to capture info about the panic after the
+        /// `catch_unwind` call and observe the context of the panic that happened.
+        ///
+        /// Unfortunately, we can't use a global static variable that would be
+        /// accessible by all threads because `std::sync::Mutex::new` became
+        /// `const` only in Rust 1.63.0, which is above our MSRV 1.59.0. However,
+        /// a thread-local works perfectly fine for our use case because we don't
+        /// spawn threads in proc macros.
+        static GLOBAL: RefCell<GlobalPanicContext> = const {
+            RefCell::new(GlobalPanicContext {
+                last_panic: None,
+                initialized: false,
+            })
+        };
+    }
 
-    GLOBAL.lock().unwrap_or_else(PoisonError::into_inner)
+    GLOBAL.with(|global| f(&mut global.borrow_mut()))
 }
 
 struct GlobalPanicContext {
@@ -36,8 +47,10 @@ pub(super) struct PanicListener {
 
 impl PanicListener {
     pub(super) fn register() -> Self {
-        let mut global = lock_global_panic_info();
+        with_global_panic_context(Self::register_with_global)
+    }
 
+    fn register_with_global(global: &mut GlobalPanicContext) -> Self {
         if global.initialized {
             return Self { _private: () };
         }
@@ -45,21 +58,17 @@ impl PanicListener {
         let prev_panic_hook = std::panic::take_hook();
 
         std::panic::set_hook(Box::new(move |panic_info| {
-            {
-                // Make sure the lock is released before the other panic hook is called
-                // to prevent potential reentrancy. Therefore this code is in a block.
-                let mut global = lock_global_panic_info();
+            with_global_panic_context(|global| {
                 let panic_number = global.last_panic.as_ref().map(|p| p.0.panic_number);
                 let panic_number = panic_number.unwrap_or(0) + 1;
 
                 global.last_panic = Some(PanicContext::from_std(panic_info, panic_number));
-            }
+            });
 
             prev_panic_hook(panic_info);
         }));
 
         global.initialized = true;
-        drop(global);
 
         Self { _private: () }
     }
@@ -69,19 +78,19 @@ impl PanicListener {
     // the global panic listener in the `register` method.
     #[allow(clippy::unused_self)]
     pub(super) fn get_last_panic(&self) -> Option<PanicContext> {
-        lock_global_panic_info().last_panic.clone()
+        with_global_panic_context(|global| global.last_panic.clone())
     }
 }
 
 /// Contains all the necessary bits of information about the occurred panic.
 #[derive(Clone)]
-pub(super) struct PanicContext(Arc<PanicContextShared>);
+pub(super) struct PanicContext(Rc<PanicContextShared>);
 
 struct PanicContextShared {
     backtrace: backtrace::Backtrace,
 
     location: Option<PanicLocation>,
-    thread_name: Option<String>,
+    thread: String,
 
     /// Defines the number of panics that happened before this one. Each panic
     /// increments this counter. This is useful to know how many panics happened
@@ -92,10 +101,16 @@ struct PanicContextShared {
 impl PanicContext {
     fn from_std(std_panic_info: &StdPanicHookInfo<'_>, panic_number: usize) -> Self {
         let location = std_panic_info.location();
-        Self(Arc::new(PanicContextShared {
+        let current_thread = std::thread::current();
+        let thread_ = current_thread
+            .name()
+            .map(String::from)
+            .unwrap_or_else(|| format!("{:?}", current_thread.id()));
+
+        Self(Rc::new(PanicContextShared {
             backtrace: backtrace::Backtrace::capture(),
             location: location.map(PanicLocation::from_std),
-            thread_name: std::thread::current().name().map(String::from),
+            thread: thread_,
             panic_number,
         }))
     }
@@ -112,7 +127,7 @@ impl fmt::Display for PanicContext {
         let PanicContextShared {
             location,
             backtrace,
-            thread_name,
+            thread,
             panic_number,
         } = &*self.0;
 
@@ -122,9 +137,7 @@ impl fmt::Display for PanicContext {
             write!(f, " at {location}")?;
         }
 
-        if let Some(thread_name) = thread_name {
-            write!(f, " in thread '{thread_name}'")?;
-        }
+        write!(f, " in thread '{thread}'")?;
 
         if *panic_number > 1 {
             write!(f, " (total panics observed: {panic_number})")?;

@@ -25,7 +25,7 @@ fn test_assoc_method() {
     }
 
     {
-        struct Sut;
+        pub(crate) struct Sut;
 
         #[bon]
         impl Sut {

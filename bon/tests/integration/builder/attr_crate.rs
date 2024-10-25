@@ -1,14 +1,12 @@
 use crate::prelude::*;
-
-#[allow(clippy::single_component_path_imports)]
-use bon;
+use bon as lyra;
 
 #[test]
 fn test_struct() {
     {
         #[derive(Builder)]
         #[builder(
-            crate = crate::builder::attr_crate::bon,
+            crate = crate::builder::attr_crate::lyra,
             derive(Debug, Clone)
         )]
         struct Sut {
@@ -22,7 +20,7 @@ fn test_struct() {
         macro_rules! in_macro {
             () => {
                 #[derive(Builder)]
-                #[builder(crate = $crate::builder::attr_crate::bon, derive(Debug, Clone))]
+                #[builder(crate = $crate::builder::attr_crate::lyra, derive(Debug, Clone))]
                 struct Sut {
                     _a: u32,
                     _b: u32,
@@ -52,7 +50,7 @@ fn test_struct() {
 fn test_free_fn() {
     {
         #[builder(
-            crate = crate::builder::attr_crate::bon,
+            crate = crate::builder::attr_crate::lyra,
             derive(Debug, Clone)
         )]
         fn sut(_a: u32, _b: u32) {}
@@ -62,7 +60,7 @@ fn test_free_fn() {
     {
         macro_rules! in_macro {
             () => {
-                #[builder(crate = $crate::builder::attr_crate::bon, derive(Debug, Clone))]
+                #[builder(crate = $crate::builder::attr_crate::lyra, derive(Debug, Clone))]
                 fn sut(_a: u32, _b: u32) {}
             };
         }
@@ -86,7 +84,7 @@ fn test_assoc_method() {
     {
         struct Sut;
 
-        #[bon(crate = crate::builder::attr_crate::bon)]
+        #[bon(crate = crate::builder::attr_crate::lyra)]
         impl Sut {
             #[builder(derive(Debug, Clone))]
             fn sut(_a: u32, _b: u32) {}
@@ -99,7 +97,7 @@ fn test_assoc_method() {
             () => {
                 struct Sut;
 
-                #[bon(crate = $crate::builder::attr_crate::bon)]
+                #[bon(crate = $crate::builder::attr_crate::lyra)]
                 impl Sut {
                     #[builder(derive(Debug, Clone))]
                     fn sut(_a: u32, _b: u32) {}
