@@ -23,37 +23,51 @@ error: `skip` attribute can't be specified together with `transparent`
    |               ^^^^
 
 error[E0599]: no method named `maybe_member` found for struct `ValidBuilder` in the current scope
-  --> tests/integration/ui/compile_fail/attr_transparent.rs:35:30
+  --> tests/integration/ui/compile_fail/attr_transparent.rs:38:30
    |
 27 | #[derive(Builder)]
    |          ------- method `maybe_member` not found for this struct
 ...
-35 |     let _ = Valid::builder().maybe_member(Some(42));
+38 |     let _ = Valid::builder().maybe_member(Some(42));
    |                              ^^^^^^^^^^^^
    |
 help: there is a method `member` with a similar name
    |
-35 |     let _ = Valid::builder().member(Some(42));
+38 |     let _ = Valid::builder().member(Some(42));
    |                              ~~~~~~
 
-error[E0277]: the member `Unset<arg1>` was not set, but this method requires it to be set
-  --> tests/integration/ui/compile_fail/attr_transparent.rs:47:32
+error[E0599]: no method named `maybe_some_member` found for struct `ValidBuilder` in the current scope
+  --> tests/integration/ui/compile_fail/attr_transparent.rs:39:30
    |
-47 |         let _ = Sut::builder().build();
+27 | #[derive(Builder)]
+   |          ------- method `maybe_some_member` not found for this struct
+...
+39 |     let _ = Valid::builder().maybe_some_member(Some(()));
+   |                              ^^^^^^^^^^^^^^^^^
+   |
+help: there is a method `some_member` with a similar name
+   |
+39 |     let _ = Valid::builder().some_member(Some(()));
+   |                              ~~~~~~~~~~~
+
+error[E0277]: the member `Unset<arg1>` was not set, but this method requires it to be set
+  --> tests/integration/ui/compile_fail/attr_transparent.rs:51:32
+   |
+51 |         let _ = Sut::builder().build();
    |                                ^^^^^ the member `Unset<arg1>` was not set, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<arg1>`, which is required by `sut_builder::Empty: sut_builder::IsComplete`
    = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required for `sut_builder::Empty` to implement `sut_builder::IsComplete`
-  --> tests/integration/ui/compile_fail/attr_transparent.rs:41:18
+  --> tests/integration/ui/compile_fail/attr_transparent.rs:45:18
    |
-41 |         #[derive(Builder)]
+45 |         #[derive(Builder)]
    |                  ^^^^^^^ unsatisfied trait bound introduced in this `derive` macro
 note: required by a bound in `SutBuilder::<S>::build`
-  --> tests/integration/ui/compile_fail/attr_transparent.rs:41:18
+  --> tests/integration/ui/compile_fail/attr_transparent.rs:45:18
    |
-41 |         #[derive(Builder)]
+45 |         #[derive(Builder)]
    |                  ^^^^^^^ required by this bound in `SutBuilder::<S>::build`
-42 |         struct Sut {
+46 |         struct Sut {
    |                --- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)

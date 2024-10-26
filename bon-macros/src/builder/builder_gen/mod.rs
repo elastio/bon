@@ -42,7 +42,7 @@ impl BuilderGenCtx {
         let mut start_fn = self.start_fn();
         let state_mod = state_mod::StateModGenCtx::new(&self).state_mod();
         let builder_decl = self.builder_decl();
-        let builder_impl = self.builder_impl();
+        let builder_impl = self.builder_impl()?;
         let builder_derives = self.builder_derives();
 
         let default_allows = syn::parse_quote!(#[allow(
@@ -94,11 +94,12 @@ impl BuilderGenCtx {
         })
     }
 
-    fn builder_impl(&self) -> TokenStream {
+    fn builder_impl(&self) -> Result<TokenStream> {
         let finish_fn = self.finish_fn();
         let setter_methods = self
             .named_members()
-            .map(|member| SettersCtx::new(self, member).setter_methods());
+            .map(|member| SettersCtx::new(self, member).setter_methods())
+            .collect::<Result<Vec<_>>>()?;
 
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
@@ -109,7 +110,7 @@ impl BuilderGenCtx {
 
         let allows = allow_warnings_on_member_types();
 
-        quote! {
+        Ok(quote! {
             #allows
             #[automatically_derived]
             impl<
@@ -125,7 +126,7 @@ impl BuilderGenCtx {
                 #finish_fn
                 #(#setter_methods)*
             }
-        }
+        })
     }
 
     /// Generates code that has no meaning to the compiler, but it helps

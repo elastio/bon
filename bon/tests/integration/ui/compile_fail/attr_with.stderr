@@ -1,4 +1,7 @@
-error: expected a closure e.g. `with = |param: T| expression`
+error: expected a closure e.g. `#[builder(with = |param: T| expression)]` or a well-known function path which could be one of:
+       - #[builder(with = Some)]
+       - #[builder(with = FromIterator::from_iter)]
+       - #[builder(with = <_>::from_iter)] (same as above, but shorter)
  --> tests/integration/ui/compile_fail/attr_with.rs:5:15
   |
 5 |     #[builder(with = 42)]
@@ -143,6 +146,42 @@ error: expected one of the following:
    |
 79 |     #[builder(with = |value: u32| -> ::core::result::Result<A, B, C> {})]
    |                                      ^
+
+error: `with = Some` only works for members with the underlying type of `Option`;
+  --> tests/integration/ui/compile_fail/attr_with.rs:86:12
+   |
+86 |     value: u32,
+   |            ^^^
+
+error: the underlying type of this member is not `Option`; by default, members of type `Option` are optional and their 'underlying type' is the type under the `Option`; you might be missing #[builder(transparent)]` annotation for this member
+  --> tests/integration/ui/compile_fail/attr_with.rs:91:22
+   |
+91 |     #[builder(with = Some)]
+   |                      ^^^^
+
+error: the underlying type of this member is not a known collection type; only a collection type that matches the following patterns will be accepted by `#[builder(with = FromIterator::from_iter)], where * at the beginning means the collection type may start with any prefix:
+       - *Map<K, V>
+       - *Vec<T>
+       - *Set<T>
+       - *Deque<T>
+       - *Heap<T>
+       - *List<T>
+  --> tests/integration/ui/compile_fail/attr_with.rs:98:19
+   |
+98 |     value: Option<u32>,
+   |                   ^^^
+
+error: the underlying type of this member is not a known collection type; only a collection type that matches the following patterns will be accepted by `#[builder(with = <_>::from_iter)], where * at the beginning means the collection type may start with any prefix:
+       - *Map<K, V>
+       - *Vec<T>
+       - *Set<T>
+       - *Deque<T>
+       - *Heap<T>
+       - *List<T>
+   --> tests/integration/ui/compile_fail/attr_with.rs:104:19
+    |
+104 |     value: Option<u32>,
+    |                   ^^^
 
 error[E0308]: mismatched types
   --> tests/integration/ui/compile_fail/attr_with.rs:54:12

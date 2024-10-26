@@ -1,4 +1,4 @@
-use super::member::SetterClosure;
+use super::member::WithConfig;
 use super::{BuilderGenCtx, NamedMember};
 use crate::parsing::ItemSigConfig;
 use crate::util::prelude::*;
@@ -14,27 +14,30 @@ impl<'a> SettersCtx<'a> {
         Self { base, member }
     }
 
-    pub(crate) fn setter_methods(&self) -> TokenStream {
+    pub(crate) fn setter_methods(&self) -> Result<TokenStream> {
         match SettersItems::new(self) {
             SettersItems::Required(item) => self.setter_for_required_member(item),
             SettersItems::Optional(setters) => self.setters_for_optional_member(setters),
         }
     }
 
-    fn setter_for_required_member(&self, item: SetterItem) -> TokenStream {
-        let input;
+    fn setter_for_required_member(&self, item: SetterItem) -> Result<TokenStream> {
+        let inputs;
         let expr;
 
         let member_type = self.member.ty.norm.as_ref();
 
-        if let Some(closure) = &self.member.config.with {
-            input = Self::underlying_input_from_closure(closure);
-            expr = self.member_expr_from_closure(closure);
+        if let Some(with) = &self.member.config.with {
+            inputs = self.underlying_inputs_from_with(with)?;
+            expr = self.member_expr_from_with(with);
         } else if self.member.config.into.is_present() {
-            input = quote!(value: impl Into<#member_type>);
+            inputs = vec![(
+                pat_ident("value"),
+                syn::parse_quote!(impl Into<#member_type>),
+            )];
             expr = quote!(Into::into(value));
         } else {
-            input = quote!(value: #member_type);
+            inputs = vec![(pat_ident("value"), member_type.clone())];
             expr = quote!(value);
         };
 
@@ -42,28 +45,28 @@ impl<'a> SettersCtx<'a> {
             expr: quote!(::core::option::Option::Some(#expr)),
         };
 
-        self.setter_method(Setter {
+        Ok(self.setter_method(Setter {
             item,
-            imp: SetterImpl { input, body },
-        })
+            imp: SetterImpl { inputs, body },
+        }))
     }
 
-    fn setters_for_optional_member(&self, items: OptionalSettersItems) -> TokenStream {
-        if let Some(closure) = &self.member.config.with {
-            return self.setters_for_optional_member_with_closure(closure, items);
+    fn setters_for_optional_member(&self, items: OptionalSettersItems) -> Result<TokenStream> {
+        if let Some(with) = &self.member.config.with {
+            return self.setters_for_optional_member_having_with(with, items);
         }
 
         let underlying_ty = self.member.underlying_norm_ty();
-        let underlying_ty = if self.member.config.into.is_present() {
-            quote!(impl Into<#underlying_ty>)
+        let underlying_ty: syn::Type = if self.member.config.into.is_present() {
+            syn::parse_quote!(impl Into<#underlying_ty>)
         } else {
-            quote!(#underlying_ty)
+            underlying_ty.clone()
         };
 
         let some_fn = Setter {
             item: items.some_fn,
             imp: SetterImpl {
-                input: quote!(value: #underlying_ty),
+                inputs: vec![(pat_ident("value"), underlying_ty.clone())],
                 body: SetterBody::Forward {
                     body: {
                         let option_fn_name = &items.option_fn.name;
@@ -78,7 +81,10 @@ impl<'a> SettersCtx<'a> {
         let option_fn = Setter {
             item: items.option_fn,
             imp: SetterImpl {
-                input: quote!(value: Option<#underlying_ty>),
+                inputs: vec![(
+                    pat_ident("value"),
+                    syn::parse_quote!(Option<#underlying_ty>),
+                )],
                 body: SetterBody::SetMember {
                     expr: if self.member.config.into.is_present() {
                         quote! {
@@ -91,20 +97,22 @@ impl<'a> SettersCtx<'a> {
             },
         };
 
-        [self.setter_method(some_fn), self.setter_method(option_fn)].concat()
+        Ok([self.setter_method(some_fn), self.setter_method(option_fn)].concat())
     }
 
-    fn setters_for_optional_member_with_closure(
+    fn setters_for_optional_member_having_with(
         &self,
-        closure: &SetterClosure,
+        with: &WithConfig,
         items: OptionalSettersItems,
-    ) -> TokenStream {
-        let idents = closure.inputs.iter().map(|input| &input.pat.ident);
+    ) -> Result<TokenStream> {
+        let inputs = self.underlying_inputs_from_with(with)?;
+
+        let idents = inputs.iter().map(|(pat, _)| &pat.ident);
 
         // If the closure accepts just a single input avoid wrapping it
         // in a tuple in the `option_fn` setter.
         let tuple_if_many = |val: TokenStream| -> TokenStream {
-            if closure.inputs.len() == 1 {
+            if inputs.len() == 1 {
                 val
             } else {
                 quote!((#val))
@@ -116,7 +124,7 @@ impl<'a> SettersCtx<'a> {
         let some_fn = Setter {
             item: items.some_fn,
             imp: SetterImpl {
-                input: Self::underlying_input_from_closure(closure),
+                inputs: inputs.clone(),
                 body: SetterBody::Forward {
                     body: {
                         let option_fn_name = &items.option_fn.name;
@@ -129,14 +137,15 @@ impl<'a> SettersCtx<'a> {
         };
 
         let option_fn_impl = SetterImpl {
-            input: {
-                let input_types = closure.inputs.iter().map(|input| &input.ty);
+            inputs: {
+                let input_types = inputs.iter().map(|(_, ty)| ty);
                 let input_types = tuple_if_many(quote!(#( #input_types, )*));
-                quote!(value: Option<#input_types>)
+
+                vec![(pat_ident("value"), syn::parse_quote!(Option<#input_types>))]
             },
             body: SetterBody::SetMember {
                 expr: {
-                    let expr = self.member_expr_from_closure(closure);
+                    let expr = self.member_expr_from_with(with);
                     quote! {
                         // Not using `Option::map` here because the `#expr`
                         // can contain a `?` operator for a fallible operation.
@@ -154,7 +163,7 @@ impl<'a> SettersCtx<'a> {
             imp: option_fn_impl,
         };
 
-        [self.setter_method(some_fn), self.setter_method(option_fn)].concat()
+        Ok([self.setter_method(some_fn), self.setter_method(option_fn)].concat())
     }
 
     /// This method is reused between the setter for the required member and
@@ -166,39 +175,151 @@ impl<'a> SettersCtx<'a> {
     /// of the builder compatible when a required member becomes optional.
     /// To be able to explicitly pass an `Option` value to the setter method
     /// users need to use the `maybe_{member_ident}` method.
-    fn underlying_input_from_closure(closure: &SetterClosure) -> TokenStream {
-        let pats = closure.inputs.iter().map(|input| &input.pat);
-        let types = closure.inputs.iter().map(|input| &input.ty);
-        quote! {
-            #( #pats: #types ),*
-        }
-    }
+    fn underlying_inputs_from_with(
+        &self,
+        with: &WithConfig,
+    ) -> Result<Vec<(syn::PatIdent, syn::Type)>> {
+        let inputs = match with {
+            WithConfig::Closure(closure) => closure
+                .inputs
+                .iter()
+                .map(|input| (input.pat.clone(), (*input.ty).clone()))
+                .collect(),
+            WithConfig::Some(some) => {
+                let input_ty = self
+                    .member
+                    .underlying_norm_ty()
+                    .option_type_param()
+                    .ok_or_else(|| {
+                        if self.member.ty.norm.is_option() {
+                            err!(
+                                some,
+                                "the underlying type of this member is not `Option`; \
+                                by default, members of type `Option` are optional and their \
+                                'underlying type' is the type under the `Option`; \
+                                you might be missing #[builder(transparent)]` annotation \
+                                for this member"
+                            )
+                        } else {
+                            err!(
+                                &self.member.underlying_norm_ty(),
+                                "`with = Some` only works for members with the underlying \
+                                    type of `Option`;"
+                            )
+                        }
+                    })?;
 
-    fn member_expr_from_closure(&self, closure: &SetterClosure) -> TokenStream {
-        let body = &closure.body;
+                vec![(pat_ident("value"), input_ty.clone())]
+            }
+            WithConfig::FromIter(from_iter) => {
+                let collection_ty = self.member.underlying_norm_ty();
 
-        let ty = self.member.underlying_norm_ty().to_token_stream();
+                let well_known_single_arg_suffixes = ["Vec", "Set", "Deque", "Heap", "List"];
 
-        let output = Self::maybe_wrap_in_result(closure, ty);
+                let err = || {
+                    let mut from_iter_path = quote!(#from_iter).to_string();
+                    from_iter_path.retain(|c| !c.is_whitespace());
 
-        // Avoid wrapping the body in a block if it's already a block.
-        let body = if matches!(body.as_ref(), syn::Expr::Block(_)) {
-            body.to_token_stream()
-        } else {
-            quote!({ #body })
+                    err!(
+                        collection_ty,
+                        "the underlying type of this member is not a known collection type; \
+                        only a collection type that matches the following patterns will be \
+                        accepted by `#[builder(with = {from_iter_path})], where * at \
+                        the beginning means the collection type may start with any prefix:\n\
+                        - *Map<K, V>\n\
+                        {}",
+                        well_known_single_arg_suffixes
+                            .iter()
+                            .map(|suffix| { format!("- *{suffix}<T>") })
+                            .join("\n")
+                    )
+                };
+
+                let path = collection_ty.as_path_no_qself().ok_or_else(err)?;
+
+                let last_segment = path.segments.last().ok_or_else(err)?;
+                let args = match &last_segment.arguments {
+                    syn::PathArguments::AngleBracketed(args) => &args.args,
+                    _ => return Err(err()),
+                };
+
+                let last_segment_ident_str = last_segment.ident.to_string();
+
+                let item_ty = if well_known_single_arg_suffixes
+                    .iter()
+                    .any(|suffix| last_segment_ident_str.ends_with(suffix))
+                {
+                    // We don't compare for `len == 1` because there may be an optional last
+                    // type argument for the allocator
+                    if args.is_empty() {
+                        return Err(err());
+                    }
+
+                    let arg = args.first().ok_or_else(err)?;
+
+                    quote!(#arg)
+                } else if last_segment_ident_str.ends_with("Map") {
+                    // We don't compare for `len == 2` because there may be an optional last
+                    // type argument for the allocator
+                    if args.len() < 2 {
+                        return Err(err());
+                    }
+
+                    let mut args = args.iter();
+                    let key = args.next().ok_or_else(err)?;
+                    let value = args.next().ok_or_else(err)?;
+
+                    quote!((#key, #value))
+                } else {
+                    return Err(err());
+                };
+
+                vec![(
+                    pat_ident("iter"),
+                    syn::parse_quote!(impl IntoIterator<Item = #item_ty>),
+                )]
+            }
         };
 
-        let question_mark = closure
-            .output
-            .is_some()
-            .then(|| syn::Token![?](Span::call_site()));
+        Ok(inputs)
+    }
 
-        quote! {
-            (move || -> #output #body)() #question_mark
+    fn member_expr_from_with(&self, with: &WithConfig) -> TokenStream {
+        match with {
+            WithConfig::Closure(closure) => {
+                let body = &closure.body;
+
+                let ty = self.member.underlying_norm_ty().to_token_stream();
+
+                let output = Self::maybe_wrap_in_result(with, ty);
+
+                // Avoid wrapping the body in a block if it's already a block.
+                let body = if matches!(body.as_ref(), syn::Expr::Block(_)) {
+                    body.to_token_stream()
+                } else {
+                    quote!({ #body })
+                };
+
+                let question_mark = closure
+                    .output
+                    .is_some()
+                    .then(|| syn::Token![?](Span::call_site()));
+
+                quote! {
+                    (move || -> #output #body)() #question_mark
+                }
+            }
+            WithConfig::Some(some) => quote!(#some(value)),
+            WithConfig::FromIter(from_iter) => quote!(#from_iter(iter)),
         }
     }
 
-    fn maybe_wrap_in_result(closure: &SetterClosure, ty: TokenStream) -> TokenStream {
+    fn maybe_wrap_in_result(with: &WithConfig, ty: TokenStream) -> TokenStream {
+        let closure = match with {
+            WithConfig::Closure(closure) => closure,
+            _ => return ty,
+        };
+
         let output = match closure.output.as_ref() {
             Some(output) => output,
             None => return ty,
@@ -260,7 +381,7 @@ impl<'a> SettersCtx<'a> {
                     .config
                     .with
                     .as_ref()
-                    .and_then(|closure| closure.output.as_ref());
+                    .and_then(|with| with.as_closure()?.output.as_ref());
 
                 if let Some(result_output) = result_output {
                     let result_path = &result_output.result_path;
@@ -290,8 +411,8 @@ impl<'a> SettersCtx<'a> {
             }
         };
 
-        if let Some(closure) = &self.member.config.with {
-            return_type = Self::maybe_wrap_in_result(closure, return_type);
+        if let Some(with) = &self.member.config.with {
+            return_type = Self::maybe_wrap_in_result(with, return_type);
         }
 
         let where_clause = (!self.member.config.overwritable.is_present()).then(|| {
@@ -303,7 +424,8 @@ impl<'a> SettersCtx<'a> {
         });
 
         let SetterItem { name, vis, docs } = item;
-        let input = imp.input;
+        let pats = imp.inputs.iter().map(|(pat, _)| pat);
+        let types = imp.inputs.iter().map(|(_, ty)| ty);
 
         quote! {
             #( #docs )*
@@ -318,7 +440,7 @@ impl<'a> SettersCtx<'a> {
                 clippy::missing_const_for_fn,
             )]
             #[inline(always)]
-            #vis fn #name(#maybe_mut self, #input) -> #return_type
+            #vis fn #name(#maybe_mut self, #( #pats: #types ),*) -> #return_type
             #where_clause
             {
                 #body
@@ -333,7 +455,7 @@ struct Setter {
 }
 
 struct SetterImpl {
-    input: TokenStream,
+    inputs: Vec<(syn::PatIdent, syn::Type)>,
     body: SetterBody,
 }
 
@@ -531,4 +653,15 @@ fn well_known_default(ty: &syn::Type) -> Option<syn::Expr> {
     };
 
     Some(value)
+}
+
+/// Unfortunately there is no `syn::Parse` impl for `PatIdent` directly,
+/// so we use this workaround instead.
+fn pat_ident(ident_name: &'static str) -> syn::PatIdent {
+    let ident = syn::Ident::new(ident_name, Span::call_site());
+    let pat: syn::Pat = syn::parse_quote!(#ident);
+    match pat {
+        syn::Pat::Ident(pat_ident) => pat_ident,
+        _ => unreachable!("can't parse something else than PatIdent here: {pat:?}"),
+    }
 }

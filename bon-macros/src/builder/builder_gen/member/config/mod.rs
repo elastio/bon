@@ -1,10 +1,10 @@
 mod blanket;
-mod setter_closure;
 mod setters;
+mod with;
 
 pub(crate) use blanket::*;
-pub(crate) use setter_closure::*;
 pub(crate) use setters::*;
+pub(crate) use with::*;
 
 use super::MemberOrigin;
 use crate::parsing::SpannedKey;
@@ -52,11 +52,12 @@ pub(crate) struct MemberConfig {
     /// this option to see if it's worth it.
     pub(crate) overwritable: darling::util::Flag,
 
-    /// Customize the setter signature and body with a custom closure. The closure
-    /// must return the value of the type of the member, or optionally a `Result<_>`
-    /// type where `_` is used to mark the type of the member. In this case the
-    /// generated setters will be fallible (they'll propagate the `Result`).
-    pub(crate) with: Option<SpannedKey<SetterClosure>>,
+    /// Customize the setter signature and body with a custom closure or a well-known
+    /// function. The closure/function must return the value of the type of the member,
+    /// or optionally a `Result<_>` type where `_` is used to mark the type of
+    /// the member. In this case the generated setters will be fallible
+    /// (they'll propagate the `Result`).
+    pub(crate) with: Option<SpannedKey<WithConfig>>,
 
     /// Disables the special handling for a member of type `Option<T>`. The
     /// member no longer has the default of `None`. It also becomes a required
