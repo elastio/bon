@@ -52,8 +52,8 @@ impl<'a> SettersCtx<'a> {
     }
 
     fn setters_for_optional_member(&self, items: OptionalSettersItems) -> Result<TokenStream> {
-        if let Some(closure) = &self.member.config.with {
-            return self.setters_for_optional_member_having_with(closure, items);
+        if let Some(with) = &self.member.config.with {
+            return self.setters_for_optional_member_having_with(with, items);
         }
 
         let underlying_ty = self.member.underlying_norm_ty();
@@ -124,7 +124,7 @@ impl<'a> SettersCtx<'a> {
         let some_fn = Setter {
             item: items.some_fn,
             imp: SetterImpl {
-                inputs: self.underlying_inputs_from_with(with)?,
+                inputs: inputs.clone(),
                 body: SetterBody::Forward {
                     body: {
                         let option_fn_name = &items.option_fn.name;
@@ -217,15 +217,17 @@ impl<'a> SettersCtx<'a> {
                 let well_known_single_arg_suffixes = ["Vec", "Set", "Deque", "Heap", "List"];
 
                 let err = || {
+                    let mut from_iter_path = quote!(#from_iter).to_string();
+                    from_iter_path.retain(|c| !c.is_whitespace());
+
                     err!(
                         collection_ty,
                         "the underlying type of this member is not a known collection type; \
                         only a collection type that matches the following patterns will be \
-                        accepted by `#[builder(with = {})], where * at the beginning means \
-                        the collection type may start with any prefix:\n\
+                        accepted by `#[builder(with = {from_iter_path})], where * at \
+                        the beginning means the collection type may start with any prefix:\n\
                         - *Map<K, V>\n\
                         {}",
-                        quote!(#from_iter),
                         well_known_single_arg_suffixes
                             .iter()
                             .map(|suffix| { format!("- *{suffix}<T>") })
@@ -653,8 +655,8 @@ fn well_known_default(ty: &syn::Type) -> Option<syn::Expr> {
     Some(value)
 }
 
-/// Unfortunately there is no `syn::Parse` impl on `PatIdent` directly,
-/// so we use this workaround instead
+/// Unfortunately there is no `syn::Parse` impl for `PatIdent` directly,
+/// so we use this workaround instead.
 fn pat_ident(ident_name: &'static str) -> syn::PatIdent {
     let ident = syn::Ident::new(ident_name, Span::call_site());
     let pat: syn::Pat = syn::parse_quote!(#ident);

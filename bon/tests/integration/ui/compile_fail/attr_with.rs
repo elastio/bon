@@ -80,5 +80,28 @@ struct ThreeGenericArgsResultReturnType {
     value: u32,
 }
 
+#[derive(Builder)]
+struct NonOptionWithSome1 {
+    #[builder(with = Some)]
+    value: u32,
+}
+
+#[derive(Builder)]
+struct NonOptionWithSome2 {
+    #[builder(with = Some)]
+    value: Option<u32>,
+}
+
+#[derive(Builder)]
+struct NonCollectionWithFromIter1 {
+    #[builder(with = FromIterator::from_iter)]
+    value: Option<u32>,
+}
+
+#[derive(Builder)]
+struct NonCollectionWithFromIter2 {
+    #[builder(with = <_>::from_iter)]
+    value: Option<u32>,
+}
 
 fn main() {}
