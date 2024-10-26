@@ -8,7 +8,7 @@ locals {
   # user name causes the server to be inaccessible via SSH. The supposition is
   # that there is a conflict with the `admin` group name already present in
   # the used Oracle Ubuntu AMI.
-  server_os_user = "mane"
+  server_os_user = "master"
 }
 
 resource "hcloud_floating_ip" "master" {
@@ -27,11 +27,9 @@ resource "hcloud_server" "master" {
   server_type  = "cax21"
   location     = local.location
   user_data    = data.cloudinit_config.master.rendered
-  firewall_ids = [hcloud_firewall.this.id]
+  firewall_ids = [hcloud_firewall.master.id]
 
   public_net {
-    # Not having IPv4 enabled reduces the cost, but we need it because we are
-    # downloading some stuff from the public internet during the provisioning.
     ipv4_enabled = true
     ipv6_enabled = true
   }
@@ -64,20 +62,18 @@ resource "hcloud_volume_attachment" "master" {
 # is detached but this isn't true.
 #
 # The reality is cruel. It was experimentally found that the volume is
-# detached abruptly. Therefore the database doesn't have time to
-# flush its data to the disk, which means potential data loss.
-resource "null_resource" "teardown" {
-  triggers = {
-    data_volume_attachment_id = hcloud_volume_attachment.master.id
+# detached abruptly. Therefore the database doesn't have time to flush its data
+# to disk, which means potential corruption or even data loss.
+resource "terraform_data" "teardown" {
+  triggers_replace = [
+    hcloud_volume_attachment.master.id
+  ]
 
-    # The data volume attachment ID is enough for the trigger, but these
-    # triggers are needed to workaround the problem that it's impossible
-    # to reference symbols other than `self` variable in the provisioner block.
-    #
-    # Issue in terraform: https://github.com/hashicorp/terraform/issues/23679
+  input = {
     server_ip      = hcloud_server.master.ipv4_address
     server_os_user = local.server_os_user
   }
+
 
   provisioner "remote-exec" {
     when = destroy
@@ -91,13 +87,13 @@ resource "null_resource" "teardown" {
     ]
 
     connection {
-      host = self.triggers.server_ip
-      user = self.triggers.server_os_user
+      host = self.input.server_ip
+      user = self.input.server_os_user
     }
   }
 }
 
-resource "hcloud_firewall" "this" {
+resource "hcloud_firewall" "master" {
   name = "allow-inbound"
   rule {
     direction  = "in"
