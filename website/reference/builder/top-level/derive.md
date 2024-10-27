@@ -1,4 +1,4 @@
-### `derive`
+# `derive`
 
 **Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
 
@@ -10,7 +10,7 @@ Generates additional derives on the builder struct itself. The syntax is similar
 The following derives are supported: `Clone`, `Debug`.
 
 ::: warning
-The format of the `Debug` output of the builder is not stable and it may change between the patch versions of `bon`.
+The format of the `Debug` output of the builder is not stable, and it may change between patch versions of `bon`.
 :::
 
 **Example:**
@@ -120,7 +120,7 @@ assert_eq!(
 
 :::
 
-#### Compile errors
+## Compile errors
 
 _Requires_ that all members of the builder including the receiver (if this is a builder for an associated method) implement the target trait. For example, this doesn't compile because not all members implement `Clone`:
 

@@ -1,5 +1,5 @@
-/* Prevent wrapping of inline code snippets */
-code, .nobr {
+/* Opt-in prevent wrapping */
+.nobr {
     white-space: nowrap;
 }
 
