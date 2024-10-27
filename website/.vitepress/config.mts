@@ -12,6 +12,34 @@ export default defineConfig({
     cleanUrls: true,
     lastUpdated: true,
 
+    vite: {
+        plugins: [
+            {
+                name: "inject-abbreviations",
+                transform: {
+                    order: "pre",
+                    handler(src, id) {
+                        if (!id.endsWith(".md")) {
+                            return;
+                        }
+
+                        const abbrs = {
+                            Member: "Struct field or a function argument",
+                            member: "Struct field or a function argument",
+                            members: "Struct fields or function arguments",
+                        };
+
+                        const abbrsStr = Object.entries(abbrs)
+                            .map(([key, value]) => `*[${key}]: ${value}`)
+                            .join("\n");
+
+                        return `${src}\n\n${abbrsStr}`;
+                    },
+                },
+            },
+        ],
+    },
+
     markdown: {
         theme: {
             dark: "dark-plus",
@@ -163,61 +191,59 @@ export default defineConfig({
                             items: [
                                 {
                                     text: "Top-level attributes",
-                                    link: "/reference/builder#top-level-attributes",
                                     items: [
                                         {
                                             text: "builder_type",
-                                            link: "/reference/builder#builder-type",
+                                            link: "/reference/builder/top-level/builder-type",
                                         },
                                         {
                                             text: "derive",
-                                            link: "/reference/builder#derive",
+                                            link: "/reference/builder/top-level/derive",
                                         },
                                         {
                                             text: "expose_positional_fn",
-                                            link: "/reference/builder#expose-positional-fn",
+                                            link: "/reference/builder/top-level/expose-positional-fn",
                                         },
                                         {
                                             text: "finish_fn",
-                                            link: "/reference/builder#finish-fn",
+                                            link: "/reference/builder/top-level/finish-fn",
                                         },
                                         {
                                             text: "on",
-                                            link: "/reference/builder#on",
+                                            link: "/reference/builder/top-level/on",
                                         },
                                         {
                                             text: "start_fn",
-                                            link: "/reference/builder#start-fn",
+                                            link: "/reference/builder/top-level/start-fn",
                                         },
                                     ],
                                 },
                                 {
                                     text: "Member attributes",
-                                    link: "/reference/builder#member-attributes",
                                     items: [
                                         {
                                             text: "default",
-                                            link: "/reference/builder#default",
+                                            link: "/reference/builder/member/default",
                                         },
                                         {
                                             text: "finish_fn",
-                                            link: "/reference/builder#finish-fn-1",
+                                            link: "/reference/builder/member/finish-fn",
                                         },
                                         {
                                             text: "into",
-                                            link: "/reference/builder#into",
+                                            link: "/reference/builder/member/into",
                                         },
                                         {
                                             text: "name",
-                                            link: "/reference/builder#name",
+                                            link: "/reference/builder/member/name",
                                         },
                                         {
                                             text: "skip",
-                                            link: "/reference/builder#skip",
+                                            link: "/reference/builder/member/skip",
                                         },
                                         {
                                             text: "start_fn",
-                                            link: "/reference/builder#start-fn-1",
+                                            link: "/reference/builder/member/start-fn",
                                         },
                                     ],
                                 },
