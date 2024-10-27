@@ -45,6 +45,7 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 - Add graceful internal panic handling. If some `bon` macro panics due to an internal bug, the macro will try to still generate a fallback for IDEs to still provide intellisense ([#145](https://github.com/elastio/bon/pull/145))
 - Switch from `elastio.github.io/bon` to a custom domain `bon-rs.com` ([#158](https://github.com/elastio/bon/pull/158))
+- Add anonymous stats with [`umami`](https://umami.is/) for the docs website ([#158](https://github.com/elastio/bon/pull/158))
 
 ## [2.3.0](https://github.com/elastio/bon/compare/v2.2.1...v2.3.0) - 2024-09-14
 

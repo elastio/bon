@@ -64,6 +64,9 @@ rustversion  = "1.0"
 default = []
 
 # See the docs on this feature in the `bon`'s crate `Cargo.toml`
+experimental-overwritable = []
+
+# See the docs on this feature in the `bon`'s crate `Cargo.toml`
 implied-bounds = []
 
 [dev-dependencies]
