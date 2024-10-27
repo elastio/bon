@@ -14,7 +14,7 @@ categories = [
 keywords = ["builder", "macro", "derive", "constructor", "setter"]
 
 edition    = "2021"
-homepage   = "https://elastio.github.io/bon/"
+homepage   = "https://bon-rs.com/"
 license    = "MIT OR Apache-2.0"
 repository = "https://github.com/elastio/bon"
 

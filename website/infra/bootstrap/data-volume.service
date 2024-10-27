@@ -1,0 +1,20 @@
+[Unit]
+Description=Data volume initialization
+
+# This unit is generated automatically by `systemd` using the builtin generator
+# that reads the configurations from `/etc/fstab`
+BindsTo=mnt-master.mount
+After=mnt-master.mount
+
+[Service]
+Type=oneshot
+User=${server_os_user}
+RemainAfterExit=yes
+WorkingDirectory=/var/app
+EnvironmentFile=${env_file_path}
+
+ExecStart=/var/app/data-volume.sh
+
+[Install]
+RequiredBy=docker.service
+Before=docker.service

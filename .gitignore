@@ -2,6 +2,20 @@
 **/node_modules/
 **/.vitepress/cache/
 **/.vitepress/dist/
-articles.json
 *.dbg.s
 .idea/
+
+.env
+
+# Terraform state files
+terraform.tfstate*
+
+# Terraform plugins dir
+.terraform
+
+# Temporary terraform fs lock file
+.terraform.tfstate.lock.info
+
+# Terraform variables usually contain sensitive information
+terraform.tfvars
+terraform.tfvars.json

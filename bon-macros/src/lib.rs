@@ -99,8 +99,8 @@ mod tests;
 /// or setting the same field twice will be reported as compile-time errors.
 ///
 /// See the full documentation for more details:
-/// - [Guide](https://elastio.github.io/bon/guide/overview)
-/// - [Attributes reference](https://elastio.github.io/bon/reference/builder)
+/// - [Guide](https://bon-rs.com/guide/overview)
+/// - [Attributes reference](https://bon-rs.com/reference/builder)
 #[proc_macro_attribute]
 pub fn builder(
     params: proc_macro::TokenStream,
@@ -142,8 +142,8 @@ pub fn builder(
 /// or setting the same field twice will be reported as compile-time errors.
 ///
 /// See the full documentation for more details:
-/// - [Guide](https://elastio.github.io/bon/guide/overview)
-/// - [Attributes reference](https://elastio.github.io/bon/reference/builder)
+/// - [Guide](https://bon-rs.com/guide/overview)
+/// - [Attributes reference](https://bon-rs.com/reference/builder)
 #[proc_macro_derive(Builder, attributes(builder))]
 pub fn derive_builder(item: proc_macro::TokenStream) -> proc_macro::TokenStream {
     builder::generate_from_derive(item.into()).into()
@@ -203,7 +203,7 @@ pub fn derive_builder(item: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// or setting the same field twice will be reported as compile-time errors.
 ///
 /// For details on this macro including the reason why it's needed see
-/// [this paragraph in the overview](https://elastio.github.io/bon/guide/overview#builder-for-an-associated-method).
+/// [this paragraph in the overview](https://bon-rs.com/guide/overview#builder-for-an-associated-method).
 ///
 /// [`builder`]: macro@builder
 #[proc_macro_attribute]

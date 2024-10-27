@@ -1,10 +1,10 @@
-<a href="https://elastio.github.io/bon/guide/overview">
+<a href="https://bon-rs.com/guide/overview">
     <!--
     We use an absolute link to the image here because this README is hosted on crates.io,
     lib.rs and docs.rs where this image isn't available through the relative link.
     -->
     <img
-        src="https://elastio.github.io/bon/bon-home.png"
+        src="https://bon-rs.com/bon-home.png"
         alt="bon home"
     />
 </a>
@@ -34,7 +34,7 @@
 
 `bon` is a Rust crate for generating compile-time-checked builders for functions and structs. It also provides idiomatic partial application with optional and named parameters for functions and methods.
 
-Visit the [guide for a complete overview of the crate](https://elastio.github.io/bon/guide/overview).
+Visit the [guide for a complete overview of the crate](https://bon-rs.com/guide/overview).
 
 ## Quick examples
 
@@ -133,7 +133,7 @@ assert_eq!(user.level, Some(24));
 assert!(user.is_admin);
 ```
 
-See [the guide](https://elastio.github.io/bon/guide/overview) for the rest.
+See [the guide](https://bon-rs.com/guide/overview) for the rest.
 
 ---
 

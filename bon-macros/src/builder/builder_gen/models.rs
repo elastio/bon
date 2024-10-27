@@ -168,7 +168,7 @@ pub(crate) struct BuilderGenCtx {
 ///
 /// This is an unfortunate workaround due to the limitations of defining the
 /// builder type inside of a nested module. See more details on this problem in
-/// <https://elastio.github.io/bon/blog/the-weird-of-function-local-types-in-rust>
+/// <https://bon-rs.com/blog/the-weird-of-function-local-types-in-rust>
 pub(super) struct PrivateIdentsPool {
     pub(super) phantom: syn::Ident,
     pub(super) receiver: syn::Ident,

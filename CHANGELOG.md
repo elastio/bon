@@ -1,1 +1,1 @@
-See the [changelog](https://elastio.github.io/bon/changelog) page on the website for details.
+See the [changelog](https://bon-rs.com/changelog) page on the website for details.
