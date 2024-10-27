@@ -373,7 +373,3 @@ Example::builder()
 This is quite subjective, but `impl Into<T>` is a bit harder to read than just `T`. It makes the signature of the setter slightly bigger and requires you to understand what the `impl Trait` does, and what its implications are.
 
 If you want to keep your code simpler and more accessible (especially for beginner rustaceans), just avoid the `Into` conversions.
-
-*[Member]: Struct field or a function argument
-*[member]: Struct field or a function argument
-*[members]: Struct fields or function arguments

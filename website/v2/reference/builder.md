@@ -1307,7 +1307,3 @@ Importantly, `Into` conversions for such members work slightly differently from 
 In general, it's not recommended to annotate optional members with `#[builder(start_fn)]` because you can't omit setting them using the positional function call syntax.
 
 :::
-
-*[Member]: Struct field or a function argument
-*[member]: Struct field or a function argument
-*[members]: Struct fields or function arguments

@@ -154,7 +154,3 @@ You can leave comments for this post on the platform of your choice:
 :::
 
 [`bon`]: https://github.com/elastio/bon
-
-*[Member]: Struct field or a function argument
-*[member]: Struct field or a function argument
-*[members]: Struct fields or function arguments

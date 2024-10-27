@@ -138,7 +138,3 @@ if 2 + 2 == 4 {
 // Pass the variables to the builder now
 // ...
 ```
-
-*[Member]: Struct field or a function argument
-*[member]: Struct field or a function argument
-*[members]: Struct fields or function arguments
