@@ -1,11 +1,13 @@
 import { defineConfig } from "vitepress";
 import { abbr } from "@mdit/plugin-abbr";
 import * as v1 from "../v1/config.mjs";
+import * as v2 from "../v2/config.mjs";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
     title: "Bon",
-    description: "Generate builders for everything!",
+    description:
+        "Next-gen compile-time-checked builder generator, named function's arguments, and more!",
 
     cleanUrls: true,
     lastUpdated: true,
@@ -21,6 +23,8 @@ export default defineConfig({
             md.use(abbr);
         },
     },
+
+    srcExclude: ["README.md", "infra/**"],
 
     head: [
         ["link", { rel: "icon", href: `bon-logo-thumb.png` }],
@@ -71,6 +75,7 @@ export default defineConfig({
 
         sidebar: {
             ...v1.sidebars,
+            ...v2.sidebars,
             "/guide": [
                 {
                     text: "Guide",
