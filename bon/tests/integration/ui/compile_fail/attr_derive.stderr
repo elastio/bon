@@ -35,7 +35,7 @@ error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
    |                        ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
    |
 note: required by a bound in `clone_member`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
    |                        ^^^^^ required by this bound in `clone_member`
@@ -52,7 +52,7 @@ error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
    |                              ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
    |
 note: required by a bound in `clone_member`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
    |                        ^^^^^ required by this bound in `clone_member`
@@ -69,7 +69,7 @@ error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
    |                         ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
    |
 note: required by a bound in `clone_member`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
    |                        ^^^^^ required by this bound in `clone_member`
@@ -88,7 +88,7 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
   = help: the trait `Debug` is not implemented for `NoTraitImpls`
   = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
 note: required by a bound in `as_dyn_debug`
- --> src/__private/derives.rs
+ --> src/__/derives.rs
   |
   | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
   |                        ^^^^^ required by this bound in `as_dyn_debug`
@@ -107,7 +107,7 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
    = help: the trait `Debug` is not implemented for `NoTraitImpls`
    = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
 note: required by a bound in `as_dyn_debug`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
    |                        ^^^^^ required by this bound in `as_dyn_debug`
@@ -126,7 +126,7 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
    = help: the trait `Debug` is not implemented for `NoTraitImpls`
    = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
 note: required by a bound in `as_dyn_debug`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
    |                        ^^^^^ required by this bound in `as_dyn_debug`
@@ -145,7 +145,7 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
    = help: the trait `Debug` is not implemented for `NoTraitImpls`
    = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
 note: required by a bound in `as_dyn_debug`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
    |                        ^^^^^ required by this bound in `as_dyn_debug`
@@ -174,7 +174,7 @@ error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
    |                         ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
    |
 note: required by a bound in `clone_member`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
    |                        ^^^^^ required by this bound in `clone_member`
@@ -191,7 +191,7 @@ error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
    |                               ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
    |
 note: required by a bound in `clone_member`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
    |                        ^^^^^ required by this bound in `clone_member`
@@ -208,7 +208,7 @@ error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
    |                          ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
    |
 note: required by a bound in `clone_member`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
    |                        ^^^^^ required by this bound in `clone_member`
@@ -227,7 +227,7 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
    = help: the trait `Debug` is not implemented for `NoTraitImpls`
    = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
 note: required by a bound in `as_dyn_debug`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
    |                        ^^^^^ required by this bound in `as_dyn_debug`
@@ -246,7 +246,7 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
    = help: the trait `Debug` is not implemented for `NoTraitImpls`
    = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
 note: required by a bound in `as_dyn_debug`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
    |                        ^^^^^ required by this bound in `as_dyn_debug`
@@ -265,7 +265,7 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
    = help: the trait `Debug` is not implemented for `NoTraitImpls`
    = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
 note: required by a bound in `as_dyn_debug`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
    |                        ^^^^^ required by this bound in `as_dyn_debug`
@@ -284,7 +284,7 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
    = help: the trait `Debug` is not implemented for `NoTraitImpls`
    = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
 note: required by a bound in `as_dyn_debug`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
    |                        ^^^^^ required by this bound in `as_dyn_debug`
@@ -319,7 +319,7 @@ error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
    |                             ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
    |
 note: required by a bound in `clone_member`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
    |                        ^^^^^ required by this bound in `clone_member`
@@ -336,7 +336,7 @@ error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
    |                                   ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
    |
 note: required by a bound in `clone_member`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
    |                        ^^^^^ required by this bound in `clone_member`
@@ -353,7 +353,7 @@ error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
    |                              ^^^^^^^^^^^^ the trait `Clone` is not implemented for `NoTraitImpls`
    |
 note: required by a bound in `clone_member`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
    |                        ^^^^^ required by this bound in `clone_member`
@@ -372,7 +372,7 @@ error[E0277]: `StructContainsNonTrait` doesn't implement `Debug`
    = help: the trait `Debug` is not implemented for `StructContainsNonTrait`
    = note: add `#[derive(Debug)]` to `StructContainsNonTrait` or manually `impl Debug for StructContainsNonTrait`
 note: required by a bound in `as_dyn_debug`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
    |                        ^^^^^ required by this bound in `as_dyn_debug`
@@ -386,7 +386,7 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
    = help: the trait `Debug` is not implemented for `NoTraitImpls`
    = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
 note: required by a bound in `as_dyn_debug`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
    |                        ^^^^^ required by this bound in `as_dyn_debug`
@@ -405,7 +405,7 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
    = help: the trait `Debug` is not implemented for `NoTraitImpls`
    = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
 note: required by a bound in `as_dyn_debug`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
    |                        ^^^^^ required by this bound in `as_dyn_debug`
@@ -424,7 +424,7 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
    = help: the trait `Debug` is not implemented for `NoTraitImpls`
    = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
 note: required by a bound in `as_dyn_debug`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
    |                        ^^^^^ required by this bound in `as_dyn_debug`
@@ -443,7 +443,7 @@ error[E0277]: `NoTraitImpls` doesn't implement `Debug`
    = help: the trait `Debug` is not implemented for `NoTraitImpls`
    = note: add `#[derive(Debug)]` to `NoTraitImpls` or manually `impl Debug for NoTraitImpls`
 note: required by a bound in `as_dyn_debug`
-  --> src/__private/derives.rs
+  --> src/__/derives.rs
    |
    | pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
    |                        ^^^^^ required by this bound in `as_dyn_debug`
