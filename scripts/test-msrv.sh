@@ -39,7 +39,7 @@ step cargo update -p windows-sys --precise 0.52.0
 
 export RUSTFLAGS="${RUSTFLAGS:-} --allow unknown-lints"
 
-step cargo clippy --all-targets --locked
+step cargo clippy --all-targets --locked --features=experimental-overwritable
 
 test_args=(
     --locked
@@ -57,4 +57,4 @@ test_args=(
     --skip ui::ui
 )
 
-step cargo test "${test_args[@]}"
+step cargo test --features=experimental-overwritable "${test_args[@]}"

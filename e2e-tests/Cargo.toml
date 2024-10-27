@@ -18,7 +18,7 @@ edition = "2021"
 workspace = true
 
 [dependencies]
-bon = { path = "../bon" }
+bon = { path = "../bon", features = ["experimental-overwritable"] }
 
 [dev-dependencies]
 anyhow                = "1.0"

@@ -28,6 +28,20 @@ impl Parse for OnConfig {
 
         let parsed = Parsed::from_meta(&syn::parse_quote!(on(#rest)))?;
 
+        if !cfg!(feature = "experimental-overwritable") && parsed.overwritable.is_present() {
+            return Err(syn::Error::new(
+                parsed.overwritable.span(),
+                "🔬 `overwritable` attribute is experimental and requires \
+                 \"experimental-overwritable\" cargo feature to be enabled; \
+                 we would be glad to make this attribute stable if you find it useful; \
+                 please leave a 👍 reaction under the issue https://github.com/elastio/bon/issues/149 \
+                 to help us measure the demand for this feature; it would be \
+                 double-awesome if you could also describe your use case in \
+                 a comment under the issue for us to understand how it's used \
+                 in practice",
+            ));
+        }
+
         {
             // Validate that at least some option was enabled.
             // This lives in a separate block to make sure that if a new
