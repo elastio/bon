@@ -29,8 +29,8 @@
 #[cfg_attr(docsrs, doc(cfg(any(feature = "std", feature = "alloc"))))]
 #[allow(edition_2024_expr_fragment_specifier)]
 macro_rules! vec {
-    () => ($crate::__private::alloc::vec::Vec::new());
-    ($($item:expr),+ $(,)?) => ($crate::__private::alloc::vec![$(::core::convert::Into::into($item)),+ ]);
+    () => ($crate::__::alloc::vec::Vec::new());
+    ($($item:expr),+ $(,)?) => ($crate::__::alloc::vec![$(::core::convert::Into::into($item)),+ ]);
 }
 
 /// Creates a fixed-size array literal with each element converted with [`Into`].
@@ -74,7 +74,7 @@ macro_rules! arr {
 #[cfg(test)]
 mod tests {
     #[cfg(feature = "alloc")]
-    use crate::__private::alloc::{string::String, vec::Vec};
+    use crate::__::alloc::{string::String, vec::Vec};
     use core::num::NonZeroU8;
 
     #[cfg(feature = "alloc")]

@@ -114,7 +114,7 @@ impl BuilderGenCtx {
             let ty = member.underlying_norm_ty();
 
             quote! {
-                #bon::__private::derives::clone_member::<#ty>(
+                #bon::__::derives::clone_member::<#ty>(
                     &self.#named_members_field.#member_index
                 )
             }
@@ -170,7 +170,7 @@ impl BuilderGenCtx {
                         if let Some(value) = &self.#named_members_field.#member_index {
                             output.field(
                                 #member_ident_str,
-                                #bon::__private::derives::as_dyn_debug::<#member_ty>(value)
+                                #bon::__::derives::as_dyn_debug::<#member_ty>(value)
                             );
                         }
                     })
@@ -182,7 +182,7 @@ impl BuilderGenCtx {
                     Some(quote! {
                         output.field(
                             #member_ident_str,
-                            #bon::__private::derives::as_dyn_debug::<#member_ty>(
+                            #bon::__::derives::as_dyn_debug::<#member_ty>(
                                 &self.#start_fn_args_field.#member_index
                             )
                         );
@@ -201,7 +201,7 @@ impl BuilderGenCtx {
             quote! {
                 output.field(
                     "self",
-                    #bon::__private::derives::as_dyn_debug::<#ty>(
+                    #bon::__::derives::as_dyn_debug::<#ty>(
                         &self.#receiver_field
                     )
                 );

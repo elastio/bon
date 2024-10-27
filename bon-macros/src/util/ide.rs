@@ -254,7 +254,7 @@ impl CompletionsSchema {
                 // to avoid Rust Analyzer from providing completions for the
                 // `self` keyword in the `use` statement. It works because
                 // `use self::self` is not a valid syntax.
-                use #bon::__private::ide #(::#module_name)* ::*;
+                use #bon::__::ide #(::#module_name)* ::*;
                 use self::{ #( #paths as _, )* };
             }
 
