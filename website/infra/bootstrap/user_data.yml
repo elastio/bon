@@ -25,14 +25,14 @@ users:
     groups: docker
     sudo: ALL=(ALL) NOPASSWD:ALL
 
-# package_update: true
-# package_upgrade: true
-# package_reboot_if_required: true
-# packages:
-#   - apt-transport-https
-#   - ca-certificates
-#   - curl
-#   - gnupg
+package_update: true
+package_upgrade: true
+package_reboot_if_required: true
+packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
 
 write_files:
   %{~ for path, file in files ~}
