@@ -104,7 +104,7 @@ resource "hcloud_firewall" "master" {
   rule {
     direction = "in"
     protocol  = "tcp"
-    port      = "3000"
+    port      = "80"
     source_ips = [
       "0.0.0.0/0",
       "::/0"
