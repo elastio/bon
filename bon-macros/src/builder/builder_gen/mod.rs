@@ -46,7 +46,7 @@ impl BuilderGenCtx {
         let builder_derives = self.builder_derives();
 
         let default_allows = syn::parse_quote!(#[allow(
-            // We have a `deprecated` lint on all `bon::__private` items which we
+            // We have a `deprecated` lint on all `bon::__` items which we
             // use in the generated code extensively
             deprecated
         )]);

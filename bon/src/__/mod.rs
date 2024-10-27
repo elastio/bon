@@ -19,7 +19,7 @@ mod cfg_eval;
 // This reexport is a private implementation detail and should not be used
 // directly! This reexport may change or be removed at any time between
 // patch releases. Use the export from your generated  builder's state module
-// directly instead of using this reexport from `bon::__private`.
+// directly instead of using this reexport from `bon::__`.
 pub use crate::builder_state::{IsSet, IsUnset};
 pub use rustversion;
 
