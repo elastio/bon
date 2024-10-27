@@ -1,6 +1,6 @@
 #![doc(
-    html_logo_url = "https://elastio.github.io/bon/bon-logo-thumb.png",
-    html_favicon_url = "https://elastio.github.io/bon/bon-logo-medium.png"
+    html_logo_url = "https://bon-rs.com/bon-logo-thumb.png",
+    html_favicon_url = "https://bon-rs.com/bon-logo-medium.png"
 )]
 #![doc = include_str!("../README.md")]
 #![cfg_attr(not(feature = "std"), no_std)]

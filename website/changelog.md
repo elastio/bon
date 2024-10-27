@@ -38,16 +38,17 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 ### Fixed
 
-- Fixed `#[cfg/cfg_attr()]` not being expanded when used on function arguments with doc comments or other attributes.
+- Fix `#[cfg/cfg_attr()]` not being expanded when used on function arguments with doc comments or other attributes.
 
 
 ### Other
 
-- Added graceful internal panic handling. If some `bon` macro panics due to an internal bug, the macro will try to still generate a fallback for IDEs to still provide intellisense ([#145](https://github.com/elastio/bon/pull/145))
+- Add graceful internal panic handling. If some `bon` macro panics due to an internal bug, the macro will try to still generate a fallback for IDEs to still provide intellisense ([#145](https://github.com/elastio/bon/pull/145))
+- Switch from `elastio.github.io/bon` to a custom domain `bon-rs.com` ([#158](https://github.com/elastio/bon/pull/158))
 
 ## [2.3.0](https://github.com/elastio/bon/compare/v2.2.1...v2.3.0) - 2024-09-14
 
-See the [blog post for this release](https://elastio.github.io/bon/blog/bon-builder-v2-3-release) that describes some of the most notable changes in detail.
+See the [blog post for this release](https://bon-rs.com/blog/bon-builder-v2-3-release) that describes some of the most notable changes in detail.
 
 ### Added
 
@@ -67,13 +68,13 @@ See the [blog post for this release](https://elastio.github.io/bon/blog/bon-buil
 
 ## [2.2.0](https://github.com/elastio/bon/compare/v2.1.1...v2.2.0) - 2024-09-08
 
-See the [blog post for this release](https://elastio.github.io/bon/blog/bon-builder-v2-2-release) that describes some of the most notable changes in detail.
+See the [blog post for this release](https://bon-rs.com/blog/bon-builder-v2-2-release) that describes some of the most notable changes in detail.
 
 ### Changed
 
-- The `#[bon::builder]` attribute was deprecated on structs. The new [`#[derive(bon::Builder)]`](https://elastio.github.io/bon/reference/builder) should be used to derive a builder from a struct. Starting with `bon` 2.3 (next minor release) all usages of `#[bon::builder]` on structs will generate deprecation warnings. ([#99](https://github.com/elastio/bon/pull/99)).
+- The `#[bon::builder]` attribute was deprecated on structs. The new [`#[derive(bon::Builder)]`](https://bon-rs.com/reference/builder) should be used to derive a builder from a struct. Starting with `bon` 2.3 (next minor release) all usages of `#[bon::builder]` on structs will generate deprecation warnings. ([#99](https://github.com/elastio/bon/pull/99)).
 
-  There is a CLI to assist in migrating to the new syntax. See the [release blog post](https://elastio.github.io/bon/blog/bon-builder-v2-2-release#derive-builder-syntax-for-structs) for details about that.
+  There is a CLI to assist in migrating to the new syntax. See the [release blog post](https://bon-rs.com/blog/bon-builder-v2-2-release#derive-builder-syntax-for-structs) for details about that.
 
 ### Added
 
@@ -100,7 +101,7 @@ See the [blog post for this release](https://elastio.github.io/bon/blog/bon-buil
 
 ## [2.1.0](https://github.com/elastio/bon/compare/v2.0.1...v2.1.0) - 2024-09-01
 
-See the [blog post for this release](https://elastio.github.io/bon/blog/bon-builder-v2-1-release) that describes some of the most notable changes in detail.
+See the [blog post for this release](https://bon-rs.com/blog/bon-builder-v2-1-release) that describes some of the most notable changes in detail.
 
 ### Added
 
@@ -125,8 +126,8 @@ See the [blog post for this release](https://elastio.github.io/bon/blog/bon-buil
 
 ### Docs
 
-- Add a new section ["`None` literals inference"](https://elastio.github.io/bon/guide/patterns/into-conversions-in-depth#none-literals-inference) to docs for "Into Conversions In-Depth"
-- Fix the docs about the comparison of Into conversions on the ["Alternatives"](http://elastio.github.io/bon/guide/alternatives) page that were not updated during the v2 release
+- Add a new section ["`None` literals inference"](https://bon-rs.com/guide/patterns/into-conversions-in-depth#none-literals-inference) to docs for "Into Conversions In-Depth"
+- Fix the docs about the comparison of Into conversions on the ["Alternatives"](http://bon-rs.com/guide/alternatives) page that were not updated during the v2 release
 
 ### Fixed
 
@@ -139,7 +140,7 @@ See the [blog post for this release](https://elastio.github.io/bon/blog/bon-buil
 
 ## [2.0.0](https://github.com/elastio/bon/compare/v1.2.1...v2.0.0) - 2024-08-26
 
-See the [blog post](https://elastio.github.io/bon/blog/bon-builder-generator-v2-release) for details.
+See the [blog post](https://bon-rs.com/blog/bon-builder-generator-v2-release) for details.
 
 ## [1.2.1](https://github.com/elastio/bon/compare/v1.2.0...v1.2.1) - 2024-08-12
 
@@ -216,4 +217,4 @@ See the [blog post](https://elastio.github.io/bon/blog/bon-builder-generator-v2-
 
 ### Added
 
-- Initial release 🎉. See the [`bon` crate overview for details](https://elastio.github.io/bon/guide/overview).
+- Initial release 🎉. See the [`bon` crate overview for details](https://bon-rs.com/guide/overview).

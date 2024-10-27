@@ -353,7 +353,7 @@ impl BuilderGenCtx {
 
         // The fields can't be hidden using Rust's privacy syntax.
         // The details about this are described in the blog post:
-        // https://elastio.github.io/bon/blog/the-weird-of-function-local-types-in-rust.
+        // https://bon-rs.com/blog/the-weird-of-function-local-types-in-rust.
         //
         // We could use `#[cfg(not(rust_analyzer))]` to hide the private fields in IDE.
         // However, RA would then not be able to type-check the generated code, which

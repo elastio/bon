@@ -1,6 +1,6 @@
 # bon website
 
-This folder contains the source code and markdown files that comprise the [bon website](https://elastio.github.io/bon/).
+This folder contains the source code and markdown files that comprise the [bon website](https://bon-rs.com/).
 
 The website is built using [VitePress](https://vitepress.dev/). It's a simple and elegant framework for static websites that hides a lot of complexity from you. You don't need to be a TypeScript expert let alone a Vue expert to get around this directory.
 

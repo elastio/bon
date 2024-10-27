@@ -2,8 +2,6 @@ import { defineConfig } from "vitepress";
 import { abbr } from "@mdit/plugin-abbr";
 import * as v1 from "../v1/config.mjs";
 
-const base = "/bon/";
-
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
     title: "Bon",
@@ -24,13 +22,16 @@ export default defineConfig({
         },
     },
 
-    base,
-
     head: [
-        ["link", { rel: "icon", href: `${base}bon-logo-thumb.png` }],
+        ["link", { rel: "icon", href: `bon-logo-thumb.png` }],
+        ["meta", { property: "og:image", content: `bon-logo-thumb.png` }],
         [
-            "meta",
-            { property: "og:image", content: `${base}bon-logo-thumb.png` },
+            "script",
+            {
+                defer: "",
+                src: "https://umami.bon-rs.com/script.js",
+                "data-website-id": "10c1ad05-7a6e-49ee-8633-5f8f75de4ab9",
+            },
         ],
     ],
 
@@ -134,7 +135,7 @@ export default defineConfig({
                         {
                             text: "Shared Configuration",
                             link: "/guide/patterns/shared-configuration",
-                        }
+                        },
                     ],
                 },
                 {
