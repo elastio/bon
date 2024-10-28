@@ -177,6 +177,6 @@ let user = User::builder()
 
 ## Adding `#[builder]` to existing functions
 
-Let's suppose you have existing code defines functions with positional parameters in the public API. You'd like to change it to expose builder syntax instead, but you want to keep the old code compatible with the positional functions API.
+Let's suppose you have existing code that defines functions with positional parameters in the public API. You'd like to change it to expose builder syntax instead, but you want to keep the old code compatible with the positional functions API.
 
 In this case, you may use the top-level attribute `#[builder(start_fn)]` to keep both syntaxes available. See examples in the [docs for this attribute](../reference/builder/top-level/start-fn#exposing-original-function).
