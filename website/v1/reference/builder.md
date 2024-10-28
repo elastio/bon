@@ -753,7 +753,3 @@ assert_eq!(user.permissions, ["read"]);
 :::
 
 [automatic `Into` conversion qualification rules]: ../guide/into-conversions#types-that-qualify-for-an-automatic-into-conversion
-
-*[Member]: Struct field or a function argument
-*[member]: Struct field or a function argument
-*[members]: Struct fields or function arguments

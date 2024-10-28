@@ -12,7 +12,43 @@ export default defineConfig({
     cleanUrls: true,
     lastUpdated: true,
 
+    vite: {
+        plugins: [
+            {
+                name: "inject-abbreviations",
+                transform: {
+                    order: "pre",
+                    handler(src, id) {
+                        if (!id.endsWith(".md")) {
+                            return;
+                        }
+
+                        const abbrs = {
+                            Member: "Struct field or function argument",
+                            member: "Struct field or function argument",
+                            members: "Struct fields or function arguments",
+                            ["starting function"]:
+                                "Function that creates the builder (e.g. `builder()`)",
+                            ["finishing function"]:
+                                "Method on the builder struct that finishes building (e.g. `build()` or `call()`)",
+                        };
+
+                        const abbrsStr = Object.entries(abbrs)
+                            .map(([key, value]) => `*[${key}]: ${value}`)
+                            .join("\n");
+
+                        return `${src}\n\n${abbrsStr}`;
+                    },
+                },
+            },
+        ],
+    },
+
     markdown: {
+        languageAlias: {
+            'attr': 'js',
+        },
+
         theme: {
             dark: "dark-plus",
             light: "light-plus",
@@ -155,83 +191,74 @@ export default defineConfig({
             ],
             "/reference": [
                 {
-                    text: "Reference",
+                    text: "#[derive(Builder)] / #[builder]",
+                    link: "/reference/builder",
                     items: [
                         {
-                            text: "#[derive(Builder)] / #[builder]",
-                            link: "/reference/builder",
+                            text: "Top-level",
+                            link: "/reference/builder#top-level-attributes",
                             items: [
                                 {
-                                    text: "Top-level attributes",
-                                    link: "/reference/builder#top-level-attributes",
-                                    items: [
-                                        {
-                                            text: "builder_type",
-                                            link: "/reference/builder#builder-type",
-                                        },
-                                        {
-                                            text: "derive",
-                                            link: "/reference/builder#derive",
-                                        },
-                                        {
-                                            text: "expose_positional_fn",
-                                            link: "/reference/builder#expose-positional-fn",
-                                        },
-                                        {
-                                            text: "finish_fn",
-                                            link: "/reference/builder#finish-fn",
-                                        },
-                                        {
-                                            text: "on",
-                                            link: "/reference/builder#on",
-                                        },
-                                        {
-                                            text: "start_fn",
-                                            link: "/reference/builder#start-fn",
-                                        },
-                                    ],
+                                    text: "builder_type",
+                                    link: "/reference/builder/top-level/builder-type",
                                 },
                                 {
-                                    text: "Member attributes",
-                                    link: "/reference/builder#member-attributes",
-                                    items: [
-                                        {
-                                            text: "default",
-                                            link: "/reference/builder#default",
-                                        },
-                                        {
-                                            text: "finish_fn",
-                                            link: "/reference/builder#finish-fn-1",
-                                        },
-                                        {
-                                            text: "into",
-                                            link: "/reference/builder#into",
-                                        },
-                                        {
-                                            text: "name",
-                                            link: "/reference/builder#name",
-                                        },
-                                        {
-                                            text: "skip",
-                                            link: "/reference/builder#skip",
-                                        },
-                                        {
-                                            text: "start_fn",
-                                            link: "/reference/builder#start-fn-1",
-                                        },
-                                    ],
+                                    text: "derive",
+                                    link: "/reference/builder/top-level/derive",
+                                },
+                                {
+                                    text: "finish_fn",
+                                    link: "/reference/builder/top-level/finish-fn",
+                                },
+                                {
+                                    text: "on",
+                                    link: "/reference/builder/top-level/on",
+                                },
+                                {
+                                    text: "start_fn",
+                                    link: "/reference/builder/top-level/start-fn",
                                 },
                             ],
                         },
                         {
-                            text: "#[bon]",
-                            link: "/reference/bon",
-                        },
-                        {
-                            text: "Other items on docs.rs",
-                            link: "https://docs.rs/bon/latest/bon/",
+                            text: "Member",
+                            link: "/reference/builder#member-attributes",
+                            items: [
+                                {
+                                    text: "default",
+                                    link: "/reference/builder/member/default",
+                                },
+                                {
+                                    text: "finish_fn",
+                                    link: "/reference/builder/member/finish-fn",
+                                },
+                                {
+                                    text: "into",
+                                    link: "/reference/builder/member/into",
+                                },
+                                {
+                                    text: "name",
+                                    link: "/reference/builder/member/name",
+                                },
+                                {
+                                    text: "skip",
+                                    link: "/reference/builder/member/skip",
+                                },
+                                {
+                                    text: "start_fn",
+                                    link: "/reference/builder/member/start-fn",
+                                },
+                            ],
                         },
                     ],
+                },
+                {
+                    text: "#[bon]",
+                    link: "/reference/bon",
+                },
+                {
+                    text: "Other items on docs.rs",
+                    link: "https://docs.rs/bon/latest/bon/",
                 },
             ],
         },

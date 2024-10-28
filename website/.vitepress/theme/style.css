@@ -1,5 +1,5 @@
-/* Prevent wrapping of inline code snippets */
-code, .nobr {
+/* Opt-in nowrap via a class */
+.nobr {
     white-space: nowrap;
 }
 

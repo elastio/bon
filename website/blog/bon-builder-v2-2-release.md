@@ -59,7 +59,7 @@ cargo fmt
 
 ### Derive `Clone` and `Debug` for the builder
 
-A new attribute is now supported at the top level. You can add [`#[builder(derive(...))]`](../reference/builder#derive) to ask `bon` to generate implementations of `Clone` or `Debug` for the builder.
+A new attribute is now supported at the top level. You can add [`#[builder(derive(...))]`](../reference/builder/top-level/derive) to ask `bon` to generate implementations of `Clone` or `Debug` for the builder.
 
 This helps with reusing [partial builders](../guide/patterns/conditional-building#shared-partial-builder), because now you can clone the builder where only part of the fields are set.
 
@@ -236,8 +236,3 @@ You can leave comments for this post on the platform of your choice:
 
 [`bon`]: https://github.com/elastio/bon
 [@recatek]: https://github.com/recatek
-
-
-*[Member]: Struct field or a function argument
-*[member]: Struct field or a function argument
-*[members]: Struct fields or function arguments

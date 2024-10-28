@@ -1,7 +1,11 @@
 <script setup>
 import { data as version } from '/data/version.data'
 import VPSocialLink from "vitepress/dist/client/theme-default/components/VPSocialLink.vue";
-const [_, versionWildcard] = version.match(/(\d+.\d+).\d+/);
+let [_, versionWildcard] = version.match(/^(\d+\.\d+)\.\d+$/);
+if (versionWildcard == null) {
+    versionWildcard = version;
+}
+
 </script>
 
 # Overview
@@ -223,7 +227,7 @@ Project::builder()
 
 However, you can ask `bon` to generate setters that accept `impl Into<T>` to remove the need for manual conversion.
 
-This can be configured with [`#[builder(into)]`](../reference//builder#into) for a single member or with [`#[builder(on({type}, into))]`](../reference/builder#on) for many members at once.
+This can be configured with [`#[builder(into)]`](../reference/builder/member/into) for a single member or with [`#[builder(on({type}, into))]`](../reference/builder/top-level/on) for many members at once.
 
 ```rust
 use bon::Builder;
@@ -303,7 +307,3 @@ If you can't figure something out, consult the docs and maybe use that search `ð
 This project was heavily inspired by such awesome crates as [`buildstructor`](https://docs.rs/buildstructor), [`typed-builder`](https://docs.rs/typed-builder) and [`derive_builder`](https://docs.rs/derive_builder). This crate was designed with many lessons learned from them.
 
 See [alternatives](./alternatives) for comparison.
-
-*[Member]: Struct field or a function argument
-*[member]: Struct field or a function argument
-*[members]: Struct fields or function arguments

@@ -104,8 +104,3 @@ assert_eq!(result, 8);
 ## Conditional building
 
 Now that you know how optional members work you can check out the ["Conditional building" patterns](./patterns/conditional-building) or continue studying other features of `bon` by following the "Next page" link at the bottom.
-
-
-*[Member]: Struct field or a function argument
-*[member]: Struct field or a function argument
-*[members]: Struct fields or function arguments

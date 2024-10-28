@@ -82,7 +82,3 @@ example()
     .call();
 
 ```
-
-*[Member]: Struct field or a function argument
-*[member]: Struct field or a function argument
-*[members]: Struct fields or function arguments

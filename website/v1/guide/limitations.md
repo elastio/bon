@@ -80,7 +80,3 @@ If you have a strong use case that requires full support for `const`, feel free 
 Conditionally-compiled members aren't supported yet. The blocker for this feature is a lack of support for attributes in `where` bounds in the language. See [rust-lang/rust/#115590](https://github.com/rust-lang/rust/issues/115590) for details.
 
 [open an issue]: https://github.com/elastio/bon/issues
-
-*[Member]: Struct field or a function argument
-*[member]: Struct field or a function argument
-*[members]: Struct fields or function arguments

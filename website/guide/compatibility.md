@@ -2,7 +2,7 @@
 
 ## Making a required member optional
 
-It's totally backwards compatible to make a required member optional by changing the type from `T` to `Option<T>` or by adding [`#[builder(default)]`](../reference/builder.md#default) to it.
+It's totally backwards compatible to make a required member optional by changing the type from `T` to `Option<T>` or by adding [`#[builder(default)]`](../reference/builder/member/default) to it.
 
 This is because both required and optional members have a setter that accepts `T` (not wrapped in an `Option`). The only change to the public API when making the required member optional is that a `maybe_`-prefixed setter is added to the builder. That new method accepts an `Option<T>`.
 
@@ -175,33 +175,8 @@ let user = User::builder()
     .build();
 ```
 
-## Adding `#[builder]` to existing code
+## Adding `#[builder]` to existing functions
 
-If your existing code defines functions with positional parameters in its public API that you'd like to change to use builder syntax, but you want to keep the old code compatible with the positional functions API, then you may use `#[builder(expose_positional_fn)]` attribute to keep both syntaxes available.
+Let's suppose you have existing code that defines functions with positional parameters in the public API. You'd like to change it to expose builder syntax instead, but you want to keep the old code compatible with the positional functions API.
 
-See [this attribute's docs](../reference/builder#expose-positional-fn) for details.
-
-**Example:**
-
-```rust ignore
-use bon::builder;
-
-// The previous name of the positional function needs to be specified
-// as the value for `expose_positional_fn`.
-#[builder(expose_positional_fn = example)] // [!code ++]
-fn example(x: u32, y: u32) {}              // [!code --]
-fn example_builder(x: u32, y: u32) {}      // [!code ++]
-
-// The positional function is now available under the specified (old) name
-example(1, 2);
-
-// The builder syntax is also available under the new function name
-example_builder()
-    .x(1)
-    .y(2)
-    .call();
-```
-
-*[Member]: Struct field or a function argument
-*[member]: Struct field or a function argument
-*[members]: Struct fields or function arguments
+In this case, you may use the top-level attribute `#[builder(start_fn)]` to keep both syntaxes available. See examples in the [docs for this attribute](../reference/builder/top-level/start-fn#exposing-original-function).

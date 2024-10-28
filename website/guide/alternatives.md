@@ -98,8 +98,8 @@ Another difference is that fields of collection types are considered required by
 [map]: https://docs.rs/bon/latest/bon/macro.map.html
 [set]: https://docs.rs/bon/latest/bon/macro.set.html
 [mutators]: https://docs.rs/typed-builder/latest/typed_builder/derive.TypedBuilder.html#mutators
-[bon-on]: ../reference/builder#on
-[bon-into]: ../reference/builder#into
+[bon-on]: ../reference/builder/top-level/on
+[bon-into]: ../reference/builder/member/into
 [bs-into]: https://docs.rs/buildstructor/latest/buildstructor/#into-field
 [db-into]: https://docs.rs/derive_builder/latest/derive_builder/#generic-setters
 [r1]: #special-setter-methods-for-collections

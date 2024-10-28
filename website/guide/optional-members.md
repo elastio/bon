@@ -56,7 +56,7 @@ example().maybe_level(value).call();
 
 ## `#[builder(default)]`
 
-To make a member of non-`Option` type optional you may use the attribute [`#[builder(default)]`](../reference/builder#default). This attribute uses the [`Default`](https://doc.rust-lang.org/stable/std/default/trait.Default.html) trait or the provided expression to assign the default value for the member.
+To make a member of non-`Option` type optional you may use the attribute [`#[builder(default)]`](../reference/builder/member/default). This attribute uses the [`Default`](https://doc.rust-lang.org/stable/std/default/trait.Default.html) trait or the provided expression to assign the default value for the member.
 
 ::: tip
 
@@ -104,8 +104,3 @@ assert_eq!(result, 8);
 ## Conditional building
 
 Now that you know how optional members work you can check out the ["Conditional building" patterns](./patterns/conditional-building) or continue studying other features of `bon` by following the "Next page" link at the bottom.
-
-
-*[Member]: Struct field or a function argument
-*[member]: Struct field or a function argument
-*[members]: Struct fields or function arguments

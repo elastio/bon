@@ -143,7 +143,3 @@ It's possible to place `#[builder]` on top of a `const fn`, but the generated bu
 If you have a strong use case that requires full support for `const`, feel free to [open an issue]. We'll figure something out for sure 🐱.
 
 [open an issue]: https://github.com/elastio/bon/issues
-
-*[Member]: Struct field or a function argument
-*[member]: Struct field or a function argument
-*[members]: Struct fields or function arguments

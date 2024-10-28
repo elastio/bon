@@ -1,6 +1,6 @@
 # Inspecting
 
-If you want to inspect the values set in the builder for debugging purposes you can leverage the [`#[builder(derive(...))]`](../reference/builder#derive) attribute to derive the [`Debug`](https://doc.rust-lang.org/stable/std/fmt/trait.Debug.html) trait for your builder.
+If you want to inspect the values set in the builder for debugging purposes you can leverage the [`#[builder(derive(...))]`](../reference/builder/top-level/derive) attribute to derive the [`Debug`](https://doc.rust-lang.org/stable/std/fmt/trait.Debug.html) trait for your builder.
 
 **Example:**
 
@@ -30,4 +30,4 @@ assert_eq!(
 builder.is_admin(true).call();
 ```
 
-You can also derive the [`Clone`](https://doc.rust-lang.org/stable/std/clone/trait.Clone.html) trait for your builder using this same attribute. See more details in the [reference for the `#[builder(derive(...))]` attribute](../reference/builder#derive).
+You can also derive the [`Clone`](https://doc.rust-lang.org/stable/std/clone/trait.Clone.html) trait for your builder using this same attribute. See more details in the [reference for the `#[builder(derive(...))]` attribute](../reference/builder/top-level/derive).

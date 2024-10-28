@@ -74,7 +74,7 @@ This has been a topic of [controversy](https://github.com/elastio/bon/issues/15)
 
 The main reason for removing this is to make `bon` more obvious and intuitive. Rust's core pillar is "being explicit". By having automatic `Into` conversions `bon` v1 introduced magical implicit behaviour, that also could lead to some footguns. For a detailed explanation of the potential footguns, see the ["Into Conversions In-Depth"](../guide/patterns/into-conversions-in-depth) page.
 
-Now, if you want to enable `Into` conversions for a set of members, you can use the new [`#[builder(on(type_pattern, into))]`](../reference/builder#on) attribute. It allows you to specify the type that you want to enable `Into` conversions for explicitly.
+Now, if you want to enable `Into` conversions for a set of members, you can use the new [`#[builder(on(type_pattern, into))]`](../reference/builder/top-level/on) attribute. It allows you to specify the type that you want to enable `Into` conversions for explicitly.
 
 Let's review an example of a migration that you need to do when upgrading to `bon` v2.
 
