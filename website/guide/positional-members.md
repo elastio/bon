@@ -10,8 +10,8 @@ As an example, suppose we have a `Treasure` struct with `x` and `y` coordinates 
 
 To do that we can use the `#[builder(start_fn)]` attribute. There are two contexts where we can place it, and they both have a different meaning:
 
-- [Top-level `#[builder(start_fn = ...)]`](../reference/builder#start-fn) - configures the name of the starting function and optionally its visibility
-- [Member-level `#[builder(start_fn)]`](../reference/builder#start-fn-1) - configures the member to be a positional parameter on the starting function
+- [Top-level `#[builder(start_fn = ...)]`](../reference/builder/top-level/start-fn) - configures the name of the starting function and optionally its visibility
+- [Member-level `#[builder(start_fn)]`](../reference/builder/member/start-fn) - configures the member to be a positional parameter on the starting function
 
 We'll want to use both of these attributes in our example to give a better name for the starting function that describes its inputs and configure `x` and `y` as positional parameters on the starting function as well.
 
@@ -56,7 +56,7 @@ impl Treasure {
 
 Now let's say we need to know the person who claimed the `Treasure`. While describing the treasure using the current builder syntax we'd like the person who claimed it to specify their first name and last name at the end of the building process.
 
-We can use a similar combination of the [top-level `#[builder(finish_fn = ...)]`](../reference/builder#finish-fn) and the [member-level `#[builder(finish_fn)]`](../reference/builder#finish-fn-1) attributes to do that.
+We can use a similar combination of the [top-level `#[builder(finish_fn = ...)]`](../reference/builder/top-level/finish-fn) and the [member-level `#[builder(finish_fn)]`](../reference/builder/member/finish-fn) attributes to do that.
 
 **Example:**
 
@@ -97,7 +97,7 @@ assert_eq!(treasure.claimed_by_last_name, "Heartstrings"); // [!code highlight]
 
 ## Into conversions
 
-You may also combine these attributes with [`#[builder(into)]`](../reference/builder#into) or [`#[builder(on(..., into))]`](../reference/builder#into) to reduce the number of `to_owned()` calls a bit.
+You may also combine these attributes with [`#[builder(into)]`](../reference/builder/member/into) or [`#[builder(on(..., into))]`](../reference/builder/top-level/on) to reduce the number of `to_owned()` calls a bit.
 
 ```rust
 use bon::Builder;

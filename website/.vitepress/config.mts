@@ -2,7 +2,6 @@ import { defineConfig } from "vitepress";
 import { abbr } from "@mdit/plugin-abbr";
 import * as v1 from "../v1/config.mjs";
 import * as v2 from "../v2/config.mjs";
-import { transformerNotationWordHighlight } from "@shikijs/transformers";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -46,6 +45,10 @@ export default defineConfig({
     },
 
     markdown: {
+        languageAlias: {
+            'attr': 'js',
+        },
+
         theme: {
             dark: "dark-plus",
             light: "light-plus",

@@ -15,6 +15,8 @@ The default naming pattern is the following:
 
 The attribute expects the desired builder type identifier as its input.
 
+### `vis`
+
 **Example:**
 
 ::: code-group

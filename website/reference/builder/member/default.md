@@ -2,15 +2,15 @@
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
 
-Makes the member optional and assigns a default value to it. There will be two setter methods generated for the member just like for [members of type `Option<T>`](../guide/optional-members). One setter accepts a value of type `T` (type of the member) and the other (with the `maybe_` prefix) accepts an `Option<T>`.
+Makes the member optional and assigns a default value to it. There will be two setter methods generated for the member just like for [members of type `Option<T>`](../../../guide/optional-members). One setter accepts a value of type `T` (type of the member) and the other (with the `maybe_` prefix) accepts an `Option<T>`.
 
 ::: tip
 
-Switching between `#[builder(default)]` and `Option<T>` is [compatible](../guide/compatibility#switching-between-option-t-and-builder-default).
+Switching between `#[builder(default)]` and `Option<T>` is [compatible](../../../guide/compatibility#switching-between-option-t-and-builder-default).
 
 :::
 
-The default value will be lazily computed inside of the [finishing function](#finish-fn) (i.e. `build()` or `call()`). It is computed only if the setter for the member wasn't called or `None` was passed to the `maybe_{member}()` setter.
+The default value will be lazily computed inside of the [finishing function](./finish-fn) (i.e. `build()` or `call()`). It is computed only if the setter for the member wasn't called or `None` was passed to the `maybe_{member}()` setter.
 
 The default value is computed based on the form of this attribute:
 
@@ -19,7 +19,7 @@ The default value is computed based on the form of this attribute:
 | `#[builder(default)]`              | `Default::default()`          |
 | `#[builder(default = expression)]` | `expression`                  |
 
-The result of the `expression` will be converted into the target type using [`Into::into`](https://doc.rust-lang.org/stable/std/convert/trait.Into.html) if [`#[builder(into)]`](#into) is enabled for the setter.
+The result of the `expression` will be converted into the target type using [`Into::into`](https://doc.rust-lang.org/stable/std/convert/trait.Into.html) if [`#[builder(into)]`](./into) is enabled for the setter.
 
 **Example:**
 

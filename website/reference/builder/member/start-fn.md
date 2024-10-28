@@ -95,7 +95,7 @@ navigator
 
 :::
 
-You can also combine this attribute with [`#[builder(into)]`](#into) or [`#[builder(on(..., into))]`](#on) to add an into conversion for the parameter.
+You can also combine this attribute with [`#[builder(into)]`](./into) or [`#[builder(on(..., into))]`](../top-level/on) to add an into conversion for the parameter.
 
 Importantly, `Into` conversions for such members work slightly differently from the regular (named) members in regard to the `Option` type. The `Option` type gives no additional meaning to the member annotated with `#[builder(start_fn)]`. Thus, it is matched by the type pattern of `on(..., into)` and wrapped with `impl Into<Option<T>>` as any other type.
 
