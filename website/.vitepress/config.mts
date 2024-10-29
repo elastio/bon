@@ -218,6 +218,10 @@ export default defineConfig({
                                     text: "start_fn",
                                     link: "/reference/builder/top-level/start-fn",
                                 },
+                                {
+                                    text: "state_mod",
+                                    link: "/reference/builder/top-level/state-mod",
+                                }
                             ],
                         },
                         {
@@ -241,12 +245,20 @@ export default defineConfig({
                                     link: "/reference/builder/member/name",
                                 },
                                 {
+                                    text: "overwritable",
+                                    link: "/reference/builder/member/overwritable",
+                                },
+                                {
                                     text: "skip",
                                     link: "/reference/builder/member/skip",
                                 },
                                 {
                                     text: "start_fn",
                                     link: "/reference/builder/member/start-fn",
+                                },
+                                {
+                                    text: "transparent",
+                                    link: "/reference/builder/member/transparent",
                                 },
                             ],
                         },

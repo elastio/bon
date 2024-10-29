@@ -10,31 +10,55 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 ### Changed
 
-- Reject unnecessary empty attributes e.g. `#[builder()]` or `#[builder]` with no parameters on a member ([#145](https://github.com/elastio/bon/pull/145))
-- Reject non-empty `#[bon(...)]` attribute. This attribute will accept some parameters in future releases ([#145](https://github.com/elastio/bon/pull/145))
-- Reject square brackets and curly braces delimiters for `builder_type`, `finish_fn`, `start_fn` and `on` attributes syntax. Only parentheses are accepted e.g. `#[builder(finish_fn(...))]` or `#[builder(on(...))]`. This no longer works: `#[builder(finish_fn[...])]` or `#[builder(on{...})]` ([#145](https://github.com/elastio/bon/pull/145))
-- `#[builder(derive(Clone, Debug))]` now generates impl blocks that follow the behavior of standard `Clone` and `Debug` derives in that it conservatively adds `Clone/Debug` trait bounds for all the generic types declared on the original item (struct or function). See the *Added* section for details on the way to override these bounds with `#[builder(derive(Clone/Debug(bounds(...))))]`.
+
+- ⚠️ **Breaking.** Reject unnecessary empty attributes e.g. `#[builder()]` or `#[builder]` with no parameters on a member ([#145](https://github.com/elastio/bon/pull/145))
+
+- ⚠️ **Breaking.** Reject square brackets and curly braces delimiters for `builder_type`, `finish_fn`, `start_fn` and `on` attributes syntax. Only parentheses are accepted e.g. `#[builder(finish_fn(...))]` or `#[builder(on(...))]`. This no longer works: `#[builder(finish_fn[...])]` or `#[builder(on{...})]` ([#145](https://github.com/elastio/bon/pull/145))
+
+- ⚠️ **Breaking.** Reject non-consecutive `on(...)` clauses. For example, the following now generates a compile error: `#[builder(on(String, into), finish_fn = build, on(Vec<_>, into))]`, because there is a `finish_fn = ...` between `on(...)` clauses.
+
+- ⚠️ **Breaking.** `#[builder(derive(Clone, Debug))]` now generates impl blocks that follow the behavior of standard `Clone` and `Debug` derives in that it conservatively adds `Clone/Debug` trait bounds for all the generic types declared on the original item (struct or function). Previously no additional bounds were required on `Clone` and `Debug` impls. See the *Added* section for details on the way to override these bounds with `#[builder(derive(Clone/Debug(bounds(...))))]`.
+
+- ⚠️ **Breaking.** The name of the builder struct generated for methods named `builder` changed from `TBuilderBuilder` to just `TBuilder` making methods name `builder` work the same as methods named `new`.
 
 ### Removed
-- Removed support for `#[bon::builder]` proc-macro attribute on top of a `struct`. Use `#[derive(bon::Builder)]` for that instead. This syntax has been deprecated since `2.1` and it is now removed as part of a major version cleanup ([#145](https://github.com/elastio/bon/pull/145))
+
+- ⚠️ **Breaking.** Remove support for `#[bon::builder]` proc-macro attribute on top of a `struct`. Use `#[derive(bon::Builder)]` for that instead. This syntax has been deprecated since `2.1` and it is now removed as part of a major version cleanup ([#145](https://github.com/elastio/bon/pull/145))
 
 ### Added
 
-- Add `#[builder(builder_type(vis = "..."))]` that allows overriding the visibility of the builder struct ([#145](https://github.com/elastio/bon/pull/145))
-- Add `#[builder(finish_fn(vis = "..."))]` that allows overriding the visibility of the finishing function ([#145](https://github.com/elastio/bon/pull/145))
-- Add `#[builder(with = closure)]` syntax to customize setters with a custom closure. If the closure returns a `Result<_, E>` the setters become fallible ([#145](https://github.com/elastio/bon/pull/145))
-- Add `#[builder(with = Some)]`, `#[builder(with = FromIterator::from_iter)]`, `#[builder(with = <_>::from_iter)]` support for two well-known functions that will probably be used frequently ([#157](https://github.com/elastio/bon/pull/157))
+
+- Add `#[builder(builder_type(vis = "...", docs { ... }))]` that allows overriding the visibility and docs of the builder struct ([#145](https://github.com/elastio/bon/pull/145))
+
+- Add `#[builder(finish_fn(vis = "...", docs { ... } ))]` that allows overriding the visibility and docs of the finishing function ([#145](https://github.com/elastio/bon/pull/145))
+
+- Add `#[builder(start_fn(docs { ... }))]` that allows overriding the docs of the starting function ([#145](https://github.com/elastio/bon/pull/145))
+
+- Add `#[builder(with = closure)]` syntax to customize setters with a closure. If the closure returns a `Result<_, E>` the setters become fallible ([#145](https://github.com/elastio/bon/pull/145))
+
+- Add `#[builder(with = Some)]`, `#[builder(with = FromIterator::from_iter)]`, `#[builder(with = <_>::from_iter)]` syntax support for two well-known functions that will probably be used frequently ([#157](https://github.com/elastio/bon/pull/157))
+
 - Add `#[builder(transparent)]` for `Option` fields to opt out from their special handling which makes `bon` treat them as regular required fields. It's also available at the top-level via `#[builder(on(_, transparent))]` ([#145](https://github.com/elastio/bon/pull/145), [#155](https://github.com/elastio/bon/pull/155))
+
 - Add `#[builder(state_mod)]` to configure the builder's type state API module name, visibility and docs ([#145](https://github.com/elastio/bon/pull/145))
-- Add `#[builder(overwritable)]` and `#[builder(on(..., overwritable)]` to make it possible to call setters multiple times for the same member ([#145](https://github.com/elastio/bon/pull/145))
+
+- 🔬 **Experimental.** Add `#[builder(overwritable)]` and `#[builder(on(..., overwritable)]` to make it possible to call setters multiple times for the same member. This attribute is available under the cargo feature `"experimental-overwritable"` (stabilization is tracked in [#149](https://github.com/elastio/bon/issues/149), let us know if you need this attribute!). ([#145](https://github.com/elastio/bon/pull/145))
+
 - Add `#[builder(setters)]` to fine-tune the setters names, visibility and docs ([#145](https://github.com/elastio/bon/pull/145))
+
 - Add `#[builder(derive(Clone/Debug(bounds(...))]` to allow overriding trait bounds on the `Clone/Debug` impl block of the builder ([#145](https://github.com/elastio/bon/pull/145))
+
 - Improve rustdoc output ([#145](https://github.com/elastio/bon/pull/145))
+
   - Add info that the member is required or optional.
+
   - For members with defaults values show the default value in the docs.
+
   - For optional members provide a link to a companion setter. The docs for `{member}(T)` setter mention the `maybe_{member}(Option<T>)` setter and vice versa.
+
   - Remove `__` prefixes for generic types and lifetimes from internal symbols. Instead, the prefixes added only if the macro detects a name collision.
-- Add inheritance of `#[allow()]` and `#[expect()]` lint attributes to all generated items. This is useful to suppress any lints coming from the generated code. Although, lints coming from the generated code are generally considered defects in `bon` and should be reported via a Github issue but this provides an easy temporary workaround the problem ([#145](https://github.com/elastio/bon/pull/145))
+
+- Add inheritance of `#[allow()]` and `#[expect()]` lint attributes to all generated items. This is useful to suppress any lints coming from the generated code. Although, lints coming from the generated code are generally considered defects in `bon` and should be reported via a Github issue but this provides an easy temporary workaround for the problem ([#145](https://github.com/elastio/bon/pull/145))
 
 ### Fixed
 

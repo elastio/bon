@@ -1,6 +1,22 @@
 use crate::prelude::*;
 
 #[test]
+fn new_method_special_case() {
+    struct Sut;
+
+    #[bon]
+    impl Sut {
+        #[builder]
+        fn new() {}
+    }
+
+    let _: SutBuilder = Sut::builder();
+    let builder: SutBuilder<sut_builder::Empty> = Sut::builder();
+
+    builder.build();
+}
+
+#[test]
 fn builder_method_special_case() {
     struct Sut;
 
@@ -17,7 +33,7 @@ fn builder_method_special_case() {
 }
 
 #[test]
-fn builder_start_fn_special_case() {
+fn builder_start_fn_is_not_special_case() {
     struct Sut;
 
     #[bon]
@@ -26,10 +42,10 @@ fn builder_start_fn_special_case() {
         fn some_other_name() {}
     }
 
-    let _: SutBuilder = Sut::builder();
-    let builder: SutBuilder<sut_builder::Empty> = Sut::builder();
+    let _: SutSomeOtherNameBuilder = Sut::builder();
+    let builder: SutSomeOtherNameBuilder<sut_some_other_name_builder::Empty> = Sut::builder();
 
-    builder.build();
+    builder.call();
 
     Sut::some_other_name();
 }

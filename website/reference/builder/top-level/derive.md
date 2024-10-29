@@ -2,10 +2,9 @@
 
 **Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
 
-*⚠️ Do not confuse this with `derive(bon::Builder)`⚠️*
+*⚠️ Do not confuse this with `#[derive(bon::Builder)]`⚠️*
 
-Generates additional derives on the builder struct itself. The syntax is similar to the regular `#[derive(...)]` attribute, but it must be wrapped in `#[builder(derive(...))]`. Expects one or more of the supported derives separated by commas.
-
+Generates additional derives on the builder struct itself. The syntax is similar to the regular `#[derive(...)]` attribute, but it must be wrapped in `#[builder(derive(...))]`. Expects one or more of the supported derives separated by a comma.
 
 The following derives are supported: `Clone`, `Debug`.
 
@@ -117,6 +116,64 @@ assert_eq!(
     "ExampleMethodWithSelfBuilder { self: Example }"
 )
 ```
+
+:::
+
+## Generic types handling
+
+If the underlying `struct` or `fn` contains generic type parameters, then the generated impl block will include a `where` bound requiring the respective trait (`Clone` or `Debug`) to be implemented by all of them. This follows the behavior of the [standard `derive` macros](https://doc.rust-lang.org/std/clone/trait.Clone.html#derivable).
+
+This works fine in most of the cases, but sometimes the generated bounds may be overly restrictive. To fix that, you can manually specify the bounds using the syntax `#[builder(derive(Trait(bounds(...))))]`, where `...` is a comma-separated list of `where` bounds.
+
+See the example of this problem, and how it can be fixed (click on the tab `Fixed` in the code snippet):
+
+::: code-group
+
+```rust [Overly restrictive]
+use bon::Builder;
+use std::rc::Rc;
+
+#[derive(Builder)]
+#[builder(derive(Clone))]
+struct Example<T, U> {
+    x: Rc<T>,
+    y: U,
+}
+
+struct NonCloneable;
+
+let builder = Example::<_, ()>::builder().x(Rc::new(NonCloneable));
+
+// `Rc` can be cloned even if `T` is not `Clone`, but this code   // [!code error]
+// doesn't compile, because the `Clone` impl for `ExampleBuilder` // [!code error]
+// conservatively requires `T: Clone`                             // [!code error]
+builder.clone(); // [!code error]
+```
+
+```rust [Fixed]
+use bon::Builder;
+use std::rc::Rc;
+
+#[derive(Builder)]
+// Only a bound `U: Clone` is needed in this case // [!code highlight]
+#[builder(derive(Clone(bounds(U: Clone))))] // [!code highlight]
+struct Example<T, U> {
+    x: Rc<T>,
+    y: U,
+}
+
+struct NonCloneable;
+
+let builder = Example::<_, ()>::builder().x(Rc::new(NonCloneable));
+
+// Now this works, because there is no bound `T: Clone` // [!code highlight]
+builder.clone();
+```
+:::
+
+
+::: tip
+If you'd like to know why this attribute is this dumb and doesn't just add a `where Rc<T>: Clone` bound instead, then check this article about the ["Implied bounds and perfect derive"](https://smallcultfollowing.com/babysteps/blog/2022/04/12/implied-bounds-and-perfect-derive/) by Niko Matsakis 📖.
 
 :::
 

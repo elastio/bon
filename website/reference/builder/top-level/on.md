@@ -1,3 +1,7 @@
+---
+outline: deep
+---
+
 # `on`
 
 **Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
@@ -79,23 +83,37 @@ Example::example()
 
 This attribute must be of form `on(type_pattern, attributes)`.
 
-- `type_pattern` - type that will be compared with the types of the members. The types are compared textually. For example, `String` doesn't match `std::string::String`. You can use `_` to mark parts of the type to ignore when matching. For example, `Vec<_>` matches `Vec<u32>` or `Vec<String>`. Lifetimes are ignored during matching.
+## Type pattern
 
-- `attributes` - for now, the only attribute supported in the `attributes` position is [`into`](../member/into). It sets `#[builder(into)]` for members that match the `type_pattern`.
+`type_pattern` is a type that will be compared with the types of the members. The types are compared textually. For example, `String` doesn't match `std::string::String` because, internally, they are compared just like strings `"String" == "std::string::String"`.
 
-If you want to apply the `attributes` to all members, you can use the `_` type pattern that matches any type. For example, `#[builder(on(_, into))]`.
+You can use `_` to mark parts of the type to ignore when matching. For example, `Vec<_>` matches `Vec<u32>` or `Vec<String>`. Lifetimes are ignored during matching.
+
+If you want to apply the attributes to all members, you can use the `_` type pattern that matches any type. For example, `#[builder(on(_, into))]`.
 
 For optional members the underlying type is matched ignoring the `Option` wrapper.
 
-**Example:**
+## Attributes
 
-```rust
+There are several attributes supported in the `attributes` position listed below. A single `on(...)` clause can contain several of these separated by a comma e.g. `on(_, into, transparent)`.
+
+- [`into`](../member/into);
+- [`transparent`](../member/transparent) - currently, this attribute can only be used with the `_` type pattern as the first `on(...)` clause;
+- [`ovewritable`](../member/overwritable) - 🔬 **experimental**, this attribute is available under the cargo feature `"experimental-overwritable"` (see the issue [#149](https://github.com/elastio/bon/issues/149));
+
+
+## Examples
+
+::: code-group
+
+```rust [into]
 use bon::Builder;
 
 #[derive(Builder)]
-#[builder(on(String, into))]
+#[builder(on(String, into))] // [!code highlight]
 struct Example {
     name: String,
+
     description: Option<String>,
 
     #[builder(default)]
@@ -111,7 +129,49 @@ Example::builder()
     .build();
 ```
 
-You can specify `on(...)` multiple times.
+```rust [transparent]
+use bon::Builder;
+
+#[derive(Builder)]
+#[builder(on(_, transparent))] // [!code highlight]
+struct Example {
+    name: String,
+    level: Option<u32>,
+    description: Option<String>,
+}
+
+Example::builder()
+    .name("regular required member".to_owned())
+    .level(Some(99))
+    .description(Some("transparent `Option`".to_owned()))
+    .build();
+```
+
+```rust [overwritable]
+use bon::Builder;
+
+#[derive(Builder)]
+#[builder(on(_, overwritable))] // [!code highlight]
+struct Example {
+    x: u32,
+    y: Option<u32>,
+}
+
+Example::builder()
+    // Now we can call setters for the same member multiple times
+    .x(2)
+    .x(99)
+    // Same also works for optional members
+    .y(1)
+    .maybe_y(None)
+    .y(2)
+    .build();
+```
+
+
+:::
+
+You can specify `on(...)` multiple times. All `on(...)` clauses must be consecutive (no other attributes between them are allowed).
 
 **Example:**
 
@@ -135,3 +195,7 @@ Example::builder()
     .level(100)
     .build();
 ```
+
+## Future releases
+
+There is an issue [#152](https://github.com/elastio/bon/issues/152) about adding support for [`default`](../member/default.md), [`with`](../member/with) and other non-boolean attributes to the `on(...)` clause. We'll be glad if you take a look at the design proposed in that issue and put a 👍 if you like/want this feature or leave comment if you have some more feedback.

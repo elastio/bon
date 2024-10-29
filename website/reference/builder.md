@@ -59,7 +59,7 @@ Click on the name of the attribute to view detailed docs.
 
 | Attribute | Short description
 | -- | -- |
-| [`builder_type`](./builder/top-level/builder-type) | Overrides the name, visibility and docs of the generated builder
+| [`builder_type`](./builder/top-level/builder-type) | Overrides the name, visibility and docs of the builder struct
 | [`derive`](./builder/top-level/derive)             | Generates additional derives on the builder struct itself
 | [`finish_fn`](./builder/top-level/finish-fn)       | Overrides the name, visibility and docs of the finishing function
 | [`on`](./builder/top-level/on)                     | Applies the given builder attributes to all members matching a type pattern

@@ -327,11 +327,14 @@ impl<'a> FnInputCtx<'a> {
             docs: finish_fn_docs,
         } = self.config.finish_fn;
 
+        let is_special_builder_method = self.impl_ctx.is_some()
+            && (self.fn_item.norm.sig.ident == "new" || self.fn_item.norm.sig.ident == "builder");
+
         let finish_fn_ident = finish_fn_ident
             .map(SpannedKey::into_value)
             .unwrap_or_else(|| {
                 // For `builder` methods the `build` finisher is more conventional
-                if self.impl_ctx.is_some() && self.start_fn.ident == "builder" {
+                if is_special_builder_method {
                     format_ident!("build")
                 } else {
                     format_ident!("call")
@@ -381,16 +384,14 @@ impl<'a> FnInputCtx<'a> {
 
             let ty_prefix = self.self_ty_prefix.unwrap_or_default();
 
-            // A special case for the starting function named `builder`.
+            // A special case for the `new` or `builder` method.
             // We don't insert the `Builder` suffix in this case because
             // this special case should be compatible with deriving
             // a builder from a struct.
             //
             // We can arrive inside of this branch only if the function under
-            // the macro is called `new` or `builder` without `start_fn`
-            // name override, or if the `start_fn = builder/start_fn(name = builder)`
-            // is specified in the macro invocation explicitly.
-            if self.impl_ctx.is_some() && self.start_fn.ident == "builder" {
+            // the macro is called `new` or `builder`.
+            if is_special_builder_method {
                 return format_ident!("{ty_prefix}Builder");
             }
 
