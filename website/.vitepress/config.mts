@@ -203,6 +203,10 @@ export default defineConfig({
                                     link: "/reference/builder/top-level/builder-type",
                                 },
                                 {
+                                    text: "crate",
+                                    link: "/reference/builder/top-level/crate",
+                                },
+                                {
                                     text: "derive",
                                     link: "/reference/builder/top-level/derive",
                                 },
@@ -245,7 +249,7 @@ export default defineConfig({
                                     link: "/reference/builder/member/name",
                                 },
                                 {
-                                    text: "overwritable",
+                                    text: "overwritable 🔬",
                                     link: "/reference/builder/member/overwritable",
                                 },
                                 {
@@ -267,6 +271,13 @@ export default defineConfig({
                 {
                     text: "#[bon]",
                     link: "/reference/bon",
+                    collapsed: true,
+                    items: [
+                        {
+                            text: "crate",
+                            link: "/reference/bon/crate",
+                        }
+                    ]
                 },
                 {
                     text: "Other items on docs.rs",

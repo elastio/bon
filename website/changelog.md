@@ -10,23 +10,42 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 ### Changed
 
-
 - ⚠️ **Breaking.** Reject unnecessary empty attributes e.g. `#[builder()]` or `#[builder]` with no parameters on a member ([#145](https://github.com/elastio/bon/pull/145))
 
 - ⚠️ **Breaking.** Reject square brackets and curly braces delimiters for `builder_type`, `finish_fn`, `start_fn` and `on` attributes syntax. Only parentheses are accepted e.g. `#[builder(finish_fn(...))]` or `#[builder(on(...))]`. This no longer works: `#[builder(finish_fn[...])]` or `#[builder(on{...})]` ([#145](https://github.com/elastio/bon/pull/145))
 
-- ⚠️ **Breaking.** Reject non-consecutive `on(...)` clauses. For example, the following now generates a compile error: `#[builder(on(String, into), finish_fn = build, on(Vec<_>, into))]`, because there is a `finish_fn = ...` between `on(...)` clauses.
+- ⚠️ **Breaking.** Reject non-consecutive `on(...)` clauses. For example, the following now generates a compile error: `#[builder(on(String, into), finish_fn = build, on(Vec<_>, into))]`, because there is a `finish_fn = ...` between `on(...)` clauses. ([#155](https://github.com/elastio/bon/pull/155))
 
-- ⚠️ **Breaking.** `#[builder(derive(Clone, Debug))]` now generates impl blocks that follow the behavior of standard `Clone` and `Debug` derives in that it conservatively adds `Clone/Debug` trait bounds for all the generic types declared on the original item (struct or function). Previously no additional bounds were required on `Clone` and `Debug` impls. See the *Added* section for details on the way to override these bounds with `#[builder(derive(Clone/Debug(bounds(...))))]`.
+- ⚠️ **Breaking.** `#[builder(derive(Clone, Debug))]` now generates impl blocks that follow the behaviour of standard `Clone` and `Debug` derives in that it conservatively adds `Clone/Debug` trait bounds for all the generic types declared on the original item (struct or function). Previously no additional bounds were required on `Clone` and `Debug` impls. See the *Added* section for details on the way to override these bounds with `#[builder(derive(Clone/Debug(bounds(...))))]`.
 
-- ⚠️ **Breaking.** The name of the builder struct generated for methods named `builder` changed from `TBuilderBuilder` to just `TBuilder` making methods name `builder` work the same as methods named `new`.
+- ⚠️ **Breaking.** The name of the builder struct generated for methods named `builder` changed from `TBuilderBuilder` to just `TBuilder` making methods name `builder` work the same as methods named `new`. ([#145](https://github.com/elastio/bon/pull/145))
+
+- ⚠️ **Breaking.** The type of the builder is now dependent on the order of the setters' invocation. This should not break anything unless you had code like the following that will stop compiling:
+  ```rust
+  let builder = if condition {
+      Foo::builder().a(1).b(2)
+  } else {
+      Foo::builder().b(1).a(2)
+  };
+
+  builder.build();
+  ```
+
+  This is because the types of the builders returned from the branches are the following:
+  - `FooBuilder<SetB<SetA>>` (`if` branch)
+  - `FooBuilder<SetA<SetB>>` (`else` branch)
+
+  We believe such code should generally be very rare and even if it breaks, it's easy to fix it by reordering the setter method calls. This compromise was accepted as a design tradeoff such that the builder's type signature becomes simpler, the generated documentation becomes much less noisy, it removes an annoying special case for the builder of just one member, and it improves the type-checking performance considerably compared to the previous approach that used tuples to represent the type state. ([#145](https://github.com/elastio/bon/pull/145))
 
 ### Removed
 
 - ⚠️ **Breaking.** Remove support for `#[bon::builder]` proc-macro attribute on top of a `struct`. Use `#[derive(bon::Builder)]` for that instead. This syntax has been deprecated since `2.1` and it is now removed as part of a major version cleanup ([#145](https://github.com/elastio/bon/pull/145))
 
+- ⚠️ **Breaking.** Remove `#[builder(expose_positional_fn = positional_fn_name)]` attribute. Use `#[builder(start_fn = builder_fn_name)]` instead, since this attribute works additively keeping the function with positional arguments under the attribute unchanged.
+
 ### Added
 
+- ⚠️ **Breaking.** Builder macros now generate additional `mod builder_name {}` where `builder_name` is the snake_case version of the name of the builder struct. This new module contains the type state API of the builder. There is a low probability that this new module name may conflict with existing symbols in your scope, so this change is marked as breaking.
 
 - Add `#[builder(builder_type(vis = "...", docs { ... }))]` that allows overriding the visibility and docs of the builder struct ([#145](https://github.com/elastio/bon/pull/145))
 
@@ -52,13 +71,13 @@ All the breaking changes are very unlikely to actually break your code that was 
 
   - Add info that the member is required or optional.
 
-  - For members with defaults values show the default value in the docs.
+  - For members with default values show the default value in the docs.
 
   - For optional members provide a link to a companion setter. The docs for `{member}(T)` setter mention the `maybe_{member}(Option<T>)` setter and vice versa.
 
   - Remove `__` prefixes for generic types and lifetimes from internal symbols. Instead, the prefixes added only if the macro detects a name collision.
 
-- Add inheritance of `#[allow()]` and `#[expect()]` lint attributes to all generated items. This is useful to suppress any lints coming from the generated code. Although, lints coming from the generated code are generally considered defects in `bon` and should be reported via a Github issue but this provides an easy temporary workaround for the problem ([#145](https://github.com/elastio/bon/pull/145))
+- Add inheritance of `#[allow()]` and `#[expect()]` lint attributes to all generated items. This is useful to suppress any lints coming from the generated code. Although, lints coming from the generated code are generally considered defects in `bon` and should be reported via a Github issue, but this provides an easy temporary workaround for the problem ([#145](https://github.com/elastio/bon/pull/145))
 
 ### Fixed
 
@@ -67,7 +86,7 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 ### Other
 
-- Add graceful internal panic handling. If some `bon` macro panics due to an internal bug, the macro will try to still generate a fallback for IDEs to still provide intellisense ([#145](https://github.com/elastio/bon/pull/145))
+- Add graceful internal panic handling. If some `bon` macro panics due to an internal bug, the macro will try to generate a fallback for IDEs to still provide intellisense ([#145](https://github.com/elastio/bon/pull/145))
 - Switch from `elastio.github.io/bon` to a custom domain `bon-rs.com` ([#158](https://github.com/elastio/bon/pull/158))
 - Add anonymous stats with [`umami`](https://umami.is/) for the docs website ([#158](https://github.com/elastio/bon/pull/158))
 
