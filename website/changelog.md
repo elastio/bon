@@ -41,7 +41,7 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 - ⚠️ **Breaking.** Remove support for `#[bon::builder]` proc-macro attribute on top of a `struct`. Use `#[derive(bon::Builder)]` for that instead. This syntax has been deprecated since `2.1` and it is now removed as part of a major version cleanup ([#145](https://github.com/elastio/bon/pull/145))
 
-- ⚠️ **Breaking.** Remove `#[builder(expose_positional_fn = positional_fn_name)]` attribute. Use `#[builder(start_fn = builder_fn_name)]` instead, since this attribute works additively keeping the function with positional arguments under the attribute unchanged.
+- ⚠️ **Breaking.** Remove `#[builder(expose_positional_fn = positional_fn_name)]` attribute. Use `#[builder(start_fn = builder_fn_name)]` instead, since this attribute works additively keeping the function with positional arguments under the attribute unchanged. ([#153](https://github.com/elastio/bon/pull/153))
 
 ### Added
 
@@ -58,6 +58,8 @@ All the breaking changes are very unlikely to actually break your code that was 
 - Add `#[builder(with = Some)]`, `#[builder(with = FromIterator::from_iter)]`, `#[builder(with = <_>::from_iter)]` syntax support for two well-known functions that will probably be used frequently ([#157](https://github.com/elastio/bon/pull/157))
 
 - Add `#[builder(transparent)]` for `Option` fields to opt out from their special handling which makes `bon` treat them as regular required fields. It's also available at the top-level via `#[builder(on(_, transparent))]` ([#145](https://github.com/elastio/bon/pull/145), [#155](https://github.com/elastio/bon/pull/155))
+
+- Add `#[builder(crate = path::to::bon)]` and `#[bon(crate = path::to::bon)]` to allow overriding the path to `bon` crate used in the generated code, which is useful for the cases when `bon` macros are wrapped by other macros ([#153](https://github.com/elastio/bon/pull/153))
 
 - Add `#[builder(state_mod)]` to configure the builder's type state API module name, visibility and docs ([#145](https://github.com/elastio/bon/pull/145))
 
