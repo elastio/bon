@@ -10,7 +10,7 @@ This ensures a consistent initialization order, and it makes these members avail
 
 ::: tip
 
-Don't confuse this with the top-level [`#[builder(start_fn = ...)]`](#start-fn) attribute that can be used to configure the name and visibility of the starting function. You'll likely want to use it in combination with this member-level attribute to define a better name for the starting function.
+Don't confuse this with the top-level [`#[builder(start_fn = ...)]`](#start-fn) attribute that can be used to configure the name, visibility and docs of the starting function. You'll likely want to use it in combination with this member-level attribute to define a better name for the starting function.
 
 :::
 

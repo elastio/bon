@@ -1,48 +1,62 @@
+---
+outline: deep
+---
+
 # Optional Members
 
 ## `Option<T>`
 
 Setters generated for members of `Option<T>` type are optional to call. If they aren't invoked, then `None` will be used as the default.
 
-**Example:**
-
 ```rust
-use bon::builder;
-
-#[builder]
+#[bon::builder]
 fn example(level: Option<u32>) {}
 
 // We can call it without specifying the `level`
 example().call();
 ```
 
-The generated builder has two setters for each optional member. One setter accepts `T` and the other accepts `Option<T>`. The following setters will be generated in the example above (simplified):
+You can use [`#[builder(transparent)]`](../reference/builder/member/transparent) to opt-out from this.
+
+### Setters pair
+
+The builder provides a **pair** of setters for each optional member:
+
+| Name             | Input       | Description                   | Configuration attribute
+|------------------|-------------|-------------------------------|------------------
+| `{member}`       | `T`         | Accepts a non-`None` value.   | [`some_fn`]
+| `maybe_{member}` | `Option<T>` | Accepts an `Option` directly. | [`option_fn`]
+
+[`some_fn`]: ../reference/builder/member/setters#some-fn
+[`option_fn`]: ../reference/builder/member/setters#option-fn
+
+
+::: details See how the setters look like in the generated code
 
 ```rust ignore
-impl ExampleBuilder {
-    // Accepts the underlying value. Wraps it in `Some()` internally
-    fn level(value: u32) -> NextBuilderState { /* */ }
+// [GENERATED CODE (simplified)]
+impl<S: State> ExampleBuilder<S> {
+    fn level(self, value: u32) -> ExampleBuilder<SetLevel<S>> {
+        self.maybe_level(Some(value)) // Yes, it's this simple!
+    }
 
-    // Accepts the `Option` directly.
-    fn maybe_level(value: Option<u32>) -> NextBuilderState { /* */ }
+    fn maybe_level(self, value: Option<u32>) -> ExampleBuilder<SetLevel<S>> { /* */ }
 }
 ```
 
-::: tip
+:::
 
 Thanks to this design, changing the member from required to optional [preserves compatibility](./compatibility#making-a-required-member-optional).
 
-:::
+### Examples
 
----
-
-If you need to pass a simple literal value, then the syntax is very short
+Pass a non-`None` value via the `{member}(T)` setter:
 
 ```rust ignore
 example().level(42).call();
 ```
 
-If you already have an `Option` variable somewhere or you need to dynamically decide if the value should be `Some` or `None`, then you can use the `maybe_` variant of the setter.
+Pass an `Option` value directly via the `maybe_{member}(Option<T>)` setter:
 
 ```rust ignore
 let value = if some_condition {
@@ -54,6 +68,8 @@ let value = if some_condition {
 example().maybe_level(value).call();
 ```
 
+
+
 ## `#[builder(default)]`
 
 To make a member of non-`Option` type optional you may use the attribute [`#[builder(default)]`](../reference/builder/member/default). This attribute uses the [`Default`](https://doc.rust-lang.org/stable/std/default/trait.Default.html) trait or the provided expression to assign the default value for the member.
@@ -64,12 +80,10 @@ Switching between `#[builder(default)]` and `Option<T>` is [compatible](./compat
 
 :::
 
-**Example:**
+### Examples
 
 ```rust
-use bon::builder;
-
-#[builder]
+#[bon::builder]
 fn example(
     // This uses the `Default` trait // [!code highlight]
     #[builder(default)]              // [!code highlight]
@@ -84,23 +98,21 @@ fn example(
 
 // Here, the default values will be used `a = 0` and `b = 4` // [!code highlight]
 let result = example().call();
+
 assert_eq!(result, 4);
+```
 
-// The same couple of setters `{member}(T)` and `maybe_{member}(Option<T>)` // [!code highlight]
-// are generated just like it works with members of `Option<T>` type        // [!code highlight]
+The same [pair of optional setters](#setters-pair) is generated for members with default values.
+
+```rust ignore
 let result = example()
+    // Pass a non-None value
     .a(3)
-    .b(5)
-    .call();
-assert_eq!(result, 8);
-
-let result = example()
-    .maybe_a(Some(3))
+    // Pass an `Option` value directly
     .maybe_b(Some(5))
     .call();
-assert_eq!(result, 8);
 ```
 
 ## Conditional building
 
-Now that you know how optional members work you can check out the ["Conditional building" patterns](./patterns/conditional-building) or continue studying other features of `bon` by following the "Next page" link at the bottom.
+Now that you know how optional members work you can check out the ["Conditional building" design patterns](./patterns/conditional-building) or continue studying other features of `bon` by following the "Next page" link at the bottom.

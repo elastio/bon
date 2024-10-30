@@ -63,7 +63,7 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 - Add `#[builder(state_mod)]` to configure the builder's type state API module name, visibility and docs ([#145](https://github.com/elastio/bon/pull/145))
 
-- 🔬 **Experimental.** Add `#[builder(overwritable)]` and `#[builder(on(..., overwritable)]` to make it possible to call setters multiple times for the same member. This attribute is available under the cargo feature `"experimental-overwritable"` (stabilization is tracked in [#149](https://github.com/elastio/bon/issues/149), let us know if you need this attribute!). ([#145](https://github.com/elastio/bon/pull/145))
+- 🔬 **Experimental.** Add `#[builder(overwritable)]` and `#[builder(on(..., overwritable)]` to make it possible to call setters multiple times for the same member. This attribute is available under the cargo feature `"experimental-overwritable"`. The fate of this feature depends on your feedback in the tracking issue [#149](https://github.com/elastio/bon/issues/149). Please, let us know if you have a use case for this attribute! ([#145](https://github.com/elastio/bon/pull/145))
 
 - Add `#[builder(setters)]` to fine-tune the setters names, visibility and docs ([#145](https://github.com/elastio/bon/pull/145))
 

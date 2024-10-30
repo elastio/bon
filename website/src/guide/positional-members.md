@@ -10,7 +10,7 @@ As an example, suppose we have a `Treasure` struct with `x` and `y` coordinates 
 
 To do that we can use the `#[builder(start_fn)]` attribute. There are two contexts where we can place it, and they both have a different meaning:
 
-- [Top-level `#[builder(start_fn = ...)]`](../reference/builder/top-level/start-fn) - configures the name of the starting function and optionally its visibility
+- [Top-level `#[builder(start_fn = ...)]`](../reference/builder/top-level/start-fn) - configures the name, visibility and docs of the starting function
 - [Member-level `#[builder(start_fn)]`](../reference/builder/member/start-fn) - configures the member to be a positional parameter on the starting function
 
 We'll want to use both of these attributes in our example to give a better name for the starting function that describes its inputs and configure `x` and `y` as positional parameters on the starting function as well.
@@ -24,9 +24,9 @@ use bon::Builder;
 // Top-level attribute to give a better name for the starting function // [!code highlight]
 #[builder(start_fn = with_coordinates)]                                // [!code highlight]
 struct Treasure {
-    // Member-level attribute to mark the member as // [!code highlight]
-    // a parameter of `with_coordinates()`          // [!code highlight]
-    #[builder(start_fn)]                            // [!code highlight]
+    // Member-level attributes to mark members as // [!code highlight]
+    // parameter of `with_coordinates()`          // [!code highlight]
+    #[builder(start_fn)]                          // [!code highlight]
     x: u32,
 
     #[builder(start_fn)] // [!code highlight]

@@ -11,7 +11,7 @@ This ensures a consistent initialization order, and it makes these members avail
 
 ::: tip
 
-Don't confuse this with the top-level [`#[builder(finish_fn = ...)]`](../top-level/finish-fn) attribute that can be used to configure the name and visibility of the finishing function. You'll likely want to use it in combination with this member-level attribute to define a better name for the finishing function.
+Don't confuse this with the top-level [`#[builder(finish_fn = ...)]`](../top-level/finish-fn) attribute that can be used to configure the name, visibility and docs of the finishing function. You'll likely want to use it in combination with this member-level attribute to define a better name for the finishing function.
 
 :::
 

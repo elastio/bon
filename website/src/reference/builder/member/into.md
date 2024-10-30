@@ -3,6 +3,12 @@
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
 
+::: tip
+
+This attribute is also configurable via the top-level [`#[builder(on(...))]`](../top-level/on)
+
+:::
+
 Changes the signature of the generated setters to accept [`impl Into<T>`](https://doc.rust-lang.org/stable/std/convert/trait.Into.html), where `T` is the type of the member.
 
 For [optional members](../../../guide/optional-members), the `maybe_{member}()` setter method will accept an `Option<impl Into<T>>` type instead of just `Option<T>`.
@@ -13,7 +19,7 @@ This parameter is often used with the `String` type, which allows you to pass `&
 
 See the ["Into Conversions In-Depth"](../../../guide/patterns/into-conversions-in-depth) page that shows the common patterns and antipatterns of `impl Into<T>`.
 
-**Example:**
+## Examples
 
 ::: code-group
 

@@ -29,7 +29,7 @@ These attributes are placed on a `struct` field or `fn` argument.
 | [`finish_fn`](./builder/member/finish-fn)          | Makes the member a positional argument on the finishing function
 | [`into`](./builder/member/into)                    | Changes the signature of the generated setters to accept `impl Into<T>`
 | [`name`](./builder/member/name)                    | Overrides the name of the member used in the builder's API
-| [`overwritable` 🔬](./builder/member/overwritable) | ??????? TODO: ADD DOCS ??????
+| [`overwritable` 🔬](./builder/member/overwritable) | Makes it possible to call setters for the same member repeatedly
 | [`setters`](./builder/member/setters)              | ??????? TODO: ADD DOCS ??????
 | [`skip`](./builder/member/skip)                    | Skips generating setters for the member
 | [`start_fn`](./builder/member/start-fn)            | Makes the member a positional argument on the starting function

@@ -1,7 +1,7 @@
 import { defineConfig } from "vitepress";
 import { abbr } from "@mdit/plugin-abbr";
-import * as v1 from "../v1/config.mjs";
-import * as v2 from "../v2/config.mjs";
+import * as v1 from "../src/v1/config.mjs";
+import * as v2 from "../src/v2/config.mjs";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -75,6 +75,12 @@ export default defineConfig({
         ],
     ],
 
+    srcDir: "src",
+
+    rewrites: {
+        "guide/:subdir/:page": "guide/:page",
+    },
+
     // https://vitepress.dev/reference/default-theme-config
     themeConfig: {
         logo: "/bon-logo-thumb.png",
@@ -125,10 +131,6 @@ export default defineConfig({
                             link: "/guide/optional-members",
                         },
                         {
-                            text: "Compatibility",
-                            link: "/guide/compatibility",
-                        },
-                        {
                             text: "Positional Members",
                             link: "/guide/positional-members",
                         },
@@ -139,6 +141,40 @@ export default defineConfig({
                         {
                             text: "Documenting",
                             link: "/guide/documenting",
+                        },
+                        {
+                            text: "Builder extensions",
+                            link: "/guide/builder-extensions",
+                        }
+                    ]
+                },
+                {
+                    text: "Patterns",
+                    items: [
+                        {
+                            text: "Conditional Building",
+                            link: "/guide/conditional-building",
+                        },
+                        {
+                            text: "Fallible Builders",
+                            link: "/guide/fallible-builders",
+                        },
+                        {
+                            text: "Into Conversions In-Depth",
+                            link: "/guide/into-conversions-in-depth",
+                        },
+                        {
+                            text: "Shared Configuration",
+                            link: "/guide/shared-configuration",
+                        },
+                    ],
+                },
+                {
+                    text: "Misc",
+                    items: [
+                        {
+                            text: "Compatibility",
+                            link: "/guide/compatibility",
                         },
                         {
                             text: "Limitations",
@@ -159,32 +195,11 @@ export default defineConfig({
                     ],
                 },
                 {
-                    text: "Patterns",
-                    items: [
-                        {
-                            text: "Conditional Building",
-                            link: "/guide/patterns/conditional-building",
-                        },
-                        {
-                            text: "Fallible Builders",
-                            link: "/guide/patterns/fallible-builders",
-                        },
-                        {
-                            text: "Into Conversions In-Depth",
-                            link: "/guide/patterns/into-conversions-in-depth",
-                        },
-                        {
-                            text: "Shared Configuration",
-                            link: "/guide/patterns/shared-configuration",
-                        },
-                    ],
-                },
-                {
                     text: "Internal",
                     items: [
                         {
                             text: "Contributing",
-                            link: "/guide/internal/contributing",
+                            link: "/guide/contributing",
                         },
                     ],
                 },
