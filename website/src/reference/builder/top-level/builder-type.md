@@ -6,7 +6,7 @@ outline: deep
 
 **Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
 
-Overrides the name, visibility and docs of the builder struct.
+Overrides the name, visibility and docs for the builder struct.
 
 **Short syntax** configures just the *name*.
 

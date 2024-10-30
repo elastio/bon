@@ -2,7 +2,7 @@
 
 **Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
 
-Overrides the name, visibility and docs of the function that starts the building process, i.e. returns the builder for the `struct` or `fn`. It is commonly referred to as the "starting function".
+Overrides the name, visibility and docs for the function that starts the building process, i.e. returns the builder for the `struct` or `fn`. It is commonly referred to as the "starting function".
 
 When this attribute is used with `fn` syntax, it additionally [exposes the original function](#exposing-original-function) under the macro.
 

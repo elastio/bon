@@ -2,7 +2,7 @@
 
 ::: danger 🔬 **Experimental**
 
-This attribute available under the cargo feature `"experimental-overwritable"`. There may be breaking changes to this attribute between **minor** releases, but not between patch releases.
+This attribute is available under the cargo feature `experimental-overwritable`. Breaking changes may occur between **minor** releases but not between patch releases.
 
 The fate of this feature depends on your feedback in the tracking issue [#149](https://github.com/elastio/bon/issues/149). Please, let us know if you have a use case for this attribute!
 
@@ -14,9 +14,9 @@ This attribute is also configurable via the top-level [`#[builder(on(...))]`](..
 
 :::
 
-Makes it possible to call setters for the same member repeatedly.
+Lets calling setters for the same member repeatedly.
 
-For example this code wouldn't compile without this attribute:
+For example, this code wouldn't compile without this attribute:
 
 ```rust
 #[derive(bon::Builder)]
@@ -32,7 +32,16 @@ Example::builder()
     .build();
 ```
 
-Overwrites like on the example above are generally considered to be bugs. However, there are several cases where this attribute may be useful.
+Overwrites like in the example above are generally considered bugs. However, there are several cases when this attribute may be useful.
+
+## Improving compile times
+
+This attribute simplifies the generated code. For example, it completely removes type states for [optional members](../../../guide/optional-members).
+
+If you'd like to improve your compile times, consider enabling overwrites with `#[builder(on(_, overwritable))]` and checking how much it helps. The difference is visible on a larger scale, especially for structs/functions with tens of optional members.
+
+It is a trade-off between the level of compile-time checks and compilation performance, so choose wisely ⚖️!
+
 
 ## Dummy values in tests
 
@@ -42,7 +51,7 @@ You might want to use this to construct dummy values for tests (fixtures).
 
 ::: tip
 
-The type signature of the builder is described in the "Typestate API" guide.
+The builder's type signature mentioned in this example is described in the ["Builder Extensions"](../../../guide/builder-extensions) guide.
 
 :::
 
@@ -55,7 +64,7 @@ struct User {
     level: u32,
 }
 
-// See details about this module in the "Typestate API" guide
+// See details about this module in the "Builder Extensions" guide
 use user_builder::{SetLevel, SetLogin, SetName};
 
 // Returns a base builder with dummy values for all fields
@@ -71,6 +80,7 @@ let user = user()
     .name("".to_owned())
     .build();
 
+// Builder an admin user with all other irrelevant fields filled with dummy data
 let admin = user()
     .level(0)
     .login("@admin".to_owned())

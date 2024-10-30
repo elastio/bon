@@ -9,7 +9,7 @@ This attribute is also configurable via the top-level [`#[builder(on(...))]`](..
 
 :::
 
-Changes the signature of the generated setters to accept [`impl Into<T>`](https://doc.rust-lang.org/stable/std/convert/trait.Into.html), where `T` is the type of the member.
+Changes the signature of the setters to accept [`impl Into<T>`](https://doc.rust-lang.org/stable/std/convert/trait.Into.html), where `T` is the type of the member.
 
 For [optional members](../../../guide/optional-members), the `maybe_{member}()` setter method will accept an `Option<impl Into<T>>` type instead of just `Option<T>`.
 

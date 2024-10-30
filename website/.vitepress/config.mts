@@ -131,6 +131,10 @@ export default defineConfig({
                             link: "/guide/optional-members",
                         },
                         {
+                            text: "Customizing Setters",
+                            link: "/guide/customizing-setters",
+                        },
+                        {
                             text: "Positional Members",
                             link: "/guide/positional-members",
                         },
@@ -143,7 +147,7 @@ export default defineConfig({
                             link: "/guide/documenting",
                         },
                         {
-                            text: "Builder extensions",
+                            text: "Builder Extensions",
                             link: "/guide/builder-extensions",
                         }
                     ]
@@ -210,7 +214,7 @@ export default defineConfig({
                     link: "/reference/builder",
                     items: [
                         {
-                            text: "Top-level",
+                            text: "Top-Level",
                             link: "/reference/builder#top-level-attributes",
                             collapsed: true,
                             items: [

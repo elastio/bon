@@ -2,7 +2,7 @@
 
 **Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
 
-Overrides the name, visibility and docs of the builder's method that finishes the building process, i.e. returns the resulting object (in case of `#[derive(Builder)]` on a `struct`) or invokes the underlying function (in case of `#[builder]` on an `fn`). It is commonly referred to as the "finishing function".
+Overrides the name, visibility and docs for the builder's method that finishes the building process, i.e. returns the resulting object (in case of `#[derive(Builder)]` on a `struct`) or invokes the underlying function (in case of `#[builder]` on an `fn`). It is commonly referred to as the "finishing function".
 
 **Short syntax** configures just the *name*.
 

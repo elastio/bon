@@ -6,7 +6,7 @@ outline: deep
 
 **Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
 
-Applies the given builder attributes to all members that match a type pattern. The syntax of this attribute is `on(type_pattern, attributes)`. For example, you can automatically apply `#[builder(into)]` to all members of type `String` this way:
+Applies member attributes to all members matching a type pattern. The syntax of this attribute is `on(type_pattern, attributes)`. For example, you can automatically apply `#[builder(into)]` to all members of type `String` this way:
 
 ::: code-group
 

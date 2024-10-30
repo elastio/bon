@@ -6,20 +6,20 @@ outline: [2, 3]
 
 Generate builders from structs via `#[derive(Builder)]`, free functions via `#[builder]`, and associated methods via `#[bon]` + `#[builder]`. They all use the same attributes syntax.
 
-## Top-level attributes
+## Top-Level Attributes
 
 These attributes are placed on top of a `struct` or `fn` declaration.
 
 | Attribute | Short description
 | -- | -- |
-| [`builder_type`](./builder/top-level/builder-type) | Overrides the name, visibility and docs of the builder struct
+| [`builder_type`](./builder/top-level/builder-type) | Overrides name, visibility and docs for the builder struct
 | [`crate`](./builder/top-level/crate)               | Overrides the path to `bon` crate referenced in the generated code
 | [`derive`](./builder/top-level/derive)             | Generates additional derives for the builder struct itself
-| [`finish_fn`](./builder/top-level/finish-fn)       | Overrides the name, visibility and docs of the finishing function
-| [`on`](./builder/top-level/on)                     | Applies the given builder attributes to all members matching a type pattern
-| [`start_fn`](./builder/top-level/start-fn)         | Overrides the name, visibility and docs of the starting function
+| [`finish_fn`](./builder/top-level/finish-fn)       | Overrides name, visibility and docs for the finishing function
+| [`on`](./builder/top-level/on)                     | Applies member attributes to all members matching a type pattern
+| [`start_fn`](./builder/top-level/start-fn)         | Overrides name, visibility and docs for the starting function
 
-## Member attributes
+## Member Attributes
 
 These attributes are placed on a `struct` field or `fn` argument.
 
@@ -27,10 +27,10 @@ These attributes are placed on a `struct` field or `fn` argument.
 | -- | -- |
 | [`default`](./builder/member/default)              | Makes the member optional with a default value
 | [`finish_fn`](./builder/member/finish-fn)          | Makes the member a positional argument on the finishing function
-| [`into`](./builder/member/into)                    | Changes the signature of the generated setters to accept `impl Into<T>`
+| [`into`](./builder/member/into)                    | Changes the signature of the setters to accept `impl Into<T>`
 | [`name`](./builder/member/name)                    | Overrides the name of the member used in the builder's API
-| [`overwritable` 🔬](./builder/member/overwritable) | Makes it possible to call setters for the same member repeatedly
-| [`setters`](./builder/member/setters)              | ??????? TODO: ADD DOCS ??????
+| [`overwritable` 🔬](./builder/member/overwritable) | Lets calling setters for the same member repeatedly
+| [`setters`](./builder/member/setters)              | Overrides name, visibility and docs for setters
 | [`skip`](./builder/member/skip)                    | Skips generating setters for the member
 | [`start_fn`](./builder/member/start-fn)            | Makes the member a positional argument on the starting function
 | [`transparent`](./builder/member/transparent)      | ??????? TODO: ADD DOCS ??????
