@@ -138,6 +138,9 @@ mod attr_on {
         #[builder(on(_, transparent))]
         #[allow(dead_code)]
         struct Sut<T> {
+            #[builder(start_fn)]
+            start_fn: u32,
+
             regular: Option<u32>,
             generic: Option<T>,
 
@@ -152,7 +155,7 @@ mod attr_on {
         }
 
         assert_debug_eq(
-            Sut::builder()
+            Sut::builder(11)
                 .regular(Some(1))
                 .generic(Some(false))
                 .with_into(2)
@@ -160,6 +163,7 @@ mod attr_on {
                 .build(),
             expect![[r#"
                 Sut {
+                    start_fn: 11,
                     regular: Some(
                         1,
                     ),
@@ -183,23 +187,31 @@ mod attr_on {
     fn test_free_fn() {
         #[builder(on(_, transparent))]
         fn sut<T: fmt::Debug>(
+            #[builder(start_fn)] start_fn: u32,
             regular: Option<u32>,
             generic: Option<T>,
             #[builder(into)] with_into: Option<u32>,
             #[builder(default = Some(99))] with_default: Option<u32>,
             #[builder(default = Some(10))] with_default_2: Option<u32>,
         ) -> impl fmt::Debug {
-            (regular, generic, with_into, with_default, with_default_2)
+            (
+                start_fn,
+                regular,
+                generic,
+                with_into,
+                with_default,
+                with_default_2,
+            )
         }
 
         assert_debug_eq(
-            sut()
+            sut(11)
                 .regular(Some(1))
                 .generic(Some(false))
                 .with_into(2)
                 .maybe_with_default_2(Some(Some(3)))
                 .call(),
-            expect!["(Some(1), Some(false), Some(2), Some(99), Some(3))"],
+            expect!["(11, Some(1), Some(false), Some(2), Some(99), Some(3))"],
         );
     }
 
@@ -211,18 +223,27 @@ mod attr_on {
         impl Sut {
             #[builder(on(_, transparent))]
             fn sut<T: fmt::Debug>(
+                #[builder(start_fn)] start_fn: u32,
                 regular: Option<u32>,
                 generic: Option<T>,
                 #[builder(into)] with_into: Option<u32>,
                 #[builder(default = Some(99))] with_default: Option<u32>,
                 #[builder(default = Some(10))] with_default_2: Option<u32>,
             ) -> impl fmt::Debug {
-                (regular, generic, with_into, with_default, with_default_2)
+                (
+                    start_fn,
+                    regular,
+                    generic,
+                    with_into,
+                    with_default,
+                    with_default_2,
+                )
             }
 
             #[builder(on(_, transparent))]
             fn with_self<T: fmt::Debug>(
                 &self,
+                #[builder(start_fn)] start_fn: u32,
                 regular: Option<u32>,
                 generic: Option<T>,
                 #[builder(into)] with_into: Option<u32>,
@@ -230,28 +251,35 @@ mod attr_on {
                 #[builder(default = Some(10))] with_default_2: Option<u32>,
             ) -> impl fmt::Debug {
                 let _ = self;
-                (regular, generic, with_into, with_default, with_default_2)
+                (
+                    start_fn,
+                    regular,
+                    generic,
+                    with_into,
+                    with_default,
+                    with_default_2,
+                )
             }
         }
 
         assert_debug_eq(
-            Sut::sut()
+            Sut::sut(11)
                 .regular(Some(1))
                 .generic(Some(false))
                 .with_into(2)
                 .maybe_with_default_2(Some(Some(3)))
                 .call(),
-            expect!["(Some(1), Some(false), Some(2), Some(99), Some(3))"],
+            expect!["(11, Some(1), Some(false), Some(2), Some(99), Some(3))"],
         );
 
         assert_debug_eq(
-            Sut.with_self()
+            Sut.with_self(11)
                 .regular(Some(1))
                 .generic(Some(false))
                 .with_into(2)
                 .maybe_with_default_2(Some(Some(3)))
                 .call(),
-            expect!["(Some(1), Some(false), Some(2), Some(99), Some(3))"],
+            expect!["(11, Some(1), Some(false), Some(2), Some(99), Some(3))"],
         );
     }
 }
