@@ -46,7 +46,7 @@ export default defineConfig({
 
     markdown: {
         languageAlias: {
-            'attr': 'js',
+            attr: "js",
         },
 
         theme: {
@@ -197,6 +197,7 @@ export default defineConfig({
                         {
                             text: "Top-level",
                             link: "/reference/builder#top-level-attributes",
+                            collapsed: true,
                             items: [
                                 {
                                     text: "builder_type",
@@ -225,12 +226,13 @@ export default defineConfig({
                                 {
                                     text: "state_mod",
                                     link: "/reference/builder/top-level/state-mod",
-                                }
+                                },
                             ],
                         },
                         {
                             text: "Member",
                             link: "/reference/builder#member-attributes",
+                            collapsed: true,
                             items: [
                                 {
                                     text: "default",
@@ -253,6 +255,10 @@ export default defineConfig({
                                     link: "/reference/builder/member/overwritable",
                                 },
                                 {
+                                    text: "setters",
+                                    link: "/reference/builder/member/setters",
+                                },
+                                {
                                     text: "skip",
                                     link: "/reference/builder/member/skip",
                                 },
@@ -264,20 +270,21 @@ export default defineConfig({
                                     text: "transparent",
                                     link: "/reference/builder/member/transparent",
                                 },
+                                {
+                                    text: "with",
+                                    link: "/reference/builder/member/with",
+                                },
                             ],
+                        },
+                        {
+                            text: "Typestate API",
+                            link: "/reference/builder/typestate-api",
                         },
                     ],
                 },
                 {
                     text: "#[bon]",
                     link: "/reference/bon",
-                    collapsed: true,
-                    items: [
-                        {
-                            text: "crate",
-                            link: "/reference/bon/crate",
-                        }
-                    ]
                 },
                 {
                     text: "Other items on docs.rs",
