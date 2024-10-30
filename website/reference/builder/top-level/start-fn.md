@@ -88,7 +88,7 @@ See examples with `fn` syntax in the section below.
 
 ## Exposing original function
 
-By default, when you place `#[builder]` on a function, that original function is modified by the macro to make it hidden such that only builder syntax remains available. Specifically, the macro does the following by default:
+By default, when you place `#[builder]` on a function, that original function is modified by the macro to make it hidden, so that only builder syntax remains available. Specifically, the macro does the following by default:
 
 - Prepends the prefix `__orig_` to the original function's name.
 - Changes the visibility of the original function to private.

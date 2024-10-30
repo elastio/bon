@@ -75,6 +75,7 @@ export default defineConfig({
         ],
     ],
 
+    // https://vitepress.dev/reference/default-theme-config
     themeConfig: {
         logo: "/bon-logo-thumb.png",
 
@@ -95,7 +96,6 @@ export default defineConfig({
             provider: "local",
         },
 
-        // https://vitepress.dev/reference/default-theme-config
         nav: [
             { text: "Guide", link: "/guide/overview" },
             { text: "Reference", link: "/reference/builder" },

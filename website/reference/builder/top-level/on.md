@@ -6,7 +6,7 @@ outline: deep
 
 **Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
 
-Applies the given builder attributes to all members that match a type pattern. For example, you can automatically apply `#[builder(into)]` to all members of type `String` this way:
+Applies the given builder attributes to all members that match a type pattern. This attribute must be of the form `on(type_pattern, attributes)`. For example, you can automatically apply `#[builder(into)]` to all members of type `String` this way:
 
 ::: code-group
 
@@ -81,17 +81,15 @@ Example::example()
 
 :::
 
-This attribute must be of form `on(type_pattern, attributes)`.
-
 ## Type pattern
 
 `type_pattern` is a type that will be compared with the types of the members. The types are compared textually. For example, `String` doesn't match `std::string::String` because, internally, they are compared just like strings `"String" == "std::string::String"`.
 
-You can use `_` to mark parts of the type to ignore when matching. For example, `Vec<_>` matches `Vec<u32>` or `Vec<String>`. Lifetimes are ignored during matching.
+You can use `_` to mark parts of the type that should be ignored when matching. For example, `Vec<_>` matches `Vec<u32>` or `Vec<String>`. Lifetimes are ignored during matching.
 
 If you want to apply the attributes to all members, you can use the `_` type pattern that matches any type. For example, `#[builder(on(_, into))]`.
 
-For optional members the underlying type is matched ignoring the `Option` wrapper.
+For optional members, the underlying type is matched ignoring the `Option` wrapper.
 
 ## Attributes
 
@@ -99,7 +97,7 @@ There are several attributes supported in the `attributes` position listed below
 
 - [`into`](../member/into);
 - [`transparent`](../member/transparent) - currently, this attribute can only be used with the `_` type pattern as the first `on(...)` clause;
-- [`ovewritable`](../member/overwritable) - 🔬 **experimental**, this attribute is available under the cargo feature `"experimental-overwritable"` (see the issue [#149](https://github.com/elastio/bon/issues/149));
+- [`overwritable](../member/overwritable) - 🔬 **experimental**, this attribute is available under the cargo feature `"experimental-overwritable"` (see the issue [#149](https://github.com/elastio/bon/issues/149));
 
 
 ## Examples
@@ -198,4 +196,4 @@ Example::builder()
 
 ## Future releases
 
-There is an issue [#152](https://github.com/elastio/bon/issues/152) about adding support for [`default`](../member/default.md), [`with`](../member/with) and other non-boolean attributes to the `on(...)` clause. We'll be glad if you take a look at the design proposed in that issue and put a 👍 if you like/want this feature or leave comment if you have some more feedback.
+There is an issue [#152](https://github.com/elastio/bon/issues/152) about adding support for [`default`](../member/default.md), [`with`](../member/with) and other non-boolean attributes to the `on(...)` clause. We'll be glad if you take a look at the design proposed in that issue and put a 👍 if you like/want this feature or leave a comment if you have some more feedback.

@@ -4,7 +4,7 @@
 
 *⚠️ Do not confuse this with `#[derive(bon::Builder)]`⚠️*
 
-Generates additional derives on the builder struct itself. The syntax is similar to the regular `#[derive(...)]` attribute, but it must be wrapped in `#[builder(derive(...))]`. Expects one or more of the supported derives separated by a comma.
+Generates additional derives for the builder struct itself. The syntax is similar to the regular `#[derive(...)]` attribute, but it must be wrapped in `#[builder(derive(...))]`. Expects one or more of the supported derives separated by a comma.
 
 The following derives are supported: `Clone`, `Debug`.
 
@@ -121,9 +121,9 @@ assert_eq!(
 
 ## Generic types handling
 
-If the underlying `struct` or `fn` contains generic type parameters, then the generated impl block will include a `where` bound requiring the respective trait (`Clone` or `Debug`) to be implemented by all of them. This follows the behavior of the [standard `derive` macros](https://doc.rust-lang.org/std/clone/trait.Clone.html#derivable).
+If the underlying `struct` or `fn` contains generic type parameters, then the generated impl block will include a `where` bound requiring the respective trait (`Clone` or `Debug`) to be implemented by all of them. This follows the behaviour of the [standard `derive` macros](https://doc.rust-lang.org/std/clone/trait.Clone.html#derivable).
 
-This works fine in most of the cases, but sometimes the generated bounds may be overly restrictive. To fix that, you can manually specify the bounds using the syntax `#[builder(derive(Trait(bounds(...))))]`, where `...` is a comma-separated list of `where` bounds.
+This works fine in most cases, but sometimes the generated bounds may be overly restrictive. To fix that, you can manually specify the bounds using the syntax `#[builder(derive(Trait(bounds(...))))]`, where `...` is a comma-separated list of `where` bounds.
 
 See the example of this problem, and how it can be fixed (click on the tab `Fixed` in the code snippet):
 
