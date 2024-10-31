@@ -30,7 +30,7 @@ pub(crate) fn generate_from_attr(params: TokenStream, item: TokenStream) -> Toke
     crate::error::handle_errors(item.clone(), || {
         try_generate_from_attr(params.clone(), item)
     })
-    .unwrap_or_else(|fallback| [fallback, generate_completion_triggers(params)].concat())
+    .unwrap_or_else(|fallback| [generate_completion_triggers(params), fallback].concat())
 }
 
 fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<TokenStream> {
@@ -72,7 +72,7 @@ fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<Toke
         ),
     };
 
-    let output = [main_output, generate_completion_triggers(input.config)].concat();
+    let output = [generate_completion_triggers(input.config), main_output].concat();
 
     Ok(output)
 }
