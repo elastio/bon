@@ -60,11 +60,11 @@ Now the documentation was split into the ["Guide"](../guide/overview) and ["Refe
 
 We added 3 new pages with guides on how to use builders idiomatically or solve some common problems (e.g. validating inputs):
 
-- [Conditional Building](../guide/patterns/conditional-building)
-- [Fallible Builders](../guide/patterns/fallible-builders)
-- [Into Conversions In-Depth](../guide/patterns/into-conversions-in-depth)
+- [Conditional Building](../guide/conditional-building)
+- [Fallible Builders](../guide/fallible-builders)
+- [Into Conversions In-Depth](../guide/into-conversions-in-depth)
 
-I recommend you to check out the ["Into Conversions In-Depth"](../guide/patterns/into-conversions-in-depth) especially because it's highly related to one of the breaking changes that we'll review below.
+I recommend you to check out the ["Into Conversions In-Depth"](../guide/into-conversions-in-depth) especially because it's highly related to one of the breaking changes that we'll review below.
 
 ## Breaking changes
 
@@ -72,7 +72,7 @@ I recommend you to check out the ["Into Conversions In-Depth"](../guide/patterns
 
 This has been a topic of [controversy](https://github.com/elastio/bon/issues/15), but finally, we aligned on the decision to remove the magical automatic `Into` conversions.
 
-The main reason for removing this is to make `bon` more obvious and intuitive. Rust's core pillar is "being explicit". By having automatic `Into` conversions `bon` v1 introduced magical implicit behaviour, that also could lead to some footguns. For a detailed explanation of the potential footguns, see the ["Into Conversions In-Depth"](../guide/patterns/into-conversions-in-depth) page.
+The main reason for removing this is to make `bon` more obvious and intuitive. Rust's core pillar is "being explicit". By having automatic `Into` conversions `bon` v1 introduced magical implicit behaviour, that also could lead to some footguns. For a detailed explanation of the potential footguns, see the ["Into Conversions In-Depth"](../guide/into-conversions-in-depth) page.
 
 Now, if you want to enable `Into` conversions for a set of members, you can use the new [`#[builder(on(type_pattern, into))]`](../reference/builder/top-level/on) attribute. It allows you to specify the type that you want to enable `Into` conversions for explicitly.
 

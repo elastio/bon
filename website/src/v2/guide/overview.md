@@ -1,5 +1,5 @@
 <script setup>
-import { data as version } from '/data/version.data'
+import { data as version } from '/../data/version.data'
 import VPSocialLink from "vitepress/dist/client/theme-default/components/VPSocialLink.vue";
 const [_, versionWildcard] = version.match(/(\d+.\d+).\d+/);
 </script>

@@ -17,7 +17,7 @@ For members that use `#[builder(default = expression)]`, the `expression` will b
 
 This parameter is often used with the `String` type, which allows you to pass `&str` into the setter without calling `.to_owned()` or `.to_string()` on it.
 
-See the ["Into Conversions In-Depth"](../../../guide/patterns/into-conversions-in-depth) page that shows the common patterns and antipatterns of `impl Into<T>`.
+See the ["Into Conversions In-Depth"](../../../guide/into-conversions-in-depth) page that shows the common patterns and antipatterns of `impl Into<T>`.
 
 ## Examples
 

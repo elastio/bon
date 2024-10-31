@@ -254,7 +254,7 @@ Project::builder()
     .build();
 ```
 
-See the ["Into Conversions In-Depth"](./patterns/into-conversions-in-depth) page for more details and important caveats (!).
+See the ["Into Conversions In-Depth"](./into-conversions-in-depth) page for more details and important caveats (!).
 
 ## What's next?
 

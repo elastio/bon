@@ -33,7 +33,7 @@ struct MyLovelyStruct2 { /**/ }
 
 ::: tip
 
-This code uses the [`#[builder(on(...))]`](../../reference/builder/top-level/on) attribute to configure the types of members for which `bon` should enable `Into` conversions.
+This code uses the [`#[builder(on(...))]`](../reference/builder/top-level/on) attribute to configure the types of members for which `bon` should enable `Into` conversions.
 
 :::
 

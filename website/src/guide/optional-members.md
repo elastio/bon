@@ -24,11 +24,10 @@ The builder provides a **pair** of setters for each optional member:
 
 | Name             | Input       | Description                   | Configuration attribute
 |------------------|-------------|-------------------------------|------------------
-| `{member}`       | `T`         | Accepts a non-`None` value.   | [`some_fn`]
-| `maybe_{member}` | `Option<T>` | Accepts an `Option` directly. | [`option_fn`]
+| `{member}`       | `T`         | Accepts a non-`None` value.   | [`some_fn`][setters]
+| `maybe_{member}` | `Option<T>` | Accepts an `Option` directly. | [`option_fn`][setters]
 
-[`some_fn`]: ../reference/builder/member/setters#some-fn
-[`option_fn`]: ../reference/builder/member/setters#option-fn
+[setters]: ../reference/builder/member/setters
 
 
 ::: details See how the setters look like in the generated code
@@ -113,4 +112,4 @@ let result = example()
 
 ## Conditional building
 
-Now that you know how optional members work you can check out the ["Conditional building" design patterns](./patterns/conditional-building) or continue studying other features of `bon` by following the "Next page" link at the bottom.
+Now that you know how optional members work you can check out the ["Conditional building" design patterns](./conditional-building) or continue studying other features of `bon` by following the "Next page" link at the bottom.
