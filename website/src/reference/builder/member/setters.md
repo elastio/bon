@@ -36,7 +36,7 @@ The config is tree-structured with overrides precedence explained in the next pa
 )]
 ```
 
-The main use case for this attribute is making setters private when writing custom setters. See ["Builder extensions"](../../../guide/builder-extensions) for details.
+The main use case for this attribute is making generated setters private to wrap them with custom setters. See ["Builder extensions"](../../../guide/builder-extensions#custom-setters) for details.
 
 ## Config precedence
 
@@ -50,19 +50,15 @@ The root-level `name`, `vis`, `docs` are still available for both required and o
 #[derive(bon::Builder)]
 struct Example {
     #[builder(setters(name = foo, some_fn = bar))]
-    member: u32,
+    member: Option<u32>,
 }
 
-// Name of `some_fn` that accept the non-None value was overriden
+// Name of `some_fn` that accepts the non-None value was overridden
 Example::builder().bar(2).build();
 
 // Name of `option_fn` was derived from the root-level `setters(name)`
 Example::builder().maybe_foo(Some(2)).build();
-
 ```
-
-
-
 
 ## `name`
 
@@ -73,7 +69,7 @@ The default name for setters is chosen according to the following rules:
 | Required     | `{member}`
 | Optional     | `some_fn` = `{member}`<br/>`option_fn` = `maybe_{member}`
 
-This attribute is different from [`#[builder(name)]`](./name), because it overrides only the names of the setters. It doesn't influence the name of the member in the builder's [typestate API](../typestate-api). This attribute also has higher precedence than [`#[builder(name)]`](./name).
+This attribute is different from [`#[builder(name)]`](./name), because it overrides only the names of setters. It doesn't influence the name of the member in the builder's [typestate API](../typestate-api). This attribute also has higher precedence than [`#[builder(name)]`](./name).
 
 ## `vis`
 

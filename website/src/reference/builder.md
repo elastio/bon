@@ -1,5 +1,5 @@
 ---
-outline: [2, 3]
+outline: deep
 ---
 
 # `#[derive(Builder)]` / `#[builder]`
@@ -13,7 +13,7 @@ These attributes are placed on top of a `struct` or `fn` declaration.
 | Attribute | Short description
 | -- | -- |
 | [`builder_type`](./builder/top-level/builder-type) | Overrides name, visibility and docs for the builder struct
-| [`crate`](./builder/top-level/crate)               | Overrides the path to `bon` crate referenced in the generated code
+| [`crate`](./builder/top-level/crate)               | Overrides path to `bon` crate referenced in the generated code
 | [`derive`](./builder/top-level/derive)             | Generates additional derives for the builder struct itself
 | [`finish_fn`](./builder/top-level/finish-fn)       | Overrides name, visibility and docs for the finishing function
 | [`on`](./builder/top-level/on)                     | Applies member attributes to all members matching a type pattern

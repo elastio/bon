@@ -129,7 +129,7 @@ See the example of this problem, and how it can be fixed (click on the tab `Fixe
 
 ::: code-group
 
-```rust [Overly restrictive]
+```rust compile_fail [Overly restrictive]
 use bon::Builder;
 use std::rc::Rc;
 

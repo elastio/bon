@@ -85,7 +85,7 @@ Example::example()
 
 `type_pattern` is a type that will be compared with the types of the members. The types are compared textually. For example, `String` doesn't match `std::string::String` because, internally, they are compared just like strings `"String" == "std::string::String"`.
 
-You can use `_` to mark parts of the type that should be ignored when matching. For example, `Vec<_>` matches `Vec<u32>` or `Vec<String>`. Lifetimes are ignored during matching.
+However, you can use `_` to mark parts of the type that should be ignored when matching. For example, `Vec<_>` matches `Vec<u32>` or `Vec<String>`. Lifetimes are ignored during matching.
 
 If you want to apply the attributes to all members, you can use the `_` type pattern that matches any type. For example, `#[builder(on(_, into))]`.
 
@@ -93,12 +93,13 @@ For optional members, the underlying type is matched ignoring the `Option` wrapp
 
 ## Attributes
 
-There are several attributes supported in the `attributes` position listed below. A single `on(...)` clause can contain several of these separated by a comma e.g. `on(_, into, transparent)`.
+There are several attributes supported in the `attributes` position listed below.
 
 - [`into`](../member/into);
 - [`transparent`](../member/transparent) - currently, this attribute can only be used with the `_` type pattern as the first `on(...)` clause;
-- [`overwritable](../member/overwritable) - 🔬 **experimental**, this attribute is available under the cargo feature `"experimental-overwritable"` (see the issue [#149](https://github.com/elastio/bon/issues/149));
+- [`overwritable`](../member/overwritable) - 🔬 **experimental**, this attribute is available under the cargo feature `"experimental-overwritable"` (see the issue [#149](https://github.com/elastio/bon/issues/149));
 
+A single `on(...)` clause can contain several of these separated by a comma e.g. `on(_, into, transparent)`.
 
 ## Examples
 

@@ -42,7 +42,6 @@ If you'd like to improve your compile times, consider enabling overwrites with `
 
 It is a trade-off between the level of compile-time checks and compilation performance, so choose wisely ⚖️!
 
-
 ## Dummy values in tests
 
 You might want to use this to construct dummy values for tests (fixtures).
@@ -68,20 +67,20 @@ struct User {
 use user_builder::{SetLevel, SetLogin, SetName};
 
 // Returns a base builder with dummy values for all fields
-fn user() -> UserBuilder<SetLevel<SetName<SetLogin>>> {
+fn user() -> UserBuilder<SetLogin<SetName<SetLevel>>> {
     User::builder()
         .level(24)
         .name("Bon Bon".to_owned())
         .login("@bonbon".to_owned())
 }
 
-// Build user with an empty name, and all other fields filled with dummy data
-let user = user()
+// Build a user with an empty name, and all other fields filled with dummy data
+user()
     .name("".to_owned())
     .build();
 
 // Builder an admin user with all other irrelevant fields filled with dummy data
-let admin = user()
+user()
     .level(0)
     .login("@admin".to_owned())
     .build();

@@ -2,7 +2,7 @@
 
 **Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
 
-Overrides the name, visibility and docs for the builder's method that finishes the building process, i.e. returns the resulting object (in case of `#[derive(Builder)]` on a `struct`) or invokes the underlying function (in case of `#[builder]` on an `fn`). It is commonly referred to as the "finishing function".
+Overrides name, visibility and docs for the builder's method that finishes the building process, i.e. returns the resulting object (in case of `#[derive(Builder)]` on a `struct`) or invokes the underlying function (in case of `#[builder]` on an `fn`). It is commonly referred to as the "finishing function".
 
 **Short syntax** configures just the *name*.
 
@@ -26,14 +26,14 @@ Overrides the name, visibility and docs for the builder's method that finishes t
 
 ## `name`
 
-The default name for the starting function is chosen according to the following rules:
+The default name for the finishing function is chosen according to the following rules:
 
-| Syntax                         | Default
-|--------------------------------|----------
-| `struct T`                     | `builder`
-| Associated `fn` `T::new()`     | `builder`
-| Associated `fn` `T::fn_name()` | `{fn_name}`
-| Free `fn fn_name()`            | `{fn_name}`
+| Syntax                             | Default
+|------------------------------------|----------
+| `struct T`                         | `build`
+| Associated `fn` `T::new/builder()` | `build`
+| Associated `fn` `T::fn_name()`     | `call`
+| Free `fn fn_name()`                | `call`
 
 ## `vis`
 

@@ -266,7 +266,7 @@ If you like the idea of this crate and want to say "thank you" or "keep up doing
 
 This is just part of what's available in `bon`. You may consider reading the rest of the `Guide` section to harness the full power of `bon` and understand the decisions it makes.
 
-You can consult also the [API reference index](../reference/builder) that describes all available configuration attributes. This guide will cover most of them but not all. Check the short descriptions of available attributes to see if something might be of immediate interest to you.
+You can also consult the [API reference index](../reference/builder) that describes all available configuration attributes. This guide will cover most of them but not all. Check the short descriptions of available attributes to see if something might be of immediate interest to you.
 
 However, feel free to skip the docs and just use the `#[builder]` and `#[derive(Builder)]` in your code. They are designed to be intuitive, so they'll probably do the thing you want them to do already.
 
