@@ -81,6 +81,12 @@ pub mod builder_top_level {
 
         /// See the docs at <https://bon-rs.com/reference/builder#on>
         pub const into: Flag = Flag;
+
+        /// See the docs at <https://bon-rs.com/reference/builder#on>
+        pub const transparent: Flag = Flag;
+
+        /// See the docs at <https://bon-rs.com/reference/builder#on>
+        pub const overwritable: Flag = Flag;
     }
 
     /// See the docs at <https://bon-rs.com/reference/builder#derive>

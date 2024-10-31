@@ -46,6 +46,7 @@ export default defineConfig({
 
     markdown: {
         languageAlias: {
+            // Attributes highlighting works with better JS tokenizer 😳
             attr: "js",
         },
 
@@ -98,9 +99,9 @@ export default defineConfig({
             text: "Edit this page on GitHub",
         },
 
-        search: {
-            provider: "local",
-        },
+        // search: {
+        //     provider: "local",
+        // },
 
         nav: [
             { text: "Guide", link: "/guide/overview" },

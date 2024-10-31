@@ -1,8 +1,12 @@
 {
+  "vueCompilerOptions": {
+    "vitePressExtensions": [".md"],
+  },
   "include": [
     "**/*.ts",
     "**/*.mts",
     "**/*.vue",
+    "**/*.md",
     ".vitepress/**/*.ts",
     ".vitepress/**/*.vue",
   ],
@@ -30,5 +34,5 @@
   },
   "ts-node": {
     "esm": true
-  }
+  },
 }
