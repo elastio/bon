@@ -133,7 +133,7 @@ assert_eq!(user.level, Some(24));
 assert!(user.is_admin);
 ```
 
-See [the guide](https://bon-rs.com/guide/overview) for the rest.
+See [the guide](https://bon-rs.com/guide/overview) for more.
 
 ---
 

@@ -48,6 +48,7 @@ fn struct_init_order() {
     );
 
     #[bon]
+    #[allow(clippy::items_after_statements)]
     impl Sut {
         #[builder]
         fn sut(

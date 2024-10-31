@@ -34,13 +34,15 @@ pub(crate) fn generate(
     } = ctx.into_builder_gen_ctx()?.output()?;
 
     Ok(quote! {
+        // Keep original function at the top. It seems like rust-analyzer
+        // does better job of highlighting syntax when it is here. Assuming
+        // this is because rust-analyzer prefers the first occurrence of the
+        // span when highlighting.
+        //
+        // See this issue for details: https://github.com/rust-lang/rust-analyzer/issues/18438
+        #adapted_fn
+
         #start_fn
         #other_items
-
-        // Keep original function at the end. It seems like rust-analyzer
-        // does better job of highlighting syntax when it is here. Assuming
-        // this is because rust-analyzer prefers the last occurrence of the
-        // span when highlighting.
-        #adapted_fn
     })
 }

@@ -65,6 +65,7 @@ fn struct_alloc() {
     );
 
     #[bon]
+    #[allow(clippy::items_after_statements)]
     impl Sut {
         #[builder]
         fn assoc(
@@ -174,6 +175,7 @@ fn struct_no_std() {
     );
 
     #[bon]
+    #[allow(clippy::items_after_statements)]
     impl Sut {
         #[builder]
         fn assoc(self, #[builder(default)] arg1: u32, #[builder(default = 43)] arg2: u32) -> Self {

@@ -104,4 +104,22 @@ struct NonCollectionWithFromIter2 {
     value: Option<u32>,
 }
 
+#[derive(Builder)]
+struct IncompatibleWithStartFn {
+    #[builder(with = |x: u32| x + 1, start_fn)]
+    value: u32,
+}
+
+#[derive(Builder)]
+struct IncompatibleWithFinishFn {
+    #[builder(with = |x: u32| x + 1, finish_fn)]
+    value: u32,
+}
+
+#[derive(Builder)]
+struct IncompatibleWithInto {
+    #[builder(with = |x: u32| x + 1, into)]
+    value: u32,
+}
+
 fn main() {}

@@ -22,7 +22,8 @@ fn main() {
         .filter(|entry| {
             entry.file_type().is_file()
                 && entry.path().extension() == Some("md".as_ref())
-                && !entry.path().starts_with("../website/v1")
+                && !entry.path().starts_with("../website/src/v1")
+                && !entry.path().starts_with("../website/src/v2")
         })
         .map(DirEntry::into_path)
         .sorted_unstable()

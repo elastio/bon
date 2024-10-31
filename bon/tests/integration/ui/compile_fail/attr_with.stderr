@@ -183,6 +183,24 @@ error: the underlying type of this member is not a known collection type; only a
 104 |     value: Option<u32>,
     |                   ^^^
 
+error: `start_fn` attribute can't be specified together with `with`
+   --> tests/integration/ui/compile_fail/attr_with.rs:109:38
+    |
+109 |     #[builder(with = |x: u32| x + 1, start_fn)]
+    |                                      ^^^^^^^^
+
+error: `finish_fn` attribute can't be specified together with `with`
+   --> tests/integration/ui/compile_fail/attr_with.rs:115:38
+    |
+115 |     #[builder(with = |x: u32| x + 1, finish_fn)]
+    |                                      ^^^^^^^^^
+
+error: `with` attribute can't be specified together with `into`
+   --> tests/integration/ui/compile_fail/attr_with.rs:121:15
+    |
+121 |     #[builder(with = |x: u32| x + 1, into)]
+    |               ^^^^
+
 error[E0308]: mismatched types
   --> tests/integration/ui/compile_fail/attr_with.rs:54:12
    |

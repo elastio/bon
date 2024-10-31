@@ -159,7 +159,7 @@ pub(crate) fn generate(
 
     let new_impl_items = outputs.iter().flat_map(|(adapted_fn, output)| {
         let start_fn = &output.start_fn;
-        [syn::parse_quote!(#start_fn), syn::parse_quote!(#adapted_fn)]
+        [syn::parse_quote!(#adapted_fn), syn::parse_quote!(#start_fn)]
     });
 
     norm_selfful_impl_block.items = other_items;
@@ -168,8 +168,15 @@ pub(crate) fn generate(
     let other_items = outputs.iter().map(|(_, output)| &output.other_items);
 
     Ok(quote! {
-        #(#other_items)*
+        // Keep the original impl block at the top. It seems like rust-analyzer
+        // does better job of highlighting syntax when it is here. Assuming
+        // this is because rust-analyzer prefers the first occurrence of the
+        // span when highlighting.
+        //
+        // See this issue for details: https://github.com/rust-lang/rust-analyzer/issues/18438
         #norm_selfful_impl_block
+
+        #(#other_items)*
     })
 }
 

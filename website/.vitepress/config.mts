@@ -1,7 +1,7 @@
 import { defineConfig } from "vitepress";
 import { abbr } from "@mdit/plugin-abbr";
-import * as v1 from "../v1/config.mjs";
-import * as v2 from "../v2/config.mjs";
+import * as v1 from "../src/v1/config.mjs";
+import * as v2 from "../src/v2/config.mjs";
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -46,7 +46,7 @@ export default defineConfig({
 
     markdown: {
         languageAlias: {
-            'attr': 'js',
+            attr: "js",
         },
 
         theme: {
@@ -75,6 +75,13 @@ export default defineConfig({
         ],
     ],
 
+    srcDir: "src",
+
+    rewrites: {
+        "guide/:subdir/:page": "guide/:page",
+    },
+
+    // https://vitepress.dev/reference/default-theme-config
     themeConfig: {
         logo: "/bon-logo-thumb.png",
 
@@ -95,7 +102,6 @@ export default defineConfig({
             provider: "local",
         },
 
-        // https://vitepress.dev/reference/default-theme-config
         nav: [
             { text: "Guide", link: "/guide/overview" },
             { text: "Reference", link: "/reference/builder" },
@@ -125,8 +131,8 @@ export default defineConfig({
                             link: "/guide/optional-members",
                         },
                         {
-                            text: "Compatibility",
-                            link: "/guide/compatibility",
+                            text: "Customizing Setters",
+                            link: "/guide/customizing-setters",
                         },
                         {
                             text: "Positional Members",
@@ -139,6 +145,40 @@ export default defineConfig({
                         {
                             text: "Documenting",
                             link: "/guide/documenting",
+                        },
+                        {
+                            text: "Builder Extensions",
+                            link: "/guide/builder-extensions",
+                        }
+                    ]
+                },
+                {
+                    text: "Patterns",
+                    items: [
+                        {
+                            text: "Conditional Building",
+                            link: "/guide/conditional-building",
+                        },
+                        {
+                            text: "Fallible Builders",
+                            link: "/guide/fallible-builders",
+                        },
+                        {
+                            text: "Into Conversions In-Depth",
+                            link: "/guide/into-conversions-in-depth",
+                        },
+                        {
+                            text: "Shared Configuration",
+                            link: "/guide/shared-configuration",
+                        },
+                    ],
+                },
+                {
+                    text: "Misc",
+                    items: [
+                        {
+                            text: "Compatibility",
+                            link: "/guide/compatibility",
                         },
                         {
                             text: "Limitations",
@@ -159,32 +199,11 @@ export default defineConfig({
                     ],
                 },
                 {
-                    text: "Patterns",
-                    items: [
-                        {
-                            text: "Conditional Building",
-                            link: "/guide/patterns/conditional-building",
-                        },
-                        {
-                            text: "Fallible Builders",
-                            link: "/guide/patterns/fallible-builders",
-                        },
-                        {
-                            text: "Into Conversions In-Depth",
-                            link: "/guide/patterns/into-conversions-in-depth",
-                        },
-                        {
-                            text: "Shared Configuration",
-                            link: "/guide/patterns/shared-configuration",
-                        },
-                    ],
-                },
-                {
                     text: "Internal",
                     items: [
                         {
                             text: "Contributing",
-                            link: "/guide/internal/contributing",
+                            link: "/guide/contributing",
                         },
                     ],
                 },
@@ -195,12 +214,17 @@ export default defineConfig({
                     link: "/reference/builder",
                     items: [
                         {
-                            text: "Top-level",
+                            text: "Top-Level",
                             link: "/reference/builder#top-level-attributes",
+                            collapsed: true,
                             items: [
                                 {
                                     text: "builder_type",
                                     link: "/reference/builder/top-level/builder-type",
+                                },
+                                {
+                                    text: "crate",
+                                    link: "/reference/builder/top-level/crate",
                                 },
                                 {
                                     text: "derive",
@@ -218,11 +242,16 @@ export default defineConfig({
                                     text: "start_fn",
                                     link: "/reference/builder/top-level/start-fn",
                                 },
+                                {
+                                    text: "state_mod",
+                                    link: "/reference/builder/top-level/state-mod",
+                                },
                             ],
                         },
                         {
                             text: "Member",
                             link: "/reference/builder#member-attributes",
+                            collapsed: true,
                             items: [
                                 {
                                     text: "default",
@@ -241,6 +270,14 @@ export default defineConfig({
                                     link: "/reference/builder/member/name",
                                 },
                                 {
+                                    text: "overwritable 🔬",
+                                    link: "/reference/builder/member/overwritable",
+                                },
+                                {
+                                    text: "setters",
+                                    link: "/reference/builder/member/setters",
+                                },
+                                {
                                     text: "skip",
                                     link: "/reference/builder/member/skip",
                                 },
@@ -248,7 +285,19 @@ export default defineConfig({
                                     text: "start_fn",
                                     link: "/reference/builder/member/start-fn",
                                 },
+                                {
+                                    text: "transparent",
+                                    link: "/reference/builder/member/transparent",
+                                },
+                                {
+                                    text: "with",
+                                    link: "/reference/builder/member/with",
+                                },
                             ],
+                        },
+                        {
+                            text: "Typestate API",
+                            link: "/reference/builder/typestate-api",
                         },
                     ],
                 },

@@ -31,15 +31,19 @@ fn struct_case() {
 #[test]
 #[allow(non_camel_case_types)]
 fn fn_case() {
-    #[builder]
-    fn r#type(r#type: u32, #[builder(name = r#while)] other: u32) {
-        let _ = (r#type, other);
+    {
+        #[builder]
+        fn r#type(r#type: u32, #[builder(name = r#while)] other: u32) {
+            let _ = (r#type, other);
+        }
+
+        r#type().r#type(42).r#while(100).call();
     }
 
-    r#type().r#type(42).r#while(100).call();
+    {
+        #[builder(builder_type = r#type, state_mod = r#mod)]
+        fn sut() {}
 
-    #[builder(builder_type = r#type, state_mod = r#mod)]
-    fn sut() {}
-
-    let _: r#type = sut();
+        let _: r#type = sut();
+    }
 }
