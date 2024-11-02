@@ -99,9 +99,13 @@ export default defineConfig({
             text: "Edit this page on GitHub",
         },
 
-        // search: {
-        //     provider: "local",
-        // },
+        // Enable the search only in the final build on CI. Locally, it takes additional
+        // time during the dev HMR server startup and config reloads.
+        search: !process.env.CI
+            ? undefined
+            : {
+                  provider: "local",
+              },
 
         nav: [
             { text: "Guide", link: "/guide/overview" },
@@ -121,12 +125,12 @@ export default defineConfig({
             ...v2.sidebars,
             "/guide": [
                 {
-                    text: "Guide",
+                    text: "Overview",
+                    link: "/guide/overview",
+                },
+                {
+                    text: "Basics",
                     items: [
-                        {
-                            text: "Overview",
-                            link: "/guide/overview",
-                        },
                         {
                             text: "Optional Members",
                             link: "/guide/optional-members",
@@ -147,10 +151,15 @@ export default defineConfig({
                             text: "Documenting",
                             link: "/guide/documenting",
                         },
+                    ],
+                },
+                {
+                    text: "Advanced",
+                    items: [
                         {
                             text: "Builder Extensions",
                             link: "/guide/builder-extensions",
-                        }
+                        },
                     ]
                 },
                 {
@@ -221,7 +230,7 @@ export default defineConfig({
                             items: [
                                 {
                                     text: "builder_type",
-                                    link: "/reference/builder/top-level/builder-type",
+                                    link: "/reference/builder/top-level/builder_type",
                                 },
                                 {
                                     text: "crate",
@@ -233,7 +242,7 @@ export default defineConfig({
                                 },
                                 {
                                     text: "finish_fn",
-                                    link: "/reference/builder/top-level/finish-fn",
+                                    link: "/reference/builder/top-level/finish_fn",
                                 },
                                 {
                                     text: "on",
@@ -241,11 +250,11 @@ export default defineConfig({
                                 },
                                 {
                                     text: "start_fn",
-                                    link: "/reference/builder/top-level/start-fn",
+                                    link: "/reference/builder/top-level/start_fn",
                                 },
                                 {
                                     text: "state_mod",
-                                    link: "/reference/builder/top-level/state-mod",
+                                    link: "/reference/builder/top-level/state_mod",
                                 },
                             ],
                         },
@@ -260,7 +269,7 @@ export default defineConfig({
                                 },
                                 {
                                     text: "finish_fn",
-                                    link: "/reference/builder/member/finish-fn",
+                                    link: "/reference/builder/member/finish_fn",
                                 },
                                 {
                                     text: "into",
@@ -284,7 +293,7 @@ export default defineConfig({
                                 },
                                 {
                                     text: "start_fn",
-                                    link: "/reference/builder/member/start-fn",
+                                    link: "/reference/builder/member/start_fn",
                                 },
                                 {
                                     text: "transparent",

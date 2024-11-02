@@ -77,8 +77,6 @@ Switching between `#[builder(default)]` and `Option<T>` is [compatible](./compat
 
 :::
 
-### Examples
-
 ```rust
 #[bon::builder]
 fn example(
@@ -105,8 +103,9 @@ The same [pair of optional setters](#setters-pair) is generated for members with
 let result = example()
     // Pass a non-None value
     .a(3)
-    // Pass an `Option` value directly
-    .maybe_b(Some(5))
+    // Pass an `Option` value directly. `None` means the default
+    // value will be used (4 in this case)
+    .maybe_b(None)
     .call();
 ```
 

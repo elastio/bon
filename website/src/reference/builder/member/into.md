@@ -1,4 +1,3 @@
-
 # `into`
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
@@ -23,7 +22,7 @@ See the ["Into Conversions In-Depth"](../../../guide/into-conversions-in-depth) 
 
 ::: code-group
 
-```rust [Struct field]
+```rust [Struct]
 use bon::Builder;
 
 #[derive(Builder)]
@@ -49,7 +48,7 @@ Example::builder()
     .build();
 ```
 
-```rust [Free function argument]
+```rust [Free function]
 use bon::builder;
 
 #[builder]
@@ -75,7 +74,7 @@ example()
     .call();
 ```
 
-```rust [Associated method argument]
+```rust [Associated method]
 use bon::bon;
 
 struct Example;

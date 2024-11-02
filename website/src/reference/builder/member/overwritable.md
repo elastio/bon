@@ -1,5 +1,9 @@
 # `overwritable` :microscope:
 
+**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
+
+Allows calling setters for the same member repeatedly.
+
 ::: danger 🔬 **Experimental**
 
 This attribute is available under the cargo feature `experimental-overwritable`. Breaking changes may occur between **minor** releases but not between patch releases.
@@ -13,8 +17,6 @@ The fate of this feature depends on your feedback in the tracking issue [#149](h
 This attribute is also configurable via the top-level [`#[builder(on(...))]`](../top-level/on)
 
 :::
-
-Lets calling setters for the same member repeatedly.
 
 For example, this code wouldn't compile without this attribute:
 

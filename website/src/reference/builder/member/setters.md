@@ -1,5 +1,7 @@
 # `setters`
 
+**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
+
 Overrides name, visibility and docs for setters.
 
 The config is tree-structured with overrides precedence explained in the next paragraph.

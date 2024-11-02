@@ -20,7 +20,7 @@ pub(crate) struct MemberConfig {
     /// Assign a default value to the member it it's not specified.
     ///
     /// An optional expression can be provided to set the value for the member,
-    /// otherwise its  [`Default`] trait impl will be used.
+    /// otherwise its [`Default`] trait impl will be used.
     #[darling(with = parse_optional_expr, map = Some)]
     pub(crate) default: Option<SpannedKey<Option<syn::Expr>>>,
 
