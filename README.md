@@ -9,7 +9,7 @@
     />
 </a>
 
-<p align="center">
+<div align="center">
     <a href="https://github.com/elastio/bon"><img
         alt="github"
         src="https://img.shields.io/badge/github-elastio/bon-228b22?style=for-the-badge&labelColor=555555&logo=github"
@@ -25,22 +25,37 @@
         src="https://img.shields.io/badge/docs.rs-bon-3b74d1?style=for-the-badge&labelColor=555555&logo=docs.rs"
         height="25"
     /></a>
-      <a href="https://docs.rs/bon/latest/bon/"><img
+        <a href="https://docs.rs/bon/latest/bon/"><img
         alt="docs.rs"
         src="https://img.shields.io/badge/MSRV-1.59.0-b83fbf?style=for-the-badge&labelColor=555555&logo=docs.rs"
         height="25"
     /></a>
-</p>
+    <table>
+        <tbody>
+            <tr>
+                <td><a href="https://bon-rs.com/guide/overview">📖 Guide Book</a></td>
+                <td>Narrative introduction</td>
+            </tr>
+            <tr>
+                <td><a href="https://bon-rs.com/reference/builder">🔍 API Reference</a></td>
+                <td>Attributes API index</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
 
-`bon` is a Rust crate for generating compile-time-checked builders for functions and structs. It also provides idiomatic partial application with optional and named parameters for functions and methods.
 
-Visit the [guide for a complete overview of the crate](https://bon-rs.com/guide/overview).
+<!-- #region overview -->
 
-## Quick examples
+# Overview
 
-### Builder for a free function
+`bon` is a Rust crate for generating compile-time-checked builders for structs and functions. It also provides idiomatic partial application with optional and named parameters for functions and methods.
 
-You can turn a function with positional parameters into a function with named parameters just by placing the `#[builder]` attribute on top of it.
+If you wonder "Why would I use builders?", see the [motivational blog post](https://bon-rs.com/blog/how-to-do-named-function-arguments-in-rust).
+
+## Function Builder
+
+You can turn a function with positional parameters into a function with named parameters just by placing `#[builder]` on top of it.
 
 ```rust
 use bon::builder;
@@ -60,55 +75,11 @@ let greeting = greet()
 assert_eq!(greeting, "Hello Bon! Your level is 24");
 ```
 
-### Builder for an associated method
+Any syntax for functions is supported including `async`, fallible, generic functions, `impl Trait`, etc.
 
-For associated methods you also need to add the `#[bon]` macro on top of the impl block.
+## Struct Builder
 
-```rust
-use bon::bon;
-
-struct User {
-    id: u32,
-    name: String,
-}
-
-#[bon] // <- this attribute is required on impl blocks that contain `#[builder]`
-impl User {
-    #[builder]
-    fn new(id: u32, name: String) -> Self {
-        Self { id, name }
-    }
-
-    #[builder]
-    fn greet(&self, target: &str, level: Option<&str>) -> String {
-        let level = level.unwrap_or("INFO");
-        let name = &self.name;
-
-        format!("[{level}] {name} says hello to {target}")
-    }
-}
-
-// The method named `new` generates `builder()/build()` methods
-let user = User::builder()
-    .id(1)
-    .name("Bon".to_owned())
-    .build();
-
-// All other methods generate `method_name()/call()` methods
-let greeting = user
-    .greet()
-    .target("the world")
-    // `level` is optional, we can omit it here
-    .call();
-
-assert_eq!(user.id, 1);
-assert_eq!(user.name, "Bon");
-assert_eq!(greeting, "[INFO] Bon says hello to the world");
-```
-
-### Builder for a struct
-
-The `#[derive(Builder)]` macro generates a builder for a struct.
+Use `#[derive(Builder)]` to generate a builder for a struct.
 
 ```rust
 use bon::Builder;
@@ -133,13 +104,105 @@ assert_eq!(user.level, Some(24));
 assert!(user.is_admin);
 ```
 
-See [the guide](https://bon-rs.com/guide/overview) for more.
+## Method Builder
 
----
+Associated methods require `#[bon]` on top of the impl block additionally.
 
-If you like the idea of this crate and want to say "thank you" or "keep doing this" consider giving us a [star ⭐ on Github](https://github.com/elastio/bon). Any support and contribution are appreciated 🐱!
+### Method `new`
 
-#### License
+The method named `new` generates `builder()/build()` methods.
+
+```rust
+use bon::bon;
+
+struct User {
+    id: u32,
+    name: String,
+}
+
+#[bon]
+impl User {
+    #[builder]
+    fn new(id: u32, name: String) -> Self {
+        Self { id, name }
+    }
+}
+
+let user = User::builder()
+    .id(1)
+    .name("Bon".to_owned())
+    .build();
+
+assert_eq!(user.id, 1);
+assert_eq!(user.name, "Bon");
+```
+
+### Other Methods
+
+All other methods generate `{method_name}()/call()` methods.
+
+```rust
+use bon::bon;
+
+struct Greeter {
+    name: String,
+}
+
+#[bon]
+impl Greeter {
+    #[builder]
+    fn greet(&self, target: &str, prefix: Option<&str>) -> String {
+        let prefix = prefix.unwrap_or("INFO");
+        let name = &self.name;
+
+        format!("[{prefix}] {name} says hello to {target}")
+    }
+}
+
+let greeter = Greeter { name: "Bon".to_owned() };
+
+let greeting = greeter
+    .greet()
+    .target("the world")
+    // `prefix` is optional, we can omit it here
+    .call();
+
+assert_eq!(greeting, "[INFO] Bon says hello to the world");
+```
+
+Methods with or without `self` are both supported.
+
+## No Panics Possible
+
+Builders generated by `bon`'s macros use the typestate pattern to make sure all required parameters are filled, and the same setters aren't called repeatedly to prevent unintentional overwrites.
+
+If something is wrong, a compile error will be created. No matter how you use the generated builder a panic is never possible.
+
+<div align="center">
+
+| ⭐ Don't forget to give our repo a [star on Github ⭐](https://github.com/elastio/bon)! |
+| --- |
+
+</div>
+
+## What's Next?
+
+What you've seen above is the first page of the 📖 [Guide Book](https://bon-rs.com/guide/overview). Consider reading the rest of the `Basics` section starting from [the next page](https://bon-rs.com/guide/optional-members) that details on optional/default values handling. Remember, knowledge is power 🐱!
+
+The [🔍 API Reference](https://bon-rs.com/reference/builder) will help you navigate in the attributes once you feel comfortable with the basics of `bon`.
+
+## Installation
+
+Add `bon` to your `Cargo.toml`.
+
+```toml
+[dependencies]
+bon = "2.3"
+```
+
+You can opt out of `std` and `alloc` cargo features with `default-features = false` for `no_std` environments.
+
+## License
 
 <sup>
 Licensed under either of <a href="https://github.com/elastio/bon/blob/master/LICENSE-APACHE">Apache License, Version
