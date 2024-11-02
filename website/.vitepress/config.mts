@@ -1,7 +1,24 @@
-import { defineConfig } from "vitepress";
+import { defineConfig, HeadConfig } from "vitepress";
 import { abbr } from "@mdit/plugin-abbr";
 import * as v1 from "../src/v1/config.mjs";
 import * as v2 from "../src/v2/config.mjs";
+
+const head: HeadConfig[] = [
+    ["link", { rel: "icon", href: `bon-logo-thumb.png` }],
+    ["meta", { property: "og:image", content: `bon-logo-thumb.png` }],
+];
+
+// Enable analytics only in the final build on CI. Locally, it's not needed.
+if (process.env.CI) {
+    head.push([
+        "script",
+        {
+            defer: "",
+            src: "https://umami.bon-rs.com/script.js",
+            "data-website-id": "10c1ad05-7a6e-49ee-8633-5f8f75de4ab9",
+        },
+    ]);
+}
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
@@ -63,18 +80,7 @@ export default defineConfig({
 
     srcExclude: ["README.md", "infra/**"],
 
-    head: [
-        ["link", { rel: "icon", href: `bon-logo-thumb.png` }],
-        ["meta", { property: "og:image", content: `bon-logo-thumb.png` }],
-        [
-            "script",
-            {
-                defer: "",
-                src: "https://umami.bon-rs.com/script.js",
-                "data-website-id": "10c1ad05-7a6e-49ee-8633-5f8f75de4ab9",
-            },
-        ],
-    ],
+    head,
 
     srcDir: "src",
 
@@ -164,7 +170,7 @@ export default defineConfig({
                             text: "Builder Extensions",
                             link: "/guide/builder-extensions",
                         },
-                    ]
+                    ],
                 },
                 {
                     text: "Patterns",
