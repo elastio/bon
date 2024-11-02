@@ -190,7 +190,7 @@ If something is wrong, a compile error will be created. No matter how you use th
 
 ## What's Next?
 
-What you've seen above is the first page of the 📖 [Guide Book](https://bon-rs.com/guide/overview). Consider reading the rest of the `Basics` section starting from [the next page](https://bon-rs.com/guide/optional-members) that describes optional/default values handling. Remember, knowledge is power 🐱!
+What you've seen above is the first page of the 📖 [Guide Book](https://bon-rs.com/guide/overview). Consider reading the rest of the `Basics` section. Here is [the next page](https://bon-rs.com/guide/optional-members) that describes optional/default values handling. Remember, knowledge is power 🐱!
 
 The [🔍 API Reference](https://bon-rs.com/reference/builder) will help you navigate in the attributes once you feel comfortable with the basics of `bon`.
 
