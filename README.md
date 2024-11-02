@@ -30,6 +30,8 @@
         src="https://img.shields.io/badge/MSRV-1.59.0-b83fbf?style=for-the-badge&labelColor=555555&logo=docs.rs"
         height="25"
     /></a>
+</div>
+<div align="center">
     <table>
         <tbody>
             <tr>
