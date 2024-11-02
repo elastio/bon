@@ -4,42 +4,9 @@ outline: deep
 
 # Optional Members
 
-If your function argument or struct field (or member for short) is of type `Option<T>`, then the generated builder will not enforce setting a value for this member, defaulting to `None`.
-
-It also generates two setters: one accepts `T` and the other accepts `Option<T>`. The first avoids wrapping values with `Some()` on the call site. The second allows passing the `Option<T>` value directly.
-
-```rust
-use bon::Builder;
-
-#[derive(Builder)]
-struct Example {
-    x: Option<u32>,
-    y: Option<u32>,
-
-    // Use an annotation for members of non-`Option` type
-    #[builder(default)]
-    z: u32,
-}
-
-// Both `x` and `y` will be set to `None`, `z` will be set to `0`
-Example::builder().build();
-
-Example::builder()
-    // Pass the value without wrapping it with `Some()`
-    .x(10)
-    // Or use a `maybe_`-prefixed setter that accepts `Option<T>`
-    .maybe_y(Some(20))
-    // The APIs generated for `#[builder(default)]` and `Option<T>` are equivalent.
-    // `z` will be set to `0` when `build()` is called.
-    .maybe_z(None)
-    .build();
-```
-
-See [optional members](./optional-members) page for details.
-
 ## `Option<T>`
 
-Setters generated for members of `Option<T>` type are optional to call. If they aren't invoked, then `None` will be used as the default.
+If your function argument or struct field (or member for short) is of type `Option<T>`, then the generated builder will not enforce setting a value for this member, defaulting to `None`.
 
 ```rust
 #[bon::builder]
@@ -102,7 +69,7 @@ example().maybe_level(value).call();
 
 ## `#[builder(default)]`
 
-To make a member of non-`Option` type optional you may use the attribute [`#[builder(default)]`](../reference/builder/member/default). This attribute uses the [`Default`](https://doc.rust-lang.org/stable/std/default/trait.Default.html) trait or the provided expression to assign the default value for the member.
+To make a member of non-`Option` type optional you may use [`#[builder(default)]`](../reference/builder/member/default). This attribute uses the [`Default`](https://doc.rust-lang.org/stable/std/default/trait.Default.html) trait or the provided expression to assign the default value for the member.
 
 ::: tip
 

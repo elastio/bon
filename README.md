@@ -1,8 +1,4 @@
 <a href="https://bon-rs.com/guide/overview">
-    <!--
-    We use an absolute link to the image here because this README is hosted on crates.io,
-    lib.rs and docs.rs where this image isn't available through the relative link.
-    -->
     <img
         src="https://bon-rs.com/bon-home.png"
         alt="bon home"
@@ -80,7 +76,7 @@ assert_eq!(greeting, "Hello Bon! Your level is 24");
 
 Any syntax for functions is supported including `async`, fallible, generic functions, `impl Trait`, etc.
 
-Many things are customizable with additional attributes described in the [API reference](https://bon-rs.com/reference/builder), but let's see what else `bon` has to offer.
+Many things are customizable with additional attributes described in the [API reference](https://bon-rs.com/reference/builder), but let's see what else `bon` offers.
 
 ## Struct Builder
 
@@ -142,7 +138,7 @@ assert_eq!(user.id, 1);
 assert_eq!(user.name, "Bon");
 ```
 
-`#[derive(Builder)]` on a struct generates builder API that is fully compatible with placing `#[builder]` attribute on the `new()` method with a signature similar to the struct's fields (more details on the [compatibility](https://bon-rs.com/guide/compatibility#switching-between-derive-builder-and-builder-on-the-new-method) page).
+`#[derive(Builder)]` on a struct generates builder API that is fully compatible with placing `#[builder]` on the `new()` method with a signature similar to the struct's fields (more details on the [compatibility](https://bon-rs.com/guide/compatibility#switching-between-derive-builder-and-builder-on-the-new-method) page).
 
 ### Other Methods
 
@@ -190,11 +186,11 @@ If something is wrong, a compile error will be created. No matter how you use th
 
 ## What's Next?
 
-What you've seen above is the first page of the 📖 [Guide Book](https://bon-rs.com/guide/overview). Consider reading the rest of the `Basics` section. You can proceed with [this page](https://bon-rs.com/guide/optional-members), that describes optional/default values handling. Remember, knowledge is power 🐱!
+What you've seen above is the first page of the 📖 [Guide Book](https://bon-rs.com/guide/overview). Consider reading the `Basics` section. Begin [here](https://bon-rs.com/guide/optional-members) with the optional/default values topic. Remember, knowledge is power 🐱!
 
 Feel free to jump to code and use the `#[builder]` and `#[derive(Builder)]` once you've seen enough docs to get started.
 
-The [🔍 API Reference](https://bon-rs.com/reference/builder) will help you navigate in the attributes once you feel comfortable with the basics of `bon`. Both `#[derive(Builder)]` on structs and `#[builder]` on functions/methods have almost identical attributes API, so the documentation for them is common.
+The [🔍 API Reference](https://bon-rs.com/reference/builder) will help you navigate the attributes once you feel comfortable with the basics of `bon`. Both `#[derive(Builder)]` on structs and `#[builder]` on functions/methods have almost identical attributes API, so the documentation for them is common.
 
 ## Installation
 
