@@ -22,7 +22,7 @@ mod collections;
     they should not be used directly; if you found a need for this, then you are probably \
     doing something wrong; feel free to open an issue/discussion in our GitHub repository \
     (https://github.com/elastio/bon) or ask for help in our Discord server \
-    (https://discord.gg/QcBYSamw4c)"]
+    (https://bon-rs.com/discord)"]
 pub mod __;
 
 mod builder_state;

@@ -143,7 +143,7 @@ This isn't a breaking change, and the code that uses `#[bon::builder]` on a stru
 
 Huge thank you for 925 stars ⭐ [on Github](https://github.com/elastio/bon)! Consider giving [`bon`] a star if you haven't already. Your support and feedback are a big motivation and together we can build a better builder 🐱!
 
-Bon's goal is to empower everyone to build beautiful APIs with great flexibility and extensibility. If you have any feedback or ideas for improvement consider joining [our Discord server](https://discord.gg/QcBYSamw4c) to discuss them, or just [open an issue on Github](https://github.com/elastio/bon/issues).
+Bon's goal is to empower everyone to build beautiful APIs with great flexibility and extensibility. If you have any feedback or ideas for improvement consider joining [our Discord server](https://bon-rs.com/discord) to discuss them, or just [open an issue on Github](https://github.com/elastio/bon/issues).
 
 ::: tip
 

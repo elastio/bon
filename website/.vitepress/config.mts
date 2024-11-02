@@ -116,7 +116,7 @@ export default defineConfig({
 
         socialLinks: [
             { icon: "github", link: "https://github.com/elastio/bon" },
-            { icon: "discord", link: "https://discord.gg/QcBYSamw4c" },
+            { icon: "discord", link: "https://bon-rs.com/discord" },
             { icon: "x", link: "https://x.com/veetaha" },
         ],
 
@@ -136,8 +136,12 @@ export default defineConfig({
                             link: "/guide/optional-members",
                         },
                         {
-                            text: "Customizing Setters",
-                            link: "/guide/customizing-setters",
+                            text: "Into Conversions",
+                            link: "/guide/into-conversions",
+                        },
+                        {
+                            text: "Custom Conversions",
+                            link: "/guide/custom-conversions",
                         },
                         {
                             text: "Positional Members",

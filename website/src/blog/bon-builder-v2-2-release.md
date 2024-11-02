@@ -222,7 +222,7 @@ If you like or dislike this change in syntax feel free to write a comment on Red
 
 ## Summary
 
-We are listening to your feedback! If you'd like to propose a change in `bon`, or ask a question, or just say "thank you", consider joining our [newly launched Discord server](https://discord.gg/QcBYSamw4c)!
+We are listening to your feedback! If you'd like to propose a change in `bon`, or ask a question, or just say "thank you", consider joining our [newly launched Discord server](https://bon-rs.com/discord)!
 
 Also, a huge thank you for 750 stars ⭐ [on Github](https://github.com/elastio/bon)! Consider giving [`bon`] a star if you haven't already. Your support and feedback are a big motivation and together we can build a better builder 🐱!
 

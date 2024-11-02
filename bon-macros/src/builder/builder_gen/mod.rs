@@ -368,7 +368,7 @@ impl BuilderGenCtx {
                 if you found yourself needing it, then you are probably doing something wrong; \
                 feel free to open an issue/discussion in our GitHub repository \
                 (https://github.com/elastio/bon) or ask for help in our Discord server \
-                (https://discord.gg/QcBYSamw4c)";
+                (https://bon-rs.com/discord)";
 
             quote! {
                 #[doc(hidden)]
