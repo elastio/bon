@@ -1,9 +1,3 @@
-<script setup>
-import { data as version } from '/../data/version.data'
-import VPSocialLink from "vitepress/dist/client/theme-default/components/VPSocialLink.vue";
-const [_, versionWildcard] = version.match(/(\d+.\d+).\d+/);
-</script>
-
 # Overview
 
 `bon` is a Rust crate for generating compile-time-checked builders for functions and structs. It also provides idiomatic partial application with optional and named parameters for functions and methods.
@@ -14,9 +8,9 @@ If you are new to the concept of builders or named function arguments, and you d
 
 Add this to your `Cargo.toml` to use this crate:
 
-```toml-vue
+```toml
 [dependencies]
-bon = "{{ versionWildcard }}"
+bon = "2.3"
 ```
 
 You can opt out of `std` and `alloc` cargo features with `default-features = false` for `no_std` environments.

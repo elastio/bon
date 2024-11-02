@@ -80,6 +80,8 @@ assert_eq!(greeting, "Hello Bon! Your level is 24");
 
 Any syntax for functions is supported including `async`, fallible, generic functions, `impl Trait`, etc.
 
+Many things are customizable with additional attributes described in the [API reference](https://bon-rs.com/reference/builder), but let's see what else `bon` has to offer.
+
 ## Struct Builder
 
 Use `#[derive(Builder)]` to generate a builder for a struct.
@@ -140,6 +142,8 @@ assert_eq!(user.id, 1);
 assert_eq!(user.name, "Bon");
 ```
 
+`#[derive(Builder)]` on a struct generates builder API that is fully compatible with placing `#[builder]` attribute on the `new()` method with a signature similar to the struct's fields (more details on the [compatibility](https://bon-rs.com/guide/compatibility#switching-between-derive-builder-and-builder-on-the-new-method) page).
+
 ### Other Methods
 
 All other methods generate `{method_name}()/call()` methods.
@@ -167,7 +171,7 @@ let greeter = Greeter { name: "Bon".to_owned() };
 let greeting = greeter
     .greet()
     .target("the world")
-    // `prefix` is optional, we can omit it here
+    // `prefix` is optional, omitting it is fine
     .call();
 
 assert_eq!(greeting, "[INFO] Bon says hello to the world");
@@ -190,9 +194,11 @@ If something is wrong, a compile error will be created. No matter how you use th
 
 ## What's Next?
 
-What you've seen above is the first page of the 📖 [Guide Book](https://bon-rs.com/guide/overview). Consider reading the rest of the `Basics` section. Here is [the next page](https://bon-rs.com/guide/optional-members) that describes optional/default values handling. Remember, knowledge is power 🐱!
+What you've seen above is the first page of the 📖 [Guide Book](https://bon-rs.com/guide/overview). Consider reading the rest of the `Basics` section. You can proceed with [this page](https://bon-rs.com/guide/optional-members), that describes optional/default values handling. Remember, knowledge is power 🐱!
 
-The [🔍 API Reference](https://bon-rs.com/reference/builder) will help you navigate in the attributes once you feel comfortable with the basics of `bon`.
+Feel free to jump to code and use the `#[builder]` and `#[derive(Builder)]` once you've seen enough docs to get started.
+
+The [🔍 API Reference](https://bon-rs.com/reference/builder) will help you navigate in the attributes once you feel comfortable with the basics of `bon`. Both `#[derive(Builder)]` on structs and `#[builder]` on functions/methods have almost the same attributes API, so the documentation for them is common.
 
 ## Installation
 
@@ -204,6 +210,36 @@ bon = "2.3"
 ```
 
 You can opt out of `std` and `alloc` cargo features with `default-features = false` for `no_std` environments.
+
+## Getting Help
+
+If you can't figure something out, consult the docs and maybe use the `🔍 Search` at the top of the page on our [docs website](https://bon-rs.com). You may also create an issue or a discussion on the [Github repository](https://github.com/elastio/bon) for help or write us a message on [Discord](https://bon-rs.com/discord) (see below).
+
+## Socials
+
+
+<table>
+<tbody>
+    <tr>
+        <td>
+            <a href="https://bon-rs.com/discord">Discord</a>
+        </td>
+        <td>Here you can leave feedback, ask questions, report bugs, or just write "thank you".</td>
+    </tr>
+    <tr>
+        <td>
+            <a href="https://x.com/veetaha" class="nobr">X (Twitter)</a>
+        </td>
+        <td>Profile of the maintainer. There are only posts about <code>bon</code> and Rust in general here.</td>
+    </tr>
+</tbody>
+</table>
+
+## Acknowledgments
+
+This project was heavily inspired by such awesome crates as [`buildstructor`](https://docs.rs/buildstructor), [`typed-builder`](https://docs.rs/typed-builder) and [`derive_builder`](https://docs.rs/derive_builder). This crate was designed with many lessons learned from them.
+
+See [alternatives](https://bon-rs.com/guide/alternatives) for comparison.
 
 ## License
 
@@ -219,3 +255,5 @@ Unless you explicitly state otherwise, any contribution intentionally submitted
 for inclusion in the work by you, as defined in the Apache-2.0 license, shall be
 dual licensed as above, without any additional terms or conditions.
 </sub>
+
+<!-- #endregion overview -->
