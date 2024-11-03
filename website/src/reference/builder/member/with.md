@@ -2,8 +2,17 @@
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="function arguments"/> <Badge type="warning" text="method arguments"/>
 
-TODO: add docs (update the short descriptions on the parent page)
+Overrides setters' signature and applies a custom conversion.
 
+You can specify the signature and the conversion either with the closure syntax or with a [well-known function](#well-known-functions)
+
+| Form                                                                              | Meaning
+|-----------------------------------------------------------------------------------|----------------------------
+| `#[builder(with = \|...\| body)]`                                                 | Custom *infallible* closure
+| <code class="nobr">#[builder(with = \|...\| -> \*Result<_[, E]>)] { body })]</code> | Custom *fallible* closure
+| `#[builder(with = well_known_function)]`                                          | One of the [well-known functions](#well-known-functions)
+
+## Closure syntax
 
 If the closure accepts a single parameter `T`, then the `maybe_` setter accepts `Option<T>`. Tuple is unnecessary in this case.
 

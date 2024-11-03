@@ -10,8 +10,8 @@ Generate builders from structs via `#[derive(Builder)]`, free functions via `#[b
 
 These attributes are placed on top of a `struct` or `fn` declaration.
 
-| Attribute | Short description
-| -- | -- |
+| Attribute                                          | Short description
+|----------------------------------------------------|---------------------
 | [`builder_type`](./builder/top-level/builder_type) | Overrides name, visibility and docs for the builder struct
 | [`crate`](./builder/top-level/crate)               | Overrides path to `bon` crate referenced in the generated code
 | [`derive`](./builder/top-level/derive)             | Generates additional derives for the builder struct itself
@@ -24,8 +24,8 @@ These attributes are placed on top of a `struct` or `fn` declaration.
 
 These attributes are placed on a `struct` field or `fn` argument.
 
-| Attribute | Short description
-| -- | -- |
+| Attribute                                          | Short description
+|----------------------------------------------------|---------------------
 | [`default`](./builder/member/default)              | Makes the member optional with a default value
 | [`finish_fn`](./builder/member/finish_fn)          | Makes the member a positional argument on the finishing function
 | [`into`](./builder/member/into)                    | Changes the signature of the setters to accept `impl Into<T>`
@@ -35,7 +35,7 @@ These attributes are placed on a `struct` field or `fn` argument.
 | [`skip`](./builder/member/skip)                    | Skips generating setters for the member
 | [`start_fn`](./builder/member/start_fn)            | Makes the member a positional argument on the starting function
 | [`transparent`](./builder/member/transparent)      | Disables `Option<T>` special handling, makes the member required
-| [`with`](./builder/member/with)                    | ??????? TODO: ADD DOCS ??????
+| [`with`](./builder/member/with)                    | Overrides setters' signature and applies a custom conversion
 
 ## Examples
 

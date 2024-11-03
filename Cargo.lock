@@ -87,7 +87,7 @@ dependencies = [
 
 [[package]]
 name = "bon-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "ra_ap_parser",
@@ -107,6 +107,15 @@ dependencies = [
  "quote",
  "rustversion",
  "syn",
+]
+
+[[package]]
+name = "borsh"
+version = "1.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a6362ed55def622cddc70a4746a68554d7b687713770de539e59a739b249f8ed"
+dependencies = [
+ "cfg_aliases",
 ]
 
 [[package]]
@@ -147,6 +156,12 @@ name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
+
+[[package]]
+name = "cfg_aliases"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 
 [[package]]
 name = "ciborium"
@@ -731,9 +746,9 @@ dependencies = [
 
 [[package]]
 name = "ra-ap-rustc_lexer"
-version = "0.63.0"
+version = "0.73.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3bdf98bb457b47b9ae4aeebf867d0ca440c86925e0b6381658c4a02589748c9d"
+checksum = "119bc05b5b6bc3e7f5b67ce8b8080e185da94bd83c447f91b6b3f3ecf60cbab1"
 dependencies = [
  "unicode-properties",
  "unicode-xid",
@@ -741,15 +756,15 @@ dependencies = [
 
 [[package]]
 name = "ra_ap_limit"
-version = "0.0.233"
+version = "0.0.241"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f413cec7ebae9832a6f58ba055cb759d682ed0c9a66224ae09b2aa1962d8782"
+checksum = "f9b1b7a869e1a2b68ff8490ff8d3af23b518f83ba41f93192dee0336c0af9b55"
 
 [[package]]
 name = "ra_ap_parser"
-version = "0.0.233"
+version = "0.0.241"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54fcf2c5b72af3e20e2fe41582fea9f2147e49bf1dbdfea51193c8e284b7f322"
+checksum = "d2756858e7851f05d6a9119ecb51b10b7ec85414ea06ab6e20e06fd4a0a64599"
 dependencies = [
  "drop_bomb",
  "ra-ap-rustc_lexer",
@@ -759,9 +774,9 @@ dependencies = [
 
 [[package]]
 name = "ra_ap_stdx"
-version = "0.0.233"
+version = "0.0.241"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6609b238dea78fc46d847b9f9177b39f92137d7ef73e5e6b062196326705590f"
+checksum = "e743e2c0495f0f1292865d30f7a56349a27f9ceeb61f7b743c96b6ca134e5f76"
 dependencies = [
  "always-assert",
  "crossbeam-channel",
@@ -774,9 +789,9 @@ dependencies = [
 
 [[package]]
 name = "ra_ap_syntax"
-version = "0.0.233"
+version = "0.0.241"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4e2abef0d98f554288b767e7b4b0377fde75728142d08f7b17d268c2639f8cb"
+checksum = "9754a818cc20ad5d0acdc2f316082d5ca166ee22db82f5b8d502ba2d5dcc2492"
 dependencies = [
  "cov-mark",
  "either",
@@ -787,7 +802,7 @@ dependencies = [
  "ra_ap_stdx",
  "ra_ap_text_edit",
  "rowan",
- "rustc-hash",
+ "rustc-hash 2.0.0",
  "smol_str",
  "tracing",
  "triomphe",
@@ -795,9 +810,9 @@ dependencies = [
 
 [[package]]
 name = "ra_ap_text_edit"
-version = "0.0.233"
+version = "0.0.241"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6be2047bedda5b44c8d8775036cbf8d01dd99c06756524f20991c4249a1bb6ec"
+checksum = "a5f89e975e82f5efe2682bc2c03dda28ad57b0bfd33f64b5831674a25204072b"
 dependencies = [
  "itertools 0.12.1",
  "text-size",
@@ -861,7 +876,7 @@ dependencies = [
  "countme",
  "hashbrown",
  "memoffset",
- "rustc-hash",
+ "rustc-hash 1.1.0",
  "text-size",
 ]
 
@@ -886,6 +901,12 @@ name = "rustc-hash"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "08d43f7aa6b08d49f382cde6a7982047c3426db949b1424bc4b7ec9ae12c6ce2"
+
+[[package]]
+name = "rustc-hash"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "583034fd73374156e66797ed8e5b0d5690409c9226b22d87cb7f19821c05d152"
 
 [[package]]
 name = "rustversion"
@@ -950,10 +971,11 @@ dependencies = [
 
 [[package]]
 name = "smol_str"
-version = "0.2.2"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd538fb6910ac1099850255cf94a94df6551fbdd602454387d0adb2d1ca6dead"
+checksum = "9676b89cd56310a87b93dec47b11af744f34d5fc9f367b829474eec0a891350d"
 dependencies = [
+ "borsh",
  "serde",
 ]
 
