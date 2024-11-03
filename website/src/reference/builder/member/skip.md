@@ -11,7 +11,7 @@ The value for the member will be computed based on the form of the attribute:
 | `#[builder(skip)]`              | `Default::default()`                 |
 | `#[builder(skip = expression)]` | `expression`                         |
 
-**Example:**
+## Example
 
 ```rust
 use bon::Builder;
@@ -34,33 +34,35 @@ assert_eq!(user.level, 0);
 assert_eq!(user.name, "anon");
 ```
 
-You can also use the values of other members by referencing their names in the `skip` expression. All members are initialized in the order of their declaration. It means only those members that are declared earlier (higher) in the code are available to the `skip` expression.
+## Evaluation context
 
-**Example:**
+You can use values of other members by referencing their names in the `skip` expression. All members are initialized in the order of their declaration. It means only those members that are declared earlier (higher) in the code are available to the `skip` expression.
 
 ```rust
 use bon::Builder;
 
 #[derive(Builder)]
 struct Example {
-    member_1: u32,
+    x1: u32,
 
-    // Note that here we don't have access to `member_3`
+    // Note that here we don't have access to `x3`
     // because it's declared (and thus initialized) later
-    #[builder(skip = 2 * member_1)]
-    member_2: u32,
+    #[builder(skip = 2 * x1)]
+    x2: u32,
 
-    #[builder(skip = member_2 + member_1)]
-    member_3: u32,
+    #[builder(skip = x2 + x1)]
+    x3: u32,
 }
 
 let example = Example::builder()
-    .member_1(3)
+    .x1(3)
     .build();
 
-assert_eq!(example.member_1, 3);
-assert_eq!(example.member_2, 6);
-assert_eq!(example.member_3, 9);
+assert_eq!(example.x1, 3);
+assert_eq!(example.x2, 6);
+assert_eq!(example.x3, 9);
 ```
 
-This attribute is not supported with free function arguments or associated method arguments because it's simply unnecessary there and can easier be expressed with local variables.
+## Unsupported function syntax
+
+This attribute is not supported with function or method syntax because it's simply unnecessary there and can easier be expressed with local variables.

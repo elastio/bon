@@ -61,9 +61,9 @@ cargo fmt
 
 A new attribute is now supported at the top level. You can add [`#[builder(derive(...))]`](../reference/builder/top-level/derive) to ask `bon` to generate implementations of `Clone` or `Debug` for the builder.
 
-This helps with reusing [partial builders](../guide/conditional-building#shared-partial-builder), because now you can clone the builder where only part of the fields are set.
+This helps with reusing [partial builders](../guide/patterns/conditional-building#shared-partial-builder), because now you can clone the builder where only part of the fields are set.
 
-The `Debug` derive allows you to [inspect](../guide/inspecting) the builder state for debugging purposes.
+The `Debug` derive allows you to [inspect](../guide/basics/inspecting) the builder state for debugging purposes.
 
 **Example:**
 
@@ -222,7 +222,7 @@ If you like or dislike this change in syntax feel free to write a comment on Red
 
 ## Summary
 
-We are listening to your feedback! If you'd like to propose a change in `bon`, or ask a question, or just say "thank you", consider joining our [newly launched Discord server](https://discord.gg/QcBYSamw4c)!
+We are listening to your feedback! If you'd like to propose a change in `bon`, or ask a question, or just say "thank you", consider joining our [newly launched Discord server](https://bon-rs.com/discord)!
 
 Also, a huge thank you for 750 stars ⭐ [on Github](https://github.com/elastio/bon)! Consider giving [`bon`] a star if you haven't already. Your support and feedback are a big motivation and together we can build a better builder 🐱!
 

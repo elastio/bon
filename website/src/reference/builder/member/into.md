@@ -1,7 +1,6 @@
-
 # `into`
 
-**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
+**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="function arguments"/> <Badge type="warning" text="method arguments"/>
 
 ::: tip
 
@@ -11,19 +10,19 @@ This attribute is also configurable via the top-level [`#[builder(on(...))]`](..
 
 Changes the signature of the setters to accept [`impl Into<T>`](https://doc.rust-lang.org/stable/std/convert/trait.Into.html), where `T` is the type of the member.
 
-For [optional members](../../../guide/optional-members), the `maybe_{member}()` setter method will accept an `Option<impl Into<T>>` type instead of just `Option<T>`.
+For [optional members](../../../guide/basics/optional-members), the `maybe_{member}()` setter method will accept an `Option<impl Into<T>>` type instead of just `Option<T>`.
 
 For members that use `#[builder(default = expression)]`, the `expression` will be converted with `Into::into`.
 
 This parameter is often used with the `String` type, which allows you to pass `&str` into the setter without calling `.to_owned()` or `.to_string()` on it.
 
-See the ["Into Conversions In-Depth"](../../../guide/into-conversions-in-depth) page that shows the common patterns and antipatterns of `impl Into<T>`.
+See the [Into Conversions In-Depth](../../../guide/patterns/into-conversions-in-depth) page that shows the common patterns and antipatterns of `impl Into<T>`.
 
 ## Examples
 
 ::: code-group
 
-```rust [Struct field]
+```rust [Struct]
 use bon::Builder;
 
 #[derive(Builder)]
@@ -49,7 +48,7 @@ Example::builder()
     .build();
 ```
 
-```rust [Free function argument]
+```rust [Function]
 use bon::builder;
 
 #[builder]
@@ -75,7 +74,7 @@ example()
     .call();
 ```
 
-```rust [Associated method argument]
+```rust [Method]
 use bon::bon;
 
 struct Example;

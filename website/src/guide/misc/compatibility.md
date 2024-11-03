@@ -2,7 +2,7 @@
 
 ## Making a required member optional
 
-It's totally backwards compatible to make a required member optional by changing the type from `T` to `Option<T>` or by adding [`#[builder(default)]`](../reference/builder/member/default) to it.
+It's totally backwards compatible to make a required member optional by changing the type from `T` to `Option<T>` or by adding [`#[builder(default)]`](../../reference/builder/member/default) to it.
 
 This is because both required and optional members have a setter that accepts `T` (not wrapped in an `Option`). The only change to the public API when making the required member optional is that a `maybe_`-prefixed setter is added to the builder. That new method accepts an `Option<T>`.
 
@@ -179,4 +179,4 @@ let user = User::builder()
 
 Let's suppose you have existing code that defines functions with positional parameters in the public API. You'd like to change it to expose builder syntax instead, but you want to keep the old code compatible with the positional functions API.
 
-In this case, you may use the top-level attribute `#[builder(start_fn)]` to keep both syntaxes available. See examples in the [docs for this attribute](../reference/builder/top-level/start-fn#exposing-original-function).
+In this case, you may use the top-level attribute `#[builder(start_fn)]` to keep both syntaxes available. See examples in the [docs for this attribute](../../reference/builder/top-level/start_fn#exposing-original-function).

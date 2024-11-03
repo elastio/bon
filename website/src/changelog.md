@@ -49,7 +49,7 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 - ⚠️ **Breaking.** Builder macros now generate additional `mod builder_name {}` where `builder_name` is the snake_case version of the name of the builder struct. This new module contains the type state API of the builder. There is a low probability that this new module name may conflict with existing symbols in your scope, so this change is marked as breaking.
 
-- Add [`#[builder(builder_type(vis = "...", doc { ... }))]`](https://bon-rs.com/reference/builder/top-level/builder-type) that allows overriding the visibility and docs of the builder struct ([#145](https://github.com/elastio/bon/pull/145))
+- Add [`#[builder(builder_type(vis = "...", doc { ... }))]`](https://bon-rs.com/reference/builder/top-level/builder_type) that allows overriding the visibility and docs of the builder struct ([#145](https://github.com/elastio/bon/pull/145))
 
 - Add [`#[builder(finish_fn(vis = "...", doc { ... } ))]`](https://bon-rs.com/reference/builder/top-level/finish-fn) that allows overriding the visibility and docs of the finishing function ([#145](https://github.com/elastio/bon/pull/145))
 

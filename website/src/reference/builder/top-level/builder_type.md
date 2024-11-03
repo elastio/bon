@@ -4,7 +4,7 @@ outline: deep
 
 # `builder_type`
 
-**Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
+**Applies to:** <Badge text="structs"/> <Badge text="functions"/> <Badge text="methods"/>
 
 Overrides name, visibility and docs for the builder struct.
 
@@ -32,12 +32,16 @@ Overrides name, visibility and docs for the builder struct.
 
 The default name for the builder struct is chosen according to the following rules:
 
+<!-- #region name -->
+
 | Syntax                             | Default
 | -----------------------------------|------------------------
 | `struct T`                         | `{T}Builder`
 | Associated `fn` `T::new/builder()` | `{T}Builder`
 | Associated `fn` `T::fn_name()`     | `{T}{FnName}Builder`
 | Free       `fn` `fn_name()`        | `{FnName}Builder`
+
+<!-- #endregion name -->
 
 ## `vis`
 
@@ -63,7 +67,7 @@ struct Brush {}
 let builder: MyBuilder = Brush::builder();
 ```
 
-```rust [Free function]
+```rust [Function]
 use bon::builder;
 
 #[builder(builder_type = MyBuilder)] // [!code highlight]
@@ -72,7 +76,7 @@ fn brush() {}
 let builder: MyBuilder = brush();
 ```
 
-```rust [Associated method]
+```rust [Method]
 use bon::bon;
 
 struct Brush;

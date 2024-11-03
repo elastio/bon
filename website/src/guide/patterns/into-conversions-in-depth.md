@@ -7,7 +7,7 @@ outline: deep
 
 ## Preface
 
-This is the continuation of the ["Into conversions" section](./overview#into-conversions) from the general overview page. This page describes the important caveats of using `impl Into` that you should know before enabling them.
+This is the continuation of [Into Conversions](../basics/into-conversions) from the `Basics` section. This page describes important caveats of using `impl Into` that you should know before enabling them.
 
 Make sure you are familiar with the standard [`From`](https://doc.rust-lang.org/stable/std/convert/trait.From.html) and [`Into`](https://doc.rust-lang.org/stable/std/convert/trait.Into.html) traits before you proceed. Reading their docs is pretty much enough. For example, you should know that every type that implements `From<T>` automatically implements `Into<T>`. Also, you should know that you can pass a value of type `T` at no cost directly to a function that accepts `impl Into<T>` thanks to [this blanket](https://github.com/rust-lang/rust/blob/1a94d839be8b248b972b9e022cb940d56de72fa1/library/core/src/convert/mod.rs#L763-L771) impl in `std`.
 

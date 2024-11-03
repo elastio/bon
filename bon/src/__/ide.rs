@@ -8,87 +8,93 @@
 pub mod builder_top_level {
     use super::*;
 
-    /// See the docs at <https://bon-rs.com/reference/builder#builder-type>
+    /// See the docs at <https://bon-rs.com/reference/builder/top-level/builder_type>
     pub const builder_type: Option<Identifier> = None;
 
     pub mod builder_type {
         use super::*;
 
-        /// See the docs at <https://bon-rs.com/reference/builder#builder-type>
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/builder_type#name>
         pub const name: Identifier = Identifier;
 
-        /// See the docs at <https://bon-rs.com/reference/builder#builder-type>
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/builder_type#vis>
         pub const vis: VisibilityString = VisibilityString;
 
-        /// See the docs at <https://bon-rs.com/reference/builder#builder-type>
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/builder_type#doc>
         pub const doc: DocComments = DocComments;
     }
 
-    /// See the docs at <https://bon-rs.com/reference/builder#finish-fn>
+    /// See the docs at <https://bon-rs.com/reference/builder/top-level/finish_fn>
     pub const finish_fn: Option<Identifier> = None;
 
-    /// See the docs at <https://bon-rs.com/reference/builder#finish-fn>
+    /// See the docs at <https://bon-rs.com/reference/builder/top-level/finish_fn>
     pub mod finish_fn {
         use super::*;
 
-        /// See the docs at <https://bon-rs.com/reference/builder#finish-fn>
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/finish_fn#name>
         pub const name: Identifier = Identifier;
 
-        /// See the docs at <https://bon-rs.com/reference/builder#finish-fn>
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/finish_fn#vis>
         pub const vis: VisibilityString = VisibilityString;
 
-        /// See the docs at <https://bon-rs.com/reference/builder#finish-fn>
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/finish_fn#doc>
         pub const doc: DocComments = DocComments;
     }
 
-    /// See the docs at <https://bon-rs.com/reference/builder#start-fn>
+    /// See the docs at <https://bon-rs.com/reference/builder/top-level/start_fn>
     pub const start_fn: Option<Identifier> = None;
 
-    /// See the docs at <https://bon-rs.com/reference/builder#start-fn>
+    /// See the docs at <https://bon-rs.com/reference/builder/top-level/start_fn>
     pub mod start_fn {
         use super::*;
 
-        /// See the docs at <https://bon-rs.com/reference/builder#start-fn>
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/start_fn#name>
         pub const name: Identifier = Identifier;
 
-        /// See the docs at <https://bon-rs.com/reference/builder#start-fn>
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/start_fn#vis>
         pub const vis: VisibilityString = VisibilityString;
 
-        /// See the docs at <https://bon-rs.com/reference/builder#start-fn>
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/start_fn#doc>
         pub const doc: DocComments = DocComments;
     }
 
-    /// See the docs at <https://bon-rs.com/reference/builder#state-mod>
+    /// See the docs at <https://bon-rs.com/reference/builder/top-level/state_mod>
     pub const state_mod: Option<Identifier> = None;
 
-    /// See the docs at <https://bon-rs.com/reference/builder#state-mod>
+    /// See the docs at <https://bon-rs.com/reference/builder/top-level/state_mod>
     pub mod state_mod {
         use super::*;
 
-        /// See the docs at <https://bon-rs.com/reference/builder#state-mod>
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/state_mod#name>
         pub const name: Identifier = Identifier;
 
-        /// See the docs at <https://bon-rs.com/reference/builder#state-mod>
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/state_mod#vis>
         pub const vis: VisibilityString = VisibilityString;
 
-        /// See the docs at <https://bon-rs.com/reference/builder#state-mod>
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/state_mod#doc>
         pub const doc: DocComments = DocComments;
     }
 
-    /// See the docs at <https://bon-rs.com/reference/builder#on>
+    /// See the docs at <https://bon-rs.com/reference/builder/top-level/on>
     pub mod on {
         use super::*;
 
-        /// See the docs at <https://bon-rs.com/reference/builder#on>
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/on>
         pub const into: Flag = Flag;
+
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/on>
+        pub const transparent: Flag = Flag;
+
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/on>
+        pub const overwritable: Flag = Flag;
     }
 
-    /// See the docs at <https://bon-rs.com/reference/builder#derive>
+    /// See the docs at <https://bon-rs.com/reference/builder/top-level/derive>
     pub mod derive {
-        /// See the docs at <https://bon-rs.com/reference/builder#derive>
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/derive>
         pub use core::fmt::Debug;
 
-        /// See the docs at <https://bon-rs.com/reference/builder#derive>
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/derive>
         pub use core::clone::Clone;
     }
 
@@ -96,7 +102,7 @@ pub mod builder_top_level {
     /// It's hinted with an underscore due to the limitations of the current
     /// completions limitation. This will be fixed in the future.
     ///
-    /// See the docs at <https://bon-rs.com/reference/builder#crate>
+    /// See the docs at <https://bon-rs.com/reference/builder/top-level/crate>
     pub const crate_: Option<Path> = None;
 }
 

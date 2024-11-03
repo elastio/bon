@@ -1,6 +1,6 @@
 # `derive`
 
-**Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
+**Applies to:** <Badge text="structs"/> <Badge text="functions"/> <Badge text="methods"/>
 
 *⚠️ Do not confuse this with `#[derive(bon::Builder)]`⚠️*
 
@@ -45,7 +45,7 @@ assert_eq!(
 let example = builder.is_admin(true).build();
 ```
 
-```rust [Free function]
+```rust [Function]
 use bon::builder;
 
 #[builder(derive(Clone, Debug))] // [!code highlight]
@@ -73,7 +73,7 @@ assert_eq!(
 builder.is_admin(true).call();
 ```
 
-```rust [Associated method]
+```rust [Method]
 use bon::bon;
 
 #[derive(Debug)]

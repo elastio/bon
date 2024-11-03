@@ -153,7 +153,16 @@ pub(crate) fn generate_completion_triggers(meta: Vec<Meta>) -> TokenStream {
             CompletionsSchema::leaf("finish_fn"),
             CompletionsSchema::leaf("state_mod"),
             CompletionsSchema::leaf("on").set_custom_filter(|meta| {
-                if !meta.is_empty() {
+                if let Some(first) = meta.first() {
+                    if let Meta::Path(path) = first {
+                        if path.is_ident("into")
+                            || path.is_ident("transparent")
+                            || path.is_ident("overwritable")
+                        {
+                            return;
+                        }
+                    }
+
                     meta.remove(0);
                 }
             }),

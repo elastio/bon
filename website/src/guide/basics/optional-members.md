@@ -6,7 +6,7 @@ outline: deep
 
 ## `Option<T>`
 
-Setters generated for members of `Option<T>` type are optional to call. If they aren't invoked, then `None` will be used as the default.
+If your function argument or struct field (or member for short) is of type `Option<T>`, then the generated builder will not enforce setting a value for this member, defaulting to `None`.
 
 ```rust
 #[bon::builder]
@@ -16,7 +16,7 @@ fn example(level: Option<u32>) {}
 example().call();
 ```
 
-You can use [`#[builder(transparent)]`](../reference/builder/member/transparent) to opt-out from this.
+You can use [`#[builder(transparent)]`](../../reference/builder/member/transparent) to opt-out from this.
 
 ### Setters pair
 
@@ -27,10 +27,10 @@ The builder provides a **pair** of setters for each optional member:
 | `{member}`       | `T`         | Accepts a non-`None` value.   | [`some_fn`][setters]
 | `maybe_{member}` | `Option<T>` | Accepts an `Option` directly. | [`option_fn`][setters]
 
-[setters]: ../reference/builder/member/setters
+[setters]: ../../reference/builder/member/setters
 
 
-::: details See how the setters look like in the generated code
+::: details See how the setters look in the generated code
 
 ```rust ignore
 // [GENERATED CODE (simplified)]
@@ -45,7 +45,7 @@ impl<S: State> ExampleBuilder<S> {
 
 :::
 
-Thanks to this design, changing the member from required to optional [preserves compatibility](./compatibility#making-a-required-member-optional).
+Thanks to this design, changing the member from required to optional [preserves compatibility](../misc/compatibility#making-a-required-member-optional).
 
 ### Examples
 
@@ -69,15 +69,13 @@ example().maybe_level(value).call();
 
 ## `#[builder(default)]`
 
-To make a member of non-`Option` type optional you may use the attribute [`#[builder(default)]`](../reference/builder/member/default). This attribute uses the [`Default`](https://doc.rust-lang.org/stable/std/default/trait.Default.html) trait or the provided expression to assign the default value for the member.
+To make a member of non-`Option` type optional you may use [`#[builder(default)]`](../../reference/builder/member/default). This attribute uses the [`Default`](https://doc.rust-lang.org/stable/std/default/trait.Default.html) trait or the provided expression to assign the default value for the member.
 
 ::: tip
 
-Switching between `#[builder(default)]` and `Option<T>` is [compatible](./compatibility#switching-between-option-t-and-builder-default).
+Switching between `#[builder(default)]` and `Option<T>` is [compatible](../misc/compatibility#switching-between-option-t-and-builder-default).
 
 :::
-
-### Examples
 
 ```rust
 #[bon::builder]
@@ -105,11 +103,14 @@ The same [pair of optional setters](#setters-pair) is generated for members with
 let result = example()
     // Pass a non-None value
     .a(3)
-    // Pass an `Option` value directly
-    .maybe_b(Some(5))
+    // Pass an `Option` value directly. `None` means the default
+    // value will be used (4 in this case)
+    .maybe_b(None)
     .call();
 ```
 
+You can also reference other members in the default expression. See [`#[builder(default)]`](../../reference/builder/member/default#evaluation-context) reference for details.
+
 ## Conditional building
 
-Now that you know how optional members work you can check out the ["Conditional building" design patterns](./conditional-building) or continue studying other features of `bon` by following the "Next page" link at the bottom.
+Now that you know how optional members work you can check out the [Conditional building](../patterns/conditional-building) design patterns or continue studying other features of `bon` by following the "Next page" link at the bottom.

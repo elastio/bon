@@ -4,7 +4,7 @@ outline: deep
 
 # `on`
 
-**Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
+**Applies to:** <Badge text="structs"/> <Badge text="functions"/> <Badge text="methods"/>
 
 Applies member attributes to all members matching a type pattern. The syntax of this attribute is `on(type_pattern, attributes)`. For example, you can automatically apply `#[builder(into)]` to all members of type `String` this way:
 
@@ -32,7 +32,7 @@ Example::builder()
     .build();
 ```
 
-```rust [Free function]
+```rust [Function]
 use bon::builder;
 
 #[builder(on(String, into))]
@@ -53,7 +53,7 @@ example()
     .call();
 ```
 
-```rust [Associated method]
+```rust [Method]
 use bon::bon;
 
 struct Example;
@@ -95,9 +95,9 @@ For optional members, the underlying type is matched ignoring the `Option` wrapp
 
 There are several attributes supported in the `attributes` position listed below.
 
-- [`into`](../member/into);
-- [`transparent`](../member/transparent) - currently, this attribute can only be used with the `_` type pattern as the first `on(...)` clause;
-- [`overwritable`](../member/overwritable) - 🔬 **experimental**, this attribute is available under the cargo feature `"experimental-overwritable"` (see the issue [#149](https://github.com/elastio/bon/issues/149));
+- [`into`](../member/into)
+- [`transparent`](../member/transparent) - currently, this attribute can only be used with the `_` type pattern as the first `on(...)` clause
+- [`overwritable`](../member/overwritable) - 🔬 **experimental**, this attribute is available under the cargo feature `"experimental-overwritable"` (see the issue [#149](https://github.com/elastio/bon/issues/149))
 
 A single `on(...)` clause can contain several of these separated by a comma e.g. `on(_, into, transparent)`.
 

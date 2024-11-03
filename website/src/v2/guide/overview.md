@@ -1,9 +1,3 @@
-<script setup>
-import { data as version } from '/../data/version.data'
-import VPSocialLink from "vitepress/dist/client/theme-default/components/VPSocialLink.vue";
-const [_, versionWildcard] = version.match(/(\d+.\d+).\d+/);
-</script>
-
 # Overview
 
 `bon` is a Rust crate for generating compile-time-checked builders for functions and structs. It also provides idiomatic partial application with optional and named parameters for functions and methods.
@@ -14,9 +8,9 @@ If you are new to the concept of builders or named function arguments, and you d
 
 Add this to your `Cargo.toml` to use this crate:
 
-```toml-vue
+```toml
 [dependencies]
-bon = "{{ versionWildcard }}"
+bon = "2.3"
 ```
 
 You can opt out of `std` and `alloc` cargo features with `default-features = false` for `no_std` environments.
@@ -264,7 +258,7 @@ This is just part of what's available in `bon`. You may consider reading the res
 
 However, feel free to skip the docs and just use the `#[builder]` and `#[derive(Builder)]` in your code. They are designed to be intuitive, so they'll probably do the thing you want them to do already.
 
-If you can't figure something out, consult the docs and maybe use that search `🔍 Search` thing at the top to navigate. You may also create an issue or a discussion in the [Github repository](https://github.com/elastio/bon) for help, or write us a message in [Discord](https://discord.gg/QcBYSamw4c) (see below).
+If you can't figure something out, consult the docs and maybe use that search `🔍 Search` thing at the top to navigate. You may also create an issue or a discussion in the [Github repository](https://github.com/elastio/bon) for help, or write us a message in [Discord](https://bon-rs.com/discord) (see below).
 
 ## Socials
 
@@ -275,9 +269,9 @@ If you can't figure something out, consult the docs and maybe use that search `�
             <div style="display: flex; align-items: center">
                 <VPSocialLink
                     icon="discord"
-                    link="https://discord.gg/QcBYSamw4c"
+                    link="https://bon-rs.com/discord"
                 />
-                <a href="https://discord.gg/QcBYSamw4c">Discord</a>
+                <a href="https://bon-rs.com/discord">Discord</a>
             </div>
         </td>
         <td>Here you can leave feedback, ask questions, report bugs, or just write "thank you".</td>
