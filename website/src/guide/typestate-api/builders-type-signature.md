@@ -108,4 +108,4 @@ If there is a mix of named and anonymous lifetimes or named generic types and `i
 
 Now you know the mechanics of how a builder's type is built, so you can denote it when it's returned from a function or stored in a struct.
 
-However, to be able to write useful custom methods on the builder, you'll need to know the `trait`s behind the type states. Go to the next page to learn more.
+However, to be able to write useful custom methods on the builder, you'll need to know the traits behind the type states. Go to the next page to learn more.
