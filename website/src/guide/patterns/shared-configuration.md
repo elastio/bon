@@ -10,7 +10,7 @@ On this page, you'll learn how to share common configurations for builders to av
 
 As an example, let's suppose you want to enable [`Into` conversions](./into-conversions-in-depth) for specific types across all your builders and maybe also override the name of the finishing function that consumes the builder from the default `build` to `finish`.
 
-The problem that you'll quickly run into is that you'll need to repeat the same configuration for every usage of the builder macro.
+You'll quickly run into a problem, where you need to repeat the same configuration for every usage of the builder macro.
 
 ```rust
 use bon::Builder;
@@ -43,7 +43,7 @@ This code uses the [`#[builder(on(...))]`](../reference/builder/top-level/on) at
 
 To overcome this problem you can utilize the [`macro_rules_attribute`] crate. It allows you to declare an [`attribute_alias`](https://docs.rs/macro_rules_attribute/latest/macro_rules_attribute/macro.attribute_alias.html) that defines all the shared configuration for your builders and makes it reusable.
 
-Use this approach if you have a lot of structs/functions in your crate that need a builder
+Use this approach if you have a lot of structs/functions in your crate that need a builder.
 
 ### Structs
 

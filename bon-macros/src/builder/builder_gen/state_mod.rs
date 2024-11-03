@@ -234,8 +234,7 @@ impl<'a> StateModGenCtx<'a> {
         let docs = format!(
             "Marker trait that indicates that all required members are set.\n\n\
             In this state, you can finish building by calling the method \
-            [`{builder_ident}::{finish_fn}()`](super::{builder_ident}::{finish_fn}()).
-            ",
+            [`{builder_ident}::{finish_fn}()`](super::{builder_ident}::{finish_fn}())",
         );
 
         quote! {

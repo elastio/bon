@@ -4,7 +4,7 @@ outline: deep
 
 # `on`
 
-**Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
+**Applies to:** <Badge text="structs"/> <Badge text="functions"/> <Badge text="methods"/>
 
 Applies member attributes to all members matching a type pattern. The syntax of this attribute is `on(type_pattern, attributes)`. For example, you can automatically apply `#[builder(into)]` to all members of type `String` this way:
 

@@ -1,6 +1,6 @@
 # `start_fn`
 
-**Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
+**Applies to:** <Badge text="structs"/> <Badge text="functions"/> <Badge text="methods"/>
 
 Overrides name, visibility and docs for the starting function.
 

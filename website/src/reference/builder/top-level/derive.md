@@ -1,6 +1,6 @@
 # `derive`
 
-**Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
+**Applies to:** <Badge text="structs"/> <Badge text="functions"/> <Badge text="methods"/>
 
 *⚠️ Do not confuse this with `#[derive(bon::Builder)]`⚠️*
 

@@ -47,4 +47,4 @@ Project::builder()
     .build();
 ```
 
-`Into` conversions don't always make sense, and you should be aware of their downsides as well. The article ["Into Conversions In-Depth"](./into-conversions-in-depth) provides recommendations on when it makes sense to use and to avoid `Into` conversions.
+`Into` conversions don't always make sense, and you should be aware of their downsides as well. The article [Into Conversions In-Depth](../patterns/into-conversions-in-depth) provides recommendations on when it makes sense to use and to avoid `Into` conversions.

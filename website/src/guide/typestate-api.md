@@ -1,6 +1,6 @@
 # Typestate API
 
-This section will teach you the builder's typestate API. It'll describe the underlying component traits and types of the builder type and how to use them.
+This section teaches you the builder's typestate API. It describes the underlying component traits and types of the builder type and how to use them.
 
 Reading this is optional. The typestate API is private by default. The users of your builder can't denote its type unless you enable [`#[builder(state_mod(vis = "pub"))]`](../../reference/builder/top-level/state_mod).
 

@@ -1,6 +1,6 @@
 # `start_fn`
 
-**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
+**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="function arguments"/> <Badge type="warning" text="method arguments"/>
 
 Makes the member a positional argument on the starting function that creates the builder.
 
@@ -18,21 +18,21 @@ use bon::Builder;
 #[derive(Builder)]
 struct Example {
     #[builder(start_fn)] // [!code highlight]
-    foo: u32,
+    x1: u32,
 
     #[builder(start_fn)] // [!code highlight]
-    bar: u32,
+    x2: u32,
 
-    baz: u32,
+    x3: u32,
 }
 
 let value = Example::builder(1, 2) // [!code highlight]
-    .baz(3)
+    .x3(3)
     .build();
 
-assert_eq!(value.foo, 1);
-assert_eq!(value.bar, 2);
-assert_eq!(value.baz, 3);
+assert_eq!(value.x1, 1);
+assert_eq!(value.x2, 2);
+assert_eq!(value.x3, 3);
 ```
 
 ```rust [Function]
@@ -41,18 +41,18 @@ use bon::builder;
 #[builder]
 fn example(
     #[builder(start_fn)] // [!code highlight]
-    foo: u32,
+    x1: u32,
 
     #[builder(start_fn)] // [!code highlight]
-    bar: u32,
+    x2: u32,
 
-    baz: u32,
+    x3: u32,
 ) -> (u32, u32, u32) {
-    (foo, bar, baz)
+    (x1, x2, x3)
 }
 
 let value = example(1, 2) // [!code highlight]
-    .baz(3)
+    .x3(3)
     .call();
 
 assert_eq!(value.0, 1);
@@ -70,19 +70,19 @@ impl Example {
     #[builder]
     fn example(
         #[builder(start_fn)] // [!code highlight]
-        foo: u32,
+        x1: u32,
 
         #[builder(start_fn)] // [!code highlight]
-        bar: u32,
+        x2: u32,
 
-        baz: u32,
+        x3: u32,
     ) -> (u32, u32, u32) {
-        (foo, bar, baz)
+        (x1, x2, x3)
     }
 }
 
 let value = Example::example(1, 2) // [!code highlight]
-    .baz(3)
+    .x3(3)
     .call();
 
 assert_eq!(value.0, 1);

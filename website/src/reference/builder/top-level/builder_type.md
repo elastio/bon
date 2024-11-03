@@ -4,7 +4,7 @@ outline: deep
 
 # `builder_type`
 
-**Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
+**Applies to:** <Badge text="structs"/> <Badge text="functions"/> <Badge text="methods"/>
 
 Overrides name, visibility and docs for the builder struct.
 

@@ -1,6 +1,6 @@
 # `name`
 
-**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
+**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="function arguments"/> <Badge type="warning" text="method arguments"/>
 
 Overrides the name of the member used in the builder's API. This is most useful when with struct syntax (`#[derive(Builder)]`) where you'd like to use a different name for the field internally. For functions this attribute makes less sense since it's easy to just create a variable named differently `let new_name = param_name;`. However, this attribute is still supported on function arguments.
 

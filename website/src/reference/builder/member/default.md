@@ -1,6 +1,6 @@
 # `default`
 
-**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
+**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="function arguments"/> <Badge type="warning" text="method arguments"/>
 
 Makes the member optional and assigns a default value to it. The default value is lazily computed inside of the finishing function based on the form of this attribute.
 
@@ -39,31 +39,31 @@ use bon::Builder;
 #[derive(Builder)]
 struct Example {
     #[builder(default)] // [!code highlight]
-    foo: u32,
+    x1: u32,
 
     #[builder(default = "anon".to_owned())] // [!code highlight]
-    bar: String,
+    x2: String,
 
     // No need for `.to_owned()`. Into is applied to the expression
     #[builder(default = "bon", into)] // [!code highlight]
-    baz: String,
+    x3: String,
 }
 
 let value = Example::builder().build();
 
-assert_eq!(value.foo, 0);
-assert_eq!(value.bar, "anon");
-assert_eq!(value.baz, "bon");
+assert_eq!(value.x1, 0);
+assert_eq!(value.x2, "anon");
+assert_eq!(value.x3, "bon");
 
 let value = Example::builder()
-    .foo(99)
-    .maybe_bar(None) // None means the default will be used
-    .maybe_baz(Some("lyra"))
+    .x1(99)
+    .maybe_x2(None) // None means the default will be used
+    .maybe_x3(Some("lyra"))
     .build();
 
-assert_eq!(value.foo, 99);
-assert_eq!(value.bar, "anon");
-assert_eq!(value.baz, "lyra");
+assert_eq!(value.x1, 99);
+assert_eq!(value.x2, "anon");
+assert_eq!(value.x3, "lyra");
 ```
 
 ```rust [Function]
@@ -72,16 +72,16 @@ use bon::builder;
 #[builder]
 fn example(
     #[builder(default)] // [!code highlight]
-    foo: u32,
+    x1: u32,
 
     #[builder(default = "anon".to_owned())] // [!code highlight]
-    bar: String,
+    x2: String,
 
     // No need for `.to_owned()`. Into is applied to the expression
     #[builder(default = "bon", into)] // [!code highlight]
-    baz: String,
+    x3: String,
 ) -> (u32, String, String) {
-    (foo, bar, baz)
+    (x1, x2, x3)
 }
 
 let value = example().call();
@@ -91,9 +91,9 @@ assert_eq!(value.1, "anon");
 assert_eq!(value.2, "bon");
 
 let value = example()
-    .foo(99)
-    .maybe_bar(None) // None means the default will be used
-    .maybe_baz(Some("lyra"))
+    .x1(99)
+    .maybe_x2(None) // None means the default will be used
+    .maybe_x3(Some("lyra"))
     .call();
 
 assert_eq!(value.0, 99);
@@ -105,9 +105,9 @@ assert_eq!(value.2, "lyra");
 use bon::bon;
 
 struct Example {
-    foo: u32,
-    bar: String,
-    baz: String,
+    x1: u32,
+    x2: String,
+    x3: String,
 }
 
 #[bon]
@@ -115,34 +115,34 @@ impl Example {
     #[builder]
     fn new(
         #[builder(default)] // [!code highlight]
-        foo: u32,
+        x1: u32,
 
         #[builder(default = "anon".to_owned())] // [!code highlight]
-        bar: String,
+        x2: String,
 
         // No need for `.to_owned()`. Into is applied to the expression
         #[builder(default = "bon", into)] // [!code highlight]
-        baz: String,
+        x3: String,
     ) -> Self {
-        Self { foo, bar, baz }
+        Self { x1, x2, x3 }
     }
 }
 
 let value = Example::builder().build();
 
-assert_eq!(value.foo, 0);
-assert_eq!(value.bar, "anon");
-assert_eq!(value.baz, "bon");
+assert_eq!(value.x1, 0);
+assert_eq!(value.x2, "anon");
+assert_eq!(value.x3, "bon");
 
 let value = Example::builder()
-    .foo(99)
-    .maybe_bar(None) // None means the default will be used
-    .maybe_baz(Some("lyra"))
+    .x1(99)
+    .maybe_x2(None) // None means the default will be used
+    .maybe_x3(Some("lyra"))
     .build();
 
-assert_eq!(value.foo, 99);
-assert_eq!(value.bar, "anon");
-assert_eq!(value.baz, "lyra");
+assert_eq!(value.x1, 99);
+assert_eq!(value.x2, "anon");
+assert_eq!(value.x3, "lyra");
 ```
 
 :::
@@ -158,24 +158,24 @@ use bon::Builder;
 
 #[derive(Builder)]
 struct Example {
-    foo: u32,
+    x1: u32,
 
-    // Note that here we don't have access to `baz`
+    // Note that here we don't have access to `x3`
     // because it's declared (and thus initialized) later
-    #[builder(default = 2 * foo)]
-    bar: u32,
+    #[builder(default = 2 * x1)]
+    x2: u32,
 
-    #[builder(default = bar + foo)]
-    baz: u32,
+    #[builder(default = x2 + x1)]
+    x3: u32,
 }
 
 let value = Example::builder()
-    .foo(3)
+    .x1(3)
     .build();
 
-assert_eq!(value.foo, 3);
-assert_eq!(value.bar, 6);
-assert_eq!(value.baz, 9);
+assert_eq!(value.x1, 3);
+assert_eq!(value.x2, 6);
+assert_eq!(value.x3, 9);
 ```
 
 ```rust [Function]
@@ -183,21 +183,21 @@ use bon::builder;
 
 #[builder]
 fn example(
-    foo: u32,
+    x1: u32,
 
-    // Note that here we don't have access to `baz`
+    // Note that here we don't have access to `x3`
     // because it's declared (and thus initialized) later
-    #[builder(default = 2 * foo)]
-    bar: u32,
+    #[builder(default = 2 * x1)]
+    x2: u32,
 
-    #[builder(default = bar + foo)]
-    baz: u32,
+    #[builder(default = x2 + x1)]
+    x3: u32,
 ) -> (u32, u32, u32) {
-    (foo, bar, baz)
+    (x1, x2, x3)
 }
 
 let value = example()
-    .foo(3)
+    .x1(3)
     .call();
 
 assert_eq!(value, (3, 6, 9));
@@ -212,22 +212,22 @@ struct Example;
 impl Example {
     #[builder]
     fn example(
-        foo: u32,
+        x1: u32,
 
-        // Note that here we don't have access to `baz`
+        // Note that here we don't have access to `x3`
         // because it's declared (and thus initialized) later
-        #[builder(default = 2 * foo)]
-        bar: u32,
+        #[builder(default = 2 * x1)]
+        x2: u32,
 
-        #[builder(default = bar + foo)]
-        baz: u32,
+        #[builder(default = x2 + x1)]
+        x3: u32,
     ) -> (u32, u32, u32) {
-        (foo, bar, baz)
+        (x1, x2, x3)
     }
 }
 
 let value = Example::example()
-    .foo(3)
+    .x1(3)
     .call();
 
 assert_eq!(value, (3, 6, 9));

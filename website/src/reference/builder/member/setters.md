@@ -1,6 +1,6 @@
 # `setters`
 
-**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
+**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="function arguments"/> <Badge type="warning" text="method arguments"/>
 
 Overrides name, visibility and docs for setters.
 
@@ -71,7 +71,7 @@ The default name for setters is chosen according to the following rules:
 | Required     | `{member}`
 | Optional     | `some_fn` = `{member}`<br/>`option_fn` = `maybe_{member}`
 
-This attribute is different from [`#[builder(name)]`](./name), because it overrides only the names of setters. It doesn't influence the name of the member in the builder's [typestate API](../../../guide/advanced/builder-extensions). This attribute also has higher precedence than [`#[builder(name)]`](./name).
+This attribute is different from [`#[builder(name)]`](./name), because it overrides only the names of setters. It doesn't influence the name of the member in the builder's [typestate API](../../../guide/typestate-api). This attribute also has higher precedence than [`#[builder(name)]`](./name).
 
 ## `vis`
 

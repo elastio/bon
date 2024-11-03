@@ -27,7 +27,7 @@ fn greet(
 
 ::: details How does this work? 🤔
 
-This works because Rust compiler checks for invalid placement of `#[doc = ...]` attributes only after the macro expansion stage. `#[builder]` makes sure to remove the docs from the function's arguments in the expanded code, and instead moves them to the docs on setter methods.
+This works because Rust compiler checks for invalid placement of `#[doc = ...]` attributes only after the macro expansion stage. `#[builder]` removes the docs from the function's arguments in the expanded code, and instead moves them to the docs on setter methods.
 
 :::
 
@@ -48,6 +48,7 @@ use bon::Builder;
     start_fn(doc {
         /// Custom docs on the starting function
     }),
+    // ...
 )]
 struct Example {}
 ```
@@ -59,7 +60,7 @@ You can document the following items this way:
 | [`builder_type`](../../reference/builder/top-level/builder_type#doc)   | Builder struct
 | [`start_fn`](../../reference/builder/top-level/start_fn#doc)           | Starting function
 | [`finish_fn`](../../reference/builder/top-level/finish_fn#doc)         | Finishing function
-| [`state_mod`](../../reference/builder/top-level/state_mod#doc)      | Builder state API module (more details in [Builder Extensions](../advanced/builder-extensions))
+| [`state_mod`](../../reference/builder/top-level/state_mod#doc)      | Builder state API module (more details in [Typestate API](../typestate-api))
 | [`setters`](../../reference/builder/member/setters#doc)                | Custom docs for setters. Prevents copying them from the field/argument
 
 

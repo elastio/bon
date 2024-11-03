@@ -30,7 +30,7 @@ The builder provides a **pair** of setters for each optional member:
 [setters]: ../reference/builder/member/setters
 
 
-::: details See how the setters look like in the generated code
+::: details See how the setters look in the generated code
 
 ```rust ignore
 // [GENERATED CODE (simplified)]
@@ -109,6 +109,8 @@ let result = example()
     .call();
 ```
 
+You can also reference other members in the default expression. See [`#[builder(default)]`](../../reference/builder/member/default#evaluation-context) reference for details.
+
 ## Conditional building
 
-Now that you know how optional members work you can check out the ["Conditional building" design patterns](./conditional-building) or continue studying other features of `bon` by following the "Next page" link at the bottom.
+Now that you know how optional members work you can check out the [Conditional building](../patterns/conditional-building) design patterns or continue studying other features of `bon` by following the "Next page" link at the bottom.

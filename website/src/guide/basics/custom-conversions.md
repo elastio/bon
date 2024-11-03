@@ -2,7 +2,7 @@
 
 [`#[builder(into)]`](../../reference/builder/member/into) is great and it works in many cases. However, what if you need to do a conversion that isn't a simple `Into`? What if you want your setter to accept several parameters? What if your setter should be fallible? The answer to all these questions is the bigger brother [`#[builder(with)]`](../../reference/builder/member/with).
 
-You can pass a custom closure to `#[builder(with)]`. It will be used to define the signature of the setter and perform a conversion.
+You can pass a custom closure to `#[builder(with)]`. It will define the signature of the setter and perform a conversion.
 
 ```rust
 use bon::Builder;

@@ -1,6 +1,6 @@
 # Positional Members
 
-You can let the caller pass some values as positional parameters to the starting function that creates the builder or to the finishing function that consumes it.
+You can let the caller pass some values as positional parameters to the starting function, that creates the builder or to the finishing function, that consumes it.
 
 ## Starting function
 
@@ -42,7 +42,7 @@ They have different meanings.
 
 ## Finishing function
 
-Use `#[builder(finish_fn)]` to move some members to the parameters of the starting function.
+Use `#[builder(finish_fn)]` to move some members to the parameters of the finishing function.
 
 ```rust
 use bon::Builder;

@@ -63,7 +63,7 @@ export default defineConfig({
 
     markdown: {
         languageAlias: {
-            // Attributes highlighting works with better JS tokenizer 😳
+            // Attributes highlighting works better with JS tokenizer 😳
             attr: "js",
         },
 
@@ -83,10 +83,6 @@ export default defineConfig({
     head,
 
     srcDir: "src",
-
-    rewrites: {
-        "guide/:subdir/:page": "guide/:page",
-    },
 
     // https://vitepress.dev/reference/default-theme-config
     themeConfig: {
@@ -139,27 +135,27 @@ export default defineConfig({
                     items: [
                         {
                             text: "Optional Members",
-                            link: "/guide/optional-members",
+                            link: "/guide/basics/optional-members",
                         },
                         {
                             text: "Into Conversions",
-                            link: "/guide/into-conversions",
+                            link: "/guide/basics/into-conversions",
                         },
                         {
                             text: "Custom Conversions",
-                            link: "/guide/custom-conversions",
+                            link: "/guide/basics/custom-conversions",
                         },
                         {
                             text: "Positional Members",
-                            link: "/guide/positional-members",
+                            link: "/guide/basics/positional-members",
                         },
                         {
                             text: "Inspecting",
-                            link: "/guide/inspecting",
+                            link: "/guide/basics/inspecting",
                         },
                         {
                             text: "Documenting",
-                            link: "/guide/documenting",
+                            link: "/guide/basics/documenting",
                         },
                     ],
                 },
@@ -169,11 +165,11 @@ export default defineConfig({
                     items: [
                         {
                             text: "Builder's Type Signature",
-                            link: "/guide/builders-type-signature",
+                            link: "/guide/typestate-api/builders-type-signature",
                         },
                         {
                             text: "Custom Methods",
-                            link: "/guide/custom-methods",
+                            link: "/guide/typestate-api/custom-methods",
                         }
                     ],
                 },
@@ -182,19 +178,19 @@ export default defineConfig({
                     items: [
                         {
                             text: "Conditional Building",
-                            link: "/guide/conditional-building",
+                            link: "/guide/patterns/conditional-building",
                         },
                         {
                             text: "Fallible Builders",
-                            link: "/guide/fallible-builders",
+                            link: "/guide/patterns/fallible-builders",
                         },
                         {
                             text: "Into Conversions In-Depth",
-                            link: "/guide/into-conversions-in-depth",
+                            link: "/guide/patterns/into-conversions-in-depth",
                         },
                         {
                             text: "Shared Configuration",
-                            link: "/guide/shared-configuration",
+                            link: "/guide/patterns/shared-configuration",
                         },
                     ],
                 },
@@ -203,23 +199,23 @@ export default defineConfig({
                     items: [
                         {
                             text: "Compatibility",
-                            link: "/guide/compatibility",
+                            link: "/guide/misc/compatibility",
                         },
                         {
                             text: "Limitations",
-                            link: "/guide/limitations",
+                            link: "/guide/misc/limitations",
                         },
                         {
                             text: "Benchmarks",
-                            link: "/guide/benchmarks",
+                            link: "/guide/misc/benchmarks",
                         },
                         {
                             text: "Alternatives",
-                            link: "/guide/alternatives",
+                            link: "/guide/misc/alternatives",
                         },
                         {
                             text: "Troubleshooting",
-                            link: "/guide/troubleshooting",
+                            link: "/guide/misc/troubleshooting",
                         },
                     ],
                 },
@@ -228,7 +224,7 @@ export default defineConfig({
                     items: [
                         {
                             text: "Contributing",
-                            link: "/guide/contributing",
+                            link: "/guide/internal/contributing",
                         },
                     ],
                 },

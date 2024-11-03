@@ -1,6 +1,6 @@
 # `finish_fn`
 
-**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
+**Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="function arguments"/> <Badge type="warning" text="method arguments"/>
 
 Makes the member a positional argument on the finishing function.
 
@@ -18,21 +18,21 @@ use bon::Builder;
 #[derive(Builder)]
 struct Example {
     #[builder(finish_fn)] // [!code highlight]
-    foo: u32,
+    x1: u32,
 
     #[builder(finish_fn)] // [!code highlight]
-    bar: u32,
+    x2: u32,
 
-    baz: u32,
+    x3: u32,
 }
 
 let value = Example::builder()
-    .baz(3)
+    .x3(3)
     .build(1, 2); // [!code highlight]
 
-assert_eq!(value.foo, 1);
-assert_eq!(value.bar, 2);
-assert_eq!(value.baz, 3);
+assert_eq!(value.x1, 1);
+assert_eq!(value.x2, 2);
+assert_eq!(value.x3, 3);
 ```
 
 ```rust [Function]
@@ -41,18 +41,18 @@ use bon::builder;
 #[builder]
 fn example(
     #[builder(finish_fn)] // [!code highlight]
-    foo: u32,
+    x1: u32,
 
     #[builder(finish_fn)] // [!code highlight]
-    bar: u32,
+    x2: u32,
 
-    baz: u32,
+    x3: u32,
 ) -> (u32, u32, u32) {
-    (foo, bar, baz)
+    (x1, x2, x3)
 }
 
 let value = example()
-    .baz(3)
+    .x3(3)
     .call(1, 2); // [!code highlight]
 
 assert_eq!(value.0, 1);
@@ -70,19 +70,19 @@ impl Example {
     #[builder]
     fn example(
         #[builder(finish_fn)] // [!code highlight]
-        foo: u32,
+        x1: u32,
 
         #[builder(finish_fn)] // [!code highlight]
-        bar: u32,
+        x2: u32,
 
-        baz: u32,
+        x3: u32,
     ) -> (u32, u32, u32) {
-        (foo, bar, baz)
+        (x1, x2, x3)
     }
 }
 
 let value = Example::example()
-    .baz(3)
+    .x3(3)
     .call(1, 2); // [!code highlight]
 
 assert_eq!(value.0, 1);
@@ -92,11 +92,11 @@ assert_eq!(value.2, 3);
 
 :::
 
-You can rename the finishing function from default `build()` or `call()` to something more readable via the top-level [`#[builder(finish_fn = ...)]`](../top-level/finish-fn) attribute.
+You can rename the finishing function from default `build()` or `call()` to something more readable via the top-level [`#[builder(finish_fn = ...)]`](../top-level/finish_fn) attribute.
 
 ## Ordering
 
-The ordering of members annotated with `#[builder(finish_fn)]` matters! They will appear in the same order relative to each other in the finishing function signature. They must also be declared at the top of the members list strictly after members annotated with [`#[builder(start_fn)]`](./start-fn) (if any).
+The ordering of members annotated with `#[builder(finish_fn)]` matters! They will appear in the same order relative to each other in the finishing function signature. They must also be declared at the top of the members list strictly after members annotated with [`#[builder(start_fn)]`](./start_fn) (if any).
 
 It ensures a consistent initialization order, making these members available in the evaluation context of expressions in `#[builder(default/skip = ...)]` for regular members that follow them.
 

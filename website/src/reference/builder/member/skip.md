@@ -65,4 +65,4 @@ assert_eq!(example.x3, 9);
 
 ## Unsupported function syntax
 
-This attribute is not supported with free function or associated method syntax because it's simply unnecessary there and can easier be expressed with local variables.
+This attribute is not supported with function or method syntax because it's simply unnecessary there and can easier be expressed with local variables.
