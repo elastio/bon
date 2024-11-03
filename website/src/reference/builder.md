@@ -51,7 +51,7 @@ struct Example {
 }
 ```
 
-```rust [Free function]
+```rust [Function]
 use bon::builder;
 
 #[builder(finish_fn = finish)] // <-- this is a top-level attribute // [!code highlight]
@@ -61,7 +61,7 @@ fn example(
 ) { }
 ```
 
-```rust [Associated method]
+```rust [Method]
 use bon::bon;
 
 struct Example;

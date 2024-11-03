@@ -41,11 +41,9 @@ struct Project {
 }
 
 Project::builder()
-    // &str is converted to `String` internally    // [!code highlight]
-    .name("Bon")
-    .description("Awesome crate 🐱")
-    // `&str` is converted to `PathBuf` internally // [!code highlight]
-    .path("/path/to/your/heart")
+    .name("Bon") // [!code highlight]
+    .description("Awesome crate 🐱") // [!code highlight]
+    .path("/path/to/your/heart") // [!code highlight]
     .build();
 ```
 

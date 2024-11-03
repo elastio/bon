@@ -66,7 +66,7 @@ assert_eq!(value.bar, "anon");
 assert_eq!(value.baz, "lyra");
 ```
 
-```rust [Free function]
+```rust [Function]
 use bon::builder;
 
 #[builder]
@@ -101,7 +101,7 @@ assert_eq!(value.1, "anon");
 assert_eq!(value.2, "lyra");
 ```
 
-```rust [Associated method]
+```rust [Method]
 use bon::bon;
 
 struct Example {
@@ -178,7 +178,7 @@ assert_eq!(value.bar, 6);
 assert_eq!(value.baz, 9);
 ```
 
-```rust [Free function]
+```rust [Function]
 use bon::builder;
 
 #[builder]
@@ -203,7 +203,7 @@ let value = example()
 assert_eq!(value, (3, 6, 9));
 ```
 
-```rust [Associated method]
+```rust [Method]
 use bon::bon;
 
 struct Example;

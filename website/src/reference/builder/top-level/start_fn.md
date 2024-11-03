@@ -2,7 +2,13 @@
 
 **Applies to:** <Badge text="structs"/> <Badge text="free functions"/> <Badge text="associated methods"/>
 
-Overrides name, visibility and docs for the function that starts the building process, i.e. returns the builder for the `struct` or `fn`. It is commonly referred to as the "starting function".
+Overrides name, visibility and docs for the starting function.
+
+::: tip
+
+Don't confuse this with the [member-level](../member/start_fn) `#[builder(start_fn)]` attribute.
+
+:::
 
 When this attribute is used with `fn` syntax, it additionally [exposes the original function](#exposing-original-function) under the macro.
 
@@ -108,7 +114,7 @@ The [`name`](#name) parameter is **required** when `start_fn` is used with `fn` 
 
 ::: code-group
 
-```rust [Free function]
+```rust [Function]
 use bon::builder;
 
 #[builder(start_fn = example_builder)] // [!code ++]
@@ -124,7 +130,7 @@ example_builder()
     .call();
 ```
 
-```rust [Associated method]
+```rust [Method]
 use bon::bon;
 
 struct Example;

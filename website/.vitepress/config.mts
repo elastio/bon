@@ -164,12 +164,17 @@ export default defineConfig({
                     ],
                 },
                 {
-                    text: "Advanced",
+                    text: "Typestate API",
+                    link: "/guide/typestate-api",
                     items: [
                         {
-                            text: "Builder Extensions",
-                            link: "/guide/builder-extensions",
+                            text: "Builder's Type Signature",
+                            link: "/guide/builders-type-signature",
                         },
+                        {
+                            text: "Custom Methods",
+                            link: "/guide/custom-methods",
+                        }
                     ],
                 },
                 {
@@ -314,10 +319,6 @@ export default defineConfig({
                                     link: "/reference/builder/member/with",
                                 },
                             ],
-                        },
-                        {
-                            text: "Typestate API",
-                            link: "/reference/builder/typestate-api",
                         },
                     ],
                 },

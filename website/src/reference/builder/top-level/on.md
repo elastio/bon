@@ -32,7 +32,7 @@ Example::builder()
     .build();
 ```
 
-```rust [Free function]
+```rust [Function]
 use bon::builder;
 
 #[builder(on(String, into))]
@@ -53,7 +53,7 @@ example()
     .call();
 ```
 
-```rust [Associated method]
+```rust [Method]
 use bon::bon;
 
 struct Example;

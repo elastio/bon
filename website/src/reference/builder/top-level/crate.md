@@ -20,12 +20,12 @@ Overrides path to `bon` crate referenced in the generated code, which is useful 
 struct Example {}
 ```
 
-```rust ignore [Free function]
+```rust ignore [Function]
 #[::path::to::bon::builder(crate = ::path::to::bon)]
 fn example() {}
 ```
 
-```rust ignore [Associated method]
+```rust ignore [Method]
 struct Example;
 
 #[::path::to::bon::bon(crate = ::path::to::bon)]

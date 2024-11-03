@@ -6,9 +6,7 @@ Makes the member a positional argument on the starting function that creates the
 
 ::: tip
 
-Don't confuse this with the top-level [`#[builder(start_fn = ...)]`](../top-level/start-fn) attribute.
-
-See ["Positional Members"](../../../guide/positional-members#starting-function) guide page for details.
+Don't confuse this with the [top-level](../top-level/start_fn) `#[builder(start_fn)]` attribute.
 
 :::
 
@@ -37,7 +35,7 @@ assert_eq!(value.bar, 2);
 assert_eq!(value.baz, 3);
 ```
 
-```rust [Free function]
+```rust [Function]
 use bon::builder;
 
 #[builder]
@@ -62,7 +60,7 @@ assert_eq!(value.1, 2);
 assert_eq!(value.2, 3);
 ```
 
-```rust [Associated method]
+```rust [Method]
 use bon::bon;
 
 struct Example;

@@ -2,13 +2,11 @@
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="free function arguments"/> <Badge type="warning" text="associated method arguments"/>
 
-Makes the member a positional argument on the finishing function that consumes the builder and returns the resulting object (for struct syntax) or performs the requested action (for function/method syntax).
+Makes the member a positional argument on the finishing function.
 
 ::: tip
 
-Don't confuse this with the top-level [`#[builder(finish_fn = ...)]`](../top-level/finish-fn) attribute.
-
-See ["Positional Members"](../../../guide/positional-members#finishing-function) guide page for details.
+Don't confuse this with the [top-level](../top-level/finish_fn) `#[builder(finish_fn)]` attribute.
 
 :::
 
@@ -37,7 +35,7 @@ assert_eq!(value.bar, 2);
 assert_eq!(value.baz, 3);
 ```
 
-```rust [Free function]
+```rust [Function]
 use bon::builder;
 
 #[builder]
@@ -62,7 +60,7 @@ assert_eq!(value.1, 2);
 assert_eq!(value.2, 3);
 ```
 
-```rust [Associated method]
+```rust [Method]
 use bon::bon;
 
 struct Example;

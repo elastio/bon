@@ -48,7 +48,7 @@ Example::builder()
     .build();
 ```
 
-```rust [Free function]
+```rust [Function]
 use bon::builder;
 
 #[builder]
@@ -74,7 +74,7 @@ example()
     .call();
 ```
 
-```rust [Associated method]
+```rust [Method]
 use bon::bon;
 
 struct Example;

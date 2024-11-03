@@ -205,7 +205,7 @@ You can opt out of `std` and `alloc` cargo features with `default-features = fal
 
 ## Getting Help
 
-If you can't figure something out, consult the docs and maybe use the `🔍 Search` at the top of the page on our [docs website](https://bon-rs.com). You may also create an issue or a discussion on the [Github repository](https://github.com/elastio/bon) for help or write us a message on [Discord](https://bon-rs.com/discord) (see below).
+If you can't figure something out, consult the docs and maybe use the `🔍 Search` bar on our [docs website](https://bon-rs.com). You may also create an issue or a discussion on the [Github repository](https://github.com/elastio/bon) for help or write us a message on [Discord](https://bon-rs.com/discord).
 
 ## Socials
 
@@ -213,15 +213,11 @@ If you can't figure something out, consult the docs and maybe use the `🔍 Sear
 <table>
 <tbody>
     <tr>
-        <td>
-            <a href="https://bon-rs.com/discord">Discord</a>
-        </td>
+        <td><a href="https://bon-rs.com/discord">Discord</a></td>
         <td>Here you can leave feedback, ask questions, report bugs, or just write "thank you".</td>
     </tr>
     <tr>
-        <td>
-            <a href="https://x.com/veetaha" class="nobr">X (Twitter)</a>
-        </td>
+        <td><a href="https://x.com/veetaha" class="nobr">X (Twitter)</a></td>
         <td>Profile of the maintainer. There are only posts about <code>bon</code> and Rust in general here.</td>
     </tr>
 </tbody>

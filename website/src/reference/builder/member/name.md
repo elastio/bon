@@ -22,7 +22,7 @@ Player::builder()
     .build();
 ```
 
-```rust [Free function]
+```rust [Function]
 use bon::builder;
 
 #[builder]
@@ -36,7 +36,7 @@ player()
     .call();
 ```
 
-```rust [Associated method]
+```rust [Method]
 use bon::bon;
 
 struct Player {
