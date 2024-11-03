@@ -28,4 +28,4 @@ assert_eq!(value.point.y, 3);
 
 You can also pass a [fallible closure](../../reference/builder/member/with#fallible-setters) and some [well-known functions](../../reference/builder/member/with#well-known-functions) to `#[builder(with)]`.
 
-If your setter needs more complex logic that isn't expressible with `#[builder(with)]` (e.g. mark the setter `unsafe`, set several members at once), then [builder extensions](../guide/builder-extensions#custom-setters) have you covered.
+If your setter needs more complex logic that isn't expressible with `#[builder(with)]` (e.g. mark the setter `unsafe`, set several members at once), then [Custom Methods](./custom-methods) can cover that.

@@ -50,7 +50,7 @@
 
 `bon` is a Rust crate for generating compile-time-checked builders for structs and functions. It also provides idiomatic partial application with optional and named parameters for functions and methods.
 
-If you wonder "Why would I use builders?" then see the [motivational blog post](https://bon-rs.com/blog/how-to-do-named-function-arguments-in-rust).
+If you wonder "Why would I use builders?", see the [motivational blog post](https://bon-rs.com/blog/how-to-do-named-function-arguments-in-rust).
 
 ## Function Builder
 
