@@ -15,7 +15,7 @@ If combined with [`#[builder(into)]`](./into), the default expression is additio
 
 ## Setters
 
-Two setter methods are generated for the member with `#[builder(default)]` just like for [members of type `Option<T>`](../../../guide/optional-members#setters-pair):
+Two setter methods are generated for the member with `#[builder(default)]` just like for [members of type `Option<T>`](../../../guide/basics/optional-members#setters-pair):
 
 | Name             | Input       | Description                   | Configuration attribute
 |------------------|-------------|-------------------------------|------------------
@@ -26,7 +26,7 @@ If `None` is passed to the `maybe_{member}` setter, then the default value is us
 
 ::: tip
 
-Switching between `#[builder(default)]` and `Option<T>` is [compatible](../../../guide/compatibility#switching-between-option-t-and-builder-default).
+Switching between `#[builder(default)]` and `Option<T>` is [compatible](../../../guide/misc/compatibility#switching-between-option-t-and-builder-default).
 
 :::
 

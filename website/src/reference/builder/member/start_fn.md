@@ -92,7 +92,7 @@ assert_eq!(value.2, 3);
 
 :::
 
-You can rename the starting function from default `builder()` for structs to something more readable via the top-level [`#[builder(start_fn = ...)]`](../top-level/start-fn) attribute.
+You can rename the starting function from default `builder()` for structs to something more readable via the top-level [`#[builder(start_fn = ...)]`](../top-level/start_fn) attribute.
 
 ## Ordering
 

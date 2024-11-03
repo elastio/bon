@@ -47,7 +47,7 @@ The default name for the starting function is chosen according to the following 
 
 The visibility must be enclosed with quotes. Use `""` or [`"pub(self)"`](https://doc.rust-lang.org/reference/visibility-and-privacy.html#pubin-path-pubcrate-pubsuper-and-pubself) for private visibility.
 
-The default visibility is the same as the visibility of the [`builder_type`](./builder-type#vis), which in turn, defaults to the visibility of the underlying `struct` or `fn`.
+The default visibility is the same as the visibility of the [`builder_type`](./builder_type#vis), which in turn, defaults to the visibility of the underlying `struct` or `fn`.
 
 ## `doc`
 

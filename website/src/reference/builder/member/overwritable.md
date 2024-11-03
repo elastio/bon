@@ -38,7 +38,7 @@ Overwrites like in the example above are generally considered bugs. However, the
 
 ## Improving compile times
 
-This attribute simplifies the generated code. For example, it completely removes type states for [optional members](../../../guide/optional-members).
+This attribute simplifies the generated code. For example, it completely removes type states for [optional members](../../../guide/basics/optional-members).
 
 If you'd like to improve your compile times, consider enabling overwrites with `#[builder(on(_, overwritable))]` and checking how much it helps. The difference is visible on a larger scale, especially for structs/functions with tens of optional members.
 
@@ -48,11 +48,9 @@ It is a trade-off between the level of compile-time checks and compilation perfo
 
 You might want to use this to construct dummy values for tests (fixtures).
 
-**Example:**
-
 ::: tip
 
-The builder's type signature mentioned in this example is described in the ["Builder Extensions"](../../../guide/builder-extensions) guide.
+The builder's type signature mentioned in this example is described in the [Builder's Type Signature](../../../guide/typestate-api/builders-type-signature) guide.
 
 :::
 

@@ -104,7 +104,7 @@ let user = User::builder()
     .build();
 ```
 
-In this case, we create a variable for each conditional member beforehand and initialize them separately, then we pass the results to the builder. We benefit from the `maybe_` setters for [optional members](./optional-members) such that we can pass the `Option<T>` values directly.
+In this case, we create a variable for each conditional member beforehand and initialize them separately, then we pass the results to the builder. We benefit from the `maybe_` setters for [optional members](../basics/optional-members) such that we can pass the `Option<T>` values directly.
 
 ::: tip NOTE
 

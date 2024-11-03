@@ -8,7 +8,7 @@ On this page, you'll learn how to share common configurations for builders to av
 
 ## Problem statement
 
-As an example, let's suppose you want to enable [`Into` conversions](./into-conversions-in-depth) for specific types across all your builders and maybe also override the name of the finishing function that consumes the builder from the default `build` to `finish`.
+As an example, let's suppose you want to enable [`Into` conversions](../patterns/into-conversions-in-depth) for specific types across all your builders and maybe also override the name of the finishing function that consumes the builder from the default `build` to `finish`.
 
 You'll quickly run into a problem, where you need to repeat the same configuration for every usage of the builder macro.
 
@@ -35,7 +35,7 @@ struct MyLovelyStruct2 { /**/ }
 
 ::: tip
 
-This code uses the [`#[builder(on(...))]`](../reference/builder/top-level/on) attribute to configure the types of members for which `bon` should enable `Into` conversions.
+This code uses the [`#[builder(on(...))]`](../../reference/builder/top-level/on) attribute to configure the types of members for which `bon` should enable `Into` conversions.
 
 :::
 

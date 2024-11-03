@@ -22,7 +22,7 @@ Project::builder()
 
 However, you can ask `bon` to generate setters that accept `impl Into<T>` to remove the need for manual conversion.
 
-This can be configured with [`#[builder(into)]`](../reference/builder/member/into) for a single member or with [`#[builder(on({type}, into))]`](../reference/builder/top-level/on) for many members at once.
+This can be configured with [`#[builder(into)]`](../../reference/builder/member/into) for a single member or with [`#[builder(on({type}, into))]`](../../reference/builder/top-level/on) for many members at once.
 
 ```rust
 use bon::Builder;

@@ -38,11 +38,11 @@ The config is tree-structured with overrides precedence explained in the next pa
 )]
 ```
 
-The main use case for this attribute is making generated setters private to wrap them with custom setters. See ["Builder extensions"](../../../guide/builder-extensions#custom-setters) for details.
+The main use case for this attribute is making generated setters private to wrap them with custom methods. See [Custom Methods](../../../guide/typestate-api/custom-methods) for details.
 
 ## Config precedence
 
-The keys `some_fn` and `option_fn` are available only for optional members that have a [pair of setters](../../../guide/optional-members#setters-pair).
+The keys `some_fn` and `option_fn` are available only for optional members that have a [pair of setters](../../../guide/basics/optional-members#setters-pair).
 
 The root-level `name`, `vis`, `docs` are still available for both required and optional setters. They can be overwritten at `some_fn` and `option_fn` level individually.
 
@@ -77,7 +77,7 @@ This attribute is different from [`#[builder(name)]`](./name), because it overri
 
 The visibility must be enclosed with quotes. Use `""` or [`"pub(self)"`](https://doc.rust-lang.org/reference/visibility-and-privacy.html#pubin-path-pubcrate-pubsuper-and-pubself) for private visibility.
 
-The default visibility is the same as the visibility of the [`builder_type`](../top-level/builder-type#vis), which in turn, defaults to the visibility of the underlying `struct` or `fn`.
+The default visibility is the same as the visibility of the [`builder_type`](../top-level/builder_type#vis), which in turn, defaults to the visibility of the underlying `struct` or `fn`.
 
 ## `doc`
 

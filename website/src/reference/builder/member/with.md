@@ -9,7 +9,7 @@ If the closure accepts a single parameter `T`, then the `maybe_` setter accepts 
 
 You can use `impl Trait` for parameters in the closure, even though you can't in the usual Rust code.
 
-There are several well-known functions that you can use instead of the closure syntax to shorten your code e.g. `#[builder(with = Some)]` and `#[builder(with = FromIterator::from_iter)]` (more details [here](../../reference/builder/member/with#well-known-functions)).
+<!-- There are several well-known functions that you can use instead of the closure syntax to shorten your code e.g. `#[builder(with = Some)]` and `#[builder(with = FromIterator::from_iter)]` (more details [here](../../reference/builder/member/with#well-known-functions)). -->
 
 ## Optional members
 

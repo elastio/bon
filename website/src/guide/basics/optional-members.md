@@ -16,7 +16,7 @@ fn example(level: Option<u32>) {}
 example().call();
 ```
 
-You can use [`#[builder(transparent)]`](../reference/builder/member/transparent) to opt-out from this.
+You can use [`#[builder(transparent)]`](../../reference/builder/member/transparent) to opt-out from this.
 
 ### Setters pair
 
@@ -27,7 +27,7 @@ The builder provides a **pair** of setters for each optional member:
 | `{member}`       | `T`         | Accepts a non-`None` value.   | [`some_fn`][setters]
 | `maybe_{member}` | `Option<T>` | Accepts an `Option` directly. | [`option_fn`][setters]
 
-[setters]: ../reference/builder/member/setters
+[setters]: ../../reference/builder/member/setters
 
 
 ::: details See how the setters look in the generated code
@@ -45,7 +45,7 @@ impl<S: State> ExampleBuilder<S> {
 
 :::
 
-Thanks to this design, changing the member from required to optional [preserves compatibility](./compatibility#making-a-required-member-optional).
+Thanks to this design, changing the member from required to optional [preserves compatibility](../misc/compatibility#making-a-required-member-optional).
 
 ### Examples
 
@@ -69,11 +69,11 @@ example().maybe_level(value).call();
 
 ## `#[builder(default)]`
 
-To make a member of non-`Option` type optional you may use [`#[builder(default)]`](../reference/builder/member/default). This attribute uses the [`Default`](https://doc.rust-lang.org/stable/std/default/trait.Default.html) trait or the provided expression to assign the default value for the member.
+To make a member of non-`Option` type optional you may use [`#[builder(default)]`](../../reference/builder/member/default). This attribute uses the [`Default`](https://doc.rust-lang.org/stable/std/default/trait.Default.html) trait or the provided expression to assign the default value for the member.
 
 ::: tip
 
-Switching between `#[builder(default)]` and `Option<T>` is [compatible](./compatibility#switching-between-option-t-and-builder-default).
+Switching between `#[builder(default)]` and `Option<T>` is [compatible](../misc/compatibility#switching-between-option-t-and-builder-default).
 
 :::
 
