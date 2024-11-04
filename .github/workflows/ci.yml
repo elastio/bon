@@ -157,7 +157,7 @@ jobs:
           cargo miri test --locked --all-features --all-targets \
             --workspace --exclude runtime-benchmarks
         env:
-          RUSTFLAGS: >-
+          MIRIFLAGS: >-
             --deny warnings
             --allow edition-2024-expr-fragment-specifier
             --allow if_let_rescope
