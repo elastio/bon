@@ -202,7 +202,7 @@ The symbol `_` must be specified verbatim. You don't need to repeat the underlyi
 You can reference generic parameters defined on the underlying `struct`, `fn` or the surrounding `impl` block.
 You can also use `impl Trait` for parameters in the closure, even though you can't in regular Rust:
 
-```rust
+```rust ignore
 #[builder(with = |value: impl Trait| /**/)]
 ```
 
@@ -234,8 +234,8 @@ let value = Example::builder()
     .maybe_x2(Some((2, 3))) // [!code highlight]
     .build();
 
-assert_eq!(value.x1, 4);
-assert_eq!(value.x2, 6);
+assert_eq!(value.x1, Some(4));
+assert_eq!(value.x2, Some(6));
 ```
 
 ## Well-Known Functions
@@ -247,7 +247,7 @@ All of them have an equivalent closure syntax, so they are just pure syntax suga
 
 **Equivalent closure syntax:**
 
-```rust
+```rust ignore
 #[builder(with = |iter: impl IntoIterator<...>| FromIterator::from_iter(iter))]
 #[builder(with = |iter: impl IntoIterator<...>| iter.into_iter().collect())]
 ```
@@ -367,7 +367,7 @@ Example::example()
 
 **Equivalent closure syntax:**
 
-```rust
+```rust ignore
 #[builder(with = |value: T| Some(value))]
 ```
 
