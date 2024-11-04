@@ -38,8 +38,9 @@ let builder: ExampleBuilder<SetX2<SetX1>> = builder.x2(2);
 Notice the pattern here. Every time we set a member, we wrap the previous type state with a new `Set{Member}<S>` type state transition.
 
 There is a special `Empty` type state, which is used as the default value for the generic parameter `S` in two places:
-- The builder type itself: `ExampleBuilder<S = Empty>`
-- The type state transitions: `Set{Member}<S = Empty>`
+
+-   The builder type itself: `ExampleBuilder<S = Empty>`
+-   The type state transitions: `Set{Member}<S = Empty>`
 
 The type states come from the builder's state module. The name of that module is the `snake_case` version of the builder's name.
 
@@ -108,4 +109,4 @@ If there is a mix of named and anonymous lifetimes or named generic types and `i
 
 Now you know the mechanics of how a builder's type is built, so you can denote it when it's returned from a function or stored in a struct.
 
-However, to be able to write useful custom methods on the builder, you'll need to know the `trait`s behind the type states. Go to the next page to learn more.
+However, to be able to write useful custom methods on the builder, you'll need to know the traits behind the type states. Go to the next page to learn more.

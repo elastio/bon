@@ -1,6 +1,7 @@
 ---
 outline: deep
 ---
+
 # Contributing
 
 **Any contributions are welcome!**
@@ -23,8 +24,8 @@ If you want to validate that the macro generates a good compile error or warning
 
 Make sure the documentation reflects your change. Add or update the docs in the following places:
 
-- Doc comments on `pub` items of the crate.
-- Docs in the `website/docs` folder. Markdown files that live in this folder automatically turn into HTML pages of this website during release.
+-   Doc comments on `pub` items of the crate.
+-   Docs in the `website/docs` folder. Markdown files that live in this folder automatically turn into HTML pages of this website during release.
 
 ## Pull request
 

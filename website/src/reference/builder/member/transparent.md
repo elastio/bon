@@ -10,7 +10,6 @@ This attribute is also configurable via the top-level [`#[builder(on(...))]`](..
 
 :::
 
-
 ## Examples
 
 ::: code-group
@@ -34,7 +33,7 @@ Example::builder()
 
 Notice the difference:
 
-| Member name | Setters                                          | Comment
-|-------------|--------------------------------------------------|------------
-| `required`  | `required(Option<u32>)`                          | Setter is required to call
-| `optional`  | `optional(u32)`<br>`maybe_optional(Option<u32>)` | Setters are optional to call
+| Member name | Setters                                          | Comment                      |
+| ----------- | ------------------------------------------------ | ---------------------------- |
+| `required`  | `required(Option<u32>)`                          | Setter is required to call   |
+| `optional`  | `optional(u32)`<br>`maybe_optional(Option<u32>)` | Setters are optional to call |

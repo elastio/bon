@@ -2,7 +2,6 @@
 outline: deep
 ---
 
-
 # `Into` Conversions In-Depth
 
 ## Preface
@@ -21,26 +20,25 @@ If you prefer being explicit in code, feel free not to use `Into` conversions at
 
 We'll cover the following:
 
-- [Use `Into` conversions](#use-into-conversions)
-- [Avoid `Into` conversions](#avoid-into-conversions)
+-   [Use `Into` conversions](#use-into-conversions)
+-   [Avoid `Into` conversions](#avoid-into-conversions)
 
 ## Use `Into` conversions
 
 The main advantage of `impl Into` in setters is that it reduces the boilerplate for the caller. The code becomes shorter and cleaner, although not without [the drawbacks](#avoid-into-conversions).
 
-`Into` conversions usually make sense only if *all of the following* are true (AND):
+`Into` conversions usually make sense only if _all of the following_ are true (AND):
 
 ::: tip The Rules of `Into`
 
-1. The code where the builder is supposed to be *used* is not performance-sensitive.
+1. The code where the builder is supposed to be _used_ is not performance-sensitive.
 2. The builder is going to be used with literal values a lot or require wrapping the values.
 
 :::
 
-
 ### Shorter syntax for literals
 
-Here is an example that shows the *non-exhaustive* list of standard types where it's usually fine to enable `Into` conversions.
+Here is an example that shows the _non-exhaustive_ list of standard types where it's usually fine to enable `Into` conversions.
 
 ::: tip
 
@@ -49,6 +47,7 @@ Switch between the UI tabs in the code snippets below to see how the code looks 
 :::
 
 ::: code-group
+
 ```rust [Into Conversions]
 use bon::Builder;
 
@@ -98,6 +97,7 @@ Example::builder()
     .ip_addr([127, 0, 0, 1].into())
     .build();
 ```
+
 :::
 
 ### Automatic enum wrapping
@@ -218,6 +218,7 @@ half(10); // [!code error]
 ```
 
 The compile error is the following ([Rust playground link](https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=6b1b38e0de6f7747dc1ea3975fcffc06)):
+
 ```log
 half(10);
 ---- ^^ the trait `std::convert::From<i32>` is not implemented for `u32`,
@@ -249,6 +250,7 @@ connect()
     .ip_addr(ip_addr)
     .call();
 ```
+
 Notice how we didn't add a type annotation for the variable `ip_addr`. The compiler can deduce (infer) the type of `ip_addr` because it sees that the variable is passed to the `ip_addr()` setter method that expects a parameter of type `IpAddr`. It's a really simple exercise for the compiler in this case because all the context to solve it is there.
 
 However, if you use an `Into` conversion, not even Sherlock Holmes can answer the question "What type did you intend to parse?":
@@ -291,10 +293,9 @@ fn ip_addr(self, value: impl Into<IpAddr>) -> NextBuilderState { /* */ }
 
 This signature implies that the `value` parameter can be of any type that implements `Into<IpAddr>`. There are several types that implement such a trait. Among them: [`Ipv4Addr`](https://doc.rust-lang.org/stable/std/net/struct.Ipv4Addr.html#impl-From%3CIpv4Addr%3E-for-IpAddr) and [`Ipv6Addr`](https://doc.rust-lang.org/stable/std/net/struct.Ipv6Addr.html#impl-From%3CIpv6Addr%3E-for-IpAddr), and, obviously, `IpAddr` itself (thanks to [this blanket impl](https://github.com/rust-lang/rust/blob/1a94d839be8b248b972b9e022cb940d56de72fa1/library/core/src/convert/mod.rs#L763-L771)).
 
-This means the setter for `ip_addr` can no longer hint the compiler a single type that it accepts. Thus the compiler can't decide which type to assign to the `ip_addr` variable in the original code, because *there can be many that make sense*. I.e. the code will compile if any of the `Ipv4Addr` or `Ipv6Addr` or `IpAddr` type annotations are added to the `ip_addr` variable, but the compiler has no right to decide which of them to use on your behalf.
+This means the setter for `ip_addr` can no longer hint the compiler a single type that it accepts. Thus the compiler can't decide which type to assign to the `ip_addr` variable in the original code, because _there can be many that make sense_. I.e. the code will compile if any of the `Ipv4Addr` or `Ipv6Addr` or `IpAddr` type annotations are added to the `ip_addr` variable, but the compiler has no right to decide which of them to use on your behalf.
 
 This is the drawback of using not only `impl Into`, but any generics at all.
-
 
 ### `None` literals inference
 

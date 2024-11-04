@@ -1,6 +1,6 @@
 [package]
 name    = "bon-cli"
-version = "0.1.0"
+version = "0.2.0"
 
 description = "Dev tool for working with the `bon` crate"
 
@@ -9,7 +9,7 @@ homepage   = "https://bon-rs.com/"
 license    = "MIT OR Apache-2.0"
 repository = "https://github.com/elastio/bon"
 
-publish = false
+publish = true
 
 [[bin]]
 doc  = false
@@ -21,6 +21,6 @@ workspace = true
 
 [dependencies]
 anyhow       = "1.0"
-ra_ap_parser = "=0.0.233"
-ra_ap_syntax = "=0.0.233"
+ra_ap_parser = "=0.0.241"
+ra_ap_syntax = "=0.0.241"
 walkdir      = "2.5"

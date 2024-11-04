@@ -60,9 +60,9 @@ Now the documentation was split into the ["Guide"](../guide/overview) and ["Refe
 
 We added 3 new pages with guides on how to use builders idiomatically or solve some common problems (e.g. validating inputs):
 
-- [Conditional Building](../guide/patterns/conditional-building)
-- [Fallible Builders](../guide/patterns/fallible-builders)
-- [Into Conversions In-Depth](../guide/patterns/into-conversions-in-depth)
+-   [Conditional Building](../guide/patterns/conditional-building)
+-   [Fallible Builders](../guide/patterns/fallible-builders)
+-   [Into Conversions In-Depth](../guide/patterns/into-conversions-in-depth)
 
 I recommend you to check out the ["Into Conversions In-Depth"](../guide/patterns/into-conversions-in-depth) especially because it's highly related to one of the breaking changes that we'll review below.
 
@@ -221,8 +221,9 @@ Also, huge thank you for 500 stars ⭐ [on Github](https://github.com/elastio/bo
 ::: tip
 
 You can leave comments for this post on the platform of your choice:
-- [Reddit](https://www.reddit.com/r/rust/comments/1f1uzkw/bon_builder_generator_20_release/)
-- [X (Twitter)](https://x.com/veetaha/status/1828210142514491658)
-- [Hacker News](https://news.ycombinator.com/item?id=41359892)
+
+-   [Reddit](https://www.reddit.com/r/rust/comments/1f1uzkw/bon_builder_generator_20_release/)
+-   [X (Twitter)](https://x.com/veetaha/status/1828210142514491658)
+-   [Hacker News](https://news.ycombinator.com/item?id=41359892)
 
 :::

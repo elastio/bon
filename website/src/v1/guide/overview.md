@@ -103,20 +103,19 @@ It wouldn't harm if `bon::builder` was imported. It won't shadow the inert `#[bu
 
 :::
 
-
 To follow the usual Rust builder naming conventions `bon` treats the method named `new` inside of the impl block specially. It generates functions with a bit different names.
 
 If `#[builder]` is placed on the method called `new`, then the generated functions are called:
 
-| Start function            | Finish function
-|---------------------------|---------------------
-| `builder() -> {T}Builder` | `build(self) -> T`
+| Start function            | Finish function    |
+| ------------------------- | ------------------ |
+| `builder() -> {T}Builder` | `build(self) -> T` |
 
 For any other methods not called `new` and for any free function the naming is a bit different:
 
-| Start function                                | Finish function
-|-----------------------------------------------|---------------------
-| `{fn_name}() -> {T}{PascalCaseFnName}Builder` | `call(self) -> T`
+| Start function                                | Finish function   |
+| --------------------------------------------- | ----------------- |
+| `{fn_name}() -> {T}{PascalCaseFnName}Builder` | `call(self) -> T` |
 
 ## Builder for a struct
 
@@ -179,23 +178,23 @@ See [`Into` conversions](./into-conversions) for details.
 The `#[builder]` attribute works almost with any kind of function that uses any available Rust syntax.
 All of the following is supported.
 
-- Functions can return any values including `Result`, `Option`, etc.
-- The `impl Trait` syntax is supported both in function parameters and return type.
-- `async` functions.
-- `unsafe` functions.
-- Generic type parameters.
-- Generic const parameters (const generics).
-- Generic lifetimes.
-- `where` clauses.
-- Anonymous lifetimes, i.e. `'_` or just regular references without explicit lifetimes like `&u32`.
-- Nested functions defined inside of other items bodies, e.g.
-  ```rust
-  fn foo() {
-      // Just works
-      #[bon::builder]
-      fn bar() {}
-  }
-  ```
+-   Functions can return any values including `Result`, `Option`, etc.
+-   The `impl Trait` syntax is supported both in function parameters and return type.
+-   `async` functions.
+-   `unsafe` functions.
+-   Generic type parameters.
+-   Generic const parameters (const generics).
+-   Generic lifetimes.
+-   `where` clauses.
+-   Anonymous lifetimes, i.e. `'_` or just regular references without explicit lifetimes like `&u32`.
+-   Nested functions defined inside of other items bodies, e.g.
+    ```rust
+    fn foo() {
+        // Just works
+        #[bon::builder]
+        fn bar() {}
+    }
+    ```
 
 ## What's next?
 

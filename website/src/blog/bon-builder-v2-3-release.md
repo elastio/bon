@@ -17,7 +17,6 @@ If you don't know about [`bon`], then see the [motivational blog post](./how-to-
     style="border-radius: 15px"
 />
 
-
 ## New features
 
 ### Positional arguments in starting and finishing functions
@@ -32,8 +31,8 @@ As an example, suppose we have a `Treasure` struct with `x` and `y` coordinates 
 
 To do that we can use the `#[builder(start_fn)]` attribute. There are two contexts where we can place it, and they both have a different meaning:
 
-- [Top-level `#[builder(start_fn = ...)]`](../reference/builder/top-level/start_fn) - configures the name of the starting function and optionally its visibility
-- [Member-level `#[builder(start_fn)]`](../reference/builder/member/start_fn) - configures the member to be a positional parameter on the starting function
+-   [Top-level `#[builder(start_fn = ...)]`](../reference/builder/top-level/start_fn) - configures the name of the starting function and optionally its visibility
+-   [Member-level `#[builder(start_fn)]`](../reference/builder/member/start_fn) - configures the member to be a positional parameter on the starting function
 
 We'll want to use both of these attributes in our example to give a better name for the starting function that describes its inputs and configure `x` and `y` as positional parameters on the starting function as well.
 
@@ -123,7 +122,6 @@ On the previous week's update (2.2 release) [a promise was made](./bon-builder-v
 
 This is the lowest possible MSRV we can guarantee for now. The choice of this version was made based on our design requirements for const generics support described in [the comment here](https://github.com/elastio/bon/blob/3217b4b0349f03f0b2a5853310f420c5b8b005a7/bon/Cargo.toml#L21-L28).
 
-
 ## Deprecation warnings
 
 As was [promised](./bon-builder-v2-2-release#derive-builder-syntax-for-structs) in the previous release we are enabling deprecation warnings for the usage of the bare `#[bon::builder]` attribute on structs in favour of the new `#[derive(bon::Builder)]` syntax.
@@ -131,7 +129,6 @@ As was [promised](./bon-builder-v2-2-release#derive-builder-syntax-for-structs) 
 The `#[builder]` syntax is still supported on functions and associated methods, and it's the only way to generate builders for them.
 
 The reasons for this deprecation as well as the instruction to update your code are described in the [2.2. release blog post](./bon-builder-v2-2-release#derive-builder-syntax-for-structs).
-
 
 ::: warning
 
@@ -148,8 +145,9 @@ Bon's goal is to empower everyone to build beautiful APIs with great flexibility
 ::: tip
 
 You can leave comments for this post on the platform of your choice:
-- [Reddit](https://www.reddit.com/r/rust/comments/1fgmbo7/media_nextgen_builder_macro_bon_23_release/)
-- [X (Twitter)](https://x.com/veetaha/status/1834951093559648544)
+
+-   [Reddit](https://www.reddit.com/r/rust/comments/1fgmbo7/media_nextgen_builder_macro_bon_23_release/)
+-   [X (Twitter)](https://x.com/veetaha/status/1834951093559648544)
 
 :::
 

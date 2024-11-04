@@ -1,6 +1,6 @@
 {
   "vueCompilerOptions": {
-    "vitePressExtensions": [".md"],
+    "vitePressExtensions": [".md"]
   },
   "include": [
     "**/*.ts",
@@ -8,7 +8,7 @@
     "**/*.vue",
     "**/*.md",
     ".vitepress/**/*.ts",
-    ".vitepress/**/*.vue",
+    ".vitepress/**/*.vue"
   ],
   "compilerOptions": {
     "target": "es2022",
@@ -34,5 +34,5 @@
   },
   "ts-node": {
     "esm": true
-  },
+  }
 }

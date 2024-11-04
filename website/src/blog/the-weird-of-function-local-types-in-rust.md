@@ -320,8 +320,8 @@ It means, that if we want to support local items in our macro we just can't use 
 
 The core problem is the conflict:
 
-- We want to make the builder's fields private, so we need to define the builder struct inside of a child module.
-- We want to reference types from the surrounding scope in the builder's fields, including local items, so we can't define the builder struct inside the child module.
+-   We want to make the builder's fields private, so we need to define the builder struct inside of a child module.
+-   We want to reference types from the surrounding scope in the builder's fields, including local items, so we can't define the builder struct inside the child module.
 
 This is the problem that I found in `buildstructor`. The only way to solve this is to make a compromise, which I did when implementing [`#[derive(bon::Builder)]`](../guide/overview). The compromise is not to use a child module, and obfuscate the private fields of the builder struct with leading `__` and `#[doc(hidden)]` attributes to make it hard for the user to access them (even though not physically impossible).
 
@@ -406,7 +406,7 @@ fn main() {
 
 Does this mean generating child modules for privacy in macros is generally a bad idea? It depends... The main thing is not to reference items from the surrounding scope in the child module. For example, if you need to add `use super::*` in your macro-generated code, then this is already a bad call. You should think of local items and doc tests when you do this.
 
-If you liked this article check out my previous blog post [*'How to do named function arguments in Rust'*](./how-to-do-named-function-arguments-in-rust) (it's also available [on Reddit](https://www.reddit.com/r/rust/comments/1eeem92/how_to_do_named_function_arguments_in_rust/)). Also, check out the [`bon` crate on GitHub](https://github.com/elastio/bon). Consider giving it a star ⭐ if you like it.
+If you liked this article check out my previous blog post [_'How to do named function arguments in Rust'_](./how-to-do-named-function-arguments-in-rust) (it's also available [on Reddit](https://www.reddit.com/r/rust/comments/1eeem92/how_to_do_named_function_arguments_in_rust/)). Also, check out the [`bon` crate on GitHub](https://github.com/elastio/bon). Consider giving it a star ⭐ if you like it.
 
 ::: tip
 

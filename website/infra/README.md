@@ -7,8 +7,9 @@ It is a simple Hetzner VPS that runs a docker-compose cluster with the umami ser
 ## Deployment
 
 Prerequisites:
-- [Terraform CLI](https://developer.hashicorp.com/terraform/install)
-- [Account at hetzner.com/cloud](https://hetzner.com/cloud)
+
+-   [Terraform CLI](https://developer.hashicorp.com/terraform/install)
+-   [Account at hetzner.com/cloud](https://hetzner.com/cloud)
 
 Create a `terraform.tfvars` file in this directory. Here is an example below, make sure to replace all `{...}` placeholders with your values.
 

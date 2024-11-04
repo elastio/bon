@@ -2,7 +2,7 @@
 
 **Applies to:** <Badge text="structs"/> <Badge text="functions"/> <Badge text="methods"/>
 
-*⚠️ Do not confuse this with `#[derive(bon::Builder)]`⚠️*
+_⚠️ Do not confuse this with `#[derive(bon::Builder)]`⚠️_
 
 Generates additional derives for the builder struct itself. The syntax is similar to the regular `#[derive(...)]` attribute, but it must be wrapped in `#[builder(derive(...))]`. Expects one or more of the supported derives separated by a comma.
 
@@ -169,8 +169,8 @@ let builder = Example::<_, ()>::builder().x(Rc::new(NonCloneable));
 // Now this works, because there is no bound `T: Clone` // [!code highlight]
 builder.clone();
 ```
-:::
 
+:::
 
 ::: tip
 If you'd like to know why this attribute is this dumb and doesn't just add a `where Rc<T>: Clone` bound instead, then check this article about the ["Implied bounds and perfect derive"](https://smallcultfollowing.com/babysteps/blog/2022/04/12/implied-bounds-and-perfect-derive/) by Niko Matsakis 📖.

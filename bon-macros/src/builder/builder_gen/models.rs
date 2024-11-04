@@ -291,7 +291,10 @@ impl BuilderGenCtx {
                     .map(SpannedKey::into_value)
                     .unwrap_or_else(|| {
                         let docs = format!(
-                            "Tools for manipulating the type state of [`{}`].",
+                            "Tools for manipulating the type state of [`{}`].\n\
+                            \n\
+                            See the [detailed guide](https://bon-rs.com/guide/typestate-api) \
+                            that describes how all the pieces here fit together.",
                             builder_type.ident
                         );
 

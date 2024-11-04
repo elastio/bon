@@ -22,13 +22,12 @@ You can use [`#[builder(transparent)]`](../../reference/builder/member/transpare
 
 The builder provides a **pair** of setters for each optional member:
 
-| Name             | Input       | Description                   | Configuration attribute
-|------------------|-------------|-------------------------------|------------------
-| `{member}`       | `T`         | Accepts a non-`None` value.   | [`some_fn`][setters]
-| `maybe_{member}` | `Option<T>` | Accepts an `Option` directly. | [`option_fn`][setters]
+| Name             | Input       | Description                   | Configuration attribute |
+| ---------------- | ----------- | ----------------------------- | ----------------------- |
+| `{member}`       | `T`         | Accepts a non-`None` value.   | [`some_fn`][setters]    |
+| `maybe_{member}` | `Option<T>` | Accepts an `Option` directly. | [`option_fn`][setters]  |
 
 [setters]: ../../reference/builder/member/setters
-
 
 ::: details See how the setters look in the generated code
 

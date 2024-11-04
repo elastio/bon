@@ -15,7 +15,6 @@ bon = "2.3"
 
 You can opt out of `std` and `alloc` cargo features with `default-features = false` for `no_std` environments.
 
-
 ## Builder for a function
 
 `bon` can turn a function with positional parameters into a function with "named" parameters via a builder. It's as easy as placing the `#[builder]` macro on top of it.
@@ -104,20 +103,19 @@ It wouldn't harm if `bon::builder` was imported. It won't shadow the inert `#[bu
 
 :::
 
-
 To follow the usual Rust builder naming conventions `bon` treats the method named `new` inside of the impl block specially. It generates functions with a bit of different names.
 
 If `#[builder]` is placed on the method called `new`, then the generated functions are called:
 
-| Start function            | Finish function
-|---------------------------|---------------------
-| `builder() -> {T}Builder` | `build(self) -> T`
+| Start function            | Finish function    |
+| ------------------------- | ------------------ |
+| `builder() -> {T}Builder` | `build(self) -> T` |
 
 For any other methods not called `new` and for any free function the naming is a bit different:
 
-| Start function                                | Finish function
-|-----------------------------------------------|---------------------
-| `{fn_name}() -> {T?}{PascalCaseFnName}Builder` | `call(self) -> T`
+| Start function                                 | Finish function   |
+| ---------------------------------------------- | ----------------- |
+| `{fn_name}() -> {T?}{PascalCaseFnName}Builder` | `call(self) -> T` |
 
 ## Builder for a struct
 
@@ -290,7 +288,6 @@ If you can't figure something out, consult the docs and maybe use that search `ð
     </tr>
 </tbody>
 </table>
-
 
 ## Acknowledgments
 

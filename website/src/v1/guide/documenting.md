@@ -4,7 +4,7 @@ In regular Rust, it's not possible to place doc comments on function arguments. 
 
 **Example:**
 
-```rust
+````rust
 use bon::builder;
 
 /// Function that returns a greeting special-tailored for a given person
@@ -23,7 +23,7 @@ fn greet(
 ) -> String {
     format!("Hello {name} with age {age}!")
 }
-```
+````
 
 ::: details How does this work? 🤔
 

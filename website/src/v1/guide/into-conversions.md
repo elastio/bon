@@ -103,7 +103,6 @@ let user = accept_string()
 
 We didn't need to add any more attributes for `bon` to figure out that the setter for `name` needs to accept `impl Into<String>`. We also didn't change the signature of `new()`, so it still accepts a `String`. This is because `bon` automatically performs an `into()` conversion inside of the `name()` setter method.
 
-
 ## Types that qualify for an automatic `Into` conversion
 
 An automatic `Into` conversion in setter methods applies only to types that are represented by a simple path (e.g. `crate::foo::Bar`) or a simple identifier (e.g. `Bar`, `String`) with the exception of primitive types.
@@ -111,9 +110,9 @@ An automatic `Into` conversion in setter methods applies only to types that are 
 The following list describes the types that don't qualify for an automatic `Into` conversion with the explanation of the reason.
 
 1. Primitive types
-    Unsigned integers                    | Signed integers                       | Floats     | Other
-    -------------------------------------|---------------------------------------|------------|--------------
-    `u8` `u16` `u32` `u64` `u128` `usize`| `i8` `i16` `i32` `i64` `i128` `isize` | `f32` `f64`| `bool` `char`
+   Unsigned integers | Signed integers | Floats | Other
+   -------------------------------------|---------------------------------------|------------|--------------
+   `u8` `u16` `u32` `u64` `u128` `usize`| `i8` `i16` `i32` `i64` `i128` `isize` | `f32` `f64`| `bool` `char`
 
     ::: details Primitive types aren't qualified for an automatic `Into` conversion for several reasons
 
@@ -128,6 +127,7 @@ The following list describes the types that don't qualify for an automatic `Into
     ```
 
     The compile error is the following ([Rust playground link](https://play.rust-lang.org/?version=stable&mode=debug&edition=2021&gist=6b1b38e0de6f7747dc1ea3975fcffc06)):
+
     ```log
           half(10);
           ---- ^^ the trait `std::convert::From<i32>` is not implemented for `u32`,
@@ -140,15 +140,16 @@ The following list describes the types that don't qualify for an automatic `Into
 
     Requiring an explicit type suffix in numeric literals would be the opposite of what `bon` tries to achieve with its focus on great ergonomics.
 
-    ---
+    ***
 
     The second reason is that it's just conventional not to use `impl Into` for primitive types in Rust. There aren't many types that implement `Into<bool>` or `Into<char>`, for example. It also keeps simple things (primitive values) simple in the method signatures of the generated builder. Hints in IDE become easier to read.
     :::
 
 2. `impl Trait` in function parameter types
-    ::: details The reason is that it leads to unnecessarily nested generics that may block type inference.
+   ::: details The reason is that it leads to unnecessarily nested generics that may block type inference.
 
     **Example:**
+
     ```rust
     use bon::builder;
 
@@ -167,9 +168,10 @@ The following list describes the types that don't qualify for an automatic `Into
     :::
 
 3. Generic types from the function signature, surrounding `impl` block or struct's declaration.
-    ::: details The reason is similar to the previous item.
+   ::: details The reason is similar to the previous item.
 
     **Example:**
+
     ```rust
     use bon::builder;
 
@@ -203,8 +205,5 @@ Suppose automatic `Into` conversion qualification rules don't satisfy your use c
 Use `#[builder(into = false)]` if you want to disable the automatic into conversion.
 
 See [this attribute's docs](../reference/builder#into) for details.
-
-
-
 
 [open an issue]: https://github.com/elastio/bon/issues

@@ -61,7 +61,6 @@ impl Builder {
 }
 ```
 
-
 **Example:**
 
 ```rust

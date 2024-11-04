@@ -107,6 +107,7 @@ greeting = greet(
 
 assert greeting == "Hello Bon with age 24!"
 ```
+
 :::
 
 We only placed `#[bon::builder]` on top of a regular Rust function. We didn't need to define its parameters in a `struct` or write any other boilerplate. In fact, this Rust code is almost as succinct as the Python version. Click on `Python` at the top of the code snippet above to compare both versions.
@@ -120,7 +121,7 @@ It supports almost any function syntax. It works fine with functions inside of `
 
 Furthermore, it also never panics. All errors such as missing required arguments are compile-time errors ✔️.
 
-[`bon`] allows you to *easily* switch your regular function into a function "with named parameters" that returns a builder. Just adding `#[builder]` to your function is enough even in advanced use cases.
+[`bon`] allows you to _easily_ switch your regular function into a function "with named parameters" that returns a builder. Just adding `#[builder]` to your function is enough even in advanced use cases.
 
 ## One builder crate to rule them all
 
@@ -148,13 +149,11 @@ User::builder()
 
 So, you can use just one builder crate solution consistently for everything. Builders for functions and structs both share the same API design, which allows you, for example, to switch between a `#[derive(Builder)]` on a struct and a `#[builder]` attribute on a method that creates a struct. This won't be an API-breaking change for your consumers ([details](../guide/misc/compatibility#switching-between-derive-builder-and-builder-on-the-new-method)).
 
-
 ## Summary
 
 If you'd like to know more about `bon` and use it in your code, then visit the [guide page with the full overview](../guide/overview).
 
 [`bon`] is fully open-source, and [available on crates.io](https://crates.io/crates/bon). Its code is public on [Github](https://github.com/elastio/bon). Consider giving it a star ⭐ if you liked the idea and the implementation.
-
 
 ## Acknowledgements
 
@@ -165,6 +164,5 @@ This project was heavily inspired by such awesome crates as [`buildstructor`](ht
 You can leave comments for this post [on Reddit](https://www.reddit.com/r/rust/comments/1eeem92/how_to_do_named_function_arguments_in_rust/).
 
 :::
-
 
 [`bon`]: ../guide/overview
