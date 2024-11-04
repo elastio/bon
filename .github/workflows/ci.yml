@@ -206,7 +206,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: npm ci
-      - run: prettier --check .
+      - run: npx prettier --check .
 
   # Check for typos in the repository based on a static dictionary
   typos:
