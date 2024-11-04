@@ -1,1 +1,5 @@
+# This file uses terraform's templating syntax rather than YML, so prettier can't parse it
 website/infra/bootstrap/user_data.yml
+
+# Leading whitespace there is intentional as the place for the main issue body
+.github/issue_template.md
