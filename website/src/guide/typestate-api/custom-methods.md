@@ -138,7 +138,7 @@ assert_eq!(value.x1, 1);
 assert_eq!(value.x2, 2);
 ```
 
-Pay attention that the type state in the return type of the setter is `SetX2<SetX1<S>>`. If you mess it up, the compiler error will help you by showing the exact type of the typestate there.
+Pay attention that the type state in the return type of the setter is `SetX2<SetX1<S>>`. If you mess it up, the compiler error will help you by showing the exact type of the typestate.
 
 For example, when first writing this solution I mistakenly wrote `SetX2<SetX1>`, and the compiler was helpful enough to correct me:
 

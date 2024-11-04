@@ -200,6 +200,14 @@ jobs:
       - run: scripts/install/taplo.sh
       - run: taplo fmt --check
 
+  # Check the formatting of Markdown, TS, JS, JSON, YAML files in the repository
+  prettier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: prettier --check .
+
   # Check for typos in the repository based on a static dictionary
   typos:
     runs-on: ubuntu-latest

@@ -2,7 +2,7 @@
 
 **Applies to:** <Badge text="structs"/> <Badge text="functions"/> <Badge text="methods"/>
 
-Overrides name, visibility and docs for the builder's [typestate API](../guide/typestate-api) module.
+Overrides name, visibility and docs for the builder's [typestate API](../../../guide/typestate-api) module.
 
 **Short syntax** configures just the _name_.
 
