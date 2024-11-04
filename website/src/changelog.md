@@ -96,6 +96,18 @@ All the breaking changes are very unlikely to actually break your code that was 
 -   Switch from `elastio.github.io/bon` to a custom domain `bon-rs.com` ([#158](https://github.com/elastio/bon/pull/158))
 -   Add anonymous stats with [`umami`](https://umami.is/) for the docs website ([#158](https://github.com/elastio/bon/pull/158))
 
+### Docs
+
+-   Refactor the README.md and all pages in the Guide Book by simplifying them and removing redundancies ([#170](https://github.com/elastio/bon/pull/170))
+-   Add new pages to the Guide Book:
+
+    -   [Custom Conversions](https://bon-rs.com/guide/basics/custom-conversions) ([#170](https://github.com/elastio/bon/pull/170))
+    -   [Typestate API](https://bon-rs.com/guide/typestate-api) ([#170](https://github.com/elastio/bon/pull/170))
+    -   [Builder's Type Signature](https://bon-rs.com/guide/typestate-api/builders-type-signature) ([#170](https://github.com/elastio/bon/pull/170)) ([#170](https://github.com/elastio/bon/pull/170))
+    -   [Custom Methods](https://bon-rs.com/guide/typestate-api/custom-methods) ([#171](https://github.com/elastio/bon/pull/171))
+
+    -   Split API reference into multiple pages. The [root page](https://bon-rs.com/reference/builder) now contains convenient table with short descriptions of all available configuration attributes ([#164](https://github.com/elastio/bon/pull/164))
+
 ## [2.3.0](https://github.com/elastio/bon/compare/v2.2.1...v2.3.0) - 2024-09-14
 
 See the [blog post for this release](https://bon-rs.com/blog/bon-builder-v2-3-release) that describes some of the most notable changes in detail.
