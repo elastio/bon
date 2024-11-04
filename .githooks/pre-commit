@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+FILES=$(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g')
+[ -z "$FILES" ] && exit 0
+
+echo "[prettier]"
+
+# Prettify all selected files
+echo "$FILES" | xargs ./node_modules/.bin/prettier --ignore-unknown --write
+
+echo "[cargo fmt]"
+
+cargo fmt
+
+# Add back the modified/prettified files to staging
+echo "$FILES" | xargs git add
+
+exit 0

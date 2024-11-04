@@ -19,3 +19,5 @@ terraform.tfstate*
 # Terraform variables usually contain sensitive information
 terraform.tfvars
 terraform.tfvars.json
+
+*dbg*
