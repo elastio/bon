@@ -2,7 +2,7 @@
 
 With `bon`, you can write a builder that validates its inputs and returns a `Result`. It's possible to do this only via the function or associated method syntax.
 
-If you need to build a struct and do some validation, you won't be able to use the `#[derive(Builder)]` annotation on the struct for that. You'll *have to* define your logic in the associated constructor method (e.g. `new`).
+If you need to build a struct and do some validation, you won't be able to use the `#[derive(Builder)]` annotation on the struct for that. You'll _have to_ define your logic in the associated constructor method (e.g. `new`).
 
 **Example:**
 

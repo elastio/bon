@@ -6,10 +6,10 @@ Makes the member optional and assigns a default value to it. The default value i
 
 ## Syntax
 
-| Form                                     | How default value is computed
-| -----------------------------------------|-------------------------------
-| `#[builder(default)]`                    | `Default::default()`
-| `#[builder(default = expression)]`       | `expression`
+| Form                               | How default value is computed |
+| ---------------------------------- | ----------------------------- |
+| `#[builder(default)]`              | `Default::default()`          |
+| `#[builder(default = expression)]` | `expression`                  |
 
 If combined with [`#[builder(into)]`](./into), the default expression is additionally converted via [`Into::into`](https://doc.rust-lang.org/stable/std/convert/trait.Into.html).
 
@@ -17,10 +17,10 @@ If combined with [`#[builder(into)]`](./into), the default expression is additio
 
 Two setter methods are generated for the member with `#[builder(default)]` just like for [members of type `Option<T>`](../../../guide/basics/optional-members#setters-pair):
 
-| Name             | Input       | Description                   | Configuration attribute
-|------------------|-------------|-------------------------------|------------------
-| `{member}`       | `T`         | Accepts a non-`None` value.   | [`some_fn`](./setters)
-| `maybe_{member}` | `Option<T>` | Accepts an `Option` directly. | [`option_fn`](./setters)
+| Name             | Input       | Description                   | Configuration attribute  |
+| ---------------- | ----------- | ----------------------------- | ------------------------ |
+| `{member}`       | `T`         | Accepts a non-`None` value.   | [`some_fn`](./setters)   |
+| `maybe_{member}` | `Option<T>` | Accepts an `Option` directly. | [`option_fn`](./setters) |
 
 If `None` is passed to the `maybe_{member}` setter, then the default value is used.
 
@@ -29,7 +29,6 @@ If `None` is passed to the `maybe_{member}` setter, then the default value is us
 Switching between `#[builder(default)]` and `Option<T>` is [compatible](../../../guide/misc/compatibility#switching-between-option-t-and-builder-default).
 
 :::
-
 
 ::: code-group
 

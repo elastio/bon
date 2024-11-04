@@ -38,8 +38,9 @@ let builder: ExampleBuilder<SetX2<SetX1>> = builder.x2(2);
 Notice the pattern here. Every time we set a member, we wrap the previous type state with a new `Set{Member}<S>` type state transition.
 
 There is a special `Empty` type state, which is used as the default value for the generic parameter `S` in two places:
-- The builder type itself: `ExampleBuilder<S = Empty>`
-- The type state transitions: `Set{Member}<S = Empty>`
+
+-   The builder type itself: `ExampleBuilder<S = Empty>`
+-   The type state transitions: `Set{Member}<S = Empty>`
 
 The type states come from the builder's state module. The name of that module is the `snake_case` version of the builder's name.
 

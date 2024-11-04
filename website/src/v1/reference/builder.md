@@ -106,10 +106,11 @@ When generating builder code for functions the `#[builder]` macro hides the orig
 Usually you'd want the underlying positional function to be hidden to provide only the builder syntax to the callers. However, in some situations you may want to keep the positional function exposed along with the builder syntax for compatibility with old code that still uses the old positional function call syntax.
 
 This attribute can take several forms.
-- Simple: `#[builder(expose_positional_fn = identifier)]`. Sets only the name of the positional function.
-- Verbose: `#[builder(expose_positional_fn(name = identifier, vis = "visibility"))]`.
-  Allows setting both the name and the visibility of the positional function.
-  Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
+
+-   Simple: `#[builder(expose_positional_fn = identifier)]`. Sets only the name of the positional function.
+-   Verbose: `#[builder(expose_positional_fn(name = identifier, vis = "visibility"))]`.
+    Allows setting both the name and the visibility of the positional function.
+    Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
 
 If `vis` parameter is not specified, then the visibility of the exposed positional function will be the same as specified on the function that the `#[builder]` was applied to.
 
@@ -159,8 +160,9 @@ Example::example()
 #### `new` method special case
 
 There are two conventional names in Rust ecosystem for constructors and builders:
-- `new` is used for a constructor method that uses positional parameters
-- `builder` is used for a method that returns a builder for a type
+
+-   `new` is used for a constructor method that uses positional parameters
+-   `builder` is used for a method that returns a builder for a type
 
 So when `#[builder]` is placed on a method called `new`, it'll generate a method called `builder` that starts the building process. This means there is already a default obvious name for the positional function that `expose_positional_fn` may use in this case if you don't specify any value for this attribute.
 
@@ -266,10 +268,11 @@ Overrides the name and visibility of the associated method that starts the build
 The default name for this method is `builder`, and the default visibility is the same as the visibility of the struct itself.
 
 This attribute can take several forms.
-- Simple: `#[builder(start_fn = identifier)]`. Overrides only the name of the "start" method.
-- Verbose: `#[builder(start_fn(name = identifier, vis = "visibility"))]`.
-  Allows overriding both the name and the visibility of the "start" method.
-  Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
+
+-   Simple: `#[builder(start_fn = identifier)]`. Overrides only the name of the "start" method.
+-   Verbose: `#[builder(start_fn(name = identifier, vis = "visibility"))]`.
+    Allows overriding both the name and the visibility of the "start" method.
+    Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
 
 **Example:**
 
@@ -315,14 +318,14 @@ Makes the member optional. This means setters will be generated as if the type o
 
 If no setter for the member is called or `None` is passed, then the default value will be computed based on the form of this attribute:
 
-Form                               | How default value is computed
------------------------------------|----------------------------------------------------------------
-`#[builder(default)]`              | `Default::default()`
-`#[builder(default = expression)]` | `expression`
+| Form                               | How default value is computed |
+| ---------------------------------- | ----------------------------- |
+| `#[builder(default)]`              | `Default::default()`          |
+| `#[builder(default = expression)]` | `expression`                  |
 
 The result of the `expression` will automatically be converted into the target type if `Into` conversion is enabled for this setter i.e. the type satisfies [automatic `Into` conversion qualification rules], or there is a [`#[builder(into)]`](#into) override.
 
-The default value will be lazily computed *only if needed* inside of the [finishing function](#finish-fn) (i.e. `build()` or `call()`).
+The default value will be lazily computed _only if needed_ inside of the [finishing function](#finish-fn) (i.e. `build()` or `call()`).
 
 **Example:**
 
@@ -647,10 +650,10 @@ Skips generating setters for the member. This hides the member from the generate
 
 The value for the member will be computed based on the form of the attribute specified below.
 
-Form                            | How value for the member is computed
---------------------------------|----------------------------------------------------------------
-`#[builder(skip)]`              | `Default::default()`
-`#[builder(skip = expression)]` | `expression`
+| Form                            | How value for the member is computed |
+| ------------------------------- | ------------------------------------ |
+| `#[builder(skip)]`              | `Default::default()`                 |
+| `#[builder(skip = expression)]` | `expression`                         |
 
 The result of the `expression` will automatically be converted into the target type if the type satisfies [automatic `Into` conversion qualification rules].
 

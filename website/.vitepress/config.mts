@@ -170,7 +170,7 @@ export default defineConfig({
                         {
                             text: "Custom Methods",
                             link: "/guide/typestate-api/custom-methods",
-                        }
+                        },
                     ],
                 },
                 {

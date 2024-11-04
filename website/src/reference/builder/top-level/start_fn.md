@@ -12,7 +12,7 @@ Don't confuse this with the [member-level](../member/start_fn) `#[builder(start_
 
 When this attribute is used with `fn` syntax, it additionally [exposes the original function](#exposing-original-function) under the macro.
 
-**Short syntax** configures just the *name*.
+**Short syntax** configures just the _name_.
 
 ```attr
 #[builder(start_fn = custom_name)]
@@ -36,12 +36,12 @@ When this attribute is used with `fn` syntax, it additionally [exposes the origi
 
 The default name for the starting function is chosen according to the following rules:
 
-| Syntax                         | Default
-|--------------------------------|----------
-| `struct T`                     | `builder`
-| Associated `fn` `T::new()`     | `builder`
-| Associated `fn` `T::fn_name()` | `{fn_name}`
-| Free `fn fn_name()`            | `{fn_name}`
+| Syntax                         | Default     |
+| ------------------------------ | ----------- |
+| `struct T`                     | `builder`   |
+| Associated `fn` `T::new()`     | `builder`   |
+| Associated `fn` `T::fn_name()` | `{fn_name}` |
+| Free `fn fn_name()`            | `{fn_name}` |
 
 ## `vis`
 
@@ -97,14 +97,13 @@ User::init() // [!code highlight]
 
 See examples with `fn` syntax in the section below.
 
-
 ## Exposing original function
 
 By default, when you place `#[builder]` on a function, that original function is modified by the macro to make it hidden, so that only builder syntax remains available. Specifically, the macro does the following by default:
 
-- Prepends the prefix `__orig_` to the original function's name.
-- Changes the visibility of the original function to private.
-- Adds `#[doc(hidden)]` to the function.
+-   Prepends the prefix `__orig_` to the original function's name.
+-   Changes the visibility of the original function to private.
+-   Adds `#[doc(hidden)]` to the function.
 
 If you specify the `start_fn` attribute on a function, the macro skips hiding the original function. It means the starting function no longer replaces the original function. This way both the original positional function and the starting function with the builder syntax are exposed.
 
@@ -177,7 +176,7 @@ One interesting quirk is that by default the associated method named `new` alrea
 
 ---
 
-Given that `#[builder(start_fn)]` on a function behaves *[additively](https://doc.rust-lang.org/cargo/reference/features.html#feature-unification)*, you can provide builder syntax as an opt-in cargo feature of your crate.
+Given that `#[builder(start_fn)]` on a function behaves _[additively](https://doc.rust-lang.org/cargo/reference/features.html#feature-unification)_, you can provide builder syntax as an opt-in cargo feature of your crate.
 
 **Example:**
 

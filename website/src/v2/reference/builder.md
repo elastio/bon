@@ -6,8 +6,8 @@ outline: [2, 3]
 
 You can generate a builder using three different kinds of syntax (struct, free function, associated method). They all share two common groups of attributes.
 
-- [Top-level attributes](#top-level-attributes) - placed on a `struct` or `fn` declaration.
-- [Member attributes](#member-attributes) - placed on a `struct` field or `fn` argument.
+-   [Top-level attributes](#top-level-attributes) - placed on a `struct` or `fn` declaration.
+-   [Member attributes](#member-attributes) - placed on a `struct` field or `fn` argument.
 
 See examples. Make sure to click through the tabs:
 
@@ -538,9 +538,9 @@ Example::example()
 
 This attribute must be of form `on(type_pattern, attributes)`.
 
-- `type_pattern` - type that will be compared with the types of the members. The types are compared textually. For example, `String` doesn't match `std::string::String`. You can use `_` to mark parts of the type to ignore when matching. For example, `Vec<_>` matches `Vec<u32>` or `Vec<String>`. Lifetimes are ignored during matching.
+-   `type_pattern` - type that will be compared with the types of the members. The types are compared textually. For example, `String` doesn't match `std::string::String`. You can use `_` to mark parts of the type to ignore when matching. For example, `Vec<_>` matches `Vec<u32>` or `Vec<String>`. Lifetimes are ignored during matching.
 
-- `attributes` - for now, the only attribute supported in the `attributes` position is [`into`](#into). It sets `#[builder(into)]` for members that match the `type_pattern`.
+-   `attributes` - for now, the only attribute supported in the `attributes` position is [`into`](#into). It sets `#[builder(into)]` for members that match the `type_pattern`.
 
 If you want to apply the `attributes` to all members, you can use the `_` type pattern that matches any type. For example, `#[builder(on(_, into))]`.
 

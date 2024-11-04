@@ -4,7 +4,7 @@
 
 Overrides name, visibility and docs for the builder's [typestate API](../guide/typestate-api) module.
 
-**Short syntax** configures just the *name*.
+**Short syntax** configures just the _name_.
 
 ```attr
 #[builder(state_mod = custom_name)]

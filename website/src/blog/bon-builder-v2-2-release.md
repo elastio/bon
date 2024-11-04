@@ -35,7 +35,7 @@ User::builder()
 
 ::: warning It's not a breaking change
 
-The usage of `#[bon::builder]` on a struct is still supported in this minor release, and all it does is just [forward](https://github.com/elastio/bon/blob/7294312bbc7ad7c612104d31d65251dc2c7f2d8d/bon-macros/src/builder/mod.rs#L43-L53) to the `#[derive(Builder)]` under the hood. Starting with the *next* minor release (`2.3`) of `bon` it'll emit a deprecation warning suggesting a migration to `#[derive(Builder)]`. If we ever make a `bon 3.0` (which we have no reason to yet), we'll remove support for `#[bon::builder]` on structs at that point.
+The usage of `#[bon::builder]` on a struct is still supported in this minor release, and all it does is just [forward](https://github.com/elastio/bon/blob/7294312bbc7ad7c612104d31d65251dc2c7f2d8d/bon-macros/src/builder/mod.rs#L43-L53) to the `#[derive(Builder)]` under the hood. Starting with the _next_ minor release (`2.3`) of `bon` it'll emit a deprecation warning suggesting a migration to `#[derive(Builder)]`. If we ever make a `bon 3.0` (which we have no reason to yet), we'll remove support for `#[bon::builder]` on structs at that point.
 
 :::
 
@@ -101,7 +101,6 @@ let _ = builder
 ### Guaranteed MSRV
 
 `bon` now has an official minimum supported Rust version (MSRV) `1.70.0`. It is guaranteed to compile on all versions of Rust starting with `1.70.0` and higher. Note that this isn't the lowest MSRV we can provide. We are planning to lower the MSRV even more in the future ([bon/#102](https://github.com/elastio/bon/issues/102)), but this first step of setting the MSRV at `1.70.0` is already useful enough that we released it.
-
 
 ## Why using a `#[derive(Builder)]` syntax?
 
@@ -219,7 +218,6 @@ So, given all the above, the decision was made to deprecate the usage of `#[bon:
 
 If you like or dislike this change in syntax feel free to write a comment on Reddit or message us on Discord (see the Discord server announcement below). It'll be interesting to hear your thoughts!
 
-
 ## Summary
 
 We are listening to your feedback! If you'd like to propose a change in `bon`, or ask a question, or just say "thank you", consider joining our [newly launched Discord server](https://bon-rs.com/discord)!
@@ -229,8 +227,9 @@ Also, a huge thank you for 750 stars ⭐ [on Github](https://github.com/elastio/
 ::: tip
 
 You can leave comments for this post on the platform of your choice:
-- [Reddit](https://www.reddit.com/r/rust/comments/1fc0ai7/media_nextgen_builder_macro_bon_22_release_derive/)
-- [X (Twitter)](https://x.com/veetaha/status/1832804375154065432)
+
+-   [Reddit](https://www.reddit.com/r/rust/comments/1fc0ai7/media_nextgen_builder_macro_bon_22_release_derive/)
+-   [X (Twitter)](https://x.com/veetaha/status/1832804375154065432)
 
 :::
 

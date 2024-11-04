@@ -4,7 +4,7 @@
 
 Overrides name, visibility and docs for the builder struct.
 
-**Short syntax** configures just the *name*.
+**Short syntax** configures just the _name_.
 
 ```attr
 #[builder(builder_type = CustomName)]
@@ -30,12 +30,12 @@ The default name for the builder struct is chosen according to the following rul
 
 <!-- #region name -->
 
-| Syntax                             | Default
-| -----------------------------------|------------------------
-| `struct T`                         | `{T}Builder`
-| Associated `fn` `T::new/builder()` | `{T}Builder`
-| Associated `fn` `T::fn_name()`     | `{T}{FnName}Builder`
-| Free       `fn` `fn_name()`        | `{FnName}Builder`
+| Syntax                             | Default              |
+| ---------------------------------- | -------------------- |
+| `struct T`                         | `{T}Builder`         |
+| Associated `fn` `T::new/builder()` | `{T}Builder`         |
+| Associated `fn` `T::fn_name()`     | `{T}{FnName}Builder` |
+| Free `fn` `fn_name()`              | `{FnName}Builder`    |
 
 <!-- #endregion name -->
 

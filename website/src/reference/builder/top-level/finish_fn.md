@@ -10,7 +10,7 @@ Don't confuse this with the [member-level](../member/finish_fn) `#[builder(finis
 
 :::
 
-**Short syntax** configures just the *name*.
+**Short syntax** configures just the _name_.
 
 ```attr
 #[builder(finish_fn = custom_name)]
@@ -34,12 +34,12 @@ Don't confuse this with the [member-level](../member/finish_fn) `#[builder(finis
 
 The default name for the finishing function is chosen according to the following rules:
 
-| Syntax                             | Default
-|------------------------------------|----------
-| `struct T`                         | `build`
-| Associated `fn` `T::new/builder()` | `build`
-| Associated `fn` `T::fn_name()`     | `call`
-| Free `fn fn_name()`                | `call`
+| Syntax                             | Default |
+| ---------------------------------- | ------- |
+| `struct T`                         | `build` |
+| Associated `fn` `T::new/builder()` | `build` |
+| Associated `fn` `T::fn_name()`     | `call`  |
+| Free `fn fn_name()`                | `call`  |
 
 ## `vis`
 

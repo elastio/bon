@@ -156,7 +156,7 @@ There is a counterpart to the `IsUnset` trait called `IsSet`. Ideally, we'd use 
 
 By the name of the `IsSet` trait, you've already probably figured out that it is implemented for type states where a particular member was set. This is useful for trait bounds on the finishing function. It must be callable only when all required members are set.
 
-Let's see how it *could* work in practice before we discuss the `IsComplete` trait.
+Let's see how it _could_ work in practice before we discuss the `IsComplete` trait.
 
 ```rust
 use bon::Builder;
@@ -168,7 +168,7 @@ struct Example {
 }
 ```
 
-This code *could* generate the following finishing function:
+This code _could_ generate the following finishing function:
 
 ```rust ignore
 use example_builder::{State, IsSet};
