@@ -14,12 +14,12 @@ struct Point {
 
 #[derive(Builder)]
 struct Example {
-    #[builder(with = |x: u32, y: u32| Point { x, y })]
+    #[builder(with = |x: u32, y: u32| Point { x, y })] // [!code highlight]
     point: Point,
 }
 
 let value = Example::builder()
-    .point(2, 3)
+    .point(2, 3) // [!code highlight]
     .build();
 
 assert_eq!(value.point.x, 2);
