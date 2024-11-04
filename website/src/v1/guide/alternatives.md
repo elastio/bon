@@ -73,9 +73,9 @@ struct User {
 
 User::builder()
     .friends(bon::vec![
-      "Foo",
-      "Bar",
-      "`String` value is also accepted".to_owned(),
+        "Foo",
+        "Bar",
+        "`String` value is also accepted".to_owned(),
     ])
     .build();
 ```
