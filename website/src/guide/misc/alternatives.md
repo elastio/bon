@@ -18,12 +18,10 @@ There are several other existing alternative crates that generate builders. `bon
 | Making required member optional is compatible by default | ✅                                                           | ✅                              | <span class="nobr">opt-in `#[builder(setter(strip_option))]`</span> | <span class="nobr">opt-in `#[builder(setter(strip_option))]`</span> |
 | Generates `T::builder()` method                          | ✅                                                           | ✅                              | ✅                                                                  | only `Builder::default()`                                           |
 | `Into` conversion in setters                             | opt-in ([members subset][bon-on], [single member][bon-into]) | [implicit (automatic)][bs-into] | opt-in (all members + out-out, single member)                       | [opt-in (all members, single member)][db-into]                      |
-| `impl Trait` supported for functions                     | ✅                                                           |                                 |                                                                     |
-| Anonymous lifetimes supported for functions              | ✅                                                           |                                 |                                                                     |
-| `Self` mentions in functions/structs are supported       | ✅                                                           |                                 |                                                                     |
+| `impl Trait`, anonymous lifetimes support                | ✅                                                           |                                 |                                                                     |
 | Positional function is hidden by default                 | ✅                                                           |                                 |                                                                     |
 | Special setter methods for collections                   | [(see below)][r1]                                            | ✅                              |                                                                     | ✅                                                                  |
-| Custom methods can be added to the builder type          |                                                              |                                 | ✅ ([mutators])                                                     | ✅                                                                  |
+| Custom methods can be added to the builder type          | ✅ [Typestate API]                                           |                                 | ✅ ([Mutators])                                                     | ✅                                                                  |
 | Builder may be configured to use &self/&mut self         |                                                              |                                 |                                                                     | ✅                                                                  |
 
 ## Function builder fallback paradigm
@@ -97,9 +95,10 @@ Another difference is that fields of collection types are considered required by
 [arr]: https://docs.rs/bon/latest/bon/macro.arr.html
 [map]: https://docs.rs/bon/latest/bon/macro.map.html
 [set]: https://docs.rs/bon/latest/bon/macro.set.html
-[mutators]: https://docs.rs/typed-builder/latest/typed_builder/derive.TypedBuilder.html#mutators
+[Mutators]: https://docs.rs/typed-builder/latest/typed_builder/derive.TypedBuilder.html#mutators
 [bon-on]: ../../reference/builder/top-level/on
 [bon-into]: ../../reference/builder/member/into
 [bs-into]: https://docs.rs/buildstructor/latest/buildstructor/#into-field
 [db-into]: https://docs.rs/derive_builder/latest/derive_builder/#generic-setters
 [r1]: #special-setter-methods-for-collections
+[Typestate API]: ../typestate-api
