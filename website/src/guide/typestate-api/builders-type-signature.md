@@ -54,7 +54,7 @@ Visibility of the builder's type is by default derived from the visibility of th
 
 Here is a simplified view of the generated builder type and state module with their visibility.
 
-```rust
+```rust ignore
 // Let's suppose we had this derive on a struct with `pub` visibility
 // #[derive(bon::Builder)]
 pub struct Example {

@@ -44,7 +44,7 @@ With `bon` and `buildstructor` you can simply change the syntax from `#[derive(B
 
 For example, suppose one day you found a need to count the number of fields that were default-initialized in the builder.
 
-```rust
+```rust ignore
 use bon::Builder;
 
 #[derive(Builder)]
@@ -56,7 +56,7 @@ struct Example {
     x2: u32,
 
     #[builder(skip = /* What? How can I calculate this here? 🤔 */)]
-    defaults_counter: u32
+    defaults_counter: u32,
 }
 ```
 
@@ -76,7 +76,7 @@ use bon::bon;
 struct Example {
     x1: u32,
     x2: u32,
-    defaults_counter: u32
+    defaults_counter: u32,
 }
 
 #[bon]
