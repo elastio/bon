@@ -132,6 +132,7 @@ export default defineConfig({
                 },
                 {
                     text: "Basics",
+                    link: "/guide/basics",
                     items: [
                         {
                             text: "Optional Members",
@@ -175,6 +176,7 @@ export default defineConfig({
                 },
                 {
                     text: "Patterns",
+                    link: "/guide/patterns",
                     items: [
                         {
                             text: "Conditional Building",
@@ -193,6 +195,10 @@ export default defineConfig({
                             link: "/guide/patterns/shared-configuration",
                         },
                     ],
+                },
+                {
+                    text: "Antipatterns",
+                    link: "/guide/antipatterns",
                 },
                 {
                     text: "Misc",

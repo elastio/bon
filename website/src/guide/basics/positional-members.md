@@ -10,7 +10,7 @@ Use `#[builder(start_fn)]` to move some members to the parameters of the startin
 use bon::Builder;
 
 #[derive(Builder)]
-// Top-level attribute to give a better name for the starting function // [!code highlight]
+// Top-level attribute to give a custom name for the starting function // [!code highlight]
 #[builder(start_fn = with_coordinates)]                                // [!code highlight]
 struct Treasure {
     // Member-level attributes to move members   // [!code highlight]
@@ -48,7 +48,7 @@ Use `#[builder(finish_fn)]` to move some members to the parameters of the finish
 use bon::Builder;
 
 #[derive(Builder)]
-// Top-level attribute to give a better name for the finishing function // [!code highlight]
+// Top-level attribute to give a custom name for the finishing function // [!code highlight]
 #[builder(finish_fn = located_at)]                                      // [!code highlight]
 struct Treasure {
     // Member-level attributes to move members // [!code highlight]

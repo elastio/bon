@@ -18,7 +18,7 @@ Here are some example use cases when you'd need to interact with the typestate A
     -   is `unsafe` or `async`
     -   declares its own named generic parameters
     -   sets multiple members at once
-    -   ~~Cooks you a dinner 🍝~~
+    -   ~~cooks you a dinner 🍝~~
 
 Just kidding 😸, the Typestate API can't cook you a dinner 😳, but **you** can definitely cook something cool using it 💪!
 
