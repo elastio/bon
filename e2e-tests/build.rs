@@ -56,7 +56,7 @@ fn main() {
                 .join("\n");
 
             format!(
-                "#[doc = r###\"{doc}\"###] \
+                "#[doc = r#####\"{doc}\"#####] \
                 mod {test_name} {{}}"
             )
         })

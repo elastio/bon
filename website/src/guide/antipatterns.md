@@ -10,7 +10,7 @@ This problem becomes visible when you skip setting an optional member.
 
 ### 🔴 Bad
 
-```rust
+```rust compile_fail
 #[bon::builder]
 fn bad<T: Into<String>>(x1: Option<T>) {
     let x1 = x1.map(Into::into);
@@ -44,9 +44,9 @@ This is inconvenient, don't do this.
 
 ### ✅ Good
 
-Instead, make the member's type non-generic. Move generics to the setter methods' signature. It's easier to understand what it means with an example.
+Instead, make the member's type non-generic and move generics to the setter methods' signature. Let's what it means with an example.
 
-For the case above, the good solution will be [`#[builder(into)]`](../reference/builder/member/into).
+For the case above, the good solution is [`#[builder(into)]`](../reference/builder/member/into).
 
 ```rust
 #[bon::builder]
@@ -63,13 +63,13 @@ Let's compare the generated code between them (simplified). Switch between the t
 
 ::: code-group
 
-```rust [#[builder(into)]]
+```rust ignore [builder(into)]
 fn good() -> GoodBuilder { /**/ }
 
 impl<S: State> GoodBuilder<S> {
     fn x1(self, value: impl Into<String>) -> GoodBuilder<SetX1<S>> {
         GoodBuilder { /* other fields */, __x1: value.into() }
- }
+    }
 }
 ```
 
@@ -78,23 +78,23 @@ Prettier tries to replace &lt; with a <, but it is intentionally there, because
 otherwise, Vue thinks as if we are trying to write an HTML tag e.g. <T></T>
 -->
 <!-- prettier-ignore -->
-```rust [Option&lt;T>]
+```rust ignore [Option&lt;T>]
 fn bad<T>() -> BadBuilder<T> { /**/ }
 
 impl<T: Into<String>, S: State> BadBuilder<T, S> {
     fn x1(self, value: T) -> BadBuilder<T, SetX1<S>> {
         BadBuilder { /* other fields */, __x1: value }
- }
+    }
 }
 ```
 
 :::
 
-Notice how in the good example of `#[builder(into)]` the starting function `good()` doesn't declare any generic parameters, while in the `Option<T>` example `bad()` does have a generic parameter `T`.
+Notice how in the `builder(into)` example the starting function `good()` doesn't declare any generic parameters, while in the `Option<T>` example `bad()` does have a generic parameter `T`.
 
-Also, in the case of `#[builder(into)]` the call to `.into()` happens inside of the setter method itself (early). In the case of `Option<T>`, the call to `.into()` is deferred to the finishing function.
+Also, in the case of `builder(into)` the call to `.into()` happens inside of the setter method itself (early). In the case of `Option<T>`, the call to `.into()` is deferred to the finishing function.
 
-This is also visible when you compare the original functions again. Notice how in the `Bad` example, we have to manually call `x1.map(Into::into)`, while in `Good` we already have a concrete `Option<String>` type:
+This is also visible when you compare the original functions again. Notice how in the `Good` example we already have a concrete `Option<String>` type while in the `Bad` example, we have to manually call `x1.map(Into::into)`:
 
 ::: code-group
 
@@ -115,6 +115,6 @@ fn bad<T: Into<String>>(x1: Option<T>) {
 
 :::
 
-So, the builder has to carry the generic parameter `T` in its type for you to be able to use that type in your function body merely to invoke an `Into::into` on a parameter. Instead, strive to do such conversions in setters.
+So, the builder has to carry the generic parameter `T` in its type for you to be able to use that type in your function body to merely invoke `Into::into` on a parameter. Instead, strive to do such conversions in setters.
 
 If you are doing a conversion with something other than `Into`, then use [`#[builder(with)]`](../reference/builder/member/with) to apply the same technique for getting rid of generic parameters _early_.
