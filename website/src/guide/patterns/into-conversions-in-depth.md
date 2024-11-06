@@ -251,7 +251,7 @@ connect()
     .call();
 ```
 
-Notice how we didn't add a type annotation for the variable `ip_addr`. The compiler can deduce (infer) the type of `ip_addr` because it sees that the variable is passed to the `ip_addr()` setter method that expects a parameter of type `IpAddr`. It's a really simple exercise for the compiler in this case because all the context to solve it is there.
+Notice how we didn't add a type annotation for the variable `ip_addr`. The compiler can deduce (infer) the type of `ip_addr` because it sees that the variable is passed to the `ip_addr()` setter method that expects a parameter of type `IpAddr`. It's a really simple exercise for the compiler in this case because all the context to do it is there.
 
 However, if you use an `Into` conversion, not even Sherlock Holmes can answer the question "What type did you intend to parse?":
 
@@ -288,7 +288,7 @@ help: consider giving `ip_addr` an explicit type                         // [!co
 This is because now the `ip_addr` setter looks like this:
 
 ```rust ignore
-fn ip_addr(self, value: impl Into<IpAddr>) -> NextBuilderState { /* */ }
+fn ip_addr(self, value: impl Into<IpAddr>) -> ConnectBuilder<SetIpAddr<S>> { /* */ }
 ```
 
 This signature implies that the `value` parameter can be of any type that implements `Into<IpAddr>`. There are several types that implement such a trait. Among them: [`Ipv4Addr`](https://doc.rust-lang.org/stable/std/net/struct.Ipv4Addr.html#impl-From%3CIpv4Addr%3E-for-IpAddr) and [`Ipv6Addr`](https://doc.rust-lang.org/stable/std/net/struct.Ipv6Addr.html#impl-From%3CIpv6Addr%3E-for-IpAddr), and, obviously, `IpAddr` itself (thanks to [this blanket impl](https://github.com/rust-lang/rust/blob/1a94d839be8b248b972b9e022cb940d56de72fa1/library/core/src/convert/mod.rs#L763-L771)).
@@ -343,8 +343,8 @@ When we compile this code we get the following error:
 The problem here is that the compiler doesn't know the complete type of the `None` literal. It definitely knows that it's a value of type `Option<_>`, but it doesn't know what type to use in place of the `_`. There could be many potential candidates for the `_` inside of the `Option<_>`. This is because the signature of the `maybe_member()` setter changed:
 
 ```rust ignore
-fn maybe_member(self, value: Option<String>) -> NextBuilderState            // [!code --]
-fn maybe_member(self, value: Option<impl Into<String>>) -> NextBuilderState // [!code ++]
+fn maybe_member(self, value: Option<String>) -> ExampleBuilder<SetMember<S>>            // [!code --]
+fn maybe_member(self, value: Option<impl Into<String>>) -> ExampleBuilder<SetMember<S>> // [!code ++]
 ```
 
 Before we enabled `Into` conversions the signature provided a hint for the compiler because the setter expected a single concrete type `Option<String>`, so it was obvious that the `None` literal was of type `Option<String>`.
