@@ -18,10 +18,12 @@ sudo apt install valgrind
 
 ## Running the benchmarks
 
-Once you have all the [dependencies](#dependencies) installed you can run the selected benchmark from this directory like this:
+Once you have all the [dependencies](#dependencies) installed you can run the selected benchmarks from this directory like this:
 
 ```bash
 ./run.sh {benchmark_name}
 ```
 
 The `{benchmark_name}` corresponds to the modules in this crate. The number in the benchmark name represents the number of arguments that are passed to the function.
+
+If you don't pass any parameter to `run.sh`, it will run all benchmarks.

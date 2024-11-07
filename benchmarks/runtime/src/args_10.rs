@@ -46,7 +46,7 @@ pub fn builder_bench() -> u32 {
         .call()
 }
 
-#[builder(start_fn = builder)]
+#[builder(crate = crate::bon, start_fn = builder)]
 fn regular(
     arg1: &str,
     arg2: u32,

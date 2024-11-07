@@ -19,7 +19,7 @@ pub fn builder_bench() -> u32 {
         .call()
 }
 
-#[builder(start_fn = builder)]
+#[builder(crate = crate::bon, start_fn = builder)]
 fn regular(arg1: &str, arg2: u32, arg3: bool, arg4: Option<&str>, arg5: Option<u32>) -> u32 {
     let x = arg1.parse::<u32>().unwrap() + arg2;
     let x = x + u32::from(arg3);
