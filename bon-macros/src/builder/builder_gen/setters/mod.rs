@@ -529,7 +529,7 @@ impl SettersItems {
                 // to make IDE's "go to definition" work correctly. It's so
                 // important that this doesn't use `format_ident!`, but rather
                 // `syn::Ident::new` to set the span of the `Ident` explicitly.
-                syn::Ident::new(&format!("maybe_{base_name}"), base_name.span())
+                syn::Ident::new(&format!("maybe_{}", base_name.raw_name()), base_name.span())
             });
 
         let default = member.config.default.as_deref().and_then(|default| {
