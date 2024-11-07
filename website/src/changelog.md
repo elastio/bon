@@ -89,6 +89,7 @@ All the breaking changes are very unlikely to actually break your code that was 
 ### Fixed
 
 -   Fix `#[cfg/cfg_attr()]` not being expanded when used on function arguments with doc comments or other attributes.
+-   Fix raw identifiers in optional/default members ([#175](https://github.com/elastio/bon/pull/175))
 
 ### Other
 
