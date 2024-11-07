@@ -38,66 +38,118 @@ There are several other existing alternative crates for generating builders. `bo
 
 ## Function Builder Paradigm Shift
 
-If you ever hit a wall with `typed-builder` or `derive_builder`, you have no other choice but to hack something around their derive attributes syntax on a struct.
+If you ever hit a wall 🧱 with `typed-builder` or `derive_builder`, you'll have to hack something around their derive attributes syntax on a struct. With `bon` or `buildstructor` you can simply change the syntax from `#[derive(Builder)]` on a struct to a `#[builder]` on a function to gain more flexibility at any time 🤸. It is [guaranteed to preserve compatibility](../misc/compatibility#switching-between-derivebuilder-and-builder-on-the-new-method) (not a breaking change).
 
-With `bon` and `buildstructor` you can simply change the syntax from `#[derive(Builder)]` on a struct to a `#[builder]` on a function, which gives you much more flexibility. It is [guaranteed to preserve compatibility](../misc/compatibility#switching-between-derivebuilder-and-builder-on-the-new-method) (non a breaking change). It allows you to create fallible, `async` or even `unsafe` builders naturally.
+### Example
 
-For example, suppose one day you found a need to count the number of fields that were default-initialized in the builder.
+Suppose you already had a struct like the following with a builder derive:
 
 ```rust ignore
 use bon::Builder;
 
 #[derive(Builder)]
-struct Example {
-    #[builder(default)]
+pub struct Segment {
     x1: u32,
+    y1: u32,
 
-    #[builder(default)]
     x2: u32,
-
-    #[builder(skip = /* What? How can I calculate this here? 🤔 */)]
-    defaults_counter: u32,
+    y2: u32,
 }
+
+// Suppose this is your users' code
+Segment::builder().x1(1).y1(2).x2(3).y2(4).build();
 ```
+
+Then you decided to refactor 🧹 your struct's internal representation by extracting a private utility `Point` type:
+
+```rust
+use bon::Builder;
+
+#[derive(Builder)]
+pub struct Segment {
+    point1: Point,
+    point2: Point,
+}
+
+// Private
+struct Point {
+    x: u32,
+    y: u32,
+}
+
+// Suppose this is your users' code (it no longer compiles)
+Segment::builder().x1(1).y1(2).x2(3).y2(4).build(); // [!code error]
+//                 ^^- error[E0599]: no method named `x1` found for struct `SegmentBuilder` // [!code error]
+//                                   available methods: `point1(Point)`, `point2(Point)` // [!code error]
+```
+
+There are two problems with `#[derive(Builder)]` syntax in this case:
+
+1.  This refactoring becomes a breaking change to `Segment`'s builder API 😢.
+2.  The private utility `Point` type leaks through the builder API via `point1`, `point2` setters 😭.
+
+The fundamental problem is that the builder's API is _coupled_ ⛓️ with your struct's internal representation. It's literally `derive`d from the fields of your struct.
+
+### Suffering
+
+If you were using `typed-builder` or `derive_builder`, you'd be stuck for a while trying to find the magical 🪄 combination of attributes that would let you do this change without breaking compatibility or leakage of the private `Point` type.
+
+With no solution in sight 😮‍💨, you'd then fall back to writing the same builder manually. You'd probably expand the builder derive macro and edit the generated code directly, which, ugh... hurts 🤕.
+
+However, that would be especially painful with `typed-builder`, which generates a complex typestate that is not human-readable and maintainable enough by hand. It also references some internal `#[doc(hidden)]` symbols from the `typed-builder` crate. Achoo... 🤧.
 
 ::: tip
 
-The attribute [`#[builder(skip)]`](../../reference/builder/member/skip) skips generating setters for a member. The field is initialized with the given expression instead.
+In contrast, `bon`'s type state **is** human-readable, maintainable, and [documented](../typestate-api) 👍
 
 :::
 
-The attribute [`#[builder(skip)]`](../../reference/builder/member/skip) is the first obvious candidate for this use case. It also has analogues in `typed-builder` and `derive_builder`. However, it's actually too limited for this use case, because it doesn't have the required context.
+### Behold the Function-Based Builder
 
-At this point, you'd probably give up on `typed-builder` and `derive_builder`, because there is no way to express the required behavior with their attributes' syntax. However, it's as simple as pie with `bon` or `buildstructor`:
+This change is as simple as pie 🥧 with `bon` or `buildstructor`. The code speaks for itself:
 
 ```rust
 use bon::bon;
 
-struct Example {
-    x1: u32,
-    x2: u32,
-    defaults_counter: u32,
+// No more derives on a struct. Its internal representation is decoupled from the builder.
+pub struct Example {
+    point1: Point,
+    point2: Point,
+}
+
+struct Point {
+    x: u32,
+    y: u32,
 }
 
 #[bon]
 impl Example {
     #[builder]
-    fn new(x1: Option<u32>, x2: Option<u32>) -> Self {
-        let mut defaults_counter = 0;
-        let x1 = x1.unwrap_or_else(|| { defaults_counter += 1; 0 });
-        let x2 = x2.unwrap_or_else(|| { defaults_counter += 1; 0 });
-        Self { x1, x2, defaults_counter }
+    fn new(x1: u32, y1: u32, x2: u32, y2: u32) -> Self {
+        Self {
+            point1: Point { x: x1, y: y1 } ,
+            point2: Point { x: x2, y: y2 } ,
+        }
     }
 }
 
-assert_eq!(Example::builder().build().defaults_counter, 2);
-assert_eq!(Example::builder().x1(1).build().defaults_counter, 1);
-assert_eq!(Example::builder().x1(1).x2(2).build().defaults_counter, 0);
+// Suppose this is your users' code (it compiles after this change, yay 🎉!)
+Segment::builder().x1(1).y1(2).x2(3).y2(4).build();
 ```
 
-Ah... Simple just like regular Rust, isn't it? 😌
+Ah... Isn't this just so simple and beautiful? 😌 The fun part is that the constructor method `new` that we originally abandoned comes back to heroically save us ⛑️ at no cost, other than a star ⭐ on `bon`'s [Github repo](https://github.com/elastio/bon) maybe 🐈?
 
-The chances of hitting a wall with function builders are close to zero. Even if you ever hit the wall with function builders you still have access to the [Typestate API](../typestate-api/) in `bon` for even more flexibility.
+And you know what, our old friend `new` doesn't feel offended for being abandoned. It doesn't even feel emotions, actually 🗿. But it's happy to help you 🫂.
+
+Moreover, it offers you a completely new dimension of flexibility:
+
+-   Need some validation? Just make the `new()` method return a `Result`. The generated `build()` method will then become fallible.
+-   Need to do an `async` operation in the constructor? Just make your constructor `async` and your `build()` will return a `Future`.
+-   Need some adrenaline 💉? Just add `unsafe`, and... you get the idea 😉.
+
+### Summary
+
+The chances of hitting a wall with function builders are close to zero, and even if you ever do, you still have access to the [Typestate API](../typestate-api/) in `bon` for even more flexibility 💪.
 
 ## Special setter methods for collections
 

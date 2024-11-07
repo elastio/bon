@@ -200,6 +200,12 @@ bon = "2.3"
 
 You can opt out of `std` and `alloc` cargo features with `default-features = false` for `no_std` environments.
 
+## Acknowledgments
+
+This project was heavily inspired by such awesome crates as [`buildstructor`](https://docs.rs/buildstructor), [`typed-builder`](https://docs.rs/typed-builder) and [`derive_builder`](https://docs.rs/derive_builder). This crate was designed with many lessons learned from them.
+
+See [alternatives](https://bon-rs.com/guide/misc/alternatives) for comparison.
+
 ## Getting Help
 
 If you can't figure something out, consult the docs and maybe use the `🔍 Search` bar on our [docs website](https://bon-rs.com). You may also create an issue or a discussion on the [Github repository](https://github.com/elastio/bon) for help or write us a message on [Discord](https://bon-rs.com/discord).
@@ -218,12 +224,6 @@ If you can't figure something out, consult the docs and maybe use the `🔍 Sear
     </tr>
 </tbody>
 </table>
-
-## Acknowledgments
-
-This project was heavily inspired by such awesome crates as [`buildstructor`](https://docs.rs/buildstructor), [`typed-builder`](https://docs.rs/typed-builder) and [`derive_builder`](https://docs.rs/derive_builder). This crate was designed with many lessons learned from them.
-
-See [alternatives](https://bon-rs.com/guide/misc/alternatives) for comparison.
 
 ## License
 
