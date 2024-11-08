@@ -4,7 +4,7 @@ Generic type parameters, `impl Trait` or const generics used exclusively in opti
 
 This problem becomes visible when you skip setting an optional member.
 
-## 🔴 Bad
+## :red_circle: Bad
 
 ```rust compile_fail
 #[bon::builder]
@@ -27,7 +27,7 @@ bad().call();
 ^^^ cannot infer type of the type parameter `T` declared on the function `bad`
 ```
 
-A similar error would be generated if we used `Option<impl Into<String>>`, although the error would reference a generic parameter [auto-generated](./typestate-api/builders-type-signature#other-generic-parameters) for the function by the builder macro. For simplicity, we'll use a named generic parameter throughout the examples.
+A similar error would be generated if we used `Option<impl Into<String>>`, although the error would reference a generic parameter [auto-generated](../typestate-api/builders-type-signature#other-generic-parameters) for the function by the builder macro. For simplicity, we'll use a named generic parameter throughout the examples.
 
 The caller of your builder would need to work around this problem by specifying the type `T` explicitly via turbofish:
 
@@ -38,11 +38,11 @@ bad::<String>().call();
 
 This is inconvenient, don't do this.
 
-## ✅ Good
+## :green_circle: Good
 
 Instead, make the member's type non-generic and move generics to the setter methods' signature. Let's see what it means with an example.
 
-For the case above, the good solution is [`#[builder(into)]`](../reference/builder/member/into).
+For the case above, the good solution is [`#[builder(into)]`](../../reference/builder/member/into).
 
 ```rust
 #[bon::builder]
@@ -113,4 +113,4 @@ fn bad<T: Into<String>>(x1: Option<T>) {
 
 So, the builder has to carry the generic parameter `T` in its type for you to be able to use that type in your function body to merely invoke `Into::into` on a parameter. Instead, strive to do such conversions in setters.
 
-If you are doing a conversion with something other than `Into`, then use [`#[builder(with)]`](../reference/builder/member/with) to apply the same technique for getting rid of generic parameters _early_.
+If you are doing a conversion with something other than `Into`, then use [`#[builder(with)]`](../../reference/builder/member/with) to apply the same technique for getting rid of generic parameters _early_.

@@ -38,7 +38,7 @@ There are several other existing alternative crates for generating builders. `bo
 
 ## Function Builder Paradigm Shift
 
-If you ever hit a wall 🧱 with `typed-builder` or `derive_builder`, you'll have to hack something around their derive attributes syntax on a struct. With `bon` or `buildstructor` you can simply change the syntax from `#[derive(Builder)]` on a struct to a `#[builder]` on a function to gain more flexibility at any time 🤸. It is [guaranteed to preserve compatibility](./basics/compatibility#switching-between-derivebuilder-and-builder-on-the-new-method), meaning it's not a breaking change.
+If you ever hit a wall 🧱 with `typed-builder` or `derive_builder`, you'll have to hack something around their derive attributes syntax on a struct. With `bon` or `buildstructor` you can simply change the syntax from `#[derive(Builder)]` on a struct to a `#[builder]` on a function to gain more flexibility at any time 🤸. It is [guaranteed to preserve compatibility](./basics/compatibility#switching-between-derive-builder-and-builder-on-the-new-method), meaning it's not a breaking change.
 
 ### Example
 
@@ -62,7 +62,7 @@ Line::builder().x1(1).y1(2).x2(3).y2(4).build();
 
 Then you decided to refactor 🧹 your struct's internal representation by extracting a private utility `Point` type:
 
-```rust
+```rust compile_fail
 use bon::Builder;
 
 #[derive(Builder)]
