@@ -16,7 +16,7 @@ fn example(level: Option<u32>) {}
 example().call();
 ```
 
-You can use [`#[builder(transparent)]`](../../reference/builder/member/transparent) to opt-out from this.
+You can use [`#[builder(required)]`](../../reference/builder/member/required) to opt-out from this.
 
 ### Setters pair
 

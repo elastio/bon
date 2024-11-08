@@ -83,7 +83,7 @@ pub mod builder_top_level {
         pub const into: Flag = Flag;
 
         /// See the docs at <https://bon-rs.com/reference/builder/top-level/on>
-        pub const transparent: Flag = Flag;
+        pub const required: Flag = Flag;
 
         /// See the docs at <https://bon-rs.com/reference/builder/top-level/on>
         pub const overwritable: Flag = Flag;

@@ -1,4 +1,4 @@
-# `transparent`
+# `required`
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="function arguments"/> <Badge type="warning" text="method arguments"/>
 
@@ -19,7 +19,7 @@ use bon::Builder;
 
 #[derive(Builder)]
 struct Example {
-    #[builder(transparent)]
+    #[builder(required)]
     required: Option<u32>,
 
     optional: Option<u32>,
@@ -30,6 +30,47 @@ Example::builder()
     .optional(2)
     .build();
 ```
+
+```rust [Function]
+use bon::builder;
+
+#[builder]
+fn example(
+    #[builder(required)]
+    required: Option<u32>,
+
+    optional: Option<u32>,
+) {}
+
+example()
+    .required(Some(2))
+    .optional(2)
+    .call();
+```
+
+```rust [Method]
+use bon::bon;
+
+struct Example;
+
+#[bon]
+impl Example {
+    #[builder]
+    fn example(
+        #[builder(required)]
+        required: Option<u32>,
+
+        optional: Option<u32>,
+    ) {}
+}
+
+Example::example()
+    .required(Some(2))
+    .optional(2)
+    .call();
+```
+
+:::
 
 Notice the difference:
 

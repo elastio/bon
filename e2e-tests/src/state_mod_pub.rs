@@ -17,8 +17,8 @@ pub struct PubStateMod {
     #[builder(overwritable, default = 2 * 2 + 3)]
     overwritable_default_arg: u32,
 
-    #[builder(transparent)]
-    transparent_arg: Option<u64>,
+    #[builder(required)]
+    required_option_arg: Option<u64>,
 
     #[builder(with = |x: &str| -> Result<_, std::num::ParseIntError> { x.parse() })]
     with_arg: u32,

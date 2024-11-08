@@ -197,7 +197,7 @@ impl<'a> SettersCtx<'a> {
                                 "the underlying type of this member is not `Option`; \
                                 by default, members of type `Option` are optional and their \
                                 'underlying type' is the type under the `Option`; \
-                                you might be missing #[builder(transparent)]` annotation \
+                                you might be missing #[builder(required)]` annotation \
                                 for this member"
                             )
                         } else {

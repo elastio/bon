@@ -133,10 +133,10 @@ impl NamedMember {
 
         self.validate_setters_config()?;
 
-        if self.config.transparent.is_present() && !self.ty.norm.is_option() {
+        if self.config.required.is_present() && !self.ty.norm.is_option() {
             bail!(
-                &self.config.transparent.span(),
-                "`#[builder(transparent)]` can only be applied to members of \
+                &self.config.required.span(),
+                "`#[builder(required)]` can only be applied to members of \
                 type `Option<T>` to disable their special handling",
             );
         }
@@ -159,7 +159,7 @@ impl NamedMember {
                 bail!(
                     &setter.key,
                     "`{}` setter function applies only to members with `#[builder(default)]` \
-                     or members of `Option<T>` type (if #[builder(transparent)] is not set)",
+                     or members of `Option<T>` type (if #[builder(required)] is not set)",
                     setter.key
                 );
             }
@@ -215,9 +215,9 @@ impl NamedMember {
     }
 
     /// Returns `true` if this member is of `Option<_>` type, but returns `false`
-    /// if `#[builder(transparent)]` is set.
+    /// if `#[builder(required)]` is set.
     pub(crate) fn is_special_option_ty(&self) -> bool {
-        !self.config.transparent.is_present() && self.ty.norm.is_option()
+        !self.config.required.is_present() && self.ty.norm.is_option()
     }
 
     /// Returns `false` if the member has a default value. It means this member
@@ -235,19 +235,19 @@ impl NamedMember {
     }
 
     /// Returns the normalized type of the member stripping the `Option<_>`
-    /// wrapper if it's present unless `#[builder(transparent)]` is set.
+    /// wrapper if it's present unless `#[builder(required)]` is set.
     pub(crate) fn underlying_norm_ty(&self) -> &syn::Type {
         self.underlying_ty(&self.ty.norm)
     }
 
     /// Returns the original type of the member stripping the `Option<_>`
-    /// wrapper if it's present unless `#[builder(transparent)]` is set.
+    /// wrapper if it's present unless `#[builder(required)]` is set.
     pub(crate) fn underlying_orig_ty(&self) -> &syn::Type {
         self.underlying_ty(&self.ty.orig)
     }
 
     fn underlying_ty<'m>(&'m self, ty: &'m syn::Type) -> &'m syn::Type {
-        if self.config.transparent.is_present() || self.config.default.is_some() {
+        if self.config.required.is_present() || self.config.default.is_some() {
             ty
         } else {
             ty.option_type_param().unwrap_or(ty)
@@ -259,12 +259,12 @@ impl NamedMember {
     }
 
     pub(crate) fn merge_on_config(&mut self, on: &[OnConfig]) -> Result {
-        // This is a temporary hack. We only allow `on(_, transparent)` as the
+        // This is a temporary hack. We only allow `on(_, required)` as the
         // first `on(...)` clause. Instead we should implement the extended design:
         // https://github.com/elastio/bon/issues/152
-        if let Some(on) = on.first().filter(|on| on.transparent.is_present()) {
+        if let Some(on) = on.first().filter(|on| on.required.is_present()) {
             if self.is_special_option_ty() {
-                self.config.transparent = on.transparent;
+                self.config.required = on.required;
             }
         }
 

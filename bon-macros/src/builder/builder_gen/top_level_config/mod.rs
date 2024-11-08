@@ -101,7 +101,7 @@ impl TopLevelConfig {
     }
 
     fn parse_for_any(meta_list: &[darling::ast::NestedMeta]) -> Result<Self> {
-        // This is a temporary hack. We only allow `on(_, transparent)` as the
+        // This is a temporary hack. We only allow `on(_, required)` as the
         // first `on(...)` clause. Instead we should implement an extended design:
         // https://github.com/elastio/bon/issues/152
         let mut on_configs = meta_list
@@ -132,20 +132,20 @@ impl TopLevelConfig {
 
         let me = Self::from_list(meta_list)?;
 
-        if let Some(on) = me.on.iter().skip(1).find(|on| on.transparent.is_present()) {
+        if let Some(on) = me.on.iter().skip(1).find(|on| on.required.is_present()) {
             bail!(
-                &on.transparent.span(),
-                "`transparent` can only be specified in the first `on(...)` clause; \
+                &on.required.span(),
+                "`required` can only be specified in the first `on(...)` clause; \
                 this restriction may be lifted in the future",
             );
         }
 
-        if let Some(first_on) = me.on.first().filter(|on| on.transparent.is_present()) {
+        if let Some(first_on) = me.on.first().filter(|on| on.required.is_present()) {
             if !matches!(first_on.type_pattern, syn::Type::Infer(_)) {
                 bail!(
                     &first_on.type_pattern,
-                    "`transparent` can only be used with the wildcard type pattern \
-                    i.e. `on(_, transparent)`; this restriction may be lifted in the future",
+                    "`required` can only be used with the wildcard type pattern \
+                    i.e. `on(_, required)`; this restriction may be lifted in the future",
                 );
             }
         }

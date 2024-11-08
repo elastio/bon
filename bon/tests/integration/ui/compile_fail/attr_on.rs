@@ -25,7 +25,7 @@ fn incomplete_on3() {}
 fn incomplete_on4() {}
 
 #[builder(
-    on(_, transparent),
+    on(_, required),
     finish_fn = finish,
     on(String, into),
 )]
@@ -33,7 +33,7 @@ fn non_consecutive_on1() {}
 
 #[builder(
     start_fn = start,
-    on(_, transparent),
+    on(_, required),
     finish_fn = finish,
     on(String, into),
 )]
@@ -41,17 +41,17 @@ fn non_consecutive_on2() {}
 
 #[builder(
     start_fn = start,
-    on(_, transparent),
+    on(_, required),
     finish_fn = finish,
     on(String, into),
     builder_type = Builder,
 )]
 fn non_consecutive_on3() {}
 
-#[builder(on(_, into), on(_, transparent))]
-fn non_first_transparent() {}
+#[builder(on(_, into), on(_, required))]
+fn non_first_required() {}
 
-#[builder(on(u8, transparent))]
-fn non_wildcard_transparent() {}
+#[builder(on(u8, required))]
+fn non_wildcard_required() {}
 
 fn main() {}

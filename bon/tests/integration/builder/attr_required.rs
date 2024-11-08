@@ -7,19 +7,19 @@ mod member_level {
         #[derive(Debug, Builder)]
         #[allow(dead_code)]
         struct Sut<T> {
-            #[builder(transparent)]
+            #[builder(required)]
             regular: Option<u32>,
 
-            #[builder(transparent)]
+            #[builder(required)]
             generic: Option<T>,
 
-            #[builder(transparent, into)]
+            #[builder(required, into)]
             with_into: Option<u32>,
 
-            #[builder(transparent, default = Some(99))]
+            #[builder(required, default = Some(99))]
             with_default: Option<u32>,
 
-            #[builder(transparent, default = Some(10))]
+            #[builder(required, default = Some(10))]
             with_default_2: Option<u32>,
         }
 
@@ -55,11 +55,11 @@ mod member_level {
     fn test_free_fn() {
         #[builder]
         fn sut<T: fmt::Debug>(
-            #[builder(transparent)] regular: Option<u32>,
-            #[builder(transparent)] generic: Option<T>,
-            #[builder(transparent, into)] with_into: Option<u32>,
-            #[builder(transparent, default = Some(99))] with_default: Option<u32>,
-            #[builder(transparent, default = Some(10))] with_default_2: Option<u32>,
+            #[builder(required)] regular: Option<u32>,
+            #[builder(required)] generic: Option<T>,
+            #[builder(required, into)] with_into: Option<u32>,
+            #[builder(required, default = Some(99))] with_default: Option<u32>,
+            #[builder(required, default = Some(10))] with_default_2: Option<u32>,
         ) -> impl fmt::Debug {
             (regular, generic, with_into, with_default, with_default_2)
         }
@@ -83,11 +83,11 @@ mod member_level {
         impl Sut {
             #[builder]
             fn sut<T: fmt::Debug>(
-                #[builder(transparent)] regular: Option<u32>,
-                #[builder(transparent)] generic: Option<T>,
-                #[builder(transparent, into)] with_into: Option<u32>,
-                #[builder(transparent, default = Some(99))] with_default: Option<u32>,
-                #[builder(transparent, default = Some(10))] with_default_2: Option<u32>,
+                #[builder(required)] regular: Option<u32>,
+                #[builder(required)] generic: Option<T>,
+                #[builder(required, into)] with_into: Option<u32>,
+                #[builder(required, default = Some(99))] with_default: Option<u32>,
+                #[builder(required, default = Some(10))] with_default_2: Option<u32>,
             ) -> impl fmt::Debug {
                 (regular, generic, with_into, with_default, with_default_2)
             }
@@ -95,11 +95,11 @@ mod member_level {
             #[builder]
             fn with_self<T: fmt::Debug>(
                 &self,
-                #[builder(transparent)] regular: Option<u32>,
-                #[builder(transparent)] generic: Option<T>,
-                #[builder(transparent, into)] with_into: Option<u32>,
-                #[builder(transparent, default = Some(99))] with_default: Option<u32>,
-                #[builder(transparent, default = Some(10))] with_default_2: Option<u32>,
+                #[builder(required)] regular: Option<u32>,
+                #[builder(required)] generic: Option<T>,
+                #[builder(required, into)] with_into: Option<u32>,
+                #[builder(required, default = Some(99))] with_default: Option<u32>,
+                #[builder(required, default = Some(10))] with_default_2: Option<u32>,
             ) -> impl fmt::Debug {
                 let _ = self;
                 (regular, generic, with_into, with_default, with_default_2)
@@ -135,7 +135,7 @@ mod attr_on {
     #[test]
     fn test_struct() {
         #[derive(Debug, Builder)]
-        #[builder(on(_, transparent))]
+        #[builder(on(_, required))]
         #[allow(dead_code)]
         struct Sut<T> {
             #[builder(start_fn)]
@@ -185,7 +185,7 @@ mod attr_on {
 
     #[test]
     fn test_free_fn() {
-        #[builder(on(_, transparent))]
+        #[builder(on(_, required))]
         fn sut<T: fmt::Debug>(
             #[builder(start_fn)] start_fn: u32,
             regular: Option<u32>,
@@ -221,7 +221,7 @@ mod attr_on {
 
         #[bon]
         impl Sut {
-            #[builder(on(_, transparent))]
+            #[builder(on(_, required))]
             fn sut<T: fmt::Debug>(
                 #[builder(start_fn)] start_fn: u32,
                 regular: Option<u32>,
@@ -240,7 +240,7 @@ mod attr_on {
                 )
             }
 
-            #[builder(on(_, transparent))]
+            #[builder(on(_, required))]
             fn with_self<T: fmt::Debug>(
                 &self,
                 #[builder(start_fn)] start_fn: u32,

@@ -240,4 +240,4 @@ The `self` parameter in associated method syntax is not available to the `defaul
 
 ## Compile errors
 
-This attribute is incompatible with members of `Option` type, since `Option` already implies the default value of `None`. However, it can be used together with [`#[builder(transparent)]`](./transparent).
+This attribute is incompatible with members of `Option` type, since `Option` already implies the default value of `None`. However, it can be used together with [`#[builder(required)]`](./required).
