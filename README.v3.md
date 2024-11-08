@@ -137,7 +137,7 @@ assert_eq!(user.id, 1);
 assert_eq!(user.name, "Bon");
 ```
 
-`#[derive(Builder)]` on a struct generates builder API that is fully compatible with placing `#[builder]` on the `new()` method with a signature similar to the struct's fields (more details on the [Compatibility](https://bon-rs.com/guide/misc/compatibility#switching-between-derive-builder-and-builder-on-the-new-method) page).
+`#[derive(Builder)]` on a struct generates builder API that is fully compatible with placing `#[builder]` on the `new()` method with a signature similar to the struct's fields (more details on the [Compatibility](https://bon-rs.com/guide/basics/compatibility#switching-between-derive-builder-and-builder-on-the-new-method) page).
 
 ### Other Methods
 
@@ -204,7 +204,7 @@ You can opt out of `std` and `alloc` cargo features with `default-features = fal
 
 This project was heavily inspired by such awesome crates as [`buildstructor`](https://docs.rs/buildstructor), [`typed-builder`](https://docs.rs/typed-builder) and [`derive_builder`](https://docs.rs/derive_builder). This crate was designed with many lessons learned from them.
 
-See [alternatives](https://bon-rs.com/guide/misc/alternatives) for comparison.
+See [alternatives](https://bon-rs.com/guide/alternatives) for comparison.
 
 ## Getting Help
 

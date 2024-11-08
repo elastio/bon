@@ -21,7 +21,7 @@ If you don't know about [`bon`], then see the [motivational blog post](./how-to-
 
 ### Positional arguments in starting and finishing functions
 
-While having the ability to use separate setters for the members gives you a ton of flexibility and extensibility described on the ["Compatibility"](../guide/misc/compatibility) page, sometimes you don't need all of that.
+While having the ability to use separate setters for the members gives you a ton of flexibility and extensibility described on the ["Compatibility"](../guide/basics/compatibility) page, sometimes you don't need all of that.
 
 Maybe you'd like to pick out some specific members and let the user pass their values as positional parameters to the starting function that creates the builder or to the finishing function that consumes it. This reduces the syntax a bit at the cost of some extensibility loss ⚖️, but it may be worth it!
 

@@ -131,8 +131,13 @@ export default defineConfig({
                     link: "/guide/overview",
                 },
                 {
+                    text: "Alternatives",
+                    link: "/guide/alternatives",
+                },
+                {
                     text: "Basics",
                     link: "/guide/basics",
+                    collapsed: false,
                     items: [
                         {
                             text: "Optional Members",
@@ -158,11 +163,16 @@ export default defineConfig({
                             text: "Documenting",
                             link: "/guide/basics/documenting",
                         },
+                        {
+                            text: "Compatibility",
+                            link: "/guide/compatibility",
+                        },
                     ],
                 },
                 {
                     text: "Typestate API",
                     link: "/guide/typestate-api",
+                    collapsed: false,
                     items: [
                         {
                             text: "Builder's Type Signature",
@@ -177,6 +187,7 @@ export default defineConfig({
                 {
                     text: "Patterns",
                     link: "/guide/patterns",
+                    collapsed: false,
                     items: [
                         {
                             text: "Conditional Building",
@@ -185,6 +196,10 @@ export default defineConfig({
                         {
                             text: "Fallible Builders",
                             link: "/guide/patterns/fallible-builders",
+                        },
+                        {
+                            text: "Optional Generic Members",
+                            link: "/guide/patterns/optional-generic-members",
                         },
                         {
                             text: "Into Conversions In-Depth",
@@ -197,42 +212,33 @@ export default defineConfig({
                     ],
                 },
                 {
-                    text: "Antipatterns",
-                    link: "/guide/antipatterns",
-                },
-                {
-                    text: "Misc",
+                    text: "Benchmarks",
+                    link: "/guide/benchmarks",
+                    collapsed: false,
                     items: [
                         {
-                            text: "Compatibility",
-                            link: "/guide/misc/compatibility",
+                            text: "Runtime",
+                            link: "/guide/benchmarks/runtime",
                         },
+                        {
+                            text: "Compilation",
+                            link: "/guide/benchmarks/compilation",
+                        },
+                    ],
+                },
+                {
+                    text: "Troubleshooting",
+                    link: "/guide/troubleshooting",
+                    items: [
                         {
                             text: "Limitations",
-                            link: "/guide/misc/limitations",
-                        },
-                        {
-                            text: "Benchmarks",
-                            link: "/guide/misc/benchmarks",
-                        },
-                        {
-                            text: "Alternatives",
-                            link: "/guide/misc/alternatives",
-                        },
-                        {
-                            text: "Troubleshooting",
-                            link: "/guide/misc/troubleshooting",
+                            link: "/guide/troubleshooting/limitations",
                         },
                     ],
                 },
                 {
-                    text: "Internal",
-                    items: [
-                        {
-                            text: "Contributing",
-                            link: "/guide/internal/contributing",
-                        },
-                    ],
+                    text: "Contributing",
+                    link: "/guide/internal/contributing",
                 },
             ],
             "/reference": [
@@ -243,7 +249,7 @@ export default defineConfig({
                         {
                             text: "Top-Level",
                             link: "/reference/builder#top-level-attributes",
-                            collapsed: true,
+                            collapsed: false,
                             items: [
                                 {
                                     text: "builder_type",
@@ -278,7 +284,7 @@ export default defineConfig({
                         {
                             text: "Member",
                             link: "/reference/builder#member-attributes",
-                            collapsed: true,
+                            collapsed: false,
                             items: [
                                 {
                                     text: "default",

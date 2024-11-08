@@ -1,4 +1,4 @@
-# Benchmarks
+# Runtime Benchmarks
 
 Builder macros generate code that is easily optimizable by the compiler. This has been tested by the benchmarks below. The benchmarks compare regular positional function call syntax and builder syntax for functions annotated with `#[builder]`.
 

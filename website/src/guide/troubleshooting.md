@@ -4,7 +4,7 @@ If you encounter any issues, then try the following.
 
 ## Check for known limitations
 
-Check if your problem is already described on the [known limitations page](./limitations), where you'll also find some suggested workarounds.
+Check if your problem is already described on the [known limitations page](./troubleshooting/limitations), where you'll also find some suggested workarounds.
 
 ## Expand the macro
 

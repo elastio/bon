@@ -43,7 +43,7 @@ impl<S> ExampleBuilder<S> {
 }
 ```
 
-Thanks to this design, changing the member from required to optional [preserves compatibility](../misc/compatibility#making-a-required-member-optional).
+Thanks to this design, changing the member from required to optional [preserves compatibility](./compatibility#making-a-required-member-optional).
 
 ### Examples
 
@@ -71,7 +71,7 @@ To make a member of non-`Option` type optional you may use [`#[builder(default)]
 
 ::: tip
 
-Switching between `#[builder(default)]` and `Option<T>` is [compatible](../misc/compatibility#switching-between-option-t-and-builder-default).
+Switching between `#[builder(default)]` and `Option<T>` is [compatible](./compatibility#switching-between-option-t-and-builder-default).
 
 :::
 

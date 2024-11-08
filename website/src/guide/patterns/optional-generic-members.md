@@ -1,14 +1,10 @@
-# Antipatterns
-
-While [Patterns](./patterns) teach you how to use `bon`, here we'll discuss how **not to use** `bon`.
-
-## Generic Types in Optional Members
+# Optional Generic Members
 
 Generic type parameters, `impl Trait` or const generics used exclusively in optional members break type inference. This is mostly relevant to `fn`-based builders.
 
 This problem becomes visible when you skip setting an optional member.
 
-### 🔴 Bad
+## 🔴 Bad
 
 ```rust compile_fail
 #[bon::builder]
@@ -42,7 +38,7 @@ bad::<String>().call();
 
 This is inconvenient, don't do this.
 
-### ✅ Good
+## ✅ Good
 
 Instead, make the member's type non-generic and move generics to the setter methods' signature. Let's what it means with an example.
 

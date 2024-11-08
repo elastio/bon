@@ -16,29 +16,29 @@ There are several other existing alternative crates for generating builders. `bo
 
 <!-- If you want to edit the table below make sure to reduce the font size in the editor or turn off word wrap to view the table easier -->
 
-| Feature                                  | `bon`                              | [`buildstructor`]         | [`typed-builder`]                    | [`derive_builder`]                            |
-| ---------------------------------------- | ---------------------------------- | ------------------------- | ------------------------------------ | --------------------------------------------- |
-| Builder for structs                      | ✅                                 | ✅                        | ✅                                   | ✅                                            |
-| Builder for free functions               | ✅                                 |                           |                                      |
-| Builder for associated methods           | ✅                                 | ✅                        |                                      |
-| Panic safe                               | ✅                                 | ✅                        | ✅                                   | `build()`&nbsp;returns&nbsp;`Result`          |
-| `Option<T>` makes members optional       | ✅                                 | ✅                        |                                      |                                               |
-| `T` -> `Option<T>` is non-breaking       | ✅ [docs][bon-req-to-opt]          | ✅                        | via attr `strip_option`              | via attr [`strip_option`][db-so]              |
-| Generates `T::builder()` method          | ✅                                 | ✅                        | ✅                                   | only `Builder::default()`                     |
-| `Into` conversion in setters             | [opt-in][bon-into]                 | [implicit][bs-into]       | opt-in                               | [opt-in][db-into]                             |
-| Validation in the finishing function     | ✅ [docs][bon-fallible-builder]    | ✅ [docs][bs-fall-finish] |                                      | ✅ [docs][db-fall-finish]                     |
-| Validation in setters (fallible setters) | ✅&nbsp;attr [`with = closure`][b] |                           |                                      | ✅ `TryInto` via attr [`try_setter`][db-fs]   |
-| Custom methods on builder                | ✅ via [direct impl block][bon-ts] |                           | ✅&nbsp; via [mutators]&nbsp;(attrs) | ✅ via [direct impl block][db-custom-methods] |
-| `impl Trait`, elided lifetimes support   | ✅                                 |                           |                                      |
-| Builder for `fn` hides original `fn`     | ✅                                 |                           |                                      |
-| Special setters for collections          | [(see below)][r1]                  | ✅                        |                                      | ✅                                            |
-| Builder by `&self`/`&mut self`           |                                    |                           |                                      | ✅                                            |
+| Feature                                  | `bon`                              | [`buildstructor`]         | [`typed-builder`]         | [`derive_builder`]                            |
+| ---------------------------------------- | ---------------------------------- | ------------------------- | ------------------------- | --------------------------------------------- |
+| Builder for structs                      | ✅                                 | ✅                        | ✅                        | ✅                                            |
+| Builder for free functions               | ✅                                 |                           |                           |
+| Builder for associated methods           | ✅                                 | ✅                        |                           |
+| Panic safe                               | ✅                                 | ✅                        | ✅                        | `build()` returns `Result`                    |
+| `Option<T>` makes members optional       | ✅                                 | ✅                        |                           |                                               |
+| `T` -> `Option<T>` is non-breaking       | ✅ [docs][bon-req-to-opt]          | ✅                        | via attr `strip_option`   | via attr [`strip_option`][db-so]              |
+| Generates `T::builder()` method          | ✅                                 | ✅                        | ✅                        | only `Builder::default()`                     |
+| `Into` conversion in setters             | [opt-in][bon-into]                 | [implicit][bs-into]       | opt-in                    | [opt-in][db-into]                             |
+| Validation in the finishing function     | ✅ [docs][bon-fallible-builder]    | ✅ [docs][bs-fall-finish] |                           | ✅ [docs][db-fall-finish]                     |
+| Validation in setters (fallible setters) | ✅ attr [`with = closure`][b]      |                           |                           | ✅ `TryInto` via attr [`try_setter`][db-fs]   |
+| Custom methods on builder                | ✅ via [direct impl block][bon-ts] |                           | ✅ via [mutators] (attrs) | ✅ via [direct impl block][db-custom-methods] |
+| `impl Trait`, elided lifetimes support   | ✅                                 |                           |                           |
+| Builder for `fn` hides original `fn`     | ✅                                 |                           |                           |
+| Special setters for collections          | [(see below)][collections]         | ✅                        |                           | ✅                                            |
+| Builder by `&self`/`&mut self`           |                                    |                           |                           | ✅                                            |
 
 </div>
 
 ## Function Builder Paradigm Shift
 
-If you ever hit a wall 🧱 with `typed-builder` or `derive_builder`, you'll have to hack something around their derive attributes syntax on a struct. With `bon` or `buildstructor` you can simply change the syntax from `#[derive(Builder)]` on a struct to a `#[builder]` on a function to gain more flexibility at any time 🤸. It is [guaranteed to preserve compatibility](../misc/compatibility#switching-between-derivebuilder-and-builder-on-the-new-method) (not a breaking change).
+If you ever hit a wall 🧱 with `typed-builder` or `derive_builder`, you'll have to hack something around their derive attributes syntax on a struct. With `bon` or `buildstructor` you can simply change the syntax from `#[derive(Builder)]` on a struct to a `#[builder]` on a function to gain more flexibility at any time 🤸. It is [guaranteed to preserve compatibility](./basics/compatibility#switching-between-derivebuilder-and-builder-on-the-new-method) (not a breaking change).
 
 ### Example
 
@@ -149,7 +149,7 @@ Moreover, it offers you a completely new dimension of flexibility:
 
 ### Summary
 
-The chances of hitting a wall with function builders are close to zero, and even if you ever do, you still have access to the [Typestate API](../typestate-api/) in `bon` for even more flexibility 💪.
+The chances of hitting a wall with function builders are close to zero, and even if you ever do, you still have access to the [Typestate API](./typestate-api/) in `bon` for even more flexibility 💪.
 
 ## Special setter methods for collections
 
@@ -216,18 +216,30 @@ Another difference is that fields of collection types are considered required by
 [arr]: https://docs.rs/bon/latest/bon/macro.arr.html
 [map]: https://docs.rs/bon/latest/bon/macro.map.html
 [set]: https://docs.rs/bon/latest/bon/macro.set.html
-[Mutators]: https://docs.rs/typed-builder/latest/typed_builder/derive.TypedBuilder.html#mutators
-[bon-on]: ../../reference/builder/top-level/on
-[bon-into]: ../../reference/builder/member/into
-[bon-req-to-opt]: ../misc/compatibilitymaking-a-required-member-optional
+[collections]: #special-setter-methods-for-collections
+
+<!-- bon -->
+
+[bon-on]: ../reference/builder/top-level/on
+[bon-into]: ../reference/builder/member/into
+[bon-req-to-opt]: ./basics/compatibility#making-a-required-member-optional
+[bon-fallible-builder]: ./patterns/fallible-builders
+[bon-ts]: ./typestate-api
+[b]: ../reference/builder/member/with#fallible-closure
+
+<!-- buildstructor -->
+
 [bs-into]: https://docs.rs/buildstructor/latest/buildstructor/#into-field
+[bs-fall-finish]: https://docs.rs/buildstructor/latest/buildstructor/#fallible
+
+<!-- typed-builder -->
+
+[mutators]: https://docs.rs/typed-builder/latest/typed_builder/derive.TypedBuilder.html#mutators
+
+<!-- derive_builder -->
+
 [db-into]: https://docs.rs/derive_builder/latest/derive_builder/#generic-setters
 [db-so]: https://docs.rs/derive_builder/latest/derive_builder/#setters-for-option
-[bon-fallible-builder]: ../patterns/fallible-builders
-[bs-fall-finish]: https://docs.rs/buildstructor/latest/buildstructor/#fallible
 [db-fall-finish]: https://docs.rs/derive_builder/latest/derive_builder/#pre-build-validation
-[b]: ../../reference/builder/member/with#fallible-closure
 [db-custom-methods]: https://docs.rs/derive_builder/latest/derive_builder/#custom-setters-skip-autogenerated-setters
 [db-fs]: https://docs.rs/derive_builder/latest/derive_builder/#fallible-setters
-[r1]: #special-setter-methods-for-collections
-[bon-ts]: ../typestate-api
