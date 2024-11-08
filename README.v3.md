@@ -206,6 +206,14 @@ This project was heavily inspired by such awesome crates as [`buildstructor`](ht
 
 See [alternatives](https://bon-rs.com/guide/alternatives) for comparison.
 
+## Who's Using `bon`?
+
+-   [`crates.io` backend](https://github.com/rust-lang/crates.io)
+-   [`ractor`](https://github.com/slawlor/ractor)
+-   [`comrak`](https://github.com/kivikakk/comrak)
+-   [`soldeer`](https://github.com/mario-eth/soldeer) (package manager endorsed by [`foundry`](https://github.com/foundry-rs/foundry))
+-   [`tachyonfx`](https://github.com/junkdog/tachyonfx)
+
 ## Getting Help
 
 If you can't figure something out, consult the docs and maybe use the `🔍 Search` bar on our [docs website](https://bon-rs.com). You may also create an issue or a discussion on the [Github repository](https://github.com/elastio/bon) for help or write us a message on [Discord](https://bon-rs.com/discord).

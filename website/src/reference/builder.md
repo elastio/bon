@@ -2,10 +2,6 @@
 outline: deep
 ---
 
-# `#[derive(Builder)]` / `#[builder]`
-
-Generate builders from structs via `#[derive(Builder)]`, free functions via `#[builder]`, and associated methods via `#[bon]` + `#[builder]`. They all use the same attributes syntax.
-
 ## Top-Level Attributes
 
 These attributes are placed on top of a `struct` or `fn` declaration.

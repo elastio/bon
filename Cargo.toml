@@ -6,7 +6,8 @@ members = [
   "bon",
   "bon-cli",
   "bon-macros",
-  "e2e-tests",
+  "bon-sandbox",
+  "website/doctests",
 ]
 resolver = "2"
 

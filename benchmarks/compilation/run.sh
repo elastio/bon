@@ -4,7 +4,6 @@ set -euxo pipefail
 
 macros=(
     bon
-    bon-overwritable
     typed-builder
     derive_builder
 )
