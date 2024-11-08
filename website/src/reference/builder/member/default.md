@@ -26,7 +26,7 @@ If `None` is passed to the `maybe_{member}` setter, then the default value is us
 
 ::: tip
 
-Switching between `#[builder(default)]` and `Option<T>` is [compatible](../../../guide/misc/compatibility#switching-between-option-t-and-builder-default).
+Switching between `#[builder(default)]` and `Option<T>` is [compatible](../../../guide/basics/compatibility#switching-between-option-t-and-builder-default).
 
 :::
 

@@ -107,6 +107,8 @@ assert_eq!(value.y, 3);
 
 You can add a return type annotation to the closure to signify that it's fallible. The closure is expected to return a `Result` with the `Ok` variant of the member's underlying type. This will make the setter fallible.
 
+<!-- #region fallible-closure-example -->
+
 ::: code-group
 
 ```rust [Struct]
@@ -183,6 +185,8 @@ fn main() -> Result<(), ParseIntError> {
 ```
 
 :::
+
+<!-- #endregion fallible-closure-example -->
 
 The return type annotation must be of the form `*Result<_[, E]>`.
 

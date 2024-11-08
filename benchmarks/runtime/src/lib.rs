@@ -12,6 +12,12 @@
     rustdoc::missing_crate_level_docs
 )]
 
+// This reexport makes it easier to prepare the ASM comparison since the
+// generated code refers to a local modules that can be manually replaced
+// on godbolt to avoid referencing a 3rd party crate.
+#[allow(clippy::single_component_path_imports)]
+use bon;
+
 cfg_if::cfg_if! {
     if #[cfg(feature = "args_3")] {
         pub mod args_3;

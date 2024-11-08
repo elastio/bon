@@ -48,6 +48,9 @@ export default defineConfig({
                                 "Function that creates the builder (e.g. `builder()`)",
                             ["finishing function"]:
                                 "Method on the builder struct that finishes building (e.g. `build()` or `call()`)",
+                            ["underlying type"]:
+                                "For required members, it's the type of the member itself. " +
+                                "For optional members, it's the type `T` inside of the `Option<T>`",
                         };
 
                         const abbrsStr = Object.entries(abbrs)
@@ -131,7 +134,12 @@ export default defineConfig({
                     link: "/guide/overview",
                 },
                 {
+                    text: "Alternatives",
+                    link: "/guide/alternatives",
+                },
+                {
                     text: "Basics",
+                    link: "/guide/basics",
                     items: [
                         {
                             text: "Optional Members",
@@ -157,6 +165,10 @@ export default defineConfig({
                             text: "Documenting",
                             link: "/guide/basics/documenting",
                         },
+                        {
+                            text: "Compatibility",
+                            link: "/guide/compatibility",
+                        },
                     ],
                 },
                 {
@@ -175,6 +187,7 @@ export default defineConfig({
                 },
                 {
                     text: "Patterns",
+                    link: "/guide/patterns",
                     items: [
                         {
                             text: "Conditional Building",
@@ -183,6 +196,10 @@ export default defineConfig({
                         {
                             text: "Fallible Builders",
                             link: "/guide/patterns/fallible-builders",
+                        },
+                        {
+                            text: "Optional Generic Members",
+                            link: "/guide/patterns/optional-generic-members",
                         },
                         {
                             text: "Into Conversions In-Depth",
@@ -195,38 +212,32 @@ export default defineConfig({
                     ],
                 },
                 {
-                    text: "Misc",
+                    text: "Benchmarks",
+                    link: "/guide/benchmarks",
                     items: [
                         {
-                            text: "Compatibility",
-                            link: "/guide/misc/compatibility",
+                            text: "Runtime",
+                            link: "/guide/benchmarks/runtime",
                         },
                         {
-                            text: "Limitations",
-                            link: "/guide/misc/limitations",
-                        },
-                        {
-                            text: "Benchmarks",
-                            link: "/guide/misc/benchmarks",
-                        },
-                        {
-                            text: "Alternatives",
-                            link: "/guide/misc/alternatives",
-                        },
-                        {
-                            text: "Troubleshooting",
-                            link: "/guide/misc/troubleshooting",
+                            text: "Compilation",
+                            link: "/guide/benchmarks/compilation",
                         },
                     ],
                 },
                 {
-                    text: "Internal",
+                    text: "Troubleshooting",
+                    link: "/guide/troubleshooting",
                     items: [
                         {
-                            text: "Contributing",
-                            link: "/guide/internal/contributing",
+                            text: "Limitations",
+                            link: "/guide/troubleshooting/limitations",
                         },
                     ],
+                },
+                {
+                    text: "Contributing",
+                    link: "/guide/contributing",
                 },
             ],
             "/reference": [
@@ -237,7 +248,7 @@ export default defineConfig({
                         {
                             text: "Top-Level",
                             link: "/reference/builder#top-level-attributes",
-                            collapsed: true,
+                            collapsed: false,
                             items: [
                                 {
                                     text: "builder_type",
@@ -272,7 +283,7 @@ export default defineConfig({
                         {
                             text: "Member",
                             link: "/reference/builder#member-attributes",
-                            collapsed: true,
+                            collapsed: false,
                             items: [
                                 {
                                     text: "default",

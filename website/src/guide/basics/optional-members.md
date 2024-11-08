@@ -29,22 +29,21 @@ The builder provides a **pair** of setters for each optional member:
 
 [setters]: ../../reference/builder/member/setters
 
-::: details See how the setters look in the generated code
+This is how setters look in the generated code for the example above (simplified):
 
 ```rust ignore
-// [GENERATED CODE (simplified)]
-impl<S: State> ExampleBuilder<S> {
+impl<S> ExampleBuilder<S> {
     fn level(self, value: u32) -> ExampleBuilder<SetLevel<S>> {
         self.maybe_level(Some(value)) // Yes, it's this simple!
     }
 
-    fn maybe_level(self, value: Option<u32>) -> ExampleBuilder<SetLevel<S>> { /* */ }
+    fn maybe_level(self, value: Option<u32>) -> ExampleBuilder<SetLevel<S>> {
+        /* */
+    }
 }
 ```
 
-:::
-
-Thanks to this design, changing the member from required to optional [preserves compatibility](../misc/compatibility#making-a-required-member-optional).
+Thanks to this design, changing the member from required to optional [preserves compatibility](./compatibility#making-a-required-member-optional).
 
 ### Examples
 
@@ -72,7 +71,7 @@ To make a member of non-`Option` type optional you may use [`#[builder(default)]
 
 ::: tip
 
-Switching between `#[builder(default)]` and `Option<T>` is [compatible](../misc/compatibility#switching-between-option-t-and-builder-default).
+Switching between `#[builder(default)]` and `Option<T>` is [compatible](./compatibility#switching-between-option-t-and-builder-default).
 
 :::
 
@@ -112,4 +111,4 @@ You can also reference other members in the default expression. See [`#[builder(
 
 ## Conditional building
 
-Now that you know how optional members work you can check out the [Conditional building](../patterns/conditional-building) design patterns or continue studying other features of `bon` by following the "Next page" link at the bottom.
+Now that you know how optional members work you can check out the [Conditional Building](../patterns/conditional-building) design patterns or continue studying other features of `bon` by following the "Next page" link at the bottom.

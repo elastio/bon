@@ -2,8 +2,6 @@
 
 If you want to inspect the values set in the builder for debugging purposes you can leverage the [`#[builder(derive(...))]`](../../reference/builder/top-level/derive) attribute to derive the [`Debug`](https://doc.rust-lang.org/stable/std/fmt/trait.Debug.html) trait for your builder.
 
-**Example:**
-
 ```rust
 use bon::builder;
 

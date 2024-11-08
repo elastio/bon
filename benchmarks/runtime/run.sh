@@ -2,21 +2,22 @@
 
 set -euxo pipefail
 
-bench=${1:-args_10_structs}
+# Run all benchmarks by default
+benches=${1:-$(find src -name '*.rs' | sed 's/\.rs$//' | sed 's/src\///' | grep -v lib)}
 
 export CARGO_INCREMENTAL=0
 
-cargo clean
+for bench in $benches; do
+    cargo build --features "$bench" --release -p runtime-benchmarks
 
-cargo build --features "$bench" --release -p runtime-benchmarks
+    # If vscode is present, show diff:
+    if command -v code; then
+        cargo asm --features "$bench" --no-color "runtime_benchmarks::$bench::builder_bench" > builder.dbg.s || true
+        cargo asm --features "$bench" --no-color "runtime_benchmarks::$bench::regular_bench" > regular.dbg.s || true
 
-cargo asm --features "$bench" --no-color "runtime_benchmarks::$bench::builder_bench" > builder.dbg.s || true
-cargo asm --features "$bench" --no-color "runtime_benchmarks::$bench::regular_bench" > regular.dbg.s || true
+        code --diff regular.dbg.s builder.dbg.s
+    fi
 
-# If vscode is present, show diff:
-if command -v code; then
-    code --diff regular.dbg.s builder.dbg.s
-fi
-
-cargo bench --features "$bench" -p runtime-benchmarks --profile release --bench iai
-cargo bench --features "$bench" -p runtime-benchmarks --profile release --bench criterion
+    cargo bench --features "$bench" -p runtime-benchmarks --profile release --bench iai
+    cargo bench --features "$bench" -p runtime-benchmarks --profile release --bench criterion
+done

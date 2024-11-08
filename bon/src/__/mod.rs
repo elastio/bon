@@ -43,15 +43,3 @@ pub struct Unset<Name>(Name);
 
 #[derive(Debug)]
 pub struct Set<Name>(Name);
-
-#[rustversion::attr(
-    since(1.78.0),
-    diagnostic::on_unimplemented(
-        message = "expected type state for the member `{Name}`, but got `{Self}`",
-        label = "expected type state for the member `{Name}`, but got `{Self}`",
-    )
-)]
-pub trait MemberState<Name>: Sealed {}
-
-impl<Name> MemberState<Name> for Unset<Name> {}
-impl<Name> MemberState<Name> for Set<Name> {}
