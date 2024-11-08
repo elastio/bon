@@ -44,7 +44,7 @@ You can do validations earlier instead, right when the setter is called. Use `#[
 
 ## None Of This Works. Help!
 
-This is very, _very_, **very**(!) unlikely but if you have an elaborate use case where none of the options above are flexible enough, then your last resort is writing a [custom method](../typestate-api/custom-methods) on the builder. You'll need to study the builder's [Typestate API](../typestate-api) to be able to do that. Don't worry, it's rather simple, and you'll be much more powerful at the end of the day 🐱.
+This is very, **very**(!) unlikely but if you have an elaborate use case where none of the options above are flexible enough, then your last resort is writing a [custom method](../typestate-api/custom-methods) on the builder. You'll need to study the builder's [Typestate API](../typestate-api) to be able to do that. Don't worry, it's rather simple, and you'll gain a lot of power at the end of the day 🐱.
 
 ## Future Possibilities
 

@@ -48,6 +48,9 @@ export default defineConfig({
                                 "Function that creates the builder (e.g. `builder()`)",
                             ["finishing function"]:
                                 "Method on the builder struct that finishes building (e.g. `build()` or `call()`)",
+                            ["underlying type"]:
+                                "For required members, it's the type of the member itself. " +
+                                "For optional members, it's the type `T` inside of the `Option<T>`",
                         };
 
                         const abbrsStr = Object.entries(abbrs)
@@ -137,7 +140,6 @@ export default defineConfig({
                 {
                     text: "Basics",
                     link: "/guide/basics",
-                    collapsed: false,
                     items: [
                         {
                             text: "Optional Members",
@@ -172,7 +174,6 @@ export default defineConfig({
                 {
                     text: "Typestate API",
                     link: "/guide/typestate-api",
-                    collapsed: false,
                     items: [
                         {
                             text: "Builder's Type Signature",
@@ -187,7 +188,6 @@ export default defineConfig({
                 {
                     text: "Patterns",
                     link: "/guide/patterns",
-                    collapsed: false,
                     items: [
                         {
                             text: "Conditional Building",
@@ -214,7 +214,6 @@ export default defineConfig({
                 {
                     text: "Benchmarks",
                     link: "/guide/benchmarks",
-                    collapsed: false,
                     items: [
                         {
                             text: "Runtime",
@@ -238,7 +237,7 @@ export default defineConfig({
                 },
                 {
                     text: "Contributing",
-                    link: "/guide/internal/contributing",
+                    link: "/guide/contributing",
                 },
             ],
             "/reference": [

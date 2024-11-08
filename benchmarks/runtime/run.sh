@@ -2,7 +2,7 @@
 
 set -euxo pipefail
 
-# List src/ dir, remove `.rs` from file extensions and remove lib.rs
+# Run all benchmarks by default
 benches=${1:-$(find src -name '*.rs' | sed 's/\.rs$//' | sed 's/src\///' | grep -v lib)}
 
 export CARGO_INCREMENTAL=0

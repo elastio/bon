@@ -20,8 +20,8 @@ use bon;
 
 cfg_if::cfg_if! {
     if #[cfg(feature = "args_3")] {
-        pub mod args_20;
-        pub use args_20 as bench;
+        pub mod args_3;
+        pub use args_3 as bench;
     } else if #[cfg(feature = "args_5")] {
         pub mod args_5;
         pub use args_5 as bench;

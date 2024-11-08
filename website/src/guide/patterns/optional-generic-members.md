@@ -40,7 +40,7 @@ This is inconvenient, don't do this.
 
 ## ✅ Good
 
-Instead, make the member's type non-generic and move generics to the setter methods' signature. Let's what it means with an example.
+Instead, make the member's type non-generic and move generics to the setter methods' signature. Let's see what it means with an example.
 
 For the case above, the good solution is [`#[builder(into)]`](../reference/builder/member/into).
 

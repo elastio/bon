@@ -48,7 +48,7 @@ The type states come from the builder's state module. The name of that module is
 
 ## Visibility
 
-The type state module is private by default and only accessible within the module where the builder macro was used. The type states and other symbols that we haven't covered yet in that module all inherit their visibility from the builder's type visibility.
+The type state module is private by default and only accessible within the module where the builder macro was used. The type states and other symbols, that we haven't covered yet, in that module all inherit their visibility from the builder's type visibility.
 
 Visibility of the builder's type is by default derived from the visibility of the underlying struct or function from which the builder was generated.
 

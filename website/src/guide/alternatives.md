@@ -6,7 +6,7 @@ aside: false
 
 There are several other existing alternative crates for generating builders. `bon` was designed based on many lessons learned from them. A table that compares the builder crates with some additional explanations is below.
 
-<!-- Prevent separating wrapping in the table -->
+<!-- Prevent wrapping in the table -->
 <style>
 .bon-guide-misc-alternatives-table tr > td:not(:first-child) {
     white-space: nowrap;
@@ -16,29 +16,29 @@ There are several other existing alternative crates for generating builders. `bo
 
 <!-- If you want to edit the table below make sure to reduce the font size in the editor or turn off word wrap to view the table easier -->
 
-| Feature                                  | `bon`                              | [`buildstructor`]         | [`typed-builder`]         | [`derive_builder`]                            |
-| ---------------------------------------- | ---------------------------------- | ------------------------- | ------------------------- | --------------------------------------------- |
-| Builder for structs                      | ✅                                 | ✅                        | ✅                        | ✅                                            |
-| Builder for free functions               | ✅                                 |                           |                           |
-| Builder for associated methods           | ✅                                 | ✅                        |                           |
-| Panic safe                               | ✅                                 | ✅                        | ✅                        | `build()` returns `Result`                    |
-| `Option<T>` makes members optional       | ✅                                 | ✅                        |                           |                                               |
-| `T` -> `Option<T>` is non-breaking       | ✅ [docs][bon-req-to-opt]          | ✅                        | via attr `strip_option`   | via attr [`strip_option`][db-so]              |
-| Generates `T::builder()` method          | ✅                                 | ✅                        | ✅                        | only `Builder::default()`                     |
-| `Into` conversion in setters             | [opt-in][bon-into]                 | [implicit][bs-into]       | opt-in                    | [opt-in][db-into]                             |
-| Validation in the finishing function     | ✅ [docs][bon-fallible-builder]    | ✅ [docs][bs-fall-finish] |                           | ✅ [docs][db-fall-finish]                     |
-| Validation in setters (fallible setters) | ✅ attr [`with = closure`][b]      |                           |                           | ✅ `TryInto` via attr [`try_setter`][db-fs]   |
-| Custom methods on builder                | ✅ via [direct impl block][bon-ts] |                           | ✅ via [mutators] (attrs) | ✅ via [direct impl block][db-custom-methods] |
-| `impl Trait`, elided lifetimes support   | ✅                                 |                           |                           |
-| Builder for `fn` hides original `fn`     | ✅                                 |                           |                           |
-| Special setters for collections          | [(see below)][collections]         | ✅                        |                           | ✅                                            |
-| Builder by `&self`/`&mut self`           |                                    |                           |                           | ✅                                            |
+| Feature                                  | `bon`                              | [`buildstructor`]         | [`typed-builder`]       | [`derive_builder`]                            |
+| ---------------------------------------- | ---------------------------------- | ------------------------- | ----------------------- | --------------------------------------------- |
+| Builder for structs                      | ✅                                 | ✅                        | ✅                      | ✅                                            |
+| Builder for functions                    | ✅                                 |                           |                         |
+| Builder for associated methods           | ✅                                 | ✅                        |                         |
+| Panic safe                               | ✅                                 | ✅                        | ✅                      | `build()` returns `Result`                    |
+| `Option<T>` makes members optional       | ✅                                 | ✅                        |                         |                                               |
+| `T` -> `Option<T>` is non-breaking       | ✅ [docs][bon-req-to-opt]          | ✅                        | via attr `strip_option` | via attr [`strip_option`][db-so]              |
+| Generates `T::builder()` method          | ✅                                 | ✅                        | ✅                      | only `Builder::default()`                     |
+| `Into` conversion in setters             | [opt-in][bon-into]                 | [implicit][bs-into]       | opt-in                  | [opt-in][db-into]                             |
+| Validation in the finishing function     | ✅ [docs][bon-fallible-builder]    | ✅ [docs][bs-fall-finish] |                         | ✅ [docs][db-fall-finish]                     |
+| Validation in setters (fallible setters) | ✅ attr [`with = closure`][b]      |                           |                         | ✅ `TryInto` via attr [`try_setter`][db-fs]   |
+| Custom methods on builder                | ✅ via [direct impl block][bon-ts] |                           | ✅ via attr [mutators]  | ✅ via [direct impl block][db-custom-methods] |
+| `impl Trait`, elided lifetimes support   | ✅                                 |                           |                         |
+| Builder for `fn` hides original `fn`     | ✅                                 |                           |                         |
+| Special setters for collections          | [(see below)][collections]         | ✅                        |                         | ✅                                            |
+| Builder by `&self`/`&mut self`           |                                    |                           |                         | ✅                                            |
 
 </div>
 
 ## Function Builder Paradigm Shift
 
-If you ever hit a wall 🧱 with `typed-builder` or `derive_builder`, you'll have to hack something around their derive attributes syntax on a struct. With `bon` or `buildstructor` you can simply change the syntax from `#[derive(Builder)]` on a struct to a `#[builder]` on a function to gain more flexibility at any time 🤸. It is [guaranteed to preserve compatibility](./basics/compatibility#switching-between-derivebuilder-and-builder-on-the-new-method) (not a breaking change).
+If you ever hit a wall 🧱 with `typed-builder` or `derive_builder`, you'll have to hack something around their derive attributes syntax on a struct. With `bon` or `buildstructor` you can simply change the syntax from `#[derive(Builder)]` on a struct to a `#[builder]` on a function to gain more flexibility at any time 🤸. It is [guaranteed to preserve compatibility](./basics/compatibility#switching-between-derivebuilder-and-builder-on-the-new-method), meaning it's not a breaking change.
 
 ### Example
 
@@ -48,7 +48,7 @@ Suppose you already had a struct like the following with a builder derive:
 use bon::Builder;
 
 #[derive(Builder)]
-pub struct Segment {
+pub struct Line {
     x1: u32,
     y1: u32,
 
@@ -57,7 +57,7 @@ pub struct Segment {
 }
 
 // Suppose this is your users' code
-Segment::builder().x1(1).y1(2).x2(3).y2(4).build();
+Line::builder().x1(1).y1(2).x2(3).y2(4).build();
 ```
 
 Then you decided to refactor 🧹 your struct's internal representation by extracting a private utility `Point` type:
@@ -66,7 +66,7 @@ Then you decided to refactor 🧹 your struct's internal representation by extra
 use bon::Builder;
 
 #[derive(Builder)]
-pub struct Segment {
+pub struct Line {
     point1: Point,
     point2: Point,
 }
@@ -78,14 +78,14 @@ struct Point {
 }
 
 // Suppose this is your users' code (it no longer compiles)
-Segment::builder().x1(1).y1(2).x2(3).y2(4).build(); // [!code error]
-//                 ^^- error[E0599]: no method named `x1` found for struct `SegmentBuilder` // [!code error]
+Line::builder().x1(1).y1(2).x2(3).y2(4).build(); // [!code error]
+//                 ^^- error[E0599]: no method named `x1` found for struct `LineBuilder` // [!code error]
 //                                   available methods: `point1(Point)`, `point2(Point)` // [!code error]
 ```
 
 There are two problems with `#[derive(Builder)]` syntax in this case:
 
-1.  This refactoring becomes a breaking change to `Segment`'s builder API 😢.
+1.  This refactoring becomes a breaking change to `Line`'s builder API 😢.
 2.  The private utility `Point` type leaks through the builder API via `point1`, `point2` setters 😭.
 
 The fundamental problem is that the builder's API is _coupled_ ⛓️ with your struct's internal representation. It's literally `derive`d from the fields of your struct.
@@ -100,7 +100,7 @@ However, that would be especially painful with `typed-builder`, which generates 
 
 ::: tip
 
-In contrast, `bon`'s type state **is** human-readable, maintainable, and [documented](../typestate-api) 👍
+In contrast, `bon`'s type state **is** human-readable, maintainable, and [documented](./typestate-api) 👍
 
 :::
 
@@ -112,7 +112,7 @@ This change is as simple as pie 🥧 with `bon` or `buildstructor`. The code spe
 use bon::bon;
 
 // No more derives on a struct. Its internal representation is decoupled from the builder.
-pub struct Example {
+pub struct Line {
     point1: Point,
     point2: Point,
 }
@@ -123,7 +123,7 @@ struct Point {
 }
 
 #[bon]
-impl Example {
+impl Line {
     #[builder]
     fn new(x1: u32, y1: u32, x2: u32, y2: u32) -> Self {
         Self {
@@ -134,7 +134,7 @@ impl Example {
 }
 
 // Suppose this is your users' code (it compiles after this change, yay 🎉!)
-Segment::builder().x1(1).y1(2).x2(3).y2(4).build();
+Line::builder().x1(1).y1(2).x2(3).y2(4).build();
 ```
 
 Ah... Isn't this just so simple and beautiful? 😌 The fun part is that the constructor method `new` that we originally abandoned comes back to heroically save us ⛑️ at no cost, other than a star ⭐ on `bon`'s [Github repo](https://github.com/elastio/bon) maybe 🐈?
@@ -147,9 +147,9 @@ Moreover, it offers you a completely new dimension of flexibility:
 -   Need to do an `async` operation in the constructor? Just make your constructor `async` and your `build()` will return a `Future`.
 -   Need some adrenaline 💉? Just add `unsafe`, and... you get the idea 😉.
 
-### Summary
+---
 
-The chances of hitting a wall with function builders are close to zero, and even if you ever do, you still have access to the [Typestate API](./typestate-api/) in `bon` for even more flexibility 💪.
+The chances of hitting a wall with function builders are close to zero, and even if you ever do, you still have access to the [Typestate API](./typestate-api) in `bon` for even more flexibility 💪.
 
 ## Special setter methods for collections
 
@@ -188,8 +188,6 @@ Alternatively, `bon` provides a separate solution. `bon` exposes the following m
 
 These macros share a common feature that every element of the collection is converted with `Into` to shorten the syntax if you, for example, need to initialize a `Vec<String>` with items of type `&str`. Use these macros only if you need this behaviour, or ignore them if you want to be explicit in code and avoid implicit `Into` conversions.
 
-**Example:**
-
 ```rust
 use bon::Builder;
 
@@ -207,7 +205,7 @@ User::builder()
     .build();
 ```
 
-Another difference is that fields of collection types are considered required by default, which isn't the case in `buildstructor`.
+Another difference is that fields of collection types are considered required by default in `bon`, which isn't the case in `buildstructor`.
 
 [`buildstructor`]: https://docs.rs/buildstructor/latest/buildstructor/
 [`typed-builder`]: https://docs.rs/typed-builder/latest/typed_builder/
