@@ -3,7 +3,7 @@
 //! The preliminary reading of [Typestate API](https://bon-rs.com/guide/typestate-api)
 //! guide is recommended to understand how the pieces in this example fit together.
 //!
-//! This module contains a struct [`Example`] that was annotated with [`#[derive(Builder)]`](crate::Builder).
+//! This module contains a struct [`Example`] that was annotated with [`#[derive(Builder)]`](bon::Builder).
 //! The config [`#[builder(state_mod(vis = "pub"))]`](https://bon-rs.com/reference/builder/top-level/state_mod)
 //! was applied to make the generated builder's typestate API public and visible here in the docs.
 //!
@@ -12,16 +12,28 @@
 //! - [`example_builder`] - the builder's typestate API module
 
 /// Example struct with the `#[derive(Builder)]` annotation.
-#[derive(crate::Builder)]
-#[builder(crate = crate, state_mod(vis = "pub"))]
+#[derive(bon::Builder)]
+#[builder(state_mod(vis = "pub"))]
 pub struct Example {
-    /// Example required member
-    x1: u32,
+    required: u32,
 
-    /// Example optional member
-    x2: Option<u32>,
+    optional: Option<u32>,
 
-    /// Example member with a default value.
-    #[builder(default = 2 + 2)]
-    x3: u32,
+    #[builder(default)]
+    default: u32,
+
+    #[builder(overwritable)]
+    overwritable_required: u32,
+
+    #[builder(overwritable)]
+    overwritable_optional: Option<u32>,
+
+    #[builder(overwritable, default = 2 * 2 + 3)]
+    overwritable_default: u32,
+
+    #[builder(required)]
+    required_option: Option<u64>,
+
+    #[builder(with = |x: &str| -> Result<_, std::num::ParseIntError> { x.parse() })]
+    with: u32,
 }

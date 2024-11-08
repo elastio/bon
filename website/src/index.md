@@ -12,6 +12,9 @@ hero:
         - theme: brand
           text: Guide
           link: /guide/overview
+        - theme: brand
+          text: Reference
+          link: /reference/builder
         - theme: alt
           text: Blog
           link: /blog

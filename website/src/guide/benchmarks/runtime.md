@@ -74,4 +74,4 @@ The benchmarks were run on a dedicated root server `AX51-NVMe` on [Hetzner](http
 
 The source code of the benchmarks is [available here][benchmarks-source].
 
-[benchmarks-source]: https://github.com/elastio/bon/tree/master/benchmarks/runtime
+[benchmarks-source]: https://github.com/elastio/bon/tree/master/benchmarks/compilation

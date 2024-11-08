@@ -6,8 +6,8 @@
 //! [Builder's Type Signature]: https://bon-rs.com/guide/typestate-api/builders-type-signature
 
 /// Example struct with the `#[derive(Builder)]` annotation.
-#[derive(crate::Builder)]
-#[builder(crate = crate, state_mod(vis = "pub"))]
+#[derive(bon::Builder)]
+#[builder(state_mod(vis = "pub"))]
 pub struct Example {
     x1: u32,
     x2: u32,
