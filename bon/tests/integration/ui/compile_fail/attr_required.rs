@@ -2,34 +2,34 @@ use bon::Builder;
 
 #[derive(Builder)]
 struct InvalidOnRequiredMember {
-    #[builder(transparent)]
+    #[builder(required)]
     member: i32,
 }
 
 #[derive(Builder)]
 struct InvalidOnStartFnMember {
-    #[builder(start_fn, transparent)]
+    #[builder(start_fn, required)]
     member: Option<i32>,
 }
 
 #[derive(Builder)]
 struct InvalidOnFnMember {
-    #[builder(finish_fn, transparent)]
+    #[builder(finish_fn, required)]
     member: Option<i32>,
 }
 
 #[derive(Builder)]
 struct InvalidOnSkippedMember {
-    #[builder(skip, transparent)]
+    #[builder(skip, required)]
     member: Option<i32>,
 }
 
 #[derive(Builder)]
 struct Valid {
-    #[builder(transparent)]
+    #[builder(required)]
     member: Option<u32>,
 
-    #[builder(transparent, with = Some)]
+    #[builder(required, with = Some)]
     some_member: Option<()>,
 }
 

@@ -22,7 +22,7 @@ expected one of the following:
     `ApiResult<_>`, then it'll work fine;
 
 (*) underlying type is the type of the member stripped from the `Option<T>` wrapper
-    if this member is of `Option<T>` type and no `#[builder(transparent)]` annotation
+    if this member is of `Option<T>` type and no `#[builder(required)]` annotation
     is present";
 
 #[derive(Debug)]

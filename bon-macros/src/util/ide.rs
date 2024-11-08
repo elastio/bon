@@ -156,7 +156,7 @@ pub(crate) fn generate_completion_triggers(meta: Vec<Meta>) -> TokenStream {
                 if let Some(first) = meta.first() {
                     if let Meta::Path(path) = first {
                         if path.is_ident("into")
-                            || path.is_ident("transparent")
+                            || path.is_ident("required")
                             || path.is_ident("overwritable")
                         {
                             return;

@@ -31,10 +31,10 @@ These attributes are placed on a `struct` field or `fn` argument.
 | [`into`](./builder/member/into)                    | Changes the signature of the setters to accept `impl Into<T>`    |
 | [`name`](./builder/member/name)                    | Overrides the name of the member used in the builder's API       |
 | [`overwritable` 🔬](./builder/member/overwritable) | Allows calling setters for the same member repeatedly            |
+| [`required`](./builder/member/required)            | Disables `Option<T>` special handling, makes the member required |
 | [`setters`](./builder/member/setters)              | Overrides name, visibility and docs for setters                  |
 | [`skip`](./builder/member/skip)                    | Skips generating setters for the member                          |
 | [`start_fn`](./builder/member/start_fn)            | Makes the member a positional argument on the starting function  |
-| [`transparent`](./builder/member/transparent)      | Disables `Option<T>` special handling, makes the member required |
 | [`with`](./builder/member/with)                    | Overrides setters' signature and applies a custom conversion     |
 
 ## Examples

@@ -42,7 +42,7 @@ error: expected `,`
    |
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: this #[builder(on(type_pattern, ...))] contains no options to override the default behavior for the selected setters like `into`, `overwritable`, `transparent`, so it does nothing
+error: this #[builder(on(type_pattern, ...))] contains no options to override the default behavior for the selected setters like `into`, `overwritable`, `required`, so it does nothing
   --> tests/integration/ui/compile_fail/attr_on.rs:24:1
    |
 24 | #[builder(on(_,))]
@@ -68,14 +68,14 @@ error: this `on(...)` clause is out of order; all `on(...)` clauses must be cons
 46 |     on(String, into),
    |     ^^
 
-error: `transparent` can only be specified in the first `on(...)` clause; this restriction may be lifted in the future
+error: `required` can only be specified in the first `on(...)` clause; this restriction may be lifted in the future
   --> tests/integration/ui/compile_fail/attr_on.rs:51:30
    |
-51 | #[builder(on(_, into), on(_, transparent))]
-   |                              ^^^^^^^^^^^
+51 | #[builder(on(_, into), on(_, required))]
+   |                              ^^^^^^^^
 
-error: `transparent` can only be used with the wildcard type pattern i.e. `on(_, transparent)`; this restriction may be lifted in the future
+error: `required` can only be used with the wildcard type pattern i.e. `on(_, required)`; this restriction may be lifted in the future
   --> tests/integration/ui/compile_fail/attr_on.rs:54:14
    |
-54 | #[builder(on(u8, transparent))]
+54 | #[builder(on(u8, required))]
    |              ^^

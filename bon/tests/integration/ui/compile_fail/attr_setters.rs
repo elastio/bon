@@ -55,14 +55,14 @@ struct OptionFnSetterOnRequiredMember {
 }
 
 #[derive(Builder)]
-struct SomeFnSetterWithTransparent {
-    #[builder(transparent, setters(some_fn = foo))]
+struct SomeFnSetterWithrequired {
+    #[builder(required, setters(some_fn = foo))]
     member: Option<i32>,
 }
 
 #[derive(Builder)]
-struct OptionFnSetterWithTransparent {
-    #[builder(transparent, setters(option_fn = bar))]
+struct OptionFnSetterWithrequired {
+    #[builder(required, setters(option_fn = bar))]
     member: Option<i32>,
 }
 

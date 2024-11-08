@@ -306,6 +306,10 @@ export default defineConfig({
                                     link: "/reference/builder/member/overwritable",
                                 },
                                 {
+                                    text: "required",
+                                    link: "/reference/builder/member/required",
+                                },
+                                {
                                     text: "setters",
                                     link: "/reference/builder/member/setters",
                                 },
@@ -316,10 +320,6 @@ export default defineConfig({
                                 {
                                     text: "start_fn",
                                     link: "/reference/builder/member/start_fn",
-                                },
-                                {
-                                    text: "transparent",
-                                    link: "/reference/builder/member/transparent",
                                 },
                                 {
                                     text: "with",

@@ -9,7 +9,7 @@ pub(crate) struct OnConfig {
     pub(crate) type_pattern: syn::Type,
     pub(crate) into: darling::util::Flag,
     pub(crate) overwritable: darling::util::Flag,
-    pub(crate) transparent: darling::util::Flag,
+    pub(crate) required: darling::util::Flag,
 }
 
 impl Parse for OnConfig {
@@ -23,7 +23,7 @@ impl Parse for OnConfig {
         struct Parsed {
             into: darling::util::Flag,
             overwritable: darling::util::Flag,
-            transparent: darling::util::Flag,
+            required: darling::util::Flag,
         }
 
         let parsed = Parsed::from_meta(&syn::parse_quote!(on(#rest)))?;
@@ -50,12 +50,12 @@ impl Parse for OnConfig {
             let Parsed {
                 into,
                 overwritable,
-                transparent,
+                required,
             } = &parsed;
             let flags = [
                 ("into", into),
                 ("overwritable", overwritable),
-                ("transparent", transparent),
+                ("required", required),
             ];
 
             if flags.iter().all(|(_, flag)| !flag.is_present()) {
@@ -103,14 +103,14 @@ impl Parse for OnConfig {
         let Parsed {
             into,
             overwritable,
-            transparent,
+            required,
         } = parsed;
 
         Ok(Self {
             type_pattern,
             into,
             overwritable,
-            transparent,
+            required,
         })
     }
 }

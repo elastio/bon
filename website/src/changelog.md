@@ -62,7 +62,7 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 -   Add `#[builder(with = Some)]`, `#[builder(with = FromIterator::from_iter)]`, `#[builder(with = <_>::from_iter)]` syntax support for two [well-known functions](https://bon-rs.com/reference/builder/member/with#well-known-functions) that will probably be used frequently ([#157](https://github.com/elastio/bon/pull/157))
 
--   Add [`#[builder(transparent)]`](https://bon-rs.com/reference/builder/member/transparent) for `Option` fields to opt out from their special handling which makes `bon` treat them as regular required fields. It's also available at the top-level via `#[builder(on(_, transparent))]` ([#145](https://github.com/elastio/bon/pull/145), [#155](https://github.com/elastio/bon/pull/155))
+-   Add [`#[builder(required)]`](https://bon-rs.com/reference/builder/member/required) for `Option` fields to opt out from their special handling which makes `bon` treat them as regular required fields. It's also available at the top-level via `#[builder(on(_, required))]` ([#145](https://github.com/elastio/bon/pull/145), [#155](https://github.com/elastio/bon/pull/155))
 
 -   Add [`#[builder(crate = path::to::bon)]`](https://bon-rs.com/reference/builder/top-level/crate) and `#[bon(crate = path::to::bon)]` to allow overriding the path to `bon` crate used in the generated code, which is useful for the cases when `bon` macros are wrapped by other macros ([#153](https://github.com/elastio/bon/pull/153))
 

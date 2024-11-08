@@ -6,16 +6,16 @@ fn test_struct() {
     #[derive(Debug, Builder)]
     #[builder(derive(Clone))]
     struct Sut<T> {
-        #[builder(transparent, with = Some)]
+        #[builder(required, with = Some)]
         _required: Option<i32>,
 
-        #[builder(transparent, with = Some, default = Some(()))]
+        #[builder(required, with = Some, default = Some(()))]
         _optional: Option<()>,
 
-        #[builder(transparent, with = Some)]
+        #[builder(required, with = Some)]
         _generic: Option<T>,
 
-        #[builder(transparent, with = Some, default = None)]
+        #[builder(required, with = Some, default = None)]
         _optional_generic: Option<T>,
     }
 
@@ -58,10 +58,10 @@ fn test_free_fn() {
     {
         #[builder(derive(Clone))]
         fn sut<T: fmt::Debug>(
-            #[builder(transparent, with = Some)] required: Option<i32>,
-            #[builder(transparent, with = Some, default = Some(()))] optional: Option<()>,
-            #[builder(transparent, with = Some)] generic: Option<T>,
-            #[builder(transparent, with = Some, default = None)] optional_generic: Option<T>,
+            #[builder(required, with = Some)] required: Option<i32>,
+            #[builder(required, with = Some, default = Some(()))] optional: Option<()>,
+            #[builder(required, with = Some)] generic: Option<T>,
+            #[builder(required, with = Some, default = None)] optional_generic: Option<T>,
         ) -> impl fmt::Debug {
             (required, optional, generic, optional_generic)
         }
@@ -85,7 +85,7 @@ fn test_free_fn() {
     {
         #[builder]
         fn sut(
-            #[builder(transparent, with = Some)] impl_trait: Option<impl fmt::Debug>,
+            #[builder(required, with = Some)] impl_trait: Option<impl fmt::Debug>,
         ) -> impl fmt::Debug {
             impl_trait
         }
@@ -105,10 +105,10 @@ fn test_assoc_method() {
     impl Sut {
         #[builder(derive(Clone))]
         fn sut<T: fmt::Debug>(
-            #[builder(transparent, with = Some)] required: Option<i32>,
-            #[builder(transparent, with = Some, default = Some(()))] optional: Option<()>,
-            #[builder(transparent, with = Some)] generic: Option<T>,
-            #[builder(transparent, with = Some, default = None)] optional_generic: Option<T>,
+            #[builder(required, with = Some)] required: Option<i32>,
+            #[builder(required, with = Some, default = Some(()))] optional: Option<()>,
+            #[builder(required, with = Some)] generic: Option<T>,
+            #[builder(required, with = Some, default = None)] optional_generic: Option<T>,
         ) -> impl fmt::Debug {
             (required, optional, generic, optional_generic)
         }
@@ -116,10 +116,10 @@ fn test_assoc_method() {
         #[builder(derive(Clone))]
         fn with_self<T: fmt::Debug>(
             &self,
-            #[builder(transparent, with = Some)] required: Option<i32>,
-            #[builder(transparent, with = Some, default = Some(()))] optional: Option<()>,
-            #[builder(transparent, with = Some)] generic: Option<T>,
-            #[builder(transparent, with = Some, default = None)] optional_generic: Option<T>,
+            #[builder(required, with = Some)] required: Option<i32>,
+            #[builder(required, with = Some, default = Some(()))] optional: Option<()>,
+            #[builder(required, with = Some)] generic: Option<T>,
+            #[builder(required, with = Some, default = None)] optional_generic: Option<T>,
         ) -> impl fmt::Debug {
             let _ = self;
             (required, optional, generic, optional_generic)
@@ -127,7 +127,7 @@ fn test_assoc_method() {
 
         #[builder]
         fn sut_impl_trait(
-            #[builder(transparent, with = Some)] impl_trait: Option<impl fmt::Debug>,
+            #[builder(required, with = Some)] impl_trait: Option<impl fmt::Debug>,
         ) -> impl fmt::Debug {
             impl_trait
         }
@@ -135,7 +135,7 @@ fn test_assoc_method() {
         #[builder]
         fn with_self_impl_trait(
             &self,
-            #[builder(transparent, with = Some)] impl_trait: Option<impl fmt::Debug>,
+            #[builder(required, with = Some)] impl_trait: Option<impl fmt::Debug>,
         ) -> impl fmt::Debug {
             let _ = self;
             impl_trait

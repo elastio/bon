@@ -22,29 +22,29 @@ error: this `doc` configuration is unused because all of the `some_fn`, `option_
 32 |         doc {
    |         ^^^
 
-error: `some_fn` setter function applies only to members with `#[builder(default)]` or members of `Option<T>` type (if #[builder(transparent)] is not set)
+error: `some_fn` setter function applies only to members with `#[builder(default)]` or members of `Option<T>` type (if #[builder(required)] is not set)
   --> tests/integration/ui/compile_fail/attr_setters.rs:47:23
    |
 47 |     #[builder(setters(some_fn = foo))]
    |                       ^^^^^^^
 
-error: `option_fn` setter function applies only to members with `#[builder(default)]` or members of `Option<T>` type (if #[builder(transparent)] is not set)
+error: `option_fn` setter function applies only to members with `#[builder(default)]` or members of `Option<T>` type (if #[builder(required)] is not set)
   --> tests/integration/ui/compile_fail/attr_setters.rs:53:23
    |
 53 |     #[builder(setters(option_fn = bar))]
    |                       ^^^^^^^^^
 
-error: `some_fn` setter function applies only to members with `#[builder(default)]` or members of `Option<T>` type (if #[builder(transparent)] is not set)
-  --> tests/integration/ui/compile_fail/attr_setters.rs:59:36
+error: `some_fn` setter function applies only to members with `#[builder(default)]` or members of `Option<T>` type (if #[builder(required)] is not set)
+  --> tests/integration/ui/compile_fail/attr_setters.rs:59:33
    |
-59 |     #[builder(transparent, setters(some_fn = foo))]
-   |                                    ^^^^^^^
+59 |     #[builder(required, setters(some_fn = foo))]
+   |                                 ^^^^^^^
 
-error: `option_fn` setter function applies only to members with `#[builder(default)]` or members of `Option<T>` type (if #[builder(transparent)] is not set)
-  --> tests/integration/ui/compile_fail/attr_setters.rs:65:36
+error: `option_fn` setter function applies only to members with `#[builder(default)]` or members of `Option<T>` type (if #[builder(required)] is not set)
+  --> tests/integration/ui/compile_fail/attr_setters.rs:65:33
    |
-65 |     #[builder(transparent, setters(option_fn = bar))]
-   |                                    ^^^^^^^^^
+65 |     #[builder(required, setters(option_fn = bar))]
+   |                                 ^^^^^^^^^
 
 error: expected parameters in parentheses
   --> tests/integration/ui/compile_fail/attr_setters.rs:71:22

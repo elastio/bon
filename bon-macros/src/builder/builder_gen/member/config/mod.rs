@@ -63,7 +63,7 @@ pub(crate) struct MemberConfig {
     /// member no longer has the default of `None`. It also becomes a required
     /// member unless a separate `#[builder(default = ...)]` attribute is
     /// also specified.
-    pub(crate) transparent: darling::util::Flag,
+    pub(crate) required: darling::util::Flag,
 }
 
 #[derive(PartialEq, Eq, Clone, Copy)]
@@ -76,7 +76,7 @@ enum ParamName {
     Setters,
     Skip,
     StartFn,
-    Transparent,
+    Required,
     With,
 }
 
@@ -91,7 +91,7 @@ impl fmt::Display for ParamName {
             Self::Setters => "setters",
             Self::Skip => "skip",
             Self::StartFn => "start_fn",
-            Self::Transparent => "transparent",
+            Self::Required => "required",
             Self::With => "with",
         };
         f.write_str(str)
@@ -154,7 +154,7 @@ impl MemberConfig {
             setters,
             skip,
             start_fn,
-            transparent,
+            required,
             with,
         } = self;
 
@@ -167,7 +167,7 @@ impl MemberConfig {
             (setters.is_some(), ParamName::Setters),
             (skip.is_some(), ParamName::Skip),
             (start_fn.is_present(), ParamName::StartFn),
-            (transparent.is_present(), ParamName::Transparent),
+            (required.is_present(), ParamName::Required),
             (with.is_some(), ParamName::With),
         ];
 
