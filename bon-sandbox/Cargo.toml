@@ -1,6 +1,6 @@
 [package]
 name    = "bon-sandbox"
-version = "2.3.0"
+version = "3.0.0-rc"
 
 description = """
   Not a real crate! It's just a showcase of examples used by `bon`'s documentation
@@ -29,7 +29,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 workspace = true
 
 [dependencies]
-bon            = { path = "../bon", version = "=2.3.0", features = ["experimental-overwritable"] }
+bon            = { path = "../bon", version = "=3.0.0-rc", features = ["experimental-overwritable"] }
 buildstructor  = "0.5"
 derive_builder = "0.20"
 typed-builder  = "0.20"

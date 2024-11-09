@@ -1,6 +1,6 @@
 [package]
 name    = "bon-macros"
-version = "2.3.0"
+version = "3.0.0-rc"
 
 description = """
 This is a proc-macro crate that is supposed to be a private implementation
