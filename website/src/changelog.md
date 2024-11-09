@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.0-rc](https://github.com/elastio/bon/compare/v2.3.0...v3.0.0-rc) - 2024-11-09
+
 All the breaking changes are very unlikely to actually break your code that was written against the `v2` version of `bon`. 99% of users should be able to update without any migration.
 
 ### Changed
