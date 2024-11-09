@@ -2,8 +2,7 @@
 #[automatically_derived]
 #[allow(deprecated)]
 impl<S: sut_builder::State> SutBuilder<S> {
-    /**| **Required** |
-| -- |
+    /**_**Required.**_
 
 */
     /// Docs on the required field setters.
@@ -15,11 +14,7 @@ impl<S: sut_builder::State> SutBuilder<S> {
     where
         S::RequiredField: sut_builder::IsUnset,
     {}
-    /**| **Optional** |
-| -- |
-
-**See also** [`maybe_optional_field()`](Self::maybe_optional_field), which is a companion setter that accepts an `Option`.
-
+    /**_**Optional** ( [Some](Self::optional_field()) / [Option](Self::maybe_optional_field()) setters)._
 
 */
     /// Docs on the optional field setters.
@@ -31,11 +26,7 @@ impl<S: sut_builder::State> SutBuilder<S> {
     where
         S::OptionalField: sut_builder::IsUnset,
     {}
-    /**| **Optional** |
-| -- |
-
-**See also** [`optional_field()`](Self::optional_field), which is a companion setter that wraps the value with `Some` internally.
-
+    /**_**Optional** ( [Some](Self::optional_field()) / [Option](Self::maybe_optional_field()) setters)._
 
 */
     /// Docs on the optional field setters.
@@ -47,13 +38,9 @@ impl<S: sut_builder::State> SutBuilder<S> {
     where
         S::OptionalField: sut_builder::IsUnset,
     {}
-    /**| **Optional** |
-| -- |
-
-**See also** [`maybe_default_field()`](Self::maybe_default_field), which is a companion setter that accepts an `Option`.
+    /**_**Optional** ( [Some](Self::default_field()) / [Option](Self::maybe_default_field()) setters)._ _**Default:**_ ```2 + 2 * 3```.
 
 
-**Default:** ```2 + 2 * 3```.
 
 */
     /// Docs on the default field setters.
@@ -65,13 +52,9 @@ impl<S: sut_builder::State> SutBuilder<S> {
     where
         S::DefaultField: sut_builder::IsUnset,
     {}
-    /**| **Optional** |
-| -- |
-
-**See also** [`default_field()`](Self::default_field), which is a companion setter that wraps the value with `Some` internally.
+    /**_**Optional** ( [Some](Self::default_field()) / [Option](Self::maybe_default_field()) setters)._ _**Default:**_ ```2 + 2 * 3```.
 
 
-**Default:** ```2 + 2 * 3```.
 
 */
     /// Docs on the default field setters.
@@ -83,11 +66,7 @@ impl<S: sut_builder::State> SutBuilder<S> {
     where
         S::DefaultField: sut_builder::IsUnset,
     {}
-    /**| **Optional** |
-| -- |
-
-**See also** [`maybe_optional_field_with_specific_overrides()`](Self::maybe_optional_field_with_specific_overrides), which is a companion setter that accepts an `Option`.
-
+    /**_**Optional** ( [Some](Self::optional_field_with_specific_overrides()) / [Option](Self::maybe_optional_field_with_specific_overrides()) setters)._
 
 */
     /// Docs on some_fn
@@ -99,11 +78,7 @@ impl<S: sut_builder::State> SutBuilder<S> {
     where
         S::OptionalFieldWithSpecificOverrides: sut_builder::IsUnset,
     {}
-    /**| **Optional** |
-| -- |
-
-**See also** [`optional_field_with_specific_overrides()`](Self::optional_field_with_specific_overrides), which is a companion setter that wraps the value with `Some` internally.
-
+    /**_**Optional** ( [Some](Self::optional_field_with_specific_overrides()) / [Option](Self::maybe_optional_field_with_specific_overrides()) setters)._
 
 */
     /// Docs on option_fn
@@ -115,13 +90,9 @@ impl<S: sut_builder::State> SutBuilder<S> {
     where
         S::OptionalFieldWithSpecificOverrides: sut_builder::IsUnset,
     {}
-    /**| **Optional** |
-| -- |
-
-**See also** [`maybe_default_field_with_specific_overrides()`](Self::maybe_default_field_with_specific_overrides), which is a companion setter that accepts an `Option`.
+    /**_**Optional** ( [Some](Self::default_field_with_specific_overrides()) / [Option](Self::maybe_default_field_with_specific_overrides()) setters)._ _**Default:**_ ```2 + 2 * 3```.
 
 
-**Default:** ```2 + 2 * 3```.
 
 */
     /// Docs on some_fn
@@ -133,13 +104,9 @@ impl<S: sut_builder::State> SutBuilder<S> {
     where
         S::DefaultFieldWithSpecificOverrides: sut_builder::IsUnset,
     {}
-    /**| **Optional** |
-| -- |
-
-**See also** [`default_field_with_specific_overrides()`](Self::default_field_with_specific_overrides), which is a companion setter that wraps the value with `Some` internally.
+    /**_**Optional** ( [Some](Self::default_field_with_specific_overrides()) / [Option](Self::maybe_default_field_with_specific_overrides()) setters)._ _**Default:**_ ```2 + 2 * 3```.
 
 
-**Default:** ```2 + 2 * 3```.
 
 */
     /// Docs on option_fn
@@ -151,11 +118,7 @@ impl<S: sut_builder::State> SutBuilder<S> {
     where
         S::DefaultFieldWithSpecificOverrides: sut_builder::IsUnset,
     {}
-    /**| **Optional** |
-| -- |
-
-**See also** [`maybe_optional_field_with_inherited_overrides()`](Self::maybe_optional_field_with_inherited_overrides), which is a companion setter that accepts an `Option`.
-
+    /**_**Optional** ( [Some](Self::optional_field_with_inherited_overrides()) / [Option](Self::maybe_optional_field_with_inherited_overrides()) setters)._
 
 */
     /// Common docs
@@ -167,11 +130,7 @@ impl<S: sut_builder::State> SutBuilder<S> {
     where
         S::OptionalFieldWithInheritedOverrides: sut_builder::IsUnset,
     {}
-    /**| **Optional** |
-| -- |
-
-**See also** [`optional_field_with_inherited_overrides()`](Self::optional_field_with_inherited_overrides), which is a companion setter that wraps the value with `Some` internally.
-
+    /**_**Optional** ( [Some](Self::optional_field_with_inherited_overrides()) / [Option](Self::maybe_optional_field_with_inherited_overrides()) setters)._
 
 */
     /// Docs on option_fn
@@ -183,13 +142,9 @@ impl<S: sut_builder::State> SutBuilder<S> {
     where
         S::OptionalFieldWithInheritedOverrides: sut_builder::IsUnset,
     {}
-    /**| **Optional** |
-| -- |
-
-**See also** [`maybe_default_field_with_inherited_overrides()`](Self::maybe_default_field_with_inherited_overrides), which is a companion setter that accepts an `Option`.
+    /**_**Optional** ( [Some](Self::default_field_with_inherited_overrides()) / [Option](Self::maybe_default_field_with_inherited_overrides()) setters)._ _**Default:**_ ```2 + 2 * 3```.
 
 
-**Default:** ```2 + 2 * 3```.
 
 */
     /// Common docs
@@ -201,13 +156,9 @@ impl<S: sut_builder::State> SutBuilder<S> {
     where
         S::DefaultFieldWithInheritedOverrides: sut_builder::IsUnset,
     {}
-    /**| **Optional** |
-| -- |
-
-**See also** [`default_field_with_inherited_overrides()`](Self::default_field_with_inherited_overrides), which is a companion setter that wraps the value with `Some` internally.
+    /**_**Optional** ( [Some](Self::default_field_with_inherited_overrides()) / [Option](Self::maybe_default_field_with_inherited_overrides()) setters)._ _**Default:**_ ```2 + 2 * 3```.
 
 
-**Default:** ```2 + 2 * 3```.
 
 */
     /// Docs on option_fn

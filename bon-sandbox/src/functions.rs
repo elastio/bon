@@ -63,7 +63,7 @@ pub fn greet(
     ///
     /// **Example:**
     /// ```
-    /// bon_sandbox::greet().name("John");
+    /// bon_sandbox::functions::greet().name("John");
     /// ```
     name: &str,
 

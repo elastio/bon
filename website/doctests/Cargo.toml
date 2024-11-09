@@ -11,11 +11,9 @@ edition = "2021"
 [lints]
 workspace = true
 
-[dependencies]
-bon = { path = "../../bon", features = ["experimental-overwritable"] }
-
 [dev-dependencies]
 anyhow                = "1.0"
+bon                   = { path = "../../bon", features = ["experimental-overwritable"] }
 buildstructor         = "0.5"
 macro_rules_attribute = "0.2"
 
