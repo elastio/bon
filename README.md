@@ -199,7 +199,7 @@ Add `bon` to your `Cargo.toml`.
 
 ```toml
 [dependencies]
-bon = "2.3"
+bon = "3.0.0-rc"
 ```
 
 You can opt out of `std` and `alloc` cargo features with `default-features = false` for `no_std` environments.
