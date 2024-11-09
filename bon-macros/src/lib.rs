@@ -202,8 +202,7 @@ pub fn derive_builder(item: proc_macro::TokenStream) -> proc_macro::TokenStream 
 /// The builder never panics. Any mistakes such as missing required fields
 /// or setting the same field twice will be reported as compile-time errors.
 ///
-/// For details on this macro including the reason why it's needed see
-/// [this paragraph in the overview](https://bon-rs.com/guide/overview#builder-for-an-associated-method).
+/// For details on this macro [see the overview](https://bon-rs.com/guide/overview).
 ///
 /// [`builder`]: macro@builder
 #[proc_macro_attribute]
