@@ -1,7 +1,7 @@
 import { withBase } from "vitepress";
 
-export const latestVersion = "v3";
-export const versions = ["v3", "v2", "v1"];
+export const latestVersion = "v3-rc";
+export const versions = ["v3-rc", "v2", "v1"];
 
 export const sectionRoots = {
     guide: "guide/overview",
