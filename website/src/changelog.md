@@ -7,11 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-All the breaking changes are very unlikely to actually break your code that was written against the `v2` version of `bon` unless you've been doing some crimes like using items marked as `#[doc(hidden)]` or using unconventional macro delimiters like `#[builder{}/[]]` instead of `#[builder()]`. See also the "Removed" section about removed/replaced deprecated APIs that you most likely never used.
+All the breaking changes are very unlikely to actually break your code that was written against the `v2` version of `bon`. 99% of users should be able to update without any migration.
 
 ### Changed
 
--   🎉🎉 Stabilize the builder's typestate API allowing for [custom builder extensions](https://bon-rs.com/guide/builder-extensions). This is the **main theme** of this release. This new API brings the flexibility to a whole new level 🚀 🚀.
+-   🎉🎉 Stabilize the builder's [typestate API](https://bon-rs.com/guide/typestate-api) allowing for custom builder extensions. This is the **main theme** of this release. This new API brings the flexibility to a whole new level 🚀 🚀 ([#145](https://github.com/elastio/bon/pull/145))
+
+-   Improve rustdoc output. See the rustoc examples and comparison in the [Alternatives](https://bon-rs.com/guide/alternatives#generated-docs-comparison) section ([#145](https://github.com/elastio/bon/pull/145))
+
+    -   Add info that the member is required or optional.
+
+    -   For members with default values show the default value in the docs.
+
+    -   For optional members provide a link to a companion setter. The docs for `{member}(T)` setter mention the `maybe_{member}(Option<T>)` setter and vice versa.
+
+    -   Remove `__` prefixes for generic types and lifetimes from internal symbols. Instead, the prefixes added only if the macro detects a name collision.
 
 -   ⚠️ **Breaking.** Reject unnecessary empty attributes e.g. `#[builder()]` or `#[builder]` with no parameters on a member ([#145](https://github.com/elastio/bon/pull/145))
 
@@ -19,7 +29,7 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 -   ⚠️ **Breaking.** Reject non-consecutive `on(...)` clauses. For example, the following now generates a compile error: `#[builder(on(String, into), finish_fn = build, on(Vec<_>, into))]`, because there is a `finish_fn = ...` between `on(...)` clauses. ([#155](https://github.com/elastio/bon/pull/155))
 
--   ⚠️ **Breaking.** `#[builder(derive(Clone, Debug))]` now generates impl blocks that follow the behaviour of standard `Clone` and `Debug` derives in that it conservatively adds `Clone/Debug` trait bounds for all the generic types declared on the original item (struct or function). Previously no additional bounds were required on `Clone` and `Debug` impls. See the _Added_ section for details on the way to override these bounds with `#[builder(derive(Clone/Debug(bounds(...))))]`.
+-   ⚠️ **Breaking.** `#[builder(derive(Clone, Debug))]` now generates impl blocks that follow the behaviour of standard `Clone` and `Debug` derives in that it conservatively adds `Clone/Debug` trait bounds for all the generic types declared on the original item (struct or function). Previously no additional bounds were required on `Clone` and `Debug` impls. See the _Added_ section for details on the way to override these bounds with `#[builder(derive(Clone/Debug(bounds(...))))]` ([#145](https://github.com/elastio/bon/pull/145))
 
 -   ⚠️ **Breaking.** The name of the builder struct generated for methods named `builder` changed from `TBuilderBuilder` to just `TBuilder` making methods named `builder` work the same as methods named `new`. ([#145](https://github.com/elastio/bon/pull/145))
 
@@ -50,7 +60,7 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 ### Added
 
--   ⚠️ **Breaking.** Builder macros now generate additional `mod builder_name {}` where `builder_name` is the snake_case version of the name of the builder struct. This new module contains the type state API of the builder. There is a low probability that this new module name may conflict with existing symbols in your scope, so this change is marked as breaking.
+-   ⚠️ **Breaking.** Builder macros now generate additional `mod builder_name {}` where `builder_name` is the snake_case version of the name of the builder struct. This new module contains the type state API of the builder. There is a low probability that this new module name may conflict with existing symbols in your scope, so this change is marked as breaking ([#145](https://github.com/elastio/bon/pull/145))
 
 -   Add [`#[builder(builder_type(vis = "...", doc { ... }))]`](https://bon-rs.com/reference/builder/top-level/builder_type) that allows overriding the visibility and docs of the builder struct ([#145](https://github.com/elastio/bon/pull/145))
 
@@ -74,16 +84,6 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 -   Add [`#[builder(derive(Clone/Debug(bounds(...))]`](https://bon-rs.com/reference/builder/top-level/derive#generic-types-handling) to allow overriding trait bounds on the `Clone/Debug` impl block of the builder ([#145](https://github.com/elastio/bon/pull/145))
 
--   Improve rustdoc output ([#145](https://github.com/elastio/bon/pull/145))
-
-    -   Add info that the member is required or optional.
-
-    -   For members with default values show the default value in the docs.
-
-    -   For optional members provide a link to a companion setter. The docs for `{member}(T)` setter mention the `maybe_{member}(Option<T>)` setter and vice versa.
-
-    -   Remove `__` prefixes for generic types and lifetimes from internal symbols. Instead, the prefixes added only if the macro detects a name collision.
-
 -   Add inheritance of `#[allow()]` and `#[expect()]` lint attributes to all generated items. This is useful to suppress any lints coming from the generated code. Although, lints coming from the generated code are generally considered defects in `bon` and should be reported via a Github issue, but this provides an easy temporary workaround for the problem ([#145](https://github.com/elastio/bon/pull/145))
 
 ### Fixed
@@ -103,9 +103,16 @@ All the breaking changes are very unlikely to actually break your code that was 
 -   Add new pages to the Guide Book:
 
     -   [Custom Conversions](https://bon-rs.com/guide/basics/custom-conversions) ([#170](https://github.com/elastio/bon/pull/170))
+
     -   [Typestate API](https://bon-rs.com/guide/typestate-api) ([#170](https://github.com/elastio/bon/pull/170))
-    -   [Builder's Type Signature](https://bon-rs.com/guide/typestate-api/builders-type-signature) ([#170](https://github.com/elastio/bon/pull/170)) ([#170](https://github.com/elastio/bon/pull/170))
+
+    -   [Builder's Type Signature](https://bon-rs.com/guide/typestate-api/builders-type-signature) ([#170](https://github.com/elastio/bon/pull/170))
+
     -   [Custom Methods](https://bon-rs.com/guide/typestate-api/custom-methods) ([#171](https://github.com/elastio/bon/pull/171))
+
+    -   [Optional Generic Members](https://bon-rs.com/guide/patterns/optional-generic-members) ([#173](https://github.com/elastio/bon/pull/173))
+
+    -   [Compilation Benchmarks](https://bon-rs.com/guide/benchmarks/compilation) ([#177](https://github.com/elastio/bon/pull/177))
 
     -   Split API reference into multiple pages. The [root page](https://bon-rs.com/reference/builder) now contains convenient table with short descriptions of all available configuration attributes ([#164](https://github.com/elastio/bon/pull/164))
 
