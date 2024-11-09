@@ -7,43 +7,43 @@ export const sidebars = {
             items: [
                 {
                     text: "Overview",
-                    link: "/guide/overview",
+                    link: "/v2/guide/overview",
                 },
                 {
                     text: "Optional Members",
-                    link: "/guide/optional-members",
+                    link: "/v2/guide/optional-members",
                 },
                 {
                     text: "Compatibility",
-                    link: "/guide/compatibility",
+                    link: "/v2/guide/compatibility",
                 },
                 {
                     text: "Positional Members",
-                    link: "/guide/positional-members",
+                    link: "/v2/guide/positional-members",
                 },
                 {
                     text: "Inspecting",
-                    link: "/guide/inspecting",
+                    link: "/v2/guide/inspecting",
                 },
                 {
                     text: "Documenting",
-                    link: "/guide/documenting",
+                    link: "/v2/guide/documenting",
                 },
                 {
                     text: "Limitations",
-                    link: "/guide/limitations",
+                    link: "/v2/guide/limitations",
                 },
                 {
                     text: "Benchmarks",
-                    link: "/guide/benchmarks",
+                    link: "/v2/guide/benchmarks",
                 },
                 {
                     text: "Alternatives",
-                    link: "/guide/alternatives",
+                    link: "/v2/guide/alternatives",
                 },
                 {
                     text: "Troubleshooting",
-                    link: "/guide/troubleshooting",
+                    link: "/v2/guide/troubleshooting",
                 },
             ],
         },
@@ -52,19 +52,19 @@ export const sidebars = {
             items: [
                 {
                     text: "Conditional Building",
-                    link: "/guide/patterns/conditional-building",
+                    link: "/v2/guide/patterns/conditional-building",
                 },
                 {
                     text: "Fallible Builders",
-                    link: "/guide/patterns/fallible-builders",
+                    link: "/v2/guide/patterns/fallible-builders",
                 },
                 {
                     text: "Into Conversions In-Depth",
-                    link: "/guide/patterns/into-conversions-in-depth",
+                    link: "/v2/guide/patterns/into-conversions-in-depth",
                 },
                 {
                     text: "Shared Configuration",
-                    link: "/guide/patterns/shared-configuration",
+                    link: "/v2/guide/patterns/shared-configuration",
                 },
             ],
         },
@@ -73,7 +73,7 @@ export const sidebars = {
             items: [
                 {
                     text: "Contributing",
-                    link: "/guide/internal/contributing",
+                    link: "/v2/guide/internal/contributing",
                 },
             ],
         },
@@ -84,65 +84,65 @@ export const sidebars = {
             items: [
                 {
                     text: "#[derive(Builder)] / #[builder]",
-                    link: "/reference/builder",
+                    link: "/v2/reference/builder",
                     items: [
                         {
                             text: "Top-level attributes",
-                            link: "/reference/builder#top-level-attributes",
+                            link: "/v2/reference/builder#top-level-attributes",
                             items: [
                                 {
                                     text: "builder_type",
-                                    link: "/reference/builder#builder-type",
+                                    link: "/v2/reference/builder#builder-type",
                                 },
                                 {
                                     text: "derive",
-                                    link: "/reference/builder#derive",
+                                    link: "/v2/reference/builder#derive",
                                 },
                                 {
                                     text: "expose_positional_fn",
-                                    link: "/reference/builder#expose-positional-fn",
+                                    link: "/v2/reference/builder#expose-positional-fn",
                                 },
                                 {
                                     text: "finish_fn",
-                                    link: "/reference/builder#finish-fn",
+                                    link: "/v2/reference/builder#finish-fn",
                                 },
                                 {
                                     text: "on",
-                                    link: "/reference/builder#on",
+                                    link: "/v2/reference/builder#on",
                                 },
                                 {
                                     text: "start_fn",
-                                    link: "/reference/builder#start-fn",
+                                    link: "/v2/reference/builder#start-fn",
                                 },
                             ],
                         },
                         {
                             text: "Member attributes",
-                            link: "/reference/builder#member-attributes",
+                            link: "/v2/reference/builder#member-attributes",
                             items: [
                                 {
                                     text: "default",
-                                    link: "/reference/builder#default",
+                                    link: "/v2/reference/builder#default",
                                 },
                                 {
                                     text: "finish_fn",
-                                    link: "/reference/builder#finish-fn-1",
+                                    link: "/v2/reference/builder#finish-fn-1",
                                 },
                                 {
                                     text: "into",
-                                    link: "/reference/builder#into",
+                                    link: "/v2/reference/builder#into",
                                 },
                                 {
                                     text: "name",
-                                    link: "/reference/builder#name",
+                                    link: "/v2/reference/builder#name",
                                 },
                                 {
                                     text: "skip",
-                                    link: "/reference/builder#skip",
+                                    link: "/v2/reference/builder#skip",
                                 },
                                 {
                                     text: "start_fn",
-                                    link: "/reference/builder#start-fn-1",
+                                    link: "/v2/reference/builder#start-fn-1",
                                 },
                             ],
                         },
@@ -150,7 +150,7 @@ export const sidebars = {
                 },
                 {
                     text: "#[bon]",
-                    link: "/reference/bon",
+                    link: "/v2/reference/bon",
                 },
                 {
                     text: "Other items on docs.rs",
