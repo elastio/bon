@@ -58,7 +58,7 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 -   ⚠️ **Breaking.** Remove support for `#[bon::builder]` proc-macro attribute on top of a `struct`. Use `#[derive(bon::Builder)]` for that instead. This syntax has been deprecated since `2.1` and it is now removed as part of a major version cleanup ([#145](https://github.com/elastio/bon/pull/145))
 
--   ⚠️ **Breaking.** Remove `#[builder(expose_positional_fn = positional_fn_name)]` attribute. Use [`#[builder(start_fn = builder_fn_name)]`](https://bon-rs.com/reference/builder/top-level/start-fn) instead, since this attribute works additively keeping the function with positional arguments under the attribute unchanged. ([#153](https://github.com/elastio/bon/pull/153))
+-   ⚠️ **Breaking.** Remove `#[builder(expose_positional_fn = positional_fn_name)]` attribute. Use [`#[builder(start_fn = builder_fn_name)]`](https://bon-rs.com/reference/builder/top-level/start_fn) instead, since this attribute works additively keeping the function with positional arguments under the attribute unchanged. ([#153](https://github.com/elastio/bon/pull/153))
 
 ### Added
 
@@ -66,9 +66,9 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 -   Add [`#[builder(builder_type(vis = "...", doc { ... }))]`](https://bon-rs.com/reference/builder/top-level/builder_type) that allows overriding the visibility and docs of the builder struct ([#145](https://github.com/elastio/bon/pull/145))
 
--   Add [`#[builder(finish_fn(vis = "...", doc { ... } ))]`](https://bon-rs.com/reference/builder/top-level/finish-fn) that allows overriding the visibility and docs of the finishing function ([#145](https://github.com/elastio/bon/pull/145))
+-   Add [`#[builder(finish_fn(vis = "...", doc { ... } ))]`](https://bon-rs.com/reference/builder/top-level/finish_fn) that allows overriding the visibility and docs of the finishing function ([#145](https://github.com/elastio/bon/pull/145))
 
--   Add [`#[builder(start_fn(doc { ... }))]`](https://bon-rs.com/reference/builder/top-level/start-fn) that allows overriding the docs of the starting function ([#145](https://github.com/elastio/bon/pull/145))
+-   Add [`#[builder(start_fn(doc { ... }))]`](https://bon-rs.com/reference/builder/top-level/start_fn) that allows overriding the docs of the starting function ([#145](https://github.com/elastio/bon/pull/145))
 
 -   Add [`#[builder(with = closure)]`](https://bon-rs.com/reference/builder/member/with) syntax to customize setters with a closure. If the closure returns a `Result<_, E>` the setters become fallible ([#145](https://github.com/elastio/bon/pull/145))
 
@@ -78,7 +78,7 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 -   Add [`#[builder(crate = path::to::bon)]`](https://bon-rs.com/reference/builder/top-level/crate) and `#[bon(crate = path::to::bon)]` to allow overriding the path to `bon` crate used in the generated code, which is useful for the cases when `bon` macros are wrapped by other macros ([#153](https://github.com/elastio/bon/pull/153))
 
--   Add [`#[builder(state_mod)]`](https://bon-rs.com/reference/builder/top-level/state-mod) to configure the builder's type state API module name, visibility and docs ([#145](https://github.com/elastio/bon/pull/145))
+-   Add [`#[builder(state_mod)]`](https://bon-rs.com/reference/builder/top-level/state_mod) to configure the builder's type state API module name, visibility and docs ([#145](https://github.com/elastio/bon/pull/145))
 
 -   🔬 **Experimental.** Add [`#[builder(overwritable)]`](https://bon-rs.com/reference/builder/member/overwritable) and `#[builder(on(..., overwritable)]` to make it possible to call setters multiple times for the same member. This attribute is available under the cargo feature `"experimental-overwritable"`. The fate of this feature depends on your feedback in the tracking issue [#149](https://github.com/elastio/bon/issues/149). Please, let us know if you have a use case for this attribute! ([#145](https://github.com/elastio/bon/pull/145))
 
