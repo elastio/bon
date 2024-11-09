@@ -29,7 +29,7 @@ targets = ["x86_64-unknown-linux-gnu"]
 workspace = true
 
 [dependencies]
-bon            = { path = "../bon", version = "=2.3.0", features = ["experimental-overwritable"] }
+bon            = { path = "../bon", version = "=3.0.0", features = ["experimental-overwritable"] }
 buildstructor  = "0.5"
 derive_builder = "0.20"
 typed-builder  = "0.20"
