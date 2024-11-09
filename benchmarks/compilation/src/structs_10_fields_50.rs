@@ -2,7 +2,6 @@
     any(feature = "bon", feature = "typed-builder", feature = "derive_builder",),
     derive(crate::Builder)
 )]
-#[cfg_attr(feature = "bon-overwritable", builder(on(_, overwritable)))]
 pub struct Struct1 {
     x1: i32,
     x2: i32,
@@ -59,7 +58,6 @@ pub struct Struct1 {
     any(feature = "bon", feature = "typed-builder", feature = "derive_builder",),
     derive(crate::Builder)
 )]
-#[cfg_attr(feature = "bon-overwritable", builder(on(_, overwritable)))]
 pub struct Struct2 {
     x1: i32,
     x2: i32,
@@ -116,7 +114,6 @@ pub struct Struct2 {
     any(feature = "bon", feature = "typed-builder", feature = "derive_builder",),
     derive(crate::Builder)
 )]
-#[cfg_attr(feature = "bon-overwritable", builder(on(_, overwritable)))]
 pub struct Struct3 {
     x1: i32,
     x2: i32,
@@ -173,7 +170,6 @@ pub struct Struct3 {
     any(feature = "bon", feature = "typed-builder", feature = "derive_builder",),
     derive(crate::Builder)
 )]
-#[cfg_attr(feature = "bon-overwritable", builder(on(_, overwritable)))]
 pub struct Struct4 {
     x1: i32,
     x2: i32,
@@ -230,7 +226,6 @@ pub struct Struct4 {
     any(feature = "bon", feature = "typed-builder", feature = "derive_builder",),
     derive(crate::Builder)
 )]
-#[cfg_attr(feature = "bon-overwritable", builder(on(_, overwritable)))]
 pub struct Struct5 {
     x1: i32,
     x2: i32,
@@ -287,7 +282,6 @@ pub struct Struct5 {
     any(feature = "bon", feature = "typed-builder", feature = "derive_builder",),
     derive(crate::Builder)
 )]
-#[cfg_attr(feature = "bon-overwritable", builder(on(_, overwritable)))]
 pub struct Struct6 {
     x1: i32,
     x2: i32,
@@ -344,7 +338,6 @@ pub struct Struct6 {
     any(feature = "bon", feature = "typed-builder", feature = "derive_builder",),
     derive(crate::Builder)
 )]
-#[cfg_attr(feature = "bon-overwritable", builder(on(_, overwritable)))]
 pub struct Struct7 {
     x1: i32,
     x2: i32,
@@ -401,7 +394,6 @@ pub struct Struct7 {
     any(feature = "bon", feature = "typed-builder", feature = "derive_builder",),
     derive(crate::Builder)
 )]
-#[cfg_attr(feature = "bon-overwritable", builder(on(_, overwritable)))]
 pub struct Struct8 {
     x1: i32,
     x2: i32,
@@ -458,7 +450,6 @@ pub struct Struct8 {
     any(feature = "bon", feature = "typed-builder", feature = "derive_builder",),
     derive(crate::Builder)
 )]
-#[cfg_attr(feature = "bon-overwritable", builder(on(_, overwritable)))]
 pub struct Struct9 {
     x1: i32,
     x2: i32,
@@ -515,7 +506,6 @@ pub struct Struct9 {
     any(feature = "bon", feature = "typed-builder", feature = "derive_builder",),
     derive(crate::Builder)
 )]
-#[cfg_attr(feature = "bon-overwritable", builder(on(_, overwritable)))]
 pub struct Struct10 {
     x1: i32,
     x2: i32,

@@ -208,6 +208,8 @@ See [alternatives](https://bon-rs.com/guide/alternatives) for comparison.
 
 ## Who's Using `bon`?
 
+Some notable users:
+
 -   [`crates.io` backend](https://github.com/rust-lang/crates.io)
 -   [`ractor`](https://github.com/slawlor/ractor)
 -   [`comrak`](https://github.com/kivikakk/comrak)

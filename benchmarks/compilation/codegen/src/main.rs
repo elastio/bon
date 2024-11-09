@@ -10,8 +10,8 @@ fn main() -> anyhow::Result<()> {
 
     let src_dir = bench_dir.join("src");
 
-    let structs_number = 100;
-    let fields_number = 10;
+    let structs_number = 10;
+    let fields_number = 50;
 
     std::fs::write(
         src_dir.join(format!(
@@ -50,10 +50,6 @@ fn structs_n_fields_n(structs_number: usize, fields_number: usize) -> TokenStrea
                         feature = "derive_builder",
                     ),
                     derive(crate::Builder),
-                )]
-                #[cfg_attr(
-                    feature = "bon-overwritable",
-                    builder(on(_, overwritable)),
                 )]
                 pub struct #struct_name {
                     #( #field_names: i32, )*
