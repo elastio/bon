@@ -19,7 +19,7 @@ All the breaking changes are very unlikely to actually break your code that was 
 
     -   For members with default values show the default value in the docs.
 
-    -   For optional members provide a link to a companion setter. The docs for `{member}(T)` setter mention the `maybe_{member}(Option<T>)` setter and vice versa.
+    -   For optional members provide links to `{member}(T)` and `maybe_{member}(Option<T>)` setters.
 
     -   Remove `__` prefixes for generic types and lifetimes from internal symbols. Instead, the prefixes added only if the macro detects a name collision.
 
