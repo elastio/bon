@@ -167,7 +167,7 @@ export default defineConfig({
                         },
                         {
                             text: "Compatibility",
-                            link: "/guide/compatibility",
+                            link: "/guide/basics/compatibility",
                         },
                     ],
                 },
