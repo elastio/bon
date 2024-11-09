@@ -1,7 +1,6 @@
 //! Minimal example of the generated builder and its typestate API.
 //!
-//! This documentation was generated as a showcase for the [Builder's Type Signature]
-//! guide
+//! This documentation was generated as a showcase for the [Builder's Type Signature] guide.
 //!
 //! [Builder's Type Signature]: https://bon-rs.com/guide/typestate-api/builders-type-signature
 

@@ -42,9 +42,9 @@ This is also done to reduce the builder's type signature size and reduce generic
 
 ### Can `bon` improve compile times?
 
-Definitely, but it comes at a cost 🪙. `bon` prioritizes the convenience of the generated builder API, documentation cleanness, and the level of compile-time checks.
+Definitely, but it comes at a cost 🪙. `bon` prioritizes the convenience of the generated builder API, documentation cleanness, and higher level of compile-time checks by default.
 
-If you'd like to improve your compile times, consider disabling compile-time checks for overwrites of optional members in setters with [`#[builder(overwritable)]`](../../reference/builder/member/overwritable). However, don't rush with that, think carefully about the trade you would make.
+If you'd like to improve your compile times, consider disabling compile-time checks for overwrites of optional members in setters with [`#[builder(overwritable)]`](../../reference/builder/member/overwritable). However, don't rush with that, think carefully about the tradeoff you would make.
 
 ### Why `derive_builder` is fastest to compile?
 
@@ -74,4 +74,4 @@ The benchmarks were run on a dedicated root server `AX51-NVMe` on [Hetzner](http
 
 The source code of the benchmarks is [available here][benchmarks-source].
 
-[benchmarks-source]: https://github.com/elastio/bon/tree/master/benchmarks/runtime
+[benchmarks-source]: https://github.com/elastio/bon/tree/master/benchmarks/compilation

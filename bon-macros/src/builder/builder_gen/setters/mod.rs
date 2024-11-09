@@ -619,9 +619,12 @@ fn optional_setter_docs(
         })
         .unwrap_or_default();
 
-    let setters = format!(" [Some](Self::{some_fn}()) / [Option](Self::{option_fn}()) setters");
-
-    format!("_**Optional** ({setters})._{default}\n\n",)
+    format!(
+        "_**Optional** \
+        ([Some](Self::{some_fn}()) / [Option](Self::{option_fn}()) setters).\
+        _{default}\
+        \n\n"
+    )
 }
 
 fn well_known_default(ty: &syn::Type) -> Option<syn::Expr> {

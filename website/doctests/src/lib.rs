@@ -1,4 +1,4 @@
-//! Crate for testing Rust code snippets in the markdown files on the website.
+//! Crate for testing Rust code snippets in markdown files on the website.
 
 #[cfg(doctest)]
 // We use a bunch of Vitepress-specific syntax in the doctests, for example to

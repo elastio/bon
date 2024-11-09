@@ -189,7 +189,7 @@ See the [blog post for this release](https://bon-rs.com/blog/bon-builder-v2-1-re
 ### Docs
 
 -   Add a new section ["`None` literals inference"](https://bon-rs.com/guide/patterns/into-conversions-in-depth#none-literals-inference) to docs for "Into Conversions In-Depth"
--   Fix the docs about the comparison of Into conversions on the ["Alternatives"](http://bon-rs.com/guide/alternatives) page that were not updated during the v2 release
+-   Fix the docs about the comparison of Into conversions on the ["Alternatives"](https://bon-rs.com/guide/alternatives) page that were not updated during the v2 release
 
 ### Fixed
 
