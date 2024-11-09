@@ -1,0 +1,23 @@
+[package]
+name    = "doctests"
+version = "0.1.0"
+
+publish = false
+
+description = "Crate for testing Rust code snippets in markdown files on the website."
+
+edition = "2021"
+
+[lints]
+workspace = true
+
+[dev-dependencies]
+anyhow                = "1.0"
+bon                   = { path = "../../bon", features = ["experimental-overwritable"] }
+buildstructor         = "0.5"
+macro_rules_attribute = "0.2"
+
+[build-dependencies]
+itertools  = "0.13"
+lazy-regex = "3.3"
+walkdir    = "2.5"

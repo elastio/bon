@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use walkdir::DirEntry;
 
 fn main() {
-    let website = "../website";
+    let website = "..";
 
     println!("cargo::rerun-if-changed={website}");
 
@@ -22,8 +22,8 @@ fn main() {
         .filter(|entry| {
             entry.file_type().is_file()
                 && entry.path().extension() == Some("md".as_ref())
-                && !entry.path().starts_with("../website/src/v1")
-                && !entry.path().starts_with("../website/src/v2")
+                && !entry.path().starts_with("../src/v1")
+                && !entry.path().starts_with("../src/v2")
         })
         .map(DirEntry::into_path)
         .sorted_unstable()

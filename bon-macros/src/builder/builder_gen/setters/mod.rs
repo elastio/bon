@@ -499,9 +499,7 @@ impl SettersItems {
         if member.is_required() {
             let docs = common_docs.unwrap_or(&member.docs);
 
-            let header = "\
-                | **Required** |\n\
-                | -- |\n\n";
+            let header = "_**Required.**_\n\n";
 
             let docs = doc(header).chain(docs.iter().cloned()).collect();
 
@@ -560,8 +558,10 @@ impl SettersItems {
             .or(common_docs)
             .unwrap_or(&member.docs);
 
+        let setter_names = (&some_fn_name, &option_fn_name);
+
         let some_fn_docs = {
-            let header = optional_setter_docs(default, &option_fn_name, "accepts an `Option`");
+            let header = optional_setter_docs(default, setter_names);
 
             doc(&header).chain(some_fn_docs.iter().cloned()).collect()
         };
@@ -572,11 +572,7 @@ impl SettersItems {
             .unwrap_or(&member.docs);
 
         let option_fn_docs = {
-            let header = optional_setter_docs(
-                default,
-                &some_fn_name,
-                "wraps the value with `Some` internally",
-            );
+            let header = optional_setter_docs(default, setter_names);
 
             doc(&header).chain(option_fn_docs.iter().cloned()).collect()
         };
@@ -611,24 +607,23 @@ impl SettersItems {
 
 fn optional_setter_docs(
     default: Option<&str>,
-    other_setter: &syn::Ident,
-    description: &str,
+    (some_fn, option_fn): (&syn::Ident, &syn::Ident),
 ) -> String {
     let default = default
         .map(|default| {
             if default.contains('\n') || default.len() > 80 {
-                format!("**Default:**\n````rust,ignore\n{default}\n````\n\n")
+                format!(" _**Default:**_\n````rust,ignore\n{default}\n````\n\n")
             } else {
-                format!("**Default:** ```{default}```.\n\n")
+                format!(" _**Default:**_ ```{default}```.\n\n")
             }
         })
         .unwrap_or_default();
 
     format!(
-        "| **Optional** |\n\
-         | -- |\n\n\
-         **See also** [`{other_setter}()`](Self::{other_setter}), which is a companion setter that {description}.
-        \n\n{default}",
+        "_**Optional** \
+        ([Some](Self::{some_fn}()) / [Option](Self::{option_fn}()) setters).\
+        _{default}\
+        \n\n"
     )
 }
 

@@ -26,7 +26,3 @@ mod collections;
 pub mod __;
 
 mod builder_state;
-
-/// Examples of generated builders' APIs.
-#[cfg(doc)]
-pub mod examples;

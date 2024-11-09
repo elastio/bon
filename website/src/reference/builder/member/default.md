@@ -146,7 +146,7 @@ assert_eq!(value.x3, "lyra");
 
 :::
 
-## Evaluation context
+## Evaluation Context
 
 You can use the values of other members by referencing their names in the `default` expression. All members are initialized in the order of their declaration. It means only those members that are declared earlier (higher) in the code are available to the `default` expression.
 
@@ -238,6 +238,12 @@ assert_eq!(value, (3, 6, 9));
 
 The `self` parameter in associated method syntax is not available to the `default` expression. If you need the `self` context for your defaulting logic, then set your member's type to `Option<T>` and handle the defaulting in the function's body manually.
 
-## Compile errors
+## Compile Errors
 
 This attribute is incompatible with members of `Option` type, since `Option` already implies the default value of `None`. However, it can be used together with [`#[builder(required)]`](./required).
+
+## Generated Docs
+
+The documentation for the setters will include the default value expression. If you use `#[builder(default)]`, then the default value expression will be inferred for primitive and some well-known types.
+
+See [examples of the generated docs](https://docs.rs/bon-sandbox/latest/bon_sandbox/attr_default/struct.ExampleBuilder.html) with `#[builder(default)]`.
