@@ -82,7 +82,7 @@ If you want to expose your builder's type signature, you need to add [`#[builder
 
 ## Example Rustdoc
 
-You can see the `rustdoc` API reference generated for this example [here](https://docs.rs/bon/latest/bon/examples/minimal/). Note that it was generated with `#[builder(state_mod(vis = "pub"))]`, otherwise, it wouldn't appear in public documentation.
+You can see the `rustdoc` API reference generated for this example [here](https://docs.rs/bon-sandbox/latest/bon_sandbox/state_mod/minimal/). Note that it was generated with `#[builder(state_mod(vis = "pub"))]`, otherwise, it wouldn't appear in public documentation.
 
 ## Other Generic Parameters
 
