@@ -45,6 +45,10 @@
 
 <!-- #region overview -->
 
+# Announcement
+
+Release `3.0.0-rc` (release-candidate) was published 🎉. The ultimate stable `3.0.0` release is scheduled for 13-th of November. You are encouraged to use the `3.0.0-rc` version in the meantime and post your feedback in [#156](https://github.com/elastio/bon/issues/156). The release blog post will be ready on the scheduled release date, until then see the [changelog](https://bon-rs.com/changelog) for details.
+
 # Overview
 
 `bon` is a Rust crate for generating compile-time-checked builders for structs and functions. It also provides idiomatic partial application with optional and named parameters for functions and methods.
