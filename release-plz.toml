@@ -9,7 +9,7 @@ changelog_update = false
 name = "bon"
 
 changelog_include = ["bon-macros"]
-changelog_path    = "website/changelog.md"
+changelog_path    = "website/src/changelog.md"
 changelog_update  = true
 
 git_release_enable = true
