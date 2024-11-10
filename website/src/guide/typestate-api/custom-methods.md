@@ -239,7 +239,7 @@ Thus, instead of writing `S::{Member}: IsSet` you can write a single bound `S: I
 ```rust ignore
 fn example<S>(/**/)
 where
-    S: State,
+    S: State,     // [!code --]
     S::X1: IsSet, // [!code --]
     S::X2: IsSet, // [!code --]
     S: IsComplete // [!code ++]
