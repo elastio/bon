@@ -42,7 +42,9 @@ This is also done to reduce the builder's type signature size and reduce generic
 
 ### Can `bon` improve compile times?
 
-Definitely, but it comes at a cost 🪙. `bon` prioritizes the convenience of the generated builder API, documentation cleanness, and higher level of compile-time checks by default.
+It will be possible to reduce compile times once the [`associated_type_defaults`](https://github.com/rust-lang/rust/issues/29661) nightly Rust feature hits stable. See [this comment](https://github.com/rust-lang/rust/issues/29661#issuecomment-2466765240), that measures the improvement at 21-60%.
+
+Any other improvements come at a cost 🪙. `bon` prioritizes the convenience of the generated builder API, documentation cleanness, and higher level of compile-time checks by default.
 
 If you'd like to improve your compile times, consider disabling compile-time checks for overwrites of optional members in setters with [`#[builder(overwritable)]`](../../reference/builder/member/overwritable). However, don't rush with that, think carefully about the tradeoff you would make.
 

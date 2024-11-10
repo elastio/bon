@@ -182,12 +182,10 @@ impl<'a> StateModGenCtx<'a> {
         let docs_suffix = if stateful_members_pascal.is_empty() {
             ""
         } else {
-            "\
-                \n\
-                \n\
-                You can use the associated types of this trait to control the state of individual members \
-                with the [`IsSet`] and [`IsUnset`] traits. You can change the state of the members with \
-                the `Set*` structs available in this module."
+            "\n\n\
+            You can use the associated types of this trait to control the state of individual members \
+            with the [`IsSet`] and [`IsUnset`] traits. You can change the state of the members with \
+            the `Set*` structs available in this module."
         };
 
         let docs = format!(
