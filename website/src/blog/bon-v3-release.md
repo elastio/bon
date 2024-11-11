@@ -35,7 +35,7 @@ It's been two months since the previous [2.3](./bon-builder-v2-3-release) releas
 
 ## What's New
 
-This is technically a major release, but [breaking changes](../changelog) a very minor. 99% of users should be able to update without any migration. The dominating part of this release is actually big new features that extend existing API 🚀.
+This is technically a major release, but [breaking changes](../changelog) are very minor. 99% of users should be able to update without any migration. The dominating part of this release is actually big new features that extend existing API 🚀.
 
 ## Typestate API
 
