@@ -88,7 +88,7 @@ let b: TbExampleBuilder<((Private,), (i32,), ())> = TbExample::builder().x1(1).x
 `typed-builder` uses a tuple to represent the typestate with the following rules:
 
 -   The number of items in the tuple corresponds to the number of fields in the struct.
--   `()` item in the tuple represents a field that was not set yet
+-   `()` item in the tuple represents a field that was not set yet.
 -   `(T,)` item in the tuple represents a field that was already set; `T` is the type of that field.
 
 `typed-builder`'s approach violates privacy by exposing the internals of the struct:
@@ -277,7 +277,7 @@ If you want to wrap `bon`'s macros with your own, the [`#[builder(crate)]`](../r
 
 ## Other Changes
 
-This post doesn't cover everything. See the [full changelog here](../changelog).
+This post doesn't cover everything. See the [full changelog here](../changelog#300---2024-11-13).
 
 ## Future Work
 
@@ -285,7 +285,7 @@ Now, that the [Typestate API](../guide/typestate-api) is in place, and you can a
 
 There are ideas for a new `#[builder(flag)]` attribute ([#142](https://github.com/elastio/bon/issues/142)) that would generate a pair of setters:
 
--   `member()` - doesn't accept any arguments, set the member to `true`
+-   `member()` - doesn't accept any arguments, sets the member to `true`
 -   `with_member(bool)` - accepts a boolean value like a usual setter
 
 These features are on the next priority list for `bon`, so stay tuned for more updates!
@@ -294,7 +294,7 @@ These features are on the next priority list for `bon`, so stay tuned for more u
 
 Huge thank you for 1150 stars ⭐ [on Github](https://github.com/elastio/bon)! Consider giving [`bon`][bon-github] a star if you haven't already. Share it with your friends/colleagues to help others discover it 🔭. Your support and feedback are a big motivation and together we can build a better builder 🐱!
 
-Bon's goal is to empower everyone to build beautiful APIs with great flexibility and extensibility. If you have any feedback or ideas for improvement consider joining [our Discord server](https://bon-rs.com/discord) to discuss them, or just [open an issue/discussion on Github](https://github.com/elastio/bon/issues).
+Bon's goal is to empower everyone to build beautiful APIs with great flexibility and extensibility. If you have any feedback or ideas for improvement, consider joining [our Discord server](https://bon-rs.com/discord) to discuss them, or just [open an issue/discussion on Github](https://github.com/elastio/bon/issues).
 
 <!-- ::: tip
 
