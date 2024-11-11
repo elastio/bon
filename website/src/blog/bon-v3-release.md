@@ -275,6 +275,12 @@ We are seeking feedback for this feature and would be glad if you could leave a 
 
 If you want to wrap `bon`'s macros with your own, the [`#[builder(crate)]`](../reference/builder/top-level/crate) attribute will help you reexport `bon` and tell it to reference symbols from the given path instead of the default `::bon`.
 
+```rust ignore
+#[derive(bon::Builder)]
+#[builder(crate = ::path::to::bon)]
+struct Example {}
+```
+
 ## Other Changes
 
 This post doesn't cover everything. See the [full changelog here](../changelog#300---2024-11-13).
