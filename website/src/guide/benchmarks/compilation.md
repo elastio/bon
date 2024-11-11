@@ -42,7 +42,7 @@ This is also done to reduce the builder's type signature size and reduce generic
 
 ### Can `bon` improve compile times?
 
-Once the [`associated_type_defaults`](https://github.com/rust-lang/rust/issues/29661) nightly Rust feature hits stable, it'll be possible to greatly improve compile times. See [this comment](https://github.com/rust-lang/rust/issues/29661#issuecomment-2466765240), which measures the improvement at 21-60%.
+Once the [`associated_type_defaults`](https://github.com/rust-lang/rust/issues/29661) nightly Rust feature hits stable, it'll be possible to greatly improve compile times. See [this comment](https://github.com/rust-lang/rust/issues/29661#issuecomment-2466765240), which measures the improvement at 16-58%.
 
 Any other improvements come at a cost 🪙. `bon` prioritizes the convenience of the generated builder API, documentation cleanness, and higher level of compile-time checks by default.
 
