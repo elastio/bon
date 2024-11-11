@@ -277,7 +277,7 @@ This post doesn't cover everything. See the [full changelog here](../changelog).
 
 ## Future Work
 
-Now, that the [Typestate API](../guide/typestate-api/) is in place, and you can add custom methods to the builder, the missing piece is the ability to add custom fields to the builder that you could use in those methods ([#189](https://github.com/elastio/bon/issues/189)).
+Now, that the [Typestate API](../guide/typestate-api) is in place, and you can add custom methods to the builder, the missing piece is the ability to add custom fields to the builder that you could use in those methods ([#189](https://github.com/elastio/bon/issues/189)).
 
 There are ideas for a new `#[builder(flag)]` attribute ([#142](https://github.com/elastio/bon/issues/142)) that would generate a pair of setters:
 
