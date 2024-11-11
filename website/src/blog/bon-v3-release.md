@@ -33,6 +33,10 @@ assert_eq!("[INFO] Bon says hello!", builder.call());
 
 It's been two months since the previous [2.3](./bon-builder-v2-3-release) release, and a lot happened. `bon` has breached **1000** ⭐ stars on [Github][bon-github] and **150_000** downloads on [crates.io](https://crates.io/crates/bon) 📈. Also, some big repositories started using `bon`: [`crates.io` backend](https://github.com/rust-lang/crates.io), [ractor](https://github.com/slawlor/ractor), [comrak](https://github.com/kivikakk/comrak), etc. Thank you so much 🥳!
 
+## What's New
+
+This is technically a major release, but [breaking changes](../changelog) a very minor. 99% of users should be able to update without any migration. The dominating part of this release is actually big new features that extend existing API 🚀.
+
 ## Typestate API
 
 The main feature of this release is the redesign and stabilization of the builder's typestate.
