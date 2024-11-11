@@ -56,7 +56,7 @@ struct Example {
     x1: u32
 }
 
-use example_builder::{State, IsUnset, SetX1};
+use example_builder::{IsUnset, State, SetX1};
 
 impl<S: State> ExampleBuilder<S> {
     fn x1(self, value: u32) -> ExampleBuilder<SetX1<S>>
