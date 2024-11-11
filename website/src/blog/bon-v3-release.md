@@ -10,7 +10,7 @@ hidden: true
 
 If you don't know about [`bon`][bon-github], then see the [motivational blog post](./how-to-do-named-function-arguments-in-rust) and [the crate overview](../guide/overview).
 
-## Snippet of This Release 🐱
+## Snippet of This Release :cat:
 
 ```rust
 #[bon::builder]
