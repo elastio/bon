@@ -199,7 +199,12 @@ impl BuilderGenCtx {
         });
 
         let receiver = receiver.map(|receiver| {
-            let receiver = &receiver.with_self_keyword;
+            let mut receiver = receiver.with_self_keyword.clone();
+
+            if receiver.reference.is_none() {
+                receiver.mutability = None;
+            }
+
             quote! { #receiver, }
         });
 

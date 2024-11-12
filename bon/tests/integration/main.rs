@@ -17,7 +17,8 @@ extern crate alloc;
 mod prelude {
     #[cfg(feature = "alloc")]
     pub(crate) use alloc::{
-        borrow::ToOwned, collections::BTreeSet, format, string::String, vec, vec::Vec,
+        borrow::ToOwned, boxed::Box, collections::BTreeSet, format, rc::Rc, string::String,
+        sync::Arc, vec, vec::Vec,
     };
 
     pub(crate) use super::assert_debug_eq;
