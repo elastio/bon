@@ -289,7 +289,7 @@ can't be called.
 
 This is implemented as a cargo feature to make sure `bon` maintains a lower MSRV by default. If you need this, then enable this in your `Cargo.toml`, but beware that it increases your MSRV to `1.79.0`:
 
-<!-- If you change this, make sure to update `./scripts/sync-version.sh` -->
+<!-- If you change this, make sure to update `scripts/sync-version.sh` -->
 
 ```toml
 [dependencies]

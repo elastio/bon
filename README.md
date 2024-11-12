@@ -199,7 +199,7 @@ The [🔍 API Reference](https://bon-rs.com/reference/builder) will help you nav
 
 Add `bon` to your `Cargo.toml`.
 
-<!-- If you change this, make sure to update `./scripts/sync-version.sh` -->
+<!-- If you change this, make sure to update `scripts/sync-version.sh` -->
 
 ```toml
 [dependencies]
