@@ -90,7 +90,8 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 ### Fixed
 
--   Fix `#[cfg/cfg_attr()]` not being expanded when used on function arguments with doc comments or other attributes.
+-   Fix false-positive `unused_mut` lints coming from `#[builder]` on a method that takes `mut self` ([#197](https://github.com/elastio/bon/pull/197))
+-   Fix `#[cfg/cfg_attr()]` not being expanded when used on function arguments with doc comments or other attributes ([#145](https://github.com/elastio/bon/pull/145))
 -   Fix raw identifiers in optional/default members ([#175](https://github.com/elastio/bon/pull/175))
 
 ### Other
