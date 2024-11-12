@@ -61,6 +61,12 @@ fn receiver_variations() {
     #[bon]
     impl Sut {
         #[builder]
+        #[allow(clippy::use_self)]
+        fn self_as_ref_sut(self: &Sut) -> u32 {
+            self.field
+        }
+
+        #[builder]
         fn mut_self(mut self) -> Self {
             self.field += 1;
             self
@@ -105,6 +111,9 @@ fn receiver_variations() {
 
     let mut sut = Sut { field: 42 };
 
+    Sut::self_as_ref_sut(&sut).call();
+    sut.self_as_ref_sut().call();
+
     Sut::mut_self(sut.clone()).call();
     sut.clone().mut_self().call();
 
@@ -130,19 +139,14 @@ fn receiver_variations_alloc() {
 
     #[derive(Clone)]
     struct Sut {
-        val: u32,
+        field: u32,
     }
 
     #[bon]
     impl Sut {
         #[builder]
-        #[allow(clippy::use_self)]
-        fn self_as_ref_sut(self: &Sut) -> u32 {
-            self.val
-        }
-        #[builder]
         fn mut_self_as_box(mut self: Box<Self>) {
-            self.val += 1;
+            self.field += 1;
             drop(self);
         }
         #[builder]
@@ -168,10 +172,7 @@ fn receiver_variations_alloc() {
         }
     }
 
-    let sut = Sut { val: 42 };
-
-    Sut::self_as_ref_sut(&sut).call();
-    sut.self_as_ref_sut().call();
+    let sut = Sut { field: 42 };
 
     Sut::mut_self_as_box(Box::new(sut.clone())).call();
     Box::new(sut.clone()).mut_self_as_box().call();
