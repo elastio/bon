@@ -382,3 +382,38 @@ mod generics {
         );
     }
 }
+
+mod mut_params {
+    use crate::prelude::*;
+
+    #[test]
+    fn test_free_fn() {
+        #[builder]
+        fn sut(#[builder(start_fn)] mut x1: u32, #[builder(finish_fn)] mut x2: u32) {
+            x1 += 1;
+            x2 += 1;
+            let _ = (x1, x2);
+        }
+
+        sut(1).call(2);
+    }
+
+    #[test]
+    fn test_assoc_method() {
+        struct Sut;
+
+        #[bon]
+        impl Sut {
+            #[builder]
+            #[allow(clippy::needless_pass_by_ref_mut)]
+            fn sut(&mut self, #[builder(start_fn)] mut x1: u32, #[builder(finish_fn)] mut x2: u32) {
+                let _ = self;
+                x1 += 1;
+                x2 += 1;
+                let _ = (x1, x2);
+            }
+        }
+
+        Sut.sut(1).call(2);
+    }
+}

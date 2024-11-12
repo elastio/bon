@@ -30,7 +30,7 @@ pub(crate) fn handle_errors(
 
             let msg = if msg.contains("unsupported proc macro punctuation character") {
                 format!(
-                    "known bug in rust-analyzer: `{msg}`;\n\
+                    "known bug in rust-analyzer: {msg};\n\
                     Github issue: https://github.com/rust-lang/rust-analyzer/issues/18244"
                 )
             } else {
@@ -40,7 +40,7 @@ pub(crate) fn handle_errors(
                     .unwrap_or_default();
 
                 format!(
-                    "proc-macro panicked (may be a bug in the crate `bon`): `{msg}`;\n\
+                    "proc-macro panicked (may be a bug in the crate `bon`): {msg};\n\
                     please report this issue at our Github repository: \
                     https://github.com/elastio/bon{context}"
                 )
