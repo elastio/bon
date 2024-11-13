@@ -69,10 +69,9 @@ struct MyLovelyStruct1 { /**/ }
 struct MyLovelyStruct2 { /**/ }
 ```
 
-### Free functions
+### Functions
 
 ```rust
-
 use macro_rules_attribute::{attribute_alias, apply};
 
 attribute_alias! {
@@ -91,7 +90,7 @@ fn my_lovely_fn1(/**/) { /**/ }
 fn my_lovely_fn2(/**/) { /**/ }
 ```
 
-### Associated methods
+### Methods
 
 Unfortunately, this technique doesn't quite work with associated methods (functions inside impl blocks) due to the limitations of proc macro attribute expansion order. The `#[bon]` macro on top of the impl block is expanded first before the `#[apply(...)]` macro inside of the impl block, so `#[bon]` doesn't see the configuration expanded from the `#[apply(...)]`.
 
