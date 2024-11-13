@@ -1,6 +1,6 @@
 [package]
 name    = "bon-cli"
-version = "3.0.0-rc"
+version = "3.0.0"
 
 description = "Dev tool for working with the `bon` crate"
 

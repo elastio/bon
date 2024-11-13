@@ -47,10 +47,6 @@
 
 <!-- #region overview -->
 
-# Announcement
-
-Release `3.0.0-rc` (release-candidate) was published 🎉. The ultimate stable `3.0.0` release is scheduled for 13-th of November. You are encouraged to use the `3.0.0-rc` version in the meantime and post your feedback in [#156](https://github.com/elastio/bon/issues/156). The release blog post will be ready on the scheduled release date, until then see the [changelog](https://bon-rs.com/changelog) for details.
-
 # Overview
 
 `bon` is a Rust crate for generating compile-time-checked builders for structs and functions. It also provides idiomatic partial application with optional and named parameters for functions and methods.
@@ -199,9 +195,11 @@ The [🔍 API Reference](https://bon-rs.com/reference/builder) will help you nav
 
 Add `bon` to your `Cargo.toml`.
 
+<!-- If you change this, make sure to update `scripts/sync-version.sh` -->
+
 ```toml
 [dependencies]
-bon = "3.0.0-rc"
+bon = "3.0"
 ```
 
 You can opt out of `std` and `alloc` cargo features with `default-features = false` for `no_std` environments.

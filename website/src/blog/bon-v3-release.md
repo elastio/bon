@@ -1,9 +1,8 @@
 ---
-title: Next-gen builder macro Bon 3.0 release 🎉. Revolutional typestate design 🚀
+title: Next-gen builder macro Bon 3.0 release. Revolutional typestate design 🚀
 date: 2024-11-13
 author: Veetaha
 outline: deep
-hidden: true
 ---
 
 [`bon`][bon-github] is a Rust crate for generating compile-time-checked builders for functions and structs. It also provides idiomatic partial application with optional and named parameters for functions and methods.
@@ -31,11 +30,17 @@ assert_eq!("[INFO] Bon says hello!", builder.call());
 
 ## Community Update
 
-It's been two months since the previous [2.3](./bon-builder-v2-3-release) release, and a lot happened. `bon` has breached **1000** ⭐ stars on [Github][bon-github] and **150_000** downloads on [crates.io](https://crates.io/crates/bon) 📈. Also, some big repositories started using `bon`: [`crates.io` backend](https://github.com/rust-lang/crates.io), [ractor](https://github.com/slawlor/ractor), [comrak](https://github.com/kivikakk/comrak), etc. Thank you so much 🥳!
+It's been two months since the previous [2.3](./bon-builder-v2-3-release) release, and a lot happened. `bon` has breached **1160** ⭐ stars on [Github][bon-github] and **150_000** downloads on [crates.io](https://crates.io/crates/bon) 📈. Also, some big repositories started using `bon`: [`crates.io` backend](https://github.com/rust-lang/crates.io), [ractor](https://github.com/slawlor/ractor), [comrak](https://github.com/kivikakk/comrak), etc. Thank you so much 🥳!
+
+::: tip
+
+Feel free to give `bon` a star ⭐ on [Github][bon-github] to help it grow if you haven't already.
+
+:::
 
 ## What's New
 
-This is technically a major release, but [breaking changes](../changelog) are very minor. 99% of users should be able to update without any migration. The dominating part of this release is actually big new features that extend existing API 🚀.
+This is technically a major release, but [breaking changes](../changelog#_3-0-0-2024-11-13) are very minor. 99% of users should be able to update without any migration. The dominating part of this release is actually big new features that extend existing API 🚀.
 
 ## Typestate API
 
@@ -88,7 +93,7 @@ let b: TbExampleBuilder<((Private,), (i32,), ())> = TbExample::builder().x1(1).x
 `typed-builder` uses a tuple to represent the typestate with the following rules:
 
 -   The number of items in the tuple corresponds to the number of fields in the struct.
--   `()` item in the tuple represents a field that was not set yet
+-   `()` item in the tuple represents a field that was not set yet.
 -   `(T,)` item in the tuple represents a field that was already set; `T` is the type of that field.
 
 `typed-builder`'s approach violates privacy by exposing the internals of the struct:
@@ -275,9 +280,15 @@ We are seeking feedback for this feature and would be glad if you could leave a 
 
 If you want to wrap `bon`'s macros with your own, the [`#[builder(crate)]`](../reference/builder/top-level/crate) attribute will help you reexport `bon` and tell it to reference symbols from the given path instead of the default `::bon`.
 
+```rust ignore
+#[derive(bon::Builder)]
+#[builder(crate = ::path::to::bon)]
+struct Example {}
+```
+
 ## Other Changes
 
-This post doesn't cover everything. See the [full changelog here](../changelog).
+This post doesn't cover everything. See the [full changelog here](../changelog#_3-0-0-2024-11-13).
 
 ## Future Work
 
@@ -285,20 +296,20 @@ Now, that the [Typestate API](../guide/typestate-api) is in place, and you can a
 
 There are ideas for a new `#[builder(flag)]` attribute ([#142](https://github.com/elastio/bon/issues/142)) that would generate a pair of setters:
 
--   `member()` - doesn't accept any arguments, set the member to `true`
+-   `member()` - doesn't accept any arguments, sets the member to `true`
 -   `with_member(bool)` - accepts a boolean value like a usual setter
 
 These features are on the next priority list for `bon`, so stay tuned for more updates!
 
 ## Summary
 
-Huge thank you for 1150 stars ⭐ [on Github](https://github.com/elastio/bon)! Consider giving [`bon`][bon-github] a star if you haven't already. Share it with your friends/colleagues to help others discover it 🔭. Your support and feedback are a big motivation and together we can build a better builder 🐱!
+Huge thank you for 1160 stars ⭐ [on Github](https://github.com/elastio/bon)! Consider giving [`bon`][bon-github] a star if you haven't already. Share it with your friends/colleagues to help others discover it 🔭. Your support and feedback are a big motivation and together we can build a better builder 🐱!
 
-Bon's goal is to empower everyone to build beautiful APIs with great flexibility and extensibility. If you have any feedback or ideas for improvement consider joining [our Discord server](https://bon-rs.com/discord) to discuss them, or just [open an issue/discussion on Github](https://github.com/elastio/bon/issues).
+Bon's goal is to empower everyone to build beautiful APIs with great flexibility and extensibility. If you have any feedback or ideas for improvement consider joining [our Discord server](https://bon-rs.com/discord) to discuss them, create an issue/discussion or a PR on [Github](https://github.com/elastio/bon/issues).
 
 <!-- ::: tip
 
-You can leave comments for this post on the platform of your choice:
+See what people are saying about this on:
 
 -   [Reddit](https://www.reddit.com/r/rust/comments/1fgmbo7/media_nextgen_builder_macro_bon_23_release/)
 -   [X (Twitter)](https://x.com/veetaha/status/1834951093559648544)

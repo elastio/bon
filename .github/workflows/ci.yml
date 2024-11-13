@@ -52,6 +52,19 @@ jobs:
 
       - run: cd ./benchmarks/compilation && ./run.sh
 
+  version-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./scripts/sync-version.sh
+        env:
+          # Use `cargo` pre-installed in the Github Managed runner image
+          RUSTUP_TOOLCHAIN: stable
+
+      - run: >-
+          git diff --exit-code --color=always || ( echo "Version is not
+          synchronized in other files. See diff above" && exit 1 )
+
   cargo-lock:
     runs-on: ubuntu-latest
 
