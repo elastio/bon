@@ -307,14 +307,15 @@ Huge thank you for 1160 stars ⭐ [on Github](https://github.com/elastio/bon)! C
 
 Bon's goal is to empower everyone to build beautiful APIs with great flexibility and extensibility. If you have any feedback or ideas for improvement consider joining [our Discord server](https://bon-rs.com/discord) to discuss them, create an issue/discussion or a PR on [Github](https://github.com/elastio/bon/issues).
 
-<!-- ::: tip
+::: tip
 
 See what people are saying about this on:
 
--   [Reddit](https://www.reddit.com/r/rust/comments/1fgmbo7/media_nextgen_builder_macro_bon_23_release/)
--   [X (Twitter)](https://x.com/veetaha/status/1834951093559648544)
+-   [Reddit](https://www.reddit.com/r/rust/comments/1gqbgbb/media_nextgen_builder_macro_bon_30_release/)
+-   [Hackernews](https://news.ycombinator.com/item?id=42125379)
+-   [X (Twitter)](https://x.com/veetaha/status/1856675619276235242)
 
-::: -->
+:::
 
 [bon-github]: https://github.com/elastio/bon
 [with]: ../reference/builder/member/with
