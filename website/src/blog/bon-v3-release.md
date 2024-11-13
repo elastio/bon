@@ -40,7 +40,7 @@ Feel free to give `bon` a star ⭐ on [Github][bon-github] to help it grow if yo
 
 ## What's New
 
-This is technically a major release, but [breaking changes](../changelog) are very minor. 99% of users should be able to update without any migration. The dominating part of this release is actually big new features that extend existing API 🚀.
+This is technically a major release, but [breaking changes](../changelog#_3-0-0-2024-11-13) are very minor. 99% of users should be able to update without any migration. The dominating part of this release is actually big new features that extend existing API 🚀.
 
 ## Typestate API
 
