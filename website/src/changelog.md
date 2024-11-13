@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.0](https://github.com/elastio/bon/compare/v2.3.0...v3.0.0) - 2024-11-13
 
+See the most interesting changes described in [**Bon 3.0 Release blog post**](https://bon-rs.com/blog/bon-v3-release).
+
 All the breaking changes are very unlikely to actually break your code that was written against the `v2` version of `bon`. 99% of users should be able to update without any migration.
 
 ### Changed
@@ -228,7 +230,7 @@ All the breaking changes are very unlikely to actually break your code that was 
 
     -   [Compilation Benchmarks](https://bon-rs.com/guide/benchmarks/compilation) ([#177](https://github.com/elastio/bon/pull/177))
 
-    -   Split API reference into multiple pages. The [root page](https://bon-rs.com/reference/builder) now contains convenient table with short descriptions of all available configuration attributes ([#164](https://github.com/elastio/bon/pull/164))
+    -   Split API reference into multiple pages. The [root page](https://bon-rs.com/reference/builder) now contains a convenient table with short descriptions of all available configuration attributes ([#164](https://github.com/elastio/bon/pull/164))
 
 ## [2.3.0](https://github.com/elastio/bon/compare/v2.2.1...v2.3.0) - 2024-09-14
 
