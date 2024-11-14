@@ -1,8 +1,6 @@
 # Optional Generic Members
 
-Generic type parameters, `impl Trait` or const generics used exclusively in optional members break type inference.
-
-This problem becomes visible when you skip setting an optional member.
+Generic type parameters, `impl Trait` or const generics used exclusively in optional members break type inference. This problem becomes visible when you skip setting an optional member.
 
 ## :red_circle: Bad
 
