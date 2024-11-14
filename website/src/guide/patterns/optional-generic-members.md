@@ -1,6 +1,6 @@
 # Optional Generic Members
 
-Generic type parameters, `impl Trait` or const generics used exclusively in optional members break type inference. This is mostly relevant to `fn`-based builders.
+Generic type parameters, `impl Trait` or const generics used exclusively in optional members break type inference.
 
 This problem becomes visible when you skip setting an optional member.
 
