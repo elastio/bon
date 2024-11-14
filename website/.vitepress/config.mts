@@ -4,8 +4,8 @@ import * as v1 from "../src/v1/config.mjs";
 import * as v2 from "../src/v2/config.mjs";
 
 const head: HeadConfig[] = [
-    ["link", { rel: "icon", href: `bon-logo-thumb.png` }],
-    ["meta", { property: "og:image", content: `bon-logo-thumb.png` }],
+    ["link", { rel: "icon", href: `/bon-logo-thumb.png` }],
+    ["meta", { property: "og:image", content: `/bon-logo-thumb.png` }],
 ];
 
 // Enable analytics only in the final build on CI. Locally, it's not needed.
