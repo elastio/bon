@@ -6,7 +6,7 @@ outline: deep
 
 **Any contributions are welcome!**
 
-Before you start working on a code contribution make sure it will be accepted. If your change introduces new behavior like a new macro attribute or some new syntax then you should probably [open an issue](https://github.com/elastio/bon/issues) that describes your change first. We'll let you know if we'll accept a pull request for the change suggested in that issue.
+Before you start working on a code contribution make sure it will be accepted. If your change introduces new behaviour like a new macro attribute or some new syntax, then you should probably [open an issue](https://github.com/elastio/bon/issues) that describes your change first. We'll let you know if we'll accept a pull request for the change suggested in that issue.
 
 However, even though desirable, creating an issue before making a pull request is optional. Just make sure your change is really straightforward and doesn't require any discussions.
 
@@ -18,14 +18,14 @@ This repository is a regular [`cargo` workspace](https://doc.rust-lang.org/book/
 
 Test your changes with `cargo test`. You may add new tests to the `bon/tests/integration` folder.
 
-If you want to validate that the macro generates a good compile error or warning, then extend the [`trybuild`](https://docs.rs/trybuild/latest/trybuild/) tests in `bon/tests/ui/compile_fail`. There are `errors.rs` and `warnings.rs` files where we have all the erroneous code examples.
+If you want to validate that the macro generates a good compile error or warning, then extend the [`trybuild`](https://docs.rs/trybuild/latest/trybuild/) tests in `bon/tests/ui/compile_fail`.
 
 ## Docs
 
 Make sure the documentation reflects your change. Add or update the docs in the following places:
 
 -   Doc comments on `pub` items of the crate.
--   Docs in the `website/docs` folder. Markdown files that live in this folder automatically turn into HTML pages of this website during release.
+-   Docs in the `website` folder. Markdown files that live in this folder automatically turn into HTML pages of this website during release.
 
 ## Pull request
 

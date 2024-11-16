@@ -1,1 +1,1 @@
-See the [contributing](https://bon-rs.com/guide/internal/contributing) page on the website for details.
+See the [contributing](https://bon-rs.com/guide/contributing) page on the website for details.
