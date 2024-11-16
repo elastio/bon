@@ -247,7 +247,7 @@ where
 
 ## Implied Bounds
 
-Rust `1.79.0` added [associated trait bounds](https://blog.rust-lang.org/2024/06/13/Rust-1.79.0.htmlbounds-in-associated-type-position) syntax, which can be used to make bounds on generic associated types implied.
+Rust `1.79.0` added [associated trait bounds](https://blog.rust-lang.org/2024/06/13/Rust-1.79.0.html#bounds-in-associated-type-position) syntax, which can be used to make bounds on generic associated types implied.
 
 This feature is useful for the trait `IsComplete`. If you enable the `implied-bounds` cargo feature, builder macros use the new syntax for bounds in
 associated type position, which enables implied `IsSet` bounds for the type state
