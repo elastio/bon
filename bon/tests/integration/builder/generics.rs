@@ -209,3 +209,136 @@ fn lifetimes_with_bounds() {
 
     sut().arg(&42).arg2(&42).call();
 }
+
+// This is based on the issue https://github.com/elastio/bon/issues/206
+mod lifetimes_used_only_in_type_predicates {
+    use crate::prelude::*;
+
+    trait Trait<'a> {}
+
+    impl Trait<'_> for u32 {}
+
+    #[test]
+    fn function() {
+        #[builder]
+        fn sut<'a, T: Trait<'a>>(x1: T) -> T {
+            x1
+        }
+
+        assert_eq!(sut().x1(2).call(), 2);
+    }
+
+    #[test]
+    fn generic_method() {
+        struct Sut;
+
+        #[bon]
+        impl Sut {
+            #[builder]
+            fn method<'a, T: Trait<'a>>(x1: T) -> T {
+                x1
+            }
+
+            #[builder]
+            fn with_self<'a, T: Trait<'a>>(&self, x1: T) -> T {
+                let _ = self;
+                x1
+            }
+        }
+
+        assert_eq!(Sut::method().x1(2).call(), 2);
+        assert_eq!(Sut.with_self().x1(2).call(), 2);
+    }
+
+    #[test]
+    fn generic_impl() {
+        struct Sut<T>(T);
+
+        #[bon]
+        impl<'a, T: Trait<'a>> Sut<T> {
+            #[builder]
+            fn method(x1: T) -> T {
+                x1
+            }
+
+            #[builder]
+            fn with_self(&self, x1: T) -> T {
+                let _ = self;
+                x1
+            }
+        }
+
+        assert_eq!(Sut::<u32>::method().x1(2).call(), 2);
+        assert_eq!(Sut(1).with_self().x1(2).call(), 2);
+    }
+}
+
+mod unused_lifetimes {
+    use crate::prelude::*;
+
+    #[test]
+    fn function() {
+        #[builder]
+        #[allow(clippy::extra_unused_lifetimes, unused_lifetimes)]
+        fn sut<'a, 'b>() {}
+
+        sut().call();
+    }
+
+    #[test]
+    fn generic_method() {
+        struct Sut;
+
+        #[bon]
+        impl Sut {
+            #[builder]
+            #[allow(clippy::extra_unused_lifetimes, unused_lifetimes)]
+            fn method<'a, 'b>() {}
+
+            #[builder]
+            #[allow(clippy::extra_unused_lifetimes, unused_lifetimes)]
+            fn with_self<'a, 'b>(&self) {
+                let _ = self;
+            }
+        }
+
+        Sut::method().call();
+        Sut.with_self().call();
+    }
+
+    #[test]
+    fn generic_impl() {
+        struct Sut<T>(T);
+
+        // Interestingly, this code doesn't produce an `unused_lifetimes` warning
+        // because the generated starting functions are inserted into this impl
+        // block and they do use the lifetimes by storing them in the builder.
+        // There isn't a good way to deal with this problem.
+        //
+        // We could generate the starting functions in a separate impl block, but
+        // then it would break the lexical order of methods as they are declared
+        // in this impl block in regards to how they are displayed in `rustdoc`.
+        //
+        // Also, rustdoc permits documentation on the impl block itself, so if
+        // we create a separate impl block for the starting functions, that
+        // would be rendered as separate impl blocks in `rustdoc` as well and we
+        // would need to do something about the docs on the original impl block,
+        // (e.g. copy them to the impl block for starting functions?).
+        //
+        // Anyway, the problem of unused lifetimes lint false-negative is probably
+        // not that serious to justify the complexity of the solution to fix it.
+        #[bon]
+        impl<'a, 'b, T> Sut<T> {
+            #[builder]
+            fn method() {}
+
+            #[builder]
+            fn with_self(&self) {
+                let _ = self;
+            }
+        }
+
+        Sut::<u32>::method().call();
+        Sut(1).with_self().call();
+    }
+}

@@ -36,6 +36,7 @@ step cargo update -p syn --precise 2.0.56
 step cargo update -p tokio --precise 1.29.1
 step cargo update -p expect-test --precise 1.4.1
 step cargo update -p windows-sys --precise 0.52.0
+step cargo update -p libc --precise 0.2.163
 
 export RUSTFLAGS="${RUSTFLAGS:-} --allow unknown-lints"
 
