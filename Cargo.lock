@@ -408,6 +408,7 @@ dependencies = [
  "itertools 0.13.0",
  "lazy-regex",
  "macro_rules_attribute",
+ "typed-builder",
  "walkdir",
 ]
 

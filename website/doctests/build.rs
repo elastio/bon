@@ -73,5 +73,5 @@ fn is_hidden(entry: &DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
-        .is_some_and(|s| s == "node_modules" || s.starts_with('.'))
+        .is_some_and(|s| s == "node_modules" || (s != ".." && s.starts_with('.')))
 }

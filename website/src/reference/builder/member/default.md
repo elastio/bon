@@ -2,9 +2,7 @@
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="function arguments"/> <Badge type="warning" text="method arguments"/>
 
-Makes the member optional and assigns a default value to it. The default value is lazily computed inside of the finishing function based on the form of this attribute.
-
-## Syntax
+Makes the member optional and assigns a default value to it. The default value is lazily computed inside of the finishing function.
 
 | Form                               | How default value is computed |
 | ---------------------------------- | ----------------------------- |

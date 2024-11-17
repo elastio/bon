@@ -23,6 +23,7 @@ These attributes are placed on a `struct` field or `fn` argument.
 | Attribute                                          | Short description                                                |
 | -------------------------------------------------- | ---------------------------------------------------------------- |
 | [`default`](./builder/member/default)              | Makes the member optional with a default value                   |
+| [`field`](./builder/member/field)                  | Defines a private field on the builder without setters           |
 | [`finish_fn`](./builder/member/finish_fn)          | Makes the member a positional argument on the finishing function |
 | [`into`](./builder/member/into)                    | Changes the signature of the setters to accept `impl Into<T>`    |
 | [`name`](./builder/member/name)                    | Overrides the name of the member used in the builder's API       |

@@ -292,6 +292,10 @@ export default defineConfig({
                                     link: "/reference/builder/member/default",
                                 },
                                 {
+                                    text: "field",
+                                    link: "/reference/builder/member/field",
+                                },
+                                {
                                     text: "finish_fn",
                                     link: "/reference/builder/member/finish_fn",
                                 },

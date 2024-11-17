@@ -4,7 +4,7 @@
 
 Skips generating setters for the member. This hides the member from the generated builder API, so the caller can't set its value.
 
-The value for the member will be computed based on the form of the attribute:
+The value for the member will be computed inside of the finishing function.
 
 | Form                            | How value for the member is computed |
 | ------------------------------- | ------------------------------------ |
