@@ -1,71 +1,5 @@
 use bon::Builder;
 
-#[derive(Builder)]
-struct IncorrectOrder1 {
-    #[builder(start_fn)]
-    _a: (),
-    _b: (),
-    #[builder(start_fn)]
-    _c: (),
-}
-
-#[derive(Builder)]
-struct IncorrectOrder2 {
-    #[builder(finish_fn)]
-    _a: (),
-    _b: (),
-    #[builder(start_fn)]
-    _c: (),
-}
-
-#[derive(Builder)]
-struct IncorrectOrder3 {
-    _a: (),
-    #[builder(start_fn)]
-    _b: (),
-}
-
-#[derive(Builder)]
-struct IncorrectOrder4 {
-    _a: (),
-    #[builder(finish_fn)]
-    _b: (),
-}
-
-#[derive(Builder)]
-struct IncorrectOrder5 {
-    #[builder(skip)]
-    _a: (),
-    #[builder(start_fn)]
-    _b: (),
-}
-
-#[derive(Builder)]
-struct IncorrectOrder6 {
-    #[builder(skip)]
-    _a: (),
-    #[builder(finish_fn)]
-    _b: (),
-}
-
-#[derive(Builder)]
-struct IncorrectOrder7 {
-    #[builder(finish_fn)]
-    _a: (),
-    #[builder(start_fn)]
-    _b: (),
-}
-
-#[derive(Builder)]
-struct IncorrectOrder8 {
-    #[builder(start_fn)]
-    _a: (),
-    #[builder(finish_fn)]
-    _b: (),
-    #[builder(start_fn)]
-    _c: (),
-}
-
 struct IntoUnit;
 
 impl From<IntoUnit> for () {
@@ -91,10 +25,7 @@ pub fn test_type_pattern_matching() {
         _d: Option<()>,
     }
 
-    TypePatternMatching::builder(IntoUnit, IntoUnit)
-        .build(IntoUnit, IntoUnit);
+    TypePatternMatching::builder(IntoUnit, IntoUnit).build(IntoUnit, IntoUnit);
 }
 
-fn main() {
-
-}
+fn main() {}

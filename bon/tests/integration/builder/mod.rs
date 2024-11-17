@@ -2,6 +2,7 @@ mod attr_bon;
 mod attr_crate;
 mod attr_default;
 mod attr_derive;
+mod attr_field;
 mod attr_into;
 mod attr_on;
 mod attr_overwritable;

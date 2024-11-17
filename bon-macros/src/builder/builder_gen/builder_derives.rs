@@ -120,6 +120,18 @@ impl BuilderGenCtx {
             }
         });
 
+        let clone_fields = self.custom_fields().map(|member| {
+            let member_ident = &member.ident;
+            let member_ty = &member.norm_ty;
+
+            quote! {
+                // The type hint here is necessary to get better error messages
+                // that point directly to the type that doesn't implement `Clone`
+                // in the input code using the span info from the type hint.
+                #member_ident: <#member_ty as #clone>::clone(&self.#member_ident)
+            }
+        });
+
         let state_var = &self.state_var;
 
         quote! {
@@ -139,6 +151,7 @@ impl BuilderGenCtx {
                         #phantom_field: ::core::marker::PhantomData,
                         #clone_receiver
                         #clone_start_fn_args
+                        #( #clone_fields, )*
 
                         // We clone named members individually instead of cloning
                         // the entire tuple to improve error messages in case if
@@ -162,6 +175,32 @@ impl BuilderGenCtx {
 
         let format_members = self.members.iter().filter_map(|member| {
             match member {
+                Member::StartFn(member) => {
+                    let member_index = &member.index;
+                    let member_ident_str = member.base.ident.to_string();
+                    let member_ty = &member.base.ty.norm;
+                    Some(quote! {
+                        output.field(
+                            #member_ident_str,
+                            #bon::__::derives::as_dyn_debug::<#member_ty>(
+                                &self.#start_fn_args_field.#member_index
+                            )
+                        );
+                    })
+                }
+                Member::Field(member) => {
+                    let member_ident = &member.ident;
+                    let member_ident_str = member_ident.to_string();
+                    let member_ty = &member.norm_ty;
+                    Some(quote! {
+                        output.field(
+                            #member_ident_str,
+                            #bon::__::derives::as_dyn_debug::<#member_ty>(
+                                &self.#member_ident
+                            )
+                        );
+                    })
+                }
                 Member::Named(member) => {
                     let member_index = &member.index;
                     let member_ident_str = &member.name.snake_raw_str;
@@ -175,24 +214,11 @@ impl BuilderGenCtx {
                         }
                     })
                 }
-                Member::StartFnArg(member) => {
-                    let member_index = &member.index;
-                    let member_ident_str = member.base.ident.to_string();
-                    let member_ty = &member.base.ty.norm;
-                    Some(quote! {
-                        output.field(
-                            #member_ident_str,
-                            #bon::__::derives::as_dyn_debug::<#member_ty>(
-                                &self.#start_fn_args_field.#member_index
-                            )
-                        );
-                    })
-                }
 
                 // The values for these members are computed only in the finishing
                 // function where the builder is consumed, and they aren't stored
                 // in the builder itself.
-                Member::FinishFnArg(_) | Member::Skipped(_) => None,
+                Member::FinishFn(_) | Member::Skip(_) => None,
             }
         });
 

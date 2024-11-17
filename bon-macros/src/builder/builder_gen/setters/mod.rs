@@ -366,9 +366,12 @@ impl<'a> SettersCtx<'a> {
                         .next()
                         .map(|_| quote!(#start_fn_args_field: self.#start_fn_args_field,));
 
+                    let custom_fields_idents = self.base.custom_fields().map(|field| &field.ident);
+
                     quote! {
                         #builder_ident {
                             #phantom_field: ::core::marker::PhantomData,
+                            #( #custom_fields_idents: self.#custom_fields_idents, )*
                             #maybe_receiver_field
                             #maybe_start_fn_args_field
                             #named_members_field: self.#named_members_field,

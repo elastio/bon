@@ -1,26 +1,31 @@
-use super::member::{Member, PositionalFnArgMember};
+use super::member::{Member, PosFnMember};
 use crate::util::prelude::*;
 
 impl super::BuilderGenCtx {
     fn finish_fn_member_expr(&self, member: &Member) -> TokenStream {
         let member = match member {
             Member::Named(member) => member,
-            Member::Skipped(member) => {
+            Member::Skip(member) => {
                 return member
                     .value
-                    .as_ref()
                     .as_ref()
                     .map(|value| quote! { (|| #value)() })
                     .unwrap_or_else(|| quote! { ::core::default::Default::default() });
             }
-            Member::StartFnArg(member) => {
+            Member::StartFn(member) => {
                 let index = &member.index;
                 let start_fn_args_field = &self.ident_pool.start_fn_args;
 
                 return quote! { self.#start_fn_args_field.#index };
             }
-            Member::FinishFnArg(member) => {
-                return member.init_expr();
+            Member::FinishFn(member) => {
+                return member
+                    .conversion()
+                    .unwrap_or_else(|| member.ident.to_token_stream());
+            }
+            Member::Field(member) => {
+                let ident = &member.ident;
+                return quote! { self.#ident };
             }
         };
 
@@ -109,8 +114,8 @@ impl super::BuilderGenCtx {
         let finish_fn_params = self
             .members
             .iter()
-            .filter_map(Member::as_finish_fn_arg)
-            .map(PositionalFnArgMember::fn_input_param);
+            .filter_map(Member::as_finish_fn)
+            .map(PosFnMember::fn_input_param);
 
         let body = &self.finish_fn.body.generate(self);
         let asyncness = &self.finish_fn.asyncness;

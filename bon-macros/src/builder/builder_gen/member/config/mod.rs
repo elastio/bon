@@ -14,9 +14,6 @@ use std::fmt;
 #[derive(Debug, darling::FromAttributes)]
 #[darling(attributes(builder))]
 pub(crate) struct MemberConfig {
-    /// Enables an `Into` conversion for the setter method.
-    pub(crate) into: darling::util::Flag,
-
     /// Assign a default value to the member it it's not specified.
     ///
     /// An optional expression can be provided to set the value for the member,
@@ -24,25 +21,26 @@ pub(crate) struct MemberConfig {
     #[darling(with = parse_optional_expr, map = Some)]
     pub(crate) default: Option<SpannedKey<Option<syn::Expr>>>,
 
-    /// Skip generating a setter method for this member.
+    /// Make the member a private field in the builder struct.
+    /// This is useful when the user needs to add custom fields to the builder,
+    /// that they would use in the custom methods they add to the builder.
     ///
-    /// An optional expression can be provided to set the value for the member,
-    /// otherwise its  [`Default`] trait impl will be used.
+    /// This is similar to `skip`. The difference is that `field` is evaluated
+    /// inside of the starting function, and stored in the builder. Its initialization
+    /// expression thus has access to all `start_fn` parameters. It must be declared
+    /// strictly after `#[builder(start_fn)]` members (if any) or right at the top of
+    /// the members list.
     #[darling(with = parse_optional_expr, map = Some)]
-    pub(crate) skip: Option<SpannedKey<Option<syn::Expr>>>,
+    pub(crate) field: Option<SpannedKey<Option<syn::Expr>>>,
+
+    /// Accept the value for the member in the finishing function parameters.
+    pub(crate) finish_fn: darling::util::Flag,
+
+    /// Enables an `Into` conversion for the setter method.
+    pub(crate) into: darling::util::Flag,
 
     /// Rename the name exposed in the builder API.
     pub(crate) name: Option<syn::Ident>,
-
-    /// Configurations for the setter methods.
-    #[darling(with = crate::parsing::parse_non_empty_paren_meta_list)]
-    pub(crate) setters: Option<SettersConfig>,
-
-    /// Where to place the member in the generated builder methods API.
-    /// By default the member is treated like a named parameter that
-    /// gets its own setter methods.
-    pub(crate) start_fn: darling::util::Flag,
-    pub(crate) finish_fn: darling::util::Flag,
 
     /// Allows setting the value for the member repeatedly. This reduces the
     /// number of type states and thus increases the compilation performance.
@@ -52,31 +50,46 @@ pub(crate) struct MemberConfig {
     /// this option to see if it's worth it.
     pub(crate) overwritable: darling::util::Flag,
 
+    /// Disables the special handling for a member of type `Option<T>`. The
+    /// member no longer has the default of `None`. It also becomes a required
+    /// member unless a separate `#[builder(default = ...)]` attribute is
+    /// also specified.
+    pub(crate) required: darling::util::Flag,
+
+    /// Configurations for the setter methods.
+    #[darling(with = crate::parsing::parse_non_empty_paren_meta_list)]
+    pub(crate) setters: Option<SettersConfig>,
+
+    /// Skip generating a setter method for this member.
+    ///
+    /// An optional expression can be provided to set the value for the member,
+    /// otherwise its  [`Default`] trait impl will be used.
+    #[darling(with = parse_optional_expr, map = Some)]
+    pub(crate) skip: Option<SpannedKey<Option<syn::Expr>>>,
+
+    /// Accept the value for the member in the starting function parameters.
+    pub(crate) start_fn: darling::util::Flag,
+
     /// Customize the setter signature and body with a custom closure or a well-known
     /// function. The closure/function must return the value of the type of the member,
     /// or optionally a `Result<_>` type where `_` is used to mark the type of
     /// the member. In this case the generated setters will be fallible
     /// (they'll propagate the `Result`).
     pub(crate) with: Option<SpannedKey<WithConfig>>,
-
-    /// Disables the special handling for a member of type `Option<T>`. The
-    /// member no longer has the default of `None`. It also becomes a required
-    /// member unless a separate `#[builder(default = ...)]` attribute is
-    /// also specified.
-    pub(crate) required: darling::util::Flag,
 }
 
 #[derive(PartialEq, Eq, Clone, Copy)]
 enum ParamName {
     Default,
+    Field,
     FinishFn,
     Into,
     Name,
     Overwritable,
+    Required,
     Setters,
     Skip,
     StartFn,
-    Required,
     With,
 }
 
@@ -84,14 +97,15 @@ impl fmt::Display for ParamName {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let str = match self {
             Self::Default => "default",
+            Self::Field => "field",
             Self::FinishFn => "finish_fn",
             Self::Into => "into",
             Self::Name => "name",
             Self::Overwritable => "overwritable",
+            Self::Required => "required",
             Self::Setters => "setters",
             Self::Skip => "skip",
             Self::StartFn => "start_fn",
-            Self::Required => "required",
             Self::With => "with",
         };
         f.write_str(str)
@@ -147,27 +161,29 @@ impl MemberConfig {
     fn specified_param_names(&self) -> impl Iterator<Item = ParamName> {
         let Self {
             default,
+            field,
             finish_fn,
             into,
             name,
             overwritable,
+            required,
             setters,
             skip,
             start_fn,
-            required,
             with,
         } = self;
 
         let attrs = [
             (default.is_some(), ParamName::Default),
+            (field.is_some(), ParamName::Field),
             (finish_fn.is_present(), ParamName::FinishFn),
             (into.is_present(), ParamName::Into),
             (name.is_some(), ParamName::Name),
             (overwritable.is_present(), ParamName::Overwritable),
+            (required.is_present(), ParamName::Required),
             (setters.is_some(), ParamName::Setters),
             (skip.is_some(), ParamName::Skip),
             (start_fn.is_present(), ParamName::StartFn),
-            (required.is_present(), ParamName::Required),
             (with.is_some(), ParamName::With),
         ];
 
@@ -206,6 +222,10 @@ impl MemberConfig {
                 self.finish_fn.span(),
                 &[ParamName::Into],
             )?;
+        }
+
+        if let Some(field) = &self.field {
+            self.validate_mutually_allowed(ParamName::Field, field.key.span(), &[])?;
         }
 
         if let Some(skip) = &self.skip {
