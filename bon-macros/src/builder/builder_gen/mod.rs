@@ -324,9 +324,10 @@ impl BuilderGenCtx {
                 fn() -> #state_var,
 
                 // Even though lifetimes will most likely be used somewhere in
-                // member types, it is not guaranteed, so we mention them all
-                // separately. This covers a special case for function builders
-                // where the lifetime can be entirely unused (the language permis that).
+                // member types, it is not guaranteed in case of functions/methods,
+                // so we mention them all separately. This covers a special case
+                // for function builders where the lifetime can be entirely unused
+                // (the language permis that).
                 //
                 // This edge case was discovered thanks to @tonywu6 ❤️:
                 // https://github.com/elastio/bon/issues/206
