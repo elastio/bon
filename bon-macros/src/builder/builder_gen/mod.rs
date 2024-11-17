@@ -289,8 +289,8 @@ impl BuilderGenCtx {
             _ => None,
         });
 
-        let types = receiver_ty
-            .into_iter()
+        let types = std::iter::empty()
+            .chain(receiver_ty)
             .chain(member_types)
             .chain(generic_types)
             .map(|ty| {
@@ -305,6 +305,11 @@ impl BuilderGenCtx {
                 quote!(fn() -> ::core::marker::PhantomData<#ty>)
             });
 
+        let lifetimes = self.generics.args.iter().filter_map(|arg| match arg {
+            syn::GenericArgument::Lifetime(lifetime) => Some(lifetime),
+            _ => None,
+        });
+
         let state_var = &self.state_var;
 
         quote! {
@@ -317,6 +322,15 @@ impl BuilderGenCtx {
                 // This removes unnecessary requirements when evaluating the
                 // applicability of the auto traits.
                 fn() -> #state_var,
+
+                // Even though lifetimes will most likely be used somewhere in
+                // member types, it is not guaranteed, so we mention them all
+                // separately. This covers a special case for function builders
+                // where the lifetime can be entirely unused (the language permis that).
+                //
+                // This edge case was discovered thanks to @tonywu6 ❤️:
+                // https://github.com/elastio/bon/issues/206
+                #( &#lifetimes (), )*
 
                 // There is an interesting quirk with lifetimes in Rust, which is the
                 // reason why we thoughtlessly store all the function parameter types
