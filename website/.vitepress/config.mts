@@ -123,6 +123,8 @@ export default defineConfig({
             { icon: "github", link: "https://github.com/elastio/bon" },
             { icon: "discord", link: "https://bon-rs.com/discord" },
             { icon: "x", link: "https://x.com/veetaha" },
+            { icon: "patreon", link: "https://patreon.com/Veetaha" },
+            { icon: "kofi", link: "https://ko-fi.com/Veetaha" },
         ],
 
         sidebar: {
