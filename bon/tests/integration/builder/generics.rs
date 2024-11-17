@@ -315,7 +315,7 @@ mod unused_lifetimes {
         // block and they do use the lifetimes by storing them in the builder.
         // There isn't a good way to deal with this problem.
         //
-        // We could generate the starting function in a separate impl block, but
+        // We could generate the starting functions in a separate impl block, but
         // then it would break the lexical order of methods as they are declared
         // in this impl block in regards to how they are displayed in `rustdoc`.
         //
@@ -325,8 +325,8 @@ mod unused_lifetimes {
         // would need to do something about the docs on the original impl block,
         // (e.g. copy them to the impl block for starting functions?).
         //
-        // Anyway, the problem of unused lifetimes is probably not that serious,
-        // and it's not worth the complexity of the solution to fix it.
+        // Anyway, the problem of unused lifetimes lint false-negative is probably
+        // not that serious to justify the complexity of the solution to fix it.
         #[bon]
         impl<'a, 'b, T> Sut<T> {
             #[builder]
