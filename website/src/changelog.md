@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.1](https://github.com/elastio/bon/compare/v3.0.0...v3.0.1) - 2024-11-17
+
+### Other
+
+- Fix handling of lifetimes not used in fn param types ([#208](https://github.com/elastio/bon/pull/208))
+
 ## [3.0.0](https://github.com/elastio/bon/compare/v2.3.0...v3.0.0) - 2024-11-13
 
 See the most interesting changes described in [**Bon 3.0 Release blog post**](https://bon-rs.com/blog/bon-v3-release).
