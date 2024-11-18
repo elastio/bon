@@ -146,7 +146,7 @@ assert_eq!(value.x3, "lyra");
 
 ## Evaluation Context
 
-You can use the values of other members by referencing their names in the `default` expression. All members are initialized in the order of their declaration. It means only those members that are declared earlier (higher) in the code are available to the `default` expression.
+You can reference other members as variables in the `default` expression. All members are initialized in the order of their declaration, and thus only members that are declared earlier (higher) in the code are available for the `default` expression.
 
 ::: code-group
 

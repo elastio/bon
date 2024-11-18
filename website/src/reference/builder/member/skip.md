@@ -36,7 +36,7 @@ assert_eq!(user.name, "anon");
 
 ## Evaluation context
 
-You can use values of other members by referencing their names in the `skip` expression. All members are initialized in the order of their declaration. It means only those members that are declared earlier (higher) in the code are available to the `skip` expression.
+You can reference other members as variables in the `skip` expression. All members are initialized in the order of their declaration, and thus only members that are declared earlier (higher) in the code are available for the `skip` expression.
 
 ```rust
 use bon::Builder;
