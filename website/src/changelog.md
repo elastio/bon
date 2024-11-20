@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.0.2](https://github.com/elastio/bon/compare/v3.0.1...v3.0.2) - 2024-11-20
 
-### Other
+### Fixed
 
-- Fix `unexpected_cfg` lint coming from `#[cfg(rust_analyzer)]` ([#212](https://github.com/elastio/bon/pull/212))
+-   Fix `unexpected_cfgs` lint coming from `#[cfg(rust_analyzer)]` on the latest nightly ([#212](https://github.com/elastio/bon/pull/212))
 
 ## [3.0.1](https://github.com/elastio/bon/compare/v3.0.0...v3.0.1) - 2024-11-17
 
