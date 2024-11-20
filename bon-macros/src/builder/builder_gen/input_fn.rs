@@ -251,7 +251,7 @@ impl<'a> FnInputCtx<'a> {
             clippy::too_many_arguments,
 
             // It's fine to use many bool arguments in the function signature because
-            // all of the will be named at the call site
+            // all of them will be named at the call site when the builder is used.
             clippy::fn_params_excessive_bools,
         )]));
 
