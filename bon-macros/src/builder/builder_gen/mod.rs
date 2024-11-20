@@ -149,6 +149,7 @@ impl BuilderGenCtx {
             // compiled by `rustc`. Rust Analyzer should be able to use the syntax
             // provided inside of the block to figure out the semantic meaning of
             // the tokens passed to the attribute.
+            #[allow(unexpected_cfgs)]
             #[cfg(rust_analyzer)]
             {
                 // Let IDEs know that these are type patterns like the ones that
