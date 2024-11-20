@@ -176,9 +176,12 @@ pub(crate) fn generate_completion_triggers(meta: Vec<Meta>) -> TokenStream {
         // The special `rust_analyzer` CFG is enabled only when Rust Analyzer is
         // running its code analysis. This allows us to provide code that is
         // useful only for Rust Analyzer for it to provide hints and completions.
-        #[cfg(rust_analyzer)]
+        #[allow(unexpected_cfgs)]
         const _: () = {
-            #completion_triggers
+            #[cfg(rust_analyzer)]
+            {
+                #completion_triggers
+            }
         };
     }
 }

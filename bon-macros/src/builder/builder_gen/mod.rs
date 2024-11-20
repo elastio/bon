@@ -149,17 +149,20 @@ impl BuilderGenCtx {
             // compiled by `rustc`. Rust Analyzer should be able to use the syntax
             // provided inside of the block to figure out the semantic meaning of
             // the tokens passed to the attribute.
-            #[cfg(rust_analyzer)]
+            #[allow(unexpected_cfgs)]
             {
-                // Let IDEs know that these are type patterns like the ones that
-                // could be written in a type annotation for a variable. Note that
-                // we don't initialize the variable with any value because we don't
-                // have any meaningful value to assign to this variable, especially
-                // because its type may contain wildcard patterns like `_`. This is
-                // used only to signal the IDEs that these tokens are meant to be
-                // type patterns by placing them in the context where type patterns
-                // are expected.
-                let _: (#(#type_patterns,)*);
+                #[cfg(rust_analyzer)]
+                {
+                    // Let IDEs know that these are type patterns like the ones that
+                    // could be written in a type annotation for a variable. Note that
+                    // we don't initialize the variable with any value because we don't
+                    // have any meaningful value to assign to this variable, especially
+                    // because its type may contain wildcard patterns like `_`. This is
+                    // used only to signal the IDEs that these tokens are meant to be
+                    // type patterns by placing them in the context where type patterns
+                    // are expected.
+                    let _: (#(#type_patterns,)*);
+                }
             }
         }
     }
