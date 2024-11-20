@@ -177,9 +177,11 @@ pub(crate) fn generate_completion_triggers(meta: Vec<Meta>) -> TokenStream {
         // running its code analysis. This allows us to provide code that is
         // useful only for Rust Analyzer for it to provide hints and completions.
         #[allow(unexpected_cfgs)]
-        #[cfg(rust_analyzer)]
         const _: () = {
-            #completion_triggers
+            #[cfg(rust_analyzer)]
+            {
+                #completion_triggers
+            }
         };
     }
 }
