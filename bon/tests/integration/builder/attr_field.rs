@@ -1,5 +1,4 @@
 use crate::prelude::*;
-use core::fmt;
 
 #[test]
 fn test_struct() {
@@ -52,8 +51,12 @@ fn test_struct() {
     let _ = sut.x8(()).build();
 }
 
+// This tests uses a turbofish with `impl Trait`
+#[rustversion::since(1.63.0)]
 #[test]
 fn test_function() {
+    use core::fmt;
+
     #[builder(derive(Debug, Clone))]
     #[allow(unused_variables)]
     fn sut<T: fmt::Debug>(
@@ -89,8 +92,12 @@ fn test_function() {
     sut.x8(()).call();
 }
 
+// This tests uses a turbofish with `impl Trait`
+#[rustversion::since(1.63.0)]
 #[test]
 fn test_method() {
+    use core::fmt;
+
     #[derive(Debug)]
     struct Sut;
 
