@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.0](https://github.com/elastio/bon/compare/v3.0.2...v3.1.0) - 2024-11-24
+
+### Added
+
+-   Add [`#[builder(field)]`](https://bon-rs.com/reference/builder/member/field) to define custom private fields on the builder type. See [Custom Fields](https://bon-rs.com/guide/typestate-api/custom-fields) guide for details ([#207](https://github.com/elastio/bon/pull/207))
+
+### Other
+
+-   Internal refactoring of naming in `bon`s test suite ([#215](https://github.com/elastio/bon/pull/215))
+
 ## [3.0.2](https://github.com/elastio/bon/compare/v3.0.1...v3.0.2) - 2024-11-20
 
 ### Fixed
