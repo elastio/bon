@@ -25,7 +25,7 @@ fn test_struct() {
         #[builder(field)]
         x6: Option<T>,
 
-        #[builder(field = std::any::type_name::<T>())]
+        #[builder(field = core::any::type_name::<T>())]
         x7: &'static str,
 
         x8: (),
@@ -63,7 +63,7 @@ fn test_function() {
         #[builder(field = x1 + x2 + u32::from(x3))] x4: u32,
         #[builder(field = x4 * 2)] x5: u32,
         #[builder(field)] x6: Option<T>,
-        #[builder(field = std::any::type_name::<T>())] x7: &'static str,
+        #[builder(field = core::any::type_name::<T>())] x7: &'static str,
         x8: (),
     ) {
     }
@@ -105,7 +105,7 @@ fn test_method() {
             #[builder(field = x1 + x2 + u32::from(x3))] x4: u32,
             #[builder(field = x4 * 2)] x5: u32,
             #[builder(field)] x6: Option<T>,
-            #[builder(field = std::any::type_name::<T>())] x7: &'static str,
+            #[builder(field = core::any::type_name::<T>())] x7: &'static str,
             x8: (),
         ) {
         }
@@ -120,7 +120,7 @@ fn test_method() {
             #[builder(field = x1 + x2 + u32::from(x3))] x4: u32,
             #[builder(field = x4 * 2)] x5: u32,
             #[builder(field)] x6: Option<T>,
-            #[builder(field = std::any::type_name::<T>())] x7: &'static str,
+            #[builder(field = core::any::type_name::<T>())] x7: &'static str,
             x8: (),
         ) {
             let _ = self;
