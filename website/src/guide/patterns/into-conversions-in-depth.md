@@ -20,10 +20,10 @@ If you prefer being explicit in code, feel free not to use `Into` conversions at
 
 We'll cover the following:
 
--   [Use `Into` conversions](#use-into-conversions)
--   [Avoid `Into` conversions](#avoid-into-conversions)
+-   [Use `Into` Conversions](#use-into-conversions)
+-   [Avoid `Into` Conversions](#avoid-into-conversions)
 
-## Use `Into` conversions
+## Use `Into` Conversions
 
 The main advantage of `impl Into` in setters is that it reduces the boilerplate for the caller. The code becomes shorter and cleaner, although not without [the drawbacks](#avoid-into-conversions).
 
@@ -36,7 +36,7 @@ The main advantage of `impl Into` in setters is that it reduces the boilerplate 
 
 :::
 
-### Shorter syntax for literals
+### Shorter Syntax for Literals
 
 Here is an example that shows the _non-exhaustive_ list of standard types where it's usually fine to enable `Into` conversions.
 
@@ -100,7 +100,7 @@ Example::builder()
 
 :::
 
-### Automatic enum wrapping
+### Automatic Enum Wrapping
 
 If you are working with enums a lot, you may implement the `From<EnumVariant>` for your enum and avoid wrapping your enum variants when passing them to the builder. Pay attention to the difference in the focused code below.
 
@@ -178,7 +178,7 @@ As you can see, the difference isn't significant in this case. It makes more sen
 
 ## Avoid `Into` conversions
 
-### Performance-sensitive code
+### Performance-Sensitive Code
 
 If allocations can pose a bottleneck for your application and you need to see every place in code where an allocation is performed, you should avoid using `impl Into` overall. It can lead to implicitly moving data to the heap or cloning it.
 
@@ -205,7 +205,7 @@ process_heavy_json()
 
 The problem here is that we unintentionally passed a `String` by reference instead of moving the ownership of the `String` to `process_heavy_json()`. This code implicitly uses [this `From` impl](https://github.com/rust-lang/rust/blob/1a94d839be8b248b972b9e022cb940d56de72fa1/library/alloc/src/string.rs#L2774-L2784) from the standard library.
 
-### Primitive numeric literals
+### Primitive Numeric Literals
 
 `impl Into` breaks type inference for numeric literal values. For example, the following code doesn't compile.
 
@@ -231,7 +231,7 @@ The reason for this error is that `rustc` can't infer the type for the numeric l
 
 Requiring an explicit type suffix in numeric literals would be the opposite of good ergonomics that `impl Into` is trying to achieve in the first place.
 
-### Weakened generics inference
+### Weakened Generics Inference
 
 If you have a function that returns a generic type, then the compiler needs to infer that generic type from usage unless it's specified explicitly. A classic example of such a function is [`str::parse()`](https://doc.rust-lang.org/stable/std/primitive.str.html#method.parse) or [`serde_json::from_str()`](https://docs.rs/serde_json/latest/serde_json/fn.from_str.html).
 
@@ -297,7 +297,7 @@ This means the setter for `ip_addr` can no longer hint the compiler a single typ
 
 This is the drawback of using not only `impl Into`, but any generics at all.
 
-### `None` literals inference
+### `None` Literals Inference
 
 `impl Into` breaks type inference for `None` literals. For example, this code doesn't use `Into` conversions and compiles fine:
 
@@ -369,7 +369,7 @@ Example::builder()
     .build();
 ```
 
-### Code complexity
+### Code Complexity
 
 This is quite subjective, but `impl Into<T>` is a bit harder to read than just `T`. It makes the signature of the setter slightly bigger and requires you to understand what the `impl Trait` does, and what its implications are.
 

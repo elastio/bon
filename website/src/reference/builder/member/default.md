@@ -2,9 +2,7 @@
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="function arguments"/> <Badge type="warning" text="method arguments"/>
 
-Makes the member optional and assigns a default value to it. The default value is lazily computed inside of the finishing function based on the form of this attribute.
-
-## Syntax
+Makes the member optional and assigns a default value to it. The default value is lazily computed inside of the finishing function.
 
 | Form                               | How default value is computed |
 | ---------------------------------- | ----------------------------- |
@@ -148,7 +146,7 @@ assert_eq!(value.x3, "lyra");
 
 ## Evaluation Context
 
-You can use the values of other members by referencing their names in the `default` expression. All members are initialized in the order of their declaration. It means only those members that are declared earlier (higher) in the code are available to the `default` expression.
+You can reference other members as variables in the `default` expression. All members are initialized in the order of their declaration, and thus only members that are declared earlier (higher) in the code are available for the `default` expression.
 
 ::: code-group
 

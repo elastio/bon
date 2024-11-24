@@ -6,7 +6,7 @@ outline: deep
 
 On this page, you'll learn how to share common configurations for builders to avoid code duplication.
 
-## Problem statement
+## Problem Statement
 
 As an example, let's suppose you want to enable [`Into` conversions](../patterns/into-conversions-in-depth) for specific types across all your builders and maybe also override the name of the finishing function that consumes the builder from the default `build` to `finish`.
 

@@ -1,6 +1,6 @@
 # Compatibility
 
-## Making a required member optional
+## Making a Required Member Optional
 
 It's totally backwards compatible to make a required member optional by changing the type from `T` to `Option<T>` or by adding [`#[builder(default)]`](../../reference/builder/member/default) to it.
 
@@ -48,7 +48,7 @@ get_page()
     .call();
 ```
 
-## Switching between `Option<T>` and `#[builder(default)]`
+## Switching Between `Option<T>` and `#[builder(default)]`
 
 Switching between `Option<T>` for the member type and `#[builder(default)]` on `T` is fully compatible. Nothing changes in the builder API when this happens.
 
@@ -78,7 +78,7 @@ fn example(
 example.maybe_filter(Some("filter".to_owned())).call();
 ```
 
-## Marking member as unused with a leading `_`
+## Marking Member as Unused with a Leading `_`
 
 You may add `_` prefix to the member name to mark it as unused for the time being. The builder API won't change if you do that. Leading underscores are stripped from the setter names automatically.
 
@@ -130,7 +130,7 @@ Example::example()
 
 :::
 
-## Switching between `#[derive(Builder)]` and `#[builder]` on the `new()` method
+## Switching Between `#[derive(Builder)]` and `#[builder]` on the `new()` Method
 
 `#[derive(Builder)]` on a struct generates builder API that is fully compatible with placing `#[builder]` on the `new()` method with the signature similar to struct's fields.
 
@@ -175,7 +175,7 @@ let user = User::builder()
     .build();
 ```
 
-## Adding `#[builder]` to existing functions
+## Adding `#[builder]` to Existing Functions
 
 Let's suppose you have existing code that defines functions with positional parameters in the public API. You'd like to change it to expose builder syntax instead, but you want to keep the old code compatible with the positional functions API.
 

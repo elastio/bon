@@ -1,8 +1,10 @@
+mod builder_decl;
 mod builder_derives;
 mod finish_fn;
 mod member;
 mod models;
 mod setters;
+mod start_fn;
 mod state_mod;
 mod top_level_config;
 
@@ -12,7 +14,7 @@ pub(crate) mod input_struct;
 pub(crate) use top_level_config::TopLevelConfig;
 
 use crate::util::prelude::*;
-use member::{Member, MemberOrigin, NamedMember, RawMember, StartFnArgMember};
+use member::{CustomField, Member, MemberOrigin, NamedMember, RawMember, StartFnMember};
 use models::{AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFnBody, Generics};
 use setters::SettersCtx;
 
@@ -30,8 +32,12 @@ impl BuilderGenCtx {
         self.members.iter().filter_map(Member::as_named)
     }
 
-    fn start_fn_args(&self) -> impl Iterator<Item = &StartFnArgMember> {
-        self.members.iter().filter_map(Member::as_start_fn_arg)
+    fn custom_fields(&self) -> impl Iterator<Item = &CustomField> {
+        self.members.iter().filter_map(Member::as_field)
+    }
+
+    fn start_fn_args(&self) -> impl Iterator<Item = &StartFnMember> {
+        self.members.iter().filter_map(Member::as_start_fn)
     }
 
     fn stateful_members(&self) -> impl Iterator<Item = &NamedMember> {
@@ -117,10 +123,7 @@ impl BuilderGenCtx {
                 #(#generics_decl,)*
                 #state_var: #state_mod::State
             >
-            #builder_ident<
-                #(#generic_args,)*
-                #state_var
-            >
+            #builder_ident<#(#generic_args,)* #state_var>
             #where_clause
             {
                 #finish_fn
@@ -167,118 +170,13 @@ impl BuilderGenCtx {
         }
     }
 
-    fn start_fn(&self) -> syn::ItemFn {
-        let builder_ident = &self.builder_type.ident;
-        let docs = &self.start_fn.docs;
-        let vis = &self.start_fn.vis;
-
-        let start_fn_ident = &self.start_fn.ident;
-
-        // TODO: we can use a shorter syntax with anonymous lifetimes to make
-        // the generated code and function signature displayed by rust-analyzer
-        // a bit shorter and easier to read. However, the caveat is that we can
-        // do this only for lifetimes that have no bounds and if they don't appear
-        // in the where clause. Research `darling`'s lifetime tracking API and
-        // maybe implement this in the future
-
-        let generics = self.start_fn.generics.as_ref().unwrap_or(&self.generics);
-
-        let generics_decl = &generics.decl_without_defaults;
-        let where_clause = &generics.where_clause;
-        let generic_args = &self.generics.args;
-
-        let phantom_field = &self.ident_pool.phantom;
-        let receiver_field = &self.ident_pool.receiver;
-        let start_fn_args_field = &self.ident_pool.start_fn_args;
-        let named_members_field = &self.ident_pool.named_members;
-
-        let receiver = self.receiver();
-
-        let receiver_field_init = receiver.map(|receiver| {
-            let self_token = &receiver.with_self_keyword.self_token;
-            quote! {
-                #receiver_field: #self_token,
-            }
-        });
-
-        let receiver = receiver.map(|receiver| {
-            let mut receiver = receiver.with_self_keyword.clone();
-
-            if receiver.reference.is_none() {
-                receiver.mutability = None;
-            }
-
-            quote! { #receiver, }
-        });
-
-        let start_fn_params = self
-            .start_fn_args()
-            .map(|member| member.base.fn_input_param());
-
-        let mut start_fn_arg_exprs = self
-            .start_fn_args()
-            .map(|member| member.base.init_expr())
-            .peekable();
-
-        let start_fn_args_field_init = start_fn_arg_exprs.peek().is_some().then(|| {
-            quote! {
-                #start_fn_args_field: (#(#start_fn_arg_exprs,)*),
-            }
-        });
-
-        let ide_hints = self.ide_hints();
-
-        // `Default` trait implementation is provided only for tuples up to 12
-        // elements in the standard library 😳:
-        // https://github.com/rust-lang/rust/blob/67bb749c2e1cf503fee64842963dd3e72a417a3f/library/core/src/tuple.rs#L213
-        let named_members_field_init = if self.named_members().take(13).count() <= 12 {
-            quote!(::core::default::Default::default())
-        } else {
-            let none = format_ident!("None");
-            let nones = self.named_members().map(|_| &none);
-            quote! {
-                (#(#nones,)*)
-            }
-        };
-
-        syn::parse_quote! {
-            #(#docs)*
-            #[inline(always)]
-            #[allow(
-                // This is intentional. We want the builder syntax to compile away
-                clippy::inline_always,
-                // We normalize `Self` references intentionally to simplify code generation
-                clippy::use_self,
-                // Let's keep it as non-const for now to avoid restricting ourselfves to only
-                // const operations.
-                clippy::missing_const_for_fn,
-            )]
-            #vis fn #start_fn_ident< #(#generics_decl),* >(
-                #receiver
-                #(#start_fn_params,)*
-            ) -> #builder_ident< #(#generic_args,)* >
-            #where_clause
-            {
-                #ide_hints
-
-                #builder_ident {
-                    #phantom_field: ::core::marker::PhantomData,
-                    #receiver_field_init
-                    #start_fn_args_field_init
-                    #named_members_field: #named_members_field_init,
-                }
-            }
-        }
-    }
-
     fn phantom_data(&self) -> TokenStream {
         let member_types = self.members.iter().filter_map(|member| {
             match member {
-                // The types of these members already appear in the struct in the types
-                // of named_members and start_fn_args fields.
-                Member::Named(_) | Member::StartFnArg(_) => None,
-                Member::FinishFnArg(member) => Some(member.ty.norm.as_ref()),
-                Member::Skipped(member) => Some(member.norm_ty.as_ref()),
+                // The types of these members already appear in the struct as regular fields.
+                Member::StartFn(_) | Member::Field(_) | Member::Named(_) => None,
+                Member::FinishFn(member) => Some(member.ty.norm.as_ref()),
+                Member::Skip(member) => Some(member.norm_ty.as_ref()),
             }
         });
 
@@ -359,120 +257,6 @@ impl BuilderGenCtx {
                 // explanation for it, I just didn't care to research it yet ¯\_(ツ)_/¯.
                 #(#types,)*
             )>
-        }
-    }
-
-    fn builder_decl(&self) -> TokenStream {
-        let builder_vis = &self.builder_type.vis;
-        let builder_ident = &self.builder_type.ident;
-        let generics_decl = &self.generics.decl_with_defaults;
-        let where_clause = &self.generics.where_clause;
-        let phantom_data = self.phantom_data();
-        let state_mod = &self.state_mod.ident;
-        let phantom_field = &self.ident_pool.phantom;
-        let receiver_field = &self.ident_pool.receiver;
-        let start_fn_args_field = &self.ident_pool.start_fn_args;
-        let named_members_field = &self.ident_pool.named_members;
-
-        // The fields can't be hidden using Rust's privacy syntax.
-        // The details about this are described in the blog post:
-        // https://bon-rs.com/blog/the-weird-of-function-local-types-in-rust.
-        //
-        // We could use `#[cfg(not(rust_analyzer))]` to hide the private fields in IDE.
-        // However, RA would then not be able to type-check the generated code, which
-        // may or may not be a problem, because the main thing is that the type signatures
-        // would still work in RA.
-        let private_field_attrs = {
-            // The message is defined separately to make it single-line in the
-            // generated code. This simplifies the task of removing unnecessary
-            // attributes from the generated code when preparing for demo purposes.
-            let deprecated_msg = "\
-                this field should not be used directly; it's an implementation detail \
-                if you found yourself needing it, then you are probably doing something wrong; \
-                feel free to open an issue/discussion in our GitHub repository \
-                (https://github.com/elastio/bon) or ask for help in our Discord server \
-                (https://bon-rs.com/discord)";
-
-            quote! {
-                #[doc(hidden)]
-                #[deprecated = #deprecated_msg]
-            }
-        };
-
-        let receiver_field = self.receiver().map(|receiver| {
-            let ty = &receiver.without_self_keyword;
-            quote! {
-                #private_field_attrs
-                #receiver_field: #ty,
-            }
-        });
-
-        let must_use_message = format!(
-            "the builder does nothing until you call `{}()` on it to finish building",
-            self.finish_fn.ident
-        );
-
-        let allows = allow_warnings_on_member_types();
-
-        let mut start_fn_arg_types = self
-            .start_fn_args()
-            .map(|member| &member.base.ty.norm)
-            .peekable();
-
-        let start_fn_args_field = start_fn_arg_types.peek().is_some().then(|| {
-            quote! {
-                #private_field_attrs
-                #start_fn_args_field: (#(#start_fn_arg_types,)*),
-            }
-        });
-
-        let named_members_types = self.named_members().map(NamedMember::underlying_norm_ty);
-
-        let docs = &self.builder_type.docs;
-        let state_var = &self.state_var;
-
-        quote! {
-            #[must_use = #must_use_message]
-            #(#docs)*
-            #allows
-            #[allow(
-                // We use `__private` prefix for all fields intentionally to hide them
-                clippy::struct_field_names,
-
-                // This lint doesn't emerge until you manually expand the macro. Just
-                // because `bon` developers need to expand the macros a lot it makes
-                // sense to just silence it to avoid some noise. This lint is triggered
-                // by the big PhantomData type generated by the macro
-                clippy::type_complexity
-            )]
-            #builder_vis struct #builder_ident<
-                #(#generics_decl,)*
-                // Having the `State` trait bound on the struct declaration is important
-                // for future proofing. It will allow us to use this bound in the `Drop`
-                // implementation of the builder if we ever add one. @Veetaha already did
-                // some experiments with `MaybeUninit` that requires a custom drop impl,
-                // so this could be useful in the future.
-                //
-                // On the flip side, if we have a custom `Drop` impl, then partially moving
-                // the builder will be impossible. So.. it's a trade-off, and it's probably
-                // not a big deal to remove this bound from here if we feel like it.
-                #state_var: #state_mod::State = #state_mod::Empty
-            >
-            #where_clause
-            {
-                #private_field_attrs
-                #phantom_field: #phantom_data,
-
-                #receiver_field
-                #start_fn_args_field
-
-                #private_field_attrs
-                #named_members_field: (
-                    #(
-                        ::core::option::Option<#named_members_types>,
-                    )*
-                )
-            }
         }
     }
 }

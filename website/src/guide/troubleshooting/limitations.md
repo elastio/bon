@@ -2,7 +2,7 @@
 
 Every tool has its constraints, and `bon` is not an exception. The limitations described below shouldn't generally occur in your day-to-day code, and if they do, there are ways to work around them. If you feel that some of the limitations are unacceptable, feel free to [open an issue] to ask for some of them to be relaxed.
 
-## Intra-doc links to `Self` on setter methods
+## Intra-Doc Links to `Self` on Setter Methods
 
 Documentation placed on the original function arguments or struct fields is copied verbatim to the documentation on the generated setter methods of the builder struct. The shortcoming of this approach is that references to `Self` break when moved into the `impl` block of the generated builder struct.
 
@@ -26,7 +26,7 @@ impl Foo {
 }
 ```
 
-## Implicit generic lifetimes
+## Implicit Generic Lifetimes
 
 Rust allows omitting generic lifetime parameters of a type in function parameters.
 
@@ -68,7 +68,7 @@ If you want to make sure your code doesn't accidentally omit a generic lifetime 
 elided_lifetimes_in_paths = "warn"
 ```
 
-## Destructuring patterns in function parameters
+## Destructuring Patterns in Function Parameters
 
 When `#[builder]` is placed on a function (including associated methods), then the parameters of that function must be simple identifiers. Destructuring patterns aren't supported because it's not obvious what identifier to assign to the member in this case. This identifier will appear in `#[builder(default = ...)]` expressions, for example.
 
@@ -89,7 +89,7 @@ example()
     .call();
 ```
 
-## Formatting of attributes on function arguments
+## Formatting of Attributes on Function Arguments
 
 At the time of this writing, `rustfmt` does a fairly bad job of formatting attributes placed on function arguments. Here is an example of `rustfmt`-formatted code that uses `#[bon::builder]`:
 
@@ -136,7 +136,7 @@ fn example(
 
 Here is [the related issue](https://github.com/rust-lang/rustfmt/issues/6276) in `rustfmt` about this problem.
 
-## `const` functions
+## `const` Functions
 
 It's possible to place `#[builder]` on top of a `const fn`, but the generated builder methods won't be marked `const`. They use the non-const method `Into::into` to transition between type states. Except for that, the generated code should be `const`-compatible.
 

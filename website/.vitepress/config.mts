@@ -123,6 +123,8 @@ export default defineConfig({
             { icon: "github", link: "https://github.com/elastio/bon" },
             { icon: "discord", link: "https://bon-rs.com/discord" },
             { icon: "x", link: "https://x.com/veetaha" },
+            { icon: "patreon", link: "https://patreon.com/Veetaha" },
+            { icon: "kofi", link: "https://ko-fi.com/Veetaha" },
         ],
 
         sidebar: {
@@ -182,6 +184,10 @@ export default defineConfig({
                         {
                             text: "Custom Methods",
                             link: "/guide/typestate-api/custom-methods",
+                        },
+                        {
+                            text: "Custom Fields",
+                            link: "/guide/typestate-api/custom-fields",
                         },
                     ],
                 },
@@ -288,6 +294,10 @@ export default defineConfig({
                                 {
                                     text: "default",
                                     link: "/reference/builder/member/default",
+                                },
+                                {
+                                    text: "field",
+                                    link: "/reference/builder/member/field",
                                 },
                                 {
                                     text: "finish_fn",

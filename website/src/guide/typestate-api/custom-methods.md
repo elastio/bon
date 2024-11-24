@@ -4,7 +4,7 @@ On this page, you'll learn how to add custom methods to the builder type 💪.
 
 This page assumes you've read the previous [Builder's Type Signature](./builders-type-signature) page. If you haven't already, please do.
 
-## `State` and `IsUnset` traits
+## `State` and `IsUnset` Traits
 
 When a builder transitions from one type state to another, the compiler must ensure the transition is valid. For example, once a setter is called, calling it again must not be possible.
 
@@ -150,7 +150,7 @@ self.x1(x1).x2(x2)
 
 :::
 
-## `IsSet` trait
+## `IsSet` Trait
 
 There is a counterpart to the `IsUnset` trait called `IsSet`. Ideally, we'd use negative trait impls and have `!IsSet` syntax, but this language feature is [not stable yet](https://github.com/rust-lang/rust/issues/68318). Therefore, `IsSet` and `IsUnset` are two separate traits, and they are implemented for mutually exclusive type states.
 
@@ -185,7 +185,7 @@ Notice how the `build` method requires only `x1` to be set. It doesn't care if `
 
 This `where S::X1: IsSet` is the core pillar of type safety. This way, the `build()` method knows it is always called with `x1` set and it doesn't have to do runtime validations: no `Result`, no `panic!()`.
 
-## `IsComplete` trait
+## `IsComplete` Trait
 
 The problem with the approach described higher that uses only the `IsSet` trait is that the number of bounds in the `where` clause of the finishing function grows with the number of required members.
 

@@ -1,5 +1,5 @@
 use super::config::{BlanketParamName, EvalBlanketFlagParam};
-use super::{NamedMember, PositionalFnArgMember};
+use super::{NamedMember, PosFnMember};
 use crate::builder::builder_gen::top_level_config::OnConfig;
 use crate::util::prelude::*;
 
@@ -30,7 +30,7 @@ impl NamedMember {
     }
 }
 
-impl PositionalFnArgMember {
+impl PosFnMember {
     pub(crate) fn merge_config_into(&mut self, on: &[OnConfig]) -> Result {
         // Positional members are never optional. Users must always specify them, so there
         // is no need for us to look into the `Option<T>` generic parameter, because the
@@ -60,15 +60,13 @@ impl PositionalFnArgMember {
         }
     }
 
-    pub(crate) fn init_expr(&self) -> TokenStream {
+    pub(crate) fn conversion(&self) -> Option<TokenStream> {
+        if !self.config.into.is_present() {
+            return None;
+        }
+
         let ident = &self.ident;
 
-        if self.config.into.is_present() {
-            quote! {
-                Into::into(#ident)
-            }
-        } else {
-            ident.to_token_stream()
-        }
+        Some(quote! { Into::into(#ident) })
     }
 }

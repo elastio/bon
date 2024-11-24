@@ -279,7 +279,9 @@ export function parseLink(opts: {
 
                 if (path.normalize(file) === path.normalize(opts.source)) {
                     if (!anchor)
-                        throw new Error("found self link without anchor");
+                        throw new Error(
+                            `found self link without anchor: ${opts.source}`,
+                        );
                     return { type: "self", anchor };
                 }
 
