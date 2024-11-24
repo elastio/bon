@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[test]
-fn test_free_fn() {
+fn test_function() {
     #[builder]
     fn sut(state: u32, member_state: u32, unset: u32, empty: u32) {
         let _ = (state, member_state, unset, empty);
@@ -30,7 +30,7 @@ fn test_struct() {
 }
 
 #[test]
-fn test_assoc_method() {
+fn test_method() {
     struct Sut;
 
     #[bon]

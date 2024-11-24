@@ -37,7 +37,7 @@ mod name {
     }
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         #[builder]
         fn sut(
             #[builder(setters(name = arg1_renamed))] _arg1: bool,
@@ -65,7 +65,7 @@ mod name {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         struct Sut;
 
         #[bon]
@@ -211,7 +211,7 @@ mod option_fn_name_and_some_fn_name {
     }
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         #[builder(derive(Clone))]
         fn sut(
             #[builder(setters(some_fn = arg1_some))] _arg1: Option<()>,
@@ -269,7 +269,7 @@ mod option_fn_name_and_some_fn_name {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         struct Sut;
 
         #[bon]
@@ -421,7 +421,7 @@ mod self_references_in_docs {
     }
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         /// [`Self`] link
         #[builder]
         fn sut(

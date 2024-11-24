@@ -2,7 +2,7 @@ use crate::prelude::*;
 use core::fmt;
 
 #[test]
-fn test_assoc_method() {
+fn test_method() {
     {
         struct Sut;
 
@@ -49,7 +49,7 @@ fn test_assoc_method() {
 }
 
 #[test]
-fn test_free_fn() {
+fn test_function() {
     {
         #[builder(start_fn(name = sut_builder))]
         fn sut(arg1: bool, arg2: u32) -> impl fmt::Debug {

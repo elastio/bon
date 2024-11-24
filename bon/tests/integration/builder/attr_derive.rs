@@ -126,7 +126,7 @@ mod generics {
     }
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         #[builder(derive(Clone, Debug))]
         fn sut<T>(_arg1: T) {}
 
@@ -136,7 +136,7 @@ mod generics {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         #[derive(Clone, Debug)]
         struct Sut<T>(T);
 
@@ -193,7 +193,7 @@ mod positional_members {
     }
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         #[builder(derive(Clone, Debug))]
         #[allow(unused_variables)]
         fn sut(
@@ -214,7 +214,7 @@ mod positional_members {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         #[derive(Debug)]
         struct Sut;
 
@@ -286,7 +286,7 @@ mod attr_bounds_empty {
     }
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         #[builder(derive(Clone(bounds()), Debug))]
         fn sut<T>(_arg: &T) {}
 
@@ -294,7 +294,7 @@ mod attr_bounds_empty {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         #[derive(Clone, Debug)]
         struct Sut;
 
@@ -325,7 +325,7 @@ mod attr_bounds_non_empty {
     }
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         #[builder(derive(Clone(bounds(&'a T: Clone, &'a &'a T: Clone)), Debug))]
         #[allow(clippy::needless_lifetimes, single_use_lifetimes)]
         fn sut<'a, T>(_arg: &'a T) {}
@@ -334,7 +334,7 @@ mod attr_bounds_non_empty {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         #[derive(Clone, Debug)]
         struct Sut;
 

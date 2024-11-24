@@ -24,7 +24,7 @@ mod smoke {
     }
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         #[builder]
         fn sut(
             #[builder(overwritable)] a: u32,
@@ -41,7 +41,7 @@ mod smoke {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         struct Sut;
 
         #[bon]

@@ -64,7 +64,7 @@ mod conflicts_in_bodies {
 
     #[test]
     #[allow(clippy::items_after_statements)]
-    fn test_free_fn() {
+    fn test_function() {
         struct S;
         struct State;
         struct BuilderState;
@@ -123,7 +123,7 @@ mod conflicts_in_bodies {
 
     #[test]
     #[allow(clippy::items_after_statements)]
-    fn test_assoc_method() {
+    fn test_method() {
         struct State;
         struct BuilderState;
 
@@ -282,7 +282,7 @@ mod conflicts_in_attrs {
     }
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         {
             #[builder]
             fn sut(#[builder(with = |s: S| s.s())] _field: u32) {}
@@ -303,7 +303,7 @@ mod conflicts_in_attrs {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         {
             struct Sut;
 
