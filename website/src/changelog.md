@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.0.3](https://github.com/elastio/bon/compare/v3.0.2...v3.0.3) - 2024-11-24
+
+### Other
+
+- Refactor test names ([#215](https://github.com/elastio/bon/pull/215))
+- `#[builder(field)]` ([#207](https://github.com/elastio/bon/pull/207))
+
 ## [3.0.2](https://github.com/elastio/bon/compare/v3.0.1...v3.0.2) - 2024-11-20
 
 ### Fixed
