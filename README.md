@@ -47,10 +47,6 @@
 
 <!-- #region overview -->
 
-# Announcement
-
-Bon 3.0 is now generally available 🚀! If you've been using 2.0, see the changes in the [**release blog post**](https://bon-rs.com/blog/bon-v3-release).
-
 # Overview
 
 `bon` is a Rust crate for generating compile-time-checked builders for structs and functions. It also provides idiomatic partial application with optional and named parameters for functions and methods.
