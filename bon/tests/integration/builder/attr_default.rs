@@ -295,7 +295,7 @@ mod interaction_with_positional_members {
     }
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         #[builder]
         #[allow(clippy::type_complexity)]
         fn sut(
@@ -324,7 +324,7 @@ mod interaction_with_positional_members {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         struct Sut;
 
         #[bon]

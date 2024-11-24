@@ -62,7 +62,7 @@ mod smoke {
     }
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         #[builder]
         fn sut(
             #[builder(start_fn)] starter_1: bool,
@@ -88,7 +88,7 @@ mod smoke {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         struct Sut;
 
         #[bon]
@@ -174,7 +174,7 @@ mod attr_on {
     }
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         #[builder(on(&str, into))]
         fn sut(
             #[builder(start_fn)] starter_1: bool,
@@ -195,7 +195,7 @@ mod attr_on {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         struct Sut;
 
         #[bon]
@@ -278,7 +278,7 @@ mod generics {
     }
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         #[builder(derive(Debug, Clone))]
         fn sut<'a, 'b, T, U, A, const N1: usize, const N2: usize>(
             #[builder(start_fn)] starter: &'a [T; N1],
@@ -327,7 +327,7 @@ mod generics {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         #[derive(Debug, Clone)]
         struct Sut;
 
@@ -387,7 +387,7 @@ mod mut_params {
     use crate::prelude::*;
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         #[builder]
         fn sut(#[builder(start_fn)] mut x1: u32, #[builder(finish_fn)] mut x2: u32) {
             x1 += 1;
@@ -399,7 +399,7 @@ mod mut_params {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         struct Sut;
 
         #[bon]

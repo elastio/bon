@@ -52,7 +52,7 @@ mod member_level {
     }
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         #[builder]
         fn sut<T: fmt::Debug>(
             #[builder(required)] regular: Option<u32>,
@@ -76,7 +76,7 @@ mod member_level {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         struct Sut;
 
         #[bon]
@@ -184,7 +184,7 @@ mod attr_on {
     }
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         #[builder(on(_, required))]
         fn sut<T: fmt::Debug>(
             #[builder(start_fn)] start_fn: u32,
@@ -216,7 +216,7 @@ mod attr_on {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         struct Sut;
 
         #[bon]

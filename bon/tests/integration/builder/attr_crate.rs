@@ -47,7 +47,7 @@ fn test_struct() {
 }
 
 #[test]
-fn test_free_fn() {
+fn test_function() {
     {
         #[builder(
             crate = crate::builder::attr_crate::lyra,
@@ -80,7 +80,7 @@ fn test_free_fn() {
 }
 
 #[test]
-fn test_assoc_method() {
+fn test_method() {
     {
         struct Sut;
 

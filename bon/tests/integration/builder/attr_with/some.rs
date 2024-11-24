@@ -54,7 +54,7 @@ fn test_struct() {
 }
 
 #[test]
-fn test_free_fn() {
+fn test_function() {
     {
         #[builder(derive(Clone))]
         fn sut<T: fmt::Debug>(
@@ -98,7 +98,7 @@ fn test_free_fn() {
 }
 
 #[test]
-fn test_assoc_method() {
+fn test_method() {
     struct Sut;
 
     #[bon]

@@ -2,7 +2,7 @@ mod lifetimes {
     use crate::prelude::*;
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         #[builder]
         #[allow(
             single_use_lifetimes,
@@ -23,7 +23,7 @@ mod lifetimes {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         #[derive(Default)]
         #[allow(dead_code)]
         struct Sut<'a, 'b, 'c, 'd, 'e, 'f, 'g, 'h>(
@@ -51,7 +51,7 @@ mod impl_trait {
     use crate::prelude::*;
 
     #[test]
-    fn test_free_fn() {
+    fn test_function() {
         struct I1;
         type I2 = I1;
 
@@ -82,7 +82,7 @@ mod impl_trait {
     }
 
     #[test]
-    fn test_assoc_method() {
+    fn test_method() {
         struct I1;
         type I2 = I1;
 
