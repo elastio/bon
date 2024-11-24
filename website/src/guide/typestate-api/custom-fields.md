@@ -2,7 +2,7 @@
 
 On this page, you'll learn how to add custom fields to the builder type 🌾.
 
-This is useful if you'd like to have a completely custom state for [custom setters](./custom-methods) in the builder.
+This is useful if you'd like a completely custom state for [custom setters](./custom-methods) in the builder.
 
 To understand how it works, we'll create a builder API _similar_ to [`std::process::Command`](https://doc.rust-lang.org/stable/std/process/struct.Command.html) where you have a couple of methods [`arg`](https://doc.rust-lang.org/stable/std/process/struct.Command.html#method.arg) and [`args`](https://doc.rust-lang.org/stable/std/process/struct.Command.html#method.args), that push values into an internal arguments `Vec`.
 
@@ -53,6 +53,6 @@ impl<S: command_builder::State> CommandBuilder<S> {
 }
 ```
 
-And that's it! This way you can extend `bon`'s builders with almost any state and behavior, that you want.
+And that's it! This way you can extend `bon`'s builders with almost any state and behaviour, that you want.
 
-You can also specify a custom initial value with `#[builder(field = expr)]`. That `expr` can refer to other members and fields defined higher. See the [evaluation context reference](../../reference/builder/member/field#evaluation-context) for details.
+You can specify a custom initial value with `#[builder(field = expr)]`. That `expr` can refer to other members and fields defined higher. See the [evaluation context reference](../../reference/builder/member/field#evaluation-context) for details.
