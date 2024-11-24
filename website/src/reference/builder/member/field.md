@@ -1,10 +1,10 @@
-c# `field`
+# `field`
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="function arguments"/> <Badge type="warning" text="method arguments"/>
 
-Defines a private field on the builder without setters. This field may be used in [Custom Methods](../../../guide/typestate-api/custom-methods).
+Defines a private field on the builder without setters. This field may be used in [Custom Methods](../../../guide/typestate-api/custom-methods). The value of this field will be moved into the resulting struct or function from which the builder was generated.
 
-The value for the member will be computed inside of the starting function and stored in the builder.
+The initial value for the field will be computed inside of the starting function and stored in the builder.
 
 | Form                             | How value for the member is computed |
 | -------------------------------- | ------------------------------------ |

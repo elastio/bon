@@ -185,6 +185,10 @@ export default defineConfig({
                             text: "Custom Methods",
                             link: "/guide/typestate-api/custom-methods",
                         },
+                        {
+                            text: "Custom Fields",
+                            link: "/guide/typestate-api/custom-fields",
+                        },
                     ],
                 },
                 {
