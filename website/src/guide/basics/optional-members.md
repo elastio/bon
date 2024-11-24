@@ -18,7 +18,7 @@ example().call();
 
 You can use [`#[builder(required)]`](../../reference/builder/member/required) to opt-out from this.
 
-### Setters pair
+### Setters Pair
 
 The builder provides a **pair** of setters for each optional member:
 
