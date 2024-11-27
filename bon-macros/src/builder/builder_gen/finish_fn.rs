@@ -15,7 +15,7 @@ impl super::BuilderGenCtx {
             Member::StartFn(member) => {
                 let index = &member.index;
 
-                return quote! { self.__private_start_fn_args.#index };
+                return quote! { self.__unsafe_private_start_fn_args.#index };
             }
             Member::FinishFn(member) => {
                 return member
@@ -31,7 +31,7 @@ impl super::BuilderGenCtx {
         let index = &member.index;
 
         let member_field = quote! {
-            self.__private_named.#index
+            self.__unsafe_private_named.#index
         };
 
         let default = member

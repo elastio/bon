@@ -349,25 +349,24 @@ impl<'a> SettersCtx<'a> {
                 } else {
                     let builder_ident = &self.base.builder_type.ident;
 
-                    let maybe_receiver_field = self
-                        .base
-                        .receiver()
-                        .map(|_| quote!(__private_receiver: self.__private_receiver,));
+                    let maybe_receiver_field = self.base.receiver().map(
+                        |_| quote!(__unsafe_private_receiver: self.__unsafe_private_receiver,),
+                    );
 
                     let maybe_start_fn_args_field =
                         self.base.start_fn_args().next().map(
-                            |_| quote!(__private_start_fn_args: self.__private_start_fn_args,),
+                            |_| quote!(__unsafe_private_start_fn_args: self.__unsafe_private_start_fn_args,),
                         );
 
                     let custom_fields_idents = self.base.custom_fields().map(|field| &field.ident);
 
                     quote! {
                         #builder_ident {
-                            __private_phantom: ::core::marker::PhantomData,
+                            __unsafe_private_phantom: ::core::marker::PhantomData,
                             #( #custom_fields_idents: self.#custom_fields_idents, )*
                             #maybe_receiver_field
                             #maybe_start_fn_args_field
-                            __private_named: self.__private_named,
+                            __unsafe_private_named: self.__unsafe_private_named,
                         }
                     }
                 };
@@ -386,7 +385,7 @@ impl<'a> SettersCtx<'a> {
 
                 let index = &self.member.index;
                 quote! {
-                    self.__private_named.#index = #expr;
+                    self.__unsafe_private_named.#index = #expr;
                     #output
                 }
             }

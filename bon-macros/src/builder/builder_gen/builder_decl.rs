@@ -23,7 +23,8 @@ impl super::BuilderGenCtx {
             // generated code. This simplifies the task of removing unnecessary
             // attributes from the generated code when preparing for demo purposes.
             let deprecated_msg = "\
-                this field should not be used directly; it's an implementation detail; \
+                this field should not be used directly; it's an implementation detail, and \
+                if you access it directly, you may break some internal unsafe invariants; \
                 if you found yourself needing it, then you are probably doing something wrong; \
                 feel free to open an issue/discussion in our GitHub repository \
                 (https://github.com/elastio/bon) or ask for help in our Discord server \
@@ -39,7 +40,7 @@ impl super::BuilderGenCtx {
             let ty = &receiver.without_self_keyword;
             quote! {
                 #private_field_attrs
-                __private_receiver: #ty,
+                __unsafe_private_receiver: #ty,
             }
         });
 
@@ -58,7 +59,7 @@ impl super::BuilderGenCtx {
         let start_fn_args_field = start_fn_arg_types.peek().is_some().then(|| {
             quote! {
                 #private_field_attrs
-                __private_start_fn_args: (#(#start_fn_arg_types,)*),
+                __unsafe_private_start_fn_args: (#(#start_fn_arg_types,)*),
             }
         });
 
@@ -100,7 +101,7 @@ impl super::BuilderGenCtx {
             #where_clause
             {
                 #private_field_attrs
-                __private_phantom: #phantom_data,
+                __unsafe_private_phantom: #phantom_data,
 
                 #receiver_field
                 #start_fn_args_field
@@ -108,7 +109,7 @@ impl super::BuilderGenCtx {
                 #( #custom_fields_idents: #custom_fields_types, )*
 
                 #private_field_attrs
-                __private_named: (
+                __unsafe_private_named: (
                     #(
                         ::core::option::Option<#named_members_types>,
                     )*

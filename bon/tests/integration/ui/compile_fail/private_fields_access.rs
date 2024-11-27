@@ -12,9 +12,9 @@ fn main() {
     let sut = Sut.sut(99);
 
     let SutSutBuilder {
-        __private_phantom: _,
-        __private_start_fn_args: _,
-        __private_receiver: _,
-        __private_named: _,
+        __unsafe_private_phantom: _,
+        __unsafe_private_start_fn_args: _,
+        __unsafe_private_receiver: _,
+        __unsafe_private_named: _,
     } = sut;
 }

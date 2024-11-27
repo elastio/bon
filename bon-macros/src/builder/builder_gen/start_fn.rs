@@ -26,7 +26,7 @@ impl super::BuilderGenCtx {
         let receiver_field_init = receiver.map(|receiver| {
             let self_token = &receiver.with_self_keyword.self_token;
             quote! {
-                __private_receiver: #self_token,
+                __unsafe_private_receiver: #self_token,
             }
         });
 
@@ -63,7 +63,7 @@ impl super::BuilderGenCtx {
         let start_fn_args_field_init = start_fn_args.peek().is_some().then(|| {
             let idents = start_fn_args.map(|member| &member.base.ident);
             quote! {
-                __private_start_fn_args: (#(#idents,)*),
+                __unsafe_private_start_fn_args: (#(#idents,)*),
             }
         });
 
@@ -124,11 +124,11 @@ impl super::BuilderGenCtx {
                 #( #custom_fields_vars )*
 
                 #builder_ident {
-                    __private_phantom: ::core::marker::PhantomData,
+                    __unsafe_private_phantom: ::core::marker::PhantomData,
                     #( #custom_fields_idents, )*
                     #receiver_field_init
                     #start_fn_args_field_init
-                    __private_named: #named_members_field_init,
+                    __unsafe_private_named: #named_members_field_init,
                 }
             }
         }
