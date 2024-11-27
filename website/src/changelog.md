@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.1.1](https://github.com/elastio/bon/compare/v3.1.0...v3.1.1) - 2024-11-27
+
+### Fixed
+
+-   Make generated identifiers of private fields deterministic. This is important for the [Buck](https://github.com/facebook/buck2) build system and probably for [Bazel](https://bazel.build/) as well ([#219](https://github.com/elastio/bon/pull/219))
+
 ## [3.1.0](https://github.com/elastio/bon/compare/v3.0.2...v3.1.0) - 2024-11-24
 
 ### Added
