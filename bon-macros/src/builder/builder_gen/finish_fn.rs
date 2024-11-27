@@ -2,7 +2,7 @@ use super::member::{Member, PosFnMember};
 use crate::util::prelude::*;
 
 impl super::BuilderGenCtx {
-    fn finish_fn_member_expr(&self, member: &Member) -> TokenStream {
+    fn finish_fn_member_expr(member: &Member) -> TokenStream {
         let member = match member {
             Member::Named(member) => member,
             Member::Skip(member) => {
@@ -14,9 +14,8 @@ impl super::BuilderGenCtx {
             }
             Member::StartFn(member) => {
                 let index = &member.index;
-                let start_fn_args_field = &self.ident_pool.start_fn_args;
 
-                return quote! { self.#start_fn_args_field.#index };
+                return quote! { self.__unsafe_private_start_fn_args.#index };
             }
             Member::FinishFn(member) => {
                 return member
@@ -31,9 +30,8 @@ impl super::BuilderGenCtx {
 
         let index = &member.index;
 
-        let named_members_field = &self.ident_pool.named_members;
         let member_field = quote! {
-            self.#named_members_field.#index
+            self.__unsafe_private_named.#index
         };
 
         let default = member
@@ -88,7 +86,7 @@ impl super::BuilderGenCtx {
 
     pub(super) fn finish_fn(&self) -> TokenStream {
         let members_vars_decls = self.members.iter().map(|member| {
-            let expr = self.finish_fn_member_expr(member);
+            let expr = Self::finish_fn_member_expr(member);
             let var_ident = member.orig_ident();
 
             // The type hint is necessary in some cases to assist the compiler

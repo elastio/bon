@@ -135,10 +135,6 @@ pub(crate) struct BuilderGenCtx {
     /// Path to the `bon` crate.
     pub(super) bon: syn::Path,
 
-    /// Private identifiers that are used in the builder implementation.
-    /// They are intentionally randomized to prevent users from accessing them.
-    pub(super) ident_pool: PrivateIdentsPool,
-
     /// Name of the generic variable that holds the builder's state.
     pub(super) state_var: syn::Ident,
 
@@ -158,22 +154,6 @@ pub(crate) struct BuilderGenCtx {
     pub(super) state_mod: StateMod,
     pub(super) start_fn: StartFn,
     pub(super) finish_fn: FinishFn,
-}
-
-/// Identifiers that are private to the builder implementation. The users should
-/// not use them directly. They are randomly generated to prevent users from
-/// using them. Even if they try to reference them, they won't be able to re-compile
-/// their code because the names of these identifiers are regenerated on every
-/// macro run.
-///
-/// This is an unfortunate workaround due to the limitations of defining the
-/// builder type inside of a nested module. See more details on this problem in
-/// <https://bon-rs.com/blog/the-weird-of-function-local-types-in-rust>
-pub(super) struct PrivateIdentsPool {
-    pub(super) phantom: syn::Ident,
-    pub(super) receiver: syn::Ident,
-    pub(super) start_fn_args: syn::Ident,
-    pub(super) named_members: syn::Ident,
 }
 
 pub(super) struct BuilderGenCtxParams<'a> {
@@ -333,7 +313,6 @@ impl BuilderGenCtx {
         Ok(Self {
             bon: bon.unwrap_or_else(|| syn::parse_quote!(::bon)),
             state_var,
-            ident_pool: PrivateIdentsPool::new(),
             members,
             allow_attrs,
             on,
@@ -344,69 +323,6 @@ impl BuilderGenCtx {
             start_fn,
             finish_fn,
         })
-    }
-}
-
-impl PrivateIdentsPool {
-    fn new() -> Self {
-        use std::collections::hash_map::RandomState;
-        use std::hash::{BuildHasher, Hasher};
-
-        // Thanks @orhun for the article https://blog.orhun.dev/zero-deps-random-in-rust/
-        let random = RandomState::new().build_hasher().finish();
-
-        // Totally random words. All coincidences are purely accidental 😸
-        let random_words = [
-            "amethyst",
-            "applejack",
-            "blackjack",
-            "bon",
-            "cadance",
-            "celestia",
-            "cheerilee",
-            "derpy",
-            "fleetfoot",
-            "flitter",
-            "fluttershy",
-            "izzy",
-            "lilly",
-            "littlepip",
-            "luna",
-            "lyra",
-            "maud",
-            "minuette",
-            "octavia",
-            "pinkie",
-            "pipp",
-            "rainbow",
-            "rampage",
-            "rarity",
-            "roseluck",
-            "scootaloo",
-            "seaswirl",
-            "spitfire",
-            "starlight",
-            "sunset",
-            "sweetie",
-            "trixie",
-            "twilight",
-            "twinkleshine",
-            "twist",
-            "velvet",
-            "vinyl",
-        ];
-
-        #[allow(clippy::cast_possible_truncation)]
-        let random_word = random_words[(random % (random_words.len() as u64)) as usize];
-
-        let ident = |name: &str| format_ident!("__private_{random_word}_{name}");
-
-        Self {
-            phantom: ident("phantom"),
-            receiver: ident("receiver"),
-            start_fn_args: ident("start_fn_args"),
-            named_members: ident("named_members"),
-        }
     }
 }
 
