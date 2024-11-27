@@ -109,6 +109,6 @@ let result = example()
 
 You can also reference other members in the default expression. See [`#[builder(default)]`](../../reference/builder/member/default#evaluation-context) reference for details.
 
-## Conditional building
+## Conditional Building
 
 Now that you know how optional members work you can check out the [Conditional Building](../patterns/conditional-building) design patterns or continue studying other features of `bon` by following the "Next page" link at the bottom.

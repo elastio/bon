@@ -9,10 +9,6 @@ impl super::BuilderGenCtx {
         let where_clause = &self.generics.where_clause;
         let phantom_data = self.phantom_data();
         let state_mod = &self.state_mod.ident;
-        let phantom_field = &self.ident_pool.phantom;
-        let receiver_field = &self.ident_pool.receiver;
-        let start_fn_args_field = &self.ident_pool.start_fn_args;
-        let named_members_field = &self.ident_pool.named_members;
 
         // The fields can't be hidden using Rust's privacy syntax.
         // The details about this are described in the blog post:
@@ -43,7 +39,7 @@ impl super::BuilderGenCtx {
             let ty = &receiver.without_self_keyword;
             quote! {
                 #private_field_attrs
-                #receiver_field: #ty,
+                __private_receiver: #ty,
             }
         });
 
@@ -62,7 +58,7 @@ impl super::BuilderGenCtx {
         let start_fn_args_field = start_fn_arg_types.peek().is_some().then(|| {
             quote! {
                 #private_field_attrs
-                #start_fn_args_field: (#(#start_fn_arg_types,)*),
+                __private_start_fn_args: (#(#start_fn_arg_types,)*),
             }
         });
 
@@ -104,7 +100,7 @@ impl super::BuilderGenCtx {
             #where_clause
             {
                 #private_field_attrs
-                #phantom_field: #phantom_data,
+                __private_phantom: #phantom_data,
 
                 #receiver_field
                 #start_fn_args_field
@@ -112,7 +108,7 @@ impl super::BuilderGenCtx {
                 #( #custom_fields_idents: #custom_fields_types, )*
 
                 #private_field_attrs
-                #named_members_field: (
+                __private_named: (
                     #(
                         ::core::option::Option<#named_members_types>,
                     )*

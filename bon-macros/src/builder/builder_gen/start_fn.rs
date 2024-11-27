@@ -21,17 +21,12 @@ impl super::BuilderGenCtx {
         let where_clause = &generics.where_clause;
         let generic_args = &self.generics.args;
 
-        let phantom_field = &self.ident_pool.phantom;
-        let receiver_field = &self.ident_pool.receiver;
-        let start_fn_args_field = &self.ident_pool.start_fn_args;
-        let named_members_field = &self.ident_pool.named_members;
-
         let receiver = self.receiver();
 
         let receiver_field_init = receiver.map(|receiver| {
             let self_token = &receiver.with_self_keyword.self_token;
             quote! {
-                #receiver_field: #self_token,
+                __private_receiver: #self_token,
             }
         });
 
@@ -68,7 +63,7 @@ impl super::BuilderGenCtx {
         let start_fn_args_field_init = start_fn_args.peek().is_some().then(|| {
             let idents = start_fn_args.map(|member| &member.base.ident);
             quote! {
-                #start_fn_args_field: (#(#idents,)*),
+                __private_start_fn_args: (#(#idents,)*),
             }
         });
 
@@ -129,11 +124,11 @@ impl super::BuilderGenCtx {
                 #( #custom_fields_vars )*
 
                 #builder_ident {
-                    #phantom_field: ::core::marker::PhantomData,
+                    __private_phantom: ::core::marker::PhantomData,
                     #( #custom_fields_idents, )*
                     #receiver_field_init
                     #start_fn_args_field_init
-                    #named_members_field: #named_members_field_init,
+                    __private_named: #named_members_field_init,
                 }
             }
         }

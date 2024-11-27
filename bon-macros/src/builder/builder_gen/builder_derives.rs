@@ -70,17 +70,12 @@ impl BuilderGenCtx {
         let generic_args = &self.generics.args;
         let builder_ident = &self.builder_type.ident;
 
-        let phantom_field = &self.ident_pool.phantom;
-        let receiver_field = &self.ident_pool.receiver;
-        let start_fn_args_field = &self.ident_pool.start_fn_args;
-        let named_members_field = &self.ident_pool.named_members;
-
         let clone = quote!(::core::clone::Clone);
 
         let clone_receiver = self.receiver().map(|receiver| {
             let ty = &receiver.without_self_keyword;
             quote! {
-                #receiver_field: <#ty as #clone>::clone(&self.#receiver_field),
+                __private_receiver: <#ty as #clone>::clone(&self.__private_receiver),
             }
         });
 
@@ -96,8 +91,8 @@ impl BuilderGenCtx {
                 // ```
                 // required for `(...big type...)` to implement `Clone`
                 // ```
-                #start_fn_args_field: (
-                    #( <#types as #clone>::clone(&self.#start_fn_args_field.#indices), )*
+                __private_start_fn_args: (
+                    #( <#types as #clone>::clone(&self.__private_start_fn_args.#indices), )*
                 ),
             }
         });
@@ -115,7 +110,7 @@ impl BuilderGenCtx {
 
             quote! {
                 #bon::__::derives::clone_member::<#ty>(
-                    &self.#named_members_field.#member_index
+                    &self.__private_named.#member_index
                 )
             }
         });
@@ -148,7 +143,7 @@ impl BuilderGenCtx {
             {
                 fn clone(&self) -> Self {
                     Self {
-                        #phantom_field: ::core::marker::PhantomData,
+                        __private_phantom: ::core::marker::PhantomData,
                         #clone_receiver
                         #clone_start_fn_args
                         #( #clone_fields, )*
@@ -160,7 +155,7 @@ impl BuilderGenCtx {
                         // ```
                         // required for `(...big type...)` to implement `Clone`
                         // ```
-                        #named_members_field: ( #( #clone_named_members, )* ),
+                        __private_named: ( #( #clone_named_members, )* ),
                     }
                 }
             }
@@ -168,9 +163,6 @@ impl BuilderGenCtx {
     }
 
     fn derive_debug(&self, derive: &DeriveConfig) -> TokenStream {
-        let receiver_field = &self.ident_pool.receiver;
-        let start_fn_args_field = &self.ident_pool.start_fn_args;
-        let named_members_field = &self.ident_pool.named_members;
         let bon = &self.bon;
 
         let format_members = self.members.iter().filter_map(|member| {
@@ -183,7 +175,7 @@ impl BuilderGenCtx {
                         output.field(
                             #member_ident_str,
                             #bon::__::derives::as_dyn_debug::<#member_ty>(
-                                &self.#start_fn_args_field.#member_index
+                                &self.__private_start_fn_args.#member_index
                             )
                         );
                     })
@@ -206,7 +198,7 @@ impl BuilderGenCtx {
                     let member_ident_str = &member.name.snake_raw_str;
                     let member_ty = member.underlying_norm_ty();
                     Some(quote! {
-                        if let Some(value) = &self.#named_members_field.#member_index {
+                        if let Some(value) = &self.__private_named.#member_index {
                             output.field(
                                 #member_ident_str,
                                 #bon::__::derives::as_dyn_debug::<#member_ty>(value)
@@ -228,7 +220,7 @@ impl BuilderGenCtx {
                 output.field(
                     "self",
                     #bon::__::derives::as_dyn_debug::<#ty>(
-                        &self.#receiver_field
+                        &self.__private_receiver
                     )
                 );
             }

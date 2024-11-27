@@ -342,12 +342,6 @@ impl<'a> SettersCtx<'a> {
         let body = match imp.body {
             SetterBody::Forward { body } => body,
             SetterBody::SetMember { expr } => {
-                let idents = &self.base.ident_pool;
-                let phantom_field = &idents.phantom;
-                let receiver_field = &idents.receiver;
-                let start_fn_args_field = &idents.start_fn_args;
-                let named_members_field = &idents.named_members;
-
                 let mut output = if !self.member.is_stateful() {
                     quote! {
                         self
@@ -358,23 +352,22 @@ impl<'a> SettersCtx<'a> {
                     let maybe_receiver_field = self
                         .base
                         .receiver()
-                        .map(|_| quote!(#receiver_field: self.#receiver_field,));
+                        .map(|_| quote!(__private_receiver: self.__private_receiver,));
 
-                    let maybe_start_fn_args_field = self
-                        .base
-                        .start_fn_args()
-                        .next()
-                        .map(|_| quote!(#start_fn_args_field: self.#start_fn_args_field,));
+                    let maybe_start_fn_args_field =
+                        self.base.start_fn_args().next().map(
+                            |_| quote!(__private_start_fn_args: self.__private_start_fn_args,),
+                        );
 
                     let custom_fields_idents = self.base.custom_fields().map(|field| &field.ident);
 
                     quote! {
                         #builder_ident {
-                            #phantom_field: ::core::marker::PhantomData,
+                            __private_phantom: ::core::marker::PhantomData,
                             #( #custom_fields_idents: self.#custom_fields_idents, )*
                             #maybe_receiver_field
                             #maybe_start_fn_args_field
-                            #named_members_field: self.#named_members_field,
+                            __private_named: self.__private_named,
                         }
                     }
                 };
@@ -393,7 +386,7 @@ impl<'a> SettersCtx<'a> {
 
                 let index = &self.member.index;
                 quote! {
-                    self.#named_members_field.#index = #expr;
+                    self.__private_named.#index = #expr;
                     #output
                 }
             }

@@ -26,7 +26,7 @@ Overrides name, visibility and docs for the builder's [typestate API](../../../g
 
 ## `name`
 
-The default name for the builder typestate API module is a `snake_case` version from the name of the [`builder_type`](./builder_type#name).
+The default name for the builder typestate API module is a `snake_case` version of the name of the [`builder_type`](./builder_type#name).
 
 ## `vis`
 
