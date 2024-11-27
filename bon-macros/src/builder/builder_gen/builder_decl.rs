@@ -23,7 +23,7 @@ impl super::BuilderGenCtx {
             // generated code. This simplifies the task of removing unnecessary
             // attributes from the generated code when preparing for demo purposes.
             let deprecated_msg = "\
-                this field should not be used directly; it's an implementation detail \
+                this field should not be used directly; it's an implementation detail; \
                 if you found yourself needing it, then you are probably doing something wrong; \
                 feel free to open an issue/discussion in our GitHub repository \
                 (https://github.com/elastio/bon) or ask for help in our Discord server \
