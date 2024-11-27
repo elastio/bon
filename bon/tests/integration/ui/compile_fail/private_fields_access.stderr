@@ -1,7 +1,7 @@
 error: use of deprecated field `SutSutBuilder::__unsafe_private_phantom`: this field should not be used directly; it's an implementation detail, and if you access it directly, you may break some internal unsafe invariants; if you found yourself needing it, then you are probably doing something wrong; feel free to open an issue/discussion in our GitHub repository (https://github.com/elastio/bon) or ask for help in our Discord server (https://bon-rs.com/discord)
-  --> tests/integration/ui/compile_fail/private_fields_access.rs:15:9
+  --> tests/integration/ui/compile_fail/private_fields_access.rs:19:9
    |
-15 |         __unsafe_private_phantom: _,
+19 |         __unsafe_private_phantom: _,
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
    |
 note: the lint level is defined here
@@ -12,19 +12,19 @@ note: the lint level is defined here
    = note: `#[deny(deprecated)]` implied by `#[deny(warnings)]`
 
 error: use of deprecated field `SutSutBuilder::__unsafe_private_start_fn_args`: this field should not be used directly; it's an implementation detail, and if you access it directly, you may break some internal unsafe invariants; if you found yourself needing it, then you are probably doing something wrong; feel free to open an issue/discussion in our GitHub repository (https://github.com/elastio/bon) or ask for help in our Discord server (https://bon-rs.com/discord)
-  --> tests/integration/ui/compile_fail/private_fields_access.rs:16:9
+  --> tests/integration/ui/compile_fail/private_fields_access.rs:20:9
    |
-16 |         __unsafe_private_start_fn_args: _,
+20 |         __unsafe_private_start_fn_args: _,
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: use of deprecated field `SutSutBuilder::__unsafe_private_receiver`: this field should not be used directly; it's an implementation detail, and if you access it directly, you may break some internal unsafe invariants; if you found yourself needing it, then you are probably doing something wrong; feel free to open an issue/discussion in our GitHub repository (https://github.com/elastio/bon) or ask for help in our Discord server (https://bon-rs.com/discord)
-  --> tests/integration/ui/compile_fail/private_fields_access.rs:17:9
+  --> tests/integration/ui/compile_fail/private_fields_access.rs:21:9
    |
-17 |         __unsafe_private_receiver: _,
+21 |         __unsafe_private_receiver: _,
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 error: use of deprecated field `SutSutBuilder::__unsafe_private_named`: this field should not be used directly; it's an implementation detail, and if you access it directly, you may break some internal unsafe invariants; if you found yourself needing it, then you are probably doing something wrong; feel free to open an issue/discussion in our GitHub repository (https://github.com/elastio/bon) or ask for help in our Discord server (https://bon-rs.com/discord)
-  --> tests/integration/ui/compile_fail/private_fields_access.rs:18:9
+  --> tests/integration/ui/compile_fail/private_fields_access.rs:22:9
    |
-18 |         __unsafe_private_named: _,
+22 |         __unsafe_private_named: _,
    |         ^^^^^^^^^^^^^^^^^^^^^^^^^
