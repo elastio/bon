@@ -1,8 +1,11 @@
 mod blanket;
+mod docs_utils;
+mod getter;
 mod setters;
 mod with;
 
 pub(crate) use blanket::*;
+pub(crate) use getter::*;
 pub(crate) use setters::*;
 pub(crate) use with::*;
 
@@ -32,6 +35,9 @@ pub(crate) struct MemberConfig {
     /// the members list.
     #[darling(with = parse_optional_expr, map = Some)]
     pub(crate) field: Option<SpannedKey<Option<syn::Expr>>>,
+
+    /// Configurations for the setter methods.
+    pub(crate) getter: Option<SpannedKey<GetterConfig>>,
 
     /// Accept the value for the member in the finishing function parameters.
     pub(crate) finish_fn: darling::util::Flag,
@@ -82,6 +88,7 @@ pub(crate) struct MemberConfig {
 enum ParamName {
     Default,
     Field,
+    Getter,
     FinishFn,
     Into,
     Name,
@@ -98,6 +105,7 @@ impl fmt::Display for ParamName {
         let str = match self {
             Self::Default => "default",
             Self::Field => "field",
+            Self::Getter => "getter",
             Self::FinishFn => "finish_fn",
             Self::Into => "into",
             Self::Name => "name",
@@ -162,6 +170,7 @@ impl MemberConfig {
         let Self {
             default,
             field,
+            getter,
             finish_fn,
             into,
             name,
@@ -176,6 +185,7 @@ impl MemberConfig {
         let attrs = [
             (default.is_some(), ParamName::Default),
             (field.is_some(), ParamName::Field),
+            (getter.is_some(), ParamName::Getter),
             (finish_fn.is_present(), ParamName::FinishFn),
             (into.is_present(), ParamName::Into),
             (name.is_some(), ParamName::Name),

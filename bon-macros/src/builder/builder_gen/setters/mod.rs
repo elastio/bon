@@ -21,7 +21,7 @@ impl<'a> SettersCtx<'a> {
         }
     }
 
-    fn setter_for_required_member(&self, item: SetterItem) -> Result<TokenStream> {
+    fn setter_for_required_member(&self, item: RequiredSettersItems) -> Result<TokenStream> {
         let inputs;
         let expr;
 
@@ -45,10 +45,15 @@ impl<'a> SettersCtx<'a> {
             expr: quote!(::core::option::Option::Some(#expr)),
         };
 
-        Ok(self.setter_method(Setter {
-            item,
+        let setter_method = self.setter_method(Setter {
+            item: item.r#fn,
             imp: SetterImpl { inputs, body },
-        }))
+        });
+
+        match item.getter_fn {
+            Some(getter_fn) => Ok([setter_method, self.getter_method(getter_fn)].concat()),
+            None => Ok(setter_method),
+        }
     }
 
     fn setters_for_optional_member(&self, items: OptionalSettersItems) -> Result<TokenStream> {
@@ -97,7 +102,15 @@ impl<'a> SettersCtx<'a> {
             },
         };
 
-        Ok([self.setter_method(some_fn), self.setter_method(option_fn)].concat())
+        match items.getter_fn {
+            Some(getter_fn) => Ok([
+                self.setter_method(some_fn),
+                self.setter_method(option_fn),
+                self.getter_method(getter_fn),
+            ]
+            .concat()),
+            None => Ok([self.setter_method(some_fn), self.setter_method(option_fn)].concat()),
+        }
     }
 
     fn setters_for_optional_member_having_with(
@@ -164,6 +177,32 @@ impl<'a> SettersCtx<'a> {
         };
 
         Ok([self.setter_method(some_fn), self.setter_method(option_fn)].concat())
+    }
+
+    fn getter_method(&self, item: Item) -> TokenStream {
+        let Item {
+            name,
+            vis,
+            docs: _todo_use_these,
+        } = item;
+
+        let index = &self.member.index;
+        let state_var = &self.base.state_var;
+        let member_pascal = &self.member.name.pascal;
+        let normalized_type = &self.member.ty.norm;
+        let state_mod = &self.base.state_mod.ident;
+
+        quote! {
+            #[allow(clippy::inline_always)]
+            #[inline(always)]
+            #vis fn #name(&self) -> &#normalized_type
+            where #state_var::#member_pascal: #state_mod::IsSet
+            {
+                unsafe {
+                   ::core::option::Option::unwrap_unchecked(self.__unsafe_private_named.#index.as_ref())
+                }
+            }
+        }
     }
 
     /// This method is reused between the setter for the required member and
@@ -418,7 +457,7 @@ impl<'a> SettersCtx<'a> {
             }
         });
 
-        let SetterItem { name, vis, docs } = item;
+        let Item { name, vis, docs } = item;
         let pats = imp.inputs.iter().map(|(pat, _)| pat);
         let types = imp.inputs.iter().map(|(_, ty)| ty);
 
@@ -445,7 +484,7 @@ impl<'a> SettersCtx<'a> {
 }
 
 struct Setter {
-    item: SetterItem,
+    item: Item,
     imp: SetterImpl,
 }
 
@@ -463,16 +502,22 @@ enum SetterBody {
 }
 
 enum SettersItems {
-    Required(SetterItem),
+    Required(RequiredSettersItems),
     Optional(OptionalSettersItems),
 }
 
-struct OptionalSettersItems {
-    some_fn: SetterItem,
-    option_fn: SetterItem,
+struct RequiredSettersItems {
+    r#fn: Item,
+    getter_fn: Option<Item>,
 }
 
-struct SetterItem {
+struct OptionalSettersItems {
+    some_fn: Item,
+    option_fn: Item,
+    getter_fn: Option<Item>,
+}
+
+struct Item {
     name: syn::Ident,
     vis: syn::Visibility,
     docs: Vec<syn::Attribute>,
@@ -491,6 +536,24 @@ impl SettersItems {
 
         let doc = |docs: &str| iter::once(syn::parse_quote!(#[doc = #docs]));
 
+        // TODO: we might want to represent the entire getter as an `ItemSigConfig`.
+        let getter_fn = member.config.getter.as_ref().map(|config| Item {
+            name: config
+                .name
+                .as_ref()
+                .map(|name| &name.value)
+                .cloned()
+                .unwrap_or_else(|| {
+                    let base_name = common_name.unwrap_or(&member.name.snake);
+
+                    syn::Ident::new(&format!("get_{}", base_name.raw_name()), base_name.span())
+                }),
+            // TODO: also this
+            vis: builder_type.vis.clone(),
+            // TODO: figure this out
+            docs: vec![],
+        });
+
         if member.is_required() {
             let docs = common_docs.unwrap_or(&member.docs);
 
@@ -498,11 +561,13 @@ impl SettersItems {
 
             let docs = doc(header).chain(docs.iter().cloned()).collect();
 
-            return Self::Required(SetterItem {
+            let r#fn = Item {
                 name: common_name.unwrap_or(&member.name.snake).clone(),
                 vis: common_vis.unwrap_or(&builder_type.vis).clone(),
                 docs,
-            });
+            };
+
+            return Self::Required(RequiredSettersItems { r#fn, getter_fn });
         }
 
         let some_fn = config.and_then(|config| config.fns.some_fn.as_deref());
@@ -572,7 +637,7 @@ impl SettersItems {
             doc(&header).chain(option_fn_docs.iter().cloned()).collect()
         };
 
-        let some_fn = SetterItem {
+        let some_fn = Item {
             name: some_fn_name,
             vis: some_fn
                 .and_then(ItemSigConfig::vis)
@@ -584,7 +649,7 @@ impl SettersItems {
         };
 
         let option_fn = config.and_then(|config| config.fns.option_fn.as_deref());
-        let option_fn = SetterItem {
+        let option_fn = Item {
             name: option_fn_name,
 
             vis: option_fn
@@ -596,7 +661,11 @@ impl SettersItems {
             docs: option_fn_docs,
         };
 
-        Self::Optional(OptionalSettersItems { some_fn, option_fn })
+        Self::Optional(OptionalSettersItems {
+            some_fn,
+            option_fn,
+            getter_fn,
+        })
     }
 }
 

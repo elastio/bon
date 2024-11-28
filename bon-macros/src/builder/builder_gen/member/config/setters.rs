@@ -1,8 +1,7 @@
+use super::docs_utils::{parse_docs, DOCS_CONTEXT};
 use crate::parsing::{ItemSigConfig, ItemSigConfigParsing, SpannedKey};
 use crate::util::prelude::*;
 use darling::FromMeta;
-
-const DOCS_CONTEXT: &str = "builder struct's impl block";
 
 fn parse_setter_fn(meta: &syn::Meta) -> Result<SpannedKey<ItemSigConfig>> {
     let params = ItemSigConfigParsing {
@@ -12,10 +11,6 @@ fn parse_setter_fn(meta: &syn::Meta) -> Result<SpannedKey<ItemSigConfig>> {
     .parse()?;
 
     SpannedKey::new(meta.path(), params)
-}
-
-fn parse_docs(meta: &syn::Meta) -> Result<SpannedKey<Vec<syn::Attribute>>> {
-    crate::parsing::parse_docs_without_self_mentions(DOCS_CONTEXT, meta)
 }
 
 #[derive(Debug, FromMeta)]
