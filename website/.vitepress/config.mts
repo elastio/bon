@@ -324,6 +324,10 @@ export default defineConfig({
                                     link: "/reference/builder/member/setters",
                                 },
                                 {
+                                    text: "getters",
+                                    link: "/reference/builder/member/getters",
+                                },
+                                {
                                     text: "skip",
                                     link: "/reference/builder/member/skip",
                                 },

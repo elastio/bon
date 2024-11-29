@@ -21,7 +21,7 @@ impl<'a> SettersCtx<'a> {
         }
     }
 
-    fn setter_for_required_member(&self, item: RequiredSettersItems) -> Result<TokenStream> {
+    fn setter_for_required_member(&self, item: SetterItem) -> Result<TokenStream> {
         let inputs;
         let expr;
 
@@ -45,15 +45,10 @@ impl<'a> SettersCtx<'a> {
             expr: quote!(::core::option::Option::Some(#expr)),
         };
 
-        let setter_method = self.setter_method(Setter {
-            item: item.r#fn,
+        Ok(self.setter_method(Setter {
+            item,
             imp: SetterImpl { inputs, body },
-        });
-
-        match item.getter_fn {
-            Some(getter_fn) => Ok([setter_method, self.getter_method(getter_fn)].concat()),
-            None => Ok(setter_method),
-        }
+        }))
     }
 
     fn setters_for_optional_member(&self, items: OptionalSettersItems) -> Result<TokenStream> {
@@ -102,15 +97,7 @@ impl<'a> SettersCtx<'a> {
             },
         };
 
-        match items.getter_fn {
-            Some(getter_fn) => Ok([
-                self.setter_method(some_fn),
-                self.setter_method(option_fn),
-                self.getter_method(getter_fn),
-            ]
-            .concat()),
-            None => Ok([self.setter_method(some_fn), self.setter_method(option_fn)].concat()),
-        }
+        Ok([self.setter_method(some_fn), self.setter_method(option_fn)].concat())
     }
 
     fn setters_for_optional_member_having_with(
@@ -177,29 +164,6 @@ impl<'a> SettersCtx<'a> {
         };
 
         Ok([self.setter_method(some_fn), self.setter_method(option_fn)].concat())
-    }
-
-    fn getter_method(&self, item: Item) -> TokenStream {
-        let Item { name, vis, docs } = item;
-
-        let index = &self.member.index;
-        let state_var = &self.base.state_var;
-        let member_pascal = &self.member.name.pascal;
-        let normalized_type = &self.member.underlying_norm_ty();
-        let state_mod = &self.base.state_mod.ident;
-
-        quote! {
-            #( #docs )*
-            #[allow(clippy::inline_always)]
-            #[inline(always)]
-            #vis fn #name(&self) -> &#normalized_type
-            where #state_var::#member_pascal: #state_mod::IsSet
-            {
-                unsafe {
-                   ::core::option::Option::unwrap_unchecked(self.__unsafe_private_named.#index.as_ref())
-                }
-            }
-        }
     }
 
     /// This method is reused between the setter for the required member and
@@ -454,7 +418,7 @@ impl<'a> SettersCtx<'a> {
             }
         });
 
-        let Item { name, vis, docs } = item;
+        let SetterItem { name, vis, docs } = item;
         let pats = imp.inputs.iter().map(|(pat, _)| pat);
         let types = imp.inputs.iter().map(|(_, ty)| ty);
 
@@ -481,7 +445,7 @@ impl<'a> SettersCtx<'a> {
 }
 
 struct Setter {
-    item: Item,
+    item: SetterItem,
     imp: SetterImpl,
 }
 
@@ -499,22 +463,16 @@ enum SetterBody {
 }
 
 enum SettersItems {
-    Required(RequiredSettersItems),
+    Required(SetterItem),
     Optional(OptionalSettersItems),
 }
 
-struct RequiredSettersItems {
-    r#fn: Item,
-    getter_fn: Option<Item>,
-}
-
 struct OptionalSettersItems {
-    some_fn: Item,
-    option_fn: Item,
-    getter_fn: Option<Item>,
+    some_fn: SetterItem,
+    option_fn: SetterItem,
 }
 
-struct Item {
+struct SetterItem {
     name: syn::Ident,
     vis: syn::Visibility,
     docs: Vec<syn::Attribute>,
@@ -533,21 +491,6 @@ impl SettersItems {
 
         let doc = |docs: &str| iter::once(syn::parse_quote!(#[doc = #docs]));
 
-        let getter_fn = member.config.getter.as_ref().map(|getter_config| Item {
-            name: getter_config.name().cloned().unwrap_or_else(|| {
-                syn::Ident::new(
-                    &format!("get_{}", member.name.snake.raw_name()),
-                    member.name.snake.span(),
-                )
-            }),
-            vis: getter_config.vis().unwrap_or(&builder_type.vis).clone(),
-            docs: getter_config.docs().map(|d| d.to_vec()).unwrap_or_else(|| {
-                let header = "_**Getter.**_\n\n";
-
-                doc(&header).chain(member.docs.iter().cloned()).collect()
-            }),
-        });
-
         if member.is_required() {
             let docs = common_docs.unwrap_or(&member.docs);
 
@@ -555,13 +498,11 @@ impl SettersItems {
 
             let docs = doc(header).chain(docs.iter().cloned()).collect();
 
-            let r#fn = Item {
+            return Self::Required(SetterItem {
                 name: common_name.unwrap_or(&member.name.snake).clone(),
                 vis: common_vis.unwrap_or(&builder_type.vis).clone(),
                 docs,
-            };
-
-            return Self::Required(RequiredSettersItems { r#fn, getter_fn });
+            });
         }
 
         let some_fn = config.and_then(|config| config.fns.some_fn.as_deref());
@@ -631,7 +572,7 @@ impl SettersItems {
             doc(&header).chain(option_fn_docs.iter().cloned()).collect()
         };
 
-        let some_fn = Item {
+        let some_fn = SetterItem {
             name: some_fn_name,
             vis: some_fn
                 .and_then(ItemSigConfig::vis)
@@ -643,7 +584,7 @@ impl SettersItems {
         };
 
         let option_fn = config.and_then(|config| config.fns.option_fn.as_deref());
-        let option_fn = Item {
+        let option_fn = SetterItem {
             name: option_fn_name,
 
             vis: option_fn
@@ -655,11 +596,7 @@ impl SettersItems {
             docs: option_fn_docs,
         };
 
-        Self::Optional(OptionalSettersItems {
-            some_fn,
-            option_fn,
-            getter_fn,
-        })
+        Self::Optional(OptionalSettersItems { some_fn, option_fn })
     }
 }
 

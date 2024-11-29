@@ -1,6 +1,7 @@
 mod builder_decl;
 mod builder_derives;
 mod finish_fn;
+mod getter;
 mod member;
 mod models;
 mod setters;
@@ -11,6 +12,7 @@ mod top_level_config;
 pub(crate) mod input_fn;
 pub(crate) mod input_struct;
 
+use getter::GetterCtx;
 pub(crate) use top_level_config::TopLevelConfig;
 
 use crate::util::prelude::*;
@@ -107,6 +109,10 @@ impl BuilderGenCtx {
             .map(|member| SettersCtx::new(self, member).setter_methods())
             .collect::<Result<Vec<_>>>()?;
 
+        let getter_methods = self
+            .named_members()
+            .map(|member| GetterCtx::new(self, member).getter_method());
+
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
         let where_clause = &self.generics.where_clause;
@@ -128,6 +134,7 @@ impl BuilderGenCtx {
             {
                 #finish_fn
                 #(#setter_methods)*
+                #(#getter_methods)*
             }
         })
     }

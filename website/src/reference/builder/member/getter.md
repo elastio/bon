@@ -1,4 +1,4 @@
-# `overwritable` :microscope:
+# `getter` :microscope:
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="function arguments"/> <Badge type="warning" text="method arguments"/>
 
@@ -9,12 +9,6 @@ Allows getting a reference to an already set member.
 This attribute is available under the cargo feature `experimental-getter`. Breaking changes may occur between **minor** releases but not between patch releases.
 
 The fate of this feature depends on your feedback in the tracking issue [#149](https://github.com/elastio/bon/issues/221). Please, let us know if you have a use case for this attribute!
-
-:::
-
-::: tip
-
-This attribute is also configurable via the top-level [`#[builder(on(...))]`](../top-level/on)
 
 :::
 
@@ -34,10 +28,6 @@ let x_ref = builder.get_x(); // [!code highlight]
 builder.build();
 ```
 
-This enables builders to hold state that can be accessed by the user while still acting as a builder to some final outcome.
-This is especially user if you have a large builder that is getting passed around to many functions,
-and you need to use some previously set value in the builder to set another value.
-
 ## Config
 
 `getter` is configured quite similarly to [`setters`](./setters).
@@ -56,7 +46,7 @@ struct Example {
 }
 
 // Name of `some_fn` that accepts the non-None value was overridden
-Example::builder().member(2);
+let builder = Example::builder().member(2);
 
 let my_member = builder.get_my_member(); // [!code highlight]
 ```
@@ -68,7 +58,7 @@ The default name for getters are chosen according to the following rules:
 | Member type | Default                                                   |
 | ----------- | --------------------------------------------------------- |
 | Required    | `get_{member}`                                            |
-| Optional    | `get_{member}`                                            |
+| Optional    | `maybe_get_{member}`                                      |
 
 ## `vis`
 

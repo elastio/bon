@@ -82,3 +82,17 @@ implied-bounds = ["bon-macros/implied-bounds"]
 # this attribute. It would also be cool if you could leave a comment under that issue
 # describing your use case for it.
 experimental-overwritable = ["bon-macros/experimental-overwritable"]
+
+# 🔬 Experimental! There may be breaking changes to this feature between *minor* releases,
+# however, compatibility within patch releases is guaranteed though.
+#
+# This feature enables the #[builder(getter)] attribute that can be used to
+# allow getting references to already set fields in the builder.
+#
+# See more info at https://bon-rs.com/reference/builder/member/getter.
+#
+# We are considering stabilizing this attribute if you have a use for it. Please leave
+# a 👍 reaction under the issue https://github.com/elastio/bon/issues/221 if you need
+# this attribute. It would also be cool if you could leave a comment under that issue
+# describing your use case for it.
+experimental-getter = ["bon-macros/experimental-getter"]
