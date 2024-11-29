@@ -58,7 +58,7 @@ The default name for getters are chosen according to the following rules:
 | Member type | Default                                                   |
 | ----------- | --------------------------------------------------------- |
 | Required    | `get_{member}`                                            |
-| Optional    | `maybe_get_{member}`                                      |
+| Optional    | `get_{member}`                                            |
 
 ## `vis`
 

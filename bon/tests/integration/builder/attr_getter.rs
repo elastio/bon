@@ -50,7 +50,7 @@ fn test_struct() {
 
     let actual = actual.maybe_generic_option_getter(None);
 
-    let gen_opt_get = actual.maybe_get_generic_option_getter();
+    let gen_opt_get = actual.get_generic_option_getter();
     assert_eq!(gen_opt_get, None);
 
     assert_debug_eq(

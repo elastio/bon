@@ -77,21 +77,12 @@ impl GetterItem {
         let common_vis = spanned_keyed_config.vis();
         let common_docs = spanned_keyed_config.docs();
 
-        let orig_item_required = member.is_required();
-
         Some(GetterItem {
             name: common_name.cloned().unwrap_or_else(|| {
-                if orig_item_required {
-                    syn::Ident::new(
-                        &format!("get_{}", member.name.snake.raw_name()),
-                        member.name.snake.span(),
-                    )
-                } else {
-                    syn::Ident::new(
-                        &format!("maybe_get_{}", member.name.snake.raw_name()),
-                        member.name.snake.span(),
-                    )
-                }
+                syn::Ident::new(
+                    &format!("get_{}", member.name.snake.raw_name()),
+                    member.name.snake.span(),
+                )
             }),
             vis: common_vis.unwrap_or(&base.builder_type.vis).clone(),
             docs: common_docs.map(|d| d.to_vec()).unwrap_or_else(|| {
