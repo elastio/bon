@@ -180,11 +180,7 @@ impl<'a> SettersCtx<'a> {
     }
 
     fn getter_method(&self, item: Item) -> TokenStream {
-        let Item {
-            name,
-            vis,
-            docs: _todo_use_these,
-        } = item;
+        let Item { name, vis, docs } = item;
 
         let index = &self.member.index;
         let state_var = &self.base.state_var;
@@ -193,6 +189,7 @@ impl<'a> SettersCtx<'a> {
         let state_mod = &self.base.state_mod.ident;
 
         quote! {
+            #( #docs )*
             #[allow(clippy::inline_always)]
             #[inline(always)]
             #vis fn #name(&self) -> &#normalized_type
@@ -536,22 +533,19 @@ impl SettersItems {
 
         let doc = |docs: &str| iter::once(syn::parse_quote!(#[doc = #docs]));
 
-        // TODO: we might want to represent the entire getter as an `ItemSigConfig`.
-        let getter_fn = member.config.getter.as_ref().map(|config| Item {
-            name: config
-                .name
-                .as_ref()
-                .map(|name| &name.value)
-                .cloned()
-                .unwrap_or_else(|| {
-                    let base_name = common_name.unwrap_or(&member.name.snake);
+        let getter_fn = member.config.getter.as_ref().map(|getter_config| Item {
+            name: getter_config.name().cloned().unwrap_or_else(|| {
+                syn::Ident::new(
+                    &format!("get_{}", member.name.snake.raw_name()),
+                    member.name.snake.span(),
+                )
+            }),
+            vis: getter_config.vis().unwrap_or(&builder_type.vis).clone(),
+            docs: getter_config.docs().map(|d| d.to_vec()).unwrap_or_else(|| {
+                let header = "_**Getter.**_\n\n";
 
-                    syn::Ident::new(&format!("get_{}", base_name.raw_name()), base_name.span())
-                }),
-            // TODO: also this
-            vis: builder_type.vis.clone(),
-            // TODO: figure this out
-            docs: vec![],
+                doc(&header).chain(member.docs.iter().cloned()).collect()
+            }),
         });
 
         if member.is_required() {

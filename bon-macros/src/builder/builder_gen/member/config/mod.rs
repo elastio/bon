@@ -36,8 +36,11 @@ pub(crate) struct MemberConfig {
     #[darling(with = parse_optional_expr, map = Some)]
     pub(crate) field: Option<SpannedKey<Option<syn::Expr>>>,
 
-    /// Configurations for the setter methods.
-    pub(crate) getter: Option<SpannedKey<GetterConfig>>,
+    /// Make the member gettable by reference.
+    ///
+    /// This takes the same attributes as the setter fns; `name`, `vis`, and `doc`
+    /// and produces a getter method that returns `&T` for the member.
+    pub(crate) getter: OptionalGetterConfig,
 
     /// Accept the value for the member in the finishing function parameters.
     pub(crate) finish_fn: darling::util::Flag,

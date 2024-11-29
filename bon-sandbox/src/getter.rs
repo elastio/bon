@@ -2,13 +2,11 @@ use bon::{builder, Builder};
 
 #[derive(Builder)]
 pub struct FullName {
-    #[builder(getter(name = get_first_name))]
+    #[builder(getter)]
     pub first_name: String,
+    #[builder(getter(name = get_the_last_name, vis = "pub(crate)", doc {
+        /// Docs on the getter
+    }))]
     pub last_name: String,
-}
-
-fn test_me() {
-    let builder_with_first_name = FullName::builder().first_name(String::new());
-
-    let first_name = builder_with_first_name.get_first_name();
+    pub no_getter: String,
 }
