@@ -185,7 +185,7 @@ impl<'a> SettersCtx<'a> {
         let index = &self.member.index;
         let state_var = &self.base.state_var;
         let member_pascal = &self.member.name.pascal;
-        let normalized_type = &self.member.ty.norm;
+        let normalized_type = &self.member.underlying_norm_ty();
         let state_mod = &self.base.state_mod.ident;
 
         quote! {
