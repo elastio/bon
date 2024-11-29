@@ -7,7 +7,7 @@ fn test_struct() {
     #[allow(dead_code)]
 
     struct Sut<T> {
-        #[builder(getter, start_fn)]
+        #[builder(start_fn)]
         x1: u32,
 
         #[builder(getter(name = x2_with_custom_name))]
@@ -36,14 +36,22 @@ fn test_struct() {
 
     let actual = sut.x2("2".to_owned()).x3(3);
 
-    let x3 = actual.get_x3();
-    assert_eq!(x3, &3);
-
     let actual = actual.x4_but_its_actually_5("4".to_owned());
     let x5 = actual.x5();
     assert_eq!(x5, "4");
 
     let actual = actual.not_a_getter(5).x6(());
+
+    let x2 = actual.x2_with_custom_name();
+    assert_eq!(x2, "2");
+
+    let x3 = actual.get_x3();
+    assert_eq!(x3, &3);
+
+    let actual = actual.maybe_generic_option_getter(None);
+
+    let gen_opt_get = actual.maybe_get_generic_option_getter();
+    assert_eq!(gen_opt_get, None);
 
     assert_debug_eq(
         &actual,

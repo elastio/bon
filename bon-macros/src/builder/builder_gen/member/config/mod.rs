@@ -256,8 +256,6 @@ impl MemberConfig {
                 &[
                     ParamName::With,
                     ParamName::Into,
-                    ParamName::StartFn,
-                    ParamName::FinishFn,
                     ParamName::Name,
                     ParamName::Setters,
                     ParamName::Required,
