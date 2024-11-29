@@ -304,6 +304,10 @@ export default defineConfig({
                                     link: "/reference/builder/member/finish_fn",
                                 },
                                 {
+                                    text: "getters 🔬",
+                                    link: "/reference/builder/member/getters",
+                                },
+                                {
                                     text: "into",
                                     link: "/reference/builder/member/into",
                                 },
@@ -322,10 +326,6 @@ export default defineConfig({
                                 {
                                     text: "setters",
                                     link: "/reference/builder/member/setters",
-                                },
-                                {
-                                    text: "getters",
-                                    link: "/reference/builder/member/getters",
                                 },
                                 {
                                     text: "skip",
