@@ -225,7 +225,7 @@ impl MemberConfig {
             self.validate_mutually_allowed(
                 ParamName::StartFn,
                 self.start_fn.span(),
-                &[ParamName::Into],
+                &[ParamName::Into, ParamName::Getter],
             )?;
         }
 
@@ -233,7 +233,23 @@ impl MemberConfig {
             self.validate_mutually_allowed(
                 ParamName::FinishFn,
                 self.finish_fn.span(),
-                &[ParamName::Into],
+                &[ParamName::Into, ParamName::Getter],
+            )?;
+        }
+
+        if self.getter.is_some() {
+            self.validate_mutually_allowed(
+                ParamName::Getter,
+                self.getter.span(),
+                &[
+                    ParamName::With,
+                    ParamName::Into,
+                    ParamName::StartFn,
+                    ParamName::FinishFn,
+                    ParamName::Name,
+                    ParamName::Setters,
+                    ParamName::Required,
+                ],
             )?;
         }
 

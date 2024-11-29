@@ -10,18 +10,27 @@ use super::{docs_utils::parse_docs, SpannedKey};
 /// a config.
 #[derive(Debug)]
 pub(crate) struct OptionalGetterConfig {
+    span: Span,
     getter_config: Option<GetterConfig>,
+}
+
+impl OptionalGetterConfig {
+    pub(crate) fn span(&self) -> Span {
+        self.span
+    }
 }
 
 impl FromMeta for OptionalGetterConfig {
     fn from_none() -> Option<Self> {
         Some(Self {
+            span: Span::call_site(),
             getter_config: None,
         })
     }
 
     fn from_meta(mi: &syn::Meta) -> darling::Result<Self> {
         GetterConfig::from_meta(mi).map(|getter_config| Self {
+            span: mi.span(),
             getter_config: Some(getter_config),
         })
     }
@@ -38,7 +47,7 @@ impl Deref for OptionalGetterConfig {
 #[derive(Debug)]
 pub(crate) enum GetterConfig {
     #[allow(unused)]
-    Inferred(Span),
+    Inferred,
     Specified(SpecifiedGetterConfig),
 }
 
@@ -48,8 +57,9 @@ impl FromMeta for GetterConfig {
     }
 
     fn from_meta(mi: &syn::Meta) -> darling::Result<Self> {
-        if let syn::Meta::Path(p) = mi {
-            Ok(Self::Inferred(p.span()))
+        mi.span();
+        if let syn::Meta::Path(_) = mi {
+            Ok(Self::Inferred)
         } else {
             SpecifiedGetterConfig::from_meta(mi).map(Self::Specified)
         }
@@ -59,21 +69,21 @@ impl FromMeta for GetterConfig {
 impl GetterConfig {
     pub(crate) fn name(&self) -> Option<&syn::Ident> {
         match self {
-            Self::Inferred(_) => None,
+            Self::Inferred => None,
             Self::Specified(config) => config.name.as_ref().map(|n| &n.value),
         }
     }
 
     pub(crate) fn vis(&self) -> Option<&syn::Visibility> {
         match self {
-            Self::Inferred(_) => None,
+            Self::Inferred => None,
             Self::Specified(config) => config.vis.as_ref().map(|v| &v.value),
         }
     }
 
     pub(crate) fn docs(&self) -> Option<&[syn::Attribute]> {
         match self {
-            Self::Inferred(_) => None,
+            Self::Inferred => None,
             Self::Specified(config) => config.docs.as_ref().map(|a| &a.value).map(|a| &**a),
         }
     }
