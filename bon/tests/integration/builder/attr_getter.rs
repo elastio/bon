@@ -5,7 +5,6 @@ fn test_struct() {
     #[derive(Debug, Builder)]
     #[builder(derive(Debug, Clone))]
     #[allow(dead_code)]
-
     struct Sut<T> {
         #[builder(start_fn)]
         x1: u32,
