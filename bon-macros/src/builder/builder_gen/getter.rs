@@ -70,7 +70,7 @@ impl GetterItem {
         let common_vis = spanned_keyed_config.vis();
         let common_docs = spanned_keyed_config.docs();
 
-        Some(GetterItem {
+        Some(Self {
             name: common_name.cloned().unwrap_or_else(|| {
                 syn::Ident::new(
                     &format!("get_{}", member.name.snake.raw_name()),
@@ -78,13 +78,15 @@ impl GetterItem {
                 )
             }),
             vis: common_vis.unwrap_or(&base.builder_type.vis).clone(),
-            docs: common_docs.map(|d| d.to_vec()).unwrap_or_else(|| {
-                const HEADER: &str = "_**Getter.**_\n\n";
+            docs: common_docs
+                .map(<[syn::Attribute]>::to_vec)
+                .unwrap_or_else(|| {
+                    const HEADER: &str = "_**Getter.**_\n\n";
 
-                std::iter::once(syn::parse_quote!(#[doc = #HEADER]))
-                    .chain(member.docs.iter().cloned())
-                    .collect()
-            }),
+                    std::iter::once(syn::parse_quote!(#[doc = #HEADER]))
+                        .chain(member.docs.iter().cloned())
+                        .collect()
+                }),
         })
     }
 }

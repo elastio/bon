@@ -24,7 +24,7 @@ struct Example {
 let builder = Example::builder().x(1);
 
 let x_ref = builder.get_x(); // [!code highlight]
-    
+
 builder.build();
 ```
 
@@ -55,10 +55,10 @@ let my_member = builder.get_my_member(); // [!code highlight]
 
 The default name for getters are chosen according to the following rules:
 
-| Member type | Default                                                   |
-| ----------- | --------------------------------------------------------- |
-| Required    | `get_{member}`                                            |
-| Optional    | `get_{member}`                                            |
+| Member type | Default        |
+| ----------- | -------------- |
+| Required    | `get_{member}` |
+| Optional    | `get_{member}` |
 
 ## `vis`
 
