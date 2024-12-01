@@ -25,6 +25,7 @@ These attributes are placed on a `struct` field or `fn` argument.
 | [`default`](./builder/member/default)              | Makes the member optional with a default value                   |
 | [`field`](./builder/member/field)                  | Defines a private field on the builder without setters           |
 | [`finish_fn`](./builder/member/finish_fn)          | Makes the member a positional argument on the finishing function |
+| [`getter`](./builder/member/getter)                | Makes the member have getter method for `&T`                     |
 | [`into`](./builder/member/into)                    | Changes the signature of the setters to accept `impl Into<T>`    |
 | [`name`](./builder/member/name)                    | Overrides the name of the member used in the builder's API       |
 | [`overwritable` 🔬](./builder/member/overwritable) | Allows calling setters for the same member repeatedly            |

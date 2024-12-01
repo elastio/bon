@@ -1,8 +1,10 @@
 mod blanket;
+mod getter;
 mod setters;
 mod with;
 
 pub(crate) use blanket::*;
+pub(crate) use getter::*;
 pub(crate) use setters::*;
 pub(crate) use with::*;
 
@@ -32,6 +34,12 @@ pub(crate) struct MemberConfig {
     /// the members list.
     #[darling(with = parse_optional_expr, map = Some)]
     pub(crate) field: Option<SpannedKey<Option<syn::Expr>>>,
+
+    /// Make the member gettable by reference.
+    ///
+    /// This takes the same attributes as the setter fns; `name`, `vis`, and `doc`
+    /// and produces a getter method that returns `&T` for the member.
+    pub(crate) getter: Option<SpannedKey<GetterConfig>>,
 
     /// Accept the value for the member in the finishing function parameters.
     pub(crate) finish_fn: darling::util::Flag,
@@ -82,6 +90,7 @@ pub(crate) struct MemberConfig {
 enum ParamName {
     Default,
     Field,
+    Getter,
     FinishFn,
     Into,
     Name,
@@ -98,6 +107,7 @@ impl fmt::Display for ParamName {
         let str = match self {
             Self::Default => "default",
             Self::Field => "field",
+            Self::Getter => "getter",
             Self::FinishFn => "finish_fn",
             Self::Into => "into",
             Self::Name => "name",
@@ -162,6 +172,7 @@ impl MemberConfig {
         let Self {
             default,
             field,
+            getter,
             finish_fn,
             into,
             name,
@@ -176,6 +187,7 @@ impl MemberConfig {
         let attrs = [
             (default.is_some(), ParamName::Default),
             (field.is_some(), ParamName::Field),
+            (getter.is_some(), ParamName::Getter),
             (finish_fn.is_present(), ParamName::FinishFn),
             (into.is_present(), ParamName::Into),
             (name.is_some(), ParamName::Name),
@@ -212,7 +224,7 @@ impl MemberConfig {
             self.validate_mutually_allowed(
                 ParamName::StartFn,
                 self.start_fn.span(),
-                &[ParamName::Into],
+                &[ParamName::Into, ParamName::Getter],
             )?;
         }
 
@@ -220,7 +232,34 @@ impl MemberConfig {
             self.validate_mutually_allowed(
                 ParamName::FinishFn,
                 self.finish_fn.span(),
-                &[ParamName::Into],
+                &[ParamName::Into, ParamName::Getter],
+            )?;
+        }
+
+        if let Some(getter) = &self.getter {
+            if !cfg!(feature = "experimental-getter") {
+                bail!(
+                    &getter.key.span(),
+                    "`getter` attribute is experimental and requires \
+                    \"experimental-getter\" cargo feature to be enabled; \
+                    we would be glad to make this attribute stable if you find it useful; \
+                    please leave a 👍 reaction under the issue https://github.com/elastio/bon/issues/221 \
+                    to help us measure the impact on this feature. If you have \
+                    a use case for this attribute, then open an issue/discussion on \
+                    https://github.com/elastio/bon/issues.",
+                );
+            }
+
+            self.validate_mutually_allowed(
+                ParamName::Getter,
+                getter.key.span(),
+                &[
+                    ParamName::With,
+                    ParamName::Into,
+                    ParamName::Name,
+                    ParamName::Setters,
+                    ParamName::Required,
+                ],
             )?;
         }
 
