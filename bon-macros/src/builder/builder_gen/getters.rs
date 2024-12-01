@@ -33,7 +33,7 @@ impl<'a> GettersCtx<'a> {
                     unsafe {
                         // SAFETY: this code is runs in a method that has a where
                         // bound that ensures the member was set.
-                        ::std::option::Option::unwrap_unchecked(
+                        ::core::option::Option::unwrap_unchecked(
                             self.__unsafe_private_named.#index.as_ref()
                         )
                     }
