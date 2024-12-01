@@ -5,10 +5,10 @@ error: this `#[builder(into)]` attribute is redundant, because `into` is already
   |                               ^^^^
 
 error: this `#[builder(overwritable)]` attribute is redundant, because `overwritable` is already implied for this member via the `#[builder(on(...))]` at the top of the function
- --> tests/integration/ui/compile_fail/attr_on.rs:7:38
+ --> tests/integration/ui/compile_fail/attr_on.rs:7:39
   |
-7 | fn unnecessary_ovewritable(#[builder(overwritable)] _x: String) {}
-  |                                      ^^^^^^^^^^^^
+7 | fn unnecessary_overwritable(#[builder(overwritable)] _x: String) {}
+  |                                       ^^^^^^^^^^^^
 
 error: this syntax is not supported in type patterns yet. If you have a use case for this, please open an issue at https://github.com/elastio/bon/issues.
  --> tests/integration/ui/compile_fail/attr_on.rs:9:15

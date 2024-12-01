@@ -2,7 +2,7 @@
 use bon::{bon, builder, Builder};
 
 fn main() {
-    // Test #[must_use]
+    // Test #[must_use] for setters
     {
         #[allow(dead_code)]
         #[derive(Builder)]
@@ -53,5 +53,27 @@ fn main() {
         }
 
         must_use_compiled_out().call();
+    }
+
+    // Test #[must_use] for getters
+    {
+        #[derive(Builder)]
+        struct Sut {
+            #[builder(getter)]
+            x1: u32,
+
+            #[builder(getter, default)]
+            x2: u32,
+
+            #[builder(getter)]
+            x3: Option<u32>,
+        }
+
+        let builder = Sut::builder().x1(1).x2(2).x3(3);
+
+        // Make sure there are `#[must_use]` warnings
+        builder.get_x1();
+        builder.get_x2();
+        builder.get_x3();
     }
 }

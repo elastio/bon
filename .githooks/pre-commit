@@ -21,4 +21,7 @@ taplo fmt
 # Add back the modified/prettified files to staging
 echo "$FILES" | xargs git add
 
+# Check for typos
+typos
+
 exit 0

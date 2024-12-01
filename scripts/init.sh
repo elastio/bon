@@ -3,11 +3,10 @@
 
 set -euxo pipefail
 
-# Install prettier
+# Installs prettier (see top-level package.json)
 npm ci
 
-# Install taplo
-cargo install taplo-cli --locked
+cargo install typos-cli taplo-cli --locked
 
 # Install the pre-commit hook
-ln -s ../../.githooks/pre-commit .git/hooks/pre-commit
+ln -sf ../../.githooks/pre-commit .git/hooks/pre-commit

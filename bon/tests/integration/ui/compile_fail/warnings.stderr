@@ -108,3 +108,39 @@ help: use `let _ = ...` to ignore the resulting value
    |
 47 |         let _ = must_use_under_cfg().call();
    |         +++++++
+
+error: unused return value of `SutBuilder::<S>::get_x1` that must be used
+  --> tests/integration/ui/compile_fail/warnings.rs:75:9
+   |
+75 |         builder.get_x1();
+   |         ^^^^^^^^^^^^^^^^
+   |
+   = note: this method has no side effects; it only returns a value
+help: use `let _ = ...` to ignore the resulting value
+   |
+75 |         let _ = builder.get_x1();
+   |         +++++++
+
+error: unused return value of `SutBuilder::<S>::get_x2` that must be used
+  --> tests/integration/ui/compile_fail/warnings.rs:76:9
+   |
+76 |         builder.get_x2();
+   |         ^^^^^^^^^^^^^^^^
+   |
+   = note: this method has no side effects; it only returns a value
+help: use `let _ = ...` to ignore the resulting value
+   |
+76 |         let _ = builder.get_x2();
+   |         +++++++
+
+error: unused return value of `SutBuilder::<S>::get_x3` that must be used
+  --> tests/integration/ui/compile_fail/warnings.rs:77:9
+   |
+77 |         builder.get_x3();
+   |         ^^^^^^^^^^^^^^^^
+   |
+   = note: this method has no side effects; it only returns a value
+help: use `let _ = ...` to ignore the resulting value
+   |
+77 |         let _ = builder.get_x3();
+   |         +++++++

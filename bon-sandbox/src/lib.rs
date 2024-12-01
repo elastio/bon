@@ -6,10 +6,10 @@
 #![allow(missing_debug_implementations, missing_docs, dead_code)]
 
 pub mod attr_default;
+pub mod attr_getter;
 pub mod attr_with;
 pub mod docs_comparison;
 pub mod functions;
-pub mod getter;
 pub mod macro_rules_wrapper_test;
 pub mod missing_docs_test;
 pub mod overrides;

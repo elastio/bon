@@ -189,6 +189,10 @@ export default defineConfig({
                             text: "Custom Fields",
                             link: "/guide/typestate-api/custom-fields",
                         },
+                        {
+                            text: "Getters 🔬",
+                            link: "/guide/typestate-api/getters",
+                        },
                     ],
                 },
                 {
@@ -304,8 +308,8 @@ export default defineConfig({
                                     link: "/reference/builder/member/finish_fn",
                                 },
                                 {
-                                    text: "getters 🔬",
-                                    link: "/reference/builder/member/getters",
+                                    text: "getter 🔬",
+                                    link: "/reference/builder/member/getter",
                                 },
                                 {
                                     text: "into",

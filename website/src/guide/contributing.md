@@ -14,7 +14,7 @@ However, even though desirable, creating an issue before making a pull request i
 
 This repository is a regular [`cargo` workspace](https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html). Just fork it and do the usual `cargo` business.
 
-Additionally, an init script is provided: `./scripts/init.sh`. This will install required dependencies and set up the commit hooks for our CI.
+Additionally, an init script is provided: `./scripts/init.sh`. This will install required dependencies and set up the git pre-commit hook that will perform code formatting and some lightweight linting that would otherwise be performed on CI anyway.
 
 ## Testing
 
