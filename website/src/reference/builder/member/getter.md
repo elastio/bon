@@ -2,20 +2,24 @@
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="function arguments"/> <Badge type="warning" text="method arguments"/>
 
-Allows getting a reference to an already set member.
+Generates a getter method for a member. The method is callable only after the value for the member is set using any of its setters.
 
 ::: danger 🔬 **Experimental**
 
 This attribute is available under the cargo feature `experimental-getter`. Breaking changes may occur between **minor** releases but not between patch releases.
 
-The fate of this feature depends on your feedback in the tracking issue [#149](https://github.com/elastio/bon/issues/221). Please, let us know if you have a use case for this attribute!
+The fate of this feature depends on your feedback in the tracking issue [#225](https://github.com/elastio/bon/issues/225). Please, let us know if you have any ideas on improving this attribute, or if it's already good enough!
 
 :::
 
-This attribute now makes the following possible:
+The getter for a required member returns `&T`.
 
-```rust
-#[derive(bon::Builder)]
+::: code-group
+
+```rust [Struct]
+use bon::Builder;
+
+#[derive(Builder)]
 struct Example {
     #[builder(getter)] // [!code highlight]
     x: u32,
@@ -23,42 +27,101 @@ struct Example {
 
 let builder = Example::builder().x(1);
 
-let x_ref = builder.get_x(); // [!code highlight]
+let x: &u32 = builder.get_x(); // [!code highlight]
 
-builder.build();
+assert_eq!(*x, 1);
 ```
+
+```rust [Function]
+use bon::builder;
+
+#[builder]
+fn example(
+    #[builder(getter)] // [!code highlight]
+    x: u32,
+) {}
+
+let builder = example().x(1);
+
+let x: &u32 = builder.get_x(); // [!code highlight]
+
+assert_eq!(*x, 1);
+```
+
+```rust [Method]
+use bon::bon;
+
+struct Example;
+
+#[bon]
+impl Example {
+    #[builder]
+    fn example(
+        #[builder(getter)] // [!code highlight]
+        x: u32,
+    ) {}
+}
+
+let builder = Example::example().x(1);
+
+let x: &u32 = builder.get_x(); // [!code highlight]
+
+assert_eq!(*x, 1);
+```
+
+:::
+
+The getter for an [optional member](../../../guide/basics/optional-members) returns `Option<&T>`.
+
+```rust
+use bon::Builder;
+
+#[derive(Builder)]
+struct Example {
+    #[builder(getter)] // [!code highlight]
+    x1: Option<u32>,
+
+    // Getters for `default` members are the same // [!code highlight]
+    // as for members of type `Option<T>`         // [!code highlight]
+    #[builder(getter, default = 99)]              // [!code highlight]
+    x2: u32,
+
+}
+
+let builder = Example::builder().x1(1).x2(2);
+
+let x1: Option<&u32> = builder.get_x1(); // [!code highlight]
+let x2: Option<&u32> = builder.get_x2(); // [!code highlight]
+
+assert_eq!(x1, Some(&1));
+assert_eq!(x2, Some(&2));
+```
+
+::: tip
+
+The getter for the member with `#[builder(default)]` returns `Option<T>` because the default value is never stored in the builder. It's calculated [lazily in the finishing function](./default#evaluation-context).
+
+:::
 
 ## Config
 
-`getter` is configured quite similarly to [`setters`](./setters).
+You can additionally override the name, visibility and docs for the getter method.
 
-You can specify any combination of a `name`, `vis`, and `doc` for the getter, or you can omit all of them and use it as a flag to inherit default values for your getters.
-
-### Example
-
-```rust
-#[derive(bon::Builder)]
-struct Example {
-    #[builder(getter(name = get_my_member, vis = "pub(crate)", doc { // [!code highlight]
-        /// `get_my_member` gets a ref to the member // [!code highlight]
-    }))] // [!code highlight]
-    member: u32, // [!code highlight]
-}
-
-// Name of `some_fn` that accepts the non-None value was overridden
-let builder = Example::builder().member(2);
-
-let my_member = builder.get_my_member(); // [!code highlight]
+```attr
+#[builder(
+    getter(
+        name = custom_name,
+        vis = "pub(crate)",
+        doc {
+            /// Custom docs
+        }
+    )
+)]
 ```
 
 ## `name`
 
-The default name for getters are chosen according to the following rules:
-
-| Member type | Default        |
-| ----------- | -------------- |
-| Required    | `get_{member}` |
-| Optional    | `get_{member}` |
+The default name for getter is `get_{member}`.
 
 ## `vis`
 

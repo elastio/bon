@@ -91,8 +91,7 @@ experimental-overwritable = ["bon-macros/experimental-overwritable"]
 #
 # See more info at https://bon-rs.com/reference/builder/member/getter.
 #
-# We are considering stabilizing this attribute if you have a use for it. Please leave
-# a 👍 reaction under the issue https://github.com/elastio/bon/issues/221 if you need
-# this attribute. It would also be cool if you could leave a comment under that issue
-# describing your use case for it.
+# The fate of this feature depends on your feedback in the tracking issue
+# https://github.com/elastio/bon/issues/225. Please, let us know if you
+# have any ideas how to make this attribute better, or if it's already good enough!
 experimental-getter = ["bon-macros/experimental-getter"]

@@ -1,12 +1,11 @@
+use crate::parsing::SpannedKey;
+use crate::util::prelude::*;
 use darling::FromMeta;
-
-use super::{Result, SpannedKey};
 
 #[derive(Debug, Default)]
 pub(crate) struct GetterConfig {
     name: Option<SpannedKey<syn::Ident>>,
     vis: Option<SpannedKey<syn::Visibility>>,
-
     docs: Option<SpannedKey<Vec<syn::Attribute>>>,
 }
 

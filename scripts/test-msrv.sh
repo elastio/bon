@@ -40,7 +40,9 @@ step cargo update -p libc --precise 0.2.163
 
 export RUSTFLAGS="${RUSTFLAGS:-} --allow unknown-lints"
 
-step cargo clippy --all-targets --locked --features=experimental-overwritable
+features=experimental-overwritable,experimental-getter
+
+step cargo clippy --all-targets --locked --features "$features"
 
 test_args=(
     --locked
@@ -58,4 +60,4 @@ test_args=(
     --skip ui::ui
 )
 
-step cargo test --features=experimental-overwritable "${test_args[@]}"
+step cargo test --features "$features" "${test_args[@]}"

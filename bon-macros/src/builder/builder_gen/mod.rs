@@ -1,7 +1,7 @@
 mod builder_decl;
 mod builder_derives;
 mod finish_fn;
-mod getter;
+mod getters;
 mod member;
 mod models;
 mod setters;
@@ -11,11 +11,10 @@ mod top_level_config;
 
 pub(crate) mod input_fn;
 pub(crate) mod input_struct;
-
-use getter::GetterCtx;
 pub(crate) use top_level_config::TopLevelConfig;
 
 use crate::util::prelude::*;
+use getters::GettersCtx;
 use member::{CustomField, Member, MemberOrigin, NamedMember, RawMember, StartFnMember};
 use models::{AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFnBody, Generics};
 use setters::SettersCtx;
@@ -104,14 +103,20 @@ impl BuilderGenCtx {
 
     fn builder_impl(&self) -> Result<TokenStream> {
         let finish_fn = self.finish_fn();
-        let setter_methods = self
+        let accessor_methods = self
             .named_members()
-            .map(|member| SettersCtx::new(self, member).setter_methods())
-            .collect::<Result<Vec<_>>>()?;
+            .map(|member| {
+                let setters = SettersCtx::new(self, member).setter_methods()?;
+                let getters = GettersCtx::new(self, member).getter_methods();
 
-        let getter_methods = self
-            .named_members()
-            .map(|member| GetterCtx::new(self, member).getter_method());
+                // Output all accessor methods for the same member adjecently.
+                // This is important in the generated rustdoc output, because
+                // rustdoc lists methods in the order they appear in the source.
+                Ok([setters, getters])
+            })
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .flatten();
 
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
@@ -133,8 +138,7 @@ impl BuilderGenCtx {
             #where_clause
             {
                 #finish_fn
-                #(#setter_methods)*
-                #(#getter_methods)*
+                #(#accessor_methods)*
             }
         })
     }

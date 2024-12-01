@@ -4,7 +4,7 @@ use bon::builder;
 fn unnecessary_into(#[builder(into)] _x: String) {}
 
 #[builder(on(String, overwritable))]
-fn unnecessary_ovewritable(#[builder(overwritable)] _x: String) {}
+fn unnecessary_overwritable(#[builder(overwritable)] _x: String) {}
 
 #[builder(on(&dyn std::fmt::Debug, into))]
 fn invalid_type_pattern() {}

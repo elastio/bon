@@ -108,10 +108,21 @@ jobs:
 
       - run: cargo test --locked --all-features --all-targets
       - run: cargo test --locked --all-features --doc
-      - run: cd bon && cargo test --locked --no-default-features --features=experimental-overwritable
-      - run: cd bon && cargo test --locked --no-default-features --features=experimental-overwritable,alloc
-      - run: cd bon && cargo test --locked --no-default-features --features=experimental-overwritable,implied-bounds
-      - run: cd bon && cargo test --locked --no-default-features --features=experimental-overwritable,alloc,implied-bounds
+      - run: |
+          cd bon && cargo test --locked --no-default-features \
+            --features=experimental-overwritable,experimental-getter
+
+      - run: |
+          cd bon && cargo test --locked --no-default-features \
+            --features=experimental-overwritable,experimental-getter,alloc
+
+      - run: |
+          cd bon && cargo test --locked --no-default-features \
+            --features=experimental-overwritable,experimental-getter,implied-bounds
+
+      - run: |
+          cd bon && cargo test --locked --no-default-features \
+            --features=experimental-overwritable,experimental-getter,alloc,implied-bounds
 
   test-msrv:
     runs-on: ${{ matrix.os }}-latest
@@ -226,7 +237,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: crate-ci/typos@v1.22.3
+      - uses: crate-ci/typos@v1.28.1
 
   website-build:
     runs-on: ubuntu-latest

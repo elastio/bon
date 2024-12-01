@@ -35,10 +35,12 @@ pub(crate) struct MemberConfig {
     #[darling(with = parse_optional_expr, map = Some)]
     pub(crate) field: Option<SpannedKey<Option<syn::Expr>>>,
 
-    /// Make the member gettable by reference.
+    /// Make the member gettable. [`GetterConfig`] specifies the signature for
+    /// the getter.
     ///
     /// This takes the same attributes as the setter fns; `name`, `vis`, and `doc`
-    /// and produces a getter method that returns `&T` for the member.
+    /// and produces a getter method that returns the value of the member.
+    /// By default, the value is returned by a shared reference (&T).
     pub(crate) getter: Option<SpannedKey<GetterConfig>>,
 
     /// Accept the value for the member in the finishing function parameters.
@@ -220,11 +222,32 @@ impl MemberConfig {
             );
         }
 
+        if let Some(getter) = &self.getter {
+            if !cfg!(feature = "experimental-getter") {
+                bail!(
+                    &getter.key,
+                    "🔬 `getter` attribute is experimental and requires \
+                    \"experimental-getter\" cargo feature to be enabled; \
+                    if you find the current design of this attribute already \
+                    solid please leave a 👍 reaction under the issue \
+                    https://github.com/elastio/bon/issues/225; if you have \
+                    any feedback, then feel free to leave a comment under that issue",
+                );
+            }
+
+            self.validate_mutually_exclusive(
+                ParamName::Getter,
+                getter.key.span(),
+                &[ParamName::Overwritable],
+            )?;
+        }
+
         if self.start_fn.is_present() {
             self.validate_mutually_allowed(
                 ParamName::StartFn,
                 self.start_fn.span(),
-                &[ParamName::Into, ParamName::Getter],
+                // TODO: add support for `#[builder(getter)]` with `start_fn`
+                &[ParamName::Into],
             )?;
         }
 
@@ -232,34 +255,7 @@ impl MemberConfig {
             self.validate_mutually_allowed(
                 ParamName::FinishFn,
                 self.finish_fn.span(),
-                &[ParamName::Into, ParamName::Getter],
-            )?;
-        }
-
-        if let Some(getter) = &self.getter {
-            if !cfg!(feature = "experimental-getter") {
-                bail!(
-                    &getter.key.span(),
-                    "`getter` attribute is experimental and requires \
-                    \"experimental-getter\" cargo feature to be enabled; \
-                    we would be glad to make this attribute stable if you find it useful; \
-                    please leave a 👍 reaction under the issue https://github.com/elastio/bon/issues/221 \
-                    to help us measure the impact on this feature. If you have \
-                    a use case for this attribute, then open an issue/discussion on \
-                    https://github.com/elastio/bon/issues.",
-                );
-            }
-
-            self.validate_mutually_allowed(
-                ParamName::Getter,
-                getter.key.span(),
-                &[
-                    ParamName::With,
-                    ParamName::Into,
-                    ParamName::Name,
-                    ParamName::Setters,
-                    ParamName::Required,
-                ],
+                &[ParamName::Into],
             )?;
         }
 
