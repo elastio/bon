@@ -76,7 +76,7 @@ dependencies = [
 
 [[package]]
 name = "bon"
-version = "3.1.1"
+version = "3.2.0"
 dependencies = [
  "bon-macros",
  "expect-test",
@@ -97,7 +97,7 @@ dependencies = [
 
 [[package]]
 name = "bon-macros"
-version = "3.1.1"
+version = "3.2.0"
 dependencies = [
  "darling",
  "expect-test",
@@ -111,7 +111,7 @@ dependencies = [
 
 [[package]]
 name = "bon-sandbox"
-version = "3.1.1"
+version = "3.2.0"
 dependencies = [
  "bon",
  "buildstructor",
