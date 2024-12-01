@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
--   Support `#[builder(getter(...))]` attribute ([#222](https://github.com/elastio/bon/pull/222)) ([#226](https://github.com/elastio/bon/pull/226)) Thanks [@lazkindness](https://github.com/lazkindness) for the contribution!
+-   Support `#[builder(getter(...))]` attribute ([#222](https://github.com/elastio/bon/pull/222)). See [Getters](https://bon-rs.com/guide/typestate-api/getters) guide for details ([#226](https://github.com/elastio/bon/pull/226)). Thanks [@lazkindness](https://github.com/lazkindness) for the contribution!
 
 ## [3.1.1](https://github.com/elastio/bon/compare/v3.1.0...v3.1.1) - 2024-11-27
 
