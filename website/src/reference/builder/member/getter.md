@@ -85,7 +85,6 @@ struct Example {
     // as for members of type `Option<T>`         // [!code highlight]
     #[builder(getter, default = 99)]              // [!code highlight]
     x2: u32,
-
 }
 
 let builder = Example::builder().x1(1).x2(2);
@@ -99,7 +98,7 @@ assert_eq!(x2, Some(&2));
 
 ::: tip
 
-The getter for the member with `#[builder(default)]` returns `Option<T>` because the default value is never stored in the builder. It's calculated [lazily in the finishing function](./default#evaluation-context).
+The getter for the member with `#[builder(default)]` returns `Option<&T>` because the default value is never stored in the builder. It's calculated [lazily in the finishing function](./default#evaluation-context).
 
 :::
 
