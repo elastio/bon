@@ -62,6 +62,7 @@ You can document the following items this way:
 | [`finish_fn`](../../reference/builder/top-level/finish_fn#doc)       | Finishing function                                                           |
 | [`state_mod`](../../reference/builder/top-level/state_mod#doc)       | Builder state API module (more details in [Typestate API](../typestate-api)) |
 | [`setters`](../../reference/builder/member/setters#doc)              | Custom docs for setters. Prevents copying them from the field/argument       |
+| [`getter`](../../reference/builder/member/getter#doc)                | Custom docs for a getter. Prevents copying them from the field/argument      |
 
 ## Positional members
 
