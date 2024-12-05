@@ -4,9 +4,25 @@ use darling::FromMeta;
 
 #[derive(Debug, Default)]
 pub(crate) struct GetterConfig {
-    name: Option<SpannedKey<syn::Ident>>,
-    vis: Option<SpannedKey<syn::Visibility>>,
-    docs: Option<SpannedKey<Vec<syn::Attribute>>>,
+    pub(crate) name: Option<SpannedKey<syn::Ident>>,
+    pub(crate) vis: Option<SpannedKey<syn::Visibility>>,
+    pub(crate) docs: Option<SpannedKey<Vec<syn::Attribute>>>,
+
+    /// Returns `&T` if [`None`]
+    pub(crate) kind: Option<SpannedKey<GetterKind>>,
+}
+
+#[derive(Debug)]
+pub(crate) enum GetterKind {
+    /// Returns `T` via [`Copy`]
+    Copy,
+
+    /// Returns `T` via [`Clone`]
+    Clone,
+
+    /// Returns `&<T as Deref>::Target`.
+    /// If the type is `None`, it will be inferred from the member's type.
+    Deref(Option<syn::Type>),
 }
 
 impl FromMeta for GetterConfig {
@@ -26,25 +42,46 @@ impl FromMeta for GetterConfig {
 
             #[darling(rename = "doc", default, with = parse_docs, map = Some)]
             docs: Option<SpannedKey<Vec<syn::Attribute>>>,
+
+            copy: Option<SpannedKey<()>>,
+            clone: Option<SpannedKey<()>>,
+            deref: Option<SpannedKey<Option<syn::Type>>>,
         }
 
-        let Parsed { name, vis, docs } = Parsed::from_meta(meta)?;
+        let Parsed {
+            name,
+            vis,
+            docs,
+            copy,
+            clone,
+            deref,
+        } = Parsed::from_meta(meta)?;
 
-        Ok(Self { name, vis, docs })
-    }
-}
+        let kinds = [
+            copy.map(|cfg| cfg.with_value(GetterKind::Copy)),
+            clone.map(|cfg| cfg.with_value(GetterKind::Clone)),
+            deref.map(|ty| ty.map_value(GetterKind::Deref)),
+        ];
 
-impl GetterConfig {
-    pub(crate) fn name(&self) -> Option<&syn::Ident> {
-        self.name.as_ref().map(|n| &n.value)
-    }
+        let kinds = kinds.into_iter().flatten().collect::<Vec<_>>();
 
-    pub(crate) fn vis(&self) -> Option<&syn::Visibility> {
-        self.vis.as_ref().map(|v| &v.value)
-    }
+        if let [kind1, kind2, ..] = kinds.as_slice() {
+            bail!(
+                &kind1.key,
+                "`{}` can't be specified together with `{}`",
+                kind1.key,
+                kind2.key
+            );
+        }
 
-    pub(crate) fn docs(&self) -> Option<&[syn::Attribute]> {
-        self.docs.as_ref().map(|a| &a.value).map(|a| &**a)
+        let kind = kinds.into_iter().next();
+
+        Ok(Self {
+            name,
+            vis,
+            docs,
+            kind,
+        })
     }
 }
 
