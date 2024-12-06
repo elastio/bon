@@ -29,11 +29,23 @@ struct NegativeTest {
     #[builder(getter)]
     x1: u32,
 
-    #[builder(getter, default)]
-    x2: u32,
-
     #[builder(getter)]
-    x3: Option<u32>
+    x2: Option<u32>,
+
+    #[builder(getter, default)]
+    x3: u32,
+}
+
+#[derive(Builder)]
+struct NonCopy {
+    #[builder(getter(copy))]
+    x1: String,
+
+    #[builder(getter(copy))]
+    x2: Option<String>,
+
+    #[builder(getter(copy), default)]
+    x3: String,
 }
 
 fn main() {

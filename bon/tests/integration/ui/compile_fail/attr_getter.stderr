@@ -22,13 +22,49 @@ error: `getter` attribute can't be specified together with `overwritable`
 23 |     #[builder(getter, overwritable)]
    |               ^^^^^^
 
-error[E0277]: the member `Unset<x1>` was not set, but this method requires it to be set
-  --> tests/integration/ui/compile_fail/attr_getter.rs:42:13
+error[E0277]: the trait bound `String: std::marker::Copy` is not satisfied
+  --> tests/integration/ui/compile_fail/attr_getter.rs:42:9
    |
-42 |     builder.get_x1();
-   |             ^^^^^^ the member `Unset<x1>` was not set, but this method requires it to be set
+42 |     x1: String,
+   |         ^^^^^^ the trait `std::marker::Copy` is not implemented for `String`
    |
-   = help: the trait `IsSet` is not implemented for `Unset<x1>`
+note: required by a bound in `copy_member`
+  --> src/__/better_errors.rs
+   |
+   | pub fn copy_member<T: Copy>(member: &Option<T>) -> Option<T> {
+   |                       ^^^^ required by this bound in `copy_member`
+
+error[E0277]: the trait bound `String: std::marker::Copy` is not satisfied
+  --> tests/integration/ui/compile_fail/attr_getter.rs:45:16
+   |
+45 |     x2: Option<String>,
+   |                ^^^^^^ the trait `std::marker::Copy` is not implemented for `String`
+   |
+note: required by a bound in `copy_member`
+  --> src/__/better_errors.rs
+   |
+   | pub fn copy_member<T: Copy>(member: &Option<T>) -> Option<T> {
+   |                       ^^^^ required by this bound in `copy_member`
+
+error[E0277]: the trait bound `String: std::marker::Copy` is not satisfied
+  --> tests/integration/ui/compile_fail/attr_getter.rs:48:9
+   |
+48 |     x3: String,
+   |         ^^^^^^ the trait `std::marker::Copy` is not implemented for `String`
+   |
+note: required by a bound in `copy_member`
+  --> src/__/better_errors.rs
+   |
+   | pub fn copy_member<T: Copy>(member: &Option<T>) -> Option<T> {
+   |                       ^^^^ required by this bound in `copy_member`
+
+error[E0277]: the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
+  --> tests/integration/ui/compile_fail/attr_getter.rs:54:13
+   |
+54 |     builder.get_x1();
+   |             ^^^^^^ the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
+   |
+   = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x1>`
    = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required by a bound in `NegativeTestBuilder::<S>::get_x1`
   --> tests/integration/ui/compile_fail/attr_getter.rs:27:10
@@ -40,13 +76,13 @@ note: required by a bound in `NegativeTestBuilder::<S>::get_x1`
    |     -- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0277]: the member `Unset<x2>` was not set, but this method requires it to be set
-  --> tests/integration/ui/compile_fail/attr_getter.rs:43:13
+error[E0277]: the member `Unset<negative_test_builder::members::x2>` was not set, but this method requires it to be set
+  --> tests/integration/ui/compile_fail/attr_getter.rs:55:13
    |
-43 |     builder.get_x2();
-   |             ^^^^^^ the member `Unset<x2>` was not set, but this method requires it to be set
+55 |     builder.get_x2();
+   |             ^^^^^^ the member `Unset<negative_test_builder::members::x2>` was not set, but this method requires it to be set
    |
-   = help: the trait `IsSet` is not implemented for `Unset<x2>`
+   = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x2>`
    = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required by a bound in `NegativeTestBuilder::<S>::get_x2`
   --> tests/integration/ui/compile_fail/attr_getter.rs:27:10
@@ -54,17 +90,17 @@ note: required by a bound in `NegativeTestBuilder::<S>::get_x2`
 27 | #[derive(Builder)]
    |          ^^^^^^^ required by this bound in `NegativeTestBuilder::<S>::get_x2`
 ...
-33 |     x2: u32,
+33 |     x2: Option<u32>,
    |     -- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0277]: the member `Unset<x3>` was not set, but this method requires it to be set
-  --> tests/integration/ui/compile_fail/attr_getter.rs:44:13
+error[E0277]: the member `Unset<negative_test_builder::members::x3>` was not set, but this method requires it to be set
+  --> tests/integration/ui/compile_fail/attr_getter.rs:56:13
    |
-44 |     builder.get_x3();
-   |             ^^^^^^ the member `Unset<x3>` was not set, but this method requires it to be set
+56 |     builder.get_x3();
+   |             ^^^^^^ the member `Unset<negative_test_builder::members::x3>` was not set, but this method requires it to be set
    |
-   = help: the trait `IsSet` is not implemented for `Unset<x3>`
+   = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x3>`
    = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required by a bound in `NegativeTestBuilder::<S>::get_x3`
   --> tests/integration/ui/compile_fail/attr_getter.rs:27:10
@@ -72,6 +108,6 @@ note: required by a bound in `NegativeTestBuilder::<S>::get_x3`
 27 | #[derive(Builder)]
    |          ^^^^^^^ required by this bound in `NegativeTestBuilder::<S>::get_x3`
 ...
-36 |     x3: Option<u32>
+36 |     x3: u32,
    |     -- required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)

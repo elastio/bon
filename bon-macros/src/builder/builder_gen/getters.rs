@@ -77,14 +77,24 @@ impl<'a> GettersCtx<'a> {
             self.__unsafe_private_named.#index
         };
 
+        let bon = &self.base.bon;
+
         match self.config.kind.as_deref() {
             Some(GetterKind::Copy) => {
+                let span = self.member.underlying_orig_ty().span();
+                let ty = quote_spanned!(span=> _);
+
+                let copy = quote! {
+                    #bon::__::better_errors::copy_member::<#ty>(&#member)
+                };
+
                 if !self.member.is_required() {
-                    return member;
+                    return copy;
                 }
                 quote! {
+                    // SAFETY: the method requires S::{Member}: IsSet, so it's not None
                     unsafe {
-                        ::core::option::Option::unwrap_unchecked(#member)
+                        ::core::option::Option::unwrap_unchecked(#copy)
                     }
                 }
             }
@@ -97,6 +107,8 @@ impl<'a> GettersCtx<'a> {
                 quote! {
                     match &#member {
                         Some(value) => ::core::clone::Clone::clone(value),
+
+                        // SAFETY: the method requires S::{Member}: IsSet, so it's not None
                         None => unsafe {
                             ::core::hint::unreachable_unchecked()
                         },
@@ -117,6 +129,8 @@ impl<'a> GettersCtx<'a> {
                     match &#member {
                         // If `deref` is enabled, performs an implicit deref coercion
                         Some(value) => value,
+
+                        // SAFETY: the method requires S::{Member}: IsSet, so it's not None
                         None => unsafe {
                             ::core::hint::unreachable_unchecked()
                         },

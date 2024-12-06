@@ -109,7 +109,7 @@ impl BuilderGenCtx {
             let ty = member.underlying_norm_ty();
 
             quote! {
-                #bon::__::derives::clone_member::<#ty>(
+                #bon::__::better_errors::clone_member::<#ty>(
                     &self.__unsafe_private_named.#member_index
                 )
             }
@@ -174,7 +174,7 @@ impl BuilderGenCtx {
                     Some(quote! {
                         output.field(
                             #member_ident_str,
-                            #bon::__::derives::as_dyn_debug::<#member_ty>(
+                            #bon::__::better_errors::as_dyn_debug::<#member_ty>(
                                 &self.__unsafe_private_start_fn_args.#member_index
                             )
                         );
@@ -187,7 +187,7 @@ impl BuilderGenCtx {
                     Some(quote! {
                         output.field(
                             #member_ident_str,
-                            #bon::__::derives::as_dyn_debug::<#member_ty>(
+                            #bon::__::better_errors::as_dyn_debug::<#member_ty>(
                                 &self.#member_ident
                             )
                         );
@@ -201,7 +201,7 @@ impl BuilderGenCtx {
                         if let Some(value) = &self.__unsafe_private_named.#member_index {
                             output.field(
                                 #member_ident_str,
-                                #bon::__::derives::as_dyn_debug::<#member_ty>(value)
+                                #bon::__::better_errors::as_dyn_debug::<#member_ty>(value)
                             );
                         }
                     })
@@ -219,7 +219,7 @@ impl BuilderGenCtx {
             quote! {
                 output.field(
                     "self",
-                    #bon::__::derives::as_dyn_debug::<#ty>(
+                    #bon::__::better_errors::as_dyn_debug::<#ty>(
                         &self.__unsafe_private_receiver
                     )
                 );

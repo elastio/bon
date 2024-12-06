@@ -12,7 +12,7 @@
 /// Used for providing better IDE hints (completions and syntax highlighting).
 pub mod ide;
 
-pub mod derives;
+pub mod better_errors;
 
 mod cfg_eval;
 
