@@ -1,7 +1,7 @@
 use crate::prelude::*;
 
 #[test]
-fn test_struct() {
+fn smoke() {
     #[derive(Debug, Builder)]
     #[builder(derive(Debug, Clone))]
     #[allow(dead_code)]
@@ -71,4 +71,91 @@ fn test_struct() {
                 x7: 7,
             }"#]],
     );
+}
+
+#[test]
+fn copy() {
+    #[derive(Debug, Builder)]
+    struct Sut {
+        #[builder(getter(copy))]
+        _x1: u32,
+    }
+
+    let sut = Sut::builder().x1(23);
+    let x1: u32 = sut.get_x1();
+    assert_eq!(x1, 23);
+}
+
+#[test]
+#[cfg(feature = "std")]
+fn deref() {
+    use core::ffi::CStr;
+    use std::borrow::Cow;
+    use std::ffi::{CString, OsStr, OsString};
+    use std::path::{Path, PathBuf};
+
+    #[derive(Debug, Builder)]
+    struct Sut<'a> {
+        #[builder(getter(deref))]
+        _vec: Vec<u32>,
+
+        #[builder(getter(deref))]
+        _box_: Box<u32>,
+
+        #[builder(getter(deref))]
+        _rc: Rc<u32>,
+
+        #[builder(getter(deref))]
+        _arc: Arc<u32>,
+
+        #[builder(getter(deref))]
+        _string: String,
+
+        #[builder(getter(deref))]
+        _c_string: CString,
+
+        #[builder(getter(deref))]
+        _os_string: OsString,
+
+        #[builder(getter(deref))]
+        _path_buf: PathBuf,
+
+        #[builder(getter(deref))]
+        _cow: Cow<'a, str>,
+    }
+
+    let builder = Sut::builder()
+        .vec(vec![1, 2, 3])
+        .box_(Box::new(4))
+        .rc(Rc::new(5))
+        .arc(Arc::new(6))
+        .string("7".to_string())
+        .c_string(CString::new("8").unwrap())
+        .os_string(OsString::from("9"))
+        .path_buf(PathBuf::from("10"))
+        .cow(Cow::Borrowed("11"));
+
+    let actual = (
+        assert_getter::<&[u32], _>(&builder, SutBuilder::get_vec),
+        assert_getter::<&u32, _>(&builder, SutBuilder::get_box_),
+        assert_getter::<&u32, _>(&builder, SutBuilder::get_rc),
+        assert_getter::<&u32, _>(&builder, SutBuilder::get_arc),
+        assert_getter::<&str, _>(&builder, SutBuilder::get_string),
+        assert_getter::<&CStr, _>(&builder, SutBuilder::get_c_string),
+        assert_getter::<&OsStr, _>(&builder, SutBuilder::get_os_string),
+        assert_getter::<&Path, _>(&builder, SutBuilder::get_path_buf),
+        assert_getter::<&str, _>(&builder, SutBuilder::get_cow),
+    );
+
+    assert_debug_eq(
+        actual,
+        expect![[r#"([1, 2, 3], 4, 5, 6, "7", "8", "9", "10", "11")"#]],
+    );
+}
+
+/// Helper function that is better than just `let _: ExpectedType = builder.get_foo();`
+/// this notation involves an implicit deref coercion, but we want to assert the exact
+/// return type of the getter without any additional implicit conversions.
+fn assert_getter<'a, T, B>(builder: &'a B, method: impl FnOnce(&'a B) -> T) -> T {
+    method(builder)
 }

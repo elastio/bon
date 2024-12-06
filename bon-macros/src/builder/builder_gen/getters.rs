@@ -19,7 +19,7 @@ impl<'a> GettersCtx<'a> {
         })
     }
 
-    pub(crate) fn getter_methods(self) -> TokenStream {
+    pub(crate) fn getter_methods(self) -> Result<TokenStream> {
         let name = self.config.name.as_deref().cloned().unwrap_or_else(|| {
             syn::Ident::new(
                 &format!("get_{}", self.member.name.snake.raw_name()),
@@ -48,33 +48,14 @@ impl<'a> GettersCtx<'a> {
         let index = &self.member.index;
         let ty = self.member.underlying_norm_ty();
 
-        let ret_ty;
-        let body;
-
-        if self.member.is_required() {
-            ret_ty = quote! { &#ty };
-            body = quote! {
-                unsafe {
-                    // SAFETY: this code is runs in a method that has a where
-                    // bound that ensures the member was set.
-                    ::core::option::Option::unwrap_unchecked(
-                        self.__unsafe_private_named.#index.as_ref()
-                    )
-                }
-            };
-        } else {
-            // We are not using the fully qualified path to `Option` here
-            // to make function signature in IDE popus shorter and more
-            // readable.
-            ret_ty = quote! { Option<&#ty> };
-            body = quote! { self.__unsafe_private_named.#index.as_ref() };
-        }
+        let ret_ty = self.return_ty()?;
+        let body = self.body();
 
         let state_var = &self.base.state_var;
         let member_pascal = &self.member.name.pascal;
         let state_mod = &self.base.state_mod.ident;
 
-        quote! {
+        Ok(quote! {
             #( #docs )*
             #[allow(
                 // This is intentional. We want the builder syntax to compile away
@@ -88,6 +69,59 @@ impl<'a> GettersCtx<'a> {
                 #state_var::#member_pascal: #state_mod::IsSet,
             {
                 #body
+            }
+        })
+    }
+
+    fn body(&self) -> TokenStream {
+        let index = &self.member.index;
+        let field = quote! {
+            self.__unsafe_private_named.#index
+        };
+
+        if let Some(kind) = &self.config.kind {
+            match &kind.value {
+                GetterKind::Copy => {
+                    if self.member.is_required() {
+                        return quote! {
+                            unsafe {
+                                ::core::option::Option::unwrap_unchecked(#field)
+                            }
+                        };
+                    }
+                    return field;
+                }
+                GetterKind::Clone => {
+                    if self.member.is_required() {
+                        return quote! {
+                            unsafe {
+                                ::core::clone::Clone::clone(&::core::option::Option::unwrap_unchecked(
+                                    ::core::option::Option::as_ref(&#field)
+                                ))
+                            }
+                        };
+                    }
+                    return quote!(::core::clone::Clone::clone(&#field));
+                }
+                GetterKind::Deref(_) => {}
+            }
+        }
+
+        if self.member.is_required() {
+            return quote! {
+                match &#field {
+                    Some(value) => value,
+                    None => unsafe {
+                        ::core::hint::unreachable_unchecked()
+                    },
+                }
+            };
+        }
+
+        quote! {
+            match &#field {
+                Some(value) => Some(value),
+                None => None,
             }
         }
     }
@@ -145,7 +179,7 @@ impl<'a> GettersCtx<'a> {
                 please specify the return type (target of the deref coercion) explicitly \
                 in parentheses without the leading `&`;\n\
                 example: `#[builder(getter(deref(TargetTypeHere))]`\n\
-                \n
+                \n\
                 automatic deref target detection is supported only for the following types:\n\
                 {inferable_types}",
             )

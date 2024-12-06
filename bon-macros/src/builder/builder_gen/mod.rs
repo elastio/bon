@@ -109,6 +109,7 @@ impl BuilderGenCtx {
                 let setters = SettersCtx::new(self, member).setter_methods()?;
                 let getters = GettersCtx::new(self, member)
                     .map(GettersCtx::getter_methods)
+                    .transpose()?
                     .unwrap_or_default();
 
                 // Output all accessor methods for the same member adjecently.

@@ -1,6 +1,7 @@
 use crate::parsing::SpannedKey;
 use crate::util::prelude::*;
 use darling::FromMeta;
+use syn::spanned::Spanned;
 
 #[derive(Debug, Default)]
 pub(crate) struct GetterConfig {
@@ -45,6 +46,8 @@ impl FromMeta for GetterConfig {
 
             copy: Option<SpannedKey<()>>,
             clone: Option<SpannedKey<()>>,
+
+            #[darling(default, map = Some, with = parse_deref)]
             deref: Option<SpannedKey<Option<syn::Type>>>,
         }
 
@@ -83,6 +86,19 @@ impl FromMeta for GetterConfig {
             kind,
         })
     }
+}
+
+fn parse_deref(meta: &syn::Meta) -> Result<SpannedKey<Option<syn::Type>>> {
+    let value = match meta {
+        syn::Meta::NameValue(_) => bail!(
+            meta,
+            "expected `getter(deref)` or `getter(deref(...))` syntax"
+        ),
+        syn::Meta::Path(_) => None,
+        syn::Meta::List(meta) => Some(syn::parse2(meta.tokens.clone())?),
+    };
+
+    SpannedKey::new(meta.path(), value)
 }
 
 fn parse_docs(meta: &syn::Meta) -> Result<SpannedKey<Vec<syn::Attribute>>> {
