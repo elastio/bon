@@ -45,9 +45,6 @@ impl<'a> GettersCtx<'a> {
                 .collect()
         });
 
-        let index = &self.member.index;
-        let ty = self.member.underlying_norm_ty();
-
         let ret_ty = self.return_ty()?;
         let body = self.body();
 
@@ -75,53 +72,55 @@ impl<'a> GettersCtx<'a> {
 
     fn body(&self) -> TokenStream {
         let index = &self.member.index;
-        let field = quote! {
+        let member = quote! {
             self.__unsafe_private_named.#index
         };
 
-        if let Some(kind) = &self.config.kind {
-            match &kind.value {
-                GetterKind::Copy => {
-                    if self.member.is_required() {
-                        return quote! {
-                            unsafe {
-                                ::core::option::Option::unwrap_unchecked(#field)
-                            }
-                        };
-                    }
-                    return field;
+        match self.config.kind.as_deref() {
+            Some(GetterKind::Copy) => {
+                if !self.member.is_required() {
+                    return member;
                 }
-                GetterKind::Clone => {
-                    if self.member.is_required() {
-                        return quote! {
-                            unsafe {
-                                ::core::clone::Clone::clone(&::core::option::Option::unwrap_unchecked(
-                                    ::core::option::Option::as_ref(&#field)
-                                ))
-                            }
-                        };
+                quote! {
+                    unsafe {
+                        ::core::option::Option::unwrap_unchecked(#member)
                     }
-                    return quote!(::core::clone::Clone::clone(&#field));
                 }
-                GetterKind::Deref(_) => {}
             }
-        }
-
-        if self.member.is_required() {
-            return quote! {
-                match &#field {
-                    Some(value) => value,
-                    None => unsafe {
-                        ::core::hint::unreachable_unchecked()
-                    },
+            Some(GetterKind::Clone) => {
+                if !self.member.is_required() {
+                    return quote! {
+                        ::core::clone::Clone::clone(&#member)
+                    };
                 }
-            };
-        }
-
-        quote! {
-            match &#field {
-                Some(value) => Some(value),
-                None => None,
+                quote! {
+                    match &#member {
+                        Some(value) => ::core::clone::Clone::clone(value),
+                        None => unsafe {
+                            ::core::hint::unreachable_unchecked()
+                        },
+                    }
+                }
+            }
+            None | Some(GetterKind::Deref(_)) => {
+                if !self.member.is_required() {
+                    return quote! {
+                        match &#member {
+                            // If `deref` is enabled, performs an implicit deref coercion
+                            Some(value) => Some(value),
+                            None => None,
+                        }
+                    };
+                }
+                quote! {
+                    match &#member {
+                        // If `deref` is enabled, performs an implicit deref coercion
+                        Some(value) => value,
+                        None => unsafe {
+                            ::core::hint::unreachable_unchecked()
+                        },
+                    }
+                }
             }
         }
     }
@@ -145,6 +144,7 @@ impl<'a> GettersCtx<'a> {
 
         let span = ty.span();
 
+        #[allow(clippy::type_complexity)]
         let deref_target_inference_table: &[(_, &dyn Fn(&Punctuated<_, _>) -> _)] = &[
             ("Vec", &|args| args.first().map(|arg| qs!(span=> [#arg]))),
             ("Box", &|args| args.first().map(ToTokens::to_token_stream)),

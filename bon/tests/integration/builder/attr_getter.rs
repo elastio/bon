@@ -1,75 +1,102 @@
 use crate::prelude::*;
 
 #[test]
-fn smoke() {
+fn by_ref() {
     #[derive(Debug, Builder)]
-    #[builder(derive(Debug, Clone))]
-    #[allow(dead_code)]
     struct Sut<T> {
         #[builder(start_fn)]
-        x1: u32,
+        _x1: u32,
 
         #[builder(getter(name = x2_with_custom_name))]
-        x2: &'static str,
+        _x2: &'static str,
 
         #[builder(getter(vis = "pub(crate)", doc {
             /// Docs on the getter
         }))]
-        x3: u32,
+        _x3: u32,
 
-        #[builder(into, getter(name = x5, vis = "pub(crate)", doc {
-            /// The name is a lie
+        #[builder(into, getter(name = x4_override, vis = "pub(crate)", doc {
+            /// Docs on getter
         }))]
-        x4_but_its_actually_5: &'static str,
+        _x4: &'static str,
 
-        not_a_getter: u32,
+        _no_getter: u32,
 
         #[builder(getter)]
-        generic_option_getter: Option<T>,
+        _generic_option: Option<T>,
 
-        x6: (),
+        _x5: (),
 
         #[builder(getter, default)]
-        x7: u32,
+        _x6: u32,
     }
 
-    #[allow(clippy::redundant_clone)]
-    let sut = Sut::<()>::builder(0u32).clone();
+    let builder = Sut::builder(0u32)
+        .x2("2")
+        .x3(3)
+        .x4("4")
+        .no_getter(5)
+        .x5(())
+        .maybe_generic_option(None::<()>)
+        .x6(7);
 
-    let actual = sut.x2("2").x3(3);
+    let actual = (
+        assert_getter::<&&'static str, _>(&builder, SutBuilder::x2_with_custom_name),
+        assert_getter::<&u32, _>(&builder, SutBuilder::get_x3),
+        assert_getter::<&&'static str, _>(&builder, SutBuilder::x4_override),
+        assert_getter::<Option<&()>, _>(&builder, SutBuilder::get_generic_option),
+        assert_getter::<Option<&u32>, _>(&builder, SutBuilder::get_x6),
+    );
 
-    let actual = actual.x4_but_its_actually_5("4");
-    let x5 = actual.x5();
-    assert_eq!(*x5, "4");
+    assert_debug_eq(actual, expect![[r#"("2", 3, "4", None, Some(7))"#]]);
+}
 
-    let actual = actual.not_a_getter(5).x6(());
+#[test]
+fn clone() {
+    #[derive(Clone, Debug)]
+    struct CloneNotCopy(#[allow(dead_code)] u32);
 
-    let x2 = actual.x2_with_custom_name();
-    assert_eq!(*x2, "2");
+    #[derive(Builder)]
+    struct Sut {
+        #[builder(getter(clone))]
+        _x1: CloneNotCopy,
 
-    let x3 = actual.get_x3();
-    assert_eq!(x3, &3);
+        #[builder(getter(clone))]
+        _x2: Option<CloneNotCopy>,
 
-    let actual = actual.maybe_generic_option_getter(None);
+        #[builder(getter(clone), default = CloneNotCopy(0))]
+        _x3: CloneNotCopy,
+    }
 
-    let gen_opt_get = actual.get_generic_option_getter();
-    assert_eq!(gen_opt_get, None);
+    let sut = Sut::builder()
+        .x1(CloneNotCopy(1))
+        .x2(CloneNotCopy(2))
+        .x3(CloneNotCopy(3));
 
-    let actual = actual.x7(7);
-    assert_eq!(actual.get_x7(), Some(&7));
+    let actual = (
+        assert_getter::<CloneNotCopy, _>(&sut, SutBuilder::get_x1),
+        assert_getter::<Option<CloneNotCopy>, _>(&sut, SutBuilder::get_x2),
+        assert_getter::<Option<CloneNotCopy>, _>(&sut, SutBuilder::get_x3),
+    );
 
     assert_debug_eq(
-        &actual,
+        actual,
         expect![[r#"
-            SutBuilder {
-                x1: 0,
-                x2: "2",
-                x3: 3,
-                x4_but_its_actually_5: "4",
-                not_a_getter: 5,
-                x6: (),
-                x7: 7,
-            }"#]],
+        (
+            CloneNotCopy(
+                1,
+            ),
+            Some(
+                CloneNotCopy(
+                    2,
+                ),
+            ),
+            Some(
+                CloneNotCopy(
+                    3,
+                ),
+            ),
+        )"#]],
     );
 }
 
@@ -79,11 +106,23 @@ fn copy() {
     struct Sut {
         #[builder(getter(copy))]
         _x1: u32,
+
+        #[builder(getter(copy))]
+        _x2: Option<u32>,
+
+        #[builder(getter(copy), default)]
+        _x3: u32,
     }
 
-    let sut = Sut::builder().x1(23);
-    let x1: u32 = sut.get_x1();
-    assert_eq!(x1, 23);
+    let sut = Sut::builder().x1(1).x2(2).x3(3);
+
+    let actual = (
+        assert_getter::<u32, _>(&sut, SutBuilder::get_x1),
+        assert_getter::<Option<u32>, _>(&sut, SutBuilder::get_x2),
+        assert_getter::<Option<u32>, _>(&sut, SutBuilder::get_x3),
+    );
+
+    assert_debug_eq(actual, expect!["(1, Some(2), Some(3))"]);
 }
 
 #[test]
@@ -98,6 +137,12 @@ fn deref() {
     struct Sut<'a> {
         #[builder(getter(deref))]
         _vec: Vec<u32>,
+
+        #[builder(getter(deref))]
+        _optional_vec: Option<Vec<u32>>,
+
+        #[builder(getter(deref), default)]
+        _default_vec: Vec<u32>,
 
         #[builder(getter(deref))]
         _box_: Box<u32>,
@@ -126,6 +171,8 @@ fn deref() {
 
     let builder = Sut::builder()
         .vec(vec![1, 2, 3])
+        .maybe_optional_vec(None)
+        .default_vec(vec![0])
         .box_(Box::new(4))
         .rc(Rc::new(5))
         .arc(Arc::new(6))
@@ -137,6 +184,8 @@ fn deref() {
 
     let actual = (
         assert_getter::<&[u32], _>(&builder, SutBuilder::get_vec),
+        assert_getter::<Option<&[u32]>, _>(&builder, SutBuilder::get_optional_vec),
+        assert_getter::<Option<&[u32]>, _>(&builder, SutBuilder::get_default_vec),
         assert_getter::<&u32, _>(&builder, SutBuilder::get_box_),
         assert_getter::<&u32, _>(&builder, SutBuilder::get_rc),
         assert_getter::<&u32, _>(&builder, SutBuilder::get_arc),
@@ -149,7 +198,28 @@ fn deref() {
 
     assert_debug_eq(
         actual,
-        expect![[r#"([1, 2, 3], 4, 5, 6, "7", "8", "9", "10", "11")"#]],
+        expect![[r#"
+            (
+                [
+                    1,
+                    2,
+                    3,
+                ],
+                None,
+                Some(
+                    [
+                        0,
+                    ],
+                ),
+                4,
+                5,
+                6,
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+            )"#]],
     );
 }
 

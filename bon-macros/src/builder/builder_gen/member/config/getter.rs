@@ -1,7 +1,6 @@
 use crate::parsing::SpannedKey;
 use crate::util::prelude::*;
 use darling::FromMeta;
-use syn::spanned::Spanned;
 
 #[derive(Debug, Default)]
 pub(crate) struct GetterConfig {
