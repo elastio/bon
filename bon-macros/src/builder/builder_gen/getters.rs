@@ -1,5 +1,6 @@
 use super::member::{GetterConfig, GetterKind};
 use super::{BuilderGenCtx, NamedMember};
+use crate::parsing::SpannedKey;
 use crate::util::prelude::*;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
@@ -125,6 +126,19 @@ impl<'a> GettersCtx<'a> {
         }
     }
 
+    fn return_ty(&self) -> Result<TokenStream> {
+        let underlying_return_ty = self.underlying_return_ty()?;
+
+        Ok(if self.member.is_required() {
+            quote! { #underlying_return_ty }
+        } else {
+            // We are not using the fully qualified path to `Option` here
+            // to make function signature in IDE popus shorter and more
+            // readable.
+            quote! { Option<#underlying_return_ty> }
+        })
+    }
+
     fn underlying_return_ty(&self) -> Result<TokenStream> {
         let ty = self.member.underlying_norm_ty();
 
@@ -134,15 +148,19 @@ impl<'a> GettersCtx<'a> {
         };
 
         match &kind.value {
-            GetterKind::Copy | GetterKind::Clone => return Ok(quote! { #ty }),
-            GetterKind::Deref(Some(deref_target)) => return Ok(quote! { &#deref_target }),
-            // Go below to the code that infers the deref target type
-            GetterKind::Deref(None) => {}
+            GetterKind::Copy | GetterKind::Clone => Ok(quote! { #ty }),
+            GetterKind::Deref(Some(deref_target)) => Ok(quote! { &#deref_target }),
+            GetterKind::Deref(None) => Self::infer_deref_target(ty, kind),
         }
+    }
 
+    fn infer_deref_target(
+        underlying_member_ty: &syn::Type,
+        kind: &SpannedKey<GetterKind>,
+    ) -> Result<TokenStream> {
         use quote_spanned as qs;
 
-        let span = ty.span();
+        let span = underlying_member_ty.span();
 
         #[allow(clippy::type_complexity)]
         let deref_target_inference_table: &[(_, &dyn Fn(&Punctuated<_, _>) -> _)] = &[
@@ -185,7 +203,7 @@ impl<'a> GettersCtx<'a> {
             )
         };
 
-        let path = ty.as_path_no_qself().ok_or_else(err)?;
+        let path = underlying_member_ty.as_path_no_qself().ok_or_else(err)?;
 
         let last_segment = path.segments.last().ok_or_else(err)?;
 
@@ -205,18 +223,5 @@ impl<'a> GettersCtx<'a> {
             .ok_or_else(err)?;
 
         Ok(quote!(&#inferred))
-    }
-
-    fn return_ty(&self) -> Result<TokenStream> {
-        let underlying_return_ty = self.underlying_return_ty()?;
-
-        Ok(if self.member.is_required() {
-            quote! { #underlying_return_ty }
-        } else {
-            // We are not using the fully qualified path to `Option` here
-            // to make function signature in IDE popus shorter and more
-            // readable.
-            quote! { Option<#underlying_return_ty> }
-        })
     }
 }
