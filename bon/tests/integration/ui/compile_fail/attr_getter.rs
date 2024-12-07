@@ -75,6 +75,23 @@ struct NoDeref {
     x3: String,
 }
 
+#[derive(Builder)]
+struct CopyCloneExclusion {
+    #[builder(getter(copy, clone))]
+    x1: u32,
+}
+
+#[derive(Builder)]
+struct CopyDerefExclusion {
+    #[builder(getter(copy, deref))]
+    x1: u32,
+}
+
+#[derive(Builder)]
+struct CloneDerefExclusion {
+    #[builder(getter(clone, deref))]
+    x1: u32,
+}
 
 fn main() {
     let builder = NegativeTest::builder();
