@@ -12,7 +12,7 @@ The fate of this feature depends on your feedback in the tracking issue [#225](h
 
 :::
 
-The getter for a required member returns `&T`.
+The getter for a required member returns `&T` by default (can be [overridden](#overriding-the-return-type)).
 
 ::: code-group
 
@@ -71,7 +71,7 @@ assert_eq!(*x, 1);
 
 :::
 
-The getter for an [optional member](../../../guide/basics/optional-members) returns `Option<&T>`.
+The getter for an [optional member](../../../guide/basics/optional-members) returns `Option<&T>` by default (can be [overridden](#config)).
 
 ```rust
 use bon::Builder;
@@ -98,17 +98,31 @@ assert_eq!(x2, Some(&2));
 
 ::: tip
 
-The getter for the member with `#[builder(default)]` returns `Option<&T>` because the default value is never stored in the builder. It's calculated [lazily in the finishing function](./default#evaluation-context).
+The getter for the member with `#[builder(default)]` returns `Option<&T>` because the default value is never stored in the builder. It's calculated [lazily in the finishing function](./default).
 
 :::
 
 ## Config
 
-You can additionally override the name, visibility and docs for the getter method.
+You can override the return type of the getter, its name, visibility and docs.
 
 ```attr
 #[builder(
     getter(
+        // Return `T` via `Copy`
+        copy,
+
+        // Return `T` via `Clone`
+        clone,
+
+        // Return `&<T as Deref>::Target`.
+        deref,
+
+        // Return the type specified in parens.
+        // A deref coercion is expected to be valid to the specified type.
+        // Don't specify the leading `&` here.
+        deref(T),
+
         name = custom_name,
         vis = "pub(crate)",
         doc {
@@ -116,6 +130,34 @@ You can additionally override the name, visibility and docs for the getter metho
         }
     )
 )]
+```
+
+## Overriding the return type
+
+Here is an example of different return type configurations and what they generate.
+
+```rust
+use bon::Builder;
+use std::rc::Rc;
+
+#[derive(Builder)]
+struct Example {
+    // Generates `get_x1(&self) -> u32`    // [!code highlight]
+    #[builder(getter(copy))]               // [!code highlight]
+    x1: u32,
+
+    // Generates `get_x2(&self) -> String` // [!code highlight]
+    #[builder(getter(clone))]              // [!code highlight]
+    x2: String,
+
+    // Generates `get_x3(&self) -> &str`   // [!code highlight]
+    #[builder(getter(deref))]              // [!code highlight]
+    x3: String,
+
+    // Generates `get_x4(&self) -> &str`   // [!code highlight]
+    #[builder(getter(deref(str)))]         // [!code highlight]
+    x4: Rc<String>,
+}
 ```
 
 ## `name`
