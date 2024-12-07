@@ -9,7 +9,6 @@
 //! point to the origin of the offending type (member's type T) from the turbofish
 //! syntax to where the type came from (original code written by the user).
 use core::fmt::Debug;
-use core::ops::Deref;
 
 #[inline(always)]
 pub fn clone_member<T: Clone>(member: &Option<T>) -> Option<T> {
@@ -24,9 +23,4 @@ pub fn as_dyn_debug<T: Debug>(member: &T) -> &dyn Debug {
 #[inline(always)]
 pub fn copy_member<T: Copy>(member: &Option<T>) -> Option<T> {
     *member
-}
-
-#[inline(always)]
-pub fn deref<T: ?Sized + Deref<Target = U>, U: ?Sized>(value: &T) -> &U {
-    value
 }
