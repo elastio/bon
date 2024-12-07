@@ -93,6 +93,12 @@ struct CloneDerefExclusion {
     x1: u32,
 }
 
+#[derive(Builder)]
+struct CantInferDerefTarget {
+    #[builder(getter(deref))]
+    x1: u32,
+}
+
 fn main() {
     let builder = NegativeTest::builder();
 

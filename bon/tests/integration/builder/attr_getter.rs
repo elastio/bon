@@ -234,13 +234,26 @@ fn deref_explicit() {
         // Make sure a deref coercion happens through multiple layers
         #[builder(getter(deref(str)))]
         _x1: Rc<String>,
+
+        #[builder(getter(deref(str)))]
+        _x2: Option<Rc<String>>,
+
+        #[builder(getter(deref(str)), default)]
+        _x3: Rc<String>,
     }
 
-    let sut = Sut::builder().x1(Rc::new("hello".to_owned()));
+    let sut = Sut::builder()
+        .x1(Rc::new("hello".to_owned()))
+        .x2(Rc::new("world".to_owned()))
+        .x3(Rc::new("!".to_owned()));
 
-    let actual = assert_getter::<&str, _>(&sut, SutBuilder::get_x1);
+    let actual = (
+        assert_getter::<&str, _>(&sut, SutBuilder::get_x1),
+        assert_getter::<Option<&str>, _>(&sut, SutBuilder::get_x2),
+        assert_getter::<Option<&str>, _>(&sut, SutBuilder::get_x3),
+    );
 
-    assert_eq!(actual, "hello");
+    assert_debug_eq(actual, expect![[r#"("hello", Some("world"), Some("!"))"#]]);
 }
 
 /// Helper function that is better than just `let _: ExpectedType = builder.get_foo();`

@@ -46,7 +46,7 @@ impl<'a> GettersCtx<'a> {
                 .collect()
         });
 
-        let ret_ty = self.return_ty()?;
+        let return_ty = self.return_ty()?;
         let body = self.body();
 
         let state_var = &self.base.state_var;
@@ -62,7 +62,7 @@ impl<'a> GettersCtx<'a> {
             )]
             #[inline(always)]
             #[must_use = "this method has no side effects; it only returns a value"]
-            #vis fn #name(&self) -> #ret_ty
+            #vis fn #name(&self) -> #return_ty
             where
                 #state_var::#member_pascal: #state_mod::IsSet,
             {
@@ -81,6 +81,9 @@ impl<'a> GettersCtx<'a> {
 
         match self.config.kind.as_deref() {
             Some(GetterKind::Copy) => {
+                // Use a `_` type hint with the span of the original type
+                // to make the compiler point to the original type in case
+                // if the type doesn't implement `Copy`.
                 let span = self.member.underlying_orig_ty().span();
                 let ty = quote_spanned!(span=> _);
 
@@ -99,6 +102,9 @@ impl<'a> GettersCtx<'a> {
                 }
             }
             Some(GetterKind::Clone) => {
+                // Use a `_` type hint with the span of the original type
+                // to make the compiler point to the original type in case
+                // if the type doesn't implement `Clone`.
                 let span = self.member.underlying_orig_ty().span();
                 let ty = quote_spanned!(span=> _);
 
@@ -123,6 +129,8 @@ impl<'a> GettersCtx<'a> {
                 }
             }
             Some(GetterKind::Deref(ty)) => {
+                // Assign the span of the deref target type to the `value` variable
+                // so that compiler points to that type if there is a type mismatch.
                 let span = ty.span();
                 let value = quote_spanned!(span=> value);
 
@@ -268,8 +276,8 @@ impl<'a> GettersCtx<'a> {
 
         let inferred = deref_target_inference_table
             .iter()
-            .filter(|(name, _)| last_segment_ident_str == *name)
-            .find_map(|(_, infer)| infer(args))
+            .find(|(name, _)| last_segment_ident_str == *name)
+            .and_then(|(_, infer)| infer(args))
             .ok_or_else(err)?;
 
         Ok(quote!(&#inferred))

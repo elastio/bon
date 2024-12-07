@@ -40,6 +40,24 @@ error: `clone` can't be specified together with `deref`
 92 |     #[builder(getter(clone, deref))]
    |                      ^^^^^
 
+error: can't infer the `Deref::Target` for the getter from the member's type; please specify the return type (target of the deref coercion) explicitly in parentheses without the leading `&`;
+       example: `#[builder(getter(deref(TargetTypeHere))]`
+
+       automatic deref target detection is supported only for the following types:
+       - Vec
+       - Box
+       - Rc
+       - Arc
+       - String
+       - CString
+       - OsString
+       - PathBuf
+       - Cow
+  --> tests/integration/ui/compile_fail/attr_getter.rs:98:22
+   |
+98 |     #[builder(getter(deref))]
+   |                      ^^^^^
+
 error[E0277]: the trait bound `String: std::marker::Copy` is not satisfied
   --> tests/integration/ui/compile_fail/attr_getter.rs:42:9
    |
@@ -179,27 +197,27 @@ note: tuple variant defined here
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
-  --> tests/integration/ui/compile_fail/attr_getter.rs:99:13
-   |
-99 |     builder.get_x1();
-   |             ^^^^^^ the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
-   |
-   = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x1>`
-   = help: the trait `IsSet` is implemented for `Set<Name>`
+   --> tests/integration/ui/compile_fail/attr_getter.rs:105:13
+    |
+105 |     builder.get_x1();
+    |             ^^^^^^ the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
+    |
+    = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x1>`
+    = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required by a bound in `NegativeTestBuilder::<S>::get_x1`
-  --> tests/integration/ui/compile_fail/attr_getter.rs:27:10
-   |
-27 | #[derive(Builder)]
-   |          ^^^^^^^ required by this bound in `NegativeTestBuilder::<S>::get_x1`
+   --> tests/integration/ui/compile_fail/attr_getter.rs:27:10
+    |
+27  | #[derive(Builder)]
+    |          ^^^^^^^ required by this bound in `NegativeTestBuilder::<S>::get_x1`
 ...
-30 |     x1: u32,
-   |     -- required by a bound in this associated function
-   = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+30  |     x1: u32,
+    |     -- required by a bound in this associated function
+    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the member `Unset<negative_test_builder::members::x2>` was not set, but this method requires it to be set
-   --> tests/integration/ui/compile_fail/attr_getter.rs:100:13
+   --> tests/integration/ui/compile_fail/attr_getter.rs:106:13
     |
-100 |     builder.get_x2();
+106 |     builder.get_x2();
     |             ^^^^^^ the member `Unset<negative_test_builder::members::x2>` was not set, but this method requires it to be set
     |
     = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x2>`
@@ -215,9 +233,9 @@ note: required by a bound in `NegativeTestBuilder::<S>::get_x2`
     = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the member `Unset<negative_test_builder::members::x3>` was not set, but this method requires it to be set
-   --> tests/integration/ui/compile_fail/attr_getter.rs:101:13
+   --> tests/integration/ui/compile_fail/attr_getter.rs:107:13
     |
-101 |     builder.get_x3();
+107 |     builder.get_x3();
     |             ^^^^^^ the member `Unset<negative_test_builder::members::x3>` was not set, but this method requires it to be set
     |
     = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x3>`
