@@ -76,6 +76,12 @@ struct NoDeref {
 }
 
 #[derive(Builder)]
+struct CantInferDerefTarget {
+    #[builder(getter(deref))]
+    x1: u32,
+}
+
+#[derive(Builder)]
 struct CopyCloneExclusion {
     #[builder(getter(copy, clone))]
     x1: u32,
@@ -90,12 +96,6 @@ struct CopyDerefExclusion {
 #[derive(Builder)]
 struct CloneDerefExclusion {
     #[builder(getter(clone, deref))]
-    x1: u32,
-}
-
-#[derive(Builder)]
-struct CantInferDerefTarget {
-    #[builder(getter(deref))]
     x1: u32,
 }
 

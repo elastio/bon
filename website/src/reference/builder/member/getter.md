@@ -104,7 +104,7 @@ The getter for the member with `#[builder(default)]` returns `Option<&T>` becaus
 
 ## Config
 
-You can override the return type of the getter, its name, visibility and docs.
+You can override the return type of the getter, its name, visibility, and docs.
 
 ```attr
 #[builder(

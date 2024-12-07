@@ -22,24 +22,6 @@ error: `getter` attribute can't be specified together with `overwritable`
 23 |     #[builder(getter, overwritable)]
    |               ^^^^^^
 
-error: `copy` can't be specified together with `clone`
-  --> tests/integration/ui/compile_fail/attr_getter.rs:80:22
-   |
-80 |     #[builder(getter(copy, clone))]
-   |                      ^^^^
-
-error: `copy` can't be specified together with `deref`
-  --> tests/integration/ui/compile_fail/attr_getter.rs:86:22
-   |
-86 |     #[builder(getter(copy, deref))]
-   |                      ^^^^
-
-error: `clone` can't be specified together with `deref`
-  --> tests/integration/ui/compile_fail/attr_getter.rs:92:22
-   |
-92 |     #[builder(getter(clone, deref))]
-   |                      ^^^^^
-
 error: can't infer the `Deref::Target` for the getter from the member's type; please specify the return type (target of the deref coercion) explicitly in parentheses without the leading `&`;
        example: `#[builder(getter(deref(TargetTypeHere))]`
 
@@ -53,9 +35,27 @@ error: can't infer the `Deref::Target` for the getter from the member's type; pl
        - OsString
        - PathBuf
        - Cow
+  --> tests/integration/ui/compile_fail/attr_getter.rs:80:22
+   |
+80 |     #[builder(getter(deref))]
+   |                      ^^^^^
+
+error: `copy` can't be specified together with `clone`
+  --> tests/integration/ui/compile_fail/attr_getter.rs:86:22
+   |
+86 |     #[builder(getter(copy, clone))]
+   |                      ^^^^
+
+error: `copy` can't be specified together with `deref`
+  --> tests/integration/ui/compile_fail/attr_getter.rs:92:22
+   |
+92 |     #[builder(getter(copy, deref))]
+   |                      ^^^^
+
+error: `clone` can't be specified together with `deref`
   --> tests/integration/ui/compile_fail/attr_getter.rs:98:22
    |
-98 |     #[builder(getter(deref))]
+98 |     #[builder(getter(clone, deref))]
    |                      ^^^^^
 
 error[E0277]: the trait bound `String: std::marker::Copy` is not satisfied
