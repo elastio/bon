@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0](https://github.com/elastio/bon/compare/v3.2.0...v4.0.0) - 2024-12-07
+
+### Other
+
+- Support clone, copy, deref in `#[builder(getter)]` ([#229](https://github.com/elastio/bon/pull/229))
+
 ## [3.2.0](https://github.com/elastio/bon/compare/v3.1.1...v3.2.0) - 2024-12-01
 
 ### Added
