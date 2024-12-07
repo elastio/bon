@@ -127,7 +127,7 @@ fn copy() {
 
 #[test]
 #[cfg(feature = "std")]
-fn deref() {
+fn deref_implicit() {
     use core::ffi::CStr;
     use std::borrow::Cow;
     use std::ffi::{CString, OsStr, OsString};
@@ -221,6 +221,26 @@ fn deref() {
                 "11",
             )"#]],
     );
+}
+
+#[test]
+#[cfg(feature = "std")]
+fn deref_explicit() {
+    use std::rc::Rc;
+
+    #[derive(Debug, Builder)]
+    #[allow(clippy::rc_buffer)]
+    struct Sut {
+        // Make sure a deref coercion happens through multiple layers
+        #[builder(getter(deref(str)))]
+        _x1: Rc<String>,
+    }
+
+    let sut = Sut::builder().x1(Rc::new("hello".to_owned()));
+
+    let actual = assert_getter::<&str, _>(&sut, SutBuilder::get_x1);
+
+    assert_eq!(actual, "hello");
 }
 
 /// Helper function that is better than just `let _: ExpectedType = builder.get_foo();`

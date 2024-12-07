@@ -122,19 +122,41 @@ impl<'a> GettersCtx<'a> {
                     }
                 }
             }
-            None | Some(GetterKind::Deref(_)) => {
+            Some(GetterKind::Deref(ty)) => {
+                let span = ty.span();
+                let value = quote_spanned!(span=> value);
+
                 if !self.member.is_required() {
                     return quote! {
+                        // Explicit match is important to trigger an implicit deref coercion
+                        // that can potentially do multiple derefs to the reach the target type.
                         match &#member {
-                            // If `deref` is enabled, performs an implicit deref coercion
-                            Some(value) => Some(value),
+                            Some(#value) => Some(#value),
                             None => None,
                         }
                     };
                 }
                 quote! {
+                    // Explicit match is important to trigger an implicit deref coercion
+                    // that can potentially do multiple derefs to the reach the target type.
                     match &#member {
-                        // If `deref` is enabled, performs an implicit deref coercion
+                        Some(#value) => #value,
+
+                        // SAFETY: the method requires S::{Member}: IsSet, so it's Some
+                        None => unsafe {
+                            ::core::hint::unreachable_unchecked()
+                        },
+                    }
+                }
+            }
+            None => {
+                if !self.member.is_required() {
+                    return quote! {
+                        ::core::option::Option::as_ref(&#member)
+                    };
+                }
+                quote! {
+                    match &#member {
                         Some(value) => value,
 
                         // SAFETY: the method requires S::{Member}: IsSet, so it's Some

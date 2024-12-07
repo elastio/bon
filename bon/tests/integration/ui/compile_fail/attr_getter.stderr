@@ -96,10 +96,74 @@ help: consider annotating `NonClone` with `#[derive(Clone)]`
 53 | struct NonClone;
    |
 
-error[E0277]: the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
-  --> tests/integration/ui/compile_fail/attr_getter.rs:69:13
+error[E0308]: mismatched types
+  --> tests/integration/ui/compile_fail/attr_getter.rs:68:28
    |
-69 |     builder.get_x1();
+66 | #[derive(Builder)]
+   |          ------- expected `&u64` because of return type
+67 | struct NoDeref {
+68 |     #[builder(getter(deref(u64)))]
+   |                            ^^^ expected `&u64`, found `&String`
+   |
+   = note: expected reference `&u64`
+              found reference `&String`
+
+error[E0308]: mismatched types
+  --> tests/integration/ui/compile_fail/attr_getter.rs:71:28
+   |
+66 | #[derive(Builder)]
+   |          ------- arguments to this enum variant are incorrect
+...
+71 |     #[builder(getter(deref(u64)))]
+   |                            ^^^ expected `&u64`, found `&String`
+   |
+   = note: expected reference `&u64`
+              found reference `&String`
+help: the type constructed contains `&String` due to the type of the argument passed
+  --> tests/integration/ui/compile_fail/attr_getter.rs:66:10
+   |
+66 | #[derive(Builder)]
+   |          ^^^^^^^
+...
+71 |     #[builder(getter(deref(u64)))]
+   |                            --- this argument influences the type of `Some`
+note: tuple variant defined here
+  --> $RUST/core/src/option.rs
+   |
+   |     Some(#[stable(feature = "rust1", since = "1.0.0")] T),
+   |     ^^^^
+   = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0308]: mismatched types
+  --> tests/integration/ui/compile_fail/attr_getter.rs:74:28
+   |
+66 | #[derive(Builder)]
+   |          ------- arguments to this enum variant are incorrect
+...
+74 |     #[builder(getter(deref(u64)), default)]
+   |                            ^^^ expected `&u64`, found `&String`
+   |
+   = note: expected reference `&u64`
+              found reference `&String`
+help: the type constructed contains `&String` due to the type of the argument passed
+  --> tests/integration/ui/compile_fail/attr_getter.rs:66:10
+   |
+66 | #[derive(Builder)]
+   |          ^^^^^^^
+...
+74 |     #[builder(getter(deref(u64)), default)]
+   |                            --- this argument influences the type of `Some`
+note: tuple variant defined here
+  --> $RUST/core/src/option.rs
+   |
+   |     Some(#[stable(feature = "rust1", since = "1.0.0")] T),
+   |     ^^^^
+   = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
+  --> tests/integration/ui/compile_fail/attr_getter.rs:82:13
+   |
+82 |     builder.get_x1();
    |             ^^^^^^ the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x1>`
@@ -115,9 +179,9 @@ note: required by a bound in `NegativeTestBuilder::<S>::get_x1`
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the member `Unset<negative_test_builder::members::x2>` was not set, but this method requires it to be set
-  --> tests/integration/ui/compile_fail/attr_getter.rs:70:13
+  --> tests/integration/ui/compile_fail/attr_getter.rs:83:13
    |
-70 |     builder.get_x2();
+83 |     builder.get_x2();
    |             ^^^^^^ the member `Unset<negative_test_builder::members::x2>` was not set, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x2>`
@@ -133,9 +197,9 @@ note: required by a bound in `NegativeTestBuilder::<S>::get_x2`
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the member `Unset<negative_test_builder::members::x3>` was not set, but this method requires it to be set
-  --> tests/integration/ui/compile_fail/attr_getter.rs:71:13
+  --> tests/integration/ui/compile_fail/attr_getter.rs:84:13
    |
-71 |     builder.get_x3();
+84 |     builder.get_x3();
    |             ^^^^^^ the member `Unset<negative_test_builder::members::x3>` was not set, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x3>`

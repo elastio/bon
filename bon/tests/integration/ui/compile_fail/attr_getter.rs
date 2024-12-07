@@ -63,6 +63,19 @@ struct NonCloneTest {
     x3: NonClone,
 }
 
+#[derive(Builder)]
+struct NoDeref {
+    #[builder(getter(deref(u64)))]
+    x1: String,
+
+    #[builder(getter(deref(u64)))]
+    x2: Option<String>,
+
+    #[builder(getter(deref(u64)), default)]
+    x3: String,
+}
+
+
 fn main() {
     let builder = NegativeTest::builder();
 
