@@ -48,6 +48,21 @@ struct NonCopy {
     x3: String,
 }
 
+#[derive(Default)]
+struct NonClone;
+
+#[derive(Builder)]
+struct NonCloneTest {
+    #[builder(getter(clone))]
+    x1: NonClone,
+
+    #[builder(getter(clone))]
+    x2: Option<NonClone>,
+
+    #[builder(getter(clone), default)]
+    x3: NonClone,
+}
+
 fn main() {
     let builder = NegativeTest::builder();
 

@@ -58,10 +58,48 @@ note: required by a bound in `copy_member`
    | pub fn copy_member<T: Copy>(member: &Option<T>) -> Option<T> {
    |                       ^^^^ required by this bound in `copy_member`
 
-error[E0277]: the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
-  --> tests/integration/ui/compile_fail/attr_getter.rs:54:13
+error[E0277]: the trait bound `NonClone: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/attr_getter.rs:57:9
    |
-54 |     builder.get_x1();
+57 |     x1: NonClone,
+   |         ^^^^^^^^ the trait `Clone` is not implemented for `NonClone`
+   |
+help: consider annotating `NonClone` with `#[derive(Clone)]`
+   |
+52 + #[derive(Clone)]
+53 | struct NonClone;
+   |
+
+error[E0277]: the trait bound `NonClone: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/attr_getter.rs:60:16
+   |
+60 |     x2: Option<NonClone>,
+   |                ^^^^^^^^ the trait `Clone` is not implemented for `NonClone`, which is required by `Option<NonClone>: Clone`
+   |
+   = note: required for `Option<NonClone>` to implement `Clone`
+help: consider annotating `NonClone` with `#[derive(Clone)]`
+   |
+52 + #[derive(Clone)]
+53 | struct NonClone;
+   |
+
+error[E0277]: the trait bound `NonClone: Clone` is not satisfied
+  --> tests/integration/ui/compile_fail/attr_getter.rs:63:9
+   |
+63 |     x3: NonClone,
+   |         ^^^^^^^^ the trait `Clone` is not implemented for `NonClone`, which is required by `Option<NonClone>: Clone`
+   |
+   = note: required for `Option<NonClone>` to implement `Clone`
+help: consider annotating `NonClone` with `#[derive(Clone)]`
+   |
+52 + #[derive(Clone)]
+53 | struct NonClone;
+   |
+
+error[E0277]: the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
+  --> tests/integration/ui/compile_fail/attr_getter.rs:69:13
+   |
+69 |     builder.get_x1();
    |             ^^^^^^ the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x1>`
@@ -77,9 +115,9 @@ note: required by a bound in `NegativeTestBuilder::<S>::get_x1`
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the member `Unset<negative_test_builder::members::x2>` was not set, but this method requires it to be set
-  --> tests/integration/ui/compile_fail/attr_getter.rs:55:13
+  --> tests/integration/ui/compile_fail/attr_getter.rs:70:13
    |
-55 |     builder.get_x2();
+70 |     builder.get_x2();
    |             ^^^^^^ the member `Unset<negative_test_builder::members::x2>` was not set, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x2>`
@@ -95,9 +133,9 @@ note: required by a bound in `NegativeTestBuilder::<S>::get_x2`
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the member `Unset<negative_test_builder::members::x3>` was not set, but this method requires it to be set
-  --> tests/integration/ui/compile_fail/attr_getter.rs:56:13
+  --> tests/integration/ui/compile_fail/attr_getter.rs:71:13
    |
-56 |     builder.get_x3();
+71 |     builder.get_x3();
    |             ^^^^^^ the member `Unset<negative_test_builder::members::x3>` was not set, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x3>`
