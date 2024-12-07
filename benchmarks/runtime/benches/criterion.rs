@@ -6,6 +6,8 @@ fn criterion_bench(c: &mut criterion::Criterion) {
     let builder_bench_addr: fn() -> u32 = runtime_benchmarks::bench::builder_bench;
     let regular_bebch_addr: fn() -> u32 = runtime_benchmarks::bench::regular_bench;
 
+    // Comes from nightly 1.85.0
+    #[allow(unknown_lints, unpredictable_function_pointer_comparisons)]
     let equal = if builder_bench_addr == regular_bebch_addr {
         "equal"
     } else {

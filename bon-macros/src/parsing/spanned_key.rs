@@ -27,6 +27,20 @@ impl<T> SpannedKey<T> {
     pub(crate) fn key(&self) -> &syn::Ident {
         &self.key
     }
+
+    pub(crate) fn with_value<U>(self, value: U) -> SpannedKey<U> {
+        SpannedKey {
+            value,
+            key: self.key,
+        }
+    }
+
+    pub(crate) fn map_value<U>(self, map: impl FnOnce(T) -> U) -> SpannedKey<U> {
+        SpannedKey {
+            value: map(self.value),
+            key: self.key,
+        }
+    }
 }
 
 impl<T: FromMeta> FromMeta for SpannedKey<T> {

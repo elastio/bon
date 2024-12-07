@@ -145,7 +145,6 @@ impl fmt::Display for PanicContext {
             write!(f, " (total panics observed: {panics_count})")?;
         }
 
-        // #[rustversion::attr(before(1.65.0), allow(clippy::irrefutable_let_patterns))]
         #[allow(clippy::incompatible_msrv)]
         if backtrace.status() == backtrace::BacktraceStatus::Captured {
             write!(f, "\nbacktrace:\n{backtrace}")?;

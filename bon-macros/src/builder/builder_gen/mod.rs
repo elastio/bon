@@ -107,7 +107,10 @@ impl BuilderGenCtx {
             .named_members()
             .map(|member| {
                 let setters = SettersCtx::new(self, member).setter_methods()?;
-                let getters = GettersCtx::new(self, member).getter_methods();
+                let getters = GettersCtx::new(self, member)
+                    .map(GettersCtx::getter_methods)
+                    .transpose()?
+                    .unwrap_or_default();
 
                 // Output all accessor methods for the same member adjecently.
                 // This is important in the generated rustdoc output, because
