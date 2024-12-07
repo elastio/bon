@@ -128,8 +128,8 @@ fn copy() {
 #[test]
 #[cfg(feature = "std")]
 fn deref_implicit() {
-    use core::ffi::CStr;
     use std::borrow::Cow;
+    use std::ffi::CStr;
     use std::ffi::{CString, OsStr, OsString};
     use std::path::{Path, PathBuf};
 
@@ -246,6 +246,6 @@ fn deref_explicit() {
 /// Helper function that is better than just `let _: ExpectedType = builder.get_foo();`
 /// this notation involves an implicit deref coercion, but we want to assert the exact
 /// return type of the getter without any additional implicit conversions.
-fn assert_getter<'a, T, B>(builder: &'a B, method: impl FnOnce(&'a B) -> T) -> T {
+fn assert_getter<'a, T, B>(builder: &'a B, method: fn(&'a B) -> T) -> T {
     method(builder)
 }

@@ -213,7 +213,14 @@ impl<'a> GettersCtx<'a> {
             ("Arc", &|args| args.first().map(ToTokens::to_token_stream)),
             ("String", &|args| args.is_empty().then(|| qs!(span=> str))),
             ("CString", &|args| {
-                args.is_empty().then(|| qs!(span=> ::core::ffi::CStr))
+                // CStr is available via `core` since 1.64.0:
+                // https://blog.rust-lang.org/2022/09/22/Rust-1.64.0.html#c-compatible-ffi-types-in-core-and-alloc
+                let module = if rustversion::cfg!(since(1.64.0)) {
+                    format_ident!("core")
+                } else {
+                    format_ident!("std")
+                };
+                args.is_empty().then(|| qs!(span=> ::#module::ffi::CStr))
             }),
             ("OsString", &|args| {
                 args.is_empty().then(|| qs!(span=> ::std::ffi::OsStr))
