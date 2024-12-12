@@ -70,7 +70,7 @@ impl FromMeta for GetterConfig {
         if let [kind1, kind2, ..] = kinds.as_slice() {
             bail!(
                 &kind1.key,
-                "`{}` can't be specified together with `{}`",
+                "`{}` is mutually exclusive with `{}`",
                 kind1.key,
                 kind2.key
             );

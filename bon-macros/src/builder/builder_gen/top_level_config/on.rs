@@ -10,6 +10,23 @@ pub(crate) struct OnConfig {
     pub(crate) into: darling::util::Flag,
     pub(crate) overwritable: darling::util::Flag,
     pub(crate) required: darling::util::Flag,
+    pub(crate) setters: OnSettersConfig,
+}
+
+#[derive(Default, Debug, FromMeta)]
+pub(crate) struct OnSettersConfig {
+    pub(crate) prefix: Option<syn::Ident>,
+
+    #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list_or_name_value)]
+    pub(crate) some_fn: OnSetterFnConfig,
+
+    #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list_or_name_value)]
+    pub(crate) option_fn: OnSetterFnConfig,
+}
+
+#[derive(Default, Debug, FromMeta)]
+pub(crate) struct OnSetterFnConfig {
+    pub(crate) prefix: Option<syn::Ident>,
 }
 
 impl Parse for OnConfig {
@@ -24,6 +41,9 @@ impl Parse for OnConfig {
             into: darling::util::Flag,
             overwritable: darling::util::Flag,
             required: darling::util::Flag,
+
+            #[darling(default, map = Some, with = crate::parsing::parse_non_empty_paren_meta_list_or_name_value)]
+            setters: Option<OnSettersConfig>,
         }
 
         let parsed = Parsed::from_meta(&syn::parse_quote!(on(#rest)))?;
@@ -51,19 +71,24 @@ impl Parse for OnConfig {
                 into,
                 overwritable,
                 required,
+                setters,
             } = &parsed;
-            let flags = [
-                ("into", into),
-                ("overwritable", overwritable),
-                ("required", required),
+            let configs = [
+                ("into", into.is_present()),
+                ("overwritable", overwritable.is_present()),
+                ("required", required.is_present()),
+                ("setters", setters.is_some()),
             ];
 
-            if flags.iter().all(|(_, flag)| !flag.is_present()) {
-                let flags = flags.iter().map(|(name, _)| format!("`{name}`")).join(", ");
+            if configs.iter().all(|(_, is_present)| !is_present) {
+                let configs = configs
+                    .iter()
+                    .map(|(name, _)| format!("`{name}`"))
+                    .join(", ");
                 let err = format!(
                     "this #[builder(on(type_pattern, ...))] contains no options \
-                    to override the default behavior for the selected setters \
-                    like {flags}, so it does nothing"
+                    to override the default behavior for the selected members \
+                    like {configs}, so it does nothing"
                 );
 
                 return Err(syn::Error::new_spanned(&rest, err));
@@ -104,6 +129,7 @@ impl Parse for OnConfig {
             into,
             overwritable,
             required,
+            setters,
         } = parsed;
 
         Ok(Self {
@@ -111,6 +137,7 @@ impl Parse for OnConfig {
             into,
             overwritable,
             required,
+            setters: setters.unwrap_or_default(),
         })
     }
 }
