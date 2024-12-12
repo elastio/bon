@@ -14,7 +14,9 @@ use syn::parse::Parser;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 
-pub(crate) fn parse_non_empty_paren_meta_list<T: FromMeta>(meta: &syn::Meta) -> Result<T> {
+pub(crate) fn parse_non_empty_paren_meta_list_or_name_value<T: FromMeta>(
+    meta: &syn::Meta,
+) -> Result<T> {
     require_non_empty_paren_meta_list_or_name_value(meta)?;
     T::from_meta(meta)
 }

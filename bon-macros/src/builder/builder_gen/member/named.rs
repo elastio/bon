@@ -1,6 +1,7 @@
 use super::config::MemberConfig;
 use super::{config, MemberOrigin};
 use crate::builder::builder_gen::member::config::SettersFnsConfig;
+use crate::builder::builder_gen::member::SetterFnSigConfig;
 use crate::builder::builder_gen::top_level_config::OnConfig;
 use crate::normalization::SyntaxVariant;
 use crate::parsing::{ItemSigConfig, SpannedKey};
@@ -117,8 +118,8 @@ impl NamedMember {
                 matches!(
                     (some_fn.as_deref(), option_fn.as_deref()),
                     (
-                        Some(ItemSigConfig { docs: Some(_), .. }),
-                        Some(ItemSigConfig { docs: Some(_), .. })
+                        Some(SetterFnSigConfig { docs: Some(_), .. }),
+                        Some(SetterFnSigConfig { docs: Some(_), .. })
                     )
                 )
             })
@@ -183,9 +184,9 @@ impl NamedMember {
     // Lint from nightly. `&Option<T>` is used to reduce syntax at the call site
     #[allow(unknown_lints, clippy::ref_option)]
     fn validate_unused_setters_cfg<T>(
-        overrides: &[&SpannedKey<ItemSigConfig>],
+        overrides: &[&SpannedKey<SetterFnSigConfig>],
         config: &Option<SpannedKey<T>>,
-        get_val: impl Fn(&ItemSigConfig) -> &Option<SpannedKey<T>>,
+        get_val: impl Fn(&SetterFnSigConfig) -> &Option<SpannedKey<T>>,
     ) -> Result {
         let config = match config {
             Some(config) => config,

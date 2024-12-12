@@ -119,7 +119,7 @@ You can override the return type of the getter, its name, visibility, and docs.
         deref,
 
         // Return the type specified in parens.
-        // A deref coercion is expected to be valid to the specified type.
+        // A deref coercion is expected to exist to the specified type.
         // Don't specify the leading `&` here.
         deref(T),
 
@@ -132,7 +132,7 @@ You can override the return type of the getter, its name, visibility, and docs.
 )]
 ```
 
-## Overriding the return type
+## Overriding the Return Type
 
 Here is an example of different return type configurations and what they generate.
 

@@ -67,7 +67,7 @@ pub(crate) struct MemberConfig {
     pub(crate) required: darling::util::Flag,
 
     /// Configurations for the setter methods.
-    #[darling(with = crate::parsing::parse_non_empty_paren_meta_list)]
+    #[darling(with = crate::parsing::parse_non_empty_paren_meta_list_or_name_value)]
     pub(crate) setters: Option<SettersConfig>,
 
     /// Skip generating a setter method for this member.
@@ -166,7 +166,7 @@ impl MemberConfig {
 
         bail!(
             &attr_span,
-            "`{attr_name}` attribute can't be specified together with {conflicting}",
+            "`{attr_name}` is mutually exclusive with {conflicting}",
         );
     }
 
@@ -278,7 +278,7 @@ impl MemberConfig {
             if let Some(Some(_expr)) = self.default.as_deref() {
                 bail!(
                     &skip.key.span(),
-                    "`skip` attribute can't be specified with the `default` attribute; \
+                    "`skip` is mutually exclusive with `default` attribute; \
                     if you wanted to specify a value for the member, then use \
                     the following syntax instead `#[builder(skip = value)]`",
                 );
