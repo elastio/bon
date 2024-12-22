@@ -12,7 +12,7 @@
 )]
 // This catches the problem of `clippy::empty_enum` lint triggering.
 // This lint is enabled only when `feature(never_type)` is enabled.
-#![cfg_attr(nightly, feature(never_type))]
+#![cfg_attr(nightly, allow(unstable_features), feature(never_type))]
 
 #[cfg(feature = "alloc")]
 extern crate alloc;
