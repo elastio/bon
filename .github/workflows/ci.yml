@@ -166,6 +166,10 @@ jobs:
             --allow edition-2024-expr-fragment-specifier \
             --allow if_let_rescope \
             --allow impl-trait-overcaptures
+        env:
+          RUSTFLAGS: >-
+            --deny warnings
+            --cfg nightly
 
   cargo-miri:
     runs-on: ubuntu-latest
