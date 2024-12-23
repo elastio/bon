@@ -271,7 +271,7 @@ impl<'a> StateModGenCtx<'a> {
             #[allow(non_camel_case_types)]
             mod members {
                 #(
-                    #vis_child_child enum #stateful_members_snake {}
+                    #vis_child_child struct #stateful_members_snake(());
                 )*
             }
         }
