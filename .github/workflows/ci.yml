@@ -169,7 +169,7 @@ jobs:
         env:
           RUSTFLAGS: >-
             --deny warnings
-            --cfg nightly
+            --cfg ${{ matrix.toolchain }}
 
   cargo-miri:
     runs-on: ubuntu-latest
