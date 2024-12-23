@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.1](https://github.com/elastio/bon/compare/v3.3.0...v3.3.1) - 2024-12-23
+
+### Other
+
+- Fix `clippy::empty_enum` triggering on nightly with `feature(never_type)` enabled ([#234](https://github.com/elastio/bon/pull/234))
+
 ## [3.3.0](https://github.com/elastio/bon/compare/v3.2.0...v3.3.0) - 2024-12-07
 
 ### Added
