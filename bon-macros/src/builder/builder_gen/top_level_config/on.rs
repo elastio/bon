@@ -17,10 +17,10 @@ pub(crate) struct OnConfig {
 pub(crate) struct OnSettersConfig {
     pub(crate) prefix: Option<syn::Ident>,
 
-    #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list_or_name_value)]
+    #[darling(default, with = crate::parsing::parse_non_empty)]
     pub(crate) some_fn: OnSetterFnConfig,
 
-    #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list_or_name_value)]
+    #[darling(default, with = crate::parsing::parse_non_empty)]
     pub(crate) option_fn: OnSetterFnConfig,
 }
 
@@ -42,7 +42,7 @@ impl Parse for OnConfig {
             overwritable: darling::util::Flag,
             required: darling::util::Flag,
 
-            #[darling(default, map = Some, with = crate::parsing::parse_non_empty_paren_meta_list_or_name_value)]
+            #[darling(default, map = Some, with = crate::parsing::parse_non_empty)]
             setters: Option<OnSettersConfig>,
         }
 

@@ -55,7 +55,7 @@ impl ItemSigConfigParsing<'_> {
             doc: Option<SpannedKey<Vec<syn::Attribute>>>,
         }
 
-        let full: Full = crate::parsing::parse_non_empty_paren_meta_list_or_name_value(meta)?;
+        let full: Full = crate::parsing::parse_non_empty(meta)?;
 
         if let Some(context) = self.reject_self_mentions {
             if let Some(docs) = &full.doc {

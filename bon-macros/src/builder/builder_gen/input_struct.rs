@@ -29,7 +29,7 @@ fn parse_top_level_config(item_struct: &syn::ItemStruct) -> Result<TopLevelConfi
                 ),
             };
 
-            crate::parsing::require_non_empty_paren_meta_list_or_name_value(&attr.meta)?;
+            crate::parsing::require_non_empty(&attr.meta)?;
 
             let meta = darling::ast::NestedMeta::parse_meta_list(meta.tokens.clone())?;
 

@@ -127,7 +127,7 @@ impl FromMeta for SetterFnSigConfig {
             prefix,
             vis,
             docs,
-        } = crate::parsing::parse_non_empty_paren_meta_list_or_name_value(meta)?;
+        } = crate::parsing::parse_non_empty(meta)?;
 
         let config = SetterFnSigConfig {
             name: SetterFnName::new(name, prefix)?,
