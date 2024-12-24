@@ -14,12 +14,12 @@ use syn::parse::Parser;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 
-pub(crate) fn parse_non_empty<T: FromMeta>(meta: &syn::Meta) -> Result<T> {
-    require_non_empty(meta)?;
+pub(crate) fn parse_classic_non_empty<T: FromMeta>(meta: &syn::Meta) -> Result<T> {
+    require_classic_non_empty(meta)?;
     T::from_meta(meta)
 }
 
-pub(crate) fn require_non_empty(meta: &syn::Meta) -> Result {
+pub(crate) fn require_classic_non_empty(meta: &syn::Meta) -> Result {
     match meta {
         syn::Meta::List(meta) => {
             meta.require_parens_delim()?;

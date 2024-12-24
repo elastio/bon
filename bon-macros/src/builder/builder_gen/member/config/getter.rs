@@ -32,7 +32,7 @@ impl FromMeta for GetterConfig {
         }
 
         // Reject empty parens such as `#[builder(getter())]`
-        crate::parsing::require_non_empty(meta)?;
+        crate::parsing::require_classic_non_empty(meta)?;
 
         // Nested `Parsed` struct used as a helper for parsing the verbose form
         #[derive(FromMeta)]

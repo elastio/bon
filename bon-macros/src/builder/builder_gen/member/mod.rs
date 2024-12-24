@@ -121,7 +121,7 @@ impl Member {
             .map(|member| {
                 for attr in member.attrs {
                     if attr.meta.path().is_ident("builder") {
-                        crate::parsing::require_non_empty(&attr.meta)?;
+                        crate::parsing::require_classic_non_empty(&attr.meta)?;
                     }
                 }
 

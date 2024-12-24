@@ -67,7 +67,7 @@ pub(crate) struct MemberConfig {
     pub(crate) required: darling::util::Flag,
 
     /// Configurations for the setter methods.
-    #[darling(with = crate::parsing::parse_non_empty)]
+    #[darling(with = crate::parsing::parse_classic_non_empty)]
     pub(crate) setters: Option<SettersConfig>,
 
     /// Skip generating a setter method for this member.

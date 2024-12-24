@@ -116,7 +116,7 @@ pub(crate) fn generate(
                 .filter(|attr| attr.path().is_ident("builder"))
                 .map(|attr| {
                     if let syn::Meta::List(_) = attr.meta {
-                        crate::parsing::require_non_empty(&attr.meta)?;
+                        crate::parsing::require_classic_non_empty(&attr.meta)?;
                     }
                     let meta_list = darling::util::parse_attribute_to_meta_list(attr)?;
                     NestedMeta::parse_meta_list(meta_list.tokens).map_err(Into::into)
