@@ -37,7 +37,14 @@ impl IdentExt for syn::Ident {
         // https://internals.rust-lang.org/t/raw-identifiers-dont-work-for-all-identifiers/9094
         //
         // So no need to handle raw identifiers here.
-        let renamed = RenameRule::PascalCase.apply_to_field(self.raw_name());
+        let mut renamed = RenameRule::PascalCase.apply_to_field(self.raw_name());
+
+        // Make sure `Self` keyword isn't generated.
+        // This may happen if the input was `self_`, for example.
+        if renamed == "Self" {
+            renamed.push('_');
+        }
+
         Self::new(&renamed, Span::call_site())
     }
 

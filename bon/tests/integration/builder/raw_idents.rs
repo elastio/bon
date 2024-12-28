@@ -92,3 +92,16 @@ fn test_fn() {
         }
     }
 }
+
+// This is based on the issue https://github.com/elastio/bon/issues/237
+#[test]
+fn test_self_underscore_bug_237() {
+    #[derive(Builder)]
+    struct Sut {
+        self_: u32,
+    }
+
+    let builder: SutBuilder<sut_builder::SetSelf_> = Sut::builder().self_(42);
+
+    assert_eq!(builder.build().self_, 42);
+}
