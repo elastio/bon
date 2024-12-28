@@ -278,7 +278,7 @@ impl MemberConfig {
             if let Some(Some(_expr)) = self.default.as_deref() {
                 bail!(
                     &skip.key.span(),
-                    "`skip` is mutually exclusive with `default` attribute; \
+                    "`skip` is mutually exclusive with `default`; \
                     if you wanted to specify a value for the member, then use \
                     the following syntax instead `#[builder(skip = value)]`",
                 );

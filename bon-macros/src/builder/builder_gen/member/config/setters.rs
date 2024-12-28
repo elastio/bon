@@ -1,6 +1,8 @@
-use crate::parsing::SpannedKey;
+use crate::parsing::{reject_syntax, SpannedKey};
 use crate::util::prelude::*;
+use darling::util::SpannedValue;
 use darling::FromMeta;
+use syn::spanned::Spanned;
 
 const DOCS_CONTEXT: &str = "builder struct's impl block";
 
@@ -8,72 +10,20 @@ fn parse_docs(meta: &syn::Meta) -> Result<SpannedKey<Vec<syn::Attribute>>> {
     crate::parsing::parse_docs_without_self_mentions(DOCS_CONTEXT, meta)
 }
 
-#[derive(Debug)]
-pub(crate) enum SetterFnName {
-    Name(syn::Ident),
-    Prefix(syn::Ident),
-}
-
-impl SetterFnName {
-    fn new(
-        name: Option<SpannedKey<syn::Ident>>,
-        prefix: Option<SpannedKey<syn::Ident>>,
-    ) -> Result<Option<SpannedKey<Self>>> {
-        match (name, prefix) {
-            (Some(name), None) => Ok(Some(name.map_value(SetterFnName::Name))),
-            (None, Some(prefix)) => Ok(Some(prefix.map_value(SetterFnName::Prefix))),
-            (None, None) => Ok(None),
-            (Some(name), Some(prefix)) => {
-                bail!(
-                    &name.key,
-                    "`{}` is mutually exclusive with `{}`",
-                    name.key,
-                    prefix.key,
-                );
-            }
-        }
-    }
-}
-
-#[derive(Debug)]
+#[derive(Debug, FromMeta)]
 pub(crate) struct SettersConfig {
-    pub(crate) name: Option<SpannedKey<SetterFnName>>,
-    pub(crate) vis: Option<SpannedKey<syn::Visibility>>,
-    pub(crate) docs: Option<SpannedKey<Vec<syn::Attribute>>>,
-    pub(crate) fns: SettersFnsConfig,
-}
+    name: Option<SpannedKey<syn::Ident>>,
 
-impl FromMeta for SettersConfig {
-    fn from_meta(meta: &syn::Meta) -> Result<Self> {
-        #[derive(FromMeta)]
-        struct Parsed {
-            name: Option<SpannedKey<syn::Ident>>,
-            prefix: Option<SpannedKey<syn::Ident>>,
+    #[darling(default, map = Some, with = parse_ident_or_str_lit)]
+    prefix: Option<SpannedKey<SpannedValue<String>>>,
 
-            vis: Option<SpannedKey<syn::Visibility>>,
+    vis: Option<SpannedKey<syn::Visibility>>,
 
-            #[darling(rename = "doc", default, map = Some, with = parse_docs)]
-            docs: Option<SpannedKey<Vec<syn::Attribute>>>,
+    #[darling(rename = "doc", default, map = Some, with = parse_docs)]
+    docs: Option<SpannedKey<Vec<syn::Attribute>>>,
 
-            #[darling(flatten)]
-            fns: SettersFnsConfig,
-        }
-
-        let Parsed {
-            name,
-            prefix,
-            vis,
-            docs,
-            fns,
-        } = Parsed::from_meta(meta)?;
-
-        Ok(SettersConfig {
-            name: SetterFnName::new(name, prefix)?,
-            vis,
-            docs,
-            fns,
-        })
-    }
+    #[darling(flatten)]
+    fns: SettersFnsConfig,
 }
 
 #[derive(Debug, FromMeta)]
@@ -93,7 +43,8 @@ pub(crate) struct SettersFnsConfig {
 
 #[derive(Debug, Default)]
 pub(crate) struct SetterFnSigConfig {
-    pub(crate) name: Option<SpannedKey<SetterFnName>>,
+    pub(crate) name: Option<SpannedKey<syn::Ident>>,
+    pub(crate) prefix: Option<SpannedKey<SpannedValue<String>>>,
     pub(crate) vis: Option<SpannedKey<syn::Visibility>>,
     pub(crate) docs: Option<SpannedKey<Vec<syn::Attribute>>>,
 }
@@ -105,7 +56,8 @@ impl FromMeta for SetterFnSigConfig {
             let name = syn::parse2(val.to_token_stream())?;
 
             return Ok(SetterFnSigConfig {
-                name: Some(SpannedKey::new(&meta.path, SetterFnName::Name(name))?),
+                name: Some(SpannedKey::new(&meta.path, name)?),
+                prefix: None,
                 vis: None,
                 docs: None,
             });
@@ -114,7 +66,9 @@ impl FromMeta for SetterFnSigConfig {
         #[derive(Debug, FromMeta)]
         struct Full {
             name: Option<SpannedKey<syn::Ident>>,
-            prefix: Option<SpannedKey<syn::Ident>>,
+
+            #[darling(default, map = Some, with = parse_ident_or_str_lit)]
+            prefix: Option<SpannedKey<SpannedValue<String>>>,
 
             vis: Option<SpannedKey<syn::Visibility>>,
 
@@ -130,11 +84,42 @@ impl FromMeta for SetterFnSigConfig {
         } = crate::parsing::parse_classic_non_empty(meta)?;
 
         let config = SetterFnSigConfig {
-            name: SetterFnName::new(name, prefix)?,
+            name,
+            prefix,
             vis,
             docs,
         };
 
         Ok(config)
     }
+}
+
+fn parse_ident_or_str_lit(meta: &syn::Meta) -> Result<SpannedKey<SpannedValue<String>>> {
+    let expr = darling::util::parse_expr::preserve_str_literal(meta)?;
+    let value = match &expr {
+        syn::Expr::Lit(syn::ExprLit {
+            attrs,
+            lit: syn::Lit::Str(str),
+            ..
+        }) => {
+            reject_syntax("attribute", &attrs.first())?;
+            str.value()
+        }
+
+        syn::Expr::Path(syn::ExprPath {
+            attrs, qself, path, ..
+        }) => {
+            reject_syntax("attribute", &attrs.first())?;
+            reject_syntax("<T as Trait> syntax", qself)?;
+            path.get_ident()
+                .ok_or_else(|| err!(&path, "expected an identifier"))?
+                .to_string()
+        }
+
+        _ => bail!(&expr, "expected an indetifier or a string literal",),
+    };
+
+    let value = SpannedValue::new(value, expr.span());
+
+    SpannedKey::new(meta.path(), value)
 }
