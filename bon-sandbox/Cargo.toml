@@ -36,4 +36,4 @@ typed-builder  = "0.20"
 [dependencies.bon]
 features = ["experimental-overwritable", "experimental-getter"]
 path     = "../bon"
-version = "=3.3.2"
+version  = "=3.3.2"
