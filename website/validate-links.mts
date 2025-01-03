@@ -181,8 +181,6 @@ async function scan(options: Options): Promise<LinkIssues> {
 }
 
 async function findFiles(root: string): Promise<string[]> {
-    //   root = root.replace(/^\/bon\//, "")
-
     return globby(path.join(root, "**/*.html"));
 }
 
@@ -367,5 +365,4 @@ function findSimilarIds(existing: Set<string>, id: string): string[] {
 
 scanAndReport({
     root: ".vitepress/dist",
-    publicPath: "/bon/",
 });
