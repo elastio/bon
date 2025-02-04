@@ -42,7 +42,8 @@ jobs:
 
       # We are using a bit older version of `valgrind`, because the newer version
       # has some breaking change in cachegrind output, which `iai` can't parse.
-      - run: sudo apt-get install -y valgrind=3.18.1-1ubuntu2
+      - run: sudo apt-get install -y valgrind
+      - run: valgrind --version
       - run: cd ./benchmarks/runtime && ./run.sh ${{ matrix.benchmark }}
 
   compilation-benchmarks:
