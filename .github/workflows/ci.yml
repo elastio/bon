@@ -25,7 +25,9 @@ env:
 jobs:
   # Sanity-check that benchmarks work
   runtime-benchmarks:
-    runs-on: ubuntu-latest
+    # We are using a bit older version for an older `valgrind`, because the newer
+    # version has some breaking change in cachegrind output, which `iai` can't parse.
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         benchmark:
@@ -38,13 +40,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      # - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      # We are using a bit older version of `valgrind`, because the newer version
-      # has some breaking change in cachegrind output, which `iai` can't parse.
-      - run: apt-cache madison valgrind
       - run: sudo apt-get install -y valgrind
-      - run: valgrind --version
       - run: cd ./benchmarks/runtime && ./run.sh ${{ matrix.benchmark }}
 
   compilation-benchmarks:
