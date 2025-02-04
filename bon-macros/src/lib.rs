@@ -14,6 +14,7 @@
     // We can't use the explicit captures syntax due to the MSRV
     impl_trait_overcaptures,
 )]
+#![allow(if_let_rescope)]
 
 mod bon;
 mod builder;

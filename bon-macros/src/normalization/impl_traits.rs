@@ -60,7 +60,7 @@ impl VisitMut for AssignTypeParams<'_> {
 
         if !matches!(ty, syn::Type::ImplTrait(_)) {
             return;
-        };
+        }
 
         let index = self.next_type_param_index;
         self.next_type_param_index += 1;
