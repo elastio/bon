@@ -222,7 +222,7 @@ impl CompletionsSchema {
     ) -> TokenStream {
         if let Some(custom_filter) = self.custom_filter {
             custom_filter(&mut meta);
-        };
+        }
 
         let module_suffix = syn::Ident::new(self.key, Span::call_site());
         let module_name = module_prefix

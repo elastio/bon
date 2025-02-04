@@ -39,7 +39,7 @@ impl<'a> SettersCtx<'a> {
         } else {
             inputs = vec![(pat_ident("value"), member_type.clone())];
             expr = quote!(value);
-        };
+        }
 
         let body = SetterBody::SetMember {
             expr: quote!(::core::option::Option::Some(#expr)),

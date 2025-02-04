@@ -13,6 +13,9 @@
 
     // We can't use the explicit captures syntax due to the MSRV
     impl_trait_overcaptures,
+
+    // There are too many false-positives for syn::Ident
+    if_let_rescope,
 )]
 
 mod bon;

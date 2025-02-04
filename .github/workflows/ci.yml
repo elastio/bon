@@ -25,7 +25,9 @@ env:
 jobs:
   # Sanity-check that benchmarks work
   runtime-benchmarks:
-    runs-on: ubuntu-latest
+    # We are using a bit older version for an older `valgrind`, because the newer
+    # version has some breaking change in cachegrind output, which `iai` can't parse.
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         benchmark:

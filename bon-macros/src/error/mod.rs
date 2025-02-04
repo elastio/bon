@@ -151,9 +151,8 @@ fn strip_invalid_tt(tokens: TokenStream) -> TokenStream {
             // We can't do anything about it, and we just ignore it.
             // Luckily, `proc-macro2` consumes the invalid token tree
             // so this doesn't cause an infinite loop.
-            match std::panic::catch_unwind(AssertUnwindSafe(|| tokens.next())) {
-                Ok(tt) => return tt.map(recurse),
-                Err(_) => continue,
+            if let Ok(tt) = std::panic::catch_unwind(AssertUnwindSafe(|| tokens.next())) {
+                return tt.map(recurse);
             }
         }
     })
