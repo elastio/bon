@@ -22,7 +22,7 @@ hero:
 features:
     - title: Great ergonomics
       details: Focused on good IDE experience, simple and readable macro-generated method signatures.
-    - title: Zero boilerlate
+    - title: Zero boilerplate
       details: No configuration is needed most of the time. Default behaviors match 99% of use cases.
     - title: Customizable
       details: Provides many attributes to override default behaviors for advanced use cases.
