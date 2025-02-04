@@ -110,7 +110,7 @@ error[E0277]: the trait bound `NonClone: Clone` is not satisfied
   --> tests/integration/ui/compile_fail/attr_getter.rs:60:16
    |
 60 |     x2: Option<NonClone>,
-   |                ^^^^^^^^ the trait `Clone` is not implemented for `NonClone`, which is required by `Option<NonClone>: Clone`
+   |                ^^^^^^^^ the trait `Clone` is not implemented for `NonClone`
    |
    = note: required for `Option<NonClone>` to implement `Clone`
 help: consider annotating `NonClone` with `#[derive(Clone)]`
@@ -123,7 +123,7 @@ error[E0277]: the trait bound `NonClone: Clone` is not satisfied
   --> tests/integration/ui/compile_fail/attr_getter.rs:63:9
    |
 63 |     x3: NonClone,
-   |         ^^^^^^^^ the trait `Clone` is not implemented for `NonClone`, which is required by `Option<NonClone>: Clone`
+   |         ^^^^^^^^ the trait `Clone` is not implemented for `NonClone`
    |
    = note: required for `Option<NonClone>` to implement `Clone`
 help: consider annotating `NonClone` with `#[derive(Clone)]`
