@@ -197,7 +197,7 @@ If you'd like to know why this attribute is this dumb and doesn't just add a `wh
 
 :::
 
-### Compile errors
+### Compile Errors
 
 _Requires_ that all members of the builder including the receiver (if this is a builder for an associated method) implement the target trait. For example, this doesn't compile because not all members implement `Clone`:
 
@@ -217,7 +217,7 @@ struct Example {
 }
 ```
 
-## `Into` derive
+## `Into` Derive
 
 Somewhat obviously, but `Into` derive actually generates a `From` implementation, providing the `Into` trait implementation automatically via the [blanket `impl` in std](https://doc.rust-lang.org/stable/std/convert/trait.From.html#generic-implementations).
 
