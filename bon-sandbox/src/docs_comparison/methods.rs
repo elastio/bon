@@ -29,11 +29,8 @@ pub mod bon {
 }
 
 /// Example docs generated with `buildstructor`
+// This lint comes from buildstructor-generated code
 #[expect(elided_lifetimes_in_paths)]
-// `buildstructor` generates a `#[cfg_attr(feature = "cargo-clippy", ...)]`,
-// which is not known to rustc. This lint comes from `nightly` at the time
-// of this writing, so using `allow` for now instead of `expect`
-#[allow(unexpected_cfgs)]
 pub mod buildstructor {
 
     /// Doc comment on `Struct`

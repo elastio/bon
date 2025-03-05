@@ -35,6 +35,7 @@ There are several other existing alternative crates for generating builders. `bo
 | Special setters for collections          | [(see below)][collections]         | ✅                        |                          | ✅                                            |
 | Builder by `&self`/`&mut self`           |                                    |                           |                          | ✅                                            |
 | [Generates nice docs][gen-docs-cmp]      | ✅                                 |                           |                          | ✅                                            |
+| Getters on the builder                   | ✅                                 |                           |                          | ✅                                            |
 
 </div>
 

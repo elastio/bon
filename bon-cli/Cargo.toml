@@ -21,6 +21,6 @@ workspace = true
 
 [dependencies]
 anyhow       = "1.0"
-ra_ap_parser = "=0.0.241"
-ra_ap_syntax = "=0.0.241"
+ra_ap_parser = "=0.0.268"
+ra_ap_syntax = "=0.0.268"
 walkdir      = "2.5"

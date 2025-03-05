@@ -27,15 +27,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "always-assert"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1078fa1ce1e34b1872d8611ad921196d76bdd7027e949fbe31231abde201892"
-dependencies = [
- "tracing",
-]
-
-[[package]]
 name = "anes"
 version = "0.1.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -130,16 +121,14 @@ dependencies = [
 
 [[package]]
 name = "buildstructor"
-version = "0.5.4"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c3907aac66c65520545ae3cb3c195306e20d5ed5c90bfbb992e061cf12a104d0"
+checksum = "caabaaee17b2a78d7aa349a33edc9090c6bb47e6dfb25b0da281df57628bba68"
 dependencies = [
- "lazy_static",
  "proc-macro2",
  "quote",
  "str_inflector",
  "syn",
- "thiserror",
  "try_match",
 ]
 
@@ -405,7 +394,7 @@ dependencies = [
  "anyhow",
  "bon",
  "buildstructor",
- "itertools 0.13.0",
+ "itertools 0.14.0",
  "lazy-regex",
  "macro_rules_attribute",
  "typed-builder",
@@ -539,9 +528,9 @@ dependencies = [
 
 [[package]]
 name = "itertools"
-version = "0.13.0"
+version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
+checksum = "2b192c782037fadd9cfa75548310488aabdbf3d2da73885b31bd0abd03351285"
 dependencies = [
  "either",
 ]
@@ -758,52 +747,53 @@ dependencies = [
 
 [[package]]
 name = "ra-ap-rustc_lexer"
-version = "0.73.0"
+version = "0.98.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "119bc05b5b6bc3e7f5b67ce8b8080e185da94bd83c447f91b6b3f3ecf60cbab1"
+checksum = "3004d1d1b50afe3e1f9cdd428a282da7ffbf5f26dd8bf04af0d651d44e4873d8"
 dependencies = [
+ "memchr",
  "unicode-properties",
  "unicode-xid",
 ]
 
 [[package]]
-name = "ra_ap_limit"
-version = "0.0.241"
+name = "ra_ap_edition"
+version = "0.0.268"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f9b1b7a869e1a2b68ff8490ff8d3af23b518f83ba41f93192dee0336c0af9b55"
+checksum = "e687a52e99470f0a91a5cac26ff8b1c1b9481517c89844a37ed5a0ca63db10ec"
 
 [[package]]
 name = "ra_ap_parser"
-version = "0.0.241"
+version = "0.0.268"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d2756858e7851f05d6a9119ecb51b10b7ec85414ea06ab6e20e06fd4a0a64599"
+checksum = "ffb58a36419b38b5577ba05a65be14da058c9e914271502a0478825df496b736"
 dependencies = [
  "drop_bomb",
  "ra-ap-rustc_lexer",
- "ra_ap_limit",
+ "ra_ap_edition",
  "tracing",
 ]
 
 [[package]]
 name = "ra_ap_stdx"
-version = "0.0.241"
+version = "0.0.268"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e743e2c0495f0f1292865d30f7a56349a27f9ceeb61f7b743c96b6ca134e5f76"
+checksum = "1c9a2f637694ef686fb0c676fde1545e517d21528adb8ca8b8c201d131bd3cf0"
 dependencies = [
- "always-assert",
  "crossbeam-channel",
  "itertools 0.12.1",
  "jod-thread",
  "libc",
  "miow",
- "windows-sys 0.52.0",
+ "tracing",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
 name = "ra_ap_syntax"
-version = "0.0.241"
+version = "0.0.268"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9754a818cc20ad5d0acdc2f316082d5ca166ee22db82f5b8d502ba2d5dcc2492"
+checksum = "d2a753572b2fadc220c7968e604347493094b18f775b7cdae6f309db379f7b72"
 dependencies = [
  "cov-mark",
  "either",
@@ -812,22 +802,11 @@ dependencies = [
  "ra-ap-rustc_lexer",
  "ra_ap_parser",
  "ra_ap_stdx",
- "ra_ap_text_edit",
  "rowan",
  "rustc-hash 2.1.0",
  "smol_str",
  "tracing",
  "triomphe",
-]
-
-[[package]]
-name = "ra_ap_text_edit"
-version = "0.0.241"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a5f89e975e82f5efe2682bc2c03dda28ad57b0bfd33f64b5831674a25204072b"
-dependencies = [
- "itertools 0.12.1",
- "text-size",
 ]
 
 [[package]]
@@ -1039,26 +1018,6 @@ name = "text-size"
 version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f18aa187839b2bdb1ad2fa35ead8c4c2976b64e4363c386d45ac0f7ee85c9233"
-
-[[package]]
-name = "thiserror"
-version = "1.0.69"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b6aaf5339b578ea85b50e080feb250a3e8ae8cfcdff9a461c9ec2904bc923f52"
-dependencies = [
- "thiserror-impl",
-]
-
-[[package]]
-name = "thiserror-impl"
-version = "1.0.69"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fee6c4efc90059e10f81e6d42c60a18f76588c3d74cb83a0b242a2b6c7504c1"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn",
-]
 
 [[package]]
 name = "tinytemplate"
@@ -1330,15 +1289,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "677d2418bec65e3338edb076e806bc1ec15693c5d0104683f2efe857f61056a9"
 dependencies = [
  "windows-targets 0.48.5",
-]
-
-[[package]]
-name = "windows-sys"
-version = "0.52.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "282be5f36a8ce781fad8c8ae18fa3f9beff57ec1b52cb3de0789201425d9a33d"
-dependencies = [
- "windows-targets 0.52.6",
 ]
 
 [[package]]
