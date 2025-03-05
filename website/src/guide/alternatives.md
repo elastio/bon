@@ -201,7 +201,7 @@ Why is there an explicit `main()` function in this code snippet 🤔? It's a lon
 
 :::
 
-It is possible to implement this with `bon` using custom fields and custom setters. See an example of how this can be done [here](../guide/typestate-api/custom-fields).
+It is possible to implement this with `bon` using custom fields and custom setters. See an example of how this can be done [here](../guide/typestate-api/builder-fields).
 
 Alternatively, `bon` provides a separate solution. `bon` exposes the following macros that provide convenient syntax to create collections.
 
