@@ -10,7 +10,7 @@ pub(crate) fn generate(params: TokenStream, item: TokenStream) -> TokenStream {
 }
 
 pub(crate) fn try_generate(params: TokenStream, item: TokenStream) -> Result<TokenStream> {
-    let item: syn::Item = syn::parse2(item)?;
+    let item = syn::parse2(item)?;
 
     let ctx = ExpandCfg {
         current_macro: format_ident!("bon"),
@@ -26,7 +26,7 @@ pub(crate) fn try_generate(params: TokenStream, item: TokenStream) -> Result<Tok
     let params = NestedMeta::parse_meta_list(input.config)?;
     let params = FromMeta::from_list(&params)?;
 
-    match input.item {
+    match *input.item {
         syn::Item::Impl(item_impl) => builder::item_impl::generate(params, item_impl),
         _ => bail!(
             &input.item,

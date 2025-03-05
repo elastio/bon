@@ -22,7 +22,7 @@ pub(crate) enum GetterKind {
 
     /// Returns `&<T as Deref>::Target`.
     /// If the type is `None`, it will be inferred from the member's type.
-    Deref(Option<syn::Type>),
+    Deref(Option<Box<syn::Type>>),
 }
 
 impl FromMeta for GetterConfig {
@@ -47,7 +47,7 @@ impl FromMeta for GetterConfig {
             clone: Option<SpannedKey<()>>,
 
             #[darling(default, map = Some, with = parse_deref)]
-            deref: Option<SpannedKey<Option<syn::Type>>>,
+            deref: Option<SpannedKey<Option<Box<syn::Type>>>>,
         }
 
         let Parsed {
@@ -87,7 +87,7 @@ impl FromMeta for GetterConfig {
     }
 }
 
-fn parse_deref(meta: &syn::Meta) -> Result<SpannedKey<Option<syn::Type>>> {
+fn parse_deref(meta: &syn::Meta) -> Result<SpannedKey<Option<Box<syn::Type>>>> {
     let value = match meta {
         syn::Meta::NameValue(_) => bail!(
             meta,
