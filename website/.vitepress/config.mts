@@ -186,8 +186,8 @@ export default defineConfig({
                             link: "/guide/typestate-api/custom-methods",
                         },
                         {
-                            text: "Custom Fields",
-                            link: "/guide/typestate-api/custom-fields",
+                            text: "Builder Fields",
+                            link: "/guide/typestate-api/builder-fields",
                         },
                         {
                             text: "Getters 🔬",
