@@ -137,9 +137,9 @@ assert_eq!(
 
 :::
 
-## `Clone` and `Debug` derives
+## `Clone` and `Debug` Derives
 
-### Generic types handling
+### Generic Types Handling
 
 If the underlying `struct` or `fn` contains generic type parameters, then the generated impl block will include a `where` bound requiring the respective trait to be implemented by all of them. This follows the behaviour of the [standard `derive` macros](https://doc.rust-lang.org/std/clone/trait.Clone.html#derivable).
 
@@ -248,3 +248,25 @@ Note that `#[builder(derive(Into))]` is quite limited. Here are some things it d
 -   `async` functions, because `From::from()` is synchronous
 -   `unsafe` functions, because `From::from()` is safe
 -   Members marked with [`#[builder(finish_fn)]`](../member/finish_fn) because `From::from()` doesn't accept arguments
+
+### Use Cases
+
+This derive is most useful to reduce the boilerplate of calling the finishing function when the result of building is passed to some other function that accepts `impl Into<T>`.
+
+```rust
+use bon::Builder;
+
+#[derive(Builder)]
+#[builder(derive(Into))]
+struct Example {
+    x1: u32,
+}
+
+fn take_example(value: impl Into<Example>) { /* */ }
+
+take_example(
+    // You can omit the call to `build()` here
+    Example::builder()
+        .x1(99)
+)
+```

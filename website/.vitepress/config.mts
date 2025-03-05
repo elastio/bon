@@ -160,8 +160,8 @@ export default defineConfig({
                             link: "/guide/basics/positional-members",
                         },
                         {
-                            text: "Inspecting",
-                            link: "/guide/basics/inspecting",
+                            text: "Derives for Builders",
+                            link: "/guide/basics/derives-for-builders",
                         },
                         {
                             text: "Documenting",
