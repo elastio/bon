@@ -112,19 +112,19 @@ jobs:
       - run: cargo test --locked --all-features --doc
       - run: |
           cd bon && cargo test --locked --no-default-features \
-            --features=experimental-overwritable,experimental-getter
+            --features=experimental-overwritable
 
       - run: |
           cd bon && cargo test --locked --no-default-features \
-            --features=experimental-overwritable,experimental-getter,alloc
+            --features=experimental-overwritable,alloc
 
       - run: |
           cd bon && cargo test --locked --no-default-features \
-            --features=experimental-overwritable,experimental-getter,implied-bounds
+            --features=experimental-overwritable,implied-bounds
 
       - run: |
           cd bon && cargo test --locked --no-default-features \
-            --features=experimental-overwritable,experimental-getter,alloc,implied-bounds
+            --features=experimental-overwritable,alloc,implied-bounds
 
   test-msrv:
     runs-on: ${{ matrix.os }}-latest

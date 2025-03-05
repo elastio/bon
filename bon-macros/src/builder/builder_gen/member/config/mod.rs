@@ -223,18 +223,6 @@ impl MemberConfig {
         }
 
         if let Some(getter) = &self.getter {
-            if !cfg!(feature = "experimental-getter") {
-                bail!(
-                    &getter.key,
-                    "🔬 `getter` attribute is experimental and requires \
-                    \"experimental-getter\" cargo feature to be enabled; \
-                    if you find the current design of this attribute already \
-                    solid please leave a 👍 reaction under the issue \
-                    https://github.com/elastio/bon/issues/225; if you have \
-                    any feedback, then feel free to leave a comment under that issue",
-                );
-            }
-
             self.validate_mutually_exclusive(
                 ParamName::Getter,
                 getter.key.span(),
