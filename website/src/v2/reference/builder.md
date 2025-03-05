@@ -6,8 +6,8 @@ outline: [2, 3]
 
 You can generate a builder using three different kinds of syntax (struct, free function, associated method). They all share two common groups of attributes.
 
--   [Top-level attributes](#top-level-attributes) - placed on a `struct` or `fn` declaration.
--   [Member attributes](#member-attributes) - placed on a `struct` field or `fn` argument.
+- [Top-level attributes](#top-level-attributes) - placed on a `struct` or `fn` declaration.
+- [Member attributes](#member-attributes) - placed on a `struct` field or `fn` argument.
 
 See examples. Make sure to click through the tabs:
 
@@ -304,10 +304,10 @@ Usually you'd want the underlying positional function to be hidden to provide on
 
 This attribute can take several forms.
 
--   Simple: `#[builder(expose_positional_fn = identifier)]`. Sets only the name of the positional function.
--   Verbose: `#[builder(expose_positional_fn(name = identifier, vis = "visibility"))]`.
-    Allows setting both the name and the visibility of the positional function.
-    Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
+- Simple: `#[builder(expose_positional_fn = identifier)]`. Sets only the name of the positional function.
+- Verbose: `#[builder(expose_positional_fn(name = identifier, vis = "visibility"))]`.
+  Allows setting both the name and the visibility of the positional function.
+  Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
 
 If `vis` parameter is not specified, then the visibility of the exposed positional function will be the same as specified on the function that the `#[builder]` was applied to.
 
@@ -358,8 +358,8 @@ Example::example()
 
 There are two conventional names in Rust ecosystem for constructors and builders:
 
--   `new` is used for a constructor method that uses positional parameters
--   `builder` is used for a method that returns a builder for a type
+- `new` is used for a constructor method that uses positional parameters
+- `builder` is used for a method that returns a builder for a type
 
 So when `#[builder]` is placed on a method called `new`, it'll generate a method called `builder` that starts the building process. This means there is already a default obvious name for the positional function that `expose_positional_fn` may use in this case if you don't specify any value for this attribute.
 
@@ -538,9 +538,9 @@ Example::example()
 
 This attribute must be of form `on(type_pattern, attributes)`.
 
--   `type_pattern` - type that will be compared with the types of the members. The types are compared textually. For example, `String` doesn't match `std::string::String`. You can use `_` to mark parts of the type to ignore when matching. For example, `Vec<_>` matches `Vec<u32>` or `Vec<String>`. Lifetimes are ignored during matching.
+- `type_pattern` - type that will be compared with the types of the members. The types are compared textually. For example, `String` doesn't match `std::string::String`. You can use `_` to mark parts of the type to ignore when matching. For example, `Vec<_>` matches `Vec<u32>` or `Vec<String>`. Lifetimes are ignored during matching.
 
--   `attributes` - for now, the only attribute supported in the `attributes` position is [`into`](#into). It sets `#[builder(into)]` for members that match the `type_pattern`.
+- `attributes` - for now, the only attribute supported in the `attributes` position is [`into`](#into). It sets `#[builder(into)]` for members that match the `type_pattern`.
 
 If you want to apply the `attributes` to all members, you can use the `_` type pattern that matches any type. For example, `#[builder(on(_, into))]`.
 
@@ -605,10 +605,10 @@ The default name for this method is `builder`, and the default visibility is the
 
 This attribute can take several forms.
 
--   Simple: `#[builder(start_fn = identifier)]`. Overrides only the name of the "start" method.
--   Verbose: `#[builder(start_fn(name = identifier, vis = "visibility"))]`.
-    Allows overriding both the name and the visibility of the "start" method.
-    Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
+- Simple: `#[builder(start_fn = identifier)]`. Overrides only the name of the "start" method.
+- Verbose: `#[builder(start_fn(name = identifier, vis = "visibility"))]`.
+  Allows overriding both the name and the visibility of the "start" method.
+  Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
 
 **Example:**
 

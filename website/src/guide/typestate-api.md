@@ -10,15 +10,15 @@ The typestate API should only come into play when you have a use case that isn't
 
 Here are some example use cases when you'd need to interact with the typestate API:
 
--   Denoting the builder's type when...
-    -   returning it from a function
-    -   declaring it as a parameter of a function
-    -   storing it in a struct
--   Defining a setter that...
-    -   is `unsafe` or `async`
-    -   declares its own named generic parameters
-    -   sets multiple members at once
-    -   ~~cooks you a dinner 🍝~~
+- Denoting the builder's type when...
+    - returning it from a function
+    - declaring it as a parameter of a function
+    - storing it in a struct
+- Defining a setter that...
+    - is `unsafe` or `async`
+    - declares its own named generic parameters
+    - sets multiple members at once
+    - ~~cooks you a dinner 🍝~~
 
 Just kidding 😸, the Typestate API can't cook you a dinner 😳, but **you** can definitely cook something cool using it 💪!
 

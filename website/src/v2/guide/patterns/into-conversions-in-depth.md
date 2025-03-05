@@ -20,8 +20,8 @@ If you prefer being explicit in code, feel free not to use `Into` conversions at
 
 We'll cover the following:
 
--   [Use `Into` conversions](#use-into-conversions)
--   [Avoid `Into` conversions](#avoid-into-conversions)
+- [Use `Into` conversions](#use-into-conversions)
+- [Avoid `Into` conversions](#avoid-into-conversions)
 
 ## Use `Into` conversions
 

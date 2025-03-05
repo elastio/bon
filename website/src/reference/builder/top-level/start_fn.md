@@ -101,9 +101,9 @@ See examples with `fn` syntax in the section below.
 
 By default, when you place `#[builder]` on a function, that original function is modified by the macro to make it hidden, so that only builder syntax remains available. Specifically, the macro does the following by default:
 
--   Prepends the prefix `__orig_` to the original function's name.
--   Changes the visibility of the original function to private.
--   Adds `#[doc(hidden)]` to the function.
+- Prepends the prefix `__orig_` to the original function's name.
+- Changes the visibility of the original function to private.
+- Adds `#[doc(hidden)]` to the function.
 
 If you specify the `start_fn` attribute on a function, the macro skips hiding the original function. It means the starting function no longer replaces the original function. This way both the original positional function and the starting function with the builder syntax are exposed.
 

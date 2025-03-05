@@ -66,9 +66,9 @@ The code was compiled with `opt-level = 3` and `debug = 0`.
 
 The benchmarks were run on a dedicated root server `AX51-NVMe` on [Hetzner](https://www.hetzner.com/).
 
--   OS: Ubuntu 22.04.4 (Linux 5.15.0-76-generic)
--   CPU: AMD Ryzen 7 3700X 8-Core Processor (x86_64)
--   RAM: 62.8 GiB
+- OS: Ubuntu 22.04.4 (Linux 5.15.0-76-generic)
+- CPU: AMD Ryzen 7 3700X 8-Core Processor (x86_64)
+- RAM: 62.8 GiB
 
 ## References
 

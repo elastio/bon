@@ -10,8 +10,8 @@ As an example, suppose we have a `Treasure` struct with `x` and `y` coordinates 
 
 To do that we can use the `#[builder(start_fn)]` attribute. There are two contexts where we can place it, and they both have a different meaning:
 
--   [Top-level `#[builder(start_fn = ...)]`](../reference/builder#start-fn) - configures the name of the starting function and optionally its visibility
--   [Member-level `#[builder(start_fn)]`](../reference/builder#start-fn-1) - configures the member to be a positional parameter on the starting function
+- [Top-level `#[builder(start_fn = ...)]`](../reference/builder#start-fn) - configures the name of the starting function and optionally its visibility
+- [Member-level `#[builder(start_fn)]`](../reference/builder#start-fn-1) - configures the member to be a positional parameter on the starting function
 
 We'll want to use both of these attributes in our example to give a better name for the starting function that describes its inputs and configure `x` and `y` as positional parameters on the starting function as well.
 
@@ -133,8 +133,8 @@ However, keep in mind that positional members (ones annotated with `#[builder(st
 
 For example `#[builder(into)]` on a regular (named) member of the `Option<T>` type generates two setters:
 
--   One that accepts `impl Into<T>`.
--   The other that accepts `Option<impl Into<T>>`.
+- One that accepts `impl Into<T>`.
+- The other that accepts `Option<impl Into<T>>`.
 
 For positional members, the story is completely different because there are no separate setters generated for them. There is just a single starting or finishing function. So if you enable an into conversion for a positional member of the `Option<T>` type, it will be accepted as `impl Into<Option<T>>` in the starting or finishing function.
 

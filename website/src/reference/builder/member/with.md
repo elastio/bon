@@ -194,10 +194,10 @@ Here `*Result` means the type must have a `Result` suffix. `[, E]` means the err
 
 Examples of valid return types:
 
--   `Result<_, MyError>`
--   `Result<_>`
--   `my_crate::Result<_>`
--   `ApiResult<_>`
+- `Result<_, MyError>`
+- `Result<_>`
+- `my_crate::Result<_>`
+- `ApiResult<_>`
 
 The symbol `_` must be specified verbatim. You don't need to repeat the underlying type of the member there.
 
@@ -218,8 +218,8 @@ For members of type `Option<T>` without [`#[builder(required)]`](./required), th
 
 The `maybe_` setter's input type depends on the number of input parameters in the closure:
 
--   If there is a single input parameter of type `T`, then the `maybe_` setter accepts `Option<T> `
--   If there are two or more input parameters of types `T1, T2, ...`, then the maybe setter accepts `Option<(T1, T2, ...)>`
+- If there is a single input parameter of type `T`, then the `maybe_` setter accepts `Option<T> `
+- If there are two or more input parameters of types `T1, T2, ...`, then the maybe setter accepts `Option<(T1, T2, ...)>`
 
 ```rust
 use bon::Builder;
@@ -260,12 +260,12 @@ Makes the setter accept `impl IntoIterator<Item = T>` or `impl IntoIterator<Item
 
 This attribute can be used with custom and 3-rd party collections such as [`indexmap::IndexMap`](https://docs.rs/indexmap/latest/indexmap/map/struct.IndexMap.html), not only with the `std::collections`. The only requirement is for the collection type to implement the `FromIterator` trait and match the following naming patterns:
 
--   `*Vec<T, ...>`
--   `*Set<T, ...>`
--   `*Map<K, V, ...>`
--   `*Deque<T, ...>`
--   `*Heap<T, ...>`
--   `*List<T, ...>`
+- `*Vec<T, ...>`
+- `*Set<T, ...>`
+- `*Map<K, V, ...>`
+- `*Deque<T, ...>`
+- `*Heap<T, ...>`
+- `*List<T, ...>`
 
 The `...` means there may be any number of other generic parameters (including zero), which could be used to pass a custom hasher or allocator.
 

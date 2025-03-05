@@ -214,11 +214,11 @@ See [alternatives](https://bon-rs.com/guide/alternatives) for comparison.
 
 Some notable users:
 
--   [`crates.io` backend](https://github.com/rust-lang/crates.io)
--   [`ractor`](https://github.com/slawlor/ractor)
--   [`comrak`](https://github.com/kivikakk/comrak)
--   [`soldeer`](https://github.com/mario-eth/soldeer) (package manager endorsed by [`foundry`](https://github.com/foundry-rs/foundry))
--   [`tachyonfx`](https://github.com/junkdog/tachyonfx)
+- [`crates.io` backend](https://github.com/rust-lang/crates.io)
+- [`ractor`](https://github.com/slawlor/ractor)
+- [`comrak`](https://github.com/kivikakk/comrak)
+- [`soldeer`](https://github.com/mario-eth/soldeer) (package manager endorsed by [`foundry`](https://github.com/foundry-rs/foundry))
+- [`tachyonfx`](https://github.com/junkdog/tachyonfx)
 
 ## Getting Help
 
