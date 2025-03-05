@@ -1,8 +1,7 @@
-use super::models::FinishFnParams;
+use super::models::{AssocMethodReceiverCtxParams, FinishFnParams};
 use super::top_level_config::TopLevelConfig;
 use super::{
-    AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFnBody, Generics, Member,
-    MemberOrigin, RawMember,
+    AssocMethodCtxParams, BuilderGenCtx, FinishFnBody, Generics, Member, MemberOrigin, RawMember,
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
 use crate::normalization::{GenericsNamespace, NormalizeSelfTy, SyntaxVariant};
@@ -122,19 +121,19 @@ impl<'a> FnInputCtx<'a> {
         }
     }
 
-    fn assoc_method_ctx(&self) -> Result<Option<AssocMethodCtx>> {
+    fn assoc_method_ctx(&self) -> Result<Option<AssocMethodCtxParams>> {
         let self_ty = match self.impl_ctx.as_deref() {
             Some(impl_ctx) => impl_ctx.self_ty.clone(),
             None => return Ok(None),
         };
 
-        Ok(Some(AssocMethodCtx {
+        Ok(Some(AssocMethodCtxParams {
             self_ty,
-            receiver: self.assoc_method_receiver_ctx()?,
+            receiver: self.assoc_method_receiver_ctx_params()?,
         }))
     }
 
-    fn assoc_method_receiver_ctx(&self) -> Result<Option<AssocMethodReceiverCtx>> {
+    fn assoc_method_receiver_ctx_params(&self) -> Result<Option<AssocMethodReceiverCtxParams>> {
         let receiver = match self.fn_item.norm.sig.receiver() {
             Some(receiver) => receiver,
             None => return Ok(None),
@@ -161,7 +160,7 @@ impl<'a> FnInputCtx<'a> {
 
         NormalizeSelfTy { self_ty }.visit_type_mut(&mut without_self_keyword);
 
-        Ok(Some(AssocMethodReceiverCtx {
+        Ok(Some(AssocMethodReceiverCtxParams {
             with_self_keyword: receiver.clone(),
             without_self_keyword,
         }))
@@ -451,10 +450,13 @@ impl FinishFnBody for FnCallBody {
             .filter(|arg| !matches!(arg, syn::GenericParam::Lifetime(_)))
             .map(syn::GenericParam::to_generic_argument);
 
-        let prefix = self
-            .sig
-            .receiver()
-            .map(|_| quote!(self.__unsafe_private_receiver.))
+        let prefix = ctx
+            .assoc_method_ctx
+            .as_ref()
+            .and_then(|ctx| {
+                let ident = &ctx.receiver.as_ref()?.field_ident;
+                Some(quote!(self.#ident.))
+            })
             .or_else(|| {
                 let self_ty = &self.impl_ctx.as_deref()?.self_ty;
                 Some(quote!(<#self_ty>::))

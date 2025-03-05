@@ -1,6 +1,83 @@
-# Custom Fields
+# Builder Fields
 
-On this page, you'll learn how to add custom fields to the builder type 🌾.
+On this page, you'll learn how to access some [native fields](#native-fields) of the builder type and add [custom fields](#custom-fields) to it 🌾.
+
+## Native Fields
+
+There are some native module-private fields on the builder that _you can access_ as the user of `bon`'s builder macros. The fields described below are guaranteed to have stable names and types so you can use them in custom methods such as custom setters and getters.
+
+::: warning Important Privacy Clarification
+
+The native fields documented here have default private Rust visibility. They are declared like this in the builder struct:
+
+```rust compile_fail
+struct BuilderStruct {
+    self_receiver: T,
+    // ... other not documented fields are actually private impl. details,
+    // so don't even try to access fields that begin with `__unsafe_private`!
+}
+```
+
+This means the fields documented below are accessible within the module where the builder struct was generated, but if you try to access them outside this module's scope, you'll get a compile error, because the fields aren't marked as `pub` or `pub(...)`.
+
+:::
+
+### `self_receiver`
+
+The field `self_receiver` is available on a builder generated from a method that has a `self` parameter.
+
+::: tip
+
+The term "receiver" was borrowed from [`syn`'s](https://docs.rs/syn/latest/syn/struct.Receiver.html) and [Rust Reference](https://doc.rust-lang.org/reference/expressions/method-call-expr.html) terminology.
+
+:::
+
+```rust
+use bon::bon;
+
+struct Example {
+    x1: u32
+}
+
+#[bon]
+impl Example {
+    #[builder]
+    fn method(&self) {
+        // ...
+    }
+}
+
+let builder = Example { x1: 99 }.method();
+
+// We can access the `self_receiver` on the builder. // [!code highlight]
+// It is a reference in this case, because `method` takes a `&self` // [!code highlight]
+let self_receiver: &Example = builder.self_receiver;
+
+assert_eq!(self_receiver.x1, 99);
+```
+
+### `#[builder(start_fn)]` members
+
+You can access the values of members marked with [`#[builder(start_fn)]`](../../reference/builder/member/start_fn) by their name on the builder directly.
+
+```rust
+use bon::Builder;
+
+#[derive(Builder)]
+struct Example {
+    #[builder(start_fn)]
+    x1: u32
+}
+
+let builder = Example::builder(99);
+
+// We can access the `x1` on the builder directly. // [!code highlight]
+let x1: u32 = builder.x1;
+
+assert_eq!(x1, 99);
+```
+
+## Custom Fields
 
 This is useful if you'd like a completely custom state for [custom setters](./custom-methods) in the builder.
 

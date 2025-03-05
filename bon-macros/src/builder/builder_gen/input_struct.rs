@@ -1,7 +1,7 @@
 use super::models::FinishFnParams;
 use super::top_level_config::TopLevelConfig;
 use super::{
-    AssocMethodCtx, BuilderGenCtx, FinishFnBody, Generics, Member, MemberOrigin, RawMember,
+    AssocMethodCtxParams, BuilderGenCtx, FinishFnBody, Generics, Member, MemberOrigin, RawMember,
 };
 use crate::builder::builder_gen::models::{BuilderGenCtxParams, BuilderTypeParams, StartFnParams};
 use crate::normalization::{GenericsNamespace, SyntaxVariant};
@@ -193,7 +193,7 @@ impl StructInputCtx {
             generics: None,
         };
 
-        let assoc_method_ctx = Some(AssocMethodCtx {
+        let assoc_method_ctx = Some(AssocMethodCtxParams {
             self_ty: self.struct_ty.into(),
             receiver: None,
         });

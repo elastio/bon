@@ -15,10 +15,8 @@ pub(crate) use top_level_config::TopLevelConfig;
 
 use crate::util::prelude::*;
 use getters::GettersCtx;
-use member::{
-    CustomField, Member, MemberOrigin, NamedMember, PosFnMember, RawMember, StartFnMember,
-};
-use models::{AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFnBody, Generics};
+use member::{CustomField, Member, MemberOrigin, NamedMember, PosFnMember, RawMember};
+use models::{AssocMethodCtxParams, AssocMethodReceiverCtx, BuilderGenCtx, FinishFnBody, Generics};
 use setters::SettersCtx;
 
 pub(crate) struct MacroOutput {
@@ -39,7 +37,7 @@ impl BuilderGenCtx {
         self.members.iter().filter_map(Member::as_field)
     }
 
-    fn start_fn_args(&self) -> impl Iterator<Item = &StartFnMember> {
+    fn start_fn_args(&self) -> impl Iterator<Item = &PosFnMember> {
         self.members.iter().filter_map(Member::as_start_fn)
     }
 

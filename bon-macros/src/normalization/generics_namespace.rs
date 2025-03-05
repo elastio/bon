@@ -33,20 +33,12 @@ impl Visit<'_> for GenericsNamespace {
 
 impl GenericsNamespace {
     pub(crate) fn unique_ident(&self, name: String) -> syn::Ident {
-        let name = Self::unique_name(&self.idents, name);
+        let name = unique_name(&self.idents, name);
         syn::Ident::new(&name, Span::call_site())
     }
 
     pub(crate) fn unique_lifetime(&self, name: String) -> String {
-        Self::unique_name(&self.lifetimes, name)
-    }
-
-    /// Adds `_` suffix to the name to avoid conflicts with existing identifiers.
-    fn unique_name(taken: &BTreeSet<String>, mut ident: String) -> String {
-        while taken.contains(&ident) {
-            ident.push('_');
-        }
-        ident
+        unique_name(&self.lifetimes, name)
     }
 
     pub(crate) fn visit_token_stream(&mut self, token_stream: TokenStream) {
@@ -72,4 +64,12 @@ impl GenericsNamespace {
             }
         }
     }
+}
+
+/// Adds `_` suffix to the name to avoid conflicts with existing identifiers.
+pub(crate) fn unique_name(taken: &BTreeSet<String>, mut ident: String) -> String {
+    while taken.contains(&ident) {
+        ident.push('_');
+    }
+    ident
 }

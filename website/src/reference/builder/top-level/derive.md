@@ -128,10 +128,10 @@ let example: u32 = builder
 assert_eq!(example, 99);
 
 // The debug output of the builder for methods with `self` includes
-// the special `self` field with the receiver.
+// the special field with called `self_receiver` that stores the `self` value.
 assert_eq!(
     format!("{:?}", Example.method_with_self()),
-    "ExampleMethodWithSelfBuilder { self: Example }"
+    "ExampleMethodWithSelfBuilder { self_receiver: Example }"
 )
 ```
 

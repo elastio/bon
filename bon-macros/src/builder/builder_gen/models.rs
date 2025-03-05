@@ -15,6 +15,14 @@ pub(super) trait FinishFnBody {
 pub(super) struct AssocMethodReceiverCtx {
     pub(super) with_self_keyword: syn::Receiver,
     pub(super) without_self_keyword: Box<syn::Type>,
+
+    /// Name of the receiver field in the builder struct.
+    pub(super) field_ident: syn::Ident,
+}
+
+pub(super) struct AssocMethodReceiverCtxParams {
+    pub(super) with_self_keyword: syn::Receiver,
+    pub(super) without_self_keyword: Box<syn::Type>,
 }
 
 pub(super) struct AssocMethodCtx {
@@ -25,6 +33,16 @@ pub(super) struct AssocMethodCtx {
     /// Present only if the method has a receiver, i.e. `self` or `&self` or
     /// `&mut self` or `self: ExplicitType`.
     pub(super) receiver: Option<AssocMethodReceiverCtx>,
+}
+
+pub(super) struct AssocMethodCtxParams {
+    /// The `Self` type of the impl block. It doesn't contain any nested
+    /// `Self` keywords in it. This is prohibited by Rust's syntax itself.
+    pub(super) self_ty: Box<syn::Type>,
+
+    /// Present only if the method has a receiver, i.e. `self` or `&self` or
+    /// `&mut self` or `self: ExplicitType`.
+    pub(super) receiver: Option<AssocMethodReceiverCtxParams>,
 }
 
 pub(super) struct FinishFn {
@@ -175,7 +193,7 @@ pub(super) struct BuilderGenCtxParams<'a> {
     /// Generics to apply to the builder type.
     pub(super) generics: Generics,
 
-    pub(super) assoc_method_ctx: Option<AssocMethodCtx>,
+    pub(super) assoc_method_ctx: Option<AssocMethodCtxParams>,
 
     pub(super) builder_type: BuilderTypeParams,
     pub(super) state_mod: ItemSigConfig,
@@ -309,6 +327,32 @@ impl BuilderGenCtx {
                 .map(|&name| syn::Ident::new(name, Span::call_site()))
                 .unwrap_or_else(|| namespace.unique_ident(format!("{}_", possible_names[0])))
         };
+
+        let assoc_method_ctx = assoc_method_ctx.map(|ctx| {
+            let receiver = ctx.receiver.map(|receiver| {
+                let start_fn_arg_names = members
+                    .iter()
+                    .filter_map(Member::as_start_fn)
+                    .map(|member| member.ident.to_string())
+                    .collect();
+
+                let field_ident = crate::normalization::unique_name(
+                    &start_fn_arg_names,
+                    "self_receiver".to_owned(),
+                );
+
+                AssocMethodReceiverCtx {
+                    with_self_keyword: receiver.with_self_keyword,
+                    without_self_keyword: receiver.without_self_keyword,
+                    field_ident: syn::Ident::new(&field_ident, Span::call_site()),
+                }
+            });
+
+            AssocMethodCtx {
+                self_ty: ctx.self_ty,
+                receiver,
+            }
+        });
 
         Ok(Self {
             bon: bon.unwrap_or_else(|| syn::parse_quote!(::bon)),

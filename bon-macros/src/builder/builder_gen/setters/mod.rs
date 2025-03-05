@@ -349,14 +349,13 @@ impl<'a> SettersCtx<'a> {
                 } else {
                     let builder_ident = &self.base.builder_type.ident;
 
-                    let maybe_receiver_field = self.base.receiver().map(
-                        |_| quote!(__unsafe_private_receiver: self.__unsafe_private_receiver,),
-                    );
+                    let maybe_receiver_field = self.base.receiver().map(|receiver| {
+                        let ident = &receiver.field_ident;
+                        quote!(#ident: self.#ident,)
+                    });
 
-                    let maybe_start_fn_args_field =
-                        self.base.start_fn_args().next().map(
-                            |_| quote!(__unsafe_private_start_fn_args: self.__unsafe_private_start_fn_args,),
-                        );
+                    let start_fn_args_fields_idents =
+                        self.base.start_fn_args().map(|member| &member.ident);
 
                     let custom_fields_idents = self.base.custom_fields().map(|field| &field.ident);
 
@@ -365,7 +364,7 @@ impl<'a> SettersCtx<'a> {
                             __unsafe_private_phantom: ::core::marker::PhantomData,
                             #( #custom_fields_idents: self.#custom_fields_idents, )*
                             #maybe_receiver_field
-                            #maybe_start_fn_args_field
+                            #( #start_fn_args_fields_idents: self.#start_fn_args_fields_idents, )*
                             __unsafe_private_named: self.__unsafe_private_named,
                         }
                     }

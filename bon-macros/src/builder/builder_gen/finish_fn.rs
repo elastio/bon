@@ -13,9 +13,8 @@ impl super::BuilderGenCtx {
                     .unwrap_or_else(|| quote! { ::core::default::Default::default() });
             }
             Member::StartFn(member) => {
-                let index = &member.index;
-
-                return quote! { self.__unsafe_private_start_fn_args.#index };
+                let ident = &member.ident;
+                return quote! { self.#ident };
             }
             Member::FinishFn(member) => {
                 return member
