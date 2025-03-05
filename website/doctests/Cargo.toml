@@ -14,11 +14,11 @@ workspace = true
 [dev-dependencies]
 anyhow                = "1.0"
 bon                   = { path = "../../bon", features = ["experimental-overwritable", "implied-bounds"] }
-buildstructor         = "0.5"
+buildstructor         = "0.6"
 macro_rules_attribute = "0.2"
 typed-builder         = "0.20"
 
 [build-dependencies]
-itertools  = "0.13"
+itertools  = "0.14"
 lazy-regex = "3.3"
 walkdir    = "2.5"
