@@ -1,16 +1,12 @@
-# `getter` :microscope:
+# `getter`
 
 **Applies to:** <Badge type="warning" text="struct fields"/> <Badge type="warning" text="function arguments"/> <Badge type="warning" text="method arguments"/>
 
 Generates a getter method for a member. The method is callable only after the value for the member is set using any of its setters.
 
-::: danger 🔬 **Experimental**
+> This attribute has some planned future extensions described in the tracking issue [#225](https://github.com/elastio/bon/issues/225). Any feedback is appreciated!
 
-This attribute is available under the cargo feature `experimental-getter`. Breaking changes may occur between **minor** releases but not between patch releases.
-
-The fate of this feature depends on your feedback in the tracking issue [#225](https://github.com/elastio/bon/issues/225). Please, let us know if you have any ideas on improving this attribute, or if it's already good enough!
-
-:::
+---
 
 The getter for a required member returns `&T` by default (can be [overridden](#overriding-the-return-type)).
 
@@ -119,7 +115,7 @@ You can override the return type of the getter, its name, visibility, and docs.
         deref,
 
         // Return the type specified in parens.
-        // A deref coercion is expected to be valid to the specified type.
+        // There must exist a deref coercion is to the specified type.
         // Don't specify the leading `&` here.
         deref(T),
 
