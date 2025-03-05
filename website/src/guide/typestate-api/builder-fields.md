@@ -4,13 +4,13 @@ On this page, you'll learn how to access some [native fields](#native-fields) of
 
 ## Native Fields
 
-There are some native module-private fields on the builder that _you can access_ as the user of `bon`'s builder macros. The fields described below are guaranteed to have stable names and types so that you could use them in your custom methods such as custom setters and getters.
+There are some native module-private fields on the builder that _you can access_ as the user of `bon`'s builder macros. The fields described below are guaranteed to have stable names and types so you can use them in custom methods such as custom setters and getters.
 
 ::: warning Important Privacy Clarification
 
 The native fields documented here have default private Rust visibility. They are declared like this in the builder struct:
 
-```rust
+```rust compile_fail
 struct BuilderStruct {
     self_receiver: T,
     // ... other not documented fields are actually private impl. details,
