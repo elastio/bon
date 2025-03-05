@@ -245,9 +245,9 @@ impl<S: example_builder::IsComplete> From<ExampleBuilder<S>> for Example {
 
 Note that `#[builder(derive(Into))]` is quite limited. Here are some things it doesn't support:
 
--   `async` functions, because `From::from()` is synchronous
--   `unsafe` functions, because `From::from()` is safe
--   Members marked with [`#[builder(finish_fn)]`](../member/finish_fn) because `From::from()` doesn't accept arguments
+- `async` functions, because `From::from()` is synchronous
+- `unsafe` functions, because `From::from()` is safe
+- Members marked with [`#[builder(finish_fn)]`](../member/finish_fn) because `From::from()` doesn't accept arguments
 
 ### Use Cases
 

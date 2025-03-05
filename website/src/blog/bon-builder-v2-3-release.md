@@ -31,8 +31,8 @@ As an example, suppose we have a `Treasure` struct with `x` and `y` coordinates 
 
 To do that we can use the `#[builder(start_fn)]` attribute. There are two contexts where we can place it, and they both have a different meaning:
 
--   [Top-level `#[builder(start_fn = ...)]`](../reference/builder/top-level/start_fn) - configures the name of the starting function and optionally its visibility
--   [Member-level `#[builder(start_fn)]`](../reference/builder/member/start_fn) - configures the member to be a positional parameter on the starting function
+- [Top-level `#[builder(start_fn = ...)]`](../reference/builder/top-level/start_fn) - configures the name of the starting function and optionally its visibility
+- [Member-level `#[builder(start_fn)]`](../reference/builder/member/start_fn) - configures the member to be a positional parameter on the starting function
 
 We'll want to use both of these attributes in our example to give a better name for the starting function that describes its inputs and configure `x` and `y` as positional parameters on the starting function as well.
 
@@ -146,8 +146,8 @@ Bon's goal is to empower everyone to build beautiful APIs with great flexibility
 
 You can leave comments for this post on the platform of your choice:
 
--   [Reddit](https://www.reddit.com/r/rust/comments/1fgmbo7/media_nextgen_builder_macro_bon_23_release/)
--   [X (Twitter)](https://x.com/veetaha/status/1834951093559648544)
+- [Reddit](https://www.reddit.com/r/rust/comments/1fgmbo7/media_nextgen_builder_macro_bon_23_release/)
+- [X (Twitter)](https://x.com/veetaha/status/1834951093559648544)
 
 :::
 

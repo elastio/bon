@@ -107,10 +107,10 @@ Usually you'd want the underlying positional function to be hidden to provide on
 
 This attribute can take several forms.
 
--   Simple: `#[builder(expose_positional_fn = identifier)]`. Sets only the name of the positional function.
--   Verbose: `#[builder(expose_positional_fn(name = identifier, vis = "visibility"))]`.
-    Allows setting both the name and the visibility of the positional function.
-    Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
+- Simple: `#[builder(expose_positional_fn = identifier)]`. Sets only the name of the positional function.
+- Verbose: `#[builder(expose_positional_fn(name = identifier, vis = "visibility"))]`.
+  Allows setting both the name and the visibility of the positional function.
+  Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
 
 If `vis` parameter is not specified, then the visibility of the exposed positional function will be the same as specified on the function that the `#[builder]` was applied to.
 
@@ -161,8 +161,8 @@ Example::example()
 
 There are two conventional names in Rust ecosystem for constructors and builders:
 
--   `new` is used for a constructor method that uses positional parameters
--   `builder` is used for a method that returns a builder for a type
+- `new` is used for a constructor method that uses positional parameters
+- `builder` is used for a method that returns a builder for a type
 
 So when `#[builder]` is placed on a method called `new`, it'll generate a method called `builder` that starts the building process. This means there is already a default obvious name for the positional function that `expose_positional_fn` may use in this case if you don't specify any value for this attribute.
 
@@ -269,10 +269,10 @@ The default name for this method is `builder`, and the default visibility is the
 
 This attribute can take several forms.
 
--   Simple: `#[builder(start_fn = identifier)]`. Overrides only the name of the "start" method.
--   Verbose: `#[builder(start_fn(name = identifier, vis = "visibility"))]`.
-    Allows overriding both the name and the visibility of the "start" method.
-    Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
+- Simple: `#[builder(start_fn = identifier)]`. Overrides only the name of the "start" method.
+- Verbose: `#[builder(start_fn(name = identifier, vis = "visibility"))]`.
+  Allows overriding both the name and the visibility of the "start" method.
+  Each key is optional. The `vis` must be specified as a string literal e.g. `"pub(crate)"`, `"pub"` or `""` (empty string means private visibility).
 
 **Example:**
 

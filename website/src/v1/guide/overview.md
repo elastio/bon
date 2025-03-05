@@ -178,16 +178,16 @@ See [`Into` conversions](./into-conversions) for details.
 The `#[builder]` attribute works almost with any kind of function that uses any available Rust syntax.
 All of the following is supported.
 
--   Functions can return any values including `Result`, `Option`, etc.
--   The `impl Trait` syntax is supported both in function parameters and return type.
--   `async` functions.
--   `unsafe` functions.
--   Generic type parameters.
--   Generic const parameters (const generics).
--   Generic lifetimes.
--   `where` clauses.
--   Anonymous lifetimes, i.e. `'_` or just regular references without explicit lifetimes like `&u32`.
--   Nested functions defined inside of other items bodies, e.g.
+- Functions can return any values including `Result`, `Option`, etc.
+- The `impl Trait` syntax is supported both in function parameters and return type.
+- `async` functions.
+- `unsafe` functions.
+- Generic type parameters.
+- Generic const parameters (const generics).
+- Generic lifetimes.
+- `where` clauses.
+- Anonymous lifetimes, i.e. `'_` or just regular references without explicit lifetimes like `&u32`.
+- Nested functions defined inside of other items bodies, e.g.
     ```rust
     fn foo() {
         // Just works

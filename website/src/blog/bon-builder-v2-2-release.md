@@ -228,8 +228,8 @@ Also, a huge thank you for 750 stars ⭐ [on Github](https://github.com/elastio/
 
 You can leave comments for this post on the platform of your choice:
 
--   [Reddit](https://www.reddit.com/r/rust/comments/1fc0ai7/media_nextgen_builder_macro_bon_22_release_derive/)
--   [X (Twitter)](https://x.com/veetaha/status/1832804375154065432)
+- [Reddit](https://www.reddit.com/r/rust/comments/1fc0ai7/media_nextgen_builder_macro_bon_22_release_derive/)
+- [X (Twitter)](https://x.com/veetaha/status/1832804375154065432)
 
 :::
 

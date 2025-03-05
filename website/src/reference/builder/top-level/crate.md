@@ -41,6 +41,6 @@ impl Example {
 
 The macro disallows relative paths. Only the following is accepted:
 
--   Absolute path with a leading colon like `::foo::bar`
--   Path with `crate` prefix like `crate::foo::bar`
--   Path with `$crate` prefix like `$crate::foo::bar`
+- Absolute path with a leading colon like `::foo::bar`
+- Path with `crate` prefix like `crate::foo::bar`
+- Path with `$crate` prefix like `$crate::foo::bar`

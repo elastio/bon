@@ -39,8 +39,8 @@ Notice the pattern here. Every time we set a member, we wrap the previous type s
 
 There is a special `Empty` type state, which is used as the default value for the generic parameter `S` in two places:
 
--   The builder type itself: `ExampleBuilder<S = Empty>`
--   The type state transitions: `Set{Member}<S = Empty>`
+- The builder type itself: `ExampleBuilder<S = Empty>`
+- The type state transitions: `Set{Member}<S = Empty>`
 
 This is why we didn't have to mention the generic parameter for the first `ExampleBuilder`, and for `SetX1`.
 

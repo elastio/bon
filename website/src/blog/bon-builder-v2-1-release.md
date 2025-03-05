@@ -29,8 +29,8 @@ This optimization covers only the code produced by expanding the [`#[bon::builde
 
 The `#[builder]` macro now [benefits](https://github.com/elastio/bon/blob/88529337e261e8ca11268b2d4759f9372d802e45/bon/src/private/mod.rs#L8-L32) from the [`#[diagnostic::on_unimplemented]`](https://doc.rust-lang.org/nightly/reference/attributes/diagnostics.html#the-diagnosticon_unimplemented-attribute) attribute. It now generates a readable compile error with additional context for debugging in the following cases:
 
--   Forgetting to set a required member.
--   Setting the same member twice (unintentional overwrite).
+- Forgetting to set a required member.
+- Setting the same member twice (unintentional overwrite).
 
 Let's see this in action in the following example of code:
 
@@ -249,8 +249,8 @@ Also, a huge thank you for 600 stars ⭐ [on Github](https://github.com/elastio/
 
 You can leave comments for this post on the platform of your choice:
 
--   [Reddit](https://www.reddit.com/r/rust/comments/1f6d7vr/media_nextgen_builder_macro_bon_21_release/)
--   [X (Twitter)](https://x.com/veetaha/status/1830221731677839637)
+- [Reddit](https://www.reddit.com/r/rust/comments/1f6d7vr/media_nextgen_builder_macro_bon_21_release/)
+- [X (Twitter)](https://x.com/veetaha/status/1830221731677839637)
 
 :::
 
