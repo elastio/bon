@@ -34,7 +34,7 @@ pub(crate) fn generate_from_attr(params: TokenStream, item: TokenStream) -> Toke
 }
 
 fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<TokenStream> {
-    let item: syn::Item = syn::parse2(item)?;
+    let item = syn::parse2(item)?;
 
     let ctx = ExpandCfg {
         current_macro: format_ident!("builder"),
@@ -47,7 +47,7 @@ fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<Toke
         Expansion::Recurse(output) => return Ok(output),
     };
 
-    let main_output = match input.item {
+    let main_output = match *input.item {
         syn::Item::Fn(item_fn) => {
             let mut namespace = GenericsNamespace::default();
 

@@ -14,13 +14,13 @@ pub(crate) enum Expansion {
 
 pub(crate) struct Expanded {
     pub(crate) config: TokenStream,
-    pub(crate) item: syn::Item,
+    pub(crate) item: Box<syn::Item>,
 }
 
 pub(crate) struct ExpandCfg {
     pub(crate) current_macro: syn::Ident,
     pub(crate) config: TokenStream,
-    pub(crate) item: syn::Item,
+    pub(crate) item: Box<syn::Item>,
 }
 
 impl ExpandCfg {

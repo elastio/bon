@@ -86,7 +86,7 @@ impl CfgSyntax {
 }
 
 pub(crate) struct CfgAttr {
-    pub(crate) predicate: syn::Meta,
+    pub(crate) predicate: Box<syn::Meta>,
     pub(crate) then_branch: Punctuated<syn::Meta, syn::Token![,]>,
 }
 

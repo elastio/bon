@@ -63,7 +63,7 @@ A new attribute is now supported at the top level. You can add [`#[builder(deriv
 
 This helps with reusing [partial builders](../guide/patterns/conditional-building#shared-partial-builder), because now you can clone the builder where only part of the fields are set.
 
-The `Debug` derive allows you to [inspect](../guide/basics/inspecting) the builder state for debugging purposes.
+The `Debug` derive allows you to [inspect](../guide/basics/derives-for-builders) the builder state for debugging purposes.
 
 **Example:**
 
