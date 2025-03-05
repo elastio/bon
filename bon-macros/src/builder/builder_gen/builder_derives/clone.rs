@@ -12,27 +12,22 @@ impl BuilderGenCtx {
         let clone = quote!(::core::clone::Clone);
 
         let clone_receiver = self.receiver().map(|receiver| {
+            let ident = &receiver.field_ident;
             let ty = &receiver.without_self_keyword;
             quote! {
-                __unsafe_private_receiver: <#ty as #clone>::clone(&self.__unsafe_private_receiver),
+                #ident: <#ty as #clone>::clone(&self.#ident),
             }
         });
 
-        let clone_start_fn_args = self.start_fn_args().next().map(|_| {
-            let types = self.start_fn_args().map(|arg| &arg.base.ty.norm);
-            let indices = self.start_fn_args().map(|arg| &arg.index);
+        let clone_start_fn_args = self.start_fn_args().map(|member| {
+            let member_ident = &member.ident;
+            let member_ty = &member.ty.norm;
 
             quote! {
-                // We clone named members individually instead of cloning
-                // the entire tuple to improve error messages in case if
-                // one of the members doesn't implement `Clone`. This avoids
-                // a sentence that say smth like
-                // ```
-                // required for `(...big type...)` to implement `Clone`
-                // ```
-                __unsafe_private_start_fn_args: (
-                    #( <#types as #clone>::clone(&self.__unsafe_private_start_fn_args.#indices), )*
-                ),
+                // The type hint here is necessary to get better error messages
+                // that point directly to the type that doesn't implement `Clone`
+                // in the input code using the span info from the type hint.
+                #member_ident: <#member_ty as #clone>::clone(&self.#member_ident)
             }
         });
 
@@ -84,7 +79,7 @@ impl BuilderGenCtx {
                     Self {
                         __unsafe_private_phantom: ::core::marker::PhantomData,
                         #clone_receiver
-                        #clone_start_fn_args
+                        #( #clone_start_fn_args, )*
                         #( #clone_fields, )*
 
                         // We clone named members individually instead of cloning

@@ -39,7 +39,7 @@ impl MemberOrigin {
 #[derive(Debug)]
 pub(crate) enum Member {
     /// Member that was marked with `#[builder(start_fn)]`
-    StartFn(StartFnMember),
+    StartFn(PosFnMember),
 
     /// Member that was marked with `#[builder(field)]`
     Field(CustomField),
@@ -52,15 +52,6 @@ pub(crate) enum Member {
 
     /// Member that was marked with `#[builder(skip)]`
     Skip(SkipMember),
-}
-
-/// Member that was marked with `#[builder(start_fn)]`
-#[derive(Debug)]
-pub(crate) struct StartFnMember {
-    pub(crate) base: PosFnMember,
-
-    /// Index of the member relative to other positional members. The index is 0-based.
-    pub(crate) index: syn::Index,
 }
 
 #[derive(Debug)]
@@ -138,21 +129,13 @@ impl Member {
         let mut output = vec![];
 
         // Collect `start_fn` members
-        for index in 0.. {
-            let next = members.next_if(|(_, meta)| meta.start_fn.is_present());
-            let (member, config) = match next {
-                Some(item) => item,
-                None => break,
-            };
-            let base = PosFnMember::new(origin, member, on, config)?;
-            output.push(Self::StartFn(StartFnMember {
-                base,
-                index: index.into(),
-            }));
+        while let Some((member, config)) = members.next_if(|(_, cfg)| cfg.start_fn.is_present()) {
+            let member = PosFnMember::new(origin, member, on, config)?;
+            output.push(Self::StartFn(member));
         }
 
         // Collect `field` members
-        while let Some((member, config)) = members.next_if(|(_, config)| config.field.is_some()) {
+        while let Some((member, config)) = members.next_if(|(_, cfg)| cfg.field.is_some()) {
             let init = config
                 .field
                 .expect("validated `field.is_some()` in `next_if`")
@@ -163,10 +146,8 @@ impl Member {
         }
 
         // Collect `finish_fn` members
-        while let Some((member, config)) =
-            members.next_if(|(_, config)| config.finish_fn.is_present())
-        {
-            let member = PosFnMember::new(origin, member, on, config)?;
+        while let Some((member, cfg)) = members.next_if(|(_, cfg)| cfg.finish_fn.is_present()) {
+            let member = PosFnMember::new(origin, member, on, cfg)?;
             output.push(Self::FinishFn(member));
         }
 
@@ -238,9 +219,8 @@ impl Member {
 impl Member {
     pub(crate) fn norm_ty(&self) -> &syn::Type {
         match self {
-            Self::StartFn(me) => &me.base.ty.norm,
             Self::Field(me) => &me.norm_ty,
-            Self::FinishFn(me) => &me.ty.norm,
+            Self::FinishFn(me) | Self::StartFn(me) => &me.ty.norm,
             Self::Named(me) => &me.ty.norm,
             Self::Skip(me) => &me.norm_ty,
         }
@@ -248,9 +228,8 @@ impl Member {
 
     pub(crate) fn orig_ident(&self) -> &syn::Ident {
         match self {
-            Self::StartFn(me) => &me.base.ident,
             Self::Field(me) => &me.ident,
-            Self::FinishFn(me) => &me.ident,
+            Self::FinishFn(me) | Self::StartFn(me) => &me.ident,
             Self::Named(me) => &me.name.orig,
             Self::Skip(me) => &me.ident,
         }
@@ -270,7 +249,7 @@ impl Member {
         }
     }
 
-    pub(crate) fn as_start_fn(&self) -> Option<&StartFnMember> {
+    pub(crate) fn as_start_fn(&self) -> Option<&PosFnMember> {
         match self {
             Self::StartFn(me) => Some(me),
             _ => None,

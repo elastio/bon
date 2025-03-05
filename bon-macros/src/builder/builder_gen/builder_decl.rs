@@ -37,10 +37,10 @@ impl super::BuilderGenCtx {
         };
 
         let receiver_field = self.receiver().map(|receiver| {
+            let ident = &receiver.field_ident;
             let ty = &receiver.without_self_keyword;
             quote! {
-                #private_field_attrs
-                __unsafe_private_receiver: #ty,
+                #ident: #ty,
             }
         });
 
@@ -51,17 +51,8 @@ impl super::BuilderGenCtx {
 
         let allows = super::allow_warnings_on_member_types();
 
-        let mut start_fn_arg_types = self
-            .start_fn_args()
-            .map(|member| &member.base.ty.norm)
-            .peekable();
-
-        let start_fn_args_field = start_fn_arg_types.peek().is_some().then(|| {
-            quote! {
-                #private_field_attrs
-                __unsafe_private_start_fn_args: (#(#start_fn_arg_types,)*),
-            }
-        });
+        let start_fn_args_fields_idents = self.start_fn_args().map(|member| &member.ident);
+        let start_fn_args_fields_types = self.start_fn_args().map(|member| &member.ty.norm);
 
         let named_members_types = self.named_members().map(NamedMember::underlying_norm_ty);
 
@@ -104,7 +95,8 @@ impl super::BuilderGenCtx {
                 __unsafe_private_phantom: #phantom_data,
 
                 #receiver_field
-                #start_fn_args_field
+
+                #( #start_fn_args_fields_idents: #start_fn_args_fields_types, )*
 
                 #( #custom_fields_idents: #custom_fields_types, )*
 

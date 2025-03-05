@@ -10,14 +10,14 @@ impl BuilderGenCtx {
         let format_members = self.members.iter().filter_map(|member| {
             match member {
                 Member::StartFn(member) => {
-                    let member_index = &member.index;
-                    let member_ident_str = member.base.ident.to_string();
-                    let member_ty = &member.base.ty.norm;
+                    let member_ident = &member.ident;
+                    let member_ident_str = member_ident.to_string();
+                    let member_ty = &member.ty.norm;
                     Some(quote! {
                         output.field(
                             #member_ident_str,
                             #bon::__::better_errors::as_dyn_debug::<#member_ty>(
-                                &self.__unsafe_private_start_fn_args.#member_index
+                                &self.#member_ident
                             )
                         );
                     })
@@ -57,12 +57,14 @@ impl BuilderGenCtx {
         });
 
         let format_receiver = self.receiver().map(|receiver| {
+            let ident = &receiver.field_ident;
+            let ident_str = ident.to_string();
             let ty = &receiver.without_self_keyword;
             quote! {
                 output.field(
-                    "self",
+                    #ident_str,
                     #bon::__::better_errors::as_dyn_debug::<#ty>(
-                        &self.__unsafe_private_receiver
+                        &self.#ident
                     )
                 );
             }

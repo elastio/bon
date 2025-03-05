@@ -1,3 +1,4 @@
+use super::member::PosFnMember;
 use crate::util::prelude::*;
 
 impl super::BuilderGenCtx {
@@ -24,9 +25,10 @@ impl super::BuilderGenCtx {
         let receiver = self.receiver();
 
         let receiver_field_init = receiver.map(|receiver| {
+            let ident = &receiver.field_ident;
             let self_token = &receiver.with_self_keyword.self_token;
             quote! {
-                __unsafe_private_receiver: #self_token,
+                #ident: #self_token,
             }
         });
 
@@ -40,32 +42,23 @@ impl super::BuilderGenCtx {
             quote! { #receiver, }
         });
 
-        let start_fn_params = self
-            .start_fn_args()
-            .map(|member| member.base.fn_input_param());
+        let start_fn_params = self.start_fn_args().map(PosFnMember::fn_input_param);
 
         // Assign `start_fn_args` to intermediate variables, which may be used
         // by custom fields init expressions. This is needed only if there is
         // a conversion configured for the `start_fn` members, otherwise these
         // are already available in scope as function arguments directly.
         let start_fn_vars = self.start_fn_args().filter_map(|member| {
-            let ident = &member.base.ident;
-            let ty = &member.base.ty.orig;
-            let conversion = member.base.conversion()?;
+            let ident = &member.ident;
+            let ty = &member.ty.orig;
+            let conversion = member.conversion()?;
 
             Some(quote! {
                 let #ident: #ty = #conversion;
             })
         });
 
-        let mut start_fn_args = self.start_fn_args().peekable();
-
-        let start_fn_args_field_init = start_fn_args.peek().is_some().then(|| {
-            let idents = start_fn_args.map(|member| &member.base.ident);
-            quote! {
-                __unsafe_private_start_fn_args: (#(#idents,)*),
-            }
-        });
+        let start_fn_args_fields_idents = self.start_fn_args().map(|member| &member.ident);
 
         // Create custom fields in separate variables. This way custom fields
         // declared lower in the struct definition can reference custom fields
@@ -127,7 +120,7 @@ impl super::BuilderGenCtx {
                     __unsafe_private_phantom: ::core::marker::PhantomData,
                     #( #custom_fields_idents, )*
                     #receiver_field_init
-                    #start_fn_args_field_init
+                    #( #start_fn_args_fields_idents, )*
                     __unsafe_private_named: #named_members_field_init,
                 }
             }

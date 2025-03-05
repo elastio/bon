@@ -17,8 +17,9 @@ fn main() {
     // for details: https://github.com/elastio/bon/issues/218
     let SutSutBuilder {
         __unsafe_private_phantom: _,
-        __unsafe_private_start_fn_args: _,
-        __unsafe_private_receiver: _,
         __unsafe_private_named: _,
+        // These are public
+        _x1: _,
+        receiver: _,
     } = sut;
 }
