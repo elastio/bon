@@ -88,7 +88,7 @@ fn builder_with_receiver() {
         &actual,
         expect![[r#"
             SutMethodBuilder {
-                receiver: Sut {
+                self_receiver: Sut {
                     name: "Blackjack",
                 },
                 other_name: "P21",
@@ -208,7 +208,7 @@ mod generics {
 
         assert_debug_eq(
             &actual,
-            expect!["SutWithSelfBuilder { receiver: Sut(true), arg1: 42 }"],
+            expect!["SutWithSelfBuilder { self_receiver: Sut(true), arg1: 42 }"],
         );
 
         let actual: u32 = From::from(actual);
@@ -308,13 +308,17 @@ mod positional_members {
 
         assert_debug_eq(
             actual.clone(),
-            expect!["SutWithSelfBuilder { receiver: Sut, start_fn_arg: true }"],
+            expect![[r#"
+                SutWithSelfBuilder {
+                    self_receiver: Sut,
+                    start_fn_arg: true,
+                }"#]],
         );
         assert_debug_eq(
             actual.named(42).clone(),
             expect![[r#"
                 SutWithSelfBuilder {
-                    receiver: Sut,
+                    self_receiver: Sut,
                     start_fn_arg: true,
                     named: 42,
                 }"#]],

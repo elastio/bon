@@ -162,7 +162,7 @@ fn test_method() {
         &sut,
         expect![[r#"
             SutWithSelfBuilder {
-                receiver: Sut,
+                self_receiver: Sut,
                 x1: 1,
                 x2: 2,
                 x3: false,

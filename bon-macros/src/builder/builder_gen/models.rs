@@ -336,8 +336,10 @@ impl BuilderGenCtx {
                     .map(|member| member.ident.to_string())
                     .collect();
 
-                let field_ident =
-                    crate::normalization::unique_name(&start_fn_arg_names, "receiver".to_owned());
+                let field_ident = crate::normalization::unique_name(
+                    &start_fn_arg_names,
+                    "self_receiver".to_owned(),
+                );
 
                 AssocMethodReceiverCtx {
                     with_self_keyword: receiver.with_self_keyword,
