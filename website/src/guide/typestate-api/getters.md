@@ -1,6 +1,6 @@
-# Getters :microscope:
+# Getters
 
-You can generate a getter method for the member with the experimental attribute [`#[builder(getter)]`](../../reference/builder/member/getter) 🔬. The generated getter is available only when the value for the member was set (i.e. its type state implements the [`IsSet`](./custom-methods#isset-trait) trait).
+You can generate a getter method for the member with the attribute [`#[builder(getter)]`](../../reference/builder/member/getter). The generated getter is available only when the value for the member was set (i.e. its type state implements the [`IsSet`](./custom-methods#isset-trait) trait).
 
 ## Custom Getters
 
