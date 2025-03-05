@@ -58,11 +58,11 @@ pub(crate) struct TopLevelConfig {
     #[darling(default, with = parse_state_mod)]
     pub(crate) state_mod: ItemSigConfig,
 
-    #[darling(multiple, with = crate::parsing::parse_non_empty_paren_meta_list)]
+    #[darling(multiple, with = crate::parsing::parse_classic_non_empty)]
     pub(crate) on: Vec<OnConfig>,
 
     /// Specifies the derives to apply to the builder.
-    #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list)]
+    #[darling(default, with = crate::parsing::parse_classic_non_empty)]
     pub(crate) derive: DerivesConfig,
 }
 

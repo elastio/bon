@@ -32,7 +32,7 @@ impl FromMeta for GetterConfig {
         }
 
         // Reject empty parens such as `#[builder(getter())]`
-        crate::parsing::require_non_empty_paren_meta_list_or_name_value(meta)?;
+        crate::parsing::require_classic_non_empty(meta)?;
 
         // Nested `Parsed` struct used as a helper for parsing the verbose form
         #[derive(FromMeta)]
@@ -70,7 +70,7 @@ impl FromMeta for GetterConfig {
         if let [kind1, kind2, ..] = kinds.as_slice() {
             bail!(
                 &kind1.key,
-                "`{}` can't be specified together with `{}`",
+                "`{}` is mutually exclusive with `{}`",
                 kind1.key,
                 kind2.key
             );
