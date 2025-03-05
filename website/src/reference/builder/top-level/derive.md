@@ -44,7 +44,7 @@ assert_eq!(
 let example: Example = builder
     .is_admin(true)
     // We can use `From<ExampleBuilder> for Example` instead of
-    // calling .build()
+    // calling .build() thanks to `Into` derive
     .into();
 ```
 
@@ -76,8 +76,8 @@ assert_eq!(
 
 let example: u32 = builder
     .is_admin(true)
-    // We can use `From<ExampleBuilder> for Example` instead of
-    // calling .build()
+    // We can use `From<ExampleBuilder> for u32` instead of
+    // calling .build() thanks to `Into` derive
     .into();
 
 assert_eq!(example, 99);
@@ -121,8 +121,8 @@ assert_eq!(
 
 let example: u32 = builder
     .is_admin(true)
-    // We can use `From<ExampleBuilder> for Example` instead of
-    // calling .build()
+    // We can use `From<ExampleBuilder> for u32` instead of
+    // calling .build() thanks to `Into` derive
     .into();
 
 assert_eq!(example, 99);
