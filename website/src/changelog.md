@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.3.3](https://github.com/elastio/bon/compare/v3.3.2...v3.3.3) - 2025-03-05
+
+### Other
+
+- Stabilize the current `#[builder(getter)]` feature MVP ([#251](https://github.com/elastio/bon/pull/251))
+- Make `self` receiver and `start_fn` members available as official fields ([#250](https://github.com/elastio/bon/pull/250))
+- Introduce `#[builder(derive(Into))]` attribute ([#248](https://github.com/elastio/bon/pull/248))
+- Lovely maintenance caressing ([#244](https://github.com/elastio/bon/pull/244))
+
 ## [3.3.2](https://github.com/elastio/bon/compare/v3.3.1...v3.3.2) - 2024-12-28
 
 ### Fixed
