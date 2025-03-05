@@ -1,7 +1,7 @@
 use crate::util::prelude::*;
 
 pub(crate) trait VecExt<T> {
-    /// Remove all alements from the [`Vec`] that do not satisfy the predicate.
+    /// Remove all elements from the [`Vec`] that do not satisfy the predicate.
     /// Also bail on the first error that the predicate returns.
     fn try_retain_mut(&mut self, f: impl FnMut(&mut T) -> Result<bool>) -> Result;
 }

@@ -10,7 +10,7 @@ use syn::visit_mut::VisitMut;
 
 #[derive(FromMeta)]
 pub(crate) struct ImplInputParams {
-    /// Overrides the path to the `bon` crate. This is usedfule when the macro is
+    /// Overrides the path to the `bon` crate. This is useful when the macro is
     /// wrapped in another macro that also reexports `bon`.
     #[darling(rename = "crate", default, map = Some, with = crate::parsing::parse_bon_crate_path)]
     bon: Option<syn::Path>,

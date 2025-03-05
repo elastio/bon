@@ -41,7 +41,7 @@ fn parse_start_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct TopLevelConfig {
-    /// Overrides the path to the `bon` crate. This is usedfule when the macro is
+    /// Overrides the path to the `bon` crate. This is useful when the macro is
     /// wrapped in another macro that also reexports `bon`.
     #[darling(rename = "crate", default, map = Some, with = crate::parsing::parse_bon_crate_path)]
     pub(crate) bon: Option<syn::Path>,

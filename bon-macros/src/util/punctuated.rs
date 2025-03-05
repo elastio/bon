@@ -2,7 +2,7 @@ use crate::util::prelude::*;
 use syn::punctuated::Punctuated;
 
 pub(crate) trait PunctuatedExt<T, P> {
-    /// Remove all alements from the [`Punctuated`] that do not satisfy the predicate.
+    /// Remove all elements from the [`Punctuated`] that do not satisfy the predicate.
     /// Also bail on the first error that the predicate returns.
     fn try_retain_mut(&mut self, f: impl FnMut(&mut T) -> Result<bool>) -> Result;
 }
