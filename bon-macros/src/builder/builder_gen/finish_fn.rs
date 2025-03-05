@@ -109,11 +109,7 @@ impl super::BuilderGenCtx {
 
         let state_mod = &self.state_mod.ident;
 
-        let finish_fn_params = self
-            .members
-            .iter()
-            .filter_map(Member::as_finish_fn)
-            .map(PosFnMember::fn_input_param);
+        let finish_fn_params = self.finish_fn_args().map(PosFnMember::fn_input_param);
 
         let body = &self.finish_fn.body.generate(self);
         let asyncness = &self.finish_fn.asyncness;

@@ -15,7 +15,9 @@ pub(crate) use top_level_config::TopLevelConfig;
 
 use crate::util::prelude::*;
 use getters::GettersCtx;
-use member::{CustomField, Member, MemberOrigin, NamedMember, RawMember, StartFnMember};
+use member::{
+    CustomField, Member, MemberOrigin, NamedMember, PosFnMember, RawMember, StartFnMember,
+};
 use models::{AssocMethodCtx, AssocMethodReceiverCtx, BuilderGenCtx, FinishFnBody, Generics};
 use setters::SettersCtx;
 
@@ -41,6 +43,10 @@ impl BuilderGenCtx {
         self.members.iter().filter_map(Member::as_start_fn)
     }
 
+    fn finish_fn_args(&self) -> impl Iterator<Item = &PosFnMember> {
+        self.members.iter().filter_map(Member::as_finish_fn)
+    }
+
     fn stateful_members(&self) -> impl Iterator<Item = &NamedMember> {
         self.named_members().filter(|member| member.is_stateful())
     }
@@ -50,7 +56,7 @@ impl BuilderGenCtx {
         let state_mod = state_mod::StateModGenCtx::new(&self).state_mod();
         let builder_decl = self.builder_decl();
         let builder_impl = self.builder_impl()?;
-        let builder_derives = self.builder_derives();
+        let builder_derives = self.builder_derives()?;
 
         let default_allows = syn::parse_quote!(#[allow(
             // We have a `deprecated` lint on all `bon::__` items which we

@@ -16,6 +16,72 @@ error: wrong delimiter, expected parentheses e.g. `bounds(...)`, but got curly b
 66 | #[builder(derive(Clone(bounds {})))]
    |                        ^^^^^^
 
+error: `#[builder(derive(Into))` is incompatible with `#[builder(finish_fn)]` members because `From::from()` method accepts zero parameters
+  --> tests/integration/ui/compile_fail/attr_derive.rs:70:48
+   |
+70 | fn derive_into_with_finish_fn_member(#[builder(finish_fn)] _finish_fn: fn() -> u32) -> u32 {
+   |                                                ^^^^^^^^^
+
+error: `#[builder(derive(Into))` is not supported for functions with the implicit unit return type; if you have a use case where it makes sense to implement `From<Builder> for ()`, please open an issue, and in the meantime annotate the function return type explicitly with `-> ()`
+  --> tests/integration/ui/compile_fail/attr_derive.rs:75:4
+   |
+75 | fn function_with_unit_return_type() {}
+   |    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: `#[builder(derive(Into))` is not supported for async functions because `From::from()` method is a synchronous method
+  --> tests/integration/ui/compile_fail/attr_derive.rs:78:1
+   |
+78 | async fn async_function() -> u32 {
+   | ^^^^^
+
+error: `#[builder(derive(Into))` is not supported for unsafe functions because `From::from()` method is a safe method
+  --> tests/integration/ui/compile_fail/attr_derive.rs:83:1
+   |
+83 | unsafe fn unsafe_function() -> u32 {
+   | ^^^^^^
+
+error: `#[builder(derive(Into))` is not supported for async functions because `From::from()` method is a synchronous method
+  --> tests/integration/ui/compile_fail/attr_derive.rs:88:1
+   |
+88 | async unsafe fn unsafe_async_function() -> u32 {
+   | ^^^^^
+
+error: `#[builder(derive(Into))` is incompatible with `#[builder(finish_fn)]` members because `From::from()` method accepts zero parameters
+  --> tests/integration/ui/compile_fail/attr_derive.rs:97:52
+   |
+97 |     fn derive_into_with_finish_fn_member(#[builder(finish_fn)] _finish_fn: fn() -> u32) -> u32 {
+   |                                                    ^^^^^^^^^
+
+error: `#[builder(derive(Into))` is not supported for functions with the implicit unit return type; if you have a use case where it makes sense to implement `From<Builder> for ()`, please open an issue, and in the meantime annotate the function return type explicitly with `-> ()`
+   --> tests/integration/ui/compile_fail/attr_derive.rs:105:8
+    |
+105 |     fn function_with_unit_return_type() {}
+    |        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+error: `#[builder(derive(Into))` is not supported for async functions because `From::from()` method is a synchronous method
+   --> tests/integration/ui/compile_fail/attr_derive.rs:111:5
+    |
+111 |     async fn async_function() -> Self {
+    |     ^^^^^
+
+error: `#[builder(derive(Into))` is not supported for unsafe functions because `From::from()` method is a safe method
+   --> tests/integration/ui/compile_fail/attr_derive.rs:119:5
+    |
+119 |     unsafe fn unsafe_function() -> Self {
+    |     ^^^^^^
+
+error: `#[builder(derive(Into))` is not supported for async functions because `From::from()` method is a synchronous method
+   --> tests/integration/ui/compile_fail/attr_derive.rs:127:5
+    |
+127 |     async unsafe fn unsafe_async_function() -> Self {
+    |     ^^^^^
+
+error: Unexpected meta-item format `list`
+   --> tests/integration/ui/compile_fail/attr_derive.rs:132:18
+    |
+132 | #[builder(derive(Into(bounds(u32: Copy))))]
+    |                  ^^^^
+
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
  --> tests/integration/ui/compile_fail/attr_derive.rs:9:23
   |

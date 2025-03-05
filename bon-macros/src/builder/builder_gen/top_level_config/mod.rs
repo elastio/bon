@@ -161,6 +161,9 @@ pub(crate) struct DerivesConfig {
 
     #[darling(rename = "Debug")]
     pub(crate) debug: Option<DeriveConfig>,
+
+    #[darling(rename = "Into")]
+    pub(crate) into: darling::util::Flag,
 }
 
 #[derive(Debug, Clone, Default)]

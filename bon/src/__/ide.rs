@@ -96,6 +96,9 @@ pub mod builder_top_level {
 
         /// See the docs at <https://bon-rs.com/reference/builder/top-level/derive>
         pub use core::clone::Clone;
+
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/derive>
+        pub use core::convert::Into;
     }
 
     /// The real name of this parameter is `crate` (without the underscore).
