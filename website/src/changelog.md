@@ -24,6 +24,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add OpenCollective funding option ([#241](https://github.com/elastio/bon/pull/241))
 - Regular maintenance ([#244](https://github.com/elastio/bon/pull/244), [#246](https://github.com/elastio/bon/pull/246), [#249](https://github.com/elastio/bon/pull/249), [#253](https://github.com/elastio/bon/pull/253))
 
+### Acknowledgements
+
+- Gratitude to the [_Kindness.ai_](https://kindness.ai/) team who started supporting on [OpenCollective](https://opencollective.com/bon-rs) at `100$` a month!
+- Gratitude to _Ethan Skowronski_ who started supporting on [Patreon](https://www.patreon.com/c/Veetaha) at `1$` a month!
+
 ## [3.3.2](https://github.com/elastio/bon/compare/v3.3.1...v3.3.2) - 2024-12-28
 
 ### Fixed
