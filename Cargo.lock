@@ -67,7 +67,7 @@ dependencies = [
 
 [[package]]
 name = "bon"
-version = "3.3.2"
+version = "3.4.0"
 dependencies = [
  "bon-macros",
  "expect-test",
@@ -78,7 +78,7 @@ dependencies = [
 
 [[package]]
 name = "bon-cli"
-version = "3.0.0"
+version = "3.4.0"
 dependencies = [
  "anyhow",
  "ra_ap_parser",
@@ -88,7 +88,7 @@ dependencies = [
 
 [[package]]
 name = "bon-macros"
-version = "3.3.2"
+version = "3.4.0"
 dependencies = [
  "darling",
  "expect-test",
@@ -102,7 +102,7 @@ dependencies = [
 
 [[package]]
 name = "bon-sandbox"
-version = "3.3.2"
+version = "3.4.0"
 dependencies = [
  "bon",
  "buildstructor",
