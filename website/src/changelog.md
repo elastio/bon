@@ -13,8 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Stabilize the current `#[builder(getter)]` attribute MVP ([#251](https://github.com/elastio/bon/pull/251)).
   The cargo feature `experimental-getters` is no longer needed and is now no-op.
-- Make `self` receiver and `start_fn` members available as official fields on the builder ([#250](https://github.com/elastio/bon/pull/250))
-- Introduce `#[builder(derive(Into))]` attribute to generate an `impl From<Builder> for T` ([#248](https://github.com/elastio/bon/pull/248))
+- Make `self` receiver and `start_fn` members available as official fields on the builder ([#250](https://github.com/elastio/bon/pull/250)).
+  Check the new documentation page about [native fields](https://bon-rs.com/guide/typestate-api/builder-fields#native-fields).
+- Introduce `#[builder(derive(Into))]` attribute to generate an `impl From<Builder> for T` ([#248](https://github.com/elastio/bon/pull/248)).
+  See the updated "Inspecting" guide page now known as [Derives for Builders](https://bon-rs.com/guide/basics/derives-for-builders) and the updated [`#[builder(derive)]` reference](https://bon-rs.com/reference/builder/top-level/derive).
 
 ### Other
 
