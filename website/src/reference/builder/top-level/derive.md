@@ -219,7 +219,7 @@ struct Example {
 
 ## `Into` Derive
 
-Somewhat obviously, but `Into` derive actually generates a `From` implementation, providing the `Into` trait implementation automatically via the [blanket `impl` in std](https://doc.rust-lang.org/stable/std/convert/trait.From.html#generic-implementations).
+Somewhat onbviously, but `Into` derive actually generates a `From` implementation, providing the `Into` trait implementation automatically via the [blanket `impl` in std](https://doc.rust-lang.org/stable/std/convert/trait.From.html#generic-implementations).
 
 ::: details See an example of what code it generates:
 
