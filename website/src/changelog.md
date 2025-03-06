@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Stabilize the current `#[builder(getter)]` attribute MVP ([#251](https://github.com/elastio/bon/pull/251)).
+- Stabilize the current [`#[builder(getter)]`](https://bon-rs.com/reference/builder/member/getter) attribute MVP ([#251](https://github.com/elastio/bon/pull/251)).
   The cargo feature `experimental-getters` is no longer needed and is now no-op.
 - Make `self` receiver and `start_fn` members available as official fields on the builder ([#250](https://github.com/elastio/bon/pull/250)).
   Check the new documentation page about [native fields](https://bon-rs.com/guide/typestate-api/builder-fields#native-fields).
