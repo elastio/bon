@@ -7,14 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.3.3](https://github.com/elastio/bon/compare/v3.3.2...v3.3.3) - 2025-03-05
+## [3.4.0](https://github.com/elastio/bon/compare/v3.3.2...v3.4.0) - 2025-03-06
+
+### Added
+
+- Stabilize the current `#[builder(getter)]` attribute MVP ([#251](https://github.com/elastio/bon/pull/251)).
+  The cargo feature `experimental-getters` is no longer needed and is now no-op.
+- Make `self` receiver and `start_fn` members available as official fields on the builder ([#250](https://github.com/elastio/bon/pull/250))
+- Introduce `#[builder(derive(Into))]` attribute to generate an `impl From<Builder> for T` ([#248](https://github.com/elastio/bon/pull/248))
 
 ### Other
 
-- Stabilize the current `#[builder(getter)]` feature MVP ([#251](https://github.com/elastio/bon/pull/251))
-- Make `self` receiver and `start_fn` members available as official fields ([#250](https://github.com/elastio/bon/pull/250))
-- Introduce `#[builder(derive(Into))]` attribute ([#248](https://github.com/elastio/bon/pull/248))
-- Lovely maintenance caressing ([#244](https://github.com/elastio/bon/pull/244))
+- Fix a typo on the front page of the website 😳 ([#243](https://github.com/elastio/bon/pull/243)). Thanks [@MegaRedHand](https://github.com/MegaRedHand) for the contribution!
+- Add OpenCollective funding option ([#241](https://github.com/elastio/bon/pull/241))
+- Regular maintenance ([#244](https://github.com/elastio/bon/pull/244), [#246](https://github.com/elastio/bon/pull/246), [#249](https://github.com/elastio/bon/pull/249), [#253](https://github.com/elastio/bon/pull/253))
 
 ## [3.3.2](https://github.com/elastio/bon/compare/v3.3.1...v3.3.2) - 2024-12-28
 
