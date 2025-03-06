@@ -79,7 +79,7 @@ assert_eq!(x1, 99);
 
 ## Custom Fields
 
-This is useful if you'd like a completely custom state for [custom setters](./custom-methods) in the builder.
+Custom fields are useful if you'd like a completely custom state for [custom setters](./custom-methods) in the builder.
 
 To understand how it works, we'll create a builder API _similar_ to [`std::process::Command`](https://doc.rust-lang.org/stable/std/process/struct.Command.html) where you have a couple of methods [`arg`](https://doc.rust-lang.org/stable/std/process/struct.Command.html#method.arg) and [`args`](https://doc.rust-lang.org/stable/std/process/struct.Command.html#method.args), that push values into an internal arguments `Vec`.
 
