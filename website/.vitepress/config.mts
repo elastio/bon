@@ -20,6 +20,8 @@ if (process.env.CI) {
     ]);
 }
 
+const srcDir = "src";
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
     title: "Bon",
@@ -85,7 +87,7 @@ export default defineConfig({
 
     head,
 
-    srcDir: "src",
+    srcDir,
 
     // https://vitepress.dev/reference/default-theme-config
     themeConfig: {
@@ -100,7 +102,7 @@ export default defineConfig({
         },
 
         editLink: {
-            pattern: "https://github.com/elastio/bon/edit/master/website/:path",
+            pattern: `https://github.com/elastio/bon/edit/master/website/${srcDir}/:path`,
             text: "Edit this page on GitHub",
         },
 

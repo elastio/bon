@@ -2,7 +2,7 @@
 
 You can specify some extra derives on the generated builder struct itself via the top-level [`#[builder(derive(...))]`](../../reference/builder/top-level/derive) attribute.
 
-For example, if you want to inspect the values set in the builder for debugging purposes you can derive the `Debug` trait for your builder.
+For example, if you want to inspect the values set in the builder for debugging purposes, you can derive the `Debug` trait for your builder.
 
 ```rust
 use bon::builder;
