@@ -132,9 +132,15 @@ pub(crate) fn generate(
                 fn_item,
                 impl_ctx: Some(impl_ctx.clone()),
                 config,
-            });
+            })?;
 
-            Result::<_>::Ok((ctx.adapted_fn()?, ctx.into_builder_gen_ctx()?.output()?))
+            let adapted_fn = ctx.adapted_fn()?;
+            let warnings = ctx.warnings();
+
+            let mut output = ctx.into_builder_gen_ctx()?.output()?;
+            output.other_items.extend(warnings);
+
+            Result::<_>::Ok((adapted_fn, output))
         })
         .collect::<Result<Vec<_>>>()?;
 

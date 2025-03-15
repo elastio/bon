@@ -1,3 +1,5 @@
+mod validation;
+
 use super::models::{AssocMethodReceiverCtxParams, FinishFnParams};
 use super::top_level_config::TopLevelConfig;
 use super::{
@@ -10,7 +12,6 @@ use crate::util::prelude::*;
 use std::borrow::Cow;
 use std::rc::Rc;
 use syn::punctuated::Punctuated;
-use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
 
 pub(crate) struct FnInputCtx<'a> {
@@ -41,7 +42,7 @@ pub(crate) struct ImplCtx {
 }
 
 impl<'a> FnInputCtx<'a> {
-    pub(crate) fn new(params: FnInputCtxParams<'a>) -> Self {
+    pub(crate) fn new(params: FnInputCtxParams<'a>) -> Result<Self> {
         let start_fn = params.config.start_fn.clone();
 
         let start_fn_ident = start_fn
@@ -111,14 +112,18 @@ impl<'a> FnInputCtx<'a> {
             Some(prefix)
         });
 
-        Self {
+        let ctx = Self {
             namespace: params.namespace,
             fn_item: params.fn_item,
             impl_ctx: params.impl_ctx,
             config: params.config,
             self_ty_prefix,
             start_fn,
-        }
+        };
+
+        ctx.validate()?;
+
+        Ok(ctx)
     }
 
     fn assoc_method_ctx(&self) -> Result<Option<AssocMethodCtxParams>> {
@@ -259,30 +264,6 @@ impl<'a> FnInputCtx<'a> {
 
     pub(crate) fn into_builder_gen_ctx(self) -> Result<BuilderGenCtx> {
         let assoc_method_ctx = self.assoc_method_ctx()?;
-
-        if self.impl_ctx.is_none() {
-            let explanation = "\
-                but #[bon] attribute is absent on top of the impl block; this \
-                additional #[bon] attribute on the impl block is required for \
-                the macro to see the type of `Self` and properly generate \
-                the builder struct definition adjacently to the impl block.";
-
-            if let Some(receiver) = &self.fn_item.orig.sig.receiver() {
-                bail!(
-                    &receiver.self_token,
-                    "function contains a `self` parameter {explanation}"
-                );
-            }
-
-            let mut ctx = FindSelfReference::default();
-            ctx.visit_item_fn(&self.fn_item.orig);
-            if let Some(self_span) = ctx.self_span {
-                bail!(
-                    &self_span,
-                    "function contains a `Self` type reference {explanation}"
-                );
-            }
-        }
 
         let members = self
             .fn_item
@@ -494,34 +475,6 @@ fn merge_generic_params(
         .chain(right_rest)
         .cloned()
         .collect()
-}
-
-#[derive(Default)]
-struct FindSelfReference {
-    self_span: Option<Span>,
-}
-
-impl Visit<'_> for FindSelfReference {
-    fn visit_item(&mut self, _: &syn::Item) {
-        // Don't recurse into nested items. We are interested in the reference
-        // to `Self` on the current item level
-    }
-
-    fn visit_path(&mut self, path: &syn::Path) {
-        if self.self_span.is_some() {
-            return;
-        }
-        syn::visit::visit_path(self, path);
-
-        let first_segment = match path.segments.first() {
-            Some(first_segment) => first_segment,
-            _ => return,
-        };
-
-        if first_segment.ident == "Self" {
-            self.self_span = Some(first_segment.ident.span());
-        }
-    }
 }
 
 fn get_must_use_attribute(attrs: &[syn::Attribute]) -> Result<Option<syn::Attribute>> {
