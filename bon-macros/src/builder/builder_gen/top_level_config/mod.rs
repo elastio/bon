@@ -4,8 +4,10 @@ pub(crate) use on::OnConfig;
 
 use crate::parsing::{ItemSigConfig, ItemSigConfigParsing, SpannedKey};
 use crate::util::prelude::*;
+use darling::ast::NestedMeta;
 use darling::FromMeta;
 use syn::punctuated::Punctuated;
+use syn::ItemFn;
 
 fn parse_finish_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
     ItemSigConfigParsing {
@@ -67,8 +69,29 @@ pub(crate) struct TopLevelConfig {
 }
 
 impl TopLevelConfig {
-    pub(crate) fn parse_for_fn(meta_list: &[darling::ast::NestedMeta]) -> Result<Self> {
-        let me = Self::parse_for_any(meta_list)?;
+    pub(crate) fn parse_for_fn(fn_item: &ItemFn, config: Option<TokenStream>) -> Result<Self> {
+        let config = config.map(NestedMeta::parse_meta_list).transpose()?;
+
+        let meta = fn_item
+            .attrs
+            .iter()
+            .filter(|attr| attr.path().is_ident("builder"))
+            .map(|attr| {
+                if let syn::Meta::List(_) = attr.meta {
+                    crate::parsing::require_non_empty_paren_meta_list_or_name_value(&attr.meta)?;
+                }
+                let meta_list = darling::util::parse_attribute_to_meta_list(attr)?;
+                let meta_list = NestedMeta::parse_meta_list(meta_list.tokens)?;
+
+                Ok(meta_list)
+            })
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .chain(config)
+            .flatten()
+            .collect::<Vec<_>>();
+
+        let me = Self::parse_for_any(&meta)?;
 
         if me.start_fn.name.is_none() {
             let ItemSigConfig { name: _, vis, docs } = &me.start_fn;
@@ -96,11 +119,11 @@ impl TopLevelConfig {
         Ok(me)
     }
 
-    pub(crate) fn parse_for_struct(meta_list: &[darling::ast::NestedMeta]) -> Result<Self> {
+    pub(crate) fn parse_for_struct(meta_list: &[NestedMeta]) -> Result<Self> {
         Self::parse_for_any(meta_list)
     }
 
-    fn parse_for_any(meta_list: &[darling::ast::NestedMeta]) -> Result<Self> {
+    fn parse_for_any(meta_list: &[NestedMeta]) -> Result<Self> {
         // This is a temporary hack. We only allow `on(_, required)` as the
         // first `on(...)` clause. Instead we should implement an extended design:
         // https://github.com/elastio/bon/issues/152
@@ -108,9 +131,7 @@ impl TopLevelConfig {
             .iter()
             .enumerate()
             .filter_map(|(i, meta)| match meta {
-                darling::ast::NestedMeta::Meta(syn::Meta::List(meta))
-                    if meta.path.is_ident("on") =>
-                {
+                NestedMeta::Meta(syn::Meta::List(meta)) if meta.path.is_ident("on") => {
                     Some((i, meta))
                 }
                 _ => None,
