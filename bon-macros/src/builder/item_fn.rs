@@ -24,9 +24,10 @@ pub(crate) fn generate(
         fn_item,
         impl_ctx: None,
         config,
-    });
+    })?;
 
     let adapted_fn = ctx.adapted_fn()?;
+    let warnings = ctx.warnings();
 
     let MacroOutput {
         start_fn,
@@ -41,6 +42,7 @@ pub(crate) fn generate(
         //
         // See this issue for details: https://github.com/rust-lang/rust-analyzer/issues/18438
         #adapted_fn
+        #warnings
 
         #start_fn
         #other_items

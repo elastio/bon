@@ -1,7 +1,6 @@
 use crate::util::prelude::*;
 
 pub(crate) trait PathExt {
-    /// Check if the path starts with the given segment.
     fn starts_with_segment(&self, desired_segment: &str) -> bool;
 
     /// Returns an error if this path has some generic arguments.

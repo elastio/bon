@@ -14,6 +14,8 @@ pub mod ide;
 
 pub mod better_errors;
 
+pub mod warnings;
+
 mod cfg_eval;
 
 // This reexport is a private implementation detail and should not be used

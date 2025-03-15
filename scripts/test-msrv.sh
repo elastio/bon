@@ -37,6 +37,8 @@ step cargo update -p tokio --precise 1.29.1
 step cargo update -p expect-test --precise 1.4.1
 step cargo update -p windows-sys --precise 0.52.0
 step cargo update -p libc --precise 0.2.163
+step cargo update -p tracing --precise 0.1.40
+step cargo update -p tracing-attributes --precise 0.1.27
 
 export RUSTFLAGS="${RUSTFLAGS:-} --allow unknown-lints"
 

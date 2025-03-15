@@ -73,6 +73,7 @@ dependencies = [
  "expect-test",
  "rustversion",
  "tokio",
+ "tracing",
  "trybuild",
 ]
 

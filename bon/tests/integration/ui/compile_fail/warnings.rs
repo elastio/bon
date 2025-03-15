@@ -76,4 +76,38 @@ fn main() {
         builder.get_x2();
         builder.get_x3();
     }
+
+    // Test #[tracing::instrument] placement after #[builder]
+    {
+        use tracing::instrument;
+
+        #[builder]
+        #[instrument]
+        fn bare_instrument() {}
+
+        #[builder]
+        #[instrument(name = "name_override")]
+        fn instrument_with_args() {}
+
+        #[builder]
+        #[tracing::instrument]
+        fn prefixed_instrument() {}
+
+        struct Sut;
+
+        #[bon]
+        impl Sut {
+            #[builder]
+            #[instrument]
+            fn bare_instrument() {}
+
+            #[builder]
+            #[instrument(name = "name_override")]
+            fn instrument_with_args() {}
+
+            #[builder]
+            #[tracing::instrument]
+            fn prefixed_instrument() {}
+        }
+    }
 }
