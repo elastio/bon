@@ -54,8 +54,7 @@ fn try_generate_from_attr(params: TokenStream, item: TokenStream) -> Result<Toke
             namespace.visit_token_stream(input.config.clone());
             namespace.visit_item_fn(&item_fn);
 
-            let meta_list = darling::ast::NestedMeta::parse_meta_list(input.config.clone())?;
-            let config = TopLevelConfig::parse_for_fn(&meta_list)?;
+            let config = TopLevelConfig::parse_for_fn(&item_fn, Some(input.config.clone()))?;
 
             item_fn::generate(config, item_fn, &namespace)?
         }
