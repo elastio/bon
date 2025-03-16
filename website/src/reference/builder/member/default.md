@@ -246,4 +246,4 @@ The documentation for the setters will include the default value expression. If 
 
 See [examples of the generated docs](https://docs.rs/bon-sandbox/latest/bon_sandbox/attr_default/struct.ExampleBuilder.html) with `#[builder(default)]`.
 
-If you don't want to show the default value in the docs, then see [`#[builder(setters(doc(default(skip))))]`](./setters#doc-setters-default-skip).
+If you don't want to show the default value in the docs, then see [`#[builder(setters(doc(default(skip))))]`](./setters#doc-default-skip).

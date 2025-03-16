@@ -97,7 +97,7 @@ There are several attributes supported in the `attributes` position listed below
 
 - [`into`](../member/into)
 - [`required`](../member/required) - currently, this attribute can only be used with the `_` type pattern as the first `on(...)` clause
-- [`setters(doc(default(skip)))`](../member/setters#doc-setters-default-skip)
+- [`setters(doc(default(skip)))`](../member/setters#doc-default-skip)
 - [`overwritable`](../member/overwritable) - 🔬 **experimental**, this attribute is available under the cargo feature `"experimental-overwritable"` (see the issue [#149](https://github.com/elastio/bon/issues/149))
 
 A single `on(...)` clause can contain several of these separated by a comma e.g. `on(_, into, required)`.
@@ -145,6 +145,18 @@ Example::builder()
     .level(Some(99))
     .description(Some("required `Option`".to_owned()))
     .build();
+```
+
+```rust [setters(doc(default(skip)))]
+use bon::Builder;
+
+#[derive(Builder)]
+#[builder(on(_, setters(doc(default(skip)))))]
+struct Example {
+    // The default value `42` won't appear in the generated docs
+    #[builder(default = 42)]
+    x1: u32,
+}
 ```
 
 ```rust [overwritable]
