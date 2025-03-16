@@ -3,7 +3,7 @@
     doc {
         /// Showcases examples of `#[builder(default)]` usage and what docs are
         /// generated for them. Click on any of `source` links to see the source code.
-    }
+    },
 ))]
 pub struct Example {
     #[builder(default = (2 + 2) * 10)]

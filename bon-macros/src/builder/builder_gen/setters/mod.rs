@@ -486,7 +486,8 @@ impl SettersItems {
 
         let common_name = config.and_then(|config| config.name.as_deref());
         let common_vis = config.and_then(|config| config.vis.as_deref());
-        let common_docs = config.and_then(|config| config.docs.as_deref().map(Vec::as_slice));
+        let common_docs =
+            config.and_then(|config| config.doc.content.as_deref().map(Vec::as_slice));
 
         let doc = |docs: &str| iter::once(syn::parse_quote!(#[doc = #docs]));
 
@@ -525,6 +526,14 @@ impl SettersItems {
             });
 
         let default = member.config.default.as_deref().and_then(|default| {
+            if let Some(setters) = &member.config.setters {
+                if let Some(default) = &setters.doc.default {
+                    if default.skip.is_present() {
+                        return None;
+                    }
+                }
+            }
+
             let default = default
                 .clone()
                 .or_else(|| well_known_default(&member.ty.norm))

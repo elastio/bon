@@ -279,6 +279,18 @@ impl MemberConfig {
             self.validate_mutually_exclusive(ParamName::With, with.key.span(), &[ParamName::Into])?;
         }
 
+        if let Some(setters) = &self.setters {
+            if let Some(default) = &setters.doc.default {
+                if self.default.is_none() {
+                    bail!(
+                        &default.key,
+                        "`#[builder(setters(doc(default(...)))]` may only be specified \
+                        when #[builder(default)] is also specified",
+                    );
+                }
+            }
+        }
+
         Ok(())
     }
 }

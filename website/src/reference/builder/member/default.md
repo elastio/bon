@@ -245,3 +245,5 @@ This attribute is incompatible with members of `Option` type, since `Option` alr
 The documentation for the setters will include the default value expression. If you use `#[builder(default)]`, then the default value expression will be inferred for primitive and some well-known types.
 
 See [examples of the generated docs](https://docs.rs/bon-sandbox/latest/bon_sandbox/attr_default/struct.ExampleBuilder.html) with `#[builder(default)]`.
+
+If you don't want to show the default value in the docs, then see [`#[builder(setters(doc(default(skip))))]`](./setters#doc-setters-default-skip).

@@ -42,13 +42,11 @@ error: expected `,`
    |
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: this #[builder(on(type_pattern, ...))] contains no options to override the default behavior for the selected setters like `into`, `overwritable`, `required`, so it does nothing
-  --> tests/integration/ui/compile_fail/attr_on.rs:24:1
+error: expected at least one parameter after the comma in `on(type_pattern, ...)`
+  --> tests/integration/ui/compile_fail/attr_on.rs:24:15
    |
 24 | #[builder(on(_,))]
-   | ^^^^^^^^^^^^^^^^^^
-   |
-   = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+   |               ^
 
 error: this `on(...)` clause is out of order; all `on(...)` clauses must be consecutive; there shouldn't be any other parameters between them
   --> tests/integration/ui/compile_fail/attr_on.rs:30:5

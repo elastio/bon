@@ -7,6 +7,7 @@ use std::fmt;
 pub(crate) enum BlanketParamName {
     Into,
     Overwritable,
+    SettersDocDefaultSkip,
 }
 
 impl fmt::Display for BlanketParamName {
@@ -14,6 +15,7 @@ impl fmt::Display for BlanketParamName {
         match self {
             Self::Into => fmt::Display::fmt(&super::ParamName::Into, f),
             Self::Overwritable => fmt::Display::fmt(&super::ParamName::Overwritable, f),
+            Self::SettersDocDefaultSkip => f.write_str("setters(doc(default(skip)))"),
         }
     }
 }
@@ -23,6 +25,7 @@ impl BlanketParamName {
         match self {
             Self::Into => cfg.into,
             Self::Overwritable => cfg.overwritable,
+            Self::SettersDocDefaultSkip => cfg.setters.doc.default.skip,
         }
     }
 
@@ -30,6 +33,12 @@ impl BlanketParamName {
         match self {
             Self::Into => cfg.into,
             Self::Overwritable => cfg.overwritable,
+            Self::SettersDocDefaultSkip => cfg
+                .setters
+                .as_ref()
+                .and_then(|setters| setters.doc.default.as_ref())
+                .map(|default| default.skip)
+                .unwrap_or_default(),
         }
     }
 }

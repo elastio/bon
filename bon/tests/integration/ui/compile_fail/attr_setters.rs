@@ -72,4 +72,41 @@ struct EmptySettersConfig {
     member: i32,
 }
 
+#[derive(Builder)]
+struct RepeatedSettersDocContent {
+    #[builder(setters(
+        doc {
+            /// Doc 1
+        },
+        doc {
+            /// Doc 2
+        }
+    ))]
+    member: i32,
+}
+
+#[derive(Builder)]
+struct RepeatedSettersDocConfig {
+    #[builder(setters(
+        doc {
+            /// Doc 1
+        },
+        doc(default(skip)),
+        doc(default(skip)),
+    ))]
+    member: i32,
+}
+
+#[derive(Builder)]
+struct InvalidSettersDocSyntax {
+    #[builder(setters(doc["Doc 2"]))]
+    member: i32,
+}
+
+#[derive(Builder)]
+struct SettersDocDefaultOnNonDefault {
+    #[builder(setters(doc(default(skip))))]
+    member: i32,
+}
+
 fn main() {}

@@ -1,4 +1,5 @@
 use crate::util::prelude::*;
+use darling::util::Flag;
 use darling::FromMeta;
 use syn::parse::Parse;
 use syn::spanned::Spanned;
@@ -7,26 +8,56 @@ use syn::visit::Visit;
 #[derive(Debug)]
 pub(crate) struct OnConfig {
     pub(crate) type_pattern: syn::Type,
-    pub(crate) into: darling::util::Flag,
-    pub(crate) overwritable: darling::util::Flag,
-    pub(crate) required: darling::util::Flag,
+    pub(crate) into: Flag,
+    pub(crate) overwritable: Flag,
+    pub(crate) required: Flag,
+    pub(crate) setters: OnSettersConfig,
+}
+
+#[derive(Debug, Default, FromMeta)]
+pub(crate) struct OnSettersConfig {
+    #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list)]
+    pub(crate) doc: OnSettersDocConfig,
+}
+
+#[derive(Debug, Default, FromMeta)]
+pub(crate) struct OnSettersDocConfig {
+    #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list)]
+    pub(crate) default: OnSettersDocDefaultConfig,
+}
+
+#[derive(Debug, Default, FromMeta)]
+pub(crate) struct OnSettersDocDefaultConfig {
+    pub(crate) skip: Flag,
 }
 
 impl Parse for OnConfig {
     fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
         let type_pattern = input.parse()?;
 
-        let _ = input.parse::<syn::Token![,]>()?;
+        let comma = input.parse::<syn::Token![,]>()?;
         let rest: TokenStream = input.parse()?;
 
         #[derive(FromMeta)]
         struct Parsed {
-            into: darling::util::Flag,
-            overwritable: darling::util::Flag,
-            required: darling::util::Flag,
+            into: Flag,
+            overwritable: Flag,
+            required: Flag,
+
+            #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list)]
+            setters: OnSettersConfig,
         }
 
-        let parsed = Parsed::from_meta(&syn::parse_quote!(on(#rest)))?;
+        if rest.is_empty() {
+            return Err(syn::Error::new(
+                comma.span(),
+                "expected at least one parameter after the comma in `on(type_pattern, ...)`",
+            ));
+        }
+
+        let parsed: Parsed = crate::parsing::parse_non_empty_paren_meta_list(
+            &syn::parse_quote_spanned!(comma.span=> on(#rest)),
+        )?;
 
         if !cfg!(feature = "experimental-overwritable") && parsed.overwritable.is_present() {
             return Err(syn::Error::new(
@@ -40,34 +71,6 @@ impl Parse for OnConfig {
                  a comment under the issue for us to understand how it's used \
                  in practice",
             ));
-        }
-
-        {
-            // Validate that at least some option was enabled.
-            // This lives in a separate block to make sure that if a new
-            // field is added to `Parsed` and unused here, then a compiler
-            // warning is emitted.
-            let Parsed {
-                into,
-                overwritable,
-                required,
-            } = &parsed;
-            let flags = [
-                ("into", into),
-                ("overwritable", overwritable),
-                ("required", required),
-            ];
-
-            if flags.iter().all(|(_, flag)| !flag.is_present()) {
-                let flags = flags.iter().map(|(name, _)| format!("`{name}`")).join(", ");
-                let err = format!(
-                    "this #[builder(on(type_pattern, ...))] contains no options \
-                    to override the default behavior for the selected setters \
-                    like {flags}, so it does nothing"
-                );
-
-                return Err(syn::Error::new_spanned(&rest, err));
-            }
         }
 
         struct FindAttr {
@@ -100,17 +103,12 @@ impl Parse for OnConfig {
             "BUG: the type pattern does not match itself: {type_pattern:#?}"
         );
 
-        let Parsed {
-            into,
-            overwritable,
-            required,
-        } = parsed;
-
         Ok(Self {
             type_pattern,
-            into,
-            overwritable,
-            required,
+            into: parsed.into,
+            overwritable: parsed.overwritable,
+            required: parsed.required,
+            setters: parsed.setters,
         })
     }
 }
