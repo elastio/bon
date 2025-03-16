@@ -103,4 +103,10 @@ struct InvalidSettersDocSyntax {
     member: i32,
 }
 
+#[derive(Builder)]
+struct SettersDocDefaultOnNonDefault {
+    #[builder(setters(doc(default(skip))))]
+    member: i32,
+}
+
 fn main() {}

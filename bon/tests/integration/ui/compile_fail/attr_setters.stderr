@@ -69,3 +69,9 @@ error: wrong delimiter, expected doc(...) or doc {...}
     |
 102 |     #[builder(setters(doc["Doc 2"]))]
     |                       ^^^
+
+error: `#[builder(setters(doc(default(...)))]` may only be specified when #[builder(default)] is also specified
+   --> tests/integration/ui/compile_fail/attr_setters.rs:108:27
+    |
+108 |     #[builder(setters(doc(default(skip))))]
+    |                           ^^^^^^^

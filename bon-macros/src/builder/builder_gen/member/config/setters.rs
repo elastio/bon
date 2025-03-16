@@ -87,7 +87,7 @@ pub(crate) struct SettersDocConfig {
     pub(crate) content: Option<SpannedKey<Vec<syn::Attribute>>>,
 
     /// Overrides the look of the default value showcase in the docs header.
-    pub(crate) default: SettersDocDefaultConfig,
+    pub(crate) default: Option<SpannedKey<SettersDocDefaultConfig>>,
 }
 
 impl SettersDocConfig {
@@ -117,8 +117,8 @@ impl SettersDocConfig {
 
         #[derive(FromMeta)]
         struct Parsed {
-            #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list)]
-            default: SettersDocDefaultConfig,
+            #[darling(with = crate::parsing::parse_non_empty_paren_meta_list)]
+            default: Option<SpannedKey<SettersDocDefaultConfig>>,
         }
 
         let config = doc_config
@@ -130,7 +130,7 @@ impl SettersDocConfig {
 
         let mut me = Self {
             content,
-            default: SettersDocDefaultConfig::default(),
+            default: None,
         };
 
         if let Some(Parsed { default }) = config {

@@ -527,8 +527,10 @@ impl SettersItems {
 
         let default = member.config.default.as_deref().and_then(|default| {
             if let Some(setters) = &member.config.setters {
-                if setters.doc.default.skip.is_present() {
-                    return None;
+                if let Some(default) = &setters.doc.default {
+                    if default.skip.is_present() {
+                        return None;
+                    }
                 }
             }
 

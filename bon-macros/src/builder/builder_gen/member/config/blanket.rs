@@ -36,7 +36,8 @@ impl BlanketParamName {
             Self::SettersDocDefaultSkip => cfg
                 .setters
                 .as_ref()
-                .map(|setters| setters.doc.default.skip)
+                .and_then(|setters| setters.doc.default.as_ref())
+                .map(|default| default.skip)
                 .unwrap_or_default(),
         }
     }

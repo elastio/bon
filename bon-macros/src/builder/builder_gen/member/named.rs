@@ -299,8 +299,9 @@ impl NamedMember {
         .eval()?;
 
         let setters = self.config.setters.get_or_insert_with(Default::default);
+        let default = setters.doc.default.get_or_insert_with(Default::default);
 
-        setters.doc.default.skip = skip;
+        default.skip = skip;
 
         Ok(())
     }
