@@ -147,6 +147,18 @@ Example::builder()
     .build();
 ```
 
+```rust [setters(doc(default(skip)))]
+use bon::Builder;
+
+#[derive(Builder)]
+#[builder(on(_, setters(doc(default(skip)))))]
+struct Example {
+    // The default value `42` won't appear in the generated docs
+    #[builder(default = 42)]
+    x1: u32,
+}
+```
+
 ```rust [overwritable]
 use bon::Builder;
 
@@ -166,18 +178,6 @@ Example::builder()
     .maybe_y(None)
     .y(2)
     .build();
-```
-
-```rust [setters(doc(default(skip)))]
-use bon::Builder;
-
-#[derive(Builder)]
-#[builder(on(_, setters(doc(default(skip)))))]
-struct Example {
-    // The default value `42` won't appear in the generated docs
-    #[builder(default = 42)]
-    x1: u32,
-}
 ```
 
 :::
