@@ -97,6 +97,7 @@ There are several attributes supported in the `attributes` position listed below
 
 - [`into`](../member/into)
 - [`required`](../member/required) - currently, this attribute can only be used with the `_` type pattern as the first `on(...)` clause
+- [`setters(doc(default(skip)))`](../member/setters#docsettersdefaultskip)
 - [`overwritable`](../member/overwritable) - 🔬 **experimental**, this attribute is available under the cargo feature `"experimental-overwritable"` (see the issue [#149](https://github.com/elastio/bon/issues/149))
 
 A single `on(...)` clause can contain several of these separated by a comma e.g. `on(_, into, required)`.

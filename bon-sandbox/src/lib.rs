@@ -7,6 +7,7 @@
 
 pub mod attr_default;
 pub mod attr_getter;
+pub mod attr_setters_doc_default_skip;
 pub mod attr_with;
 pub mod docs_comparison;
 pub mod functions;
