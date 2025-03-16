@@ -115,6 +115,24 @@ fn setters_docs_and_vis() {
                 default = 2 + 2 * 3
             )]
             default_field_with_inherited_overrides: u32,
+
+            #[builder(
+                setters(doc(default(skip))),
+                default = 2 + 2 * 3
+            )]
+            setters_doc_default_skip: u32,
+
+            #[builder(
+                setters(
+                    doc(default(skip)),
+                    doc {
+                        /// Custom docs
+                        /// Multiline.
+                    }
+                ),
+                default = 2 + 2 * 3
+            )]
+            setters_doc_default_skip_and_custom_docs_block: u32,
         }
     });
 

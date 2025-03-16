@@ -1,10 +1,14 @@
 #[derive(bon::Builder)]
-#[builder(builder_type(
-    doc {
-        /// Showcases examples of `#[builder(default)]` usage and what docs are
-        /// generated for them. Click on any of `source` links to see the source code.
-    }
-))]
+#[builder(
+    builder_type(
+        doc {
+            /// Showcases examples of `#[builder(default)]` usage and what docs are
+            /// generated for them. Click on any of `source` links to see the source code.
+        },
+    ),
+    // Try this one to disable the rendering of default values on all members.
+    // on(_, setters(doc(default(skip))))
+)]
 pub struct Example {
     #[builder(default = (2 + 2) * 10)]
     small_custom_default: u32,
@@ -22,6 +26,10 @@ pub struct Example {
 
     #[builder(default)]
     standard_string_default: String,
+
+    /// This member uses `#[builder(setters(doc(default(skip))))]`
+    #[builder(default = 42, setters(doc(default(skip))))]
+    uses_setters_doc_default_skip: u32,
 }
 
 struct Point {

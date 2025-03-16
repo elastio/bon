@@ -109,7 +109,7 @@ impl NamedMember {
             .setters
             .as_ref()
             .map(|setters| {
-                if setters.docs.is_some() {
+                if setters.doc.content.is_some() {
                     return true;
                 }
 
@@ -174,7 +174,9 @@ impl NamedMember {
 
             Self::validate_unused_setters_cfg(setter_fns, &setters.name, |config| &config.name)?;
             Self::validate_unused_setters_cfg(setter_fns, &setters.vis, |config| &config.vis)?;
-            Self::validate_unused_setters_cfg(setter_fns, &setters.docs, |config| &config.docs)?;
+            Self::validate_unused_setters_cfg(setter_fns, &setters.doc.content, |config| {
+                &config.docs
+            })?;
         }
 
         Ok(())
@@ -269,6 +271,7 @@ impl NamedMember {
         }
 
         self.merge_config_into(on)?;
+        self.merge_setters_doc_skip(on)?;
 
         // FIXME: refactor this to make it more consistent with `into`
         // and allow for non-boolean flags in `OnConfig`. E.g. add support
@@ -281,6 +284,23 @@ impl NamedMember {
             origin: self.origin,
         }
         .eval()?;
+
+        Ok(())
+    }
+
+    fn merge_setters_doc_skip(&mut self, on: &[OnConfig]) -> Result {
+        let skip = config::EvalBlanketFlagParam {
+            on,
+            param_name: config::BlanketParamName::SettersDocDefaultSkip,
+            member_config: &self.config,
+            scrutinee: self.underlying_norm_ty(),
+            origin: self.origin,
+        }
+        .eval()?;
+
+        let setters = self.config.setters.get_or_insert_with(Default::default);
+
+        setters.doc.default.skip = skip;
 
         Ok(())
     }

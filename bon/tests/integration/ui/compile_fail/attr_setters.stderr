@@ -51,3 +51,21 @@ error: expected parameters in parentheses
    |
 71 |     #[builder(setters())]
    |                      ^^
+
+error: repeated `doc {...}` attribute is not allowed
+  --> tests/integration/ui/compile_fail/attr_setters.rs:81:9
+   |
+81 |         doc {
+   |         ^^^
+
+error: repeated `doc(...)` attribute is not allowed
+  --> tests/integration/ui/compile_fail/attr_setters.rs:95:9
+   |
+95 |         doc(default(skip)),
+   |         ^^^
+
+error: wrong delimiter, expected doc(...) or doc {...}
+   --> tests/integration/ui/compile_fail/attr_setters.rs:102:23
+    |
+102 |     #[builder(setters(doc["Doc 2"]))]
+    |                       ^^^

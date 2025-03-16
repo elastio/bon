@@ -170,4 +170,48 @@ impl<S: sut_builder::State> SutBuilder<S> {
     where
         S::DefaultFieldWithInheritedOverrides: sut_builder::IsUnset,
     {}
+    /**_**Optional** ([Some](Self::setters_doc_default_skip()) / [Option](Self::maybe_setters_doc_default_skip()) setters)._
+
+*/
+    fn setters_doc_default_skip(
+        self,
+        value: u32,
+    ) -> SutBuilder<sut_builder::SetSettersDocDefaultSkip<S>>
+    where
+        S::SettersDocDefaultSkip: sut_builder::IsUnset,
+    {}
+    /**_**Optional** ([Some](Self::setters_doc_default_skip()) / [Option](Self::maybe_setters_doc_default_skip()) setters)._
+
+*/
+    fn maybe_setters_doc_default_skip(
+        mut self,
+        value: Option<u32>,
+    ) -> SutBuilder<sut_builder::SetSettersDocDefaultSkip<S>>
+    where
+        S::SettersDocDefaultSkip: sut_builder::IsUnset,
+    {}
+    /**_**Optional** ([Some](Self::setters_doc_default_skip_and_custom_docs_block()) / [Option](Self::maybe_setters_doc_default_skip_and_custom_docs_block()) setters)._
+
+*/
+    /// Custom docs
+    /// Multiline.
+    fn setters_doc_default_skip_and_custom_docs_block(
+        self,
+        value: u32,
+    ) -> SutBuilder<sut_builder::SetSettersDocDefaultSkipAndCustomDocsBlock<S>>
+    where
+        S::SettersDocDefaultSkipAndCustomDocsBlock: sut_builder::IsUnset,
+    {}
+    /**_**Optional** ([Some](Self::setters_doc_default_skip_and_custom_docs_block()) / [Option](Self::maybe_setters_doc_default_skip_and_custom_docs_block()) setters)._
+
+*/
+    /// Custom docs
+    /// Multiline.
+    fn maybe_setters_doc_default_skip_and_custom_docs_block(
+        mut self,
+        value: Option<u32>,
+    ) -> SutBuilder<sut_builder::SetSettersDocDefaultSkipAndCustomDocsBlock<S>>
+    where
+        S::SettersDocDefaultSkipAndCustomDocsBlock: sut_builder::IsUnset,
+    {}
 }

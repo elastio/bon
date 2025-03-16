@@ -48,7 +48,6 @@ pub(crate) fn require_non_empty_paren_meta_list_or_name_value(meta: &syn::Meta) 
 /// parse an arbitrary sequence of items inside of parentheses. For example
 /// `foo(a, b, c)`, where `a`, `b`, and `c` are of type `T` and `,` is represented
 /// by the token type `P`.
-#[allow(dead_code)]
 pub(crate) fn parse_paren_meta_list_with_terminated<T, P>(
     meta: &syn::Meta,
 ) -> Result<Punctuated<T, P>>
