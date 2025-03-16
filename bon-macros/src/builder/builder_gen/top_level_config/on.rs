@@ -48,6 +48,13 @@ impl Parse for OnConfig {
             setters: OnSettersConfig,
         }
 
+        if rest.is_empty() {
+            return Err(syn::Error::new(
+                comma.span(),
+                "expected at least one parameter after the comma in `on(type_pattern, ...)`",
+            ));
+        }
+
         let parsed: Parsed = crate::parsing::parse_non_empty_paren_meta_list(
             &syn::parse_quote_spanned!(comma.span=> on(#rest)),
         )?;

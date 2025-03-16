@@ -214,4 +214,24 @@ impl<S: sut_builder::State> SutBuilder<S> {
     where
         S::SettersDocDefaultSkipAndCustomDocsBlock: sut_builder::IsUnset,
     {}
+    /**_**Optional** ([Some](Self::setters_doc_default_skip_from_top_level_on()) / [Option](Self::maybe_setters_doc_default_skip_from_top_level_on()) setters)._
+
+*/
+    fn setters_doc_default_skip_from_top_level_on(
+        self,
+        value: u8,
+    ) -> SutBuilder<sut_builder::SetSettersDocDefaultSkipFromTopLevelOn<S>>
+    where
+        S::SettersDocDefaultSkipFromTopLevelOn: sut_builder::IsUnset,
+    {}
+    /**_**Optional** ([Some](Self::setters_doc_default_skip_from_top_level_on()) / [Option](Self::maybe_setters_doc_default_skip_from_top_level_on()) setters)._
+
+*/
+    fn maybe_setters_doc_default_skip_from_top_level_on(
+        mut self,
+        value: Option<u8>,
+    ) -> SutBuilder<sut_builder::SetSettersDocDefaultSkipFromTopLevelOn<S>>
+    where
+        S::SettersDocDefaultSkipFromTopLevelOn: sut_builder::IsUnset,
+    {}
 }

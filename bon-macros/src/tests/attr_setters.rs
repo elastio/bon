@@ -4,6 +4,7 @@ use crate::util::prelude::*;
 #[test]
 fn setters_docs_and_vis() {
     let actual_tokens = crate::builder::generate_from_derive(quote! {
+        #[builder(on(u8, setters(doc(default(skip)))))]
         struct Sut {
             /// Docs on the required field itself
             #[builder(setters(
@@ -133,6 +134,9 @@ fn setters_docs_and_vis() {
                 default = 2 + 2 * 3
             )]
             setters_doc_default_skip_and_custom_docs_block: u32,
+
+            #[builder(default = 2 + 2 * 3)]
+            setters_doc_default_skip_from_top_level_on: u8,
         }
     });
 

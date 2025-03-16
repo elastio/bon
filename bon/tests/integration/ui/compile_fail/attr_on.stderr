@@ -42,7 +42,7 @@ error: expected `,`
    |
    = note: this error originates in the attribute macro `builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error: expected parameters in parentheses
+error: expected at least one parameter after the comma in `on(type_pattern, ...)`
   --> tests/integration/ui/compile_fail/attr_on.rs:24:15
    |
 24 | #[builder(on(_,))]

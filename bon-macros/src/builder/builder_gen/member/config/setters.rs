@@ -58,8 +58,8 @@ impl FromMeta for SettersConfig {
         Ok(Self {
             name: parsed.name,
             vis: parsed.vis,
-            doc,
             fns: parsed.fns,
+            doc,
         })
     }
 }
