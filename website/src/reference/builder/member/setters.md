@@ -97,9 +97,9 @@ doc {
 
 Note that this doesn't influence the auto-generated docs header. Use `doc(...)` to configure the header instead.
 
-### `doc(setters(default(skip)))`
+### `doc(default(skip))`
 
-Skips the inclusion of the default value of the member in the auto-generated documentation header for optional setters that use the [`#[builder(default)]` attribute](./default#generated-docs).
+Skips the inclusion of the default value of the member in the auto-generated documentation header for optional setters that use the [`#[builder(default)]`](./default#generated-docs) attribute.
 
 This attribute can also be configured via the top-level [`#[builder(on(_, ...))]`](../top-level/on#attributes) attribute.
 
