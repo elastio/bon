@@ -7,12 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.4.1](https://github.com/elastio/bon/compare/v3.4.0...v3.4.1) - 2025-03-16
+## [3.5.0](https://github.com/elastio/bon/compare/v3.4.0...v3.5.0) - 2025-03-16
 
-### Other
+### Added
 
-- Introduce `setters(doc(default(skip)))` attribute ([#265](https://github.com/elastio/bon/pull/265))
-- Trigger a compiler warning if `#[tracing::instrument]` is placed after the `#[builder]` instead of before ([#264](https://github.com/elastio/bon/pull/264))
+- Introduce `setters(doc(default(skip)))` attribute to skip the inclusion of the default value in the generated docs for setters ([#265](https://github.com/elastio/bon/pull/265)). See the updated docs [here](https://bon-rs.com/reference/builder/member/setters#doc-setters-default-skip).
+
+### Fixed
+
+- Trigger a compiler warning if `#[tracing::instrument]` is placed after the `#[builder]` instead of before ([#264](https://github.com/elastio/bon/pull/264)). This should prevent the papercut where `tracing::instrument` assigns the span name with the ugly `__orig_` prefix in the name.
 - Fix repeated `#[builder]` attributes getting ignored on free functions ([#263](https://github.com/elastio/bon/pull/263))
 
 ## [3.4.0](https://github.com/elastio/bon/compare/v3.3.2...v3.4.0) - 2025-03-06
