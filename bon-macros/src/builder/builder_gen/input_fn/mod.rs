@@ -209,15 +209,6 @@ impl<'a> FnInputCtx<'a> {
             // By default the original positional function becomes hidden.
             orig.vis = syn::Visibility::Inherited;
 
-            // We don't use a random name here because the name of this function
-            // can be used by other macros that may need a stable identifier.
-            // For example, if `#[tracing::instrument]` is placed on the function,
-            // the function name will be used as a span name. The name of the span
-            // may be indexed in some logs database (e.g. Grafana Loki). If the name
-            // of the span changes the DB index may grow and also log queries won't
-            // be stable.
-            orig.sig.ident = format_ident!("__orig_{}", orig.sig.ident.raw_name());
-
             // Remove all doc comments from the function itself to avoid docs duplication
             // which may lead to duplicating doc tests, which in turn implies repeated doc
             // tests execution, which means worse tests performance.
@@ -227,7 +218,18 @@ impl<'a> FnInputCtx<'a> {
             // as the function itself is visible.
             orig.attrs.retain(|attr| !attr.is_doc_expr());
 
-            orig.attrs.extend([syn::parse_quote!(#[doc(hidden)])]);
+            let bon = &self.config.bon;
+
+            orig.attrs.extend([
+                syn::parse_quote!(#[doc(hidden)]),
+                // We don't rename the function immediately, but instead defer the renaming
+                // to a later stage. This is because the original name of the function can
+                // be used by other macros that may need a stable identifier.
+                //
+                // For example, if `#[tracing::instrument]` is placed on the function,
+                // the function name will be used as a span name.
+                syn::parse_quote!(#[#bon::__::__privatize]),
+            ]);
         }
 
         // Remove any `#[builder]` attributes that were meant for this proc macro.
@@ -296,8 +298,14 @@ impl<'a> FnInputCtx<'a> {
 
         let generics = self.generics();
 
+        let mut adapted_fn_sig = self.adapted_fn()?.sig;
+
+        if self.config.start_fn.name.is_none() {
+            crate::privatize::privatize_fn_name(&mut adapted_fn_sig);
+        }
+
         let finish_fn_body = FnCallBody {
-            sig: self.adapted_fn()?.sig,
+            sig: adapted_fn_sig,
             impl_ctx: self.impl_ctx.clone(),
         };
 

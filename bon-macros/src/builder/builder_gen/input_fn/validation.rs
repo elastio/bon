@@ -1,5 +1,4 @@
 use crate::util::prelude::*;
-use syn::spanned::Spanned;
 use syn::visit::Visit;
 
 impl super::FnInputCtx<'_> {
@@ -32,31 +31,13 @@ impl super::FnInputCtx<'_> {
     }
 
     pub(crate) fn warnings(&self) -> TokenStream {
-        let mut warnings = TokenStream::new();
+        // We used to emit some warnings here previously, but then that logic
+        // was removed. The code for the `warnings()` method was preserved just
+        // in case if we need to issue some new warnings again. However, it's not
+        // critical. Feel free to eliminate this method if you feel like it.
+        let _ = self;
 
-        let bon = self
-            .config
-            .bon
-            .clone()
-            .unwrap_or_else(|| syn::parse_quote!(::bon));
-
-        let instrument = self
-            .fn_item
-            .orig
-            .attrs
-            .iter()
-            .filter_map(|attr| attr.path().segments.last())
-            .find(|segment| segment.ident == "instrument");
-
-        if let Some(instrument) = instrument {
-            let span = instrument.span();
-
-            warnings.extend(quote_spanned! {span=>
-                use #bon::__::warnings::tracing_instrument_attribute_after_builder as _;
-            });
-        }
-
-        warnings
+        TokenStream::new()
     }
 }
 

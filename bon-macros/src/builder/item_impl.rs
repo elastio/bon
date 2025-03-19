@@ -1,6 +1,7 @@
 use super::builder_gen::input_fn::{FnInputCtx, FnInputCtxParams, ImplCtx};
 use super::builder_gen::TopLevelConfig;
 use crate::normalization::{GenericsNamespace, SyntaxVariant};
+use crate::parsing::BonCratePath;
 use crate::util::prelude::*;
 use darling::FromMeta;
 use std::rc::Rc;
@@ -11,8 +12,8 @@ use syn::visit_mut::VisitMut;
 pub(crate) struct ImplInputParams {
     /// Overrides the path to the `bon` crate. This is useful when the macro is
     /// wrapped in another macro that also reexports `bon`.
-    #[darling(rename = "crate", default, map = Some, with = crate::parsing::parse_bon_crate_path)]
-    bon: Option<syn::Path>,
+    #[darling(rename = "crate", default)]
+    bon: BonCratePath,
 }
 
 // ImplInputParams will evolve in the future where we'll probably want to move from it
@@ -111,9 +112,9 @@ pub(crate) fn generate(
 
             let mut config = TopLevelConfig::parse_for_fn(&orig_fn, None)?;
 
-            if let Some(bon) = config.bon {
+            if let BonCratePath::Explicit(path) = config.bon {
                 bail!(
-                    &bon,
+                    &path,
                     "`crate` parameter should be specified via `#[bon(crate = path::to::bon)]` \
                     when impl block syntax is used; no need to specify it in the method's \
                     `#[builder]` attribute"

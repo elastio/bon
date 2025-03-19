@@ -24,6 +24,7 @@ mod collections;
 mod error;
 mod normalization;
 mod parsing;
+mod privatize;
 mod util;
 
 #[cfg(test)]
@@ -308,4 +309,15 @@ pub fn set(input: proc_macro::TokenStream) -> proc_macro::TokenStream {
     let entries = syn::parse_macro_input!(input with Punctuated::parse_terminated);
 
     collections::set::generate(entries).into()
+}
+
+// Private implementation detail. Don't use it directly!
+// This attribute renames the function provided to it to `__orig_{fn_name}`
+#[doc(hidden)]
+#[proc_macro_attribute]
+pub fn __privatize(
+    _params: proc_macro::TokenStream,
+    input: proc_macro::TokenStream,
+) -> proc_macro::TokenStream {
+    privatize::privatize_fn(input.into()).into()
 }
