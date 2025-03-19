@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.5.1](https://github.com/elastio/bon/compare/v3.5.0...v3.5.1) - 2025-03-19
+
+### Fixed
+
+- Delay the privatizing (i.e. renaming of the original function to `__orig_{fn_name}`) until after all other macros are expanded ([#269](https://github.com/elastio/bon/pull/269)). Also removed the warnings for `#[tracing::instrument]` users introduced in [#264](https://github.com/elastio/bon/pull/264). This is because with this patch there will be no difference whether you place `#[tracing::instrument]` after or before the `#[builder]` attribute - all other proc macros on the function will see the original function name.
+
 ## [3.5.0](https://github.com/elastio/bon/compare/v3.4.0...v3.5.0) - 2025-03-16
 
 ### Added
