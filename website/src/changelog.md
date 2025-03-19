@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [4.0.0](https://github.com/elastio/bon/compare/v3.5.0...v4.0.0) - 2025-03-19
+
+### Other
+
+- Delay the renaming of the original function to `__orig_{fn_name}` until after all other macros are expanded ([#269](https://github.com/elastio/bon/pull/269))
+
 ## [3.5.0](https://github.com/elastio/bon/compare/v3.4.0...v3.5.0) - 2025-03-16
 
 ### Added
