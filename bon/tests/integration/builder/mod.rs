@@ -20,6 +20,7 @@ mod lints;
 mod many_params;
 mod name_conflicts;
 mod native_fields;
+mod orig_fn_naming;
 mod positional_members;
 mod raw_idents;
 mod smoke;

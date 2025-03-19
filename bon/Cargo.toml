@@ -53,8 +53,9 @@ rustversion = "1"
 expect-test = "1.4.1"
 
 # Using a bit older version that supports our MSRV
-tokio   = { version = "1.29.1", features = ["macros", "rt-multi-thread"] }
-tracing = "0.1"
+tokio = { version = "1.29.1", features = ["macros", "rt-multi-thread"] }
+
+macro_rules_attribute = "0.2"
 
 # Using a bit older version that supports our MSRV
 trybuild = "1.0.89"
