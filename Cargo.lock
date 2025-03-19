@@ -67,7 +67,7 @@ dependencies = [
 
 [[package]]
 name = "bon"
-version = "4.0.0"
+version = "3.5.1"
 dependencies = [
  "bon-macros",
  "expect-test",

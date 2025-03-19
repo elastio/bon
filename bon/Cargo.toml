@@ -1,6 +1,6 @@
 [package]
 name    = "bon"
-version = "4.0.0"
+version = "3.5.1"
 
 description = "Next-gen compile-time-checked builder generator, named function's arguments, and more!"
 
