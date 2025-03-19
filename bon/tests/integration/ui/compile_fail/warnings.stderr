@@ -1,58 +1,3 @@
-error: use of deprecated module `bon::__::warnings::tracing_instrument_attribute_after_builder`: #[tracing::instrument] attribute should be placed before the #[builder] attribute to make sure it uses the original function name as the span name;
-
-       reason: when the #[tracing::instrument] attribute is placed after the #[builder] attribute it will run after the #[builder] attribute is expanded, at which point the original function will be renamed to __orig_{fn_name}, and this will make that extra __orig_ prefix appear in the span name, which is likely not what you want
-  --> tests/integration/ui/compile_fail/warnings.rs:85:11
-   |
-85 |         #[instrument]
-   |           ^^^^^^^^^^
-   |
-note: the lint level is defined here
-  --> tests/integration/ui/compile_fail/warnings.rs:1:9
-   |
-1  | #![deny(warnings)]
-   |         ^^^^^^^^
-   = note: `#[deny(deprecated)]` implied by `#[deny(warnings)]`
-
-error: use of deprecated module `bon::__::warnings::tracing_instrument_attribute_after_builder`: #[tracing::instrument] attribute should be placed before the #[builder] attribute to make sure it uses the original function name as the span name;
-
-       reason: when the #[tracing::instrument] attribute is placed after the #[builder] attribute it will run after the #[builder] attribute is expanded, at which point the original function will be renamed to __orig_{fn_name}, and this will make that extra __orig_ prefix appear in the span name, which is likely not what you want
-  --> tests/integration/ui/compile_fail/warnings.rs:89:11
-   |
-89 |         #[instrument(name = "name_override")]
-   |           ^^^^^^^^^^
-
-error: use of deprecated module `bon::__::warnings::tracing_instrument_attribute_after_builder`: #[tracing::instrument] attribute should be placed before the #[builder] attribute to make sure it uses the original function name as the span name;
-
-       reason: when the #[tracing::instrument] attribute is placed after the #[builder] attribute it will run after the #[builder] attribute is expanded, at which point the original function will be renamed to __orig_{fn_name}, and this will make that extra __orig_ prefix appear in the span name, which is likely not what you want
-  --> tests/integration/ui/compile_fail/warnings.rs:93:20
-   |
-93 |         #[tracing::instrument]
-   |                    ^^^^^^^^^^
-
-error: use of deprecated module `bon::__::warnings::tracing_instrument_attribute_after_builder`: #[tracing::instrument] attribute should be placed before the #[builder] attribute to make sure it uses the original function name as the span name;
-
-       reason: when the #[tracing::instrument] attribute is placed after the #[builder] attribute it will run after the #[builder] attribute is expanded, at which point the original function will be renamed to __orig_{fn_name}, and this will make that extra __orig_ prefix appear in the span name, which is likely not what you want
-   --> tests/integration/ui/compile_fail/warnings.rs:101:15
-    |
-101 |             #[instrument]
-    |               ^^^^^^^^^^
-
-error: use of deprecated module `bon::__::warnings::tracing_instrument_attribute_after_builder`: #[tracing::instrument] attribute should be placed before the #[builder] attribute to make sure it uses the original function name as the span name;
-
-       reason: when the #[tracing::instrument] attribute is placed after the #[builder] attribute it will run after the #[builder] attribute is expanded, at which point the original function will be renamed to __orig_{fn_name}, and this will make that extra __orig_ prefix appear in the span name, which is likely not what you want
-   --> tests/integration/ui/compile_fail/warnings.rs:105:15
-    |
-105 |             #[instrument(name = "name_override")]
-    |               ^^^^^^^^^^
-
-error: use of deprecated module `bon::__::warnings::tracing_instrument_attribute_after_builder`: #[tracing::instrument] attribute should be placed before the #[builder] attribute to make sure it uses the original function name as the span name;
-
-       reason: when the #[tracing::instrument] attribute is placed after the #[builder] attribute it will run after the #[builder] attribute is expanded, at which point the original function will be renamed to __orig_{fn_name}, and this will make that extra __orig_ prefix appear in the span name, which is likely not what you want
-   --> tests/integration/ui/compile_fail/warnings.rs:109:24
-    |
-109 |             #[tracing::instrument]
-    |                        ^^^^^^^^^^
-
 error: unused `ExampleBuilder` that must be used
   --> tests/integration/ui/compile_fail/warnings.rs:29:9
    |
@@ -60,6 +5,11 @@ error: unused `ExampleBuilder` that must be used
    |         ^^^^^^^^^^^^^^^^^^
    |
    = note: the builder does nothing until you call `build()` on it to finish building
+note: the lint level is defined here
+  --> tests/integration/ui/compile_fail/warnings.rs:1:9
+   |
+1  | #![deny(warnings)]
+   |         ^^^^^^^^
    = note: `#[deny(unused_must_use)]` implied by `#[deny(warnings)]`
 help: use `let _ = ...` to ignore the resulting value
    |

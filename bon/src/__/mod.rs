@@ -14,8 +14,6 @@ pub mod ide;
 
 pub mod better_errors;
 
-pub mod warnings;
-
 mod cfg_eval;
 
 // This reexport is a private implementation detail and should not be used
@@ -23,6 +21,7 @@ mod cfg_eval;
 // patch releases. Use the export from your generated  builder's state module
 // directly instead of using this reexport from `bon::__`.
 pub use crate::builder_state::{IsSet, IsUnset};
+pub use bon_macros::__privatize;
 pub use rustversion;
 
 pub(crate) mod sealed {

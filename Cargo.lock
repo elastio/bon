@@ -71,9 +71,9 @@ version = "3.5.0"
 dependencies = [
  "bon-macros",
  "expect-test",
+ "macro_rules_attribute",
  "rustversion",
  "tokio",
- "tracing",
  "trybuild",
 ]
 

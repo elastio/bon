@@ -1,8 +1,10 @@
+mod bon_crate_path;
 mod docs;
 mod item_sig;
 mod simple_closure;
 mod spanned_key;
 
+pub(crate) use bon_crate_path::*;
 pub(crate) use docs::*;
 pub(crate) use item_sig::*;
 pub(crate) use simple_closure::*;
@@ -89,41 +91,6 @@ fn parse_path_mod_style(meta: &syn::Meta) -> Result<syn::Path> {
     };
 
     Ok(expr.require_path_mod_style()?.clone())
-}
-
-pub(crate) fn parse_bon_crate_path(meta: &syn::Meta) -> Result<syn::Path> {
-    let path = parse_path_mod_style(meta)?;
-
-    let prefix = &path
-        .segments
-        .first()
-        .ok_or_else(|| err!(&path, "path must have at least one segment"))?
-        .ident;
-
-    let is_absolute = path.leading_colon.is_some() || prefix == "crate" || prefix == "$crate";
-
-    if is_absolute {
-        return Ok(path);
-    }
-
-    if prefix == "super" || prefix == "self" {
-        bail!(
-            &path,
-            "path must not be relative; specify the path that starts with `crate::` \
-            instead; if you want to refer to a reexport from an external crate then \
-            use a leading colon like `::crate_name::reexport::path::bon`"
-        )
-    }
-
-    let path_str = darling::util::path_to_string(&path);
-
-    bail!(
-        &path,
-        "path must be absolute; if you want to refer to a reexport from an external \
-        crate then add a leading colon like `::{path_str}`; if the path leads to a module \
-        in the current crate, then specify the absolute path with `crate` like \
-        `crate::reexport::path::bon` or `$crate::reexport::path::bon` (if within a macro)"
-    )
 }
 
 // Lint from nightly. `&Option<T>` is used to reduce syntax at the callsite

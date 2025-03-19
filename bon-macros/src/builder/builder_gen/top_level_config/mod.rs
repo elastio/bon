@@ -2,7 +2,7 @@ mod on;
 
 pub(crate) use on::OnConfig;
 
-use crate::parsing::{ItemSigConfig, ItemSigConfigParsing, SpannedKey};
+use crate::parsing::{BonCratePath, ItemSigConfig, ItemSigConfigParsing, SpannedKey};
 use crate::util::prelude::*;
 use darling::ast::NestedMeta;
 use darling::FromMeta;
@@ -45,8 +45,8 @@ fn parse_start_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
 pub(crate) struct TopLevelConfig {
     /// Overrides the path to the `bon` crate. This is useful when the macro is
     /// wrapped in another macro that also reexports `bon`.
-    #[darling(rename = "crate", default, map = Some, with = crate::parsing::parse_bon_crate_path)]
-    pub(crate) bon: Option<syn::Path>,
+    #[darling(rename = "crate", default)]
+    pub(crate) bon: BonCratePath,
 
     #[darling(default, with = parse_start_fn)]
     pub(crate) start_fn: ItemSigConfig,

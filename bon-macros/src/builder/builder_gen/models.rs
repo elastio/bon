@@ -1,7 +1,7 @@
 use super::member::Member;
 use super::top_level_config::{DerivesConfig, OnConfig};
 use crate::normalization::GenericsNamespace;
-use crate::parsing::{ItemSigConfig, SpannedKey};
+use crate::parsing::{BonCratePath, ItemSigConfig, SpannedKey};
 use crate::util::prelude::*;
 use std::borrow::Cow;
 
@@ -150,8 +150,7 @@ pub(super) struct Generics {
 }
 
 pub(crate) struct BuilderGenCtx {
-    /// Path to the `bon` crate.
-    pub(super) bon: syn::Path,
+    pub(super) bon: BonCratePath,
 
     /// Name of the generic variable that holds the builder's state.
     pub(super) state_var: syn::Ident,
@@ -175,7 +174,7 @@ pub(crate) struct BuilderGenCtx {
 }
 
 pub(super) struct BuilderGenCtxParams<'a> {
-    pub(crate) bon: Option<syn::Path>,
+    pub(crate) bon: BonCratePath,
     pub(super) namespace: Cow<'a, GenericsNamespace>,
     pub(super) members: Vec<Member>,
 
@@ -355,7 +354,7 @@ impl BuilderGenCtx {
         });
 
         Ok(Self {
-            bon: bon.unwrap_or_else(|| syn::parse_quote!(::bon)),
+            bon,
             state_var,
             members,
             allow_attrs,
