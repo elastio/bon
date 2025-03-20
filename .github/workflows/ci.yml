@@ -5,9 +5,12 @@ on:
   merge_group:
   pull_request:
   push:
-    branches:
-      - master
-      - hotfix/*
+    branches: [master]
+
+  # Run a scheduled CI every day to catch regressions from nightly or new version
+  # releases early.
+  schedule:
+    - cron: 0 12 * * *
 
 defaults:
   run:
