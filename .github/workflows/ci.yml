@@ -5,9 +5,12 @@ on:
   merge_group:
   pull_request:
   push:
-    branches:
-      - master
-      - hotfix/*
+    branches: [master]
+
+  # Run a scheduled CI every day to catch regressions from nightly or new version
+  # releases early.
+  schedule:
+    - cron: 0 12 * * *
 
 defaults:
   run:
@@ -91,10 +94,13 @@ jobs:
   test-stable:
     runs-on: ${{ matrix.os }}-latest
 
+    continue-on-error: ${{ matrix.locked == '' }}
+
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu, windows, macos]
+        locked: [--locked, ""]
 
     steps:
       - uses: actions/checkout@v4
@@ -106,24 +112,24 @@ jobs:
           # of rust standard library code.
           components: rust-src
 
-      - run: cargo clippy --all-features --all-targets --locked
+      - run: cargo clippy --all-features --all-targets ${{ matrix.locked }}
 
-      - run: cargo test --locked --all-features --all-targets
-      - run: cargo test --locked --all-features --doc
+      - run: cargo test ${{ matrix.locked }} --all-features --all-targets
+      - run: cargo test ${{ matrix.locked }} --all-features --doc
       - run: |
-          cd bon && cargo test --locked --no-default-features \
+          cd bon && cargo test ${{ matrix.locked }} --no-default-features \
             --features=experimental-overwritable
 
       - run: |
-          cd bon && cargo test --locked --no-default-features \
+          cd bon && cargo test ${{ matrix.locked }} --no-default-features \
             --features=experimental-overwritable,alloc
 
       - run: |
-          cd bon && cargo test --locked --no-default-features \
+          cd bon && cargo test ${{ matrix.locked }} --no-default-features \
             --features=experimental-overwritable,implied-bounds
 
       - run: |
-          cd bon && cargo test --locked --no-default-features \
+          cd bon && cargo test ${{ matrix.locked }} --no-default-features \
             --features=experimental-overwritable,alloc,implied-bounds
 
   test-msrv:
@@ -154,6 +160,7 @@ jobs:
       fail-fast: false
       matrix:
         toolchain: [beta, nightly]
+        locked: [--locked, ""]
 
     steps:
       - uses: actions/checkout@v4
@@ -163,7 +170,7 @@ jobs:
           components: clippy
 
       - run: |
-          cargo +${{ matrix.toolchain }} clippy --all-features --all-targets --locked \
+          cargo +${{ matrix.toolchain }} clippy --all-features --all-targets ${{ matrix.locked }} \
             -- \
             --allow edition-2024-expr-fragment-specifier \
             --allow if_let_rescope \
@@ -176,6 +183,12 @@ jobs:
   cargo-miri:
     runs-on: ubuntu-latest
 
+    continue-on-error: ${{ matrix.locked == '' }}
+
+    strategy:
+      matrix:
+        locked: [--locked, ""]
+
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -184,7 +197,7 @@ jobs:
           components: miri, rust-src
 
       - run: |
-          cargo miri test --locked --all-features --all-targets \
+          cargo miri test ${{ matrix.locked }} --all-features --all-targets \
             --workspace --exclude runtime-benchmarks
         env:
           RUSTFLAGS: >-
