@@ -110,6 +110,9 @@ impl PanicContext {
             .unwrap_or_else(|| format!("{:?}", current_thread.id()));
 
         Self(Rc::new(PanicContextShared {
+            // This is expected, and we handle the compatibility with
+            // conditional compilation via the `rustversion` crate.
+            #[allow(clippy::incompatible_msrv)]
             backtrace: backtrace::Backtrace::capture(),
             location: location.map(PanicLocation::from_std),
             thread: thread_,
