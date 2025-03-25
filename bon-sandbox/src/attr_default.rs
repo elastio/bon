@@ -5,6 +5,10 @@
         /// generated for them. Click on any of `source` links to see the source code.
     },
 ))]
+#[allow(
+    clippy::struct_field_names,
+    reason = "Common `_default` suffix is for better readability"
+)]
 pub struct Example {
     #[builder(default = (2 + 2) * 10)]
     small_custom_default: u32,
