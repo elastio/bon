@@ -1,0 +1,9 @@
+# Based on Hetzner's instructions:
+# https://docs.hetzner.com/cloud/floating-ips/persistent-configuration/#ubuntu-using-netplan
+
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    eth0:
+      addresses: ["${server_ip}/32"]

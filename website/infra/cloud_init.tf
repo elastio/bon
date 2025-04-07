@@ -6,6 +6,7 @@ locals {
   bootstrap        = "${path.module}/bootstrap"
 
   template_files = {
+    "60-static-ip.yaml"   = "/etc/netplan/60-static-ip.yaml"
     "umami.service"       = "/etc/systemd/system/umami.service"
     "data-volume.service" = "/etc/systemd/system/data-volume.service"
     "docker-daemon.json"  = "/etc/docker/daemon.json"

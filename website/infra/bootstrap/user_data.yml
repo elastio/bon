@@ -53,7 +53,7 @@ runcmd:
     log_content /var/run/reboot-required
     log_content /var/run/reboot-required.pkgs
 
-  - ip addr add ${server_ip} dev eth0
+  - netplan apply
 
   - systemctl enable --now data-volume.service
 
