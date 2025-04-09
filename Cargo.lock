@@ -79,7 +79,7 @@ dependencies = [
 
 [[package]]
 name = "bon-cli"
-version = "3.4.1"
+version = "3.5.2"
 dependencies = [
  "anyhow",
  "ra_ap_parser",

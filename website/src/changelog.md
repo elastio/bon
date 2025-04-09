@@ -9,9 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.5.2](https://github.com/elastio/bon/compare/v3.5.1...v3.5.2) - 2025-04-09
 
-### Other
+### Fixed
 
-- Small fix for rust-analyzer syntax highlighting of parameters for functions annotated with `#[builder]` ([#275](https://github.com/elastio/bon/pull/275))
+- Small fix for rust-analyzer syntax highlighting of parameters for functions annotated with `#[builder]` ([#275](https://github.com/elastio/bon/pull/275)).
+  This doesn't fix the problem fully since function parameters are now assigned "variable" semantic token type instead of "parameter". However, it's already better than "struct" that they were assigned before this fix. Created an issue in rust-analyzer with more details and to get the full fix of this problem: [rust-lang/rust-analyzer#19556](https://github.com/rust-lang/rust-analyzer/issues/19556).
 - Fix lints on nightly 2025-03-20 ([#272](https://github.com/elastio/bon/pull/272))
 
 ## [3.5.1](https://github.com/elastio/bon/compare/v3.5.0...v3.5.1) - 2025-03-19
