@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.5.2](https://github.com/elastio/bon/compare/v3.5.1...v3.5.2) - 2025-04-09
+
+### Other
+
+- Small fix for rust-analyzer syntax highlighting of parameters for functions annotated with `#[builder]` ([#275](https://github.com/elastio/bon/pull/275))
+- Fix lints on nightly 2025-03-20 ([#272](https://github.com/elastio/bon/pull/272))
+
 ## [3.5.1](https://github.com/elastio/bon/compare/v3.5.0...v3.5.1) - 2025-03-19
 
 ### Fixed
