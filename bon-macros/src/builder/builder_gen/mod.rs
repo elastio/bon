@@ -67,10 +67,10 @@ impl BuilderGenCtx {
         // -- Postprocessing --
         // Here we parse all items back and add the `allow` attributes to them.
         let other_items = quote! {
-            #state_mod
             #builder_decl
-            #builder_derives
             #builder_impl
+            #builder_derives
+            #state_mod
         };
 
         let other_items_str = other_items.to_string();
