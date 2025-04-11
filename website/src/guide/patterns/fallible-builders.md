@@ -38,7 +38,7 @@ With this approach, the finishing function of the generated builder returns a `R
 
 ## Custom Finishing Function
 
-The example above declares the same parameters on the `new` method as there are fields on the `User` struct. Usually, this repetition is fine and even beneficial because it decouples your struct's representation from the building logic allowing both to evolve more independently. For example, this way it's easy to change the type of `id` parameter to a `&str` or some other type, while keeping it as `u32` internally in the struct.
+The example above declares the same parameters on the `new` method as there are fields on the `User` struct. Usually, this repetition is fine and even beneficial because it decouples your struct's representation from the building logic allowing both to evolve more independently. For example, this way it's easy to change the type of the `id` parameter to a `&str` or some other type while keeping it as `u32` internally in the struct.
 
 However, if you want to avoid repeating the struct's fields you can override the finishing function of the builder while keeping the builder derived from the struct.
 
@@ -84,7 +84,7 @@ This example uses the `IsComplete` trait which is explained in the ["Custom Meth
 
 :::
 
-Note that the signature of the `build()` method is fully under your control. You can make it accept additional parameters, return a different type, etc. The only difference of this approach from the method `new` is that this method accepts the builder as `self` and creates the target object (`User`) before validating the inputs.
+Note that the signature of the `build()` method is fully under your control. You can make it accept additional parameters, return a different type, etc. The only difference between this approach and the `new` method is that this method accepts the builder as `self` and creates the target object (`User`) before validating the inputs.
 
 This approach suffers from having a state of the object in code where it's constructed but not valid, which is however contained within the custom `build()` method implementation.
 
