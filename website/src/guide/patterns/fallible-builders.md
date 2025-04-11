@@ -93,7 +93,3 @@ This approach suffers from having a state of the object in code where it's const
 It is possible to do validations right when the setter is called. Use `#[builder(with)]` with a fallible closure to achieve that. The following example is an excerpt from that attribute's [API reference](../../reference/builder/member/with), see more details there in the [Fallible Closure](../../reference/builder/member/with#fallible-closure) section.
 
 <!--@include: ../../reference/builder/member/with.md#fallible-closure-example-->
-
-## Future Possibilities
-
-If you have some design ideas for an attributes API to do validations with the builder macros, then feel free to post them in [this Github issue](https://github.com/elastio/bon/issues/34).
