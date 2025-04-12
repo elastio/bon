@@ -33,8 +33,9 @@ error[E0599]: no method named `maybe_member` found for struct `ValidBuilder` in 
    |
 help: there is a method `member` with a similar name
    |
-38 |     let _ = Valid::builder().member(Some(42));
-   |                              ~~~~~~
+38 -     let _ = Valid::builder().maybe_member(Some(42));
+38 +     let _ = Valid::builder().member(Some(42));
+   |
 
 error[E0599]: no method named `maybe_some_member` found for struct `ValidBuilder` in the current scope
   --> tests/integration/ui/compile_fail/attr_required.rs:39:30
@@ -47,8 +48,9 @@ error[E0599]: no method named `maybe_some_member` found for struct `ValidBuilder
    |
 help: there is a method `some_member` with a similar name
    |
-39 |     let _ = Valid::builder().some_member(Some(()));
-   |                              ~~~~~~~~~~~
+39 -     let _ = Valid::builder().maybe_some_member(Some(()));
+39 +     let _ = Valid::builder().some_member(Some(()));
+   |
 
 error[E0277]: the member `Unset<arg1>` was not set, but this method requires it to be set
   --> tests/integration/ui/compile_fail/attr_required.rs:51:32

@@ -218,9 +218,6 @@ help: the type constructed contains `&str` due to the type of the argument passe
    |            this argument influences the type of `Ok`
 note: tuple variant defined here
   --> $RUST/core/src/result.rs
-   |
-   |     Ok(#[stable(feature = "rust1", since = "1.0.0")] T),
-   |     ^^
 
 error[E0308]: mismatched types
   --> tests/integration/ui/compile_fail/attr_with.rs:61:62

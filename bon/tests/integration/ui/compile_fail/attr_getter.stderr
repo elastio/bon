@@ -165,9 +165,6 @@ help: the type constructed contains `&String` due to the type of the argument pa
    |                            --- this argument influences the type of `Some`
 note: tuple variant defined here
   --> $RUST/core/src/option.rs
-   |
-   |     Some(#[stable(feature = "rust1", since = "1.0.0")] T),
-   |     ^^^^
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0308]: mismatched types
@@ -191,9 +188,6 @@ help: the type constructed contains `&String` due to the type of the argument pa
    |                            --- this argument influences the type of `Some`
 note: tuple variant defined here
   --> $RUST/core/src/option.rs
-   |
-   |     Some(#[stable(feature = "rust1", since = "1.0.0")] T),
-   |     ^^^^
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
