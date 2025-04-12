@@ -6,6 +6,7 @@ use crate::parsing::{BonCratePath, ItemSigConfig, ItemSigConfigParsing, SpannedK
 use crate::util::prelude::*;
 use darling::ast::NestedMeta;
 use darling::FromMeta;
+use syn::parse::Parser;
 use syn::punctuated::Punctuated;
 use syn::ItemFn;
 
@@ -43,6 +44,14 @@ fn parse_start_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct TopLevelConfig {
+    /// Specifies whether the generated functions should be `const`.\
+    ///
+    /// It is marked as `#[darling(skip)]` because `const` is a keyword, that
+    /// can't be parsed as a `syn::Ident` and therefore as a `syn::Meta` item.
+    /// We manually parse it from the beginning `builder(...)`.
+    #[darling(skip)]
+    pub(crate) const_: Option<syn::Token![const]>,
+
     /// Overrides the path to the `bon` crate. This is useful when the macro is
     /// wrapped in another macro that also reexports `bon`.
     #[darling(rename = "crate", default)]
@@ -70,9 +79,7 @@ pub(crate) struct TopLevelConfig {
 
 impl TopLevelConfig {
     pub(crate) fn parse_for_fn(fn_item: &ItemFn, config: Option<TokenStream>) -> Result<Self> {
-        let config = config.map(NestedMeta::parse_meta_list).transpose()?;
-
-        let meta = fn_item
+        let other_configs = fn_item
             .attrs
             .iter()
             .filter(|attr| attr.path().is_ident("builder"))
@@ -81,17 +88,16 @@ impl TopLevelConfig {
                     crate::parsing::require_non_empty_paren_meta_list_or_name_value(&attr.meta)?;
                 }
                 let meta_list = darling::util::parse_attribute_to_meta_list(attr)?;
-                let meta_list = NestedMeta::parse_meta_list(meta_list.tokens)?;
+                Ok(meta_list.tokens)
+            });
 
-                Ok(meta_list)
-            })
-            .collect::<Result<Vec<_>>>()?
+        let configs = config
+            .map(Ok)
             .into_iter()
-            .chain(config)
-            .flatten()
-            .collect::<Vec<_>>();
+            .chain(other_configs)
+            .collect::<Result<Vec<_>>>()?;
 
-        let me = Self::parse_for_any(&meta)?;
+        let me = Self::parse_for_any(configs)?;
 
         if me.start_fn.name.is_none() {
             let ItemSigConfig { name: _, vis, docs } = &me.start_fn;
@@ -119,15 +125,46 @@ impl TopLevelConfig {
         Ok(me)
     }
 
-    pub(crate) fn parse_for_struct(meta_list: &[NestedMeta]) -> Result<Self> {
-        Self::parse_for_any(meta_list)
+    pub(crate) fn parse_for_struct(configs: Vec<TokenStream>) -> Result<Self> {
+        Self::parse_for_any(configs)
     }
 
-    fn parse_for_any(meta_list: &[NestedMeta]) -> Result<Self> {
+    fn parse_for_any(mut configs: Vec<TokenStream>) -> Result<Self> {
+        fn parse_const_prefix(
+            parse: syn::parse::ParseStream<'_>,
+        ) -> syn::Result<(Option<syn::Token![const]>, TokenStream)> {
+            let const_ = parse.parse().ok();
+            if const_.is_some() && !parse.is_empty() {
+                parse.parse::<syn::Token![,]>()?;
+            }
+
+            let rest = parse.parse()?;
+            Ok((const_, rest))
+        }
+
+        // Try to parse the first token of the first config as `const` token.
+        // We have to do this manually because `syn` doesn't support parsing
+        // keywords in the `syn::Meta` keys. Yeah, unfortunately it means that
+        // the users must ensure they place `const` right at the beginning of
+        // their `#[builder(...)]` attributes.
+        let mut const_ = None;
+
+        if let Some(config) = configs.first_mut() {
+            (const_, *config) = parse_const_prefix.parse2(std::mem::take(config))?;
+        }
+
+        let configs = configs
+            .into_iter()
+            .map(NestedMeta::parse_meta_list)
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .flatten()
+            .collect::<Vec<_>>();
+
         // This is a temporary hack. We only allow `on(_, required)` as the
         // first `on(...)` clause. Instead we should implement an extended design:
         // https://github.com/elastio/bon/issues/152
-        let mut on_configs = meta_list
+        let mut on_configs = configs
             .iter()
             .enumerate()
             .filter_map(|(i, meta)| match meta {
@@ -151,7 +188,10 @@ impl TopLevelConfig {
             }
         }
 
-        let me = Self::from_list(meta_list)?;
+        let me = Self {
+            const_,
+            ..Self::from_list(&configs)?
+        };
 
         if let Some(on) = me.on.iter().skip(1).find(|on| on.required.is_present()) {
             bail!(
