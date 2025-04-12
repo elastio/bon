@@ -1,4 +1,4 @@
-use super::reject_syntax;
+use super::{reject_attrs, reject_syntax};
 use crate::util::prelude::*;
 use darling::FromMeta;
 
@@ -43,7 +43,7 @@ impl FromMeta for SimpleClosure {
         reject_syntax("`static` keyword", &closure.movability)?;
         reject_syntax("`async` keyword", &closure.asyncness)?;
         reject_syntax("`move` keyword", &closure.capture)?;
-        reject_syntax("attribute", &closure.attrs.first())?;
+        reject_attrs(&closure.attrs)?;
 
         let inputs = closure
             .clone()
@@ -66,13 +66,13 @@ impl FromMeta for SimpleClosure {
 
 impl SimpleClosureInput {
     fn from_pat_ident(pat: syn::PatIdent) -> Result<Self> {
-        reject_syntax("attribute", &pat.attrs.first())?;
+        reject_attrs(&pat.attrs)?;
         reject_syntax("`ref` keyword", &pat.by_ref)?;
         Ok(Self { pat, ty: None })
     }
 
     fn from_pat_type(input: syn::PatType) -> Result<Self> {
-        reject_syntax("attribute", &input.attrs.first())?;
+        reject_attrs(&input.attrs)?;
 
         let ident = match *input.pat {
             syn::Pat::Ident(pat) => Self::from_pat_ident(pat)?.pat,

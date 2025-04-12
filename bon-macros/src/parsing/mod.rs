@@ -1,10 +1,12 @@
 mod bon_crate_path;
+mod const_;
 mod docs;
 mod item_sig;
 mod simple_closure;
 mod spanned_key;
 
 pub(crate) use bon_crate_path::*;
+pub(crate) use const_::*;
 pub(crate) use docs::*;
 pub(crate) use item_sig::*;
 pub(crate) use simple_closure::*;
@@ -93,12 +95,16 @@ fn parse_path_mod_style(meta: &syn::Meta) -> Result<syn::Path> {
     Ok(expr.require_path_mod_style()?.clone())
 }
 
-// Lint from nightly. `&Option<T>` is used to reduce syntax at the callsite
-#[allow(unknown_lints, clippy::ref_option)]
+// `&Option<T>` is used to reduce syntax at the callsite
+#[allow(clippy::ref_option)]
 pub(crate) fn reject_syntax<T: Spanned>(name: &'static str, syntax: &Option<T>) -> Result {
     if let Some(syntax) = syntax {
         bail!(syntax, "{name} is not allowed here")
     }
 
     Ok(())
+}
+
+pub(crate) fn reject_attrs(attrs: &[syn::Attribute]) -> Result {
+    reject_syntax("attribute", &attrs.first())
 }

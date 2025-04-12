@@ -6,6 +6,7 @@ pub(crate) use config::*;
 pub(crate) use named::*;
 
 use super::top_level_config::OnConfig;
+use super::TopLevelConfig;
 use crate::normalization::SyntaxVariant;
 use crate::util::prelude::*;
 use config::MemberConfig;
@@ -103,10 +104,12 @@ impl Member {
     // (there is an other lint that checks for this).
     #[allow(single_use_lifetimes)]
     pub(crate) fn from_raw<'a>(
-        on: &[OnConfig],
+        top_config: &TopLevelConfig,
         origin: MemberOrigin,
         members: impl IntoIterator<Item = RawMember<'a>>,
     ) -> Result<Vec<Self>> {
+        let on = &top_config.on;
+
         let mut members = members
             .into_iter()
             .map(|member| {
@@ -119,7 +122,7 @@ impl Member {
                 }
 
                 let config = MemberConfig::from_attributes(member.attrs)?;
-                config.validate(origin)?;
+                config.validate(top_config, origin)?;
                 Ok((member, config))
             })
             .collect::<Result<Vec<_>>>()?

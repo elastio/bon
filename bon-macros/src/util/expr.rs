@@ -11,7 +11,7 @@ impl ExprExt for syn::Expr {
             _ => bail!(self, "expected a simple path, like `foo::bar`"),
         };
 
-        crate::parsing::reject_syntax("attribute", &expr.attrs.first())?;
+        crate::parsing::reject_attrs(&expr.attrs)?;
         crate::parsing::reject_syntax("<T as Trait> syntax", &expr.qself)?;
 
         expr.path.require_mod_style()?;

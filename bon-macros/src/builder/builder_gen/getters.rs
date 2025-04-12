@@ -52,6 +52,7 @@ impl<'a> GettersCtx<'a> {
         let state_var = &self.base.state_var;
         let member_pascal = &self.member.name.pascal;
         let state_mod = &self.base.state_mod.ident;
+        let const_ = &self.base.const_;
 
         Ok(quote! {
             #( #docs )*
@@ -62,7 +63,7 @@ impl<'a> GettersCtx<'a> {
             )]
             #[inline(always)]
             #[must_use = "this method has no side effects; it only returns a value"]
-            #vis fn #name(&self) -> #return_ty
+            #const_ #vis fn #name(&self) -> #return_ty
             where
                 #state_var::#member_pascal: #state_mod::IsSet,
             {

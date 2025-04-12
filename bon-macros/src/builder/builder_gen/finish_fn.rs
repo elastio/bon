@@ -2,14 +2,24 @@ use super::member::{Member, PosFnMember};
 use crate::util::prelude::*;
 
 impl super::BuilderGenCtx {
-    fn finish_fn_member_expr(member: &Member) -> TokenStream {
+    fn finish_fn_member_expr(&self, member: &Member) -> TokenStream {
         let member = match member {
             Member::Named(member) => member,
             Member::Skip(member) => {
                 return member
                     .value
                     .as_ref()
-                    .map(|value| quote! { (|| #value)() })
+                    .map(|value| {
+                        // Closures aren't supported in `const` contexts at the time of this writing
+                        // (Rust 1.86.0), so we don't wrap it in a closure but we require the expression
+                        // to be simple so that it doesn't break out of the surrounding scope.
+                        // Search for `require_embeddable_const_expr` for more.
+                        if self.const_.is_some() {
+                            return quote!(#value);
+                        }
+
+                        quote! { (|| #value)() }
+                    })
                     .unwrap_or_else(|| quote! { ::core::default::Default::default() });
             }
             Member::StartFn(member) => {
@@ -47,6 +57,18 @@ impl super::BuilderGenCtx {
                     quote! { #default }
                 };
 
+                // Special case for `const` because `unwrap_or_else` is not `const`
+                // and closure calls aren't supported in `const` contexts at the time
+                // of this writing (Rust 1.86.0).
+                if self.const_.is_some() {
+                    return quote! {
+                        match #member_field {
+                            Some(value) => value,
+                            None => #default,
+                        }
+                    };
+                }
+
                 quote! {
                     ::core::option::Option::unwrap_or_else(#member_field, || #default)
                 }
@@ -63,19 +85,33 @@ impl super::BuilderGenCtx {
                     return member_field;
                 }
 
+                // SAFETY: we know that the member is set because we are in
+                // the `finish` function where this method uses the trait
+                // bound of `IsSet` for every required member. It's also
+                // not possible to intervene with the builder's state from
+                // the outside because all members of the builder are considered
+                // private (we even generate random names for them to make it
+                // impossible to access them from the outside in the same module).
+                //
+                // We also make sure to use fully qualified paths to methods
+                // involved in setting the value for the required member to make
+                // sure no trait/function in scope can override the behavior.
+
+                // Special case for `const` mode where `unwrap_unchecked` is
+                // unstable in Rust <1.83.0.
+                if self.const_.is_some() {
+                    return quote! {
+                        match #member_field {
+                            Some(value) => value,
+                            // SAFETY: see the big safety comment above
+                            None => unsafe { ::core::hint::unreachable_unchecked() },
+                        }
+                    };
+                }
+
                 quote! {
+                    // SAFETY: see the big safety comment above
                     unsafe {
-                        // SAFETY: we know that the member is set because we are in
-                        // the `finish` function where this method uses the trait
-                        // bound of `IsSet` for every required member. It's also
-                        // not possible to intervene with the builder's state from
-                        // the outside because all members of the builder are considered
-                        // private (we even generate random names for them to make it
-                        // impossible to access them from the outside in the same module).
-                        //
-                        // We also make sure to use fully qualified paths to methods
-                        // involved in setting the value for the required member to make
-                        // sure no trait/function in scope can override the behavior.
                         ::core::option::Option::unwrap_unchecked(#member_field)
                     }
                 }
@@ -85,7 +121,7 @@ impl super::BuilderGenCtx {
 
     pub(super) fn finish_fn(&self) -> TokenStream {
         let members_vars_decls = self.members.iter().map(|member| {
-            let expr = Self::finish_fn_member_expr(member);
+            let expr = self.finish_fn_member_expr(member);
             let var_ident = member.orig_ident();
 
             // The type hint is necessary in some cases to assist the compiler
@@ -119,6 +155,7 @@ impl super::BuilderGenCtx {
         let finish_fn_ident = &self.finish_fn.ident;
         let output = &self.finish_fn.output;
         let state_var = &self.state_var;
+        let const_ = &self.const_;
 
         quote! {
             #(#attrs)*
@@ -135,7 +172,10 @@ impl super::BuilderGenCtx {
                 clippy::missing_const_for_fn,
             )]
             #must_use
-            #finish_fn_vis #asyncness #unsafety fn #finish_fn_ident(self, #(#finish_fn_params,)*) #output
+            #finish_fn_vis #const_ #asyncness #unsafety fn #finish_fn_ident(
+                self,
+                #(#finish_fn_params,)*
+            ) #output
             where
                 #state_var: #state_mod::IsComplete
             {
