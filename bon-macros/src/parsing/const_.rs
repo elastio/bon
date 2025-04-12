@@ -127,10 +127,7 @@ pub(crate) fn require_embeddable_const_expr(expr: &syn::Expr) -> Result {
                 recurse(end)?;
             }
         }
-        RawAddr(raw_addr) => {
-            reject_attrs(&raw_addr.attrs)?;
-            recurse(&raw_addr.expr)?;
-        }
+
         Reference(reference) => {
             reject_attrs(&reference.attrs)?;
             recurse(&reference.expr)?;
