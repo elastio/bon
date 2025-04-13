@@ -32,7 +32,7 @@ impl super::FnInputCtx<'_> {
                 bail!(
                     &const_,
                     "#[builder(const)] requires the underlying function to be \
-                    marked as `const fn` too"
+                    marked as `const fn`"
                 );
             }
         }
