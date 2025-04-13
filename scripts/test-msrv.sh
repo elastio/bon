@@ -34,6 +34,7 @@ with_log cd bon
 
 step echo '[workspace]' >> Cargo.toml
 
+step cargo update -p prettyplease --precise 0.2.17
 step cargo update -p syn --precise 2.0.56
 step cargo update -p tokio --precise 1.29.1
 step cargo update -p expect-test --precise 1.4.1
