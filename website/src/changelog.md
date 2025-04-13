@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.5.3](https://github.com/elastio/bon/compare/v3.5.2...v3.5.3) - 2025-04-13
+
+### Other
+
+- Add very limited support for `#[builder(const)]` ([#279](https://github.com/elastio/bon/pull/279))
+
 ## [3.5.2](https://github.com/elastio/bon/compare/v3.5.1...v3.5.2) - 2025-04-09
 
 ### Fixed
