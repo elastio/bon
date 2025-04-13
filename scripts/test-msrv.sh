@@ -4,6 +4,8 @@ set -euo pipefail
 
 . "$(dirname "${BASH_SOURCE[0]}")/util/lib.sh"
 
+msrv="${1:-1.59.0}"
+
 # If not on CI - create temp dir
 if [[ ! -v CI ]]; then
     trap cleanup SIGINT SIGTERM ERR EXIT
@@ -21,10 +23,10 @@ if [[ ! -v CI ]]; then
 
     with_log pushd "$temp_dir"
 
+    step echo "$msrv" > rust-toolchain
+
     info "Running in a temp dir $(pwd)"
 fi
-
-step echo '1.59.0' > rust-toolchain
 
 step cargo --version --verbose
 
@@ -32,6 +34,10 @@ with_log cd bon
 
 step echo '[workspace]' >> Cargo.toml
 
+step cargo update -p once_cell --precise 1.17.2
+step cargo update -p serde --precise 1.0.194
+step cargo update -p trybuild --precise 1.0.89
+step cargo update -p prettyplease --precise 0.2.17
 step cargo update -p syn --precise 2.0.56
 step cargo update -p tokio --precise 1.29.1
 step cargo update -p expect-test --precise 1.4.1

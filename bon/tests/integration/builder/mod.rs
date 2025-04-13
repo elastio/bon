@@ -1,5 +1,6 @@
 mod attr_bon;
 mod attr_builder;
+mod attr_const;
 mod attr_crate;
 mod attr_default;
 mod attr_derive;

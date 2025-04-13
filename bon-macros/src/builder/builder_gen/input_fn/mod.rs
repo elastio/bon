@@ -294,7 +294,7 @@ impl<'a> FnInputCtx<'a> {
             })
             .collect::<Result<Vec<_>>>()?;
 
-        let members = Member::from_raw(&self.config.on, MemberOrigin::FnArg, members)?;
+        let members = Member::from_raw(&self.config, MemberOrigin::FnArg, members)?;
 
         let generics = self.generics();
 
@@ -402,6 +402,7 @@ impl<'a> FnInputCtx<'a> {
 
             allow_attrs,
 
+            const_: self.config.const_,
             on: self.config.on,
 
             assoc_method_ctx,

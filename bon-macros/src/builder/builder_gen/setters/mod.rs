@@ -1,4 +1,4 @@
-use super::member::WithConfig;
+use super::member::{SetterClosure, WithConfig};
 use super::{BuilderGenCtx, NamedMember};
 use crate::parsing::ItemSigConfig;
 use crate::util::prelude::*;
@@ -286,31 +286,59 @@ impl<'a> SettersCtx<'a> {
 
     fn member_expr_from_with(&self, with: &WithConfig) -> TokenStream {
         match with {
-            WithConfig::Closure(closure) => {
-                let body = &closure.body;
-
-                let ty = self.member.underlying_norm_ty().to_token_stream();
-
-                let output = Self::maybe_wrap_in_result(with, ty);
-
-                // Avoid wrapping the body in a block if it's already a block.
-                let body = if matches!(body.as_ref(), syn::Expr::Block(_)) {
-                    body.to_token_stream()
-                } else {
-                    quote!({ #body })
-                };
-
-                let question_mark = closure
-                    .output
-                    .is_some()
-                    .then(|| syn::Token![?](Span::call_site()));
-
-                quote! {
-                    (move || -> #output #body)() #question_mark
-                }
-            }
+            WithConfig::Closure(closure) => self.member_expr_from_with_closure(with, closure),
             WithConfig::Some(some) => quote!(#some(value)),
             WithConfig::FromIter(from_iter) => quote!(#from_iter(iter)),
+        }
+    }
+
+    fn member_expr_from_with_closure(
+        &self,
+        with: &WithConfig,
+        closure: &SetterClosure,
+    ) -> TokenStream {
+        let body = &closure.body;
+
+        let ty = self.member.underlying_norm_ty().to_token_stream();
+
+        let output = Self::maybe_wrap_in_result(with, ty);
+
+        // Closures aren't supported in `const` contexts at the time of this writing
+        // (Rust 1.86.0), so we don't wrap it in a closure but we require the expression
+        // to be simple so that it doesn't break out of the surrounding scope.
+        // Search for `require_embeddable_const_expr` for more.
+        if self.base.const_.is_some() {
+            let body = quote! {{
+                let value: #output = #body;
+                value
+            }};
+
+            if closure.output.is_none() {
+                return body;
+            }
+
+            return quote! {
+                match #body {
+                    Ok(value) => value,
+                    Err(err) => return Err(err),
+                }
+            };
+        }
+
+        // Avoid wrapping the body in a block if it's already a block.
+        let body = if matches!(body.as_ref(), syn::Expr::Block(_)) {
+            body.to_token_stream()
+        } else {
+            quote!({ #body })
+        };
+
+        let question_mark = closure
+            .output
+            .is_some()
+            .then(|| syn::Token![?](Span::call_site()));
+
+        quote! {
+            (move || -> #output #body)() #question_mark
         }
     }
 
@@ -420,6 +448,7 @@ impl<'a> SettersCtx<'a> {
         let SetterItem { name, vis, docs } = item;
         let pats = imp.inputs.iter().map(|(pat, _)| pat);
         let types = imp.inputs.iter().map(|(_, ty)| ty);
+        let const_ = &self.base.const_;
 
         quote! {
             #( #docs )*
@@ -434,7 +463,7 @@ impl<'a> SettersCtx<'a> {
                 clippy::missing_const_for_fn,
             )]
             #[inline(always)]
-            #vis fn #name(#maybe_mut self, #( #pats: #types ),*) -> #return_type
+            #const_ #vis fn #name(#maybe_mut self, #( #pats: #types ),*) -> #return_type
             #where_clause
             {
                 #body

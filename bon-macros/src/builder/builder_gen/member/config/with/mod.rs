@@ -53,7 +53,7 @@ impl FromMeta for WithConfig {
             _ => return Err(err()),
         };
 
-        crate::parsing::reject_syntax("attribute", &path.attrs.first())?;
+        crate::parsing::reject_attrs(&path.attrs)?;
 
         if *path == syn::parse_quote!(Some) {
             return Ok(Self::Some(path.path.clone()));

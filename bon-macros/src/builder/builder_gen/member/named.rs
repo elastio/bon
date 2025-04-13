@@ -182,8 +182,8 @@ impl NamedMember {
         Ok(())
     }
 
-    // Lint from nightly. `&Option<T>` is used to reduce syntax at the call site
-    #[allow(unknown_lints, clippy::ref_option)]
+    // `&Option<T>` is used to reduce syntax at the call site
+    #[allow(clippy::ref_option)]
     fn validate_unused_setters_cfg<T>(
         overrides: &[&SpannedKey<ItemSigConfig>],
         config: &Option<SpannedKey<T>>,

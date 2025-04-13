@@ -9,6 +9,7 @@ pub(crate) use setters::*;
 pub(crate) use with::*;
 
 use super::MemberOrigin;
+use crate::builder::builder_gen::TopLevelConfig;
 use crate::parsing::SpannedKey;
 use crate::util::prelude::*;
 use std::fmt;
@@ -207,7 +208,11 @@ impl MemberConfig {
             .map(|(_, name)| name)
     }
 
-    pub(crate) fn validate(&self, origin: MemberOrigin) -> Result {
+    pub(crate) fn validate(&self, top_config: &TopLevelConfig, origin: MemberOrigin) -> Result {
+        if top_config.const_.is_some() {
+            self.require_const_compat()?;
+        }
+
         if !cfg!(feature = "experimental-overwritable") && self.overwritable.is_present() {
             bail!(
                 &self.overwritable.span(),
@@ -287,6 +292,80 @@ impl MemberConfig {
                         "`#[builder(setters(doc(default(...)))]` may only be specified \
                         when #[builder(default)] is also specified",
                     );
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    fn require_const_compat(&self) -> Result {
+        if let Some(default) = &self.default {
+            match &default.value {
+                Some(expr) => crate::parsing::require_embeddable_const_expr(expr)?,
+                None => bail!(
+                    &default.key,
+                    "bare #[builder(default)] is incompatible with #[builder(const)] \
+                    because Default::default() can not be called in const context; \
+                    provide an explicit default value via #[builder(default = ...)] instead",
+                ),
+            }
+        }
+
+        if let Some(skip) = &self.skip {
+            match &skip.value {
+                Some(expr) => crate::parsing::require_embeddable_const_expr(expr)?,
+                None => bail!(
+                    &skip.key,
+                    "bare #[builder(skip)] is incompatible with #[builder(const)] \
+                    because Default::default() can not be called in const context; \
+                    provide an explicit initial value via #[builder(skip = ...)] instead",
+                ),
+            }
+        }
+
+        if self.into.is_present() {
+            bail!(
+                &self.into.span(),
+                "#[builder(into)] is incompatible with #[builder(const)] \
+                because Into::into() can not be called in const context",
+            );
+        }
+
+        if let Some(getter) = &self.getter {
+            if let Some(getter_kind) = &getter.kind {
+                match &getter_kind.value {
+                    GetterKind::Copy => {}
+                    GetterKind::Clone => {
+                        bail!(
+                            &getter_kind.key,
+                            "#[builder(getter(clone))] is incompatible with #[builder(const)] \
+                            because Clone::clone() can not be called in const context",
+                        )
+                    }
+                    GetterKind::Deref(_) => {
+                        bail!(
+                            &getter_kind.key,
+                            "#[builder(getter(deref))] is incompatible with #[builder(const)] \
+                            because Deref::deref() can not be called in const context",
+                        )
+                    }
+                }
+            }
+        }
+
+        if let Some(with) = &self.with {
+            match &with.value {
+                WithConfig::Closure(closure) => {
+                    crate::parsing::require_embeddable_const_expr(&closure.body)?;
+                }
+                WithConfig::Some(_) => {}
+                WithConfig::FromIter(from_iter) => {
+                    bail!(
+                        &from_iter,
+                        "from_iter is incompatible with #[builder(const)] because \
+                        FromIterator::from_iter() can not be called in const context",
+                    )
                 }
             }
         }
