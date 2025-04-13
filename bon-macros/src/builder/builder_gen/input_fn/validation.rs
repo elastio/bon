@@ -27,6 +27,16 @@ impl super::FnInputCtx<'_> {
             }
         }
 
+        if let Some(const_) = &self.config.const_ {
+            if self.fn_item.orig.sig.constness.is_none() {
+                bail!(
+                    &const_,
+                    "#[builder(const)] requires the underlying function to be \
+                    marked as `const fn` too"
+                );
+            }
+        }
+
         Ok(())
     }
 

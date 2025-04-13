@@ -8,21 +8,27 @@ mod msrv_1_61 {
         #[derive(Builder)]
         #[builder(const)]
         struct Sut {
+            #[builder(start_fn)]
             x1: u32,
 
-            x2: Option<u32>,
+            #[builder(finish_fn)]
+            x2: u32,
 
-            #[builder(default = x1 + 99)]
             x3: u32,
 
-            #[builder(skip = 4)]
-            x4: u32,
+            x4: Option<u32>,
 
-            #[builder(with = |a: u32, b: u32| a + b)]
+            #[builder(default = x1 + 99)]
             x5: u32,
 
+            #[builder(with = |a: u32, b: u32| a + b)]
+            x6: u32,
+
             #[builder(with = |a: u32, b: u32| -> Result<_, ()> { Ok(a + b) })]
-            _x6: Option<u32>,
+            x7: Option<u32>,
+
+            #[builder(skip = 10)]
+            x8: u32,
             //
             // This doesn't work because Rust complains about this in setters that
             // consume `self` and return a new instance of the builder:
@@ -34,100 +40,96 @@ mod msrv_1_61 {
             // x8: String,
         }
 
-        const ACTUAL: Sut = Sut::builder().x1(2).x2(2).x5(3, 4).build();
+        const ACTUAL: Sut = Sut::builder(1).x3(2).x4(3).x6(4, 5).build(6);
 
         #[allow(clippy::assertions_on_constants)]
         {
-            assert!(ACTUAL.x1 == 2);
-            assert!(ACTUAL.x2.unwrap() == 2);
-            assert!(ACTUAL.x3 == 101);
-            assert!(ACTUAL.x4 == 4);
-            assert!(ACTUAL.x5 == 7);
+            assert!(ACTUAL.x1 == 1);
+            assert!(ACTUAL.x2 == 6);
+            assert!(ACTUAL.x3 == 2);
+            assert!(matches!(ACTUAL.x4, Some(3)));
+            assert!(ACTUAL.x5 == 100);
+            assert!(ACTUAL.x6 == 9);
+            assert!(ACTUAL.x7.is_none());
+            assert!(ACTUAL.x8 == 10);
         }
     }
     #[test]
     const fn test_function() {
-        #[derive(Builder)]
+        type Output = (u32, u32, u32, Option<u32>, u32, u32, Option<u32>);
+
         #[builder(const)]
-        struct Sut {
-            x1: u32,
+        const fn sut(
+            #[builder(start_fn)] x1: u32,
 
-            x2: Option<u32>,
+            #[builder(finish_fn)] x2: u32,
 
-            #[builder(default = x1 + 99)]
             x3: u32,
 
-            #[builder(skip = 4)]
-            x4: u32,
+            x4: Option<u32>,
 
-            #[builder(with = |a: u32, b: u32| a + b)]
-            x5: u32,
+            #[builder(default = x1 + 99)] x5: u32,
 
-            #[builder(with = |a: u32, b: u32| -> Result<_, ()> { Ok(a + b) })]
-            _x6: Option<u32>,
-            //
-            // This doesn't work because Rust complains about this in setters that
-            // consume `self` and return a new instance of the builder:
-            // ```
-            // destructor of `builder::attr_const::test_struct::SutBuilder<S>`
-            // cannot be evaluated at compile-time
-            // ```
-            // x7: Vec<String>,
-            // x8: String,
+            #[builder(with = |a: u32, b: u32| a + b)] x6: u32,
+
+            #[builder(with = |a: u32, b: u32| -> Result<_, ()> { Ok(a + b) })] x7: Option<u32>,
+        ) -> Output {
+            (x1, x2, x3, x4, x5, x6, x7)
         }
 
-        const ACTUAL: Sut = Sut::builder().x1(2).x2(2).x5(3, 4).build();
+        const ACTUAL: Output = sut(1).x3(2).x4(3).x6(4, 5).call(6);
 
         #[allow(clippy::assertions_on_constants)]
         {
-            assert!(ACTUAL.x1 == 2);
-            assert!(ACTUAL.x2.unwrap() == 2);
-            assert!(ACTUAL.x3 == 101);
-            assert!(ACTUAL.x4 == 4);
-            assert!(ACTUAL.x5 == 7);
+            assert!(ACTUAL.0 == 1);
+            assert!(ACTUAL.1 == 6);
+            assert!(ACTUAL.2 == 2);
+            assert!(matches!(ACTUAL.3, Some(3)));
+            assert!(ACTUAL.4 == 100);
+            assert!(ACTUAL.5 == 9);
+            assert!(ACTUAL.6.is_none());
         }
     }
 
     #[test]
     const fn test_method() {
-        #[derive(Builder)]
-        #[builder(const)]
-        struct Sut {
-            x1: u32,
+        type Output = (u32, u32, u32, Option<u32>, u32, u32, Option<u32>);
 
-            x2: Option<u32>,
+        struct Sut;
 
-            #[builder(default = x1 + 99)]
-            x3: u32,
+        #[bon]
+        impl Sut {
+            #[builder(const)]
+            const fn sut(
+                #[builder(start_fn)] x1: u32,
 
-            #[builder(skip = 4)]
-            x4: u32,
+                #[builder(finish_fn)] x2: u32,
 
-            #[builder(with = |a: u32, b: u32| a + b)]
-            x5: u32,
+                x3: u32,
 
-            #[builder(with = |a: u32, b: u32| -> Result<_, ()> { Ok(a + b) })]
-            _x6: Option<u32>,
-            //
-            // This doesn't work because Rust complains about this in setters that
-            // consume `self` and return a new instance of the builder:
-            // ```
-            // destructor of `builder::attr_const::test_struct::SutBuilder<S>`
-            // cannot be evaluated at compile-time
-            // ```
-            // x7: Vec<String>,
-            // x8: String,
+                x4: Option<u32>,
+
+                #[builder(default = x1 + 99)] x5: u32,
+
+                #[builder(with = |a: u32, b: u32| a + b)] x6: u32,
+
+                #[builder(with = |a: u32, b: u32| -> Result<_, ()> { Ok(a + b) })] x7: Option<u32>,
+            ) -> Output {
+                (x1, x2, x3, x4, x5, x6, x7)
+            }
         }
 
-        const ACTUAL: Sut = Sut::builder().x1(2).x2(2).x5(3, 4).build();
+        const ACTUAL: Output = Sut::sut(1).x3(2).x4(3).x6(4, 5).call(6);
 
         #[allow(clippy::assertions_on_constants)]
         {
-            assert!(ACTUAL.x1 == 2);
-            assert!(ACTUAL.x2.unwrap() == 2);
-            assert!(ACTUAL.x3 == 101);
-            assert!(ACTUAL.x4 == 4);
-            assert!(ACTUAL.x5 == 7);
+            assert!(ACTUAL.0 == 1);
+            assert!(ACTUAL.1 == 6);
+            assert!(ACTUAL.2 == 2);
+            assert!(matches!(ACTUAL.3, Some(3)));
+            assert!(ACTUAL.4 == 100);
+            assert!(ACTUAL.5 == 9);
+            assert!(ACTUAL.6.is_none());
         }
     }
 }
