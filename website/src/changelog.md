@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [3.5.3](https://github.com/elastio/bon/compare/v3.5.2...v3.5.3) - 2025-04-13
+## [3.6.0](https://github.com/elastio/bon/compare/v3.5.2...v3.6.0) - 2025-04-13
 
 ### Other
 
