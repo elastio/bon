@@ -78,19 +78,18 @@ const {
 
 ## Limitations
 
-| Limitation                                                                             | Reason                                                                                                                                                                     |
-| -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `const` must be the _first_ attribute parameter: `#[builder(const, ...other params)]`  | `syn::Meta` [limitation](https://github.com/dtolnay/syn/issues/1458)                                                                                                       |
-| No member types with non-trivial `Drop` implementations such as `String`, `Vec`, `Box` | Requires&nbsp;[const_precise_live_drops](https://github.com/rust-lang/rust/issues/73255)                                                                                   |
-| No _bare_ [`default`] and [`skip`]                                                     | `Default::default()` can't be called in `const` context. Specify the value explicitly via `default/skip = ...`                                                             |
-| Only simple expressions are allowed in [`default`], [`skip`], [`with`]                 | Full support requires [const_closures](https://github.com/rust-lang/rust/issues/106003). In the meantime move your expression into a separate function if `bon` rejects it |
-| No [`into`]                                                                            | `Into::into()` can't be called in `const` context                                                                                                                          |
-| No [`with = FromIterator::from_iter`] or [`with = <_>::from_iter`]                     | `FromIterator::from_iter()` can't be called in `const` context                                                                                                             |
-| `1.61.0` MSRV                                                                          | Requires [`const_fn_trait_bound`](https://github.com/rust-lang/rust/issues/93706) stabilized in `1.61.0`                                                                   |
+| Limitation                                                                                                 | Reason                                                                                                                                                                     |
+| ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `const` must be the _first_ attribute parameter: `#[builder(const, ...other params)]`                      | `syn::Meta` [limitation](https://github.com/dtolnay/syn/issues/1458)                                                                                                       |
+| No member types with non-trivial `Drop` implementations such as `String`, `Vec`, `Box`                     | Requires&nbsp;[const_precise_live_drops](https://github.com/rust-lang/rust/issues/73255)                                                                                   |
+| No _bare_ [`default`] and [`skip`]                                                                         | `Default::default()` can't be called in `const` context. Specify the value explicitly via `default/skip = ...`                                                             |
+| Only simple expressions are allowed in [`default`], [`skip`], [`with`]                                     | Full support requires [const_closures](https://github.com/rust-lang/rust/issues/106003). In the meantime move your expression into a separate function if `bon` rejects it |
+| No attributes requiring non-const functions ([`into`], [`with = <_>::from_iter`], [`getter(clone)`], etc.) | Non-const functions and trait methods can't be called in `const` context                                                                                                   |
+| `1.61.0` MSRV                                                                                              | Requires [`const_fn_trait_bound`](https://github.com/rust-lang/rust/issues/93706) stabilized in `1.61.0`                                                                   |
 
 [`into`]: ../member/into
 [`default`]: ../member/default
 [`skip`]: ../member/skip
 [`with`]: ../member/with
-[`with = FromIterator::from_iter`]: ../member/with##fromiterator-from-iter
 [`with = <_>::from_iter`]: ../member/with##fromiterator-from-iter
+[`getter(clone)`]: ../member/getter
