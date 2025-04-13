@@ -139,13 +139,18 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu, windows, macos]
+        toolchain:
+          # Default MSRV
+          - 1.59.0
+          # Slightly higher MSRV for `#[builder(const)]`
+          - 1.61.0
 
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           components: clippy
-          toolchain: 1.59.0
+          toolchain: ${{ matrix.toolchain }}
 
       - run: ./scripts/test-msrv.sh
 
