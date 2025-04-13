@@ -1,5 +1,6 @@
 use crate::prelude::*;
 
+#[rustversion::since(1.61.0)]
 #[test]
 const fn smoke_struct() {
     #[derive(Builder)]
