@@ -22,8 +22,26 @@ error: bare #[builder(skip)] is incompatible with #[builder(const)] because Defa
 24 |     #[builder(skip)]
    |               ^^^^
 
-error: this kind of expression is not allowed in this position; if you need to use a complex expression such as this then move it into a separate `const fn` and call that function here instead
-  --> tests/integration/ui/compile_fail/attr_const.rs:31:25
+error: #[builder(into)] is incompatible with #[builder(const)] because Into::into() can not be called in const context
+  --> tests/integration/ui/compile_fail/attr_const.rs:31:15
    |
-31 |     #[builder(default = return 1)]
+31 |     #[builder(into)]
+   |               ^^^^
+
+error: from_iter is incompatible with #[builder(const)] because FromIterator::from_iter() can not be called in const context
+  --> tests/integration/ui/compile_fail/attr_const.rs:38:22
+   |
+38 |     #[builder(with = FromIterator::from_iter)]
+   |                      ^^^^^^^^^^^^
+
+error: from_iter is incompatible with #[builder(const)] because FromIterator::from_iter() can not be called in const context
+  --> tests/integration/ui/compile_fail/attr_const.rs:45:22
+   |
+45 |     #[builder(with = <_>::from_iter)]
+   |                      ^
+
+error: this kind of expression is not allowed in this position; if you need to use a complex expression such as this then move it into a separate `const fn` and call that function here instead
+  --> tests/integration/ui/compile_fail/attr_const.rs:52:25
+   |
+52 |     #[builder(default = return 1)]
    |                         ^^^^^^

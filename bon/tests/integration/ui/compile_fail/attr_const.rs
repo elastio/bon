@@ -27,6 +27,27 @@ struct IncompatibleSkip {
 
 #[derive(Builder)]
 #[builder(const)]
+struct IncompatibleInto {
+    #[builder(into)]
+    x1: u32,
+}
+
+#[derive(Builder)]
+#[builder(const)]
+struct IncompatibleFromIter1 {
+    #[builder(with = FromIterator::from_iter)]
+    x1: Vec<u32>,
+}
+
+#[derive(Builder)]
+#[builder(const)]
+struct IncompatibleFromIter2 {
+    #[builder(with = <_>::from_iter)]
+    x1: Vec<u32>,
+}
+
+#[derive(Builder)]
+#[builder(const)]
 struct IncompatibleDefaultExpression {
     #[builder(default = return 1)]
     x1: u32,

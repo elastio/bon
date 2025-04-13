@@ -135,14 +135,3 @@ fn example(
 ```
 
 Here is [the related issue](https://github.com/rust-lang/rustfmt/issues/6276) in `rustfmt` about this problem.
-
-## `const` Evaluation
-
-It's possible to place `#[builder]` on top of a `const fn`, but the generated builder methods won't be marked as `const`. Note that even if `bon` adds support for `const` builders, some features won't work for them. For example:
-
-- `#[builder(default)]` can not work because `Default::default()` is not `const`. You'd have to write `#[builder(default = ...)]` instead to construct the default value manually
-- `#[builder(into)]` can not work because `Into::into()` is not `const`
-
-If you have a strong use case that requires full support for `const`, feel free to leave a 👍 on [this issue](https://github.com/elastio/bon/issues/169).
-
-[open an issue]: https://github.com/elastio/bon/issues
