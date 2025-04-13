@@ -91,5 +91,5 @@ const {
 [`default`]: ../member/default
 [`skip`]: ../member/skip
 [`with`]: ../member/with
-[`with = <_>::from_iter`]: ../member/with##fromiterator-from-iter
+[`with = <_>::from_iter`]: ../member/with#fromiterator-from-iter
 [`getter(clone)`]: ../member/getter
