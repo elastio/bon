@@ -267,6 +267,10 @@ export default defineConfig({
                                     link: "/reference/builder/top-level/builder_type",
                                 },
                                 {
+                                    text: "const",
+                                    link: "/reference/builder/top-level/const",
+                                },
+                                {
                                     text: "crate",
                                     link: "/reference/builder/top-level/crate",
                                 },

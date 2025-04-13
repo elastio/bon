@@ -9,6 +9,7 @@ These attributes are placed on top of a `struct` or `fn` declaration.
 | Attribute                                          | Short description                                                                                    |
 | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | [`builder_type`](./builder/top-level/builder_type) | Overrides name, visibility and docs for the builder struct                                           |
+| [`const`](./builder/top-level/const)               | Marks all generated builder functions and methods as `const fn`                                      |
 | [`crate`](./builder/top-level/crate)               | Overrides path to `bon` crate referenced in the generated code                                       |
 | [`derive`](./builder/top-level/derive)             | Generates additional derives for the builder struct itself                                           |
 | [`finish_fn`](./builder/top-level/finish_fn)       | Overrides name, visibility and docs for the finishing function                                       |
