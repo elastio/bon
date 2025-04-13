@@ -44,7 +44,7 @@ fn parse_start_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct TopLevelConfig {
-    /// Specifies whether the generated functions should be `const`.\
+    /// Specifies whether the generated functions should be `const`.
     ///
     /// It is marked as `#[darling(skip)]` because `const` is a keyword, that
     /// can't be parsed as a `syn::Ident` and therefore as a `syn::Meta` item.
