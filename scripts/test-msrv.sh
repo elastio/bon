@@ -4,6 +4,8 @@ set -euo pipefail
 
 . "$(dirname "${BASH_SOURCE[0]}")/util/lib.sh"
 
+msrv="${1:-1.59.0}"
+
 # If not on CI - create temp dir
 if [[ ! -v CI ]]; then
     trap cleanup SIGINT SIGTERM ERR EXIT
@@ -21,10 +23,10 @@ if [[ ! -v CI ]]; then
 
     with_log pushd "$temp_dir"
 
+    step echo "$msrv" > rust-toolchain
+
     info "Running in a temp dir $(pwd)"
 fi
-
-step echo '1.59.0' > rust-toolchain
 
 step cargo --version --verbose
 

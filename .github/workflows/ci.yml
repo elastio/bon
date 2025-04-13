@@ -152,7 +152,7 @@ jobs:
           components: clippy
           toolchain: ${{ matrix.toolchain }}
 
-      - run: ./scripts/test-msrv.sh
+      - run: ./scripts/test-msrv.sh ${{ matrix.toolchain }}
 
   test-unstable:
     runs-on: ubuntu-latest
