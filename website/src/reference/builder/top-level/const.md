@@ -8,7 +8,7 @@ Marks all generated builder functions and methods as `const fn`. See the [limita
 
 ::: code-group
 
-```rust ignore [Struct]
+```rust [Struct]
 use bon::Builder;
 
 #[derive(Builder)]
@@ -29,11 +29,11 @@ const {
 }
 ```
 
-```rust ignore [Function]
+```rust [Function]
 use bon::builder;
 
 #[builder(const)]
-fn example(
+const fn example(
     x1: u32,
 
     // Must specify the default value explicitly because `Default::default()`
@@ -49,7 +49,7 @@ const {
 }
 ```
 
-```rust ignore [Method]
+```rust [Method]
 use bon::bon;
 
 struct Example;
@@ -57,7 +57,7 @@ struct Example;
 #[bon]
 impl Example {
     #[builder(const)]
-    fn example(
+    const fn example(
         x1: u32,
 
         // Must specify the default value explicitly because `Default::default()`
