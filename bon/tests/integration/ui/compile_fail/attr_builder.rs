@@ -67,3 +67,8 @@ fn destructuring1((x, y): (u32, u32)) {
 
 #[builder]
 fn destructuring2((_, _): (u32, u32)) {}
+
+#[builder]
+#[track_caller]
+#[track_caller]
+fn double_track_caller() {}

@@ -25,6 +25,7 @@ mod orig_fn_naming;
 mod positional_members;
 mod raw_idents;
 mod smoke;
+mod track_caller;
 
 use crate::prelude::*;
 
