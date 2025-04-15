@@ -149,7 +149,7 @@ impl super::BuilderGenCtx {
         let body = &self.finish_fn.body.generate(self);
         let asyncness = &self.finish_fn.asyncness;
         let unsafety = &self.finish_fn.unsafety;
-        let must_use = &self.finish_fn.must_use;
+        let special_attrs = &self.finish_fn.special_attrs;
         let attrs = &self.finish_fn.attrs;
         let finish_fn_vis = &self.finish_fn.vis;
         let finish_fn_ident = &self.finish_fn.ident;
@@ -171,7 +171,7 @@ impl super::BuilderGenCtx {
                 clippy::future_not_send,
                 clippy::missing_const_for_fn,
             )]
-            #must_use
+            #(#special_attrs)*
             #finish_fn_vis #const_ #asyncness #unsafety fn #finish_fn_ident(
                 self,
                 #(#finish_fn_params,)*

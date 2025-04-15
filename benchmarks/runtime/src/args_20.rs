@@ -1,3 +1,7 @@
+#![allow(
+    clippy::similar_names,
+    reason = "names don't matter for benching purposes"
+)]
 use bon::builder;
 use std::hint::black_box;
 

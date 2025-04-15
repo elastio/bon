@@ -297,7 +297,6 @@ impl<'a> FnInputCtx<'a> {
         let members = Member::from_raw(&self.config, MemberOrigin::FnArg, members)?;
 
         let generics = self.generics();
-
         let mut adapted_fn_sig = self.adapted_fn()?.sig;
 
         if self.config.start_fn.name.is_none() {
@@ -342,7 +341,7 @@ impl<'a> FnInputCtx<'a> {
             vis: finish_fn_vis.map(SpannedKey::into_value),
             unsafety: self.fn_item.norm.sig.unsafety,
             asyncness: self.fn_item.norm.sig.asyncness,
-            must_use: get_must_use_attribute(&self.fn_item.norm.attrs)?,
+            special_attrs: get_propagated_attrs(&self.fn_item.norm.attrs)?,
             body: Box::new(finish_fn_body),
             output: self.fn_item.norm.sig.output,
             attrs: finish_fn_docs,
@@ -486,17 +485,28 @@ fn merge_generic_params(
         .collect()
 }
 
-fn get_must_use_attribute(attrs: &[syn::Attribute]) -> Result<Option<syn::Attribute>> {
+const PROPAGATED_ATTRIBUTES: &[&str] = &["must_use", "track_caller"];
+
+fn get_propagated_attrs(attrs: &[syn::Attribute]) -> Result<Vec<syn::Attribute>> {
+    PROPAGATED_ATTRIBUTES
+        .iter()
+        .copied()
+        .filter_map(|needle| find_propagated_attr(attrs, needle).transpose())
+        .collect()
+}
+
+fn find_propagated_attr(attrs: &[syn::Attribute], needle: &str) -> Result<Option<syn::Attribute>> {
     let mut iter = attrs
         .iter()
-        .filter(|attr| attr.meta.path().is_ident("must_use"));
+        .filter(|attr| attr.meta.path().is_ident(needle));
 
     let result = iter.next();
 
     if let Some(second) = iter.next() {
         bail!(
             second,
-            "found multiple #[must_use], but bon only works with exactly one or zero."
+            "found multiple #[{}], but bon only works with exactly one or zero.",
+            needle
         );
     }
 
@@ -504,8 +514,9 @@ fn get_must_use_attribute(attrs: &[syn::Attribute]) -> Result<Option<syn::Attrib
         if let syn::AttrStyle::Inner(_) = attr.style {
             bail!(
                 attr,
-                "#[must_use] attribute must be placed on the function itself, \
-                not inside it."
+                "#[{}] attribute must be placed on the function itself, \
+                not inside it.",
+                needle
             );
         }
     }
