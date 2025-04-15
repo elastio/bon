@@ -56,8 +56,9 @@ pub(super) struct FinishFn {
 
     pub(super) unsafety: Option<syn::Token![unsafe]>,
     pub(super) asyncness: Option<syn::Token![async]>,
-    /// <https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute>
-    pub(super) must_use: Option<syn::Attribute>,
+    /// Special attributes to propagate, such as [`must_use`](<https://doc.rust-lang.org/reference/attributes/diagnostics.html#the-must_use-attribute>)
+    /// and [`track_caller`](<https://doc.rust-lang.org/reference/attributes/codegen.html#r-attributes.codegen.track_caller>)
+    pub(super) special_attrs: Vec<syn::Attribute>,
     pub(super) body: Box<dyn FinishFnBody>,
     pub(super) output: syn::ReturnType,
 }
@@ -71,7 +72,7 @@ pub(super) struct FinishFnParams {
     pub(super) attrs: Vec<syn::Attribute>,
     pub(super) unsafety: Option<syn::Token![unsafe]>,
     pub(super) asyncness: Option<syn::Token![async]>,
-    pub(super) must_use: Option<syn::Attribute>,
+    pub(super) special_attrs: Vec<syn::Attribute>,
     pub(super) body: Box<dyn FinishFnBody>,
     pub(super) output: syn::ReturnType,
 }
@@ -316,7 +317,7 @@ impl BuilderGenCtx {
             attrs: finish_fn.attrs,
             unsafety: finish_fn.unsafety,
             asyncness: finish_fn.asyncness,
-            must_use: finish_fn.must_use,
+            special_attrs: finish_fn.special_attrs,
             body: finish_fn.body,
             output: finish_fn.output,
         };

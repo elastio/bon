@@ -9,6 +9,7 @@
     clippy::let_and_return,
     clippy::map_unwrap_or,
     clippy::must_use_candidate,
+    clippy::similar_names,
     rustdoc::missing_crate_level_docs
 )]
 

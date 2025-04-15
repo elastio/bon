@@ -157,9 +157,9 @@ impl StructInputCtx {
             vis: finish_fn_vis.map(SpannedKey::into_value),
             unsafety: None,
             asyncness: None,
-            must_use: Some(syn::parse_quote! {
+            special_attrs: vec![syn::parse_quote! {
                 #[must_use = "building a struct without using it is likely a bug"]
-            }),
+            }],
             body: Box::new(finish_fn_body),
             output: syn::parse_quote!(-> #struct_ty),
             attrs: finish_fn_docs
