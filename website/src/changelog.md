@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.6.1](https://github.com/elastio/bon/compare/v3.6.0...v3.6.1) - 2025-04-15
+
+### Fixed
+
+- Propagate `#[track_caller]` to the generated finishing function from the underlying function/method ([#282](https://github.com/elastio/bon/pull/282))
+
 ## [3.6.0](https://github.com/elastio/bon/compare/v3.5.2...v3.6.0) - 2025-04-13
 
 ### Added
