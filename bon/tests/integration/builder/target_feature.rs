@@ -1,4 +1,5 @@
 #[rustversion::since(1.86.0)]
+#[cfg(target_arch = "x86_64")]
 mod msrv_1_86 {
     #![allow(dead_code)]
     use crate::prelude::*;
@@ -35,6 +36,7 @@ mod msrv_1_86 {
         #[target_feature(enable = "avx2")]
         #[allow(unsafe_code, reason = "we don't do anything with it")]
         unsafe fn briiick() {
+            let x: &str = 1
             Senti::builder().brick(Brick([0; 32])).yatta_but_wide();
         }
     }
