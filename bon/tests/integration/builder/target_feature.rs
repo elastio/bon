@@ -5,7 +5,7 @@ mod msrv_1_86 {
     use crate::prelude::*;
 
     #[test]
-    fn target_feature_fn() {
+    fn target_feature_function() {
         #[builder]
         #[target_feature(enable = "avx2")]
         fn building_but_wider(_x: [u8; 32], _y: [u32; 8]) {}
@@ -18,7 +18,7 @@ mod msrv_1_86 {
     }
 
     #[test]
-    fn target_feature_impl_block() {
+    fn target_feature_method() {
         #[repr(C, align(32))]
         struct Brick([u8; 32]);
         struct Senti;
@@ -31,12 +31,11 @@ mod msrv_1_86 {
                 let Brick(_) = brick;
                 Self
             }
-        }
-
-        #[target_feature(enable = "avx2")]
-        #[allow(unsafe_code)]
-        unsafe fn briiick() {
-            Senti::builder().brick(Brick([0; 32])).yatta_but_wide();
+            #[target_feature(enable = "avx2")]
+            #[allow(unsafe_code)]
+            unsafe fn briiick() {
+                Self::builder().brick(Brick([0; 32])).yatta_but_wide();
+            }
         }
     }
 }
