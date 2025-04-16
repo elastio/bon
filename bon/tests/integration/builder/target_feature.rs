@@ -1,5 +1,5 @@
-#[rustversion::since(1.86.0)]
 #[cfg(target_arch = "x86_64")]
+#[rustversion::since(1.86.0)]
 mod msrv_1_86 {
     #![allow(dead_code)]
     use crate::prelude::*;
@@ -11,7 +11,7 @@ mod msrv_1_86 {
         fn building_but_wider(_x: [u8; 32], _y: [u32; 8]) {}
 
         #[target_feature(enable = "avx2")]
-        #[allow(unsafe_code, reason = "we don't do anything with it")]
+        #[allow(unsafe_code)]
         unsafe fn wider() {
             building_but_wider().x([0; 32]).y([1; 8]).call();
         }
@@ -34,7 +34,7 @@ mod msrv_1_86 {
         }
 
         #[target_feature(enable = "avx2")]
-        #[allow(unsafe_code, reason = "we don't do anything with it")]
+        #[allow(unsafe_code)]
         unsafe fn briiick() {
             Senti::builder().brick(Brick([0; 32])).yatta_but_wide();
         }
