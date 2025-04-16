@@ -157,9 +157,23 @@ impl super::BuilderGenCtx {
         let state_var = &self.state_var;
         let const_ = &self.const_;
 
+        // `#[target_feature]` is not compatible with `#[inline(always)]`,
+        // so we need to downgrade it to `#[inline]
+        let inline_attr = self
+            .finish_fn
+            .special_attrs
+            .iter()
+            .find_map(|attr| {
+                attr.meta
+                    .path()
+                    .is_ident("target_feature")
+                    .then(|| quote! { #[inline] })
+            })
+            .unwrap_or_else(|| quote! { #[inline(always)] });
+
         quote! {
             #(#attrs)*
-            #[inline(always)]
+            #inline_attr
             #[allow(
                 // This is intentional. We want the builder syntax to compile away
                 clippy::inline_always,
