@@ -485,7 +485,7 @@ fn merge_generic_params(
         .collect()
 }
 
-const PROPAGATED_ATTRIBUTES: &[&str] = &["must_use", "track_caller"];
+const PROPAGATED_ATTRIBUTES: &[&str] = &["must_use", "track_caller", "target_feature"];
 
 fn get_propagated_attrs(attrs: &[syn::Attribute]) -> Result<Vec<syn::Attribute>> {
     PROPAGATED_ATTRIBUTES

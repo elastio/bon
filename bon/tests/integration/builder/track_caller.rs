@@ -18,7 +18,7 @@ impl From<&'_ Location<'_>> for LineCol {
 }
 
 #[test]
-fn track_caller_fn() {
+fn track_caller_function() {
     #[builder]
     #[track_caller]
     fn dont_brick(_x: u32) -> LineCol {
@@ -39,7 +39,7 @@ fn track_caller_fn() {
 }
 
 #[test]
-fn track_caller_impl_block() {
+fn track_caller_method() {
     struct Brick;
     struct Senti;
     #[bon]
