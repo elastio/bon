@@ -463,7 +463,7 @@ impl<'a> SettersCtx<'a> {
                 clippy::missing_const_for_fn,
             )]
             #[inline(always)]
-            #const_ #vis fn #name(#maybe_mut self, #( #pats: #types ),*) -> #return_type
+            #vis #const_ fn #name(#maybe_mut self, #( #pats: #types ),*) -> #return_type
             #where_clause
             {
                 #body

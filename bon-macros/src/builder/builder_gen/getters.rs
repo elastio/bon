@@ -63,7 +63,7 @@ impl<'a> GettersCtx<'a> {
             )]
             #[inline(always)]
             #[must_use = "this method has no side effects; it only returns a value"]
-            #const_ #vis fn #name(&self) -> #return_ty
+            #vis #const_ fn #name(&self) -> #return_ty
             where
                 #state_var::#member_pascal: #state_mod::IsSet,
             {
