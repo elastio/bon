@@ -69,7 +69,7 @@ impl super::BuilderGenCtx {
             let init = field
                 .init
                 .as_ref()
-                .map(|init| self.wrap_user_supplied_expr(init))
+                .map(|init| self.sanitize_supplied_expr(init))
                 .unwrap_or_else(|| quote! { ::core::default::Default::default() });
 
             quote! {
