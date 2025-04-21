@@ -64,8 +64,8 @@ mod msrv_1_61 {
             }
         }
 
-        #[test]
         #[rustversion::since(1.83.0)]
+        #[test]
         const fn test_struct_msrv_1_83() {
             #[derive(Builder)]
             #[builder(const)]
