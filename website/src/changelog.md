@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.6.3](https://github.com/elastio/bon/compare/v3.6.2...v3.6.3) - 2025-04-21
+
+### Other
+
+- Fix missing support for `#[builder(field)]` with `#[builder(const)]` ([#291](https://github.com/elastio/bon/pull/291))
+
 ## [3.6.2](https://github.com/elastio/bon/compare/v3.6.1...v3.6.2) - 2025-04-20
 
 ### Added
