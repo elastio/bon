@@ -9,17 +9,7 @@ impl super::BuilderGenCtx {
                 return member
                     .value
                     .as_ref()
-                    .map(|value| {
-                        // Closures aren't supported in `const` contexts at the time of this writing
-                        // (Rust 1.86.0), so we don't wrap it in a closure but we require the expression
-                        // to be simple so that it doesn't break out of the surrounding scope.
-                        // Search for `require_embeddable_const_expr` for more.
-                        if self.const_.is_some() {
-                            return quote!(#value);
-                        }
-
-                        quote! { (|| #value)() }
-                    })
+                    .map(|value| self.sanitize_expr(value))
                     .unwrap_or_else(|| quote! { ::core::default::Default::default() });
             }
             Member::StartFn(member) => {

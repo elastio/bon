@@ -277,6 +277,26 @@ impl BuilderGenCtx {
             )>
         }
     }
+
+    /// Wrap the user-supplied expression in a closure to prevent it from
+    /// breaking out of the surrounding scope.
+    ///
+    /// Closures aren't supported in `const` contexts at the time of this writing
+    /// (Rust 1.86.0), so we don't wrap the expression in a closure in `const` case
+    /// but we require the expression to be simple so that it doesn't break out of
+    /// the surrounding scope.
+    ///
+    /// This function assumes the expression underwent a `require_embeddable_const_expr`
+    /// check if `const` is enabled. Search for it in code to see where it happens.
+    fn sanitize_expr(&self, expr: &syn::Expr) -> TokenStream {
+        if self.const_.is_some() {
+            return quote!(#expr);
+        }
+
+        quote! {
+            (|| #expr)()
+        }
+    }
 }
 
 fn allow_warnings_on_member_types() -> TokenStream {

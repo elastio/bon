@@ -300,29 +300,29 @@ impl MemberConfig {
     }
 
     fn require_const_compat(&self) -> Result {
-        if let Some(default) = &self.default {
-            match &default.value {
-                Some(expr) => crate::parsing::require_embeddable_const_expr(expr)?,
-                None => bail!(
-                    &default.key,
-                    "bare #[builder(default)] is incompatible with #[builder(const)] \
-                    because Default::default() can not be called in const context; \
-                    provide an explicit default value via #[builder(default = ...)] instead",
-                ),
+        fn validate_default_trait_or_expr(attr: &Option<SpannedKey<Option<syn::Expr>>>) -> Result {
+            let attr = match attr {
+                Some(attr) => attr,
+                None => return Ok(()),
+            };
+
+            let name = attr.key.to_string();
+
+            if let Some(expr) = &attr.value {
+                return crate::parsing::require_embeddable_const_expr(expr);
             }
+
+            bail!(
+                &attr.key,
+                "bare #[builder({name})] is incompatible with #[builder(const)] \
+                because Default::default() can not be called in const context; \
+                provide an explicit value via #[builder({name} = ...)] instead",
+            )
         }
 
-        if let Some(skip) = &self.skip {
-            match &skip.value {
-                Some(expr) => crate::parsing::require_embeddable_const_expr(expr)?,
-                None => bail!(
-                    &skip.key,
-                    "bare #[builder(skip)] is incompatible with #[builder(const)] \
-                    because Default::default() can not be called in const context; \
-                    provide an explicit initial value via #[builder(skip = ...)] instead",
-                ),
-            }
-        }
+        validate_default_trait_or_expr(&self.default)?;
+        validate_default_trait_or_expr(&self.skip)?;
+        validate_default_trait_or_expr(&self.field)?;
 
         if self.into.is_present() {
             bail!(

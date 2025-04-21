@@ -27,6 +27,13 @@ struct IncompatibleSkip {
 
 #[derive(Builder)]
 #[builder(const)]
+struct IncompatibleField {
+    #[builder(field)]
+    x1: u32,
+}
+
+#[derive(Builder)]
+#[builder(const)]
 struct IncompatibleInto {
     #[builder(into)]
     x1: u32,
