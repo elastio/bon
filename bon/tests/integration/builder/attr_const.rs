@@ -48,13 +48,6 @@ mod msrv_1_61 {
                 // x8: String,
             }
 
-            impl<S: sut_builder::State> SutBuilder<S> {
-                const fn inc(&mut self) {
-                    self.x1 += 1;
-                    self.x2 += 1;
-                }
-            }
-
             const ACTUAL: Sut = Sut::builder(1).x4(2).x5(3).x7(4, 5).build(6);
 
             #[allow(clippy::assertions_on_constants)]
@@ -69,15 +62,37 @@ mod msrv_1_61 {
                 assert!(ACTUAL.x8.is_none());
                 assert!(ACTUAL.x9 == 10);
             }
-
-            {
-                let mut builder = Sut::builder(1);
-                builder.inc();
-                builder.inc();
-                assert!(builder.x1 == 3);
-                assert!(builder.x2 == 13);
-            }
         }
+
+        #[test]
+        #[rustversion::since(1.83.0)]
+        const fn test_struct_msrv_1_83() {
+            #[derive(Builder)]
+            #[builder(const)]
+            struct Sut {
+                #[builder(start_fn)]
+                #[allow(dead_code)]
+                x1: u32,
+
+                #[builder(field = 11)]
+                #[allow(dead_code)]
+                x2: u32,
+            }
+
+            impl<S: sut_builder::State> SutBuilder<S> {
+                const fn inc(&mut self) {
+                    self.x1 += 1;
+                    self.x2 += 1;
+                }
+            }
+
+            let mut builder = Sut::builder(1);
+            builder.inc();
+            builder.inc();
+            assert!(builder.x1 == 3);
+            assert!(builder.x2 == 13);
+        }
+
         #[test]
         const fn test_function() {
             type Output = (u32, u32, u32, u32, Option<u32>, u32, u32, Option<u32>);
