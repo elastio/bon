@@ -182,8 +182,6 @@ impl NamedMember {
         Ok(())
     }
 
-    // `&Option<T>` is used to reduce syntax at the call site
-    #[allow(clippy::ref_option)]
     fn validate_unused_setters_cfg<T>(
         overrides: &[&SpannedKey<ItemSigConfig>],
         config: &Option<SpannedKey<T>>,

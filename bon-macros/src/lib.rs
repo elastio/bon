@@ -11,6 +11,12 @@
     clippy::too_many_lines,
     clippy::if_not_else,
 
+    // This crate doesn't expose complex public function signatures, any occurrences
+    // of `&Option<T>` are internal and they are likely just small private functions
+    // that take a reference to an `Option<T>` to make the callsite cleaner avoiding
+    // the unnecessary `Option::as_ref()` calls.
+    clippy::ref_option,
+
     // We can't use the explicit captures syntax due to the MSRV
     impl_trait_overcaptures,
 

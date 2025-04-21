@@ -95,8 +95,6 @@ fn parse_path_mod_style(meta: &syn::Meta) -> Result<syn::Path> {
     Ok(expr.require_path_mod_style()?.clone())
 }
 
-// `&Option<T>` is used to reduce syntax at the callsite
-#[allow(clippy::ref_option)]
 pub(crate) fn reject_syntax<T: Spanned>(name: &'static str, syntax: &Option<T>) -> Result {
     if let Some(syntax) = syntax {
         bail!(syntax, "{name} is not allowed here")

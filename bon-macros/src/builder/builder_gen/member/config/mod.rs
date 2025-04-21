@@ -300,9 +300,6 @@ impl MemberConfig {
     }
 
     fn require_const_compat(&self) -> Result {
-        // This is a small private function to reduce code duplication, we don't
-        // need explicit `as_ref` at the callsite in this case.
-        #[allow(clippy::ref_option)]
         fn validate_default_trait_or_expr(attr: &Option<SpannedKey<Option<syn::Expr>>>) -> Result {
             let attr = match attr {
                 Some(attr) => attr,
