@@ -9,7 +9,7 @@ impl super::BuilderGenCtx {
                 return member
                     .value
                     .as_ref()
-                    .map(|value| self.sanitize_supplied_expr(value))
+                    .map(|value| self.sanitize_expr(value))
                     .unwrap_or_else(|| quote! { ::core::default::Default::default() });
             }
             Member::StartFn(member) => {

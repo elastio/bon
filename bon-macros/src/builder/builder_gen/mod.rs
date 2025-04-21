@@ -288,7 +288,7 @@ impl BuilderGenCtx {
     ///
     /// This function assumes the expression underwent a `require_embeddable_const_expr`
     /// check if `const` is enabled. Search for it in code to see where it happens.
-    fn sanitize_supplied_expr(&self, expr: &syn::Expr) -> TokenStream {
+    fn sanitize_expr(&self, expr: &syn::Expr) -> TokenStream {
         if self.const_.is_some() {
             return quote!(#expr);
         }
