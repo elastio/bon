@@ -51,7 +51,7 @@ export async function scanAndReport(options: Options) {
 
     const count = countIssues(issues);
     if (count === 0) {
-        console.log(chalk`{green ✓ Haven't detected any broken links}`);
+        console.log(chalk.green(`✓ Haven't detected any broken links`));
     } else {
         const sortByFileName = <T extends [string, unknown]>(
             items: T[],
@@ -66,7 +66,7 @@ export async function scanAndReport(options: Options) {
         const formatFile = (file: string): string => {
             const relative = path.relative(options.root, file);
             const ext = path.extname(relative);
-            return chalk`${relative.slice(0, -ext.length)}{reset.dim ${ext}}`;
+            return relative.slice(0, -ext.length) + chalk.reset.dim(ext);
         };
 
         const formatSimilar = (origin: string, similar?: string[]) => {
@@ -88,7 +88,7 @@ export async function scanAndReport(options: Options) {
                     })
                     .join("");
 
-                return chalk`{blue ${x}} {gray.dim (diff: ${diff}})`;
+                return chalk.blue(x) + chalk.gray.dim(` (diff: ${diff})`);
             });
 
             return `. Here are similar ones:\n      ` + diffs.join("\n      ");
@@ -103,22 +103,28 @@ export async function scanAndReport(options: Options) {
                                 // actually, it should never happen: VitePress disallows dead links to other pages
                                 .with({ type: "missing-other-file" }, (x) => {
                                     return (
-                                        chalk`  Broken link: {bold.red ${formatFile(x.file)}}\n    ` +
-                                        chalk`{red Cannot find the file.}`
+                                        `  Broken link: ${chalk.bold.red(formatFile(x.file))}\n    ` +
+                                        chalk.red(`Cannot find the file.`)
                                     );
                                 })
                                 .with({ type: "missing-id-in-other" }, (x) => {
                                     return (
-                                        chalk`  Broken link: {bold ${formatFile(x.file)}{red #${x.id}}}` +
+                                        `  Broken link: ` +
+                                        chalk.bold(formatFile(x.file)) +
+                                        chalk.red(`#${x.id}`) +
                                         `\n    ` +
-                                        chalk`{red Cannot find the ID in the other file}` +
+                                        chalk.red(
+                                            "Cannot find the ID in the other file",
+                                        ) +
                                         formatSimilar(x.id, x.similar)
                                     );
                                 })
                                 .with({ type: "missing-id-in-self" }, (x) => {
                                     return (
-                                        chalk`  Broken link: {bold.red #${x.id}}\n    ` +
-                                        chalk`{red Cannot find the ID within the file itself}` +
+                                        `  Broken link: ${chalk.bold.red(`#${x.id}`)}\n    ` +
+                                        chalk.red(
+                                            "Cannot find the ID within the file itself",
+                                        ) +
                                         formatSimilar(x.id, x.similar)
                                     );
                                 })
