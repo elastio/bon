@@ -110,7 +110,7 @@ jobs:
           # the same as locally. The `rust-src` component is installed by default
           # locally, and with its presence compile error messages can show snippets
           # of rust standard library code.
-          components: rust-src
+          components: rust-src, clippy
 
       - run: cargo clippy --all-features --all-targets ${{ matrix.locked }}
 
@@ -229,6 +229,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: rustfmt
+
       - run: cargo fmt --check
 
   # Check for unused dependencies that uses simple regex search,
