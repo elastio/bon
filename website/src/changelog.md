@@ -9,9 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.6.4](https://github.com/elastio/bon/compare/v3.6.3...v3.6.4) - 2025-05-30
 
-### Other
+### Added
 
-- Improve error reporting for using the #[bon::builder] fully qualified attribute inside of impl blocks ([#297](https://github.com/elastio/bon/pull/297))
+- Improve error reporting when using the `#[bon::builder]` fully qualified attribute inside of impl blocks ([#297](https://github.com/elastio/bon/pull/297))
 
 ## [3.6.3](https://github.com/elastio/bon/compare/v3.6.2...v3.6.3) - 2025-04-21
 
