@@ -227,7 +227,7 @@ Big thanks to `bon`'s financial supporters ❤️
 
 ## Who's Using `bon`?
 
-Some notable open-source users: [`crates.io` backend](https://github.com/rust-lang/crates.io), [`tantivy`](https://github.com/quickwit-oss/tantivy), [`apache-avro`](https://github.com/apache/avro-rs), [`google-cloud-auth`](https://github.com/googleapis/google-cloud-rust), [`comrak`](https://github.com/kivikakk/comrak), [`ractor`](https://github.com/slawlor/ractor)
+Some notable open-source users: [`crates.io` backend](https://github.com/rust-lang/crates.io), [`tantivy`](https://github.com/quickwit-oss/tantivy), [`apache-avro`](https://github.com/apache/avro-rs), [`google-cloud-auth`](https://github.com/googleapis/google-cloud-rust), [`comrak`](https://github.com/kivikakk/comrak), [`ractor`](https://github.com/slawlor/ractor).
 
 ## Getting Help
 
