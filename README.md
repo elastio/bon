@@ -216,9 +216,10 @@ See [alternatives](https://bon-rs.com/guide/alternatives) for comparison.
 
 Big thanks to `bon`'s financial supporters ❤️
 
+<a href="https://kindness.ai/">
 <img src="https://github.com/user-attachments/assets/b7b7e027-0b34-442c-a630-1c07514d800a" width="100px"></img>
-
-[**Kindness**](https://kindness.ai/)
+</a>
+<a href="https://kindness.ai/">Kindness</a>
 
 Ethan Skowronski
 
@@ -226,13 +227,14 @@ Ethan Skowronski
 
 ## Who's Using `bon`?
 
-Some notable users:
+Some notable open-source users:
 
 - [`crates.io` backend](https://github.com/rust-lang/crates.io)
-- [`ractor`](https://github.com/slawlor/ractor)
+- [`tantivy`](https://github.com/quickwit-oss/tantivy)
+- [`apache-avro`](https://github.com/apache/avro-rs)
+- [`google-cloud-auth`](https://github.com/googleapis/google-cloud-rust)
 - [`comrak`](https://github.com/kivikakk/comrak)
-- [`soldeer`](https://github.com/mario-eth/soldeer)
-- [`tachyonfx`](https://github.com/junkdog/tachyonfx)
+- [`ractor`](https://github.com/slawlor/ractor)
 
 ## Getting Help
 
@@ -244,7 +246,7 @@ If you can't figure something out, consult the docs and maybe use the `🔍 Sear
 <tbody>
     <tr>
         <td><a href="https://bon-rs.com/discord">Discord</a></td>
-        <td>Here you can leave feedback, ask questions, report bugs, or just write "thank you".</td>
+        <td>Here you can leave feedback, ask questions, report bugs, etc.</td>
     </tr>
 </tbody>
 </table>
