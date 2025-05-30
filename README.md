@@ -216,25 +216,16 @@ See [alternatives](https://bon-rs.com/guide/alternatives) for comparison.
 
 Big thanks to `bon`'s financial supporters ❤️
 
-<a href="https://kindness.ai/">
-<img src="https://github.com/user-attachments/assets/b7b7e027-0b34-442c-a630-1c07514d800a" width="100px"></img>
-</a>
-<a href="https://kindness.ai/">Kindness</a>
+[![](https://github.com/user-attachments/assets/b0acb844-4b91-461c-95ae-90a601296500)](https://kindness.ai)\
+[**Kindness**](https://kindness.ai)
 
-Ethan Skowronski
+**Ethan Skowronski**
 
 </div>
 
 ## Who's Using `bon`?
 
-Some notable open-source users:
-
-- [`crates.io` backend](https://github.com/rust-lang/crates.io)
-- [`tantivy`](https://github.com/quickwit-oss/tantivy)
-- [`apache-avro`](https://github.com/apache/avro-rs)
-- [`google-cloud-auth`](https://github.com/googleapis/google-cloud-rust)
-- [`comrak`](https://github.com/kivikakk/comrak)
-- [`ractor`](https://github.com/slawlor/ractor)
+Some notable open-source users: [`crates.io` backend](https://github.com/rust-lang/crates.io), [`tantivy`](https://github.com/quickwit-oss/tantivy), [`apache-avro`](https://github.com/apache/avro-rs), [`google-cloud-auth`](https://github.com/googleapis/google-cloud-rust), [`comrak`](https://github.com/kivikakk/comrak), [`ractor`](https://github.com/slawlor/ractor)
 
 ## Getting Help
 
