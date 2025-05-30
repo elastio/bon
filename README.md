@@ -217,9 +217,9 @@ See [alternatives](https://bon-rs.com/guide/alternatives) for comparison.
 Big thanks to `bon`'s financial supporters ❤️
 
 [![](https://github.com/user-attachments/assets/b0acb844-4b91-461c-95ae-90a601296500)](https://kindness.ai)\
-[**Kindness**](https://kindness.ai)
+[**Kindness**](https://kindness.ai) ($100/month)
 
-**Ethan Skowronski**
+**Ethan Skowronski** ($1/month)
 
 </div>
 
