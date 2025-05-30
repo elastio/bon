@@ -43,11 +43,7 @@ pub(crate) fn generate(
         });
 
     if builder_fns.is_empty() {
-        bail!(
-            &Span::call_site(),
-            "there are no #[builder] functions in the impl block, so there is no \
-            need for a #[bon] attribute here"
-        );
+        return Err(no_builder_attrs_error(&other_items));
     }
 
     orig_impl_block.items = builder_fns;
@@ -187,4 +183,43 @@ fn conv_impl_item_fn_into_fn_item(func: syn::ImplItemFn) -> Result<syn::ItemFn> 
         sig,
         block: Box::new(block),
     })
+}
+
+fn no_builder_attrs_error(other_items: &[syn::ImplItem]) -> Error {
+    let builder_like_err = other_items.iter().find_map(|item| {
+        let item = match item {
+            syn::ImplItem::Fn(fn_item) => fn_item,
+            _ => return None,
+        };
+
+        let builder_like = item
+            .attrs
+            .iter()
+            .find(|attr| attr.path().ends_with_segment("builder"))?;
+
+        let builder_like_str = darling::util::path_to_string(builder_like.path());
+        let builder_like_prefix = builder_like_str
+            .strip_suffix("builder")
+            .unwrap_or(&builder_like_str);
+
+        Some(err!(
+            &builder_like.path(),
+            "#[bon] macro found no #[builder] attributes in the impl block, but \
+            it looks like this attribute was meant for #[bon]; note that #[bon] \
+            expects a bare #[builder] attribute without the `{builder_like_prefix}` \
+            prefix; #[builder] acts as a simple config attribute for the active \
+            #[bon] attribute in impl blocks; more info on inert vs active attributes: \
+            https://doc.rust-lang.org/reference/attributes.html#active-and-inert-attributes"
+        ))
+    });
+
+    if let Some(err) = builder_like_err {
+        return err;
+    }
+
+    err!(
+        &Span::call_site(),
+        "there are no #[builder] functions in the impl block, so there is no \
+        need for a #[bon] attribute here"
+    )
 }

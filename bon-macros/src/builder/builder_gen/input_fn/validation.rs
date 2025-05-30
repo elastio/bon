@@ -5,15 +5,18 @@ impl super::FnInputCtx<'_> {
     pub(super) fn validate(&self) -> Result {
         if self.impl_ctx.is_none() {
             let explanation = "\
-                but #[bon] attribute is absent on top of the impl block; this \
-                additional #[bon] attribute on the impl block is required for \
-                the macro to see the type of `Self` and properly generate \
-                the builder struct definition adjacently to the impl block.";
+                which likely means the builder attribute was used inside of an \
+                impl block; the impl block needs to be annotated with the #[bon] \
+                attribute and the builder attribute must be spelled as #[builder] \
+                without any additional path prefix, since it's used as a simple \
+                inert config attribute for #[bon] in impl blocks; more info on \
+                inert vs active attributes: \
+                https://doc.rust-lang.org/reference/attributes.html#active-and-inert-attributes";
 
             if let Some(receiver) = &self.fn_item.orig.sig.receiver() {
                 bail!(
                     &receiver.self_token,
-                    "function contains a `self` parameter {explanation}"
+                    "this function contains a `self` parameter {explanation}"
                 );
             }
 
@@ -22,7 +25,7 @@ impl super::FnInputCtx<'_> {
             if let Some(self_span) = ctx.self_span {
                 bail!(
                     &self_span,
-                    "function contains a `Self` type reference {explanation}"
+                    "this function contains a `Self` type reference {explanation}"
                 );
             }
         }
