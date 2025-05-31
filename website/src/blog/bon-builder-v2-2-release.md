@@ -50,7 +50,7 @@ Make sure your working directory is clean from files not committed to git before
 :::
 
 ```bash
-cargo install --git https://github.com/elastio/bon bon-cli
+cargo install bon-cli
 bon migrate
 
 # Prettify the resulting code
