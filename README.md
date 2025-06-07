@@ -223,6 +223,9 @@ Big thanks to `bon`'s financial supporters ❤️
 **Ethan Skowronski**\
 <sup><code>$1/month</code></sup>
 
+**Julius Lungys**\
+<sup><code>$1/month</code></sup>
+
 </div>
 
 ## Who's Using `bon`?
