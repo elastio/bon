@@ -210,15 +210,27 @@ This project was heavily inspired by such awesome crates as [`buildstructor`](ht
 
 See [alternatives](https://bon-rs.com/guide/alternatives) for comparison.
 
+## Supporters
+
+<div align="center">
+
+Big thanks to `bon`'s financial supporters ❤️
+
+[![](https://github.com/user-attachments/assets/b0acb844-4b91-461c-95ae-90a601296500)](https://kindness.ai)\
+[**Kindness**](https://kindness.ai) \
+<sup><code>$100/month</code></sup>
+
+**Ethan Skowronski**\
+<sup><code>$1/month</code></sup>
+
+**Julius Lungys**\
+<sup><code>$1/month</code></sup>
+
+</div>
+
 ## Who's Using `bon`?
 
-Some notable users:
-
-- [`crates.io` backend](https://github.com/rust-lang/crates.io)
-- [`ractor`](https://github.com/slawlor/ractor)
-- [`comrak`](https://github.com/kivikakk/comrak)
-- [`soldeer`](https://github.com/mario-eth/soldeer) (package manager endorsed by [`foundry`](https://github.com/foundry-rs/foundry))
-- [`tachyonfx`](https://github.com/junkdog/tachyonfx)
+Some notable open-source users: [`crates.io` backend](https://github.com/rust-lang/crates.io), [`tantivy`](https://github.com/quickwit-oss/tantivy), [`apache-avro`](https://github.com/apache/avro-rs), [`google-cloud-auth`](https://github.com/googleapis/google-cloud-rust), [`comrak`](https://github.com/kivikakk/comrak), [`ractor`](https://github.com/slawlor/ractor).
 
 ## Getting Help
 
@@ -230,11 +242,7 @@ If you can't figure something out, consult the docs and maybe use the `🔍 Sear
 <tbody>
     <tr>
         <td><a href="https://bon-rs.com/discord">Discord</a></td>
-        <td>Here you can leave feedback, ask questions, report bugs, or just write "thank you".</td>
-    </tr>
-    <tr>
-        <td><a href="https://x.com/veetaha" class="nobr">X (Twitter)</a></td>
-        <td>Profile of the maintainer. There are only posts about <code>bon</code> and Rust in general here.</td>
+        <td>Here you can leave feedback, ask questions, report bugs, etc.</td>
     </tr>
 </tbody>
 </table>
