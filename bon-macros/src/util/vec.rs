@@ -10,7 +10,7 @@ impl<T> VecExt<T> for Vec<T> {
     fn try_retain_mut(&mut self, mut try_predicate: impl FnMut(&mut T) -> Result<bool>) -> Result {
         let mut i = 0;
         while i < self.len() {
-            if try_predicate(&mut self[i])? {
+            if try_predicate(self.get_mut(i).expect("BUG: index must be valid"))? {
                 i += 1;
             } else {
                 self.remove(i);

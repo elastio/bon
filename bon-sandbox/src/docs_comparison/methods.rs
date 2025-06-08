@@ -31,6 +31,8 @@ pub mod bon {
 /// Example docs generated with `buildstructor`
 // This lint comes from buildstructor-generated code
 #[expect(elided_lifetimes_in_paths)]
+// This lint comes from nightly
+#[allow(unknown_lints, mismatched_lifetime_syntaxes)]
 pub mod buildstructor {
 
     /// Doc comment on `Struct`

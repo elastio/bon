@@ -73,6 +73,9 @@ macro_rules! arr {
 
 #[cfg(test)]
 mod tests {
+    // It's okay to use indexing in tests for conciseness.
+    #![allow(clippy::indexing_slicing)]
+
     #[cfg(feature = "alloc")]
     use crate::__::alloc::{string::String, vec::Vec};
     use core::num::NonZeroU8;
