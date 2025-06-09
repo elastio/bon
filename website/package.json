@@ -8,7 +8,7 @@
     "preview": "vitepress preview"
   },
   "devDependencies": {
-    "@mdit/plugin-abbr": "^0.18.0",
+    "@mdit/plugin-abbr": "^0.22.0",
     "@types/node": "^22.15.8",
     "chalk": "^5.4.1",
     "css-select": "^5.1.0",
@@ -18,7 +18,7 @@
     "leven": "^4.0.0",
     "medium-zoom": "^1.1.0",
     "ts-node": "^10.9.2",
-    "ts-pattern": "^5.5.0",
+    "ts-pattern": "^5.7.1",
     "vitepress": "^1.6.3"
   },
   "dependencies": {
