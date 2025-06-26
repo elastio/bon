@@ -205,25 +205,22 @@ dependencies = [
 
 [[package]]
 name = "criterion"
-version = "0.5.1"
+version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f2b12d017a929603d80db1831cd3a24082f8137ce19c69e6447f54f5fc8d692f"
+checksum = "3bf7af66b0989381bd0be551bd7cc91912a655a58c6918420c9527b1fd8b4679"
 dependencies = [
  "anes",
  "cast",
  "ciborium",
  "clap",
  "criterion-plot",
- "is-terminal",
- "itertools 0.10.5",
+ "itertools 0.13.0",
  "num-traits",
- "once_cell",
  "oorandom",
  "plotters",
  "rayon",
  "regex",
  "serde",
- "serde_derive",
  "serde_json",
  "tinytemplate",
  "walkdir",
@@ -413,12 +410,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5971ac85611da7067dbfcabef3c70ebb5606018acd9e2a3903a0da507521e0d5"
 
 [[package]]
-name = "hermit-abi"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f154ce46856750ed433c8649605bf7ed2de3bc35fd9d2a9f30cddd873c80cb08"
-
-[[package]]
 name = "iai"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -441,21 +432,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "is-terminal"
-version = "0.4.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e04d7f318608d35d4b61ddd75cbdaee86b023ebe2bd5a66ee0915f0bf93095a9"
-dependencies = [
- "hermit-abi",
- "libc",
- "windows-sys",
-]
-
-[[package]]
 name = "itertools"
 version = "0.10.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b0fd2260e829bddf4cb6ea802289de2f86d6a7a690192fbe91b3f46e0f2c8473"
+dependencies = [
+ "either",
+]
+
+[[package]]
+name = "itertools"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "413ee7dfc52ee1a4949ceeb7dbc8a33f2d6c088194d9f922fb8318faf1f01186"
 dependencies = [
  "either",
 ]
