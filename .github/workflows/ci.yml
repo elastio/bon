@@ -115,8 +115,14 @@ jobs:
 
       - run: cargo clippy --all-features --all-targets ${{ matrix.locked }}
 
-      - run: cargo test ${{ matrix.locked }} --all-features --exclude runtime-benchmarks --all-targets
-      - run: cargo test ${{ matrix.locked }} --all-features --exclude runtime-benchmarks --doc
+      - run: |
+          cargo test ${{ matrix.locked }} --workspace --all-features \
+            --exclude runtime-benchmarks --all-targets
+
+      - run: |
+          cargo test ${{ matrix.locked }} --workspace --all-features \
+            --exclude runtime-benchmarks --doc
+
       - run: |
           cd bon && cargo test ${{ matrix.locked }} --no-default-features \
             --features=experimental-overwritable
