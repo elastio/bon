@@ -25,12 +25,12 @@ Don't take these microbenchmarks for granted. Do your own performance measuremen
 
 | Benchmark         | Instructions count                            | L1&nbsp;accesses                              | L2&nbsp;accesses                        | RAM&nbsp;accesses                         |
 | ----------------- | --------------------------------------------- | --------------------------------------------- | --------------------------------------- | ----------------------------------------- |
-| `args_3`          | regular:&nbsp;`71`<br/>builder:&nbsp;`71`     | regular:&nbsp;`81`<br/>builder:&nbsp;`81`     | regular:&nbsp;`1`<br/>builder:&nbsp;`1` | regular:&nbsp;`10`<br/>builder:&nbsp;`9`  |
-| `args_5`          | regular:&nbsp;`89`<br/>builder:&nbsp;`89`     | regular:&nbsp;`111`<br/>builder:&nbsp;`111`   | regular:&nbsp;`0`<br/>builder:&nbsp;`0` | regular:&nbsp;`10`<br/>builder:&nbsp;`10` |
-| `args_10`         | regular:&nbsp;`206`<br/>builder:&nbsp;`206`   | regular:&nbsp;`269`<br/>builder:&nbsp;`268`   | regular:&nbsp;`0`<br/>builder:&nbsp;`0` | regular:&nbsp;`20`<br/>builder:&nbsp;`21` |
-| `args_10_structs` | regular:&nbsp;`20`<br/>builder:&nbsp;`20`     | regular:&nbsp;`29`<br/>builder:&nbsp;`28`     | regular:&nbsp;`0`<br/>builder:&nbsp;`0` | regular:&nbsp;`5`<br/>builder:&nbsp;`6`   |
-| `args_10_alloc`   | regular:&nbsp;`1830`<br/>builder:&nbsp;`1829` | regular:&nbsp;`2555`<br/>builder:&nbsp;`2554` | regular:&nbsp;`1`<br/>builder:&nbsp;`1` | regular:&nbsp;`36`<br/>builder:&nbsp;`36` |
-| `args_20`         | regular:&nbsp;`414`<br/>builder:&nbsp;`414`   | regular:&nbsp;`548`<br/>builder:&nbsp;`547`   | regular:&nbsp;`0`<br/>builder:&nbsp;`0` | regular:&nbsp;`46`<br/>builder:&nbsp;`47` |
+| `args_3`          | regular:&nbsp;`108`<br/>builder:&nbsp;`108`   | regular:&nbsp;`138`<br/>builder:&nbsp;`138`   | regular:&nbsp;`2`<br/>builder:&nbsp;`2` | regular:&nbsp;`4`<br/>builder:&nbsp;`4`   |
+| `args_5`          | regular:&nbsp;`126`<br/>builder:&nbsp;`126`   | regular:&nbsp;`161`<br/>builder:&nbsp;`161`   | regular:&nbsp;`2`<br/>builder:&nbsp;`2` | regular:&nbsp;`10`<br/>builder:&nbsp;`10` |
+| `args_10`         | regular:&nbsp;`281`<br/>builder:&nbsp;`281`   | regular:&nbsp;`381`<br/>builder:&nbsp;`380`   | regular:&nbsp;`2`<br/>builder:&nbsp;`2` | regular:&nbsp;`19`<br/>builder:&nbsp;`20` |
+| `args_10_structs` | regular:&nbsp;`75`<br/>builder:&nbsp;`75`     | regular:&nbsp;`106`<br/>builder:&nbsp;`106`   | regular:&nbsp;`4`<br/>builder:&nbsp;`4` | regular:&nbsp;`12`<br/>builder:&nbsp;`12` |
+| `args_10_alloc`   | regular:&nbsp;`2028`<br/>builder:&nbsp;`2027` | regular:&nbsp;`2824`<br/>builder:&nbsp;`2824` | regular:&nbsp;`3`<br/>builder:&nbsp;`2` | regular:&nbsp;`36`<br/>builder:&nbsp;`36` |
+| `args_20`         | regular:&nbsp;`556`<br/>builder:&nbsp;`556`   | regular:&nbsp;`767`<br/>builder:&nbsp;`767`   | regular:&nbsp;`4`<br/>builder:&nbsp;`4` | regular:&nbsp;`36`<br/>builder:&nbsp;`36` |
 
 ## Conditions
 
