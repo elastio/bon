@@ -12,7 +12,7 @@ If you'd like to run the benchmarks yourself, first you need to install the foll
 If you are on Ubuntu or Debian, just run the following commands to install the dependencies:
 
 ```bash
-cargo install cargo-asm "iai-callgrind-runner@$(cargo pkgid iai-callgrind | cut -d@ -f2)"
+cargo install cargo-asm iai-callgrind-runner@$(cargo pkgid iai-callgrind | cut -d@ -f2)
 sudo apt install valgrind
 ```
 
