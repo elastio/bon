@@ -41,7 +41,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - run: ls -lah /home/runner/.cargo/bin || true
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: ls -lah /home/runner/.cargo/bin || true
 
       - uses: taiki-e/install-action@cargo-binstall
       - run: cargo binstall iai-callgrind-runner --version $(cargo pkgid iai-callgrind | cut -d@ -f2)
