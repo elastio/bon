@@ -47,7 +47,7 @@ jobs:
       - run: cat /home/runner/.cargo/.crates.toml
 
       - uses: taiki-e/install-action@cargo-binstall
-      - run: cargo binstall iai-callgrind-runner --version $(cargo pkgid iai-callgrind | cut -d@ -f2)
+      - run: cargo binstall iai-callgrind-runner@$(cargo pkgid iai-callgrind | cut -d@ -f2)
       - run: iai-callgrind-runner --help
 
       - run: sudo apt-get update && sudo apt-get install -y valgrind
