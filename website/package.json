@@ -8,8 +8,8 @@
     "preview": "vitepress preview"
   },
   "devDependencies": {
-    "@mdit/plugin-abbr": "^0.22.0",
-    "@types/node": "^22.15.8",
+    "@mdit/plugin-abbr": "^0.22.1",
+    "@types/node": "^24.0.4",
     "chalk": "^5.4.1",
     "css-select": "^5.1.0",
     "fast-diff": "^1.3.0",
@@ -22,6 +22,6 @@
     "vitepress": "^1.6.3"
   },
   "dependencies": {
-    "vue": "^3.5.12"
+    "vue": "^3.5.17"
   }
 }

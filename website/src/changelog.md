@@ -152,7 +152,6 @@ All the breaking changes are very unlikely to actually break your code that was 
 - 🎉🎉 Stabilize the builder's [typestate API](https://bon-rs.com/guide/typestate-api) allowing for custom builder extensions. This is the **main theme** of this release. This new API brings the flexibility to a whole new level 🚀 🚀 ([#145](https://github.com/elastio/bon/pull/145))
 
 - Improve rustdoc output. See the rustoc examples and comparison in the [Alternatives](https://bon-rs.com/guide/alternatives#generated-docs-comparison) section ([#145](https://github.com/elastio/bon/pull/145))
-
     - Add info that the member is required or optional.
 
     - For members with default values show the default value in the docs.
@@ -184,7 +183,6 @@ All the breaking changes are very unlikely to actually break your code that was 
     ```
 
     This is because the types of the builders returned from the branches are the following:
-
     - `FooBuilder<SetB<SetA>>` (`if` branch)
     - `FooBuilder<SetA<SetB>>` (`else` branch)
 
@@ -240,7 +238,6 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 - Refactor the README.md and all pages in the Guide Book by simplifying them and removing redundancies ([#170](https://github.com/elastio/bon/pull/170))
 - Add new pages to the Guide Book:
-
     - [Custom Conversions](https://bon-rs.com/guide/basics/custom-conversions) ([#170](https://github.com/elastio/bon/pull/170))
 
     - [Typestate API](https://bon-rs.com/guide/typestate-api) ([#170](https://github.com/elastio/bon/pull/170))
@@ -264,7 +261,6 @@ All the breaking changes are very unlikely to actually break your code that was 
 - 🎉🎉 Stabilize the builder's [typestate API](https://bon-rs.com/guide/typestate-api) allowing for custom builder extensions. This is the **main theme** of this release. This new API brings the flexibility to a whole new level 🚀 🚀 ([#145](https://github.com/elastio/bon/pull/145))
 
 - Improve rustdoc output. See the rustoc examples and comparison in the [Alternatives](https://bon-rs.com/guide/alternatives#generated-docs-comparison) section ([#145](https://github.com/elastio/bon/pull/145))
-
     - Add info that the member is required or optional.
 
     - For members with default values show the default value in the docs.
@@ -296,7 +292,6 @@ All the breaking changes are very unlikely to actually break your code that was 
     ```
 
     This is because the types of the builders returned from the branches are the following:
-
     - `FooBuilder<SetB<SetA>>` (`if` branch)
     - `FooBuilder<SetA<SetB>>` (`else` branch)
 
@@ -351,7 +346,6 @@ All the breaking changes are very unlikely to actually break your code that was 
 
 - Refactor the README.md and all pages in the Guide Book by simplifying them and removing redundancies ([#170](https://github.com/elastio/bon/pull/170))
 - Add new pages to the Guide Book:
-
     - [Custom Conversions](https://bon-rs.com/guide/basics/custom-conversions) ([#170](https://github.com/elastio/bon/pull/170))
 
     - [Typestate API](https://bon-rs.com/guide/typestate-api) ([#170](https://github.com/elastio/bon/pull/170))

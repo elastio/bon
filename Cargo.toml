@@ -15,6 +15,11 @@ resolver = "2"
 debug     = 0
 opt-level = 3
 
+# Required as per iai-callgrind:
+# https://iai-callgrind.github.io/iai-callgrind/latest/html/installation/prerequisites.html
+[profile.bench]
+debug = true
+
 [workspace.lints.clippy]
 # We are targeting a pre-let-else MSRV so we can't use it
 manual_let_else = "allow"

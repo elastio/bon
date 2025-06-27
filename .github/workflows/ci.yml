@@ -7,8 +7,8 @@ on:
   push:
     branches: [master]
 
-  # Run a scheduled CI every day to catch regressions from nightly or new version
-  # releases early.
+  # Run a scheduled CI every day to catch regressions from nightly or new
+  # version releases early.
   schedule:
     - cron: 0 12 * * *
 
@@ -28,9 +28,7 @@ env:
 jobs:
   # Sanity-check that benchmarks work
   runtime-benchmarks:
-    # We are using a bit older version for an older `valgrind`, because the newer
-    # version has some breaking change in cachegrind output, which `iai` can't parse.
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         benchmark:
@@ -44,6 +42,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions-rust-lang/setup-rust-toolchain@v1
+
+      - uses: taiki-e/install-action@cargo-binstall
+      - run: cargo binstall iai-callgrind-runner --version $(cargo pkgid iai-callgrind | cut -d@ -f2)
 
       - run: sudo apt-get update && sudo apt-get install -y valgrind
       - run: cd ./benchmarks/runtime && ./run.sh ${{ matrix.benchmark }}
@@ -114,8 +115,14 @@ jobs:
 
       - run: cargo clippy --all-features --all-targets ${{ matrix.locked }}
 
-      - run: cargo test ${{ matrix.locked }} --all-features --all-targets
-      - run: cargo test ${{ matrix.locked }} --all-features --doc
+      - run: |
+          cargo test ${{ matrix.locked }} --workspace --all-features \
+            --exclude runtime-benchmarks --all-targets
+
+      - run: |
+          cargo test ${{ matrix.locked }} --workspace --all-features \
+            --exclude runtime-benchmarks --doc
+
       - run: |
           cd bon && cargo test ${{ matrix.locked }} --no-default-features \
             --features=experimental-overwritable
@@ -276,7 +283,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
           cache-dependency-path: website/package-lock.json
 

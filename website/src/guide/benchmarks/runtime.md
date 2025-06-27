@@ -49,12 +49,12 @@ Interestingly, in this case builder version performed even better. If you don't 
 
 | Benchmark         | Instructions count                  | L1 accesses                         | L2 accesses                   | RAM accesses                    |
 | ----------------- | ----------------------------------- | ----------------------------------- | ----------------------------- | ------------------------------- |
-| `args_3`          | regular: `107`<br/>builder: `107`   | regular: `134`<br/>builder: `134`   | regular: `1`<br/>builder: `1` | regular: `8`<br/>builder: `8`   |
-| `args_5`          | regular: `125`<br/>builder: `125`   | regular: `164`<br/>builder: `164`   | regular: `1`<br/>builder: `1` | regular: `7`<br/>builder: `7`   |
-| `args_10`         | regular: `283`<br/>builder: `283`   | regular: `382`<br/>builder: `383`   | regular: `4`<br/>builder: `2` | regular: `18`<br/>builder: `19` |
-| `args_10_structs` | regular: `22`<br/>builder: `22`     | regular: `30`<br/>builder: `31`     | regular: `2`<br/>builder: `1` | regular: `5`<br/>builder: `5`   |
-| `args_10_alloc`   | regular: `2038`<br/>builder: `2037` | regular: `2839`<br/>builder: `2837` | regular: `1`<br/>builder: `1` | regular: `33`<br/>builder: `34` |
-| `args_20`         | regular: `557`<br/>builder: `557`   | regular: `775`<br/>builder: `775`   | regular: `1`<br/>builder: `1` | regular: `32`<br/>builder: `32` |
+| `args_3`          | regular: `71`<br/>builder: `71`     | regular: `81`<br/>builder: `81`     | regular: `1`<br/>builder: `1` | regular: `10`<br/>builder: `9`  |
+| `args_5`          | regular: `89`<br/>builder: `89`     | regular: `111`<br/>builder: `111`   | regular: `0`<br/>builder: `0` | regular: `10`<br/>builder: `10` |
+| `args_10`         | regular: `206`<br/>builder: `206`   | regular: `269`<br/>builder: `268`   | regular: `0`<br/>builder: `0` | regular: `20`<br/>builder: `21` |
+| `args_10_structs` | regular: `20`<br/>builder: `20`     | regular: `29`<br/>builder: `28`     | regular: `0`<br/>builder: `0` | regular: `5`<br/>builder: `6`   |
+| `args_10_alloc`   | regular: `1830`<br/>builder: `1829` | regular: `2555`<br/>builder: `2554` | regular: `1`<br/>builder: `1` | regular: `36`<br/>builder: `36` |
+| `args_20`         | regular: `414`<br/>builder: `414`   | regular: `548`<br/>builder: `547`   | regular: `0`<br/>builder: `0` | regular: `46`<br/>builder: `47` |
 
 </div>
 
