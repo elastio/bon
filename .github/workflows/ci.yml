@@ -41,13 +41,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - run: ls -lah /home/runner/.cargo/bin || true
       - uses: actions-rust-lang/setup-rust-toolchain@v1
-      - run: ls -lah /home/runner/.cargo/bin || true
-      - run: cat /home/runner/.cargo/.crates.toml
-
       - uses: taiki-e/install-action@cargo-binstall
-      - run: cargo binstall iai-callgrind-runner@$(cargo pkgid iai-callgrind | cut -d@ -f2)
+
+      # Using `--force` flag because the caching action has this bug:
+      # https://github.com/Swatinem/rust-cache/issues/204
+      - run: cargo binstall --force iai-callgrind-runner@$(cargo pkgid iai-callgrind | cut -d@ -f2)
+
       - run: iai-callgrind-runner --help
 
       - run: sudo apt-get update && sudo apt-get install -y valgrind
