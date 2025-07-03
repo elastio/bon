@@ -97,13 +97,13 @@ fn emit_build_from_method(
         quote!(from)
     };
 
-    // Fix: Convert `target_ty` to a path segment with no generics
+    // Convert `target_ty` to a path segment with no generics
     let ctor_path = match target_ty {
         Type::Path(type_path) => {
             let ident = &type_path.path.segments.last().unwrap().ident;
             quote!(#ident)
         }
-        _ => quote!(#target_ty), // fallback for non-path types
+        _ => quote!(#target_ty),
     };
 
     quote! {
