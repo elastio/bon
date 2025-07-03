@@ -1,6 +1,6 @@
 use crate::util::prelude::*;
-use darling::util::Flag;
 use darling::FromMeta;
+use darling::util::Flag;
 use syn::parse::Parse;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
