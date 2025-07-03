@@ -146,7 +146,7 @@ impl BuilderGenCtx {
         let allows = allow_warnings_on_member_types();
 
         let build_froms = match &self.finish_fn.output {
-            syn::ReturnType::Type(_, ty) => build_from::emit(self, ty),
+            syn::ReturnType::Type(_, ty) => build_from::emit(self, ty)?,
             syn::ReturnType::Default => quote! {},
         };
 

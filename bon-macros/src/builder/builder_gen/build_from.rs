@@ -1,9 +1,10 @@
 use crate::builder::builder_gen::{BuilderGenCtx, member::Member};
 use crate::util::prelude::*;
+use proc_macro2::Span;
 use quote::quote;
-use syn::Type;
+use syn::{Type, spanned::Spanned};
 
-pub(super) fn emit(ctx: &BuilderGenCtx, target_ty: &Type) -> TokenStream {
+pub(super) fn emit(ctx: &BuilderGenCtx, target_ty: &Type) -> Result<TokenStream> {
     let mut tokens = TokenStream::new();
 
     let field_vars: Vec<_> = ctx
@@ -61,10 +62,10 @@ pub(super) fn emit(ctx: &BuilderGenCtx, target_ty: &Type) -> TokenStream {
             target_ty,
             &field_vars,
             &ctor_args,
-        ));
+        )?);
     }
 
-    tokens
+    Ok(tokens)
 }
 
 fn emit_build_from_method(
@@ -72,7 +73,7 @@ fn emit_build_from_method(
     target_ty: &Type,
     field_vars: &[TokenStream],
     ctor_args: &[TokenStream],
-) -> TokenStream {
+) -> Result<TokenStream> {
     let doc = if clone {
         "Fills unset builder fields from an owned value of the target type and builds it."
     } else {
@@ -97,15 +98,9 @@ fn emit_build_from_method(
         quote!(from)
     };
 
-    // Convert `target_ty` to a path segment with no generics
-    let ctor_path = if let Type::Path(type_path) = target_ty {
-        let ident = &type_path.path.segments.last().unwrap().ident;
-        quote!(#ident)
-    } else {
-        quote!(#target_ty)
-    };
+    let ctor_path = extract_ctor_ident_path(target_ty, target_ty.span())?;
 
-    quote! {
+    Ok(quote! {
         #[inline(always)]
         #[doc = #doc]
         pub fn #method_name(self, #arg_pat: #arg_type) -> #target_ty {
@@ -114,5 +109,25 @@ fn emit_build_from_method(
                 #( #ctor_args, )*
             }
         }
-    }
+    })
+}
+
+pub(crate) fn extract_ctor_ident_path(ty: &Type, span: Span) -> Result<TokenStream> {
+    use quote::quote_spanned;
+
+    let path = ty.as_path_no_qself().ok_or_else(|| {
+        err!(
+            &span,
+            "expected a concrete type path (like `MyStruct`) for constructor"
+        )
+    })?;
+
+    let ident = path
+        .segments
+        .last()
+        .ok_or_else(|| err!(&span, "expected a named type, but found an empty path"))?
+        .ident
+        .clone();
+
+    Ok(quote_spanned! { span => #ident })
 }
