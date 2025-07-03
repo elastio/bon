@@ -183,6 +183,8 @@ pub(crate) struct BuilderGenCtx {
     pub(super) state_mod: StateMod,
     pub(super) start_fn: StartFn,
     pub(super) finish_fn: FinishFn,
+    pub(super) build_from: bool,
+    pub(super) build_from_clone: bool,
 }
 
 pub(super) struct BuilderGenCtxParams<'a> {
@@ -212,6 +214,8 @@ pub(super) struct BuilderGenCtxParams<'a> {
     pub(super) state_mod: ItemSigConfig,
     pub(super) start_fn: StartFnParams,
     pub(super) finish_fn: FinishFnParams,
+    pub(super) build_from: bool,
+    pub(super) build_from_clone: bool,
 }
 
 impl BuilderGenCtx {
@@ -231,6 +235,8 @@ impl BuilderGenCtx {
             state_mod,
             start_fn,
             finish_fn,
+            build_from,
+            build_from_clone,
         } = params;
 
         let builder_type = BuilderType {
@@ -385,6 +391,8 @@ impl BuilderGenCtx {
             state_mod,
             start_fn,
             finish_fn,
+            build_from,
+            build_from_clone,
         })
     }
 }
