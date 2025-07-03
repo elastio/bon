@@ -4,11 +4,11 @@ pub(crate) use on::OnConfig;
 
 use crate::parsing::{BonCratePath, ItemSigConfig, ItemSigConfigParsing, SpannedKey};
 use crate::util::prelude::*;
-use darling::ast::NestedMeta;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
+use syn::ItemFn;
 use syn::parse::Parser;
 use syn::punctuated::Punctuated;
-use syn::ItemFn;
 
 fn parse_finish_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
     ItemSigConfigParsing {
@@ -75,6 +75,12 @@ pub(crate) struct TopLevelConfig {
     /// Specifies the derives to apply to the builder.
     #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list)]
     pub(crate) derive: DerivesConfig,
+
+    #[darling(default)]
+    pub(crate) build_from: bool,
+
+    #[darling(default)]
+    pub(crate) build_from_clone: bool,
 }
 
 impl TopLevelConfig {

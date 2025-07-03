@@ -1,6 +1,6 @@
 use crate::util::prelude::*;
-use darling::util::Flag;
 use darling::FromMeta;
+use darling::util::Flag;
 use syn::parse::Parse;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
@@ -79,7 +79,7 @@ impl Parse for OnConfig {
 
         impl Visit<'_> for FindAttr {
             fn visit_attribute(&mut self, attr: &'_ syn::Attribute) {
-                self.attr.get_or_insert(attr.span());
+                self.attr.get_or_insert_with(|| attr.span());
             }
         }
 
