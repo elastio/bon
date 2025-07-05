@@ -79,7 +79,7 @@ impl Parse for OnConfig {
 
         impl Visit<'_> for FindAttr {
             fn visit_attribute(&mut self, attr: &'_ syn::Attribute) {
-                self.attr.get_or_insert(attr.span());
+                self.attr.get_or_insert_with(|| attr.span());
             }
         }
 
