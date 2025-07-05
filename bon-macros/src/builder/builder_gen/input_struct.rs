@@ -238,6 +238,8 @@ impl StructInputCtx {
             state_mod: self.config.state_mod,
             start_fn,
             finish_fn,
+            build_from: self.config.build_from,
+            build_from_clone: self.config.build_from_clone,
         })
     }
 }
