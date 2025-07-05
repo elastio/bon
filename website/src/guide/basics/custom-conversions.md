@@ -4,15 +4,15 @@
 
 You can pass a custom closure to `#[builder(with)]`. It will define the signature of the setter and perform a conversion.
 
-```rust
-use bon::Builder;
+::: code-group
 
+```rust [Struct]
 struct Point {
     x: u32,
     y: u32,
 }
 
-#[derive(Builder)]
+#[derive(bon::Builder)]
 struct Example {
     #[builder(with = |x: u32, y: u32| Point { x, y })] // [!code highlight]
     point: Point,
@@ -25,6 +25,57 @@ let value = Example::builder()
 assert_eq!(value.point.x, 2);
 assert_eq!(value.point.y, 3);
 ```
+
+```rust [Function]
+struct Point {
+    x: u32,
+    y: u32,
+}
+
+#[bon::builder]
+fn example(
+    #[builder(with = |x: u32, y: u32| Point { x, y })] // [!code highlight]
+    point: Point,
+) -> Point {
+    point
+}
+
+let value = example()
+    .point(2, 3) // [!code highlight]
+    .call();
+
+assert_eq!(value.x, 2);
+assert_eq!(value.y, 3);
+```
+
+```rust [Method]
+struct Point {
+    x: u32,
+    y: u32,
+}
+
+struct Example;
+
+#[bon::bon]
+impl Example {
+    #[builder]
+    fn example(
+        #[builder(with = |x: u32, y: u32| Point { x, y })] // [!code highlight]
+        point: Point,
+    ) -> Point {
+        point
+    }
+}
+
+let value = Example::example()
+    .point(2, 3) // [!code highlight]
+    .call();
+
+assert_eq!(value.x, 2);
+assert_eq!(value.y, 3);
+```
+
+:::
 
 You can make the setter fallible by passing a [fallible closure](../../reference/builder/member/with#fallible-closure).
 
