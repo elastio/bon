@@ -66,9 +66,11 @@ pub(crate) struct TopLevelConfig {
     #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list)]
     pub(crate) generics: Option<SpannedKey<GenericsConfig>>,
 
+    #[cfg(feature = "experimental-build-from")]
     #[darling(default)]
     pub(crate) build_from: bool,
 
+    #[cfg(feature = "experimental-build-from")]
     #[darling(default)]
     pub(crate) build_from_clone: bool,
 }
