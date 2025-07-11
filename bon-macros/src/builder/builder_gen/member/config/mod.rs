@@ -61,6 +61,9 @@ pub(crate) struct MemberConfig {
     /// this option to see if it's worth it.
     pub(crate) overwritable: darling::util::Flag,
 
+    /// Allows the use of `build_from` and `build_from_clone` methods.
+    pub(crate) build_from: darling::util::Flag,
+
     /// Disables the special handling for a member of type `Option<T>`. The
     /// member no longer has the default of `None`. It also becomes a required
     /// member unless a separate `#[builder(default = ...)]` attribute is
@@ -98,6 +101,7 @@ enum ParamName {
     Into,
     Name,
     Overwritable,
+    BuildFrom,
     Required,
     Setters,
     Skip,
@@ -115,6 +119,7 @@ impl fmt::Display for ParamName {
             Self::Into => "into",
             Self::Name => "name",
             Self::Overwritable => "overwritable",
+            Self::BuildFrom => "build_from",
             Self::Required => "required",
             Self::Setters => "setters",
             Self::Skip => "skip",
@@ -180,6 +185,7 @@ impl MemberConfig {
             into,
             name,
             overwritable,
+            build_from,
             required,
             setters,
             skip,
@@ -195,6 +201,7 @@ impl MemberConfig {
             (into.is_present(), ParamName::Into),
             (name.is_some(), ParamName::Name),
             (overwritable.is_present(), ParamName::Overwritable),
+            (build_from.is_present(), ParamName::BuildFrom),
             (required.is_present(), ParamName::Required),
             (setters.is_some(), ParamName::Setters),
             (skip.is_some(), ParamName::Skip),
@@ -224,6 +231,14 @@ impl MemberConfig {
                  double-awesome if you could also describe your use case in \
                  a comment under the issue for us to understand how it's used \
                  in practice",
+            );
+        }
+
+        if !cfg!(feature = "experimental-build-from") && self.build_from.is_present() {
+            bail!(
+                &self.build_from.span(),
+                "🔬 `build_from` attribute is experimental and requires \
+                 \"experimental-build-from\" cargo feature to be enabled.",
             );
         }
 

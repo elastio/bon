@@ -412,7 +412,9 @@ impl<'a> FnInputCtx<'a> {
             state_mod: self.config.state_mod,
             start_fn: self.start_fn,
             finish_fn,
+            #[cfg(feature = "experimental-build-from")]
             build_from: self.config.build_from,
+            #[cfg(feature = "experimental-build-from")]
             build_from_clone: self.config.build_from_clone,
         })
     }

@@ -1,43 +1,11 @@
 use crate::builder::builder_gen::{BuilderGenCtx, member::Member};
 use crate::util::prelude::*;
-use proc_macro2::Span;
+use proc_macro2::{Ident, Span};
 use quote::quote;
 use syn::{Type, spanned::Spanned};
 
 pub(super) fn emit(ctx: &BuilderGenCtx, target_ty: &Type) -> Result<TokenStream> {
     let mut tokens = TokenStream::new();
-
-    let field_vars: Vec<_> = ctx
-        .members
-        .iter()
-        .map(|member| {
-            let ident = member.orig_ident();
-            let ty = member.norm_ty();
-            let default_expr = quote! { ::core::default::Default::default() };
-
-            match member {
-                Member::Field(_) | Member::StartFn(_) => quote! {
-                    let #ident: #ty = self.#ident;
-                },
-                Member::Named(member) => {
-                    let index = &member.index;
-                    quote! {
-                        let #ident: #ty = match self.__unsafe_private_named.#index {
-                            Some(value) => value,
-                            None => from.#ident.clone(),
-                        };
-                    }
-                }
-                Member::FinishFn(_) => quote! {
-                    let #ident: #ty = from.#ident.clone();
-                },
-                Member::Skip(_) => quote! {
-                    let #ident: #ty = #default_expr;
-                },
-            }
-        })
-        .collect();
-
     let ctor_args: Vec<_> = ctx
         .members
         .iter()
@@ -47,11 +15,14 @@ pub(super) fn emit(ctx: &BuilderGenCtx, target_ty: &Type) -> Result<TokenStream>
         })
         .collect();
 
+    let base_name = ctx.finish_fn.ident.clone();
+
     if ctx.build_from {
         tokens.extend(emit_build_from_method(
             false,
+            &base_name,
             target_ty,
-            &field_vars,
+            &ctx.members,
             &ctor_args,
         ));
     }
@@ -59,8 +30,9 @@ pub(super) fn emit(ctx: &BuilderGenCtx, target_ty: &Type) -> Result<TokenStream>
     if ctx.build_from_clone {
         tokens.extend(emit_build_from_method(
             true,
+            &base_name,
             target_ty,
-            &field_vars,
+            &ctx.members,
             &ctor_args,
         )?);
     }
@@ -70,8 +42,9 @@ pub(super) fn emit(ctx: &BuilderGenCtx, target_ty: &Type) -> Result<TokenStream>
 
 fn emit_build_from_method(
     clone: bool,
+    base_name: &Ident,
     target_ty: &Type,
-    field_vars: &[TokenStream],
+    members: &[Member],
     ctor_args: &[TokenStream],
 ) -> Result<TokenStream> {
     let doc = if clone {
@@ -81,15 +54,15 @@ fn emit_build_from_method(
     };
 
     let method_name = if clone {
-        quote!(build_from_clone)
+        format_ident!("{}_from_clone", base_name)
     } else {
-        quote!(build_from)
+        format_ident!("{}_from", base_name)
     };
 
     let arg_type = if clone {
-        quote!(#target_ty)
-    } else {
         quote!(&#target_ty)
+    } else {
+        quote!(#target_ty)
     };
 
     let arg_pat = if clone {
@@ -99,6 +72,7 @@ fn emit_build_from_method(
     };
 
     let ctor_path = extract_ctor_ident_path(target_ty, target_ty.span())?;
+    let field_vars = field_vars_from_members(members, clone);
 
     Ok(quote! {
         #[inline(always)]
@@ -112,6 +86,55 @@ fn emit_build_from_method(
     })
 }
 
+fn field_vars_from_members(members: &[Member], clone: bool) -> Vec<TokenStream> {
+    members
+        .iter()
+        .map(|member| {
+            let ident = member.orig_ident();
+            let ty = member.norm_ty();
+            let default_expr = quote! { ::core::default::Default::default() };
+
+            match member {
+                Member::Field(_) | Member::StartFn(_) => quote! {
+                    let #ident: #ty = self.#ident;
+                },
+                Member::Named(member) => {
+                    let index = &member.index;
+                    if clone {
+                        quote! {
+                            let #ident: #ty = match self.__unsafe_private_named.#index {
+                                Some(value) => value,
+                                None => from.#ident.clone(),
+                            };
+                        }
+                    } else {
+                        quote! {
+                            let #ident: #ty = match self.__unsafe_private_named.#index {
+                                Some(value) => value,
+                                None => from.#ident,
+                            };
+                        }
+                    }
+                }
+                Member::FinishFn(_) => {
+                    if clone {
+                        quote! {
+                            let #ident: #ty = from.#ident.clone();
+                        }
+                    } else {
+                        quote! {
+                            let #ident: #ty = from.#ident;
+                        }
+                    }
+                }
+                Member::Skip(_) => quote! {
+                    let #ident: #ty = #default_expr;
+                },
+            }
+        })
+        .collect()
+}
+
 pub(crate) fn extract_ctor_ident_path(ty: &Type, span: Span) -> Result<TokenStream> {
     use quote::quote_spanned;
 
@@ -122,12 +145,14 @@ pub(crate) fn extract_ctor_ident_path(ty: &Type, span: Span) -> Result<TokenStre
         )
     })?;
 
-    let ident = path
+    let mut ident = path
         .segments
         .last()
         .ok_or_else(|| err!(&span, "expected a named type, but found an empty path"))?
         .ident
         .clone();
 
-    Ok(quote_spanned! { span => #ident })
+    ident.set_span(span);
+
+    Ok(quote! { #ident })
 }

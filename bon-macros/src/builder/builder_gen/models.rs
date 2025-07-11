@@ -173,7 +173,9 @@ pub(crate) struct BuilderGenCtx {
     pub(super) state_mod: StateMod,
     pub(super) start_fn: StartFn,
     pub(super) finish_fn: FinishFn,
+    #[cfg(feature = "experimental-build-from")]
     pub(super) build_from: bool,
+    #[cfg(feature = "experimental-build-from")]
     pub(super) build_from_clone: bool,
 }
 
@@ -203,7 +205,9 @@ pub(super) struct BuilderGenCtxParams<'a> {
     pub(super) state_mod: ItemSigConfig,
     pub(super) start_fn: StartFnParams,
     pub(super) finish_fn: FinishFnParams,
+    #[cfg(feature = "experimental-build-from")]
     pub(super) build_from: bool,
+    #[cfg(feature = "experimental-build-from")]
     pub(super) build_from_clone: bool,
 }
 
@@ -223,9 +227,12 @@ impl BuilderGenCtx {
             state_mod,
             start_fn,
             finish_fn,
-            build_from,
-            build_from_clone,
+            ..
         } = params;
+        #[cfg(feature = "experimental-build-from")]
+        let build_from = params.build_from;
+        #[cfg(feature = "experimental-build-from")]
+        let build_from_clone = params.build_from_clone;
 
         let builder_type = BuilderType {
             ident: builder_type.ident,
@@ -376,7 +383,9 @@ impl BuilderGenCtx {
             state_mod,
             start_fn,
             finish_fn,
+            #[cfg(feature = "experimental-build-from")]
             build_from,
+            #[cfg(feature = "experimental-build-from")]
             build_from_clone,
         })
     }
