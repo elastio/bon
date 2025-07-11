@@ -28,6 +28,24 @@ fn parse_start_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
     ItemSigConfigParsing::new(meta, None).parse()
 }
 
+#[cfg(feature = "experimental-build-from")]
+fn parse_build_from(meta: &syn::Meta) -> Result<ItemSigConfig> {
+    ItemSigConfigParsing {
+        meta,
+        reject_self_mentions: Some("builder struct's impl block"),
+    }
+    .parse()
+}
+
+#[cfg(feature = "experimental-build-from")]
+fn parse_build_from_clone(meta: &syn::Meta) -> Result<ItemSigConfig> {
+    ItemSigConfigParsing {
+        meta,
+        reject_self_mentions: Some("builder struct's impl block"),
+    }
+    .parse()
+}
+
 #[derive(Debug, FromMeta)]
 pub(crate) struct TopLevelConfig {
     /// Specifies whether the generated functions should be `const`.
@@ -67,12 +85,12 @@ pub(crate) struct TopLevelConfig {
     pub(crate) generics: Option<SpannedKey<GenericsConfig>>,
 
     #[cfg(feature = "experimental-build-from")]
-    #[darling(default)]
-    pub(crate) build_from: bool,
+    #[darling(default, with = parse_build_from)]
+    pub(crate) build_from: ItemSigConfig,
 
     #[cfg(feature = "experimental-build-from")]
-    #[darling(default)]
-    pub(crate) build_from_clone: bool,
+    #[darling(default, with = parse_build_from_clone)]
+    pub(crate) build_from_clone: ItemSigConfig,
 }
 
 impl TopLevelConfig {

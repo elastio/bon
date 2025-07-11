@@ -145,12 +145,14 @@ pub(crate) fn extract_ctor_ident_path(ty: &Type, span: Span) -> Result<TokenStre
         )
     })?;
 
-    let ident = path
+    let mut ident = path
         .segments
         .last()
         .ok_or_else(|| err!(&span, "expected a named type, but found an empty path"))?
         .ident
         .clone();
 
-    Ok(quote_spanned! { span => #ident })
+    ident.set_span(span);
+
+    Ok(quote! { #ident })
 }
