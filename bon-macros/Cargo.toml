@@ -42,7 +42,7 @@ proc-macro = true
 
 # Patch version 0.20.7 of darling added `flatten` feature. We use it, so we
 # need to specify an explicit patch version requirement
-darling = "0.20.10"
+darling = "0.21.0"
 
 # This dependency is used by `darling` itself, so we use it as well for case
 # conversions to share the same dependency.
