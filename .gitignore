@@ -2,6 +2,7 @@
 **/node_modules/
 **/.vitepress/cache/
 **/.vitepress/dist/
+**/.vitepress/temp/
 *.dbg.s
 .idea/
 

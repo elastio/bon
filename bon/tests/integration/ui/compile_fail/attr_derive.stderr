@@ -76,11 +76,11 @@ error: `#[builder(derive(Into))` is not supported for async functions because `F
 127 |     async unsafe fn unsafe_async_function() -> Self {
     |     ^^^^^
 
-error: Unexpected meta-item format `list`
-   --> tests/integration/ui/compile_fail/attr_derive.rs:132:18
+error: Unknown field: `bounds`
+   --> tests/integration/ui/compile_fail/attr_derive.rs:132:23
     |
 132 | #[builder(derive(Into(bounds(u32: Copy))))]
-    |                  ^^^^
+    |                       ^^^^^^
 
 error[E0277]: the trait bound `NoTraitImpls: Clone` is not satisfied
  --> tests/integration/ui/compile_fail/attr_derive.rs:9:23
