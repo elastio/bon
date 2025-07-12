@@ -15,7 +15,7 @@ version = "0.1.0"
 bon            = { path = "../../bon", optional = true, features = ["experimental-overwritable"] }
 cfg-if         = "1.0"
 derive_builder = { version = "0.20", optional = true }
-typed-builder  = { version = "0.20", optional = true }
+typed-builder  = { version = "0.21", optional = true }
 
 [lints]
 workspace = true
