@@ -85,6 +85,9 @@ implied-bounds = ["bon-macros/implied-bounds"]
 # describing your use case for it.
 experimental-overwritable = ["bon-macros/experimental-overwritable"]
 
+
+experimental-build-from = ["bon-macros/experimental-build-from"]
+
 # Legacy experimental attribute. It's left here for backwards compatibility,
 # and it will be removed in the next major release.
 #
