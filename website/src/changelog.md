@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.6.5](https://github.com/elastio/bon/compare/v3.6.4...v3.6.5) - 2025-07-18
+
+This is a regular maintenance release with no essential API/behavior changes. Enjoy the stability 😄.
+
+### Docs
+
+- Add all 3 variations of builder syntax to the Basics guide pages ([#315](https://github.com/elastio/bon/pull/315))
+
+### Internal
+
+- Update the dependency [`darling`](https://docs.rs/darling/latest/darling/) (crate for parsing the attributes) from `0.20` to `0.21` and other internal dependencies ([#317](https://github.com/elastio/bon/pull/317), [#320](https://github.com/elastio/bon/pull/320), [#304](https://github.com/elastio/bon/pull/304))
+- Switch from [`iai`](https://github.com/bheisler/iai) to [`iai-callgrind`](https://github.com/iai-callgrind/iai-callgrind) for high-precision benchmarking of `bon` ([#311](https://github.com/elastio/bon/pull/311)). `iai-callgrind` is a better maintained alternative to `iai`, but in any case, both deserve a huge thanks for providing the benchmarking capabilities for `bon`!
+- Migrate to OIDC for [trusted publishing](https://crates.io/docs/trusted-publishing). Huge thanks for this new crates.io feature to everyone who made it happen! ([#318](https://github.com/elastio/bon/pull/318))
+- Fix `clippy::or_fun_call` lint from the nightly toolchain ([#316](https://github.com/elastio/bon/pull/316))
+
 ## [3.6.4](https://github.com/elastio/bon/compare/v3.6.3...v3.6.4) - 2025-05-30
 
 ### Added
