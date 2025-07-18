@@ -209,7 +209,7 @@ impl MemberConfig {
     }
 
     pub(crate) fn validate(&self, top_config: &TopLevelConfig, origin: MemberOrigin) -> Result {
-        if top_config.const_.is_some() {
+        if top_config.const_.is_present() {
             self.require_const_compat()?;
         }
 
