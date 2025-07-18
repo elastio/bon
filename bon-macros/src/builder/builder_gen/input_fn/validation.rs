@@ -30,14 +30,12 @@ impl super::FnInputCtx<'_> {
             }
         }
 
-        if let Some(const_) = &self.config.const_ {
-            if self.fn_item.orig.sig.constness.is_none() {
-                bail!(
-                    &const_,
-                    "#[builder(const)] requires the underlying function to be \
-                    marked as `const fn`"
-                );
-            }
+        if self.config.const_.is_present() && self.fn_item.orig.sig.constness.is_none() {
+            bail!(
+                &self.config.const_.span(),
+                "#[builder(const)] requires the underlying function to be \
+                marked as `const fn`"
+            );
         }
 
         Ok(())

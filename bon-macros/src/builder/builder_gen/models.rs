@@ -181,7 +181,7 @@ pub(super) struct BuilderGenCtxParams<'a> {
     pub(super) members: Vec<Member>,
 
     pub(super) allow_attrs: Vec<syn::Attribute>,
-    pub(super) const_: Option<syn::Token![const]>,
+    pub(super) const_: darling::util::Flag,
     pub(super) on: Vec<OnConfig>,
 
     /// This is the visibility of the original item that the builder is generated for.
@@ -356,6 +356,12 @@ impl BuilderGenCtx {
                 receiver,
             }
         });
+
+        let const_ = if const_.is_present() {
+            Some(syn::Token![const](const_.span()))
+        } else {
+            None
+        };
 
         Ok(Self {
             bon,
