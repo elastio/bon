@@ -357,11 +357,9 @@ impl BuilderGenCtx {
             }
         });
 
-        let const_ = if const_.is_present() {
-            Some(syn::Token![const](const_.span()))
-        } else {
-            None
-        };
+        let const_ = const_
+            .is_present()
+            .then(|| syn::Token![const](const_.span()));
 
         Ok(Self {
             bon,

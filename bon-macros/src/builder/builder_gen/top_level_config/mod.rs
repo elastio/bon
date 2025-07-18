@@ -43,7 +43,7 @@ fn parse_start_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct TopLevelConfig {
-    /// Specifies whether the generated functions should be `co
+    /// Specifies whether the generated functions should be `const`
     #[darling(rename = "const")]
     pub(crate) const_: darling::util::Flag,
 
