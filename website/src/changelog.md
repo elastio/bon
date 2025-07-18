@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [3.6.5](https://github.com/elastio/bon/compare/v3.6.4...v3.6.5) - 2025-07-18
+
+### Other
+
+- Update dependencies ([#317](https://github.com/elastio/bon/pull/317))
+- Fix `clippy::or_fun_call` lint from the nightly toolchain ([#316](https://github.com/elastio/bon/pull/316))
+
 ## [3.6.4](https://github.com/elastio/bon/compare/v3.6.3...v3.6.4) - 2025-05-30
 
 ### Added
