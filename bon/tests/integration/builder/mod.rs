@@ -7,6 +7,7 @@ mod attr_derive;
 mod attr_field;
 mod attr_getter;
 mod attr_into;
+mod attr_into_future;
 mod attr_on;
 mod attr_overwritable;
 mod attr_required;
