@@ -194,11 +194,86 @@ pub(crate) struct DerivesConfig {
 
     #[darling(rename = "Into")]
     pub(crate) into: darling::util::Flag,
+
+    #[darling(rename = "IntoFuture")]
+    pub(crate) into_future: Option<IntoFutureConfig>,
 }
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct DeriveConfig {
     pub(crate) bounds: Option<Punctuated<syn::WherePredicate, syn::Token![,]>>,
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct IntoFutureConfig {
+    pub(crate) is_send: bool,
+}
+
+impl Default for IntoFutureConfig {
+    fn default() -> Self {
+        Self { is_send: true }
+    }
+}
+
+impl FromMeta for IntoFutureConfig {
+    fn from_meta(meta: &syn::Meta) -> Result<Self> {
+        let meta_list = meta.require_list()?;
+        meta_list.require_parens_delim()?;
+
+        // Use syn's Parse trait for cleaner parsing.
+        struct ParsedArguments {
+            is_send: bool,
+        }
+
+        impl syn::parse::Parse for ParsedArguments {
+            fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
+                // Parse "Box" as the required first argument.
+                let box_ident: syn::Ident = input.parse()?;
+                if box_ident != "Box" {
+                    return Err(syn::Error::new(
+                        box_ident.span(),
+                        "expected `Box` as the first argument, only boxed futures are supported",
+                    ));
+                }
+
+                // Check for optional ", ?Send" part.
+                let is_send = if input.peek(syn::Token![,]) {
+                    input.parse::<syn::Token![,]>()?;
+
+                    // Parse "?Send" as a single unit.
+                    if input.peek(syn::Token![?]) {
+                        input.parse::<syn::Token![?]>()?;
+                        let send_ident: syn::Ident = input.parse()?;
+                        if send_ident != "Send" {
+                            return Err(syn::Error::new(
+                                send_ident.span(),
+                                "expected `Send` after ?",
+                            ));
+                        }
+                        false
+                    } else {
+                        return Err(input.error("expected `?Send` as the second argument"));
+                    }
+                } else {
+                    true
+                };
+
+                // Ensure no trailing tokens.
+                if !input.is_empty() {
+                    return Err(input.error("unexpected tokens after arguments"));
+                }
+
+                Ok(ParsedArguments { is_send })
+            }
+        }
+
+        let parsed: ParsedArguments = syn::parse2(meta_list.tokens.clone())
+            .map_err(|err| Error::from(err).with_span(meta))?;
+
+        Ok(Self {
+            is_send: parsed.is_send,
+        })
+    }
 }
 
 impl FromMeta for DeriveConfig {
