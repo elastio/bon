@@ -6,7 +6,7 @@ _⚠️ Do not confuse this with `#[derive(bon::Builder)]`⚠️_
 
 Generates additional derives for the builder struct itself. The syntax is similar to the regular `#[derive(...)]` attribute, but it must be wrapped in `#[builder(derive(...))]`. Expects one or more of the supported derives separated by a comma.
 
-The following derives are supported: [`Clone`, `Debug`](#clone-and-debug-derives), [`Into`](#into-derive).
+The following derives are supported: [`Clone`, `Debug`](#clone-and-debug-derives), [`Into`](#into-derive), [`IntoFuture`](#intofuture-derive).
 
 ::: warning
 The format of the `Debug` output of the builder is not stable, and it may change between patch versions of `bon`.
@@ -245,7 +245,7 @@ impl<S: example_builder::IsComplete> From<ExampleBuilder<S>> for Example {
 
 Note that `#[builder(derive(Into))]` is quite limited. Here are some things it doesn't support:
 
-- `async` functions, because `From::from()` is synchronous
+- `async` functions, because `From::from()` is synchronous. Refer to [`IntoFuture`](#intofuture-derive) instead.
 - `unsafe` functions, because `From::from()` is safe
 - Members marked with [`#[builder(finish_fn)]`](../member/finish_fn) because `From::from()` doesn't accept arguments
 
@@ -269,4 +269,24 @@ take_example(
     Example::builder()
         .x1(99)
 )
+```
+
+## `IntoFuture` Derive
+
+Implements [`IntoFuture`](https://doc.rust-lang.org/std/future/trait.IntoFuture.html) for the builder, allowing it to be
+`await`-ed directly. To have the derived implementation produce non-`Send` futures, add `?Send` like so: `#[builder(derive(IntoFuture(Box, ?Send)))]`.
+
+```rust
+use bon::builder;
+
+#[builder(derive(IntoFuture(Box)))]
+async fn fetch_string(url: &str, body: Option<Vec<u8>>) -> std::io::Result<String> {
+    // …
+    Ok("Server response".to_owned())
+}
+
+tokio_test::block_on(async {
+    let response = fetch_string().url("https://example.org").await;
+    assert_eq!(response.ok().as_deref(), Some("Server response"));
+})
 ```
