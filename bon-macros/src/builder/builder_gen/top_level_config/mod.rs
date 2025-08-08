@@ -7,6 +7,7 @@ use crate::util::prelude::*;
 use darling::ast::NestedMeta;
 use darling::FromMeta;
 use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
 use syn::ItemFn;
 
 fn parse_finish_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
@@ -194,11 +195,85 @@ pub(crate) struct DerivesConfig {
 
     #[darling(rename = "Into")]
     pub(crate) into: darling::util::Flag,
+
+    #[darling(rename = "IntoFuture")]
+    pub(crate) into_future: Option<IntoFutureConfig>,
 }
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct DeriveConfig {
     pub(crate) bounds: Option<Punctuated<syn::WherePredicate, syn::Token![,]>>,
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct IntoFutureConfig {
+    pub(crate) is_send: bool,
+}
+
+impl Default for IntoFutureConfig {
+    fn default() -> Self {
+        Self {
+            is_send: true,
+        }
+    }
+}
+
+impl FromMeta for IntoFutureConfig {
+    fn from_meta(meta: &syn::Meta) -> Result<Self> {
+        match meta {
+            // #[builder(derive(IntoFuture(Box)))]
+            syn::Meta::List(meta_list) => {
+                // Parse the token stream manually to handle ?Send syntax
+                let mut tokens = meta_list.tokens.clone().into_iter().peekable();
+                
+                // First argument should be "Box"
+                let first_arg = tokens.next().ok_or_else(|| {
+                    syn::Error::new(meta_list.span(), "IntoFuture requires at least one argument (Box)")
+                })?;
+                
+                if !matches!(first_arg, proc_macro2::TokenTree::Ident(ref ident) if ident == "Box") {
+                    bail!(&first_arg, "expected Box as the first argument; only Box is supported as the future container");
+                }
+                
+                let mut is_send = true;
+                
+                // Check if there's a comma and second argument
+                if let Some(comma) = tokens.next() {
+                    if !matches!(comma, proc_macro2::TokenTree::Punct(ref punct) if punct.as_char() == ',') {
+                        bail!(&comma, "expected comma after Box");
+                    }
+                    
+                    // Skip whitespace/spans
+                    while tokens.peek().is_some() {
+                        if let Some(token) = tokens.next() {
+                            match token {
+                                // Handle ?Send as two separate tokens: ? and Send
+                                proc_macro2::TokenTree::Punct(ref punct) if punct.as_char() == '?' => {
+                                    if let Some(proc_macro2::TokenTree::Ident(ref ident)) = tokens.next() {
+                                        if ident == "Send" {
+                                            is_send = false;
+                                            break;
+                                        } else {
+                                            bail!(&ident, "expected Send after ?");
+                                        }
+                                    } else {
+                                        bail!(&punct, "expected Send after ?");
+                                    }
+                                }
+                                _ => {
+                                    bail!(&token, "expected ?Send as the second argument");
+                                }
+                            }
+                        }
+                    }
+                }
+
+                Ok(Self { is_send })
+            }
+            // This shouldn't happen as darling should require list syntax
+            _ => bail!(meta, "IntoFuture requires parentheses with arguments"),
+        }
+    }
 }
 
 impl FromMeta for DeriveConfig {

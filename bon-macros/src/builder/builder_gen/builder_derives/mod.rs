@@ -1,6 +1,7 @@
 mod clone;
 mod debug;
 mod into;
+mod into_future;
 
 use super::top_level_config::{DeriveConfig, DerivesConfig};
 use super::BuilderGenCtx;
@@ -9,7 +10,7 @@ use darling::ast::GenericParamExt;
 
 impl BuilderGenCtx {
     pub(crate) fn builder_derives(&self) -> Result<TokenStream> {
-        let DerivesConfig { clone, debug, into } = &self.builder_type.derives;
+        let DerivesConfig { clone, debug, into, into_future } = &self.builder_type.derives;
 
         let mut tokens = TokenStream::new();
 
@@ -23,6 +24,10 @@ impl BuilderGenCtx {
 
         if into.is_present() {
             tokens.extend(self.derive_into()?);
+        }
+
+        if let Some(derive) = into_future {
+            tokens.extend(self.derive_into_future(derive)?);
         }
 
         Ok(tokens)
