@@ -41,6 +41,7 @@ impl BuilderGenCtx {
         let state_mod = &self.state_mod.ident;
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
+        let where_clause = &self.generics.where_clause;
         let builder_ident = &self.builder_type.ident;
         let state_var = &self.state_var;
         let finish_fn_ident = &self.finish_fn.ident;
@@ -55,7 +56,9 @@ impl BuilderGenCtx {
                 #(#generics_decl,)*
                 #state_var: #state_mod::IsComplete
             >
-            ::core::convert::From<#builder_ty> for #output_ty {
+            ::core::convert::From<#builder_ty> for #output_ty
+            #where_clause
+            {
                 fn from(builder: #builder_ty) -> Self {
                     #builder_ident::#finish_fn_ident(builder)
                 }

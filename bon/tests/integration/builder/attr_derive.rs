@@ -148,7 +148,10 @@ mod generics {
     fn test_struct() {
         #[derive(Builder, Debug)]
         #[builder(derive(Clone, Debug, Into))]
-        struct Sut<T> {
+        struct Sut<T>
+        where
+            T: Clone,
+        {
             _arg1: T,
         }
 
@@ -164,7 +167,10 @@ mod generics {
     #[test]
     fn test_function() {
         #[builder(derive(Clone, Debug, Into))]
-        fn sut<T>(_arg1: T) -> u32 {
+        fn sut<T>(_arg1: T) -> u32
+        where
+            T: Clone,
+        {
             99
         }
 
@@ -183,7 +189,10 @@ mod generics {
         struct Sut<T>(T);
 
         #[bon]
-        impl<T> Sut<T> {
+        impl<T> Sut<T>
+        where
+            T: Clone,
+        {
             #[builder(derive(Clone, Debug, Into))]
             fn sut<U>(_arg1: U) -> u32 {
                 99
