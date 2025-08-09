@@ -18,7 +18,7 @@ error: `#[builder(derive(IntoFuture(...)))` is incompatible with `#[builder(fini
 19 |     #[builder(finish_fn)] value: u32
    |               ^^^^^^^^^
 
-error: expected attribute arguments in parentheses: `IntoFuture(...)`
+error: expected an attribute of form `IntoFuture(Box, ...)`
   --> tests/integration/ui/compile_fail/attr_into_future.rs:26:18
    |
 26 | #[builder(derive(IntoFuture))]

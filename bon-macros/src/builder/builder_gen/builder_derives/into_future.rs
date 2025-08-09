@@ -47,6 +47,7 @@ impl BuilderGenCtx {
         let builder_ident = &self.builder_type.ident;
         let state_var = &self.state_var;
         let finish_fn_ident = &self.finish_fn.ident;
+        let box_ = &config.box_ident;
 
         let builder_ty = quote! {
             #builder_ident<#(#generic_args,)* #state_var>
@@ -58,21 +59,36 @@ impl BuilderGenCtx {
             quote! {}
         };
 
+        let bon = &self.bon;
+
+        let alloc = if cfg!(feature = "std") {
+            quote!(::std)
+        } else if cfg!(feature = "alloc") {
+            quote!(#bon::__::alloc)
+        } else {
+            bail!(
+                &config.box_ident,
+                "`#[builder(derive(IntoFuture(Box)))]` requires either `std` or \
+                `alloc` feature to be enabled"
+            )
+        };
+
         let tokens = quote! {
             #[automatically_derived]
             impl<
                 #(#generics_decl,)*
                 #state_var: #state_mod::IsComplete + 'static
             >
-            ::core::future::IntoFuture for #builder_ty
-            where
-                #builder_ty: 'static,
-            {
+            ::core::future::IntoFuture for #builder_ty {
                 type Output = #output_ty;
-                type IntoFuture = ::std::pin::Pin<::std::boxed::Box<dyn ::core::future::Future<Output = #output_ty> #send_bound>>;
+                type IntoFuture = ::core::pin::Pin<
+                    #alloc::boxed::#box_<
+                        dyn ::core::future::Future<Output = #output_ty> #send_bound
+                    >
+                >;
 
                 fn into_future(self) -> Self::IntoFuture {
-                    ::std::boxed::Box::pin(#builder_ident::#finish_fn_ident(self))
+                    #alloc::boxed::#box_::pin(#builder_ident::#finish_fn_ident(self))
                 }
             }
         };

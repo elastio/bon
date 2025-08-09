@@ -32,11 +32,11 @@ async fn into_future_non_send() {
 #[tokio::test]
 async fn into_future_with_result() {
     #[builder(derive(IntoFuture(Box)))]
-    async fn async_with_result(value: u32) -> Result<u32, String> {
+    async fn async_with_result(value: u32) -> Result<u32, &'static str> {
         if value > 0 {
             Ok(value * 2)
         } else {
-            Err("Value must be positive".to_string())
+            Err("Value must be positive")
         }
     }
 

@@ -63,6 +63,9 @@ rustversion  = "1.0"
 [features]
 default = []
 
+alloc = []
+std   = []
+
 # See the docs on this feature in the `bon`'s crate `Cargo.toml`
 experimental-overwritable = []
 

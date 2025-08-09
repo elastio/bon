@@ -7,7 +7,6 @@ mod attr_derive;
 mod attr_field;
 mod attr_getter;
 mod attr_into;
-mod attr_into_future;
 mod attr_on;
 mod attr_overwritable;
 mod attr_required;
@@ -30,6 +29,10 @@ mod target_feature;
 mod track_caller;
 
 use crate::prelude::*;
+
+/// [`core::future::IntoFuture`] relies on [`Box`]
+#[cfg(any(feature = "std", feature = "alloc"))]
+mod attr_into_future;
 
 #[test]
 fn leading_underscore_is_stripped() {
