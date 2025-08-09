@@ -1,5 +1,23 @@
 # Changelog
 
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [3.6.6](https://github.com/elastio/bon/compare/v3.6.5...v3.6.6) - 2025-08-09
+
+### Other
+
+- Make tests pass without the `experimental-overwritable` feature ([#326](https://github.com/elastio/bon/pull/326))
+- Add missing `where` clause forwarding to `#[builder(derive(Into))]` ([#325](https://github.com/elastio/bon/pull/325))
+- Sunset financial support by Kindness ([#324](https://github.com/elastio/bon/pull/324))
+- Add support for `derive(IntoFuture(Box))` ([#322](https://github.com/elastio/bon/pull/322))
+- Fix clippy lints from nightly (2025-08-09) ([#323](https://github.com/elastio/bon/pull/323))
+# Changelog
+
 All notable changes to this project are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
