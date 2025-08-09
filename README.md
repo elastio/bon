@@ -214,17 +214,24 @@ See [alternatives](https://bon-rs.com/guide/alternatives) for comparison.
 
 <div align="center">
 
-Big thanks to `bon`'s financial supporters ❤️
-
-[![](https://github.com/user-attachments/assets/b0acb844-4b91-461c-95ae-90a601296500)](https://kindness.ai)\
-[**Kindness**](https://kindness.ai) \
-<sup><code>$100/month</code></sup>
+Big thanks to `bon`'s current financial supporters ❤️
 
 **Ethan Skowronski**\
 <sup><code>$1/month</code></sup>
 
 **Julius Lungys**\
 <sup><code>$1/month</code></sup>
+
+</div>
+
+## Past Supporters
+
+<div align="center">
+
+Big thanks to `bon`'s past financial supporters ❤️
+
+[![](https://github.com/user-attachments/assets/b0acb844-4b91-461c-95ae-90a601296500)](https://kindness.ai)\
+[**Kindness**](https://kindness.ai)
 
 </div>
 
