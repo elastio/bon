@@ -5,10 +5,15 @@ use crate::util::prelude::*;
 impl BuilderGenCtx {
     pub(super) fn derive_into_future(&self, config: &IntoFutureConfig) -> Result<TokenStream> {
         if self.finish_fn.asyncness.is_none() {
+            // While it is technically possible to call a synchronous function
+            // inside of the `IntoFuture::into_future()`, it's better force the
+            // user to mark the function as `async` explicitly. Otherwise it may
+            // indicate of some logic bug where the developer mistakenly marks
+            // a function that could be sync with `derive(IntoFuture)`.
             bail!(
                 &self.finish_fn.ident,
-                "`#[builder(derive(IntoFuture(...)))` can only be used with async functions \
-                because `IntoFuture::into_future()` method is an asynchronous method"
+                "`#[builder(derive(IntoFuture(...)))` can only be used with async functions; \
+                using it with a synchronous function is likely a mistake"
             );
         }
 
