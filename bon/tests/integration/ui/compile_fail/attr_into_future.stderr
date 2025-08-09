@@ -1,5 +1,4 @@
-error: `#[builder(derive(IntoFuture(...)))` can only be used with async functions
-                       because `IntoFuture::into_future()` method is an asynchronous method
+error: `#[builder(derive(IntoFuture(...)))` can only be used with async functions because `IntoFuture::into_future()` method is an asynchronous method
  --> tests/integration/ui/compile_fail/attr_into_future.rs:2:1
   |
 2 | #[bon::builder]
@@ -37,8 +36,7 @@ error: expected `?Send` as the second argument
 40 | #[builder(derive(IntoFuture(Box, Send)))]
    |                                  ^^^^
 
-error: `#[builder(derive(IntoFuture(...)))` can only be used with async functions
-                       because `IntoFuture::into_future()` method is an asynchronous method
+error: `#[builder(derive(IntoFuture(...)))` can only be used with async functions because `IntoFuture::into_future()` method is an asynchronous method
   --> tests/integration/ui/compile_fail/attr_into_future.rs:50:8
    |
 50 | struct AsyncConfig {

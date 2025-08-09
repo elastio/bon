@@ -7,7 +7,7 @@ impl BuilderGenCtx {
         if self.finish_fn.asyncness.is_none() {
             bail!(
                 &self.finish_fn.ident,
-                "`#[builder(derive(IntoFuture(...)))` can only be used with async functions
+                "`#[builder(derive(IntoFuture(...)))` can only be used with async functions \
                 because `IntoFuture::into_future()` method is an asynchronous method"
             );
         }
