@@ -280,13 +280,14 @@ Implements [`IntoFuture`](https://doc.rust-lang.org/std/future/trait.IntoFuture.
 use bon::builder;
 
 #[builder(derive(IntoFuture(Box)))]
-async fn fetch_string(url: &str, body: Option<Vec<u8>>) -> std::io::Result<String> {
+async fn fetch_string(url: &str, body: Option<Vec<u8>>) -> String {
     // …
-    Ok("Server response".to_owned())
+    "Server response".to_owned()
 }
 
-tokio_test::block_on(async {
+#[tokio::main]
+async fn main() {
     let response = fetch_string().url("https://example.org").await;
-    assert_eq!(response.ok().as_deref(), Some("Server response"));
-})
+    assert_eq!(response, "Server response");
+}
 ```
