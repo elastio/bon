@@ -3,9 +3,6 @@ use bon::builder;
 #[builder(on(String, into))]
 fn unnecessary_into(#[builder(into)] _x: String) {}
 
-#[builder(on(String, overwritable))]
-fn unnecessary_overwritable(#[builder(overwritable)] _x: String) {}
-
 #[builder(on(&dyn std::fmt::Debug, into))]
 fn invalid_type_pattern() {}
 

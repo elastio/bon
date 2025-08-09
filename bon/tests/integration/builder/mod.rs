@@ -9,6 +9,7 @@ mod attr_getter;
 mod attr_into;
 mod attr_into_future;
 mod attr_on;
+#[cfg(feature = "experimental-overwritable")]
 mod attr_overwritable;
 mod attr_required;
 mod attr_setters;

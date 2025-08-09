@@ -16,12 +16,6 @@ error: `skip` attribute can't be specified together with `getter`
 17 |     #[builder(getter, skip)]
    |                       ^^^^
 
-error: `getter` attribute can't be specified together with `overwritable`
-  --> tests/integration/ui/compile_fail/attr_getter.rs:23:15
-   |
-23 |     #[builder(getter, overwritable)]
-   |               ^^^^^^
-
 error: can't infer the `Deref::Target` for the getter from the member's type; please specify the return type (target of the deref coercion) explicitly in parentheses without the leading `&`;
        example: `#[builder(getter(deref(TargetTypeHere))]`
 
@@ -35,33 +29,33 @@ error: can't infer the `Deref::Target` for the getter from the member's type; pl
        - OsString
        - PathBuf
        - Cow
-  --> tests/integration/ui/compile_fail/attr_getter.rs:80:22
+  --> tests/integration/ui/compile_fail/attr_getter.rs:74:22
    |
-80 |     #[builder(getter(deref))]
+74 |     #[builder(getter(deref))]
    |                      ^^^^^
 
 error: `copy` can't be specified together with `clone`
-  --> tests/integration/ui/compile_fail/attr_getter.rs:86:22
+  --> tests/integration/ui/compile_fail/attr_getter.rs:80:22
    |
-86 |     #[builder(getter(copy, clone))]
+80 |     #[builder(getter(copy, clone))]
    |                      ^^^^
 
 error: `copy` can't be specified together with `deref`
-  --> tests/integration/ui/compile_fail/attr_getter.rs:92:22
+  --> tests/integration/ui/compile_fail/attr_getter.rs:86:22
    |
-92 |     #[builder(getter(copy, deref))]
+86 |     #[builder(getter(copy, deref))]
    |                      ^^^^
 
 error: `clone` can't be specified together with `deref`
-  --> tests/integration/ui/compile_fail/attr_getter.rs:98:22
+  --> tests/integration/ui/compile_fail/attr_getter.rs:92:22
    |
-98 |     #[builder(getter(clone, deref))]
+92 |     #[builder(getter(clone, deref))]
    |                      ^^^^^
 
 error[E0277]: the trait bound `String: std::marker::Copy` is not satisfied
-  --> tests/integration/ui/compile_fail/attr_getter.rs:42:9
+  --> tests/integration/ui/compile_fail/attr_getter.rs:36:9
    |
-42 |     x1: String,
+36 |     x1: String,
    |         ^^^^^^ the trait `std::marker::Copy` is not implemented for `String`
    |
 note: required by a bound in `copy_member`
@@ -71,9 +65,9 @@ note: required by a bound in `copy_member`
    |                       ^^^^ required by this bound in `copy_member`
 
 error[E0277]: the trait bound `String: std::marker::Copy` is not satisfied
-  --> tests/integration/ui/compile_fail/attr_getter.rs:45:16
+  --> tests/integration/ui/compile_fail/attr_getter.rs:39:16
    |
-45 |     x2: Option<String>,
+39 |     x2: Option<String>,
    |                ^^^^^^ the trait `std::marker::Copy` is not implemented for `String`
    |
 note: required by a bound in `copy_member`
@@ -83,9 +77,9 @@ note: required by a bound in `copy_member`
    |                       ^^^^ required by this bound in `copy_member`
 
 error[E0277]: the trait bound `String: std::marker::Copy` is not satisfied
-  --> tests/integration/ui/compile_fail/attr_getter.rs:48:9
+  --> tests/integration/ui/compile_fail/attr_getter.rs:42:9
    |
-48 |     x3: String,
+42 |     x3: String,
    |         ^^^^^^ the trait `std::marker::Copy` is not implemented for `String`
    |
 note: required by a bound in `copy_member`
@@ -95,73 +89,73 @@ note: required by a bound in `copy_member`
    |                       ^^^^ required by this bound in `copy_member`
 
 error[E0277]: the trait bound `NonClone: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/attr_getter.rs:57:9
+  --> tests/integration/ui/compile_fail/attr_getter.rs:51:9
    |
-57 |     x1: NonClone,
+51 |     x1: NonClone,
    |         ^^^^^^^^ the trait `Clone` is not implemented for `NonClone`
    |
 help: consider annotating `NonClone` with `#[derive(Clone)]`
    |
-52 + #[derive(Clone)]
-53 | struct NonClone;
+46 + #[derive(Clone)]
+47 | struct NonClone;
    |
 
 error[E0277]: the trait bound `NonClone: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/attr_getter.rs:60:16
+  --> tests/integration/ui/compile_fail/attr_getter.rs:54:16
    |
-60 |     x2: Option<NonClone>,
+54 |     x2: Option<NonClone>,
    |                ^^^^^^^^ the trait `Clone` is not implemented for `NonClone`
    |
    = note: required for `Option<NonClone>` to implement `Clone`
 help: consider annotating `NonClone` with `#[derive(Clone)]`
    |
-52 + #[derive(Clone)]
-53 | struct NonClone;
+46 + #[derive(Clone)]
+47 | struct NonClone;
    |
 
 error[E0277]: the trait bound `NonClone: Clone` is not satisfied
-  --> tests/integration/ui/compile_fail/attr_getter.rs:63:9
+  --> tests/integration/ui/compile_fail/attr_getter.rs:57:9
    |
-63 |     x3: NonClone,
+57 |     x3: NonClone,
    |         ^^^^^^^^ the trait `Clone` is not implemented for `NonClone`
    |
    = note: required for `Option<NonClone>` to implement `Clone`
 help: consider annotating `NonClone` with `#[derive(Clone)]`
    |
-52 + #[derive(Clone)]
-53 | struct NonClone;
+46 + #[derive(Clone)]
+47 | struct NonClone;
    |
 
 error[E0308]: mismatched types
-  --> tests/integration/ui/compile_fail/attr_getter.rs:68:28
+  --> tests/integration/ui/compile_fail/attr_getter.rs:62:28
    |
-66 | #[derive(Builder)]
+60 | #[derive(Builder)]
    |          ------- expected `&u64` because of return type
-67 | struct NoDeref {
-68 |     #[builder(getter(deref(u64)))]
+61 | struct NoDeref {
+62 |     #[builder(getter(deref(u64)))]
    |                            ^^^ expected `&u64`, found `&String`
    |
    = note: expected reference `&u64`
               found reference `&String`
 
 error[E0308]: mismatched types
-  --> tests/integration/ui/compile_fail/attr_getter.rs:71:28
+  --> tests/integration/ui/compile_fail/attr_getter.rs:65:28
    |
-66 | #[derive(Builder)]
+60 | #[derive(Builder)]
    |          ------- arguments to this enum variant are incorrect
 ...
-71 |     #[builder(getter(deref(u64)))]
+65 |     #[builder(getter(deref(u64)))]
    |                            ^^^ expected `&u64`, found `&String`
    |
    = note: expected reference `&u64`
               found reference `&String`
 help: the type constructed contains `&String` due to the type of the argument passed
-  --> tests/integration/ui/compile_fail/attr_getter.rs:66:10
+  --> tests/integration/ui/compile_fail/attr_getter.rs:60:10
    |
-66 | #[derive(Builder)]
+60 | #[derive(Builder)]
    |          ^^^^^^^
 ...
-71 |     #[builder(getter(deref(u64)))]
+65 |     #[builder(getter(deref(u64)))]
    |                            --- this argument influences the type of `Some`
 note: tuple variant defined here
   --> $RUST/core/src/option.rs
@@ -171,23 +165,23 @@ note: tuple variant defined here
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0308]: mismatched types
-  --> tests/integration/ui/compile_fail/attr_getter.rs:74:28
+  --> tests/integration/ui/compile_fail/attr_getter.rs:68:28
    |
-66 | #[derive(Builder)]
+60 | #[derive(Builder)]
    |          ------- arguments to this enum variant are incorrect
 ...
-74 |     #[builder(getter(deref(u64)), default)]
+68 |     #[builder(getter(deref(u64)), default)]
    |                            ^^^ expected `&u64`, found `&String`
    |
    = note: expected reference `&u64`
               found reference `&String`
 help: the type constructed contains `&String` due to the type of the argument passed
-  --> tests/integration/ui/compile_fail/attr_getter.rs:66:10
+  --> tests/integration/ui/compile_fail/attr_getter.rs:60:10
    |
-66 | #[derive(Builder)]
+60 | #[derive(Builder)]
    |          ^^^^^^^
 ...
-74 |     #[builder(getter(deref(u64)), default)]
+68 |     #[builder(getter(deref(u64)), default)]
    |                            --- this argument influences the type of `Some`
 note: tuple variant defined here
   --> $RUST/core/src/option.rs
@@ -197,55 +191,55 @@ note: tuple variant defined here
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
-   --> tests/integration/ui/compile_fail/attr_getter.rs:105:13
-    |
-105 |     builder.get_x1();
-    |             ^^^^^^ the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
-    |
-    = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x1>`
-    = help: the trait `IsSet` is implemented for `Set<Name>`
+  --> tests/integration/ui/compile_fail/attr_getter.rs:99:13
+   |
+99 |     builder.get_x1();
+   |             ^^^^^^ the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
+   |
+   = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x1>`
+   = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required by a bound in `NegativeTestBuilder::<S>::get_x1`
-   --> tests/integration/ui/compile_fail/attr_getter.rs:27:10
-    |
-27  | #[derive(Builder)]
-    |          ^^^^^^^ required by this bound in `NegativeTestBuilder::<S>::get_x1`
+  --> tests/integration/ui/compile_fail/attr_getter.rs:21:10
+   |
+21 | #[derive(Builder)]
+   |          ^^^^^^^ required by this bound in `NegativeTestBuilder::<S>::get_x1`
 ...
-30  |     x1: u32,
-    |     -- required by a bound in this associated function
-    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+24 |     x1: u32,
+   |     -- required by a bound in this associated function
+   = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the member `Unset<negative_test_builder::members::x2>` was not set, but this method requires it to be set
-   --> tests/integration/ui/compile_fail/attr_getter.rs:106:13
+   --> tests/integration/ui/compile_fail/attr_getter.rs:100:13
     |
-106 |     builder.get_x2();
+100 |     builder.get_x2();
     |             ^^^^^^ the member `Unset<negative_test_builder::members::x2>` was not set, but this method requires it to be set
     |
     = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x2>`
     = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required by a bound in `NegativeTestBuilder::<S>::get_x2`
-   --> tests/integration/ui/compile_fail/attr_getter.rs:27:10
+   --> tests/integration/ui/compile_fail/attr_getter.rs:21:10
     |
-27  | #[derive(Builder)]
+21  | #[derive(Builder)]
     |          ^^^^^^^ required by this bound in `NegativeTestBuilder::<S>::get_x2`
 ...
-33  |     x2: Option<u32>,
+27  |     x2: Option<u32>,
     |     -- required by a bound in this associated function
     = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
 error[E0277]: the member `Unset<negative_test_builder::members::x3>` was not set, but this method requires it to be set
-   --> tests/integration/ui/compile_fail/attr_getter.rs:107:13
+   --> tests/integration/ui/compile_fail/attr_getter.rs:101:13
     |
-107 |     builder.get_x3();
+101 |     builder.get_x3();
     |             ^^^^^^ the member `Unset<negative_test_builder::members::x3>` was not set, but this method requires it to be set
     |
     = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x3>`
     = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required by a bound in `NegativeTestBuilder::<S>::get_x3`
-   --> tests/integration/ui/compile_fail/attr_getter.rs:27:10
+   --> tests/integration/ui/compile_fail/attr_getter.rs:21:10
     |
-27  | #[derive(Builder)]
+21  | #[derive(Builder)]
     |          ^^^^^^^ required by this bound in `NegativeTestBuilder::<S>::get_x3`
 ...
-36  |     x3: u32,
+30  |     x3: u32,
     |     -- required by a bound in this associated function
     = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
