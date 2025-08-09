@@ -101,6 +101,7 @@ pub mod builder_top_level {
         pub use core::convert::Into;
 
         /// See the docs at <https://bon-rs.com/reference/builder/top-level/derive>
+        #[rustversion::since(1.64)]
         pub use core::future::IntoFuture;
     }
 
