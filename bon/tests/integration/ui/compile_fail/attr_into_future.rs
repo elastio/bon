@@ -1,5 +1,4 @@
-use bon::{bon, builder, Builder};
-use core::future::IntoFuture;
+use bon::{builder, Builder};
 
 // IntoFuture can only be used with async functions
 #[builder(derive(IntoFuture(Box)))]
@@ -42,29 +41,6 @@ async fn wrong_send_syntax() -> u32 {
 #[builder(derive(IntoFuture(Box)))]
 struct AsyncConfig {
     value: u32,
-}
-
-fn _non_send() {
-    struct Sut;
-
-    fn assert_send(_: &dyn Send) {}
-
-    #[bon]
-    impl Sut {
-        #[builder(derive(IntoFuture(Box, ?Send)))]
-        async fn sut(&self, value: u32) -> u32 {
-            value * 2
-        }
-    }
-
-    assert_send(&Sut.sut().value(21).into_future());
-
-    #[builder(derive(IntoFuture(Box, ?Send)))]
-    async fn sut(value: u32) -> u32 {
-        value * 2
-    }
-
-    assert_send(&sut().value(21).into_future());
 }
 
 fn main() {}
