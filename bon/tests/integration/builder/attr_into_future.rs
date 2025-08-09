@@ -1,6 +1,8 @@
+use crate::prelude::*;
+
 #[tokio::test]
 async fn into_future_basic() {
-    #[bon::builder]
+    #[builder]
     #[builder(derive(IntoFuture(Box)))]
     async fn simple_async_fn(value: u32) -> u32 {
         value * 2
@@ -17,7 +19,7 @@ async fn into_future_basic() {
 
 #[tokio::test]
 async fn into_future_non_send() {
-    #[bon::builder]
+    #[builder]
     #[builder(derive(IntoFuture(Box, ?Send)))]
     async fn non_send_async_fn(value: u32) -> u32 {
         // This future can be !Send.
@@ -31,7 +33,7 @@ async fn into_future_non_send() {
 
 #[tokio::test]
 async fn into_future_with_result() {
-    #[bon::builder]
+    #[builder]
     #[builder(derive(IntoFuture(Box)))]
     async fn async_with_result(value: u32) -> Result<u32, String> {
         if value > 0 {
@@ -54,7 +56,7 @@ async fn into_future_with_result() {
 async fn into_future_with_impl() {
     struct Calculator;
 
-    #[bon::bon]
+    #[bon]
     impl Calculator {
         #[builder]
         #[builder(derive(IntoFuture(Box)))]
@@ -70,7 +72,7 @@ async fn into_future_with_impl() {
 
 #[tokio::test]
 async fn into_future_with_optional() {
-    #[bon::builder]
+    #[builder]
     #[builder(derive(IntoFuture(Box)))]
     async fn optional_param(#[builder(default = 100)] value: u32) -> u32 {
         value
