@@ -61,9 +61,9 @@ macro_rules_attribute = "0.2"
 trybuild = "1.0.89"
 
 [features]
-alloc   = []
+alloc   = ["bon-macros/alloc"]
 default = ["std"]
-std     = ["alloc"]
+std     = ["bon-macros/std", "alloc"]
 
 # See the explanation of what this feature does in the docs here:
 # https://bon-rs.com/guide/typestate-api/custom-methods#implied-bounds

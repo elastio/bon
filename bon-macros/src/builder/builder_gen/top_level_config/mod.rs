@@ -194,11 +194,77 @@ pub(crate) struct DerivesConfig {
 
     #[darling(rename = "Into")]
     pub(crate) into: darling::util::Flag,
+
+    #[darling(rename = "IntoFuture")]
+    pub(crate) into_future: Option<IntoFutureConfig>,
 }
 
 #[derive(Debug, Clone, Default)]
 pub(crate) struct DeriveConfig {
     pub(crate) bounds: Option<Punctuated<syn::WherePredicate, syn::Token![,]>>,
+}
+
+#[derive(Debug, Clone)]
+pub(crate) struct IntoFutureConfig {
+    pub(crate) box_ident: syn::Ident,
+    pub(crate) is_send: bool,
+}
+
+impl syn::parse::Parse for IntoFutureConfig {
+    fn parse(input: syn::parse::ParseStream<'_>) -> syn::Result<Self> {
+        // Parse "Box" as the required first argument.
+        let box_ident: syn::Ident = input.parse()?;
+        if box_ident != "Box" {
+            return Err(syn::Error::new(
+                box_ident.span(),
+                "expected `Box` as the first argument, only boxed futures are supported",
+            ));
+        }
+
+        // Check for optional ", ?Send" part.
+        let is_send = if input.peek(syn::Token![,]) {
+            input.parse::<syn::Token![,]>()?;
+
+            // Parse "?Send" as a single unit.
+            if input.peek(syn::Token![?]) {
+                input.parse::<syn::Token![?]>()?;
+                let send_ident: syn::Ident = input.parse()?;
+                if send_ident != "Send" {
+                    return Err(syn::Error::new(
+                        send_ident.span(),
+                        "expected `Send` after ?",
+                    ));
+                }
+                false
+            } else {
+                return Err(input.error("expected `?Send` as the second argument"));
+            }
+        } else {
+            true
+        };
+
+        // Ensure no trailing tokens.
+        if !input.is_empty() {
+            return Err(input.error("unexpected tokens after arguments"));
+        }
+
+        Ok(Self { box_ident, is_send })
+    }
+}
+
+impl FromMeta for IntoFutureConfig {
+    fn from_meta(meta: &syn::Meta) -> Result<Self> {
+        let meta = match meta {
+            syn::Meta::List(meta) => meta,
+            _ => bail!(meta, "expected an attribute of form `IntoFuture(Box, ...)`"),
+        };
+
+        meta.require_parens_delim()?;
+
+        let me = syn::parse2(meta.tokens.clone())?;
+
+        Ok(me)
+    }
 }
 
 impl FromMeta for DeriveConfig {

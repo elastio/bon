@@ -16,6 +16,7 @@ anyhow                = "1.0"
 bon                   = { path = "../../bon", features = ["experimental-overwritable", "implied-bounds"] }
 buildstructor         = "0.6"
 macro_rules_attribute = "0.2"
+tokio                 = { version = "1.47", features = ["macros", "rt-multi-thread"] }
 typed-builder         = "0.21"
 
 [build-dependencies]
