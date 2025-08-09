@@ -1,10 +1,11 @@
 use crate::prelude::*;
+use core::future::ready;
 
 #[tokio::test]
 async fn into_future_basic() {
     #[builder(derive(IntoFuture(Box)))]
     async fn simple_async_fn(value: u32) -> u32 {
-        value * 2
+        ready(value * 2).await
     }
 
     // Test direct call.
@@ -21,7 +22,7 @@ async fn into_future_non_send() {
     #[builder(derive(IntoFuture(Box, ?Send)))]
     async fn non_send_async_fn(value: u32) -> u32 {
         // This future can be !Send.
-        value * 2
+        ready(value * 2).await
     }
 
     // Test with non-Send future.
@@ -33,11 +34,12 @@ async fn into_future_non_send() {
 async fn into_future_with_result() {
     #[builder(derive(IntoFuture(Box)))]
     async fn async_with_result(value: u32) -> Result<u32, &'static str> {
-        if value > 0 {
+        ready(if value > 0 {
             Ok(value * 2)
         } else {
             Err("Value must be positive")
-        }
+        })
+        .await
     }
 
     // Test successful case.
@@ -46,7 +48,7 @@ async fn into_future_with_result() {
 
     // Test error case.
     let result = async_with_result().value(0).await;
-    assert!(result.is_err());
+    result.unwrap_err();
 }
 
 #[tokio::test]
@@ -58,7 +60,7 @@ async fn into_future_with_impl() {
         #[builder]
         #[builder(derive(IntoFuture(Box)))]
         async fn multiply(a: u32, b: u32) -> u32 {
-            a * b
+            ready(a * b).await
         }
     }
 
@@ -71,7 +73,7 @@ async fn into_future_with_impl() {
 async fn into_future_with_optional() {
     #[builder(derive(IntoFuture(Box)))]
     async fn optional_param(#[builder(default = 100)] value: u32) -> u32 {
-        value
+        ready(value).await
     }
 
     // Test with value.
