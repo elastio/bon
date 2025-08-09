@@ -199,7 +199,7 @@ Add `bon` to your `Cargo.toml`.
 
 ```toml
 [dependencies]
-bon = "3.6"
+bon = "3.7"
 ```
 
 You can opt out of `std` and `alloc` cargo features with `default-features = false` for `no_std` environments.
