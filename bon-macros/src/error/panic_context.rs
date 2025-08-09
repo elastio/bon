@@ -89,6 +89,7 @@ impl PanicListener {
 pub(super) struct PanicContext(Rc<PanicContextShared>);
 
 struct PanicContextShared {
+    #[allow(clippy::incompatible_msrv)]
     backtrace: backtrace::Backtrace,
 
     location: Option<PanicLocation>,
@@ -101,6 +102,7 @@ struct PanicContextShared {
 }
 
 impl PanicContext {
+    #[allow(clippy::incompatible_msrv)]
     fn from_std(std_panic_info: &StdPanicHookInfo<'_>, panics_count: usize) -> Self {
         let location = std_panic_info.location();
         let current_thread = std::thread::current();
