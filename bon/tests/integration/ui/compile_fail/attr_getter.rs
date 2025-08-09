@@ -19,12 +19,6 @@ struct SkipCompat {
 }
 
 #[derive(Builder)]
-struct OverwritableCompat {
-    #[builder(getter, overwritable)]
-    x: u32,
-}
-
-#[derive(Builder)]
 struct NegativeTest {
     #[builder(getter)]
     x1: u32,

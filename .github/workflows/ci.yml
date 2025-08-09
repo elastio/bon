@@ -126,6 +126,10 @@ jobs:
             --exclude runtime-benchmarks --doc
 
       - run: |
+          cd bon && cargo test ${{ matrix.locked }} \
+            --features=experimental-overwritable
+
+      - run: |
           cd bon && cargo test ${{ matrix.locked }} --no-default-features \
             --features=experimental-overwritable
 
