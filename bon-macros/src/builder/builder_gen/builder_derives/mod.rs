@@ -10,7 +10,12 @@ use darling::ast::GenericParamExt;
 
 impl BuilderGenCtx {
     pub(crate) fn builder_derives(&self) -> Result<TokenStream> {
-        let DerivesConfig { clone, debug, into, into_future } = &self.builder_type.derives;
+        let DerivesConfig {
+            clone,
+            debug,
+            into,
+            into_future,
+        } = &self.builder_type.derives;
 
         let mut tokens = TokenStream::new();
 
