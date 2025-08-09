@@ -1,11 +1,26 @@
 # Changelog
 
-All notable changes to this project are documented here.
+All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [3.7.0](https://github.com/elastio/bon/compare/v3.6.5...v3.7.0) - 2025-08-09
+
+### Added
+
+- Add support for [`#[builder(derive(IntoFuture(Box)))]`](https://bon-rs.com/reference/builder/top-level/derive#intofuture-derive) ([#322](https://github.com/elastio/bon/pull/322)).
+  This allows calling `builder.await` instead of `builder.call().await`. Thanks [@jakubadamw](https://github.com/jakubadamw) for the contribution!
+
+### Fixed
+
+- Add missing `where` clause forwarding to `#[builder(derive(Into))]` ([#325](https://github.com/elastio/bon/pull/325))
+
+### Internal
+
+- Make tests pass without the `experimental-overwritable` feature ([#326](https://github.com/elastio/bon/pull/326))
+- Sunset financial support by Kindness ([#324](https://github.com/elastio/bon/pull/324))
+- Fix clippy lints from nightly (2025-08-09) ([#323](https://github.com/elastio/bon/pull/323))
 
 ## [3.6.5](https://github.com/elastio/bon/compare/v3.6.4...v3.6.5) - 2025-07-18
 
