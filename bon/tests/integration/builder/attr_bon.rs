@@ -81,7 +81,7 @@ fn receiver_variations() {
         fn mut_self_ref_self(#[allow(clippy::needless_arbitrary_self_type)] mut self: &Self) {
             #[allow(clippy::self_assignment, unused_assignments)]
             {
-                self = self;
+                self = &Self { field: 43 };
             }
         }
 
@@ -89,7 +89,8 @@ fn receiver_variations() {
         fn mut_self_as_ref_mut_self(
             #[allow(clippy::needless_arbitrary_self_type)] mut self: &mut Self,
         ) {
-            #[allow(clippy::self_assignment, unused_assignments)]
+            self.field = 45;
+            #[allow(clippy::self_assignment, unused_assignments, dead_code)]
             {
                 self = self;
             }
@@ -126,7 +127,7 @@ fn receiver_variations() {
 
     Sut::mut_self_as_ref_mut_self(&mut sut).call();
     sut.mut_self_as_ref_mut_self().call();
-    assert_eq!(sut.field, 44);
+    assert_eq!(sut.field, 45);
 
     Sut::self_as_pin_mut_self(Pin::new(&mut sut)).call();
     Pin::new(&mut sut).self_as_pin_mut_self().call();
