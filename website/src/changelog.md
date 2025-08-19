@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [3.7.1](https://github.com/elastio/bon/compare/v3.7.0...v3.7.1) - 2025-08-19
+
+### Other
+
+- Revert refactoring PR 320 to make code compatible with darling 0.20 ([#332](https://github.com/elastio/bon/pull/332))
+- Fix MSRV tests and lints from nightly 13-08-2025 ([#329](https://github.com/elastio/bon/pull/329))
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ## [3.7.0](https://github.com/elastio/bon/compare/v3.6.5...v3.7.0) - 2025-08-09
 
 ### Added
