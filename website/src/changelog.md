@@ -13,7 +13,7 @@ This is a small patch release to make `bon` easier to package for Debian.
 
 ### Other
 
-- Add Copyright header to the MIT License
+- Add Copyright header to the MIT License ([#331](https://github.com/elastio/bon/pull/331))
 
 ### Internal
 
