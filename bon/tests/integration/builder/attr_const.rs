@@ -9,8 +9,7 @@ mod msrv_1_61 {
         #[test]
         const fn test_struct() {
             #[derive(Builder)]
-            // Make sure `const` is parsed if it's not the first attribute
-            #[builder(builder_type(vis = ""), const)]
+            #[builder(const)]
             struct Sut {
                 #[builder(start_fn)]
                 x1: u32,
