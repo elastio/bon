@@ -6,6 +6,7 @@ use crate::parsing::{BonCratePath, ItemSigConfig, ItemSigConfigParsing, SpannedK
 use crate::util::prelude::*;
 use darling::ast::NestedMeta;
 use darling::FromMeta;
+use syn::parse::Parser;
 use syn::punctuated::Punctuated;
 use syn::ItemFn;
 
@@ -43,9 +44,13 @@ fn parse_start_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
 
 #[derive(Debug, FromMeta)]
 pub(crate) struct TopLevelConfig {
-    /// Specifies whether the generated functions should be `const`
-    #[darling(rename = "const")]
-    pub(crate) const_: darling::util::Flag,
+    /// Specifies whether the generated functions should be `const`.
+    ///
+    /// It is marked as `#[darling(skip)]` because `const` is a keyword, that
+    /// can't be parsed as a `syn::Ident` and therefore as a `syn::Meta` item.
+    /// We manually parse it from the beginning `builder(...)`.
+    #[darling(skip)]
+    pub(crate) const_: Option<syn::Token![const]>,
 
     /// Overrides the path to the `bon` crate. This is useful when the macro is
     /// wrapped in another macro that also reexports `bon`.
@@ -124,7 +129,30 @@ impl TopLevelConfig {
         Self::parse_for_any(configs)
     }
 
-    fn parse_for_any(configs: Vec<TokenStream>) -> Result<Self> {
+    fn parse_for_any(mut configs: Vec<TokenStream>) -> Result<Self> {
+        fn parse_const_prefix(
+            parse: syn::parse::ParseStream<'_>,
+        ) -> syn::Result<(Option<syn::Token![const]>, TokenStream)> {
+            let const_ = parse.parse().ok();
+            if const_.is_some() && !parse.is_empty() {
+                parse.parse::<syn::Token![,]>()?;
+            }
+
+            let rest = parse.parse()?;
+            Ok((const_, rest))
+        }
+
+        // Try to parse the first token of the first config as `const` token.
+        // We have to do this manually because `syn` doesn't support parsing
+        // keywords in the `syn::Meta` keys. Yeah, unfortunately it means that
+        // the users must ensure they place `const` right at the beginning of
+        // their `#[builder(...)]` attributes.
+        let mut const_ = None;
+
+        if let Some(config) = configs.first_mut() {
+            (const_, *config) = parse_const_prefix.parse2(std::mem::take(config))?;
+        }
+
         let configs = configs
             .into_iter()
             .map(NestedMeta::parse_meta_list)
@@ -160,7 +188,10 @@ impl TopLevelConfig {
             }
         }
 
-        let me = Self::from_list(&configs)?;
+        let me = Self {
+            const_,
+            ..Self::from_list(&configs)?
+        };
 
         if let Some(on) = me.on.iter().skip(1).find(|on| on.required.is_present()) {
             bail!(
