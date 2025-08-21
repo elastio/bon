@@ -34,7 +34,7 @@ assert_eq!(user.level, 0);
 assert_eq!(user.name, "anon");
 ```
 
-## Evaluation context
+## Evaluation Context
 
 You can reference other members as variables in the `skip` expression. All members are initialized in the order of their declaration, and thus only members that are declared earlier (higher) in the code are available for the `skip` expression.
 
@@ -63,6 +63,6 @@ assert_eq!(example.x2, 6);
 assert_eq!(example.x3, 9);
 ```
 
-## Unsupported function syntax
+## Unsupported Function Syntax
 
 This attribute is not supported with function or method syntax because it's simply unnecessary there and can easier be expressed with local variables.

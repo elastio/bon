@@ -97,7 +97,7 @@ User::init() // [!code highlight]
 
 See examples with `fn` syntax in the section below.
 
-## Exposing original function
+## Exposing Original Function
 
 By default, when you place `#[builder]` on a function, that original function is modified by the macro to make it hidden, so that only builder syntax remains available. Specifically, the macro does the following by default:
 

@@ -36,7 +36,7 @@ Example::builder()
 
 Overwrites like in the example above are generally considered bugs. However, there are several cases when this attribute may be useful.
 
-## Improving compile times
+## Improving Compile Times
 
 This attribute simplifies the generated code. For example, it completely removes type states for [optional members](../../../guide/basics/optional-members).
 
@@ -44,7 +44,7 @@ If you'd like to improve your compile times, consider enabling overwrites with `
 
 It is a trade-off between the level of compile-time checks and compilation performance, so choose wisely ⚖️!
 
-## Dummy values in tests
+## Dummy Values in Tests
 
 You might want to use this to construct dummy values for tests (fixtures).
 

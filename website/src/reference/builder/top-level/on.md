@@ -207,6 +207,6 @@ Example::builder()
     .build();
 ```
 
-## Future releases
+## Future Releases
 
 There is an issue [#152](https://github.com/elastio/bon/issues/152) about adding support for [`default`](../member/default.md), [`with`](../member/with) and other non-boolean attributes to the `on(...)` clause. We'll be glad if you take a look at the design proposed in that issue and put a 👍 if you like/want this feature or leave a comment if you have some more feedback.

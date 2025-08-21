@@ -110,7 +110,7 @@ assert_eq!(example, [2, 99]);
 
 :::
 
-## Evaluation context
+## Evaluation Context
 
 You can reference other members marked with [`#[builder(start_fn)]`](./start_fn) or `#[builder(field)]` as variables in the `field` expression. All members are initialized in the order of their declaration, and thus only members that are declared earlier (higher) in the code are available for the `field` expression.
 

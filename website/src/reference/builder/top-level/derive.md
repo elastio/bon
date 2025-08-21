@@ -283,9 +283,7 @@ Implements [`IntoFuture`](https://doc.rust-lang.org/std/future/trait.IntoFuture.
 :::
 
 ```rust
-use bon::builder;
-
-#[builder(derive(IntoFuture(Box)))]
+#[bon::builder(derive(IntoFuture(Box)))]
 async fn fetch_string(url: &str, body: Option<Vec<u8>>) -> String {
     // …
     "Server response".to_owned()
@@ -302,6 +300,6 @@ To have the derived implementation produce non-`Send` futures, add `?Send` like 
 
 Take into account that `IntoFuture` trait became stable in Rust `1.64`, which is important if you care about your MSRV.
 
-### Lifetimes caveat
+### Lifetimes Caveat
 
 There is a caveat that `dyn Trait` objects can only have a single `+ 'lifetime` bound which is the Rust language's fundamental limitation. So the generated `IntoFuture` implementation squashes all lifetimes into a single `'builder` lifetime. This means it's not strictly equivalent to the default `finish_fn` in terms of lifetimes. This should generally not be a problem unless the output type of the function's `Future` contains more than one lifetime.
