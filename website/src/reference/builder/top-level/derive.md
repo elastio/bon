@@ -274,7 +274,13 @@ take_example(
 ## `IntoFuture` Derive
 
 Implements [`IntoFuture`](https://doc.rust-lang.org/std/future/trait.IntoFuture.html) for the builder, allowing it to be
-`await`-ed directly. To have the derived implementation produce non-`Send` futures, add `?Send` like so: `#[builder(derive(IntoFuture(Box, ?Send)))]`.
+`await`-ed directly. The generated derive boxes (i.e. heap-allocates) the future, so it's not zero cost and thus the attribute uses the syntax `IntoFuture(Box)` to show that.
+
+::: tip Why boxing is required?
+
+`IntoFuture` trait requires spelling the exact type of the future in its `IntoFuture` associated type. However, futures produced by `async` functions are unnameable, and thus need to be boxed to erase their type.
+
+:::
 
 ```rust
 use bon::builder;
@@ -291,6 +297,8 @@ async fn main() {
     assert_eq!(response, "Server response");
 }
 ```
+
+To have the derived implementation produce non-`Send` futures, add `?Send` like so: `#[builder(derive(IntoFuture(Box, ?Send)))]`.
 
 Take into account that `IntoFuture` trait became stable in Rust `1.64`, which is important if you care about your MSRV.
 
