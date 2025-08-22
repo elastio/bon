@@ -274,12 +274,16 @@ take_example(
 ## `IntoFuture` Derive
 
 Implements [`IntoFuture`](https://doc.rust-lang.org/std/future/trait.IntoFuture.html) for the builder, allowing it to be
-`await`-ed directly. To have the derived implementation produce non-`Send` futures, add `?Send` like so: `#[builder(derive(IntoFuture(Box, ?Send)))]`.
+`await`-ed directly. The generated derive boxes (i.e. heap-allocates) the future, so it's not zero cost and thus the attribute uses the syntax `IntoFuture(Box)` to show that.
+
+::: tip Why boxing is required?
+
+`IntoFuture` trait requires spelling the exact type of the future in its `IntoFuture` associated type. However, futures produced by `async` functions are unnameable, and thus need to be boxed to erase their type.
+
+:::
 
 ```rust
-use bon::builder;
-
-#[builder(derive(IntoFuture(Box)))]
+#[bon::builder(derive(IntoFuture(Box)))]
 async fn fetch_string(url: &str, body: Option<Vec<u8>>) -> String {
     // …
     "Server response".to_owned()
@@ -292,8 +296,10 @@ async fn main() {
 }
 ```
 
+To have the derived implementation produce non-`Send` futures, add `?Send` like so: `#[builder(derive(IntoFuture(Box, ?Send)))]`.
+
 Take into account that `IntoFuture` trait became stable in Rust `1.64`, which is important if you care about your MSRV.
 
-### Lifetimes caveat
+### Lifetimes Caveat
 
-There is a caveat that `dyn Trait` objects can only have a single `+ 'lifetime` bound which is the Rust language's fundamental limitation. So the generated `IntoFuture` implementation squashes all lifetimes into a single `'builder` lifetime. This means it's not strictly equivalent the default `finish_fn` in terms of lifetimes. This should generally not be a problem unless the output type of the function's `Future` contains more than one lifetime.
+There is a caveat that `dyn Trait` objects can only have a single `+ 'lifetime` bound which is the Rust language's fundamental limitation. So the generated `IntoFuture` implementation squashes all lifetimes into a single `'builder` lifetime. This means it's not strictly equivalent to the default `finish_fn` in terms of lifetimes. This should generally not be a problem unless the output type of the function's `Future` contains more than one lifetime.

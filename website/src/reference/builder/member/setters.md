@@ -42,7 +42,7 @@ The config is tree-structured with overrides precedence explained in the next pa
 
 The main use case for this attribute is making generated setters private to wrap them with custom methods. See [Custom Methods](../../../guide/typestate-api/custom-methods) for details.
 
-## Config precedence
+## Config Precedence
 
 The keys `some_fn` and `option_fn` are available only for optional members that have a [pair of setters](../../../guide/basics/optional-members#setters-pair).
 

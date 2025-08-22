@@ -212,7 +212,7 @@ You can also use `impl Trait` for parameters in the closure, even though you can
 
 You can't declare new generic parameters. If `impl Trait` isn't enough for you, consider defining a [custom method](../../../guide/typestate-api/custom-methods) on the builder.
 
-### Optional members
+### Optional Members
 
 For members of type `Option<T>` without [`#[builder(required)]`](./required), the closure needs to return a value of type `T` or `Result<T>`.
 

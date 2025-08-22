@@ -37,7 +37,7 @@ impl Example {
 
 :::
 
-## Compile errors
+## Compile Errors
 
 The macro disallows relative paths. Only the following is accepted:
 
