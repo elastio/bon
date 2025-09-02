@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [3.7.2](https://github.com/elastio/bon/compare/v3.7.1...v3.7.2) - 2025-09-02
+
+### Other
+
+- Add missing lifetime replacement for generic param decls on `derive(IntoFuture)` impl block ([#337](https://github.com/elastio/bon/pull/337))
+- Set lowerbound of `rustversion` of to v1.0.19 ([#336](https://github.com/elastio/bon/pull/336))
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
 ## [3.7.1](https://github.com/elastio/bon/compare/v3.7.0...v3.7.1) - 2025-08-19
 
 This is a small patch release to make `bon` easier to package for Debian.
