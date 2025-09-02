@@ -163,6 +163,10 @@ impl BuilderGenCtx {
             original_lifetimes: &original_lifetimes,
         };
 
+        for decl in &mut new_generics_decl {
+            replace_lifetimes.visit_generic_param_mut(decl);
+        }
+
         let mut new_where_clause = where_clause.clone();
 
         if let Some(where_clause) = &mut new_where_clause {

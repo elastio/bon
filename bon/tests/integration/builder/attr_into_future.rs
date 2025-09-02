@@ -151,6 +151,30 @@ mod tests {
 
             let &Dummy = assert_send(builder).await;
         }
+
+        #[tokio::test]
+        async fn complex_generics() {
+            struct Dummy;
+
+            #[builder(derive(IntoFuture(Box)))]
+            async fn sut<'a: 'b, 'b, T: Sync + 'a + 'b, U: Sync + 'a, const N: usize>(
+                x1: &'a T,
+                x2: &'b U,
+            ) -> (&'a T, &'b U, usize) {
+                async {}.await;
+                (x1, x2, N)
+            }
+
+            // Store the dummy struct in local variables to make sure no `'static`
+            // lifetime promotion happens
+            let local_x1 = Dummy;
+            let local_x2 = Dummy;
+
+            let builder = sut::<_, _, 42>().x1(&local_x1).x2(&local_x2);
+
+            let (&Dummy, &Dummy, usize) = assert_send(builder).await;
+            assert_eq!(usize, 42);
+        }
     }
 
     mod test_method {
@@ -252,6 +276,33 @@ mod tests {
             let builder = local_self.sut().x1(&local_x1);
 
             let _: &Dummy = assert_send(builder).await;
+        }
+
+        #[tokio::test]
+        async fn complex_generics() {
+            struct Dummy;
+
+            #[bon]
+            impl Dummy {
+                #[builder(derive(IntoFuture(Box)))]
+                async fn sut<'a: 'b, 'b, T: Sync + 'a + 'b, U: Sync + 'a, const N: usize>(
+                    x1: &'a T,
+                    x2: &'b U,
+                ) -> (&'a T, &'b U, usize) {
+                    async {}.await;
+                    (x1, x2, N)
+                }
+            }
+
+            // Store the dummy struct in local variables to make sure no `'static`
+            // lifetime promotion happens
+            let local_x1 = Dummy;
+            let local_x2 = Dummy;
+
+            let builder = Dummy::sut::<_, _, 42>().x1(&local_x1).x2(&local_x2);
+
+            let (&Dummy, &Dummy, usize) = assert_send(builder).await;
+            assert_eq!(usize, 42);
         }
     }
 }
