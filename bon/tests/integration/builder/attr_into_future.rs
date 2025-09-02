@@ -299,7 +299,7 @@ mod tests {
             let local_x1 = Dummy;
             let local_x2 = Dummy;
 
-            let builder = Dummy::sut().x1(&local_x1).x2(&local_x2);
+            let builder = Dummy::sut::<_, _, 42>().x1(&local_x1).x2(&local_x2);
 
             let (&Dummy, &Dummy, usize) = assert_send(builder).await;
             assert_eq!(usize, 42);
