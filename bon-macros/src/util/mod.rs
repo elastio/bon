@@ -14,8 +14,6 @@ mod visibility;
 
 pub(crate) mod ide;
 
-use prelude::*;
-
 pub(crate) mod prelude {
     pub(crate) use proc_macro2::{Span, TokenStream};
     pub(crate) use quote::{format_ident, quote, quote_spanned, ToTokens};
