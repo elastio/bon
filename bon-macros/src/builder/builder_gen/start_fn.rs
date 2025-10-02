@@ -116,6 +116,7 @@ impl super::BuilderGenCtx {
                 // https://github.com/elastio/bon/pull/341#discussion_r2398893516
                 // for an explanation.
                 clippy::elidable_lifetime_names,
+                clippy::needless_lifetimes,
             )]
             #vis #const_ fn #start_fn_ident< #(#generics_decl),* >(
                 #receiver
