@@ -96,14 +96,27 @@ impl super::BuilderGenCtx {
             };
 
         let const_ = &self.const_;
-        let fn_kw = self.start_fn.fn_token;
 
-        // construct function body separately so that we can reuse the original
-        // function's braces and span. Reusing the span makes rustdoc link
-        // our generated function to the original function rather than the
-        // macro invocation site.
-        let body_span = self.start_fn.brace_tokens.span;
-        let body_block = quote_spanned! {body_span=>
+        // Construct using a span which links to our original implementation.
+        // This ensures rustdoc doesn't just link every method to the macro
+        // callsite.
+        syn::parse_quote_spanned! {self.start_fn.span=>
+            #(#docs)*
+            #[inline(always)]
+            #[allow(
+                // This is intentional. We want the builder syntax to compile away
+                clippy::inline_always,
+                // We normalize `Self` references intentionally to simplify code generation
+                clippy::use_self,
+                // Let's keep it as non-const for now to avoid restricting ourselfves to only
+                // const operations.
+                clippy::missing_const_for_fn,
+            )]
+            #vis #const_ fn #start_fn_ident< #(#generics_decl),* >(
+                #receiver
+                #(#start_fn_params,)*
+            ) -> #builder_ident< #(#generic_args,)* >
+            #where_clause
             {
                 #ide_hints
                 #( #start_fn_vars )*
@@ -117,26 +130,6 @@ impl super::BuilderGenCtx {
                     __unsafe_private_named: #named_members_field_init,
                 }
             }
-        };
-
-        syn::parse_quote! {
-            #(#docs)*
-            #[inline(always)]
-            #[allow(
-                // This is intentional. We want the builder syntax to compile away
-                clippy::inline_always,
-                // We normalize `Self` references intentionally to simplify code generation
-                clippy::use_self,
-                // Let's keep it as non-const for now to avoid restricting ourselfves to only
-                // const operations.
-                clippy::missing_const_for_fn,
-            )]
-            #vis #const_ #fn_kw #start_fn_ident< #(#generics_decl),* >(
-                #receiver
-                #(#start_fn_params,)*
-            ) -> #builder_ident< #(#generic_args,)* >
-            #where_clause
-            #body_block
         }
     }
 }

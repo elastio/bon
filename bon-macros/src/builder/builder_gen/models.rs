@@ -86,12 +86,8 @@ pub(super) struct StartFn {
     /// Overrides the default generics
     pub(super) generics: Option<Generics>,
 
-    /// Preserve the original fn token span.
-    /// This determines the generated fn's span start
-    pub(super) fn_token: syn::token::Fn,
-    /// Preserve the original brace token.
-    /// This determines the generated fn's span end
-    pub(super) brace_tokens: syn::token::Brace,
+    /// Preserve a span the documentation for `start_fn` should link to.
+    pub(super) span: Span,
 }
 
 pub(super) struct StartFnParams {
@@ -104,12 +100,9 @@ pub(super) struct StartFnParams {
 
     /// Overrides the default generics
     pub(super) generics: Option<Generics>,
-    /// Preserve original fn token for its span if possible. Defaults to
-    /// macro callsite if not supplied.
-    pub(super) orig_fn_token: Option<syn::token::Fn>,
-    /// Preserve original brace tokens `{}` for their spans if possible.
+    /// Preserve a span the documentation for `start_fn` should link to.
     /// Defaults to macro callsite if not supplied.
-    pub(super) orig_brace_tokens: Option<syn::token::Brace>,
+    pub(super) span: Option<Span>,
 }
 
 pub(super) struct BuilderType {
@@ -322,8 +315,7 @@ impl BuilderGenCtx {
             vis: start_fn.vis.unwrap_or_else(|| builder_type.vis.clone()),
             docs: start_fn.docs,
             generics: start_fn.generics,
-            fn_token: start_fn.orig_fn_token.unwrap_or_default(),
-            brace_tokens: start_fn.orig_brace_tokens.unwrap_or_default(),
+            span: start_fn.span.unwrap_or_else(Span::call_site),
         };
 
         let finish_fn = FinishFn {
