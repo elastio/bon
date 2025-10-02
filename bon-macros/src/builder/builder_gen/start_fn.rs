@@ -111,6 +111,11 @@ impl super::BuilderGenCtx {
                 // Let's keep it as non-const for now to avoid restricting ourselfves to only
                 // const operations.
                 clippy::missing_const_for_fn,
+                // Hide generics with elidable lifetimes. Clippy may suggest
+                // eliding lifetimes even when it is wrong. See
+                // https://github.com/elastio/bon/pull/341#discussion_r2398893516
+                // for an explanation.
+                clippy::elidable_lifetime_names,
             )]
             #vis #const_ fn #start_fn_ident< #(#generics_decl),* >(
                 #receiver
