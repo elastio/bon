@@ -96,28 +96,27 @@ impl super::BuilderGenCtx {
             };
 
         let const_ = &self.const_;
-        let fn_kw = self.start_fn.orig_fn_token;
+        let fn_kw = self.start_fn.fn_token;
 
         // construct function body separately so that we can reuse the original
         // function's braces and span. Reusing the span makes rustdoc link
         // our generated function to the original function rather than the
         // macro invocation site.
-        let body_contents: Vec<syn::Stmt> = syn::parse_quote! {
-            #ide_hints
-            #( #start_fn_vars )*
-            #( #custom_fields_vars )*
+        let body_span = self.start_fn.brace_tokens.span;
+        let body_block = quote_spanned! {body_span=>
+            {
+                #ide_hints
+                #( #start_fn_vars )*
+                #( #custom_fields_vars )*
 
-            #builder_ident {
-                __unsafe_private_phantom: ::core::marker::PhantomData,
-                #( #custom_fields_idents, )*
-                #receiver_field_init
-                #( #start_fn_args_fields_idents, )*
-                __unsafe_private_named: #named_members_field_init,
+                #builder_ident {
+                    __unsafe_private_phantom: ::core::marker::PhantomData,
+                    #( #custom_fields_idents, )*
+                    #receiver_field_init
+                    #( #start_fn_args_fields_idents, )*
+                    __unsafe_private_named: #named_members_field_init,
+                }
             }
-        };
-        let body_block = syn::Block {
-            brace_token: self.start_fn.orig_brace_tokens,
-            stmts: body_contents,
         };
 
         syn::parse_quote! {
