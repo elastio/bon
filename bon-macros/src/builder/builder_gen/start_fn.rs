@@ -96,6 +96,26 @@ impl super::BuilderGenCtx {
             };
 
         let const_ = &self.const_;
+        // add the `clippy::needless_lifetimes` lint if before rust version 1.87
+        // Rust version 1.87 includes a clippy change where `needless_lifetimes`
+        // was split with the more complex part of the lint going to
+        // `elidable_lifetime_names`. For versions since 1.87 we want to block
+        // `elidable_lifetime_names` (See
+        // https://github.com/elastio/bon/pull/341#discussion_r2398893516 for
+        // an explanation).
+        #[rustversion::before(1.87)]
+        fn get_needless_lifetime_lint_annotation() -> TokenStream {
+            quote! {
+                #[allow(clippy::needless_lifetimes)]
+            }
+        }
+        #[rustversion::since(1.87)]
+        fn get_needless_lifetime_lint_annotation() -> TokenStream {
+            quote! {
+                #[allow(clippy::elidable_lifetime_names)]
+            }
+        }
+        let needless_lifetime_lint = get_needless_lifetime_lint_annotation();
 
         // Construct using a span which links to our original implementation.
         // This ensures rustdoc doesn't just link every method to the macro
@@ -111,13 +131,8 @@ impl super::BuilderGenCtx {
                 // Let's keep it as non-const for now to avoid restricting ourselfves to only
                 // const operations.
                 clippy::missing_const_for_fn,
-                // Hide generics with elidable lifetimes. Clippy may suggest
-                // eliding lifetimes even when it is wrong. See
-                // https://github.com/elastio/bon/pull/341#discussion_r2398893516
-                // for an explanation.
-                clippy::elidable_lifetime_names,
-                clippy::needless_lifetimes,
             )]
+            #needless_lifetime_lint
             #vis #const_ fn #start_fn_ident< #(#generics_decl),* >(
                 #receiver
                 #(#start_fn_params,)*
