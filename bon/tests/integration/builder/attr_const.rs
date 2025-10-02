@@ -205,6 +205,7 @@ mod msrv_1_61 {
         #[test]
         const fn test_function() {
             #[builder(const)]
+            #[allow(unreachable_pub)]
             pub const fn sut(#[builder(getter)] _x: u32) {}
 
             sut().x(1).call();
@@ -217,6 +218,7 @@ mod msrv_1_61 {
             #[bon]
             impl Sut {
                 #[builder(const)]
+                #[allow(unreachable_pub)]
                 pub const fn sut(#[builder(getter)] _x: u32) {}
             }
 
