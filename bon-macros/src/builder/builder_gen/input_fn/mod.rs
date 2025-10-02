@@ -97,6 +97,9 @@ impl<'a> FnInputCtx<'a> {
                     .collect(),
                 params.fn_item.norm.sig.generics.where_clause.clone(),
             )),
+
+            orig_fn_token: Some(params.fn_item.orig.sig.fn_token),
+            orig_brace_tokens: Some(params.fn_item.orig.block.brace_token),
         };
 
         let self_ty_prefix = params.impl_ctx.as_deref().and_then(|impl_ctx| {

@@ -187,6 +187,8 @@ impl StructInputCtx {
             vis: start_fn_vis.map(SpannedKey::into_value),
             docs: start_fn_docs,
             generics: None,
+            orig_brace_tokens: None,
+            orig_fn_token: None,
         };
 
         let assoc_method_ctx = Some(AssocMethodCtxParams {
