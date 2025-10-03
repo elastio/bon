@@ -95,6 +95,7 @@ pub(crate) struct RawMember<'a> {
     pub(crate) attrs: &'a [syn::Attribute],
     pub(crate) ident: syn::Ident,
     pub(crate) ty: SyntaxVariant<Box<syn::Type>>,
+    pub(crate) span: Span,
 }
 
 impl Member {
@@ -157,7 +158,12 @@ impl Member {
         let mut named_count = 0;
 
         for (member, config) in members {
-            let RawMember { attrs, ident, ty } = member;
+            let RawMember {
+                attrs,
+                ident,
+                ty,
+                span: _,
+            } = member;
 
             if let Some(value) = config.skip {
                 output.push(Self::Skip(SkipMember {
@@ -206,6 +212,7 @@ impl Member {
                 ty,
                 config,
                 docs,
+                span: member.span,
             };
 
             member.merge_on_config(on)?;
@@ -278,6 +285,7 @@ impl PosFnMember {
             attrs: _,
             ident,
             ty,
+            span: _,
         } = member;
 
         let mut me = Self {

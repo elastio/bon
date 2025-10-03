@@ -90,6 +90,9 @@ pub(crate) struct NamedMember {
 
     /// Parameters configured by the user explicitly via attributes
     pub(crate) config: MemberConfig,
+
+    /// Preserve a span the documentation for the member's methods should link to.
+    pub(crate) span: Span,
 }
 
 impl NamedMember {

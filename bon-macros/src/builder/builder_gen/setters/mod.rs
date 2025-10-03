@@ -445,12 +445,27 @@ impl<'a> SettersCtx<'a> {
             }
         });
 
-        let SetterItem { name, vis, docs } = item;
+        let SetterItem {
+            name,
+            vis,
+            docs,
+            span,
+        } = item;
         let pats = imp.inputs.iter().map(|(pat, _)| pat);
         let types = imp.inputs.iter().map(|(_, ty)| ty);
         let const_ = &self.base.const_;
 
-        quote! {
+        let fn_prefix = quote_spanned! {span =>
+            #vis #const_ fn
+        }
+        .into_iter()
+        .map(|mut token| {
+            token.set_span(span);
+            token
+        })
+        .collect::<TokenStream>();
+
+        quote_spanned! {span=>
             #( #docs )*
             #[allow(
                 // This is intentional. We want the builder syntax to compile away
@@ -463,7 +478,7 @@ impl<'a> SettersCtx<'a> {
                 clippy::missing_const_for_fn,
             )]
             #[inline(always)]
-            #vis #const_ fn #name(#maybe_mut self, #( #pats: #types ),*) -> #return_type
+            #fn_prefix #name(#maybe_mut self, #( #pats: #types ),*) -> #return_type
             #where_clause
             {
                 #body
@@ -504,6 +519,7 @@ struct SetterItem {
     name: syn::Ident,
     vis: syn::Visibility,
     docs: Vec<syn::Attribute>,
+    span: Span,
 }
 
 impl SettersItems {
@@ -531,6 +547,7 @@ impl SettersItems {
                 name: common_name.unwrap_or(&member.name.snake).clone(),
                 vis: common_vis.unwrap_or(&builder_type.vis).clone(),
                 docs,
+                span: member.span,
             });
         }
 
@@ -618,6 +635,7 @@ impl SettersItems {
                 .clone(),
 
             docs: some_fn_docs,
+            span: member.span,
         };
 
         let option_fn = config.and_then(|config| config.fns.option_fn.as_deref());
@@ -631,6 +649,7 @@ impl SettersItems {
                 .clone(),
 
             docs: option_fn_docs,
+            span: member.span,
         };
 
         Self::Optional(OptionalSettersItems { some_fn, option_fn })
