@@ -103,19 +103,11 @@ impl super::BuilderGenCtx {
         // `elidable_lifetime_names` (See
         // https://github.com/elastio/bon/pull/341#discussion_r2398893516 for
         // an explanation).
-        #[rustversion::before(1.87)]
-        fn get_needless_lifetime_lint_annotation() -> TokenStream {
-            quote! {
-                #[allow(clippy::needless_lifetimes)]
-            }
-        }
-        #[rustversion::since(1.87)]
-        fn get_needless_lifetime_lint_annotation() -> TokenStream {
-            quote! {
-                #[allow(clippy::elidable_lifetime_names)]
-            }
-        }
-        let needless_lifetime_lint = get_needless_lifetime_lint_annotation();
+        let needless_lifetime_lint = if rustversion::cfg!(before(1.87)) {
+            format_ident!("needless_lifetimes")
+        } else {
+            format_ident!("elidable_lifetime_names")
+        };
 
         // Construct using a span which links to our original implementation.
         // This ensures rustdoc doesn't just link every method to the macro
@@ -131,8 +123,8 @@ impl super::BuilderGenCtx {
                 // Let's keep it as non-const for now to avoid restricting ourselfves to only
                 // const operations.
                 clippy::missing_const_for_fn,
+                clippy::#needless_lifetime_lint
             )]
-            #needless_lifetime_lint
             #vis #const_ fn #start_fn_ident< #(#generics_decl),* >(
                 #receiver
                 #(#start_fn_params,)*
