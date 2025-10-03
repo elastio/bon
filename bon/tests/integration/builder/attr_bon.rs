@@ -102,7 +102,6 @@ fn receiver_variations() {
         }
 
         #[builder]
-        #[allow(dead_code)]
         fn mut_self_as_pin_mut_self(mut self: Pin<&mut Self>) {
             #[allow(clippy::self_assignment, unused_assignments)]
             {
@@ -132,6 +131,9 @@ fn receiver_variations() {
 
     Sut::self_as_pin_mut_self(Pin::new(&mut sut)).call();
     Pin::new(&mut sut).self_as_pin_mut_self().call();
+
+    Sut::mut_self_as_pin_mut_self(Pin::new(&mut sut)).call();
+    Pin::new(&mut sut).mut_self_as_pin_mut_self().call();
 }
 
 #[cfg(feature = "alloc")]

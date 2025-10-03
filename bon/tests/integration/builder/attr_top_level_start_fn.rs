@@ -52,31 +52,34 @@ fn test_method() {
 fn test_function() {
     {
         #[builder(start_fn(name = sut_builder))]
-        #[allow(dead_code)]
         fn sut(arg1: bool, arg2: u32) -> impl fmt::Debug {
             (arg1, arg2)
         }
 
+        assert_debug_eq(
+            sut_builder().arg1(true).arg2(42).call(),
+            expect!["(true, 42)"],
+        );
         assert_debug_eq(sut(true, 42), expect!["(true, 42)"]);
     }
 
     {
         #[builder(start_fn = sut_builder)]
-        #[allow(dead_code)]
         fn sut(arg1: u32) -> u32 {
             arg1
         }
 
+        assert_debug_eq(sut_builder().arg1(42).call(), expect!["42"]);
         assert_debug_eq(sut(42), expect!["42"]);
     }
 
     {
         #[builder(start_fn(name = sut_builder, vis = ""))]
-        #[allow(dead_code)]
         fn sut(arg1: u32) -> u32 {
             arg1
         }
 
+        assert_debug_eq(sut_builder().arg1(42).call(), expect!["42"]);
         assert_debug_eq(sut(42), expect!["42"]);
     }
 
