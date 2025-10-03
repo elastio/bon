@@ -52,6 +52,7 @@ fn test_method() {
 fn test_function() {
     {
         #[builder(start_fn(name = sut_builder))]
+        #[allow(dead_code)]
         fn sut(arg1: bool, arg2: u32) -> impl fmt::Debug {
             (arg1, arg2)
         }
@@ -61,6 +62,7 @@ fn test_function() {
 
     {
         #[builder(start_fn = sut_builder)]
+        #[allow(dead_code)]
         fn sut(arg1: u32) -> u32 {
             arg1
         }
@@ -70,6 +72,7 @@ fn test_function() {
 
     {
         #[builder(start_fn(name = sut_builder, vis = ""))]
+        #[allow(dead_code)]
         fn sut(arg1: u32) -> u32 {
             arg1
         }

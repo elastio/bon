@@ -14,7 +14,7 @@
 // Rexport all macros from the proc-macro crate.
 pub use bon_macros::{bon, builder, map, set, Builder};
 
-/// Small utility declarative macros for creating colletions with [`Into`] conversions.
+/// Small utility declarative macros for creating collections with [`Into`] conversions.
 mod collections;
 
 #[doc(hidden)]

@@ -12,6 +12,7 @@ use crate::util::prelude::*;
 use std::borrow::Cow;
 use std::rc::Rc;
 use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
 use syn::visit_mut::VisitMut;
 
 pub(crate) struct FnInputCtx<'a> {
@@ -97,6 +98,11 @@ impl<'a> FnInputCtx<'a> {
                     .collect(),
                 params.fn_item.norm.sig.generics.where_clause.clone(),
             )),
+            // We don't use params.fn_item.orig.span() here because that span
+            // only contains the annotations before the function and the
+            // function name. Block contains function name + implementation
+            // which is what rustdoc normally links to.
+            span: Some(params.fn_item.orig.block.span()),
         };
 
         let self_ty_prefix = params.impl_ctx.as_deref().and_then(|impl_ctx| {

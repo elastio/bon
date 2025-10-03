@@ -85,6 +85,9 @@ pub(super) struct StartFn {
 
     /// Overrides the default generics
     pub(super) generics: Option<Generics>,
+
+    /// Preserve a span the documentation for `start_fn` should link to.
+    pub(super) span: Span,
 }
 
 pub(super) struct StartFnParams {
@@ -97,6 +100,9 @@ pub(super) struct StartFnParams {
 
     /// Overrides the default generics
     pub(super) generics: Option<Generics>,
+    /// Preserve a span the documentation for `start_fn` should link to.
+    /// Defaults to macro callsite if not supplied.
+    pub(super) span: Option<Span>,
 }
 
 pub(super) struct BuilderType {
@@ -309,6 +315,7 @@ impl BuilderGenCtx {
             vis: start_fn.vis.unwrap_or_else(|| builder_type.vis.clone()),
             docs: start_fn.docs,
             generics: start_fn.generics,
+            span: start_fn.span.unwrap_or_else(Span::call_site),
         };
 
         let finish_fn = FinishFn {
