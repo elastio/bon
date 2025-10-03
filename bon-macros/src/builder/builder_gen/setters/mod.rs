@@ -458,6 +458,9 @@ impl<'a> SettersCtx<'a> {
         let fn_prefix = quote_spanned! {span =>
             #vis #const_ fn
         }
+        // Respan the tokens to make sure the function's signature begins with
+        // the member's span. This is important to make rustdoc's source links
+        // point to the original member's location.
         .into_iter()
         .map(|mut token| {
             token.set_span(span);
