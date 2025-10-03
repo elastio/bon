@@ -103,7 +103,7 @@ fn receiver_variations() {
 
         #[builder]
         fn mut_self_as_pin_mut_self(mut self: Pin<&mut Self>) {
-            #[allow(clippy::self_assignment, unused_assignments)]
+            #[allow(clippy::self_assignment, unused_assignments, dead_code)]
             {
                 self = self;
             }
