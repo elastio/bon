@@ -455,16 +455,13 @@ impl<'a> SettersCtx<'a> {
         let types = imp.inputs.iter().map(|(_, ty)| ty);
         let const_ = &self.base.const_;
 
-        let fn_modifiers = quote!(#vis #const_)
-            // Respan the tokens to make sure the function's signature begins with
-            // the member's span. This is important to make rustdoc's source links
-            // point to the original member's location.
-            .into_iter()
-            .map(|mut token| {
-                token.set_span(span);
-                token
-            })
-            .collect::<TokenStream>();
+        // Respan the tokens to make sure the function's signature begins with
+        // the member's span. This is important to make rustdoc's source links
+        // point to the original member's location.
+        let fn_modifiers = quote!(#vis #const_).into_iter().map(|mut token| {
+            token.set_span(span);
+            token
+        });
 
         quote_spanned! {span=>
             #( #docs )*
@@ -479,7 +476,7 @@ impl<'a> SettersCtx<'a> {
                 clippy::missing_const_for_fn,
             )]
             #[inline(always)]
-            #fn_modifiers fn #name(#maybe_mut self, #( #pats: #types ),*) -> #return_type
+            #(#fn_modifiers)* fn #name(#maybe_mut self, #( #pats: #types ),*) -> #return_type
             #where_clause
             {
                 #body
