@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.8.0](https://github.com/elastio/bon/compare/v3.7.2...v3.8.0) - 2025-10-04
 
-### ⚠️ Lint Update Notice
+### Lint Update Notice
 
 This release brings some rustdoc improvements and no other visible API changes except that `rustc` and `clippy` will start reporting some more true-positive lints. For example builder methods defined via an impl block annotated with `#[bon]` will now be correctly reported as unused if they are not used. Also, using a private type in a public builder method will trigger a `private_interfaces` lint now.
 
