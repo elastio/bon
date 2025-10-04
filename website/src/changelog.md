@@ -20,7 +20,7 @@ This is all thanks to the updated span handling design researched and implemente
 
 ### Internal
 
-- Regular maintenance ([#342](https://github.com/elastio/bon/pull/342), [#343](https://github.com/elastio/bon/pull/343))
+- Regular maintenance ([#342](https://github.com/elastio/bon/pull/342), [#343](https://github.com/elastio/bon/pull/343), [#347](https://github.com/elastio/bon/pull/347))
 
 ## [3.7.2](https://github.com/elastio/bon/compare/v3.7.1...v3.7.2) - 2025-09-02
 
