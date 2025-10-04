@@ -136,6 +136,9 @@ impl BuilderGenCtx {
 
         Ok(quote! {
             #allows
+            // Ignore dead code warnings because some setter/getter methods may
+            // not be used
+            #[allow(dead_code)]
             #[automatically_derived]
             impl<
                 #(#generics_decl,)*

@@ -28,7 +28,7 @@ pub struct Example {
     standard_string_default: String,
 }
 
-struct Point {
+pub struct Point {
     x: u32,
     y: u32,
 }

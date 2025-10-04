@@ -34,6 +34,9 @@ pub struct Example {
     #[builder(required)]
     required_option: Option<u64>,
 
+    /// # Errors
+    ///
+    /// Non-integer strings will be rejected.
     #[builder(with = |x: &str| -> Result<_, std::num::ParseIntError> { x.parse() })]
     with: u32,
 }
