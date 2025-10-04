@@ -18,7 +18,7 @@ jobs:
   release-rust-crates:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           # Needed to clone all the git history, which is necessary to determine
           # the next version and build the changelog.
