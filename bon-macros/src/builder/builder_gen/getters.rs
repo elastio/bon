@@ -54,7 +54,9 @@ impl<'a> GettersCtx<'a> {
         let state_mod = &self.base.state_mod.ident;
         let const_ = &self.base.const_;
 
-        Ok(quote! {
+        let fn_modifiers = self.member.respan(quote!(#vis #const_));
+
+        Ok(quote_spanned! {self.member.span=>
             #( #docs )*
             #[allow(
                 // This is intentional. We want the builder syntax to compile away
@@ -63,7 +65,7 @@ impl<'a> GettersCtx<'a> {
             )]
             #[inline(always)]
             #[must_use = "this method has no side effects; it only returns a value"]
-            #vis #const_ fn #name(&self) -> #return_ty
+            #(#fn_modifiers)* fn #name(&self) -> #return_ty
             where
                 #state_var::#member_pascal: #state_mod::IsSet,
             {

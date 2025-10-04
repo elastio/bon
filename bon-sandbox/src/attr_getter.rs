@@ -10,7 +10,7 @@ pub struct FullName {
     #[builder(getter)]
     first_name: String,
 
-    #[builder(getter(name = get_the_last_name, vis = "pub(crate)", doc {
+    #[builder(getter(name = get_the_last_name, doc {
         /// Docs on the getter
     }))]
     last_name: String,

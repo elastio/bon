@@ -111,7 +111,7 @@ impl StructInputCtx {
                     attrs: &norm_field.attrs,
                     ident,
                     ty,
-                    span: orig_field.span(),
+                    span: orig_field.ident.span(),
                 })
             })
             .collect::<Result<Vec<_>>>()?;
