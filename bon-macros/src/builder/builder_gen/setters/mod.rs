@@ -449,8 +449,14 @@ impl<'a> SettersCtx<'a> {
         let pats = imp.inputs.iter().map(|(pat, _)| pat);
         let types = imp.inputs.iter().map(|(_, ty)| ty);
         let const_ = &self.base.const_;
+        let fn_modifiers = self.member.respan(quote!(#vis #const_));
 
-        quote! {
+        // It's important to keep the span of `self` the same across all
+        // references to it. Otherwise `self`s that have different spans will
+        // be treated as totally different symbols due to the hygiene rules.
+        let self_ = quote!(self);
+
+        quote_spanned! {self.member.span=>
             #( #docs )*
             #[allow(
                 // This is intentional. We want the builder syntax to compile away
@@ -463,7 +469,7 @@ impl<'a> SettersCtx<'a> {
                 clippy::missing_const_for_fn,
             )]
             #[inline(always)]
-            #vis #const_ fn #name(#maybe_mut self, #( #pats: #types ),*) -> #return_type
+            #(#fn_modifiers)* fn #name(#maybe_mut #self_, #( #pats: #types ),*) -> #return_type
             #where_clause
             {
                 #body

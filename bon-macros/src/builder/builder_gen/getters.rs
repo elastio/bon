@@ -53,8 +53,14 @@ impl<'a> GettersCtx<'a> {
         let member_pascal = &self.member.name.pascal;
         let state_mod = &self.base.state_mod.ident;
         let const_ = &self.base.const_;
+        let fn_modifiers = self.member.respan(quote!(#vis #const_));
 
-        Ok(quote! {
+        // It's important to keep the span of `self` the same across all
+        // references to it. Otherwise `self`s that have different spans will
+        // be treated as totally different symbols due to the hygiene rules.
+        let self_ = quote!(self);
+
+        Ok(quote_spanned! {self.member.span=>
             #( #docs )*
             #[allow(
                 // This is intentional. We want the builder syntax to compile away
@@ -63,7 +69,7 @@ impl<'a> GettersCtx<'a> {
             )]
             #[inline(always)]
             #[must_use = "this method has no side effects; it only returns a value"]
-            #vis #const_ fn #name(&self) -> #return_ty
+            #(#fn_modifiers)* fn #name(&#self_) -> #return_ty
             where
                 #state_var::#member_pascal: #state_mod::IsSet,
             {

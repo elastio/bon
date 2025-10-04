@@ -8,6 +8,7 @@ use crate::normalization::{GenericsNamespace, SyntaxVariant};
 use crate::parsing::{ItemSigConfig, SpannedKey};
 use crate::util::prelude::*;
 use std::borrow::Cow;
+use syn::spanned::Spanned;
 use syn::visit::Visit;
 use syn::visit_mut::VisitMut;
 
@@ -110,6 +111,7 @@ impl StructInputCtx {
                     attrs: &norm_field.attrs,
                     ident,
                     ty,
+                    span: orig_field.ident.span(),
                 })
             })
             .collect::<Result<Vec<_>>>()?;

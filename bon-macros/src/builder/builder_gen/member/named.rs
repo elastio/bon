@@ -5,6 +5,7 @@ use crate::builder::builder_gen::top_level_config::OnConfig;
 use crate::normalization::SyntaxVariant;
 use crate::parsing::{ItemSigConfig, SpannedKey};
 use crate::util::prelude::*;
+use proc_macro2::TokenTree;
 
 #[derive(Debug)]
 pub(crate) struct MemberName {
@@ -90,6 +91,9 @@ pub(crate) struct NamedMember {
 
     /// Parameters configured by the user explicitly via attributes
     pub(crate) config: MemberConfig,
+
+    /// Preserve a span the documentation for the member's methods should link to.
+    pub(crate) span: Span,
 }
 
 impl NamedMember {
@@ -302,5 +306,15 @@ impl NamedMember {
         default.skip = skip;
 
         Ok(())
+    }
+
+    /// Respan the tokens with the member's span. This is important to make
+    /// rustdoc's source links point to the original member's location.
+    pub(crate) fn respan(&self, tokens: TokenStream) -> impl Iterator<Item = TokenTree> {
+        let span = self.span;
+        tokens.into_iter().map(move |mut token| {
+            token.set_span(span);
+            token
+        })
     }
 }

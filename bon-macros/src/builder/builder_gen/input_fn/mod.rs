@@ -296,6 +296,7 @@ impl<'a> FnInputCtx<'a> {
                     attrs: &arg.norm.attrs,
                     ident: pat.ident.clone(),
                     ty,
+                    span: pat.ident.span(),
                 })
             })
             .collect::<Result<Vec<_>>>()?;

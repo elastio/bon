@@ -1,5 +1,6 @@
 use crate::util::prelude::*;
 use ident_case::RenameRule;
+use syn::spanned::Spanned;
 
 pub(crate) trait IdentExt {
     /// Converts the ident (assumed to be in `snake_case`) to `PascalCase` without
@@ -45,7 +46,7 @@ impl IdentExt for syn::Ident {
             renamed.push('_');
         }
 
-        Self::new(&renamed, Span::call_site())
+        Self::new(&renamed, renamed.span())
     }
 
     fn pascal_to_snake_case(&self) -> Self {
