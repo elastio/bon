@@ -82,7 +82,7 @@ checksum = "1b8e56985ec62d17e9c1001dc89c88ecd7dc08e47eba5ec7c29c7b5eeecde967"
 
 [[package]]
 name = "bon"
-version = "3.7.3"
+version = "3.8.0"
 dependencies = [
  "bon-macros",
  "expect-test",
@@ -94,7 +94,7 @@ dependencies = [
 
 [[package]]
 name = "bon-macros"
-version = "3.7.3"
+version = "3.8.0"
 dependencies = [
  "darling 0.21.0",
  "expect-test",
@@ -108,7 +108,7 @@ dependencies = [
 
 [[package]]
 name = "bon-sandbox"
-version = "3.7.3"
+version = "3.8.0"
 dependencies = [
  "bon",
  "buildstructor",
