@@ -9,17 +9,17 @@
   },
   "devDependencies": {
     "@mdit/plugin-abbr": "^0.22.1",
-    "@types/node": "^24.0.13",
-    "chalk": "^5.4.1",
+    "@types/node": "^24.6.2",
+    "chalk": "^5.6.2",
     "css-select": "^6.0.0",
     "fast-diff": "^1.3.0",
-    "globby": "^14.0.2",
+    "globby": "^15.0.0",
     "htmlparser2": "^10.0.0",
-    "leven": "^4.0.0",
+    "leven": "^4.1.0",
     "medium-zoom": "^1.1.0",
     "ts-node": "^10.9.2",
-    "ts-pattern": "^5.7.1",
-    "vitepress": "^1.6.3"
+    "ts-pattern": "^5.8.0",
+    "vitepress": "^1.6.4"
   },
   "dependencies": {
     "vue": "^3.5.17"

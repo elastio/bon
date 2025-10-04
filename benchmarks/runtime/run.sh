@@ -18,6 +18,6 @@ for bench in $benches; do
         code --diff regular.dbg.s builder.dbg.s
     fi
 
-    cargo bench --features "$bench" -p runtime-benchmarks --profile release --bench iai
+    cargo bench --features "$bench" -p runtime-benchmarks --profile release --bench gungraun
     cargo bench --features "$bench" -p runtime-benchmarks --profile release --bench criterion
 done

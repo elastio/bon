@@ -15,8 +15,8 @@ resolver = "2"
 debug     = 0
 opt-level = 3
 
-# Required as per iai-callgrind:
-# https://iai-callgrind.github.io/iai-callgrind/latest/html/installation/prerequisites.html
+# Required as per gungraun:
+# https://gungraun.github.io/gungraun/latest/html/installation/prerequisites.html
 [profile.bench]
 debug = true
 
