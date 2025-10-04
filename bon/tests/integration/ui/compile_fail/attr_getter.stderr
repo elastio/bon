@@ -219,10 +219,10 @@ error[E0277]: the member `Unset<negative_test_builder::members::x2>` was not set
 note: required by a bound in `NegativeTestBuilder::<S>::get_x2`
    --> tests/integration/ui/compile_fail/attr_getter.rs:21:10
     |
-21  | #[derive(Builder)]
+ 21 | #[derive(Builder)]
     |          ^^^^^^^ required by this bound in `NegativeTestBuilder::<S>::get_x2`
 ...
-27  |     x2: Option<u32>,
+ 27 |     x2: Option<u32>,
     |     -- required by a bound in this associated function
     = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
@@ -237,9 +237,9 @@ error[E0277]: the member `Unset<negative_test_builder::members::x3>` was not set
 note: required by a bound in `NegativeTestBuilder::<S>::get_x3`
    --> tests/integration/ui/compile_fail/attr_getter.rs:21:10
     |
-21  | #[derive(Builder)]
+ 21 | #[derive(Builder)]
     |          ^^^^^^^ required by this bound in `NegativeTestBuilder::<S>::get_x3`
 ...
-30  |     x3: u32,
+ 30 |     x3: u32,
     |     -- required by a bound in this associated function
     = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
