@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.0](https://github.com/elastio/bon/compare/v3.7.2...v3.8.0) - 2025-10-04
+
+### Other
+
+- Add some more assertions to eliminate dead code lints in tests ([#343](https://github.com/elastio/bon/pull/343))
+- Preserve `fn` and `{}` for `start_fn` so that rustdoc generates correct links ([#341](https://github.com/elastio/bon/pull/341))
+- Make rustdoc source links for setters/getters/other_items reference original member ([#345](https://github.com/elastio/bon/pull/345))
+- Fix msrv and unstable CI jobs ([#342](https://github.com/elastio/bon/pull/342))
+
 ## [3.7.2](https://github.com/elastio/bon/compare/v3.7.1...v3.7.2) - 2025-09-02
 
 ### Fixed
