@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `clippy::wrong_self_convention` warning for fields with `is_` prefix etc. ([#349](https://github.com/elastio/bon/pull/349))
 
-### Other
+### Internal
 
 - Add a regression test for `clippy::wrong_self_convention` ([#350](https://github.com/elastio/bon/pull/350))
 
