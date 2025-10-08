@@ -1,3 +1,6 @@
+#[cfg(feature = "experimental-build-from")]
+mod build_from;
+
 mod builder_decl;
 mod builder_derives;
 mod finish_fn;
@@ -134,6 +137,21 @@ impl BuilderGenCtx {
 
         let allows = allow_warnings_on_member_types();
 
+        let build_froms = {
+            #[cfg(feature = "experimental-build-from")]
+            {
+                match &self.finish_fn.output {
+                    syn::ReturnType::Type(_, ty) => build_from::emit(self, ty)?,
+                    syn::ReturnType::Default => quote! {},
+                }
+            }
+
+            #[cfg(not(feature = "experimental-build-from"))]
+            {
+                quote! {}
+            }
+        };
+
         Ok(quote! {
             #allows
             // Ignore dead code warnings because some setter/getter methods may
@@ -148,6 +166,7 @@ impl BuilderGenCtx {
             #where_clause
             {
                 #finish_fn
+                #build_froms
                 #(#accessor_methods)*
             }
         })
