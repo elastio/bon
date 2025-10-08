@@ -467,6 +467,10 @@ impl<'a> SettersCtx<'a> {
                 // your design of this setter already went wrong.
                 clippy::impl_trait_in_params,
                 clippy::missing_const_for_fn,
+                // When having a field which has one of the prefixes listed by
+                // `clippy::wrong_self_convention` you will end up getting said lint
+                // warning in your `bon::Builder` because we take self by value.
+                clippy::wrong_self_convention,
             )]
             #[inline(always)]
             #(#fn_modifiers)* fn #name(#maybe_mut #self_, #( #pats: #types ),*) -> #return_type
