@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- `clippy::wrong_self_convention` warning for fields with `is_` prefix etc. ([#349](https://github.com/elastio/bon/pull/349)). Thanks [@Fokko](https://github.com/Fokko) for the contribution!
+- `clippy::wrong_self_convention` warning for fields with `is_` prefix etc. ([#349](https://github.com/elastio/bon/pull/349)). Thanks [@nicmue](https://github.com/nicmue) for the contribution!
 
 ### Internal
 
@@ -37,7 +37,7 @@ This is all thanks to the updated span handling design researched and implemente
 ### Fixed
 
 - Add missing lifetime replacement for generic param declarations on `derive(IntoFuture)` impl block ([#337](https://github.com/elastio/bon/pull/337))
-- Set the lower bound requirement of `rustversion` to v1.0.19 ([#336](https://github.com/elastio/bon/pull/336)). Thanks [@nicmue](https://github.com/nicmue) for the contribution!
+- Set the lower bound requirement of `rustversion` to v1.0.19 ([#336](https://github.com/elastio/bon/pull/336)). Thanks [@Fokko](https://github.com/Fokko) for the contribution!
 
 ## [3.7.1](https://github.com/elastio/bon/compare/v3.7.0...v3.7.1) - 2025-08-19
 
