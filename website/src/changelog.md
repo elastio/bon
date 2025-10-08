@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- `clippy::wrong_self_convention` warning for fields with `is_` prefix etc. ([#349](https://github.com/elastio/bon/pull/349)). Thanks [@nicmue](https://github.com/nicmue) for the contribution!
+- Fix `clippy::wrong_self_convention` warning for fields with `is_` prefix etc. ([#349](https://github.com/elastio/bon/pull/349)). Thanks [@nicmue](https://github.com/nicmue) for the contribution!
 
 ### Internal
 
