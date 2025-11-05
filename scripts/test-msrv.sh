@@ -34,6 +34,7 @@ with_log cd bon
 
 step echo '[workspace]' >> Cargo.toml
 
+step cargo update -p proc-macro2 --precise 1.0.101
 step cargo update -p quote --precise 1.0.40
 step cargo update -p once_cell --precise 1.17.2
 step cargo update -p trybuild --precise 1.0.89
