@@ -188,7 +188,7 @@ pub(crate) fn generate_completion_triggers(meta: Vec<Meta>) -> TokenStream {
 
 struct CompletionsSchema {
     key: &'static str,
-    children: Vec<CompletionsSchema>,
+    children: Vec<Self>,
     custom_filter: Option<fn(&mut Vec<Meta>)>,
 }
 

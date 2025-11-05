@@ -129,7 +129,6 @@ export default defineConfig({
                 link: "https://opencollective.com/bon-rs",
             },
             { icon: "patreon", link: "https://patreon.com/Veetaha" },
-            { icon: "kofi", link: "https://ko-fi.com/Veetaha" },
         ],
 
         sidebar: {
