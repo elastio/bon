@@ -15,7 +15,7 @@ if (process.env.CI) {
         {
             defer: "",
             src: "https://umami.bon-rs.com/script.js",
-            "data-website-id": "10c1ad05-7a6e-49ee-8633-5f8f75de4ab9",
+            "data-website-id": "2cf84b2e-1da2-48f4-acbd-1d967a6836f6",
         },
     ]);
 }
@@ -83,7 +83,7 @@ export default defineConfig({
         },
     },
 
-    srcExclude: ["README.md", "infra/**", "doctests/**"],
+    srcExclude: ["README.md", "doctests/**"],
 
     head,
 

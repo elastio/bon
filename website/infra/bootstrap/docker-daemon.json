@@ -1,8 +1,0 @@
-{
-  "data-root": "${data_volume_path}/docker",
-  "log-driver": "local",
-  "log-opts": {
-    "mode": "non-blocking",
-    "max-buffer-size": "5m"
-  }
-}
