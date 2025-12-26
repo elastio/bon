@@ -83,7 +83,7 @@ export default defineConfig({
         },
     },
 
-    srcExclude: ["README.md", "infra/**", "doctests/**"],
+    srcExclude: ["README.md", "doctests/**"],
 
     head,
 
