@@ -600,24 +600,16 @@ impl SettersItems {
             .or(common_docs)
             .unwrap_or(&member.docs);
 
-        let setter_names = (&some_fn_name, &option_fn_name);
-
-        let some_fn_docs = {
-            let header = optional_setter_docs(default, setter_names);
-
-            doc(&header).chain(some_fn_docs.iter().cloned()).collect()
-        };
+        let some_fn_docs =
+            optional_setter_docs(default, &some_fn_name, &option_fn_name, some_fn_docs);
 
         let option_fn_docs = option_fn
             .and_then(ItemSigConfig::docs)
             .or(common_docs)
             .unwrap_or(&member.docs);
 
-        let option_fn_docs = {
-            let header = optional_setter_docs(default, setter_names);
-
-            doc(&header).chain(option_fn_docs.iter().cloned()).collect()
-        };
+        let option_fn_docs =
+            optional_setter_docs(default, &some_fn_name, &option_fn_name, option_fn_docs);
 
         let some_fn = SetterItem {
             name: some_fn_name,
@@ -649,24 +641,39 @@ impl SettersItems {
 
 fn optional_setter_docs(
     default: Option<&str>,
-    (some_fn, option_fn): (&syn::Ident, &syn::Ident),
-) -> String {
-    let default = default
-        .map(|default| {
-            if default.contains('\n') || default.len() > 80 {
-                format!(" _**Default:**_\n````rust,ignore\n{default}\n````\n\n")
-            } else {
-                format!(" _**Default:**_ ```{default}```.\n\n")
-            }
-        })
-        .unwrap_or_default();
+    some_fn: &syn::Ident,
+    option_fn: &syn::Ident,
+    doc_comments: &[syn::Attribute],
+) -> Vec<syn::Attribute> {
+    let header = format!(
+        "_**Optional** ([Some](Self::{some_fn}()) / [Option](Self::{option_fn}()) setters)._"
+    );
 
-    format!(
-        "_**Optional** \
-        ([Some](Self::{some_fn}()) / [Option](Self::{option_fn}()) setters).\
-        _{default}\
-        \n\n"
-    )
+    let mut attrs = vec![syn::parse_quote!(#[doc = #header])];
+
+    if let Some(default) = default {
+        let sep = if doc_comments.is_empty() { "" } else { "\n\n" };
+
+        if default.contains('\n') || default.len() > 80 {
+            // `no_doctest` helps to avoid interpreting the code block as
+            // an "ignored but still runnable" doc test. See details:
+            // - bon issue: https://github.com/elastio/bon/issues/359
+            // - rust issue: https://github.com/rust-lang/rust/issues/63193
+            let tail = format!("\n{default}\n````{sep}");
+            attrs.extend([
+                syn::parse_quote!(#[doc = " _**Default:**_\n"]),
+                syn::parse_quote!(#[cfg_attr(doctest, doc = "````no_doctest")]),
+                syn::parse_quote!(#[cfg_attr(not(doctest), doc = "````")]),
+                syn::parse_quote!(#[doc = #tail]),
+            ]);
+        } else {
+            let doc = format!(" _**Default:**_ ```{default}```.{sep}");
+            attrs.push(syn::parse_quote!(#[doc = #doc]));
+        }
+    }
+
+    attrs.extend(doc_comments.iter().cloned());
+    attrs
 }
 
 fn well_known_default(ty: &syn::Type) -> Option<syn::Expr> {
