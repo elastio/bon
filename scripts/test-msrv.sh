@@ -34,19 +34,21 @@ with_log cd bon
 
 step echo '[workspace]' >> Cargo.toml
 
-step cargo update -p proc-macro2 --precise 1.0.101
-step cargo update -p quote --precise 1.0.40
-step cargo update -p once_cell --precise 1.17.2
-step cargo update -p trybuild --precise 1.0.89
-step cargo update -p serde_json --precise 1.0.143
-step cargo update -p serde --precise 1.0.194
-step cargo update -p prettyplease --precise 0.2.17
-step cargo update -p syn --precise 2.0.56
-step cargo update -p tokio --precise 1.29.1
-step cargo update -p expect-test --precise 1.4.1
-step cargo update -p windows-sys --precise 0.52.0
-step cargo update -p libc --precise 0.2.163
-step cargo update -p glob --precise 0.3.2
+step cargo update --precise 1.0.15  -p itoa
+step cargo update --precise 1.0.20  -p ryu
+step cargo update --precise 1.0.101 -p proc-macro2
+step cargo update --precise 1.0.40  -p quote
+step cargo update --precise 1.17.2  -p once_cell
+step cargo update --precise 1.0.89  -p trybuild
+step cargo update --precise 1.0.143 -p serde_json
+step cargo update --precise 1.0.194 -p serde
+step cargo update --precise 0.2.17  -p prettyplease
+step cargo update --precise 2.0.56  -p syn
+step cargo update --precise 1.29.1  -p tokio
+step cargo update --precise 1.4.1   -p expect-test
+step cargo update --precise 0.52.0  -p windows-sys
+step cargo update --precise 0.2.163 -p libc
+step cargo update --precise 0.3.2   -p glob
 
 export RUSTFLAGS="${RUSTFLAGS:-} --allow unknown-lints"
 
