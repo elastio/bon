@@ -10,9 +10,15 @@
     reason = "Common `_default` suffix is for better readability"
 )]
 pub struct Example {
+    /// More docs
+    ///
+    /// even more!
     #[builder(default = (2 + 2) * 10)]
     small_custom_default: u32,
 
+    /// More docs
+    ///
+    /// even more!
     #[builder(default = Vec::from([
         Point { x: 1, y: 2 },
         Point { x: 3, y: 4 },
