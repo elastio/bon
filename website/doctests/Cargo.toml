@@ -17,7 +17,7 @@ bon                   = { path = "../../bon", features = ["experimental-overwrit
 buildstructor         = "0.6"
 macro_rules_attribute = "0.2"
 tokio                 = { version = "1.47", features = ["macros", "rt-multi-thread"] }
-typed-builder         = "0.22"
+typed-builder         = "0.23"
 
 [build-dependencies]
 itertools  = "0.14"
