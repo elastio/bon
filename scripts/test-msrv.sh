@@ -35,12 +35,12 @@ with_log cd bon
 step echo '[workspace]' >> Cargo.toml
 
 step cargo update --precise 1.0.15  -p itoa
-step cargo update --precise 1.0.20  -p ryu
 step cargo update --precise 1.0.101 -p proc-macro2
 step cargo update --precise 1.0.40  -p quote
 step cargo update --precise 1.17.2  -p once_cell
 step cargo update --precise 1.0.89  -p trybuild
 step cargo update --precise 1.0.143 -p serde_json
+step cargo update --precise 1.0.20  -p ryu
 step cargo update --precise 1.0.194 -p serde
 step cargo update --precise 0.2.17  -p prettyplease
 step cargo update --precise 2.0.56  -p syn
