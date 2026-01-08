@@ -197,7 +197,6 @@ error[E0277]: the member `Unset<negative_test_builder::members::x1>` was not set
    |             ^^^^^^ the member `Unset<negative_test_builder::members::x1>` was not set, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x1>`
-   = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required by a bound in `NegativeTestBuilder::<S>::get_x1`
   --> tests/integration/ui/compile_fail/attr_getter.rs:21:10
    |
@@ -215,7 +214,6 @@ error[E0277]: the member `Unset<negative_test_builder::members::x2>` was not set
     |             ^^^^^^ the member `Unset<negative_test_builder::members::x2>` was not set, but this method requires it to be set
     |
     = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x2>`
-    = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required by a bound in `NegativeTestBuilder::<S>::get_x2`
    --> tests/integration/ui/compile_fail/attr_getter.rs:21:10
     |
@@ -233,7 +231,6 @@ error[E0277]: the member `Unset<negative_test_builder::members::x3>` was not set
     |             ^^^^^^ the member `Unset<negative_test_builder::members::x3>` was not set, but this method requires it to be set
     |
     = help: the trait `IsSet` is not implemented for `Unset<negative_test_builder::members::x3>`
-    = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required by a bound in `NegativeTestBuilder::<S>::get_x3`
    --> tests/integration/ui/compile_fail/attr_getter.rs:21:10
     |
