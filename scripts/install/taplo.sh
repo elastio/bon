@@ -4,7 +4,7 @@ set -euo pipefail
 
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
-: "${TOOL_VERSION:=0.9.2}"
+: "${TOOL_VERSION:=0.10.0}"
 
 base_url=https://github.com/tamasfe/taplo/releases/download/$TOOL_VERSION
 

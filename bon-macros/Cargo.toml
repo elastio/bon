@@ -39,10 +39,12 @@ workspace = true
 proc-macro = true
 
 [dependencies]
-
-# Patch version 0.20.7 of darling added `flatten` feature. We use it, so we
-# need to specify an explicit patch version requirement
-darling = "0.21.0"
+# Darling `0.23` updated MSRV to `1.88+` without other code changes.
+# Therefore, it should be compatible with `0.22` as well.
+#
+# Version `0.20` is the version of `darling` available in Debian packages:
+# https://salsa.debian.org/rust-team/debcargo-conf. We keep support for it.
+darling = ">=0.20.0, <0.24.0"
 
 # This dependency is used by `darling` itself, so we use it as well for case
 # conversions to share the same dependency.

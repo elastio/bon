@@ -4,7 +4,7 @@ set -euo pipefail
 
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
-: "${TOOL_VERSION:=0.6.2}"
+: "${TOOL_VERSION:=0.9.1}"
 
 base_url=https://github.com/bnjbvr/cargo-machete/releases/download/v$TOOL_VERSION
 file_stem=cargo-machete-v$TOOL_VERSION-$arch_rust-unknown-linux-musl

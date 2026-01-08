@@ -31,7 +31,7 @@ workspace = true
 [dependencies]
 buildstructor  = "0.6"
 derive_builder = "0.20"
-typed-builder  = "0.22"
+typed-builder  = "0.23"
 
 [dependencies.bon]
 features = ["experimental-overwritable"]
