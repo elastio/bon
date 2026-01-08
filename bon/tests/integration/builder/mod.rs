@@ -16,6 +16,8 @@ mod attr_setters;
 mod attr_skip;
 mod attr_top_level_start_fn;
 mod attr_with;
+#[cfg(feature = "experimental-build-from")]
+mod build_from;
 mod cfgs;
 mod generics;
 mod init_order;

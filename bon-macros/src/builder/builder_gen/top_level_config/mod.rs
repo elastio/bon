@@ -4,11 +4,11 @@ pub(crate) use on::OnConfig;
 
 use crate::parsing::{BonCratePath, ItemSigConfig, ItemSigConfigParsing, SpannedKey};
 use crate::util::prelude::*;
-use darling::ast::NestedMeta;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
+use syn::ItemFn;
 use syn::parse::Parser;
 use syn::punctuated::Punctuated;
-use syn::ItemFn;
 
 fn parse_finish_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
     ItemSigConfigParsing {
@@ -38,6 +38,24 @@ fn parse_start_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
     ItemSigConfigParsing {
         meta,
         reject_self_mentions: None,
+    }
+    .parse()
+}
+
+#[cfg(feature = "experimental-build-from")]
+fn parse_build_from(meta: &syn::Meta) -> Result<ItemSigConfig> {
+    ItemSigConfigParsing {
+        meta,
+        reject_self_mentions: Some("builder struct's impl block"),
+    }
+    .parse()
+}
+
+#[cfg(feature = "experimental-build-from")]
+fn parse_build_from_clone(meta: &syn::Meta) -> Result<ItemSigConfig> {
+    ItemSigConfigParsing {
+        meta,
+        reject_self_mentions: Some("builder struct's impl block"),
     }
     .parse()
 }
@@ -75,6 +93,14 @@ pub(crate) struct TopLevelConfig {
     /// Specifies the derives to apply to the builder.
     #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list)]
     pub(crate) derive: DerivesConfig,
+
+    #[cfg(feature = "experimental-build-from")]
+    #[darling(default, with = parse_build_from)]
+    pub(crate) build_from: ItemSigConfig,
+
+    #[cfg(feature = "experimental-build-from")]
+    #[darling(default, with = parse_build_from_clone)]
+    pub(crate) build_from_clone: ItemSigConfig,
 }
 
 impl TopLevelConfig {

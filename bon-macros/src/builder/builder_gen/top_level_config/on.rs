@@ -1,6 +1,6 @@
 use crate::util::prelude::*;
-use darling::util::Flag;
 use darling::FromMeta;
+use darling::util::Flag;
 use syn::parse::Parse;
 use syn::spanned::Spanned;
 use syn::visit::Visit;
@@ -10,6 +10,8 @@ pub(crate) struct OnConfig {
     pub(crate) type_pattern: syn::Type,
     pub(crate) into: Flag,
     pub(crate) overwritable: Flag,
+    #[allow(dead_code)]
+    pub(crate) build_from: Flag,
     pub(crate) required: Flag,
     pub(crate) setters: OnSettersConfig,
 }
@@ -42,6 +44,7 @@ impl Parse for OnConfig {
         struct Parsed {
             into: Flag,
             overwritable: Flag,
+            build_from: Flag,
             required: Flag,
 
             #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list)]
@@ -70,6 +73,14 @@ impl Parse for OnConfig {
                  double-awesome if you could also describe your use case in \
                  a comment under the issue for us to understand how it's used \
                  in practice",
+            ));
+        }
+
+        if !cfg!(feature = "experimental-build-from") && parsed.build_from.is_present() {
+            return Err(syn::Error::new(
+                parsed.build_from.span(),
+                "🔬 `build_from` attribute is experimental and requires \
+                 \"experimental-build-from\" cargo feature to be enabled.",
             ));
         }
 
@@ -107,6 +118,7 @@ impl Parse for OnConfig {
             type_pattern,
             into: parsed.into,
             overwritable: parsed.overwritable,
+            build_from: parsed.build_from,
             required: parsed.required,
             setters: parsed.setters,
         })

@@ -71,6 +71,8 @@ std   = []
 # See the docs on this feature in the `bon`'s crate `Cargo.toml`
 experimental-overwritable = []
 
+experimental-build-from = []
+
 # See the docs on this feature in the `bon`'s crate `Cargo.toml`
 implied-bounds = []
 
