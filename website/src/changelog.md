@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Internal
 
-- Regular maintenance ([#361](https://github.com/elastio/bon/pull/361), [#354](https://github.com/elastio/bon/pull/354))
+- Regular maintenance ([#361](https://github.com/elastio/bon/pull/361), [#354](https://github.com/elastio/bon/pull/354), [#363](https://github.com/elastio/bon/pull/363))
 
 ## [3.8.1](https://github.com/elastio/bon/compare/v3.8.0...v3.8.1) - 2025-10-08
 
