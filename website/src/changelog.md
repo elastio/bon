@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.8.2](https://github.com/elastio/bon/compare/v3.8.1...v3.8.2) - 2026-01-08
+
+### Other
+
+- Update dependencies ([#361](https://github.com/elastio/bon/pull/361))
+- Don't attempt to compile big default value showcases as ignored rust doctests ([#360](https://github.com/elastio/bon/pull/360))
+- Fix MSRV tests ([#354](https://github.com/elastio/bon/pull/354))
+
 ## [3.8.1](https://github.com/elastio/bon/compare/v3.8.0...v3.8.1) - 2025-10-08
 
 ### Fixed
