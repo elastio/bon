@@ -22,7 +22,7 @@ error: `skip` attribute can't be specified together with `required`
 23 |     #[builder(skip, required)]
    |               ^^^^
 
-error[E0599]: no method named `maybe_member` found for struct `ValidBuilder` in the current scope
+error[E0599]: no method named `maybe_member` found for struct `ValidBuilder<S>` in the current scope
   --> tests/integration/ui/compile_fail/attr_required.rs:38:30
    |
 27 | #[derive(Builder)]
@@ -37,7 +37,7 @@ help: there is a method `member` with a similar name
 38 +     let _ = Valid::builder().member(Some(42));
    |
 
-error[E0599]: no method named `maybe_some_member` found for struct `ValidBuilder` in the current scope
+error[E0599]: no method named `maybe_some_member` found for struct `ValidBuilder<S>` in the current scope
   --> tests/integration/ui/compile_fail/attr_required.rs:39:30
    |
 27 | #[derive(Builder)]
@@ -59,7 +59,6 @@ error[E0277]: the member `Unset<arg1>` was not set, but this method requires it 
    |                                ^^^^^ the member `Unset<arg1>` was not set, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<arg1>`
-   = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required for `sut_builder::Empty` to implement `sut_builder::IsComplete`
   --> tests/integration/ui/compile_fail/attr_required.rs:45:18
    |

@@ -5,7 +5,6 @@ error[E0277]: the member `Unset<y>` was not set, but this method requires it to 
    |                                     ^^^^^ the member `Unset<y>` was not set, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<y>`
-   = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required for `SetX` to implement `IsComplete`
   --> tests/integration/ui/compile_fail/diagnostic_on_unimplemented.rs:4:14
    |
@@ -27,7 +26,6 @@ error[E0277]: the member `Unset<renamed>` was not set, but this method requires 
    |                                     ^^^^^ the member `Unset<renamed>` was not set, but this method requires it to be set
    |
    = help: the trait `IsSet` is not implemented for `Unset<renamed>`
-   = help: the trait `IsSet` is implemented for `Set<Name>`
 note: required for `SetX` to implement `IsComplete`
   --> tests/integration/ui/compile_fail/diagnostic_on_unimplemented.rs:4:14
    |
@@ -49,7 +47,6 @@ error[E0277]: the member `Set<y>` was already set, but this method requires it t
    |                                     ^ the member `Set<y>` was already set, but this method requires it to be unset
    |
    = help: the trait `IsUnset` is not implemented for `Set<y>`
-   = help: the trait `IsUnset` is implemented for `Unset<Name>`
 note: required by a bound in `ExampleBuilder::<S>::y`
   --> tests/integration/ui/compile_fail/diagnostic_on_unimplemented.rs:4:14
    |
