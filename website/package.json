@@ -18,10 +18,10 @@
     "leven": "^4.1.0",
     "medium-zoom": "^1.1.0",
     "ts-node": "^10.9.2",
-    "ts-pattern": "^5.8.0",
+    "ts-pattern": "^5.9.0",
     "vitepress": "^1.6.4"
   },
   "dependencies": {
-    "vue": "^3.5.17"
+    "vue": "^3.5.26"
   }
 }
