@@ -53,7 +53,7 @@ step cargo update --precise 0.3.2   -p glob
 
 export RUSTFLAGS="${RUSTFLAGS:-} --allow unknown-lints"
 
-features=experimental-overwritable
+features=experimental-overwritable,experimental-generics-setters
 
 step cargo clippy --all-targets --locked --features "$features"
 

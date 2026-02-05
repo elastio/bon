@@ -12,7 +12,7 @@ edition = "2021"
 version = "0.1.0"
 
 [dependencies]
-bon            = { path = "../../bon", optional = true, features = ["experimental-overwritable"] }
+bon            = { path = "../../bon", optional = true, features = ["experimental-overwritable", "experimental-generics-setters"] }
 cfg-if         = "1.0"
 derive_builder = { version = "0.20", optional = true }
 typed-builder  = { version = "0.23", optional = true }

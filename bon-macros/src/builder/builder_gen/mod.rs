@@ -1,6 +1,7 @@
 mod builder_decl;
 mod builder_derives;
 mod finish_fn;
+mod generic_setters;
 mod getters;
 mod member;
 mod models;
@@ -14,6 +15,7 @@ pub(crate) mod input_struct;
 pub(crate) use top_level_config::TopLevelConfig;
 
 use crate::util::prelude::*;
+use generic_setters::GenericSettersCtx;
 use getters::GettersCtx;
 use member::{CustomField, Member, MemberOrigin, NamedMember, PosFnMember, RawMember};
 use models::{AssocMethodCtxParams, AssocMethodReceiverCtx, BuilderGenCtx, FinishFnBody, Generics};
@@ -125,6 +127,13 @@ impl BuilderGenCtx {
             .into_iter()
             .flatten();
 
+        let generic_setter_methods = self
+            .generics_config
+            .as_ref()
+            .and_then(|config| config.setters.as_ref())
+            .map(|config| GenericSettersCtx::new(self, config).generic_setter_methods())
+            .unwrap_or_default();
+
         let generics_decl = &self.generics.decl_without_defaults;
         let generic_args = &self.generics.args;
         let where_clause = &self.generics.where_clause;
@@ -149,6 +158,7 @@ impl BuilderGenCtx {
             {
                 #finish_fn
                 #(#accessor_methods)*
+                #generic_setter_methods
             }
         })
     }
