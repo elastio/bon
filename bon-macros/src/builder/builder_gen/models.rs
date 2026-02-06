@@ -1,5 +1,5 @@
 use super::member::Member;
-use super::top_level_config::{DerivesConfig, OnConfig};
+use super::top_level_config::{DerivesConfig, GenericsConfig, OnConfig};
 use crate::normalization::GenericsNamespace;
 use crate::parsing::{BonCratePath, ItemSigConfig, SpannedKey};
 use crate::util::prelude::*;
@@ -162,6 +162,9 @@ pub(crate) struct BuilderGenCtx {
     /// Name of the generic variable that holds the builder's state.
     pub(super) state_var: syn::Ident,
 
+    /// Namespace for generating unique identifiers.
+    pub(super) namespace: GenericsNamespace,
+
     pub(super) members: Vec<Member>,
 
     /// Lint suppressions from the original item that will be inherited by all items
@@ -172,6 +175,7 @@ pub(crate) struct BuilderGenCtx {
     pub(super) on: Vec<OnConfig>,
 
     pub(super) generics: Generics,
+    pub(super) generics_config: Option<GenericsConfig>,
 
     pub(super) assoc_method_ctx: Option<AssocMethodCtx>,
 
@@ -200,6 +204,7 @@ pub(super) struct BuilderGenCtxParams<'a> {
 
     /// Generics to apply to the builder type.
     pub(super) generics: Generics,
+    pub(super) generics_config: Option<GenericsConfig>,
 
     pub(super) assoc_method_ctx: Option<AssocMethodCtxParams>,
 
@@ -219,6 +224,7 @@ impl BuilderGenCtx {
             const_,
             on,
             generics,
+            generics_config,
             orig_item_vis,
             assoc_method_ctx,
             builder_type,
@@ -367,11 +373,13 @@ impl BuilderGenCtx {
         Ok(Self {
             bon,
             state_var,
+            namespace: namespace.into_owned(),
             members,
             allow_attrs,
             const_,
             on,
             generics,
+            generics_config,
             assoc_method_ctx,
             builder_type,
             state_mod,

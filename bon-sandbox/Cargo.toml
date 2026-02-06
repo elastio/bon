@@ -34,6 +34,6 @@ derive_builder = "0.20"
 typed-builder  = "0.23"
 
 [dependencies.bon]
-features = ["experimental-overwritable"]
+features = ["experimental-overwritable", "experimental-generics-setters"]
 path     = "../bon"
 version  = "=3.8.2"

@@ -7,12 +7,7 @@ use syn::punctuated::Punctuated;
 const DOCS_CONTEXT: &str = "builder struct's impl block";
 
 fn parse_setter_fn(meta: &syn::Meta) -> Result<SpannedKey<ItemSigConfig>> {
-    let params = ItemSigConfigParsing {
-        meta,
-        reject_self_mentions: Some(DOCS_CONTEXT),
-    }
-    .parse()?;
-
+    let params = ItemSigConfigParsing::new(meta, Some(DOCS_CONTEXT)).parse()?;
     SpannedKey::new(meta.path(), params)
 }
 

@@ -85,6 +85,13 @@ implied-bounds = ["bon-macros/implied-bounds"]
 # describing your use case for it.
 experimental-overwritable = ["bon-macros/experimental-overwritable"]
 
+# 🔬 Experimental! There may be breaking changes to this feature between *minor* releases,
+# however, compatibility within patch releases is guaranteed though.
+#
+# This feature enables the #[builder(generics(setters(...)))] attribute that can be used to
+# generate methods for converting generic parameters on builders.
+experimental-generics-setters = ["bon-macros/experimental-generics-setters"]
+
 # Legacy experimental attribute. It's left here for backwards compatibility,
 # and it will be removed in the next major release.
 #

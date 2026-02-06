@@ -72,6 +72,9 @@ std   = []
 experimental-overwritable = []
 
 # See the docs on this feature in the `bon`'s crate `Cargo.toml`
+experimental-generics-setters = []
+
+# See the docs on this feature in the `bon`'s crate `Cargo.toml`
 implied-bounds = []
 
 [dev-dependencies]

@@ -1,5 +1,7 @@
+mod generics;
 mod on;
 
+pub(crate) use generics::GenericsConfig;
 pub(crate) use on::OnConfig;
 
 use crate::parsing::{BonCratePath, ItemSigConfig, ItemSigConfigParsing, SpannedKey};
@@ -11,35 +13,19 @@ use syn::punctuated::Punctuated;
 use syn::ItemFn;
 
 fn parse_finish_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
-    ItemSigConfigParsing {
-        meta,
-        reject_self_mentions: Some("builder struct's impl block"),
-    }
-    .parse()
+    ItemSigConfigParsing::new(meta, Some("builder struct's impl block")).parse()
 }
 
 fn parse_builder_type(meta: &syn::Meta) -> Result<ItemSigConfig> {
-    ItemSigConfigParsing {
-        meta,
-        reject_self_mentions: Some("builder struct"),
-    }
-    .parse()
+    ItemSigConfigParsing::new(meta, Some("builder struct")).parse()
 }
 
 fn parse_state_mod(meta: &syn::Meta) -> Result<ItemSigConfig> {
-    ItemSigConfigParsing {
-        meta,
-        reject_self_mentions: Some("builder's state module"),
-    }
-    .parse()
+    ItemSigConfigParsing::new(meta, Some("builder's state module")).parse()
 }
 
 fn parse_start_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
-    ItemSigConfigParsing {
-        meta,
-        reject_self_mentions: None,
-    }
-    .parse()
+    ItemSigConfigParsing::new(meta, None).parse()
 }
 
 #[derive(Debug, FromMeta)]
@@ -75,6 +61,10 @@ pub(crate) struct TopLevelConfig {
     /// Specifies the derives to apply to the builder.
     #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list)]
     pub(crate) derive: DerivesConfig,
+
+    /// Specifies configuration for generic parameter conversion methods.
+    #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list)]
+    pub(crate) generics: Option<SpannedKey<GenericsConfig>>,
 }
 
 impl TopLevelConfig {

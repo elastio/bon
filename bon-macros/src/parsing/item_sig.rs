@@ -5,18 +5,34 @@ use darling::FromMeta;
 /// "Item signature" is a set of parameters that configures some aspects of
 /// an item like a function, struct, struct field, module, trait. All of them
 /// have configurable properties that are specified here.
-#[derive(Debug, Clone, Default)]
-pub(crate) struct ItemSigConfig {
-    pub(crate) name: Option<SpannedKey<syn::Ident>>,
+///
+/// The generic parameter `N` specifies the type used for the name field:
+/// - `syn::Ident` (default): For regular identifiers
+/// - `String`: For pattern strings (e.g., "conv_{}")
+#[derive(Debug, Clone)]
+pub(crate) struct ItemSigConfig<N = syn::Ident> {
+    pub(crate) name: Option<SpannedKey<N>>,
     pub(crate) vis: Option<SpannedKey<syn::Visibility>>,
     pub(crate) docs: Option<SpannedKey<Vec<syn::Attribute>>>,
 }
 
-impl ItemSigConfig {
+impl<N> Default for ItemSigConfig<N> {
+    fn default() -> Self {
+        Self {
+            name: None,
+            vis: None,
+            docs: None,
+        }
+    }
+}
+
+impl ItemSigConfig<syn::Ident> {
     pub(crate) fn name(&self) -> Option<&syn::Ident> {
         self.name.as_ref().map(|name| &name.value)
     }
+}
 
+impl<N> ItemSigConfig<N> {
     pub(crate) fn vis(&self) -> Option<&syn::Visibility> {
         self.vis.as_ref().map(|vis| &vis.value)
     }
@@ -31,31 +47,39 @@ pub(crate) struct ItemSigConfigParsing<'a> {
     pub(crate) reject_self_mentions: Option<&'static str>,
 }
 
-impl ItemSigConfigParsing<'_> {
-    pub(crate) fn parse(self) -> Result<ItemSigConfig> {
+impl<'a> ItemSigConfigParsing<'a> {
+    pub(crate) fn new(meta: &'a syn::Meta, reject_self_mentions: Option<&'static str>) -> Self {
+        ItemSigConfigParsing {
+            meta,
+            reject_self_mentions,
+        }
+    }
+
+    pub(crate) fn parse<N>(self) -> Result<ItemSigConfig<N>>
+    where
+        N: FromMeta,
+    {
         let meta = self.meta;
 
-        if let syn::Meta::NameValue(meta) = meta {
-            let val = &meta.value;
-            let name = syn::parse2(val.to_token_stream())?;
-
+        if let syn::Meta::NameValue(_) = meta {
+            let name = SpannedKey::from_meta(meta)?;
             return Ok(ItemSigConfig {
-                name: Some(SpannedKey::new(&meta.path, name)?),
+                name: Some(name),
                 vis: None,
                 docs: None,
             });
         }
 
         #[derive(Debug, FromMeta)]
-        struct Full {
-            name: Option<SpannedKey<syn::Ident>>,
+        struct Full<N> {
+            name: Option<SpannedKey<N>>,
             vis: Option<SpannedKey<syn::Visibility>>,
 
             #[darling(default, with = super::parse_docs, map = Some)]
             doc: Option<SpannedKey<Vec<syn::Attribute>>>,
         }
 
-        let full: Full = crate::parsing::parse_non_empty_paren_meta_list(meta)?;
+        let full: Full<N> = crate::parsing::parse_non_empty_paren_meta_list(meta)?;
 
         if let Some(context) = self.reject_self_mentions {
             if let Some(docs) = &full.doc {

@@ -223,6 +223,8 @@ impl StructInputCtx {
         let mut namespace = GenericsNamespace::default();
         namespace.visit_item_struct(&self.struct_item.orig);
 
+        let generics_config = self.config.generics.map(SpannedKey::into_value);
+
         BuilderGenCtx::new(BuilderGenCtxParams {
             bon: self.config.bon,
             namespace: Cow::Owned(namespace),
@@ -235,6 +237,7 @@ impl StructInputCtx {
 
             assoc_method_ctx,
             generics,
+            generics_config,
             orig_item_vis: self.struct_item.norm.vis,
 
             builder_type,
