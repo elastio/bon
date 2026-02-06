@@ -1,0 +1,58 @@
+error[E0277]: the trait bound `T_: MyTrait` is not satisfied
+  --> tests/integration/ui/compile_fail/generics_setters.rs:42:10
+   |
+42 | #[derive(Builder)]
+   |          ^^^^^^^ the trait `MyTrait` is not implemented for `T_`
+   |
+note: required by a bound in `AssocTypeFieldBuilder`
+  --> tests/integration/ui/compile_fail/generics_setters.rs:44:26
+   |
+42 | #[derive(Builder)]
+   |          ------- required by a bound in this struct
+43 | #[builder(generics(setters(name = "conv_{}")))]
+44 | struct AssocTypeField<T: MyTrait> {
+   |                          ^^^^^^^ required by this bound in `AssocTypeFieldBuilder`
+   = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the trait bound `T_: MyTrait` is not satisfied
+  --> tests/integration/ui/compile_fail/generics_setters.rs:48:10
+   |
+48 | #[derive(Builder)]
+   |          ^^^^^^^ the trait `MyTrait` is not implemented for `T_`
+   |
+note: required by a bound in `QualifiedPathFieldBuilder`
+  --> tests/integration/ui/compile_fail/generics_setters.rs:50:30
+   |
+48 | #[derive(Builder)]
+   |          ------- required by a bound in this struct
+49 | #[builder(generics(setters(name = "conv_{}")))]
+50 | struct QualifiedPathField<T: MyTrait> {
+   |                              ^^^^^^^ required by this bound in `QualifiedPathFieldBuilder`
+   = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0308]: mismatched types
+  --> tests/integration/ui/compile_fail/generics_setters.rs:63:16
+   |
+63 |         .value(None)
+   |          ----- ^^^^ expected `()`, found `Option<_>`
+   |          |
+   |          arguments to this method are incorrect
+   |
+   = note: expected unit type `()`
+                   found enum `Option<_>`
+help: the return type of this call is `Option<_>` due to the type of the argument passed
+  --> tests/integration/ui/compile_fail/generics_setters.rs:62:5
+   |
+62 | /     OptionField::<()>::builder()
+63 | |         .value(None)
+   | |________________----^
+   |                  |
+   |                  this argument influences the return type of `value`
+note: method defined here
+  --> tests/integration/ui/compile_fail/generics_setters.rs:9:5
+   |
+ 6 | #[derive(Builder)]
+   |          -------
+...
+ 9 |     value: core::option::Option<T>,
+   |     ^^^^^

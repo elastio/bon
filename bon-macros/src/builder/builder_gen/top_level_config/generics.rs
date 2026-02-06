@@ -35,5 +35,26 @@ fn parse_setters_config(meta: &syn::Meta) -> Result<ItemSigConfig<String>> {
     }
 
     const DOCS_CONTEXT: &str = "builder struct's impl block";
-    ItemSigConfigParsing::new(meta, Some(DOCS_CONTEXT)).parse()
+    let config: ItemSigConfig<String> =
+        ItemSigConfigParsing::new(meta, Some(DOCS_CONTEXT)).parse()?;
+
+    // Validate that name is provided and contains the placeholder
+    let name_pattern = config.name.as_ref().ok_or_else(|| {
+        err!(
+            meta,
+            "`name` parameter is required for `generics(setters(...))`; \
+             specify a pattern like `name = \"conv_{{}}\"` where `{{}}` will be \
+             replaced with the snake_case name of each generic parameter"
+        )
+    })?;
+
+    if !name_pattern.value.contains("{}") {
+        bail!(
+            &name_pattern.key,
+            "the `name` pattern must contain the `{{}}` placeholder, \
+             which will be replaced with the snake_case name of each generic parameter"
+        );
+    }
+
+    Ok(config)
 }

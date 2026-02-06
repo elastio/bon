@@ -12,26 +12,32 @@ impl<'a> GenericSettersCtx<'a> {
         Self { base, config }
     }
 
-    pub(super) fn generic_setter_methods(&self) -> TokenStream {
-        let methods = self
-            .base
-            .generics
-            .decl_without_defaults
-            .iter()
-            .enumerate()
-            .filter_map(|(index, param)| {
-                // Only generate setters for type parameters, not lifetimes or const generics
-                match param {
-                    syn::GenericParam::Type(type_param) => {
-                        Some(self.generic_setter_method(index, &type_param.ident))
-                    }
-                    _ => None,
-                }
-            });
+    pub(super) fn generic_setter_methods(&self) -> Result<TokenStream> {
+        let generics = &self.base.generics.decl_without_defaults;
 
-        quote! {
-            #(#methods)*
+        let mut methods = Vec::with_capacity(generics.len());
+
+        for (index, param) in generics.iter().enumerate() {
+            match param {
+                syn::GenericParam::Type(type_param) => {
+                    methods.push(self.generic_setter_method(index, &type_param.ident));
+                }
+                syn::GenericParam::Const(const_param) => {
+                    bail!(
+                        &const_param.ident,
+                        "const generic parameters are not supported in `generics(setters(...))`; \
+                         only type parameters can be converted"
+                    );
+                }
+                syn::GenericParam::Lifetime(_) => {
+                    // Skip lifetimes, they don't get setters
+                }
+            }
         }
+
+        Ok(quote! {
+            #(#methods)*
+        })
     }
 
     fn generic_setter_method(&self, param_index: usize, param_ident: &syn::Ident) -> TokenStream {
@@ -52,7 +58,7 @@ impl<'a> GenericSettersCtx<'a> {
 
         // Build the generic arguments for the output type, where the current parameter
         // is replaced with a new type variable
-        let new_type_var = format_ident!("{}2", param_ident);
+        let new_type_var = self.base.namespace.unique_ident(param_ident.to_string());
         let output_generic_args = self
             .base
             .generics
@@ -68,23 +74,26 @@ impl<'a> GenericSettersCtx<'a> {
             })
             .collect::<Vec<_>>();
 
-        let new_type_param: syn::GenericParam = syn::parse_quote!(#new_type_var);
-
-        let where_clause = where_clause.as_ref().map(|wc| quote!(#wc));
-
         // Check which named members use this generic parameter
+        let mut runtime_asserts = Vec::new();
         let named_member_conversions = self
             .base
             .named_members()
             .enumerate()
             .map(|(idx, member)| {
                 let uses_param = member_uses_generic_param(member, param_ident);
+                let index = syn::Index::from(idx);
                 if uses_param {
+                    // Add runtime assert that this field is None
+                    let field_ident = &member.name.orig;
+                    let message = format!("BUG: field `{field_ident}` should be None when converting generic parameter `{param_ident}`");
+                    runtime_asserts.push(quote! {
+                        ::core::assert!(named.#index.is_none(), #message);
+                    });
                     // Field uses the generic parameter, so create a new None
                     quote!(::core::option::Option::None)
                 } else {
                     // Field doesn't use the generic parameter, so move it from the tuple
-                    let index = syn::Index::from(idx);
                     quote!(named.#index)
                 }
             })
@@ -108,12 +117,16 @@ impl<'a> GenericSettersCtx<'a> {
         quote! {
             #(#docs)*
             #[inline(always)]
-            #vis fn #method_name<#new_type_param>(
+            #vis fn #method_name<#new_type_var>(
                 self
             ) -> #builder_ident<#(#output_generic_args,)* #state_var>
             #where_clause
             {
                 let named = self.__unsafe_private_named;
+
+                // Runtime safety asserts to ensure fields using the converted
+                // generic parameter are None
+                #(#runtime_asserts)*
 
                 #builder_ident {
                     __unsafe_private_phantom: ::core::marker::PhantomData,
@@ -129,17 +142,17 @@ impl<'a> GenericSettersCtx<'a> {
     }
 
     fn method_name(&self, param_ident: &syn::Ident) -> syn::Ident {
-        let param_name = param_ident.to_string();
-        let param_name_lower = param_name.to_lowercase();
+        let param_name_snake = param_ident.pascal_to_snake_case();
 
-        let name_pattern = self
+        // Name is guaranteed to be present due to validation in parse_setters_config
+        let name_pattern = &self
             .config
             .name
             .as_ref()
-            .map(|n| n.value.as_str())
-            .unwrap_or("conv_{}");
+            .expect("name should be validated")
+            .value;
 
-        let method_name = name_pattern.replace("{}", &param_name_lower);
+        let method_name = name_pattern.replace("{}", &param_name_snake.to_string());
 
         syn::Ident::new(&method_name, param_ident.span())
     }
@@ -151,11 +164,10 @@ impl<'a> GenericSettersCtx<'a> {
         }
 
         // Otherwise, generate default documentation
-        let param_name = param_ident.to_string();
         let doc = format!(
-            "Convert the `{param_name}` generic parameter to a different type.\n\
+            "Convert the `{param_ident}` generic parameter to a different type.\n\
             \n\
-            This method allows changing the type of the `{param_name}` parameter on the builder, \
+            This method allows changing the type of the `{param_ident}` parameter on the builder, \
             which is useful when you need to build up values with different types at \
             different stages of construction."
         );
@@ -180,15 +192,20 @@ fn type_uses_generic_param(ty: &syn::Type, param_ident: &syn::Ident) -> bool {
     }
 
     impl<'ast> Visit<'ast> for GenericParamVisitor<'_> {
-        fn visit_path(&mut self, path: &'ast syn::Path) {
+        fn visit_type_path(&mut self, type_path: &'ast syn::TypePath) {
+            // Early return if already found to avoid unnecessary recursion
+            if self.found {
+                return;
+            }
+
             // Check if the path is the generic parameter we're looking for
-            if path.is_ident(self.param_ident) {
+            if type_path.path.is_ident(self.param_ident) {
                 self.found = true;
                 return;
             }
 
-            // Continue visiting the rest of the path
-            syn::visit::visit_path(self, path);
+            // Continue visiting the rest of the type path
+            syn::visit::visit_type_path(self, type_path);
         }
     }
 
