@@ -132,6 +132,7 @@ impl BuilderGenCtx {
             .as_ref()
             .and_then(|config| config.setters.as_ref())
             .map(|config| GenericSettersCtx::new(self, config).generic_setter_methods())
+            .transpose()?
             .unwrap_or_default();
 
         let generics_decl = &self.generics.decl_without_defaults;

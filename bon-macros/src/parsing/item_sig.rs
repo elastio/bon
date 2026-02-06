@@ -42,30 +42,23 @@ impl<N> ItemSigConfig<N> {
     }
 }
 
-pub(crate) struct ItemSigConfigParsing<'a, N = syn::Ident> {
+pub(crate) struct ItemSigConfigParsing<'a> {
     pub(crate) meta: &'a syn::Meta,
     pub(crate) reject_self_mentions: Option<&'static str>,
-    _phantom: std::marker::PhantomData<N>,
 }
 
-impl<'a, N> ItemSigConfigParsing<'a, N>
-where
-    N: FromMeta,
-{
+impl<'a> ItemSigConfigParsing<'a> {
     pub(crate) fn new(meta: &'a syn::Meta, reject_self_mentions: Option<&'static str>) -> Self {
         ItemSigConfigParsing {
             meta,
             reject_self_mentions,
-            _phantom: std::marker::PhantomData,
         }
     }
-}
 
-impl<N> ItemSigConfigParsing<'_, N>
-where
-    N: FromMeta,
-{
-    pub(crate) fn parse(self) -> Result<ItemSigConfig<N>> {
+    pub(crate) fn parse<N>(self) -> Result<ItemSigConfig<N>>
+    where
+        N: FromMeta,
+    {
         let meta = self.meta;
 
         if let syn::Meta::NameValue(_) = meta {

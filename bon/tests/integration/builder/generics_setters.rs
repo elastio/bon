@@ -25,12 +25,12 @@ fn test_simple_syntax() {
     // Start with () types, then convert to the actual types
     let result = Sut::<(), ()>::builder()
         .x1(42)
-        .x2_and_x3(String::from("hello"), vec![1, 2, 3])
+        .x2_and_x3("hello", [1, 2, 3])
         .build();
 
     assert_eq!(result.x1, 42);
     assert_eq!(result.x2, "hello");
-    assert_eq!(result.x3, vec![1, 2, 3]);
+    assert_eq!(result.x3, [1, 2, 3]);
 }
 
 #[test]
@@ -50,10 +50,8 @@ fn test_complex_syntax_with_name() {
         }
     }
 
-    let result = Sut::<()>::builder()
-        .convert_and_set(String::from("test"))
-        .build();
-    assert_eq!(result.value, "test");
+    let result = Sut::<()>::builder().convert_and_set(42).build();
+    assert_eq!(result.value, 42);
 }
 
 #[test]
@@ -73,10 +71,8 @@ fn test_complex_syntax_with_vis() {
         }
     }
 
-    let result = Sut::<()>::builder()
-        .convert_and_set(String::from("test"))
-        .build();
-    assert_eq!(result.value, "test");
+    let result = Sut::<()>::builder().convert_and_set(100).build();
+    assert_eq!(result.value, 100);
 }
 
 #[test]
@@ -89,9 +85,6 @@ fn test_complex_syntax_with_docs() {
         value: T,
     }
 
-    let result = Sut::<()>::builder()
-        .conv_t::<String>()
-        .value(String::from("test"))
-        .build();
-    assert_eq!(result.value, "test");
+    let result = Sut::<()>::builder().conv_t::<u32>().value(42).build();
+    assert_eq!(result.value, 42);
 }

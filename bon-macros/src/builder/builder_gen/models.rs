@@ -162,6 +162,9 @@ pub(crate) struct BuilderGenCtx {
     /// Name of the generic variable that holds the builder's state.
     pub(super) state_var: syn::Ident,
 
+    /// Namespace for generating unique identifiers.
+    pub(super) namespace: GenericsNamespace,
+
     pub(super) members: Vec<Member>,
 
     /// Lint suppressions from the original item that will be inherited by all items
@@ -370,6 +373,7 @@ impl BuilderGenCtx {
         Ok(Self {
             bon,
             state_var,
+            namespace: namespace.into_owned(),
             members,
             allow_attrs,
             const_,
