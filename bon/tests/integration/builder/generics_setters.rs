@@ -88,3 +88,83 @@ fn test_complex_syntax_with_docs() {
     let result = Sut::<()>::builder().conv_t::<u32>().value(42).build();
     assert_eq!(result.value, 42);
 }
+
+#[test]
+fn test_with_trait_bounds() {
+    trait MyTrait {
+        type Assoc;
+    }
+
+    impl MyTrait for () {
+        type Assoc = u32;
+    }
+
+    impl MyTrait for bool {
+        type Assoc = u64;
+    }
+
+    #[derive(Builder)]
+    #[builder(generics(setters(name = "conv_{}")))]
+    struct AssocTypeField<T: MyTrait> {
+        value: T::Assoc,
+    }
+
+    #[derive(Builder)]
+    #[builder(generics(setters(name = "conv_{}")))]
+    struct QualifiedPathField<T: MyTrait> {
+        value: <T as MyTrait>::Assoc,
+    }
+
+    let result1 = AssocTypeField::<()>::builder()
+        .conv_t::<bool>()
+        .value(42u64)
+        .build();
+    assert_eq!(result1.value, 42u64);
+
+    let result2 = QualifiedPathField::<()>::builder()
+        .conv_t::<bool>()
+        .value(99u64)
+        .build();
+    assert_eq!(result2.value, 99u64);
+}
+
+#[test]
+fn test_with_trait_bounds_false_friend() {
+    // The associated type is also called T, but should not be replaced by the generic <T>
+
+    trait MyTrait {
+        type T;
+    }
+
+    impl MyTrait for () {
+        type T = u32;
+    }
+
+    impl MyTrait for bool {
+        type T = u64;
+    }
+
+    #[derive(Builder)]
+    #[builder(generics(setters(name = "conv_{}")))]
+    struct AssocTypeField<T: MyTrait> {
+        value: T::T,
+    }
+
+    #[derive(Builder)]
+    #[builder(generics(setters(name = "conv_{}")))]
+    struct QualifiedPathField<T: MyTrait> {
+        value: <T as MyTrait>::T,
+    }
+
+    let result1 = AssocTypeField::<()>::builder()
+        .conv_t::<bool>()
+        .value(42u64)
+        .build();
+    assert_eq!(result1.value, 42u64);
+
+    let result2 = QualifiedPathField::<()>::builder()
+        .conv_t::<bool>()
+        .value(99u64)
+        .build();
+    assert_eq!(result2.value, 99u64);
+}

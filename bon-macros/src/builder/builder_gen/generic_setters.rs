@@ -20,7 +20,7 @@ impl<'a> GenericSettersCtx<'a> {
         for (index, param) in generics.iter().enumerate() {
             match param {
                 syn::GenericParam::Type(type_param) => {
-                    methods.push(self.generic_setter_method(index, &type_param.ident));
+                    methods.push(self.generic_setter_method(index, type_param));
                 }
                 syn::GenericParam::Const(const_param) => {
                     bail!(
@@ -40,11 +40,16 @@ impl<'a> GenericSettersCtx<'a> {
         })
     }
 
-    fn generic_setter_method(&self, param_index: usize, param_ident: &syn::Ident) -> TokenStream {
+    fn generic_setter_method(
+        &self,
+        param_index: usize,
+        type_param: &syn::TypeParam,
+    ) -> TokenStream {
         let builder_ident = &self.base.builder_type.ident;
         let state_var = &self.base.state_var;
         let where_clause = &self.base.generics.where_clause;
 
+        let param_ident = &type_param.ident;
         let method_name = self.method_name(param_ident);
 
         let vis = self
@@ -59,6 +64,15 @@ impl<'a> GenericSettersCtx<'a> {
         // Build the generic arguments for the output type, where the current parameter
         // is replaced with a new type variable
         let new_type_var = self.base.namespace.unique_ident(param_ident.to_string());
+
+        // Copy the bounds from the original type parameter to the new one
+        let bounds = &type_param.bounds;
+        let new_type_param = if bounds.is_empty() {
+            quote!(#new_type_var)
+        } else {
+            quote!(#new_type_var: #bounds)
+        };
+
         let output_generic_args = self
             .base
             .generics
@@ -117,7 +131,7 @@ impl<'a> GenericSettersCtx<'a> {
         quote! {
             #(#docs)*
             #[inline(always)]
-            #vis fn #method_name<#new_type_var>(
+            #vis fn #method_name<#new_type_param>(
                 self
             ) -> #builder_ident<#(#output_generic_args,)* #state_var>
             #where_clause
@@ -202,6 +216,20 @@ fn type_uses_generic_param(ty: &syn::Type, param_ident: &syn::Ident) -> bool {
             if type_path.path.is_ident(self.param_ident) {
                 self.found = true;
                 return;
+            }
+
+            // For qualified paths like T::Assoc or <T as Trait>::Assoc,
+            // check if the first segment (or qself) uses the generic parameter
+
+            if let Some(qself) = &type_path.qself {
+                // For <T as Trait>::Assoc syntax
+                self.visit_type(&qself.ty);
+            } else if let Some(segment) = type_path.path.segments.first() {
+                // For T::Assoc syntax
+                if segment.ident == *self.param_ident {
+                    self.found = true;
+                    return;
+                }
             }
 
             // Continue visiting the rest of the type path
