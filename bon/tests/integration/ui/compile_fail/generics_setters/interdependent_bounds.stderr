@@ -1,0 +1,7 @@
+error: generic conversion methods cannot be generated for interdependent type parameters; the where clause predicate references multiple type parameters: `T`, `U`
+
+       Consider removing `generics(setters(...))` or restructuring your types to avoid interdependencies
+  --> tests/integration/ui/compile_fail/generics_setters/interdependent_bounds.rs:10:5
+   |
+10 |     T: IntoIterator<Item = U>,
+   |     ^^^^^^^^^^^^^^^^^^^^^^^^^

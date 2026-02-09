@@ -12,4 +12,8 @@ fn ui() {
     if cfg!(feature = "experimental-overwritable") {
         t.compile_fail("tests/integration/ui/compile_fail/overwritable/*.rs");
     }
+
+    if cfg!(feature = "experimental-generics-setters") {
+        t.compile_fail("tests/integration/ui/compile_fail/generics_setters/*.rs");
+    }
 }

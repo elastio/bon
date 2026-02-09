@@ -1,6 +1,8 @@
 use super::models::BuilderGenCtx;
 use crate::parsing::ItemSigConfig;
 use crate::util::prelude::*;
+use syn::punctuated::Punctuated;
+use syn::token::Where;
 
 pub(super) struct GenericSettersCtx<'a> {
     base: &'a BuilderGenCtx,
@@ -14,6 +16,37 @@ impl<'a> GenericSettersCtx<'a> {
 
     pub(super) fn generic_setter_methods(&self) -> Result<TokenStream> {
         let generics = &self.base.generics.decl_without_defaults;
+
+        let type_param_idents: Vec<&syn::Ident> = generics
+            .iter()
+            .filter_map(|param| match param {
+                syn::GenericParam::Type(type_param) => Some(&type_param.ident),
+                _ => None,
+            })
+            .collect();
+
+        // Check for interdependent type parameters in where clauses
+        if let Some(where_clause) = &self.base.generics.where_clause {
+            for predicate in &where_clause.predicates {
+                let params_in_predicate =
+                    find_type_params_in_predicate(predicate, &type_param_idents);
+                if params_in_predicate.len() > 1 {
+                    let params_str = params_in_predicate
+                        .iter()
+                        .map(|p| format!("`{p}`"))
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    bail!(
+                        predicate,
+                        "generic conversion methods cannot be generated for interdependent type parameters; \
+                         the where clause predicate references multiple type parameters: {}\n\
+                         \n\
+                         Consider removing `generics(setters(...))` or restructuring your types to avoid interdependencies",
+                        params_str
+                    );
+                }
+            }
+        }
 
         let mut methods = Vec::with_capacity(generics.len());
 
@@ -90,6 +123,7 @@ impl<'a> GenericSettersCtx<'a> {
 
         // Check which named members use this generic parameter
         let mut runtime_asserts = Vec::new();
+        let mut type_state_bounds = Vec::new();
         let named_member_conversions = self
             .base
             .named_members()
@@ -98,6 +132,13 @@ impl<'a> GenericSettersCtx<'a> {
                 let uses_param = member_uses_generic_param(member, param_ident);
                 let index = syn::Index::from(idx);
                 if uses_param {
+                    // Add compile-time type state constraint
+                    let state_mod = &self.base.state_mod.ident;
+                    let field_pascal = &member.name.pascal;
+                    type_state_bounds.push(quote! {
+                        #state_var::#field_pascal: #state_mod::IsUnset
+                    });
+
                     // Add runtime assert that this field is None
                     let field_ident = &member.name.orig;
                     let message = format!("BUG: field `{field_ident}` should be None when converting generic parameter `{param_ident}`");
@@ -128,13 +169,35 @@ impl<'a> GenericSettersCtx<'a> {
             quote!(#ident: self.#ident,)
         });
 
+        // Extend where clause with type state bounds and update type parameter references
+        let extended_where_clause = {
+            let mut clause = where_clause.clone().unwrap_or_else(|| syn::WhereClause {
+                where_token: Where::default(),
+                predicates: Punctuated::default(),
+            });
+
+            for predicate in &mut clause.predicates {
+                replace_type_param_in_predicate(predicate, param_ident, &new_type_var);
+            }
+
+            for bound in type_state_bounds {
+                clause.predicates.push(syn::parse_quote!(#bound));
+            }
+
+            if clause.predicates.is_empty() {
+                None
+            } else {
+                Some(clause)
+            }
+        };
+
         quote! {
             #(#docs)*
             #[inline(always)]
             #vis fn #method_name<#new_type_param>(
                 self
             ) -> #builder_ident<#(#output_generic_args,)* #state_var>
-            #where_clause
+            #extended_where_clause
             {
                 let named = self.__unsafe_private_named;
 
@@ -188,6 +251,78 @@ impl<'a> GenericSettersCtx<'a> {
 
         vec![syn::parse_quote!(#[doc = #doc])]
     }
+}
+
+fn find_type_params_in_predicate<'b>(
+    predicate: &syn::WherePredicate,
+    type_params: &'b [&'b syn::Ident],
+) -> Vec<&'b syn::Ident> {
+    use syn::visit::Visit;
+
+    struct TypeParamFinder<'a> {
+        type_params: &'a [&'a syn::Ident],
+        found: std::collections::HashSet<&'a syn::Ident>,
+    }
+
+    impl<'ast> Visit<'ast> for TypeParamFinder<'_> {
+        fn visit_path(&mut self, path: &'ast syn::Path) {
+            // Check if this path is one of our type parameters
+            for &param in self.type_params {
+                if path.is_ident(param) {
+                    self.found.insert(param);
+                }
+            }
+            // Continue visiting nested paths
+            syn::visit::visit_path(self, path);
+        }
+    }
+
+    let mut finder = TypeParamFinder {
+        type_params,
+        found: std::collections::HashSet::new(),
+    };
+    finder.visit_where_predicate(predicate);
+    finder.found.into_iter().collect()
+}
+
+fn replace_type_param_in_predicate(
+    predicate: &mut syn::WherePredicate,
+    old_param: &syn::Ident,
+    new_param: &syn::Ident,
+) {
+    use syn::visit_mut::VisitMut;
+
+    struct TypeParamReplacer<'a> {
+        old_param: &'a syn::Ident,
+        new_param: &'a syn::Ident,
+    }
+
+    impl VisitMut for TypeParamReplacer<'_> {
+        fn visit_path_mut(&mut self, path: &mut syn::Path) {
+            // Replace simple paths like `T`
+            if path.is_ident(self.old_param) {
+                if let Some(segment) = path.segments.first_mut() {
+                    segment.ident = self.new_param.clone();
+                }
+            }
+            // Continue visiting nested paths
+            syn::visit_mut::visit_path_mut(self, path);
+        }
+
+        fn visit_type_path_mut(&mut self, type_path: &mut syn::TypePath) {
+            // Handle qualified paths like T::Assoc
+            if let Some(qself) = &mut type_path.qself {
+                self.visit_type_mut(&mut qself.ty);
+            }
+            self.visit_path_mut(&mut type_path.path);
+        }
+    }
+
+    let mut replacer = TypeParamReplacer {
+        old_param,
+        new_param,
+    };
+    replacer.visit_where_predicate_mut(predicate);
 }
 
 /// Check if a member's type uses a specific generic parameter
