@@ -25,6 +25,32 @@ impl<'a> GenericSettersCtx<'a> {
             })
             .collect();
 
+        // Check for interdependent type parameters in generic bounds
+        for param in generics.iter() {
+            if let syn::GenericParam::Type(type_param) = param {
+                let params_in_bounds =
+                    find_type_params_in_bounds(&type_param.bounds, &type_param_idents);
+                if params_in_bounds.len() > 1
+                    || (params_in_bounds.len() == 1 && params_in_bounds[0] != &type_param.ident)
+                {
+                    let params_str = params_in_bounds
+                        .iter()
+                        .map(|p| format!("`{p}`"))
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    bail!(
+                        &type_param.bounds,
+                        "generic conversion methods cannot be generated for interdependent type parameters; \
+                         the bounds on generic parameter `{}` reference other type parameters: {}\n\
+                         \n\
+                         Consider removing `generics(setters(...))` or restructuring your types to avoid interdependencies",
+                        type_param.ident,
+                        params_str
+                    );
+                }
+            }
+        }
+
         // Check for interdependent type parameters in where clauses
         if let Some(where_clause) = &self.base.generics.where_clause {
             for predicate in &where_clause.predicates {
@@ -251,6 +277,47 @@ impl<'a> GenericSettersCtx<'a> {
 
         vec![syn::parse_quote!(#[doc = #doc])]
     }
+}
+
+fn find_type_params_in_bounds<'b>(
+    bounds: &syn::punctuated::Punctuated<syn::TypeParamBound, syn::token::Plus>,
+    type_params: &'b [&'b syn::Ident],
+) -> Vec<&'b syn::Ident> {
+    use syn::visit::Visit;
+
+    struct TypeParamFinder<'a> {
+        type_params: &'a [&'a syn::Ident],
+        found: std::collections::HashSet<&'a syn::Ident>,
+    }
+
+    impl<'ast> Visit<'ast> for TypeParamFinder<'_> {
+        fn visit_path(&mut self, path: &'ast syn::Path) {
+            // Check if this path is one of our type parameters
+            for &param in self.type_params {
+                if path.is_ident(param) {
+                    self.found.insert(param);
+                }
+            }
+            // Continue visiting nested paths
+            syn::visit::visit_path(self, path);
+        }
+    }
+
+    let mut finder = TypeParamFinder {
+        type_params,
+        found: std::collections::HashSet::new(),
+    };
+
+    for bound in bounds {
+        finder.visit_type_param_bound(bound);
+    }
+
+    // Preserve the original order of type parameters for deterministic output
+    type_params
+        .iter()
+        .filter(|param| finder.found.contains(*param))
+        .copied()
+        .collect()
 }
 
 fn find_type_params_in_predicate<'b>(

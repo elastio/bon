@@ -1,0 +1,7 @@
+error: generic conversion methods cannot be generated for interdependent type parameters; the bounds on generic parameter `Iter` reference other type parameters: `Item`
+
+       Consider removing `generics(setters(...))` or restructuring your types to avoid interdependencies
+ --> tests/integration/ui/compile_fail/generics_setters/interdependent_param_bounds.rs:7:18
+  |
+7 | struct Sut<Iter: Iterator<Item = Item>, Item> {
+  |                  ^^^^^^^^
