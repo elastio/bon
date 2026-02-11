@@ -285,6 +285,10 @@ export default defineConfig({
                                     link: "/reference/builder/top-level/finish_fn",
                                 },
                                 {
+                                    text: "generics",
+                                    link: "/reference/builder/top-level/generics",
+                                },
+                                {
                                     text: "on",
                                     link: "/reference/builder/top-level/on",
                                 },

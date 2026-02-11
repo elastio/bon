@@ -1,0 +1,16 @@
+error[E0277]: the member `Set<value>` was already set, but this method requires it to be unset
+  --> tests/integration/ui/compile_fail/generics_setters/assoc_type.rs:28:10
+   |
+28 |         .conv_t::<bool>()
+   |          ^^^^^^ the member `Set<value>` was already set, but this method requires it to be unset
+   |
+   = help: the trait `IsUnset` is not implemented for `Set<value>`
+note: required by a bound in `AssocTypeFieldBuilder::<T, S>::conv_t`
+  --> tests/integration/ui/compile_fail/generics_setters/assoc_type.rs:18:10
+   |
+18 | #[derive(Builder)]
+   |          ^^^^^^^ required by this bound in `AssocTypeFieldBuilder::<T, S>::conv_t`
+19 | #[builder(generics(setters(name = "conv_{}")))]
+20 | struct AssocTypeField<T: MyTrait> {
+   |                       - required by a bound in this associated function
+   = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)

@@ -18,6 +18,8 @@ mod attr_top_level_start_fn;
 mod attr_with;
 mod cfgs;
 mod generics;
+#[cfg(feature = "experimental-generics-setters")]
+mod generics_setters;
 mod init_order;
 mod lints;
 mod many_params;

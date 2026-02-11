@@ -401,6 +401,8 @@ impl<'a> FnInputCtx<'a> {
             vis: self.config.builder_type.vis.map(SpannedKey::into_value),
         };
 
+        let generics_config = self.config.generics.map(SpannedKey::into_value);
+
         BuilderGenCtx::new(BuilderGenCtxParams {
             bon: self.config.bon,
             namespace: Cow::Borrowed(self.namespace),
@@ -413,6 +415,7 @@ impl<'a> FnInputCtx<'a> {
 
             assoc_method_ctx,
             generics,
+            generics_config,
             orig_item_vis: self.fn_item.norm.vis,
 
             builder_type,

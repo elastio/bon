@@ -1,0 +1,16 @@
+error[E0277]: the member `Set<value>` was already set, but this method requires it to be unset
+  --> tests/integration/ui/compile_fail/generics_setters/fn_pointer.rs:16:10
+   |
+16 |         .conv_t::<bool>()
+   |          ^^^^^^ the member `Set<value>` was already set, but this method requires it to be unset
+   |
+   = help: the trait `IsUnset` is not implemented for `Set<value>`
+note: required by a bound in `FnPointerFieldBuilder::<T, S>::conv_t`
+  --> tests/integration/ui/compile_fail/generics_setters/fn_pointer.rs:6:10
+   |
+ 6 | #[derive(Builder)]
+   |          ^^^^^^^ required by this bound in `FnPointerFieldBuilder::<T, S>::conv_t`
+ 7 | #[builder(generics(setters(name = "conv_{}")))]
+ 8 | struct FnPointerField<T> {
+   |                       - required by a bound in this associated function
+   = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
