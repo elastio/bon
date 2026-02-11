@@ -370,8 +370,6 @@ fn member_uses_generic_param(member: &super::NamedMember, param_ident: &syn::Ide
 
 /// Recursively check if a type uses a specific generic parameter
 fn type_uses_generic_param(ty: &syn::Type, param_ident: &syn::Ident) -> bool {
-    use syn::visit::Visit;
-
     struct GenericParamVisitor<'a> {
         param_ident: &'a syn::Ident,
         found: bool,
