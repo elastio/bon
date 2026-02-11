@@ -32,7 +32,7 @@ impl<'a> GenericSettersCtx<'a> {
                     find_type_params_in_bounds(&type_param.bounds, &type_param_idents);
                 if params_in_bounds.len() > 1
                     || (params_in_bounds.len() == 1
-                        && params_in_bounds.get(0) != Some(&&type_param.ident))
+                        && params_in_bounds.first() != Some(&&type_param.ident))
                 {
                     let params_str = params_in_bounds
                         .iter()
