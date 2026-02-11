@@ -1,16 +1,50 @@
-error[E0277]: the member `Set<value>` was already set, but this method requires it to be unset
-  --> tests/integration/ui/compile_fail/generics_setters/fn_pointer.rs:16:10
+error[E0277]: the member `Set<fn_pointer_field_in_out_builder::members::value>` was already set, but this method requires it to be unset
+  --> tests/integration/ui/compile_fail/generics_setters/fn_pointer.rs:27:10
    |
-16 |         .conv_t::<bool>()
-   |          ^^^^^^ the member `Set<value>` was already set, but this method requires it to be unset
+27 |         .conv_t::<bool>()
+   |          ^^^^^^ the member `Set<fn_pointer_field_in_out_builder::members::value>` was already set, but this method requires it to be unset
    |
-   = help: the trait `IsUnset` is not implemented for `Set<value>`
-note: required by a bound in `FnPointerFieldBuilder::<T, S>::conv_t`
+   = help: the trait `IsUnset` is not implemented for `Set<fn_pointer_field_in_out_builder::members::value>`
+note: required by a bound in `FnPointerFieldInOutBuilder::<T, S>::conv_t`
   --> tests/integration/ui/compile_fail/generics_setters/fn_pointer.rs:6:10
    |
  6 | #[derive(Builder)]
-   |          ^^^^^^^ required by this bound in `FnPointerFieldBuilder::<T, S>::conv_t`
+   |          ^^^^^^^ required by this bound in `FnPointerFieldInOutBuilder::<T, S>::conv_t`
  7 | #[builder(generics(setters(name = "conv_{}")))]
- 8 | struct FnPointerField<T> {
-   |                       - required by a bound in this associated function
+ 8 | struct FnPointerFieldInOut<T> {
+   |                            - required by a bound in this associated function
+   = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the member `Set<fn_pointer_field_in_builder::members::value>` was already set, but this method requires it to be unset
+  --> tests/integration/ui/compile_fail/generics_setters/fn_pointer.rs:32:10
+   |
+32 |         .conv_t::<bool>()
+   |          ^^^^^^ the member `Set<fn_pointer_field_in_builder::members::value>` was already set, but this method requires it to be unset
+   |
+   = help: the trait `IsUnset` is not implemented for `Set<fn_pointer_field_in_builder::members::value>`
+note: required by a bound in `FnPointerFieldInBuilder::<T, S>::conv_t`
+  --> tests/integration/ui/compile_fail/generics_setters/fn_pointer.rs:12:10
+   |
+12 | #[derive(Builder)]
+   |          ^^^^^^^ required by this bound in `FnPointerFieldInBuilder::<T, S>::conv_t`
+13 | #[builder(generics(setters(name = "conv_{}")))]
+14 | struct FnPointerFieldIn<T> {
+   |                         - required by a bound in this associated function
+   = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+error[E0277]: the member `Set<fn_pointer_field_out_builder::members::value>` was already set, but this method requires it to be unset
+  --> tests/integration/ui/compile_fail/generics_setters/fn_pointer.rs:37:10
+   |
+37 |         .conv_t::<bool>()
+   |          ^^^^^^ the member `Set<fn_pointer_field_out_builder::members::value>` was already set, but this method requires it to be unset
+   |
+   = help: the trait `IsUnset` is not implemented for `Set<fn_pointer_field_out_builder::members::value>`
+note: required by a bound in `FnPointerFieldOutBuilder::<T, S>::conv_t`
+  --> tests/integration/ui/compile_fail/generics_setters/fn_pointer.rs:18:10
+   |
+18 | #[derive(Builder)]
+   |          ^^^^^^^ required by this bound in `FnPointerFieldOutBuilder::<T, S>::conv_t`
+19 | #[builder(generics(setters(name = "conv_{}")))]
+20 | struct FnPointerFieldOut<T> {
+   |                          - required by a bound in this associated function
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)

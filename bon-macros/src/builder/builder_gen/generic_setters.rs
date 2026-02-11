@@ -1,8 +1,10 @@
 use super::models::BuilderGenCtx;
 use crate::parsing::ItemSigConfig;
 use crate::util::prelude::*;
+use std::collections::BTreeSet;
 use syn::punctuated::Punctuated;
 use syn::token::Where;
+use syn::visit::Visit;
 
 pub(super) struct GenericSettersCtx<'a> {
     base: &'a BuilderGenCtx,
@@ -28,19 +30,24 @@ impl<'a> GenericSettersCtx<'a> {
         // Check for interdependent type parameters in generic bounds
         for param in generics {
             if let syn::GenericParam::Type(type_param) = param {
-                let params_in_bounds =
-                    find_type_params_in_bounds(&type_param.bounds, &type_param_idents);
-                if params_in_bounds.len() > 1
-                    || (params_in_bounds.len() == 1
-                        && params_in_bounds.first() != Some(&&type_param.ident))
-                {
-                    let params_str = params_in_bounds
+                let mut params = TypeParamFinder::new(&type_param_idents);
+
+                for bound in &type_param.bounds {
+                    params.visit_type_param_bound(bound);
+                }
+
+                // Self-referential type params are fine
+                params.found.remove(&type_param.ident);
+
+                if let Some(first_param) = params.found.iter().next() {
+                    let params_str = params
+                        .found
                         .iter()
                         .map(|p| format!("`{p}`"))
                         .collect::<Vec<_>>()
                         .join(", ");
                     bail!(
-                        &type_param.bounds,
+                        first_param,
                         "generic conversion methods cannot be generated for interdependent type parameters; \
                          the bounds on generic parameter `{}` reference other type parameters: {}\n\
                          \n\
@@ -55,10 +62,11 @@ impl<'a> GenericSettersCtx<'a> {
         // Check for interdependent type parameters in where clauses
         if let Some(where_clause) = &self.base.generics.where_clause {
             for predicate in &where_clause.predicates {
-                let params_in_predicate =
-                    find_type_params_in_predicate(predicate, &type_param_idents);
-                if params_in_predicate.len() > 1 {
-                    let params_str = params_in_predicate
+                let mut params = TypeParamFinder::new(&type_param_idents);
+                params.visit_where_predicate(predicate);
+                if params.found.len() > 1 {
+                    let params_str = params
+                        .found
                         .iter()
                         .map(|p| format!("`{p}`"))
                         .collect::<Vec<_>>()
@@ -85,8 +93,9 @@ impl<'a> GenericSettersCtx<'a> {
                 syn::GenericParam::Const(const_param) => {
                     bail!(
                         &const_param.ident,
-                        "const generic parameters are not supported in `generics(setters(...))`; \
-                         only type parameters can be converted"
+                        "const generic parameters are not yet supported with `generics(setters(...))`; \
+                         only type parameters can be overridden, feel free to open an issue if you need \
+                         this feature"
                     );
                 }
                 syn::GenericParam::Lifetime(_) => {
@@ -122,8 +131,12 @@ impl<'a> GenericSettersCtx<'a> {
         let docs = self.method_docs(param_ident);
 
         // Build the generic arguments for the output type, where the current parameter
-        // is replaced with a new type variable
-        let new_type_var = self.base.namespace.unique_ident(param_ident.to_string());
+        // is replaced with a new type variable. Even though the `GenericsNamespace`
+        let new_type_var = self
+            .base
+            .namespace
+            // Add `New` prefix to make the type variable more readable in the docs and IDE hints
+            .unique_ident(format!("New{param_ident}"));
 
         // Copy the bounds from the original type parameter to the new one
         let bounds = &type_param.bounds;
@@ -168,7 +181,10 @@ impl<'a> GenericSettersCtx<'a> {
 
                     // Add runtime assert that this field is None
                     let field_ident = &member.name.orig;
-                    let message = format!("BUG: field `{field_ident}` should be None when converting generic parameter `{param_ident}`");
+                    let message = format!(
+                        "BUG: field `{field_ident}` should be None \
+                        when converting generic parameter `{param_ident}`"
+                    );
                     runtime_asserts.push(quote! {
                         ::core::assert!(named.#index.is_none(), #message);
                     });
@@ -211,11 +227,7 @@ impl<'a> GenericSettersCtx<'a> {
                 clause.predicates.push(syn::parse_quote!(#bound));
             }
 
-            if clause.predicates.is_empty() {
-                None
-            } else {
-                Some(clause)
-            }
+            (!clause.predicates.is_empty()).then(|| clause)
         };
 
         quote! {
@@ -280,82 +292,34 @@ impl<'a> GenericSettersCtx<'a> {
     }
 }
 
-fn find_type_params_in_bounds<'b>(
-    bounds: &Punctuated<syn::TypeParamBound, syn::token::Plus>,
-    type_params: &'b [&'b syn::Ident],
-) -> Vec<&'b syn::Ident> {
-    use syn::visit::Visit;
+struct TypeParamFinder<'ty, 'ast> {
+    type_params: &'ty [&'ty syn::Ident],
 
-    struct TypeParamFinder<'a> {
-        type_params: &'a [&'a syn::Ident],
-        found: std::collections::HashSet<&'a syn::Ident>,
-    }
-
-    impl<'ast> Visit<'ast> for TypeParamFinder<'_> {
-        fn visit_path(&mut self, path: &'ast syn::Path) {
-            // Check if this path is one of our type parameters
-            for &param in self.type_params {
-                if path.is_ident(param) {
-                    self.found.insert(param);
-                }
-            }
-            // Continue visiting nested paths
-            syn::visit::visit_path(self, path);
-        }
-    }
-
-    let mut finder = TypeParamFinder {
-        type_params,
-        found: std::collections::HashSet::new(),
-    };
-
-    for bound in bounds {
-        finder.visit_type_param_bound(bound);
-    }
-
-    // Preserve the original order of type parameters for deterministic output
-    type_params
-        .iter()
-        .filter(|param| finder.found.contains(*param))
-        .copied()
-        .collect()
+    // Use a `BTreeSet` for deterministic ordering
+    found: BTreeSet<&'ast syn::Ident>,
 }
 
-fn find_type_params_in_predicate<'b>(
-    predicate: &syn::WherePredicate,
-    type_params: &'b [&'b syn::Ident],
-) -> Vec<&'b syn::Ident> {
-    use syn::visit::Visit;
-
-    struct TypeParamFinder<'a> {
-        type_params: &'a [&'a syn::Ident],
-        found: std::collections::HashSet<&'a syn::Ident>,
-    }
-
-    impl<'ast> Visit<'ast> for TypeParamFinder<'_> {
-        fn visit_path(&mut self, path: &'ast syn::Path) {
-            // Check if this path is one of our type parameters
-            for &param in self.type_params {
-                if path.is_ident(param) {
-                    self.found.insert(param);
-                }
-            }
-            // Continue visiting nested paths
-            syn::visit::visit_path(self, path);
+impl<'ty> TypeParamFinder<'ty, '_> {
+    fn new(type_params: &'ty [&'ty syn::Ident]) -> Self {
+        Self {
+            type_params,
+            found: BTreeSet::new(),
         }
     }
+}
 
-    let mut finder = TypeParamFinder {
-        type_params,
-        found: std::collections::HashSet::new(),
-    };
-    finder.visit_where_predicate(predicate);
-    // Preserve the original order of type parameters for deterministic output
-    type_params
-        .iter()
-        .filter(|param| finder.found.contains(*param))
-        .copied()
-        .collect()
+impl<'ast> Visit<'ast> for TypeParamFinder<'_, 'ast> {
+    fn visit_path(&mut self, path: &'ast syn::Path) {
+        // Check if this path is one of our type parameters
+        if let Some(param) = path.get_ident() {
+            if self.type_params.contains(&param) {
+                self.found.insert(param);
+            }
+        }
+
+        // Continue visiting nested paths
+        syn::visit::visit_path(self, path);
+    }
 }
 
 fn replace_type_param_in_predicate(
