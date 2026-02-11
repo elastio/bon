@@ -26,12 +26,13 @@ impl<'a> GenericSettersCtx<'a> {
             .collect();
 
         // Check for interdependent type parameters in generic bounds
-        for param in generics.iter() {
+        for param in generics {
             if let syn::GenericParam::Type(type_param) = param {
                 let params_in_bounds =
                     find_type_params_in_bounds(&type_param.bounds, &type_param_idents);
                 if params_in_bounds.len() > 1
-                    || (params_in_bounds.len() == 1 && params_in_bounds[0] != &type_param.ident)
+                    || (params_in_bounds.len() == 1
+                        && params_in_bounds.get(0) != Some(&&type_param.ident))
                 {
                     let params_str = params_in_bounds
                         .iter()
@@ -280,7 +281,7 @@ impl<'a> GenericSettersCtx<'a> {
 }
 
 fn find_type_params_in_bounds<'b>(
-    bounds: &syn::punctuated::Punctuated<syn::TypeParamBound, syn::token::Plus>,
+    bounds: &Punctuated<syn::TypeParamBound, syn::token::Plus>,
     type_params: &'b [&'b syn::Ident],
 ) -> Vec<&'b syn::Ident> {
     use syn::visit::Visit;
