@@ -282,7 +282,12 @@ fn find_type_params_in_predicate<'b>(
         found: std::collections::HashSet::new(),
     };
     finder.visit_where_predicate(predicate);
-    finder.found.into_iter().collect()
+    // Preserve the original order of type parameters for deterministic output
+    type_params
+        .iter()
+        .filter(|param| finder.found.contains(*param))
+        .copied()
+        .collect()
 }
 
 fn replace_type_param_in_predicate(

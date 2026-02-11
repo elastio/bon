@@ -42,7 +42,7 @@ Configures the generic parameter conversion methods.
 
 ### `name`
 
-**Required.** A pattern string where `{}` will be replaced with the snake_case name of each generic parameter. For example, with generic parameters `<TData, TError>` and pattern `"with_{}"`, methods `with_t_data()` and `with_t_error()` will be generated.
+**Required.** A pattern string where `{}` will be replaced with the `snake_case` name of each generic parameter. For example, with generic parameters `<TData, TError>` and pattern `"with_{}"`, methods `with_t_data()` and `with_t_error()` will be generated.
 
 ### `vis`
 
