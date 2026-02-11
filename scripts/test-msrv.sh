@@ -35,6 +35,7 @@ with_log cd bon
 step echo '[workspace]' >> Cargo.toml
 
 step cargo update --precise 0.21.3  -p darling
+step cargo update --precise 1.0.22  -p unicode-ident
 step cargo update --precise 1.0.15  -p itoa
 step cargo update --precise 1.0.101 -p proc-macro2
 step cargo update --precise 1.0.40  -p quote
