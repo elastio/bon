@@ -183,6 +183,19 @@ impl TopLevelConfig {
             ..Self::from_list(&configs)?
         };
 
+        if let Some(generics) = &me.generics {
+            if generics.setters.is_some() {
+                if let Some(const_) = &me.const_ {
+                    bail!(
+                        const_,
+                        "`generics(setters(...))` cannot be used together with `const` \
+                         functions; if you have a use case for this, consider opening an \
+                         issue to discuss it!"
+                    );
+                }
+            }
+        }
+
         if let Some(on) = me.on.iter().skip(1).find(|on| on.required.is_present()) {
             bail!(
                 &on.required.span(),
