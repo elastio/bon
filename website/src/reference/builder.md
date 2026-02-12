@@ -13,6 +13,7 @@ These attributes are placed on top of a `struct` or `fn` declaration.
 | [`crate`](./builder/top-level/crate)               | Overrides path to `bon` crate referenced in the generated code                                       |
 | [`derive`](./builder/top-level/derive)             | Generates additional derives for the builder struct itself                                           |
 | [`finish_fn`](./builder/top-level/finish_fn)       | Overrides name, visibility and docs for the finishing function                                       |
+| [`generics` 🔬](./builder/top-level/generics)      | Generates methods to overwrite generic type parameters                                               |
 | [`on`](./builder/top-level/on)                     | Applies member attributes to all members matching a type pattern                                     |
 | [`start_fn`](./builder/top-level/start_fn)         | Overrides name, visibility and docs for the starting function                                        |
 | [`state_mod`](./builder/top-level/state_mod)       | Overrides name, visibility and docs for the builder's [typestate API](../guide/typestate-api) module |

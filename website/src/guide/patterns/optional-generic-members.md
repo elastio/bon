@@ -112,3 +112,5 @@ fn bad<T: Into<String>>(x1: Option<T>) {
 So, the builder has to carry the generic parameter `T` in its type for you to be able to use that type in your function body to merely invoke `Into::into` on a parameter. Instead, strive to do such conversions in setters.
 
 If you are doing a conversion with something other than `Into`, then use [`#[builder(with)]`](../../reference/builder/member/with) to apply the same technique for getting rid of generic parameters _early_.
+
+See also another, more complex solution to this problem with [`#[builder(generics(setters))]`](../../reference/builder/top-level/generics#no-turbofish-optional-generic-members).
