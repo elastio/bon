@@ -108,6 +108,9 @@ mod on {
 
         let value = builder.build();
 
-        assert_debug_eq(value, expect!["Sut { a: 2, b: Some(4), c: 6, d: 7 }"]);
+        assert_debug_eq(
+            value,
+            expect!["Sut { a: 2, b: Some(4), c: 6, d: 7, e: Some(8) }"],
+        );
     }
 }
