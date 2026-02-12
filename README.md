@@ -204,40 +204,7 @@ bon = "3.8"
 
 You can opt out of `std` and `alloc` cargo features with `default-features = false` for `no_std` environments.
 
-## Acknowledgments
-
-This project was heavily inspired by such awesome crates as [`buildstructor`](https://docs.rs/buildstructor), [`typed-builder`](https://docs.rs/typed-builder) and [`derive_builder`](https://docs.rs/derive_builder). This crate was designed with many lessons learned from them.
-
 See [alternatives](https://bon-rs.com/guide/alternatives) for comparison.
-
-## Supporters
-
-<div align="center">
-
-Big thanks to `bon`'s current financial supporters ❤️
-
-**Ethan Skowronski**\
-<sup><code>$1/month</code></sup>
-
-**Julius Lungys**\
-<sup><code>$1/month</code></sup>
-
-</div>
-
-## Past Supporters
-
-<div align="center">
-
-Big thanks to `bon`'s past financial supporters ❤️
-
-[![](https://github.com/user-attachments/assets/b0acb844-4b91-461c-95ae-90a601296500)](https://kindness.ai)\
-[**Kindness**](https://kindness.ai)
-
-</div>
-
-## Who's Using `bon`?
-
-Some notable open-source users: [`crates.io` backend](https://github.com/rust-lang/crates.io), [`tantivy`](https://github.com/quickwit-oss/tantivy), [`apache-avro`](https://github.com/apache/avro-rs), [`google-cloud-auth`](https://github.com/googleapis/google-cloud-rust), [`comrak`](https://github.com/kivikakk/comrak), [`ractor`](https://github.com/slawlor/ractor).
 
 ## Getting Help
 
@@ -253,6 +220,34 @@ If you can't figure something out, consult the docs and maybe use the `🔍 Sear
     </tr>
 </tbody>
 </table>
+
+## Acknowledgments
+
+This project was heavily inspired by such awesome crates as [`buildstructor`](https://docs.rs/buildstructor), [`typed-builder`](https://docs.rs/typed-builder) and [`derive_builder`](https://docs.rs/derive_builder). This crate was designed with many lessons learned from them.
+
+## Supporters
+
+<div align="center">
+
+Big thanks to `bon`'s current financial supporters ❤️
+
+**Julius Lungys**\
+<sup><code>$1/month</code></sup>
+
+</div>
+
+## Past Supporters
+
+<div align="center">
+
+Big thanks to `bon`'s past financial supporters ❤️
+
+[![](https://github.com/user-attachments/assets/b0acb844-4b91-461c-95ae-90a601296500)](https://kindness.ai)\
+[**Kindness**](https://kindness.ai)
+
+**Ethan Skowronski**
+
+</div>
 
 ## License
 
