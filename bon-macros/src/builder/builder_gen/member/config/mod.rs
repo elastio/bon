@@ -231,14 +231,6 @@ impl MemberConfig {
             );
         }
 
-        if let Some(getter) = &self.getter {
-            self.validate_mutually_exclusive(
-                ParamName::Getter,
-                getter.key.span(),
-                &[ParamName::Overwritable],
-            )?;
-        }
-
         if self.start_fn.is_present() {
             self.validate_mutually_allowed(
                 ParamName::StartFn,

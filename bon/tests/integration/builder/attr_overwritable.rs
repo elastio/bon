@@ -93,11 +93,21 @@ mod on {
 
             #[builder(default)]
             c: u32,
+
+            #[builder(getter)]
+            d: u32,
+
+            #[builder(getter)]
+            e: Option<u32>,
         }
 
-        assert_debug_eq(
-            Sut::builder().a(1).a(2).b(3).b(4).c(5).c(6).build(),
-            expect!["Sut { a: 2, b: Some(4), c: 6 }"],
-        );
+        let builder = Sut::builder().a(1).a(2).b(3).b(4).c(5).c(6).d(7).e(8);
+
+        assert_debug_eq(builder.get_d(), expect!["7"]);
+        assert_debug_eq(builder.get_e(), expect!["Some(8)"]);
+
+        let value = builder.build();
+
+        assert_debug_eq(value, expect!["Sut { a: 2, b: Some(4), c: 6, d: 7 }"]);
     }
 }
