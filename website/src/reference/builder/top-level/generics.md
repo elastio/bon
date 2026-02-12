@@ -104,7 +104,7 @@ assert_eq!(example.1, 42_u32);
 ## No-Turbofish Optional Generic Members
 
 This feature can be used to provide default values for generic types that can be overwritten with a setter.
-This is one of the solutions for the [optional generic members turbofish problem](http://localhost:5173/guide/patterns/optional-generic-members).
+This is one of the solutions for the [optional generic members turbofish problem](../../../guide/patterns/optional-generic-members).
 It's quite verbose at definition site, so it should be used as a last resort. You may also wrap this pattern with your own macro if you are going to use it alot.
 
 ::: tip NOTE
