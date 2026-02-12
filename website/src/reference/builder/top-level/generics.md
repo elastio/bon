@@ -1,8 +1,8 @@
-# `generics` 🔬
+# `generics` :microscope:
 
 **Applies to:** <Badge text="structs"/> <Badge text="functions"/> <Badge text="methods"/>
 
-::: danger 🔬 Experimental
+::: danger 🔬 **Experimental**
 
 This attribute is available under the cargo feature `experimental-generics-setters`. Breaking changes may occur between **minor** releases but not between patch releases.
 
