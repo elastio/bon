@@ -60,6 +60,13 @@ impl<'a> GettersCtx<'a> {
         // be treated as totally different symbols due to the hygiene rules.
         let self_ = quote!(self);
 
+        let where_clause = self.member.is_stateful().then(|| {
+            quote! {
+                where
+                    #state_var::#member_pascal: #state_mod::IsSet,
+            }
+        });
+
         Ok(quote_spanned! {self.member.span=>
             #( #docs )*
             #[allow(
@@ -70,8 +77,7 @@ impl<'a> GettersCtx<'a> {
             #[inline(always)]
             #[must_use = "this method has no side effects; it only returns a value"]
             #(#fn_modifiers)* fn #name(&#self_) -> #return_ty
-            where
-                #state_var::#member_pascal: #state_mod::IsSet,
+            #where_clause
             {
                 #body
             }
