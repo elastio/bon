@@ -5,14 +5,35 @@ use bon::Builder;
 
 #[derive(Builder)]
 #[builder(generics(setters(name = "conv_{}")))]
-struct FnPointerField<T> {
+struct FnPointerFieldInOut<T> {
     value: fn(T) -> T,
 }
 
+#[derive(Builder)]
+#[builder(generics(setters(name = "conv_{}")))]
+struct FnPointerFieldIn<T> {
+    value: fn(T),
+}
+
+#[derive(Builder)]
+#[builder(generics(setters(name = "conv_{}")))]
+struct FnPointerFieldOut<T> {
+    value: fn() -> T,
+}
+
 fn main() {
-    // Test fn(T) -> T - can't change type after setting field
-    FnPointerField::<()>::builder()
-        .value(|x| x)
+    FnPointerFieldInOut::<()>::builder()
+        .value(|()| ())
+        .conv_t::<bool>()
+        .build();
+
+    FnPointerFieldIn::<()>::builder()
+        .value(|()| ())
+        .conv_t::<bool>()
+        .build();
+
+    FnPointerFieldOut::<()>::builder()
+        .value(|| ())
         .conv_t::<bool>()
         .build();
 }
