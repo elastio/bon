@@ -1,6 +1,6 @@
 [package]
 name    = "bon-sandbox"
-version = "3.8.2"
+version = "3.9.0"
 
 description = """
   Not a real crate! It's just a showcase of examples used by `bon`'s documentation
@@ -36,4 +36,4 @@ typed-builder  = "0.23"
 [dependencies.bon]
 features = ["experimental-overwritable", "experimental-generics-setters"]
 path     = "../bon"
-version  = "=3.8.2"
+version  = "=3.9.0"
