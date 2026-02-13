@@ -293,5 +293,5 @@ This is implemented as a cargo feature to make sure `bon` maintains a lower MSRV
 
 ```toml
 [dependencies]
-bon = { version = "3.8", features = ["implied-bounds"] }
+bon = { version = "3.9", features = ["implied-bounds"] }
 ```
