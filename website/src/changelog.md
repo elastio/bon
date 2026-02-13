@@ -5,14 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [3.8.3](https://github.com/elastio/bon/compare/v3.8.2...v3.8.3) - 2026-02-13
+## [3.9.0](https://github.com/elastio/bon/compare/v3.8.2...v3.9.0) - 2026-02-13
 
-### Other
+### Added
 
+- Introduce a new experimental attribute [`builder(generics(setters))`](https://bon-rs.com/reference/builder/top-level/generics) for overwriting generic types on the builder. ([#364](https://github.com/elastio/bon/pull/364), [#368](https://github.com/elastio/bon/pull/368), [#370](https://github.com/elastio/bon/pull/370)). Thanks [@dflemstr](https://github.com/dflemstr) for the contribution!
 - Support `builder(overwritable)` with `builder(getter)` ([#369](https://github.com/elastio/bon/pull/369))
-- Actualize readme ([#365](https://github.com/elastio/bon/pull/365))
-- Veetaha's followup for `#[builder(generics(setters))]` ([#368](https://github.com/elastio/bon/pull/368))
-- Add support for setters that change the builder type ([#364](https://github.com/elastio/bon/pull/364))
+
+### Internal
+
+- Regular maintenance ([#365](https://github.com/elastio/bon/pull/365))
 
 ## [3.8.2](https://github.com/elastio/bon/compare/v3.8.1...v3.8.2) - 2026-01-08
 
