@@ -213,6 +213,21 @@ fn fn_generic_default() {
     sut::<(), ()>().call();
 }
 
+#[test]
+fn different_generic_with_default() {
+    #[derive(Builder)]
+    struct Sut<A> {
+        #[builder(default)]
+        x1: A,
+    }
+
+    #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+    struct B;
+
+    let result = Sut::<B>::builder().build();
+    assert_eq!(result.x1, B);
+}
+
 mod interaction_with_positional_members {
     use crate::prelude::*;
     use core::fmt;

@@ -168,3 +168,32 @@ fn test_with_trait_bounds_false_friend() {
         .build();
     assert_eq!(result2.value, 99u64);
 }
+
+#[test]
+fn test_with_default_on_generic_field() {
+    trait MyTrait {}
+
+    #[derive(Debug, PartialEq, Default)]
+    struct MyImplWithDefault;
+    impl MyTrait for MyImplWithDefault {}
+
+    #[derive(Debug, PartialEq, Default)]
+    struct MyOtherImpl;
+    impl MyTrait for MyOtherImpl {}
+
+    #[derive(Builder)]
+    #[builder(generics(setters = "conv_{}"))]
+    struct Sut<A: MyTrait> {
+        #[builder(default)]
+        value: A,
+    }
+
+    let result = Sut::<MyImplWithDefault>::builder().build();
+    assert_eq!(result.value, MyImplWithDefault);
+
+    let result = Sut::<MyImplWithDefault>::builder()
+        .conv_a::<MyOtherImpl>()
+        .value(MyOtherImpl)
+        .build();
+    assert_eq!(result.value, MyOtherImpl);
+}

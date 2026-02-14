@@ -132,6 +132,21 @@ impl super::BuilderGenCtx {
             }
         });
 
+        // Collect `Default` bounds for members with bare `#[builder(default)]`
+        // (no explicit default value). This allows us to set the required
+        // default implementations on the builder method, rather than reusing
+        // the bounds on the struct (which might require over-specifying bounds).
+        let default_bounds = self.named_members().filter_map(|member| {
+            let has_bare_default = matches!(
+                member.config.default.as_ref(),
+                Some(default) if default.value.is_none()
+            );
+            has_bare_default.then(|| {
+                let ty = &member.ty.norm;
+                quote! { #ty: ::core::default::Default }
+            })
+        });
+
         let state_mod = &self.state_mod.ident;
 
         let finish_fn_params = self.finish_fn_args().map(PosFnMember::fn_input_param);
@@ -181,7 +196,8 @@ impl super::BuilderGenCtx {
                 #(#finish_fn_params,)*
             ) #output
             where
-                #state_var: #state_mod::IsComplete
+                #state_var: #state_mod::IsComplete,
+                #(#default_bounds,)*
             {
                 #(#members_vars_decls)*
                 #body
