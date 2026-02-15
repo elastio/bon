@@ -228,6 +228,73 @@ fn different_generic_with_default() {
     assert_eq!(result.x1, B);
 }
 
+#[test]
+fn default_bound_not_required_when_provided() {
+    trait MyDefault {
+        fn my_default() -> Self;
+    }
+
+    #[derive(Debug, PartialEq)]
+    struct NotDefault(u32);
+
+    impl MyDefault for NotDefault {
+        fn my_default() -> Self {
+            NotDefault(42)
+        }
+    }
+
+    #[derive(Builder)]
+    struct Sut<A: MyDefault> {
+        #[builder(default = A::my_default())]
+        x1: A,
+    }
+
+    let result = Sut::<NotDefault>::builder().build();
+    assert_eq!(result.x1, NotDefault(42));
+}
+
+#[test]
+fn generic_type_which_always_implements_default_compiles() {
+    #[derive(Builder)]
+    struct Sut<A> {
+        #[builder(default)]
+        items: Vec<A>,
+    }
+
+    let result = Sut::<String>::builder().build();
+    assert!(result.items.is_empty());
+
+    let result = Sut::<u32>::builder().items(vec![1, 2, 3]).build();
+    assert_eq!(result.items, vec![1, 2, 3]);
+}
+
+#[test]
+fn generic_type_only_requires_default_on_fields_with_default() {
+    #[derive(Builder)]
+    struct Sut<A, B> {
+        required: A,
+
+        #[builder(default)]
+        optional2: B,
+
+        #[builder(default)]
+        optional: B,
+    }
+
+    #[derive(Debug, PartialEq)]
+    struct NotDefault;
+
+    #[derive(Debug, PartialEq, Default)]
+    struct HasDefault;
+
+    let result = Sut::<NotDefault, HasDefault>::builder()
+        .required(NotDefault)
+        .build();
+
+    assert_eq!(result.required, NotDefault);
+    assert_eq!(result.optional, HasDefault);
+}
+
 mod interaction_with_positional_members {
     use crate::prelude::*;
     use core::fmt;

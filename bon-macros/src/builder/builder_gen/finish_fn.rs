@@ -136,16 +136,29 @@ impl super::BuilderGenCtx {
         // (no explicit default value). This allows us to set the required
         // default implementations on the builder method, rather than reusing
         // the bounds on the struct (which might require over-specifying bounds).
-        let default_bounds = self.named_members().filter_map(|member| {
-            let has_bare_default = matches!(
-                member.config.default.as_ref(),
-                Some(default) if default.value.is_none()
-            );
-            has_bare_default.then(|| {
-                let ty = &member.ty.norm;
+
+        let type_params: Vec<_> = self
+            .generics
+            .decl_without_defaults
+            .iter()
+            .filter_map(|decl| match decl {
+                syn::GenericParam::Type(type_param) => Some(&type_param.ident),
+                _ => None,
+            })
+            .collect();
+
+        let mut seen_default_generic_types = std::collections::HashSet::new();
+        let default_bounds: Vec<_> = self.named_members().filter_map(|member| {
+            if !matches!(member.config.default.as_ref(), Some(default) if default.value.is_none()) {
+                return None;
+            }
+            let ty = &member.ty.norm;
+            let uses_generic = super::generic_setters::type_uses_generic_params(ty, &type_params);
+
+            (uses_generic && seen_default_generic_types.insert(ty)).then(|| {
                 quote! { #ty: ::core::default::Default }
             })
-        });
+        }).collect();
 
         let state_mod = &self.state_mod.ident;
 

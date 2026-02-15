@@ -365,13 +365,13 @@ fn replace_type_param_in_predicate(
 /// Check if a member's type uses a specific generic parameter
 fn member_uses_generic_param(member: &super::NamedMember, param_ident: &syn::Ident) -> bool {
     let member_ty = member.underlying_norm_ty();
-    type_uses_generic_param(member_ty, param_ident)
+    type_uses_generic_params(member_ty, &[param_ident])
 }
 
-/// Recursively check if a type uses a specific generic parameter
-fn type_uses_generic_param(ty: &syn::Type, param_ident: &syn::Ident) -> bool {
+/// Recursively check if a type uses any of the given generic type parameters
+pub(super) fn type_uses_generic_params(ty: &syn::Type, param_idents: &[&syn::Ident]) -> bool {
     struct GenericParamVisitor<'a> {
-        param_ident: &'a syn::Ident,
+        param_idents: &'a [&'a syn::Ident],
         found: bool,
     }
 
@@ -382,8 +382,12 @@ fn type_uses_generic_param(ty: &syn::Type, param_ident: &syn::Ident) -> bool {
                 return;
             }
 
-            // Check if the path is the generic parameter we're looking for
-            if type_path.path.is_ident(self.param_ident) {
+            // Check if the path is one of the generic parameters we're looking for
+            if type_path
+                .path
+                .get_ident()
+                .map_or(false, |ident| self.param_idents.contains(&ident))
+            {
                 self.found = true;
                 return;
             }
@@ -396,7 +400,7 @@ fn type_uses_generic_param(ty: &syn::Type, param_ident: &syn::Ident) -> bool {
                 self.visit_type(&qself.ty);
             } else if let Some(segment) = type_path.path.segments.first() {
                 // For T::Assoc syntax
-                if segment.ident == *self.param_ident {
+                if self.param_idents.contains(&&segment.ident) {
                     self.found = true;
                     return;
                 }
@@ -408,7 +412,7 @@ fn type_uses_generic_param(ty: &syn::Type, param_ident: &syn::Ident) -> bool {
     }
 
     let mut visitor = GenericParamVisitor {
-        param_ident,
+        param_idents,
         found: false,
     };
     visitor.visit_type(ty);
