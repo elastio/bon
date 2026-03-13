@@ -7,10 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.9.1](https://github.com/elastio/bon/compare/v3.9.0...v3.9.1) - 2026-03-13
 
-### Other
+This is purely a minutae update with zero changes to the Rust API. Enjoy the stability 🍸.
+
+### Fixed
+
+- Redistribute license files with the crates sources ([#376](https://github.com/elastio/bon/pull/376))
+
+### Internal
 
 - Maintenance tests and dependencies update ([#377](https://github.com/elastio/bon/pull/377))
-- Redistribute license files with the crates sources ([#376](https://github.com/elastio/bon/pull/376))
 
 ## [3.9.0](https://github.com/elastio/bon/compare/v3.8.2...v3.9.0) - 2026-02-13
 
