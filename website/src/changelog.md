@@ -15,7 +15,7 @@ This is purely a minutae update with zero changes to the Rust API. Enjoy the sta
 
 ### Internal
 
-- Maintenance tests and dependencies update ([#377](https://github.com/elastio/bon/pull/377))
+- Regular maintenance ([#377](https://github.com/elastio/bon/pull/377))
 
 ## [3.9.0](https://github.com/elastio/bon/compare/v3.8.2...v3.9.0) - 2026-02-13
 
