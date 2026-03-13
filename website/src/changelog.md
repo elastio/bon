@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.9.1](https://github.com/elastio/bon/compare/v3.9.0...v3.9.1) - 2026-03-13
 
-This is purely a minutae update with zero changes to the Rust API. Enjoy the stability 🍸.
+This is purely a minutiae update with zero changes to the Rust API. Enjoy the stability 🍸.
 
 ### Fixed
 
