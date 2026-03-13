@@ -1,4 +1,4 @@
-error: Unknown field: `attrs`. Available values: `crate`
+error: Unknown field: `attrs`
  --> tests/integration/ui/compile_fail/attr_bon.rs:5:7
   |
 5 | #[bon(attrs)]
