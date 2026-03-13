@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.9.1](https://github.com/elastio/bon/compare/v3.9.0...v3.9.1) - 2026-03-13
+
+This is purely a minutiae update with zero changes to the Rust API. Enjoy the stability 🍸.
+
+### Fixed
+
+- Redistribute license files with the crates sources ([#376](https://github.com/elastio/bon/pull/376))
+
+### Internal
+
+- Regular maintenance ([#377](https://github.com/elastio/bon/pull/377))
+
 ## [3.9.0](https://github.com/elastio/bon/compare/v3.8.2...v3.9.0) - 2026-02-13
 
 ### Added
