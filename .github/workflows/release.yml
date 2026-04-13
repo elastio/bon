@@ -18,16 +18,16 @@ jobs:
   release-rust-crates:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           # Needed to clone all the git history, which is necessary to determine
           # the next version and build the changelog.
           fetch-depth: 0
 
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - uses: actions-rust-lang/setup-rust-toolchain@150fca883cd4034361b621bd4e6a9d34e5143606 # v1.15.4
 
       # This is configured with trusted publishing from Github to crates.io
-      - uses: MarcoIeni/release-plz-action@v0.5
+      - uses: MarcoIeni/release-plz-action@1528104d2ca23787631a1c1f022abb64b34c1e11 # v0.5.128
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
