@@ -12,8 +12,8 @@ for bench in $benches; do
 
     # If vscode is present, show diff:
     if command -v code; then
-        cargo asm --features "$bench" --no-color "runtime_benchmarks::$bench::builder_bench" > builder.dbg.s || true
-        cargo asm --features "$bench" --no-color "runtime_benchmarks::$bench::regular_bench" > regular.dbg.s || true
+        cargo asm --features "$bench" -p runtime-benchmarks --lib --no-color "runtime_benchmarks::$bench::builder_bench" > builder.dbg.s || true
+        cargo asm --features "$bench" -p runtime-benchmarks --lib --no-color "runtime_benchmarks::$bench::regular_bench" > regular.dbg.s || true
 
         code --diff regular.dbg.s builder.dbg.s
     fi
