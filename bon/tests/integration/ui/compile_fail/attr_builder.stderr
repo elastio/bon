@@ -93,21 +93,5 @@ error: found multiple #[track_caller], but bon only works with exactly one or ze
 error: found multiple #[target_feature], but bon only works with exactly one or zero.
   --> tests/integration/ui/compile_fail/attr_builder.rs:77:1
    |
-77 | #[target_feature(enable = "")]
+77 | #[target_feature(enable = "avx2")]
    | ^
-
-error: the feature named `` is not valid for this target
-  --> tests/integration/ui/compile_fail/attr_builder.rs:76:18
-   |
-76 | #[target_feature(enable = "")]
-   |                  ^^^^^^^^^^^ `` is not valid for this target
-   |
-   = help: valid names are: `kl`, `adx`, `aes`, `avx`, and `fma` and 74 more
-
-error: the feature named `` is not valid for this target
-  --> tests/integration/ui/compile_fail/attr_builder.rs:77:18
-   |
-77 | #[target_feature(enable = "")]
-   |                  ^^^^^^^^^^^ `` is not valid for this target
-   |
-   = help: valid names are: `kl`, `adx`, `aes`, `avx`, and `fma` and 74 more

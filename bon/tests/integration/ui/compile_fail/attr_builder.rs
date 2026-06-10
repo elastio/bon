@@ -73,6 +73,6 @@ fn destructuring2((_, _): (u32, u32)) {}
 #[track_caller]
 fn double_track_caller() {}
 #[builder]
-#[target_feature(enable = "")]
-#[target_feature(enable = "")]
+#[target_feature(enable = "avx2")]
+#[target_feature(enable = "avx2")]
 fn double_invalid_target_feature() {}
