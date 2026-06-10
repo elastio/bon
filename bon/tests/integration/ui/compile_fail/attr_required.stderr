@@ -52,18 +52,19 @@ help: there is a method `some_member` with a similar name
 39 +     let _ = Valid::builder().some_member(Some(()));
    |
 
-error[E0277]: the member `Unset<arg1>` was not set, but this method requires it to be set
+error[E0277]: the member `bon::__::Unset<arg1>` was not set, but this method requires it to be set
   --> tests/integration/ui/compile_fail/attr_required.rs:51:32
    |
 51 |         let _ = Sut::builder().build();
-   |                                ^^^^^ the member `Unset<arg1>` was not set, but this method requires it to be set
+   |                                ^^^^^ the member `bon::__::Unset<arg1>` was not set, but this method requires it to be set
    |
-   = help: the trait `IsSet` is not implemented for `Unset<arg1>`
+   = help: the trait `bon::__::IsSet` is not implemented for `bon::__::Unset<arg1>`
 note: required for `sut_builder::Empty` to implement `sut_builder::IsComplete`
   --> tests/integration/ui/compile_fail/attr_required.rs:45:18
    |
 45 |         #[derive(Builder)]
-   |                  ^^^^^^^ unsatisfied trait bound introduced in this `derive` macro
+   |                  ^^^^^^^ type parameter would need to implement `sut_builder::IsComplete`
+   = help: consider manually implementing `sut_builder::IsComplete` to avoid undesired bounds
 note: required by a bound in `SutBuilder::<S>::build`
   --> tests/integration/ui/compile_fail/attr_required.rs:45:18
    |
