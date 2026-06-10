@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.9.2](https://github.com/elastio/bon/compare/v3.9.1...v3.9.2) - 2026-06-10
 
-### Other
+### Fixed
 
-- [Maintenance] Update dependencies 2026-06-10 ([#381](https://github.com/elastio/bon/pull/381)) ([#386](https://github.com/elastio/bon/pull/386))
 - Fix rust-analyzer "Go to Definition" inside `#[builder]` functions ([#385](https://github.com/elastio/bon/pull/385))
+
+### Internal
+
+- Regular maintenance ([#381](https://github.com/elastio/bon/pull/381), [#386](https://github.com/elastio/bon/pull/386), [#379](https://github.com/elastio/bon/pull/379))
 
 ## [3.9.1](https://github.com/elastio/bon/compare/v3.9.0...v3.9.1) - 2026-03-13
 
