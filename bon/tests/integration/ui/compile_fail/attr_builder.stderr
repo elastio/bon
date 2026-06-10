@@ -93,5 +93,5 @@ error: found multiple #[track_caller], but bon only works with exactly one or ze
 error: found multiple #[target_feature], but bon only works with exactly one or zero.
   --> tests/integration/ui/compile_fail/attr_builder.rs:77:1
    |
-77 | #[target_feature(enable = "avx2")]
+77 | #[target_feature(enable = "aes")]
    | ^
