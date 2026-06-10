@@ -2,7 +2,6 @@
 //! and attaches the content of the file as a doc attribute to the module so that
 //! the we can test the rust example snippets in the website with `cargo test --doc`.
 
-use itertools::Itertools;
 use std::path::PathBuf;
 use walkdir::DirEntry;
 
@@ -11,7 +10,7 @@ fn main() {
 
     println!("cargo::rerun-if-changed={website}");
 
-    let doc_tests = walkdir::WalkDir::new(website)
+    let mut doc_tests = walkdir::WalkDir::new(website)
         .into_iter()
         .filter_entry(|entry| !is_hidden(entry))
         .map(|entry| {
@@ -26,7 +25,12 @@ fn main() {
                 && !entry.path().starts_with("../src/v2")
         })
         .map(DirEntry::into_path)
-        .sorted_unstable()
+        .collect::<Vec<_>>();
+
+    doc_tests.sort_unstable();
+
+    let doc_tests = doc_tests
+        .into_iter()
         .map(|path| {
             let test_name = path
                 .iter()
@@ -38,6 +42,7 @@ fn main() {
                         .replace(['.', '-'], "_")
                         .to_lowercase()
                 })
+                .collect::<Vec<_>>()
                 .join("_");
 
             let doc = std::fs::read_to_string(&path).unwrap();
@@ -48,11 +53,26 @@ fn main() {
                 .lines()
                 .map(|line| {
                     if !line.contains("```") {
-                        return line.into();
+                        return line.to_owned();
                     }
 
-                    lazy_regex::regex_replace_all!(r"\[.*?\]", line, "")
+                    let mut in_brackets = false;
+
+                    line.chars()
+                        .filter(|&c| match c {
+                            '[' => {
+                                in_brackets = true;
+                                false
+                            }
+                            ']' => {
+                                in_brackets = false;
+                                false
+                            }
+                            _ => !in_brackets,
+                        })
+                        .collect()
                 })
+                .collect::<Vec<_>>()
                 .join("\n");
 
             format!(

@@ -1,10 +1,4 @@
-#![allow(
-    missing_docs,
-
-    // Allowing unsafe code due to this issue in gungraun:
-    // https://github.com/gungraun/gungraun/issues/490
-    unsafe_code,
-)]
+#![allow(missing_docs)]
 use gungraun::{library_benchmark, library_benchmark_group, main};
 
 #[library_benchmark]
