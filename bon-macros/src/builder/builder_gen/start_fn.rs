@@ -109,10 +109,7 @@ impl super::BuilderGenCtx {
             format_ident!("elidable_lifetime_names")
         };
 
-        // Construct using a span which links to our original implementation.
-        // This ensures rustdoc doesn't just link every method to the macro
-        // callsite.
-        syn::parse_quote_spanned! {self.start_fn.span=>
+        let mut start_fn: syn::ItemFn = syn::parse_quote! {
             #(#docs)*
             #[inline(always)]
             #[allow(
@@ -143,6 +140,13 @@ impl super::BuilderGenCtx {
                     __unsafe_private_named: #named_members_field_init,
                 }
             }
-        }
+        };
+
+        let span = self.start_fn.span;
+
+        start_fn.sig.fn_token = syn::Token![fn](span);
+        start_fn.block.brace_token = syn::token::Brace(span);
+
+        start_fn
     }
 }
