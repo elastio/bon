@@ -85,24 +85,8 @@ error: `const` items in this context need a name
    |
    = note: this error originates in the attribute macro `bon::builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0433]: failed to resolve: could not find `foo` in the list of imported crates
+error[E0433]: cannot find `foo` in the crate root
   --> tests/integration/ui/compile_fail/attr_bon.rs:35:9
    |
 35 |     #[::foo::builder]
    |         ^^^ could not find `foo` in the list of imported crates
-
-error[E0412]: cannot find type `ActiveBonCluelessBuilder` in this scope
-  --> tests/integration/ui/compile_fail/attr_bon.rs:49:1
-   |
-49 | #[bon]
-   | ^^^^^^ not found in this scope
-   |
-   = note: this error originates in the attribute macro `bon::builder` (in Nightly builds, run with -Z macro-backtrace for more info)
-
-error[E0422]: cannot find struct, variant or union type `ActiveBonCluelessBuilder` in this scope
-  --> tests/integration/ui/compile_fail/attr_bon.rs:49:1
-   |
-49 | #[bon]
-   | ^^^^^^ not found in this scope
-   |
-   = note: this error originates in the attribute macro `bon::builder` (in Nightly builds, run with -Z macro-backtrace for more info)

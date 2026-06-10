@@ -101,9 +101,13 @@ error: the feature named `` is not valid for this target
    |
 76 | #[target_feature(enable = "")]
    |                  ^^^^^^^^^^^ `` is not valid for this target
+   |
+   = help: valid names are: `kl`, `adx`, `aes`, `avx`, and `fma` and 74 more
 
 error: the feature named `` is not valid for this target
   --> tests/integration/ui/compile_fail/attr_builder.rs:77:18
    |
 77 | #[target_feature(enable = "")]
    |                  ^^^^^^^^^^^ `` is not valid for this target
+   |
+   = help: valid names are: `kl`, `adx`, `aes`, `avx`, and `fma` and 74 more
