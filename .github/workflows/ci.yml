@@ -42,12 +42,7 @@ jobs:
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1.16.1
-      - name: Install gungraun-runner
-        run: |
-          version=$(cargo pkgid gungraun | cut -d@ -f2)
-          archive=gungraun-runner-v$version-x86_64-unknown-linux-gnu.tar.gz
-          curl -LO https://github.com/gungraun/gungraun/releases/download/v$version/$archive
-          tar -xf $archive -C /usr/local/bin
+      - run: ./scripts/install/gungraun-runner.sh
 
       - run: sudo apt-get update && sudo apt-get install -y valgrind
       - run: cd ./benchmarks/runtime && ./run.sh ${{ matrix.benchmark }}

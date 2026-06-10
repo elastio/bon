@@ -91,7 +91,11 @@ function try_download_and_decompress {
     if [[ "$hash_algo" != "" ]]
     then
         hash=$(curl_with_retry "$url.$hash_algo")
-        echo "$hash $archive" | step "${hash_algo}sum" --check
+        if ! echo "$hash" | grep -q " $archive$"
+        then
+            hash="$hash $archive"
+        fi
+        echo "$hash" | step "${hash_algo}sum" --check
     fi
 
     if [[ $url == *.tar.* || $url == *.tgz ]]
