@@ -48,9 +48,9 @@ fn emit_build_from_method(
     ctor_args: &[TokenStream],
 ) -> Result<TokenStream> {
     let doc = if clone {
-        "Fills unset builder fields from an owned value of the target type and builds it."
-    } else {
         "Fills unset builder fields from a reference to the target type and builds it."
+    } else {
+        "Fills unset builder fields from an owned value of the target type and builds it."
     };
 
     let method_name = if clone {
