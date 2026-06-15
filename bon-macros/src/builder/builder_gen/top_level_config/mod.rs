@@ -12,6 +12,9 @@ use syn::ItemFn;
 use syn::parse::Parser;
 use syn::punctuated::Punctuated;
 
+#[cfg(feature = "experimental-build-from")]
+use darling::util::Override;
+
 fn parse_finish_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
     ItemSigConfigParsing::new(meta, Some("builder struct's impl block")).parse()
 }
@@ -26,28 +29,6 @@ fn parse_state_mod(meta: &syn::Meta) -> Result<ItemSigConfig> {
 
 fn parse_start_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
     ItemSigConfigParsing::new(meta, None).parse()
-}
-
-#[cfg(feature = "experimental-build-from")]
-fn parse_build_from(meta: &syn::Meta) -> Result<Option<ItemSigConfig>> {
-    let config = ItemSigConfigParsing {
-        meta,
-        reject_self_mentions: Some("builder struct's impl block"),
-    }
-    .parse()?;
-
-    Ok(Some(config))
-}
-
-#[cfg(feature = "experimental-build-from")]
-fn parse_build_from_clone(meta: &syn::Meta) -> Result<Option<ItemSigConfig>> {
-    let config = ItemSigConfigParsing {
-        meta,
-        reject_self_mentions: Some("builder struct's impl block"),
-    }
-    .parse()?;
-
-    Ok(Some(config))
 }
 
 #[derive(Debug, FromMeta)]
@@ -89,12 +70,12 @@ pub(crate) struct TopLevelConfig {
     pub(crate) generics: Option<SpannedKey<GenericsConfig>>,
 
     #[cfg(feature = "experimental-build-from")]
-    #[darling(default, with = parse_build_from)]
-    pub(crate) build_from: Option<ItemSigConfig>,
+    #[darling(default)]
+    pub(crate) build_from: Option<Override<syn::Meta>>,
 
     #[cfg(feature = "experimental-build-from")]
-    #[darling(default, with = parse_build_from_clone)]
-    pub(crate) build_from_clone: Option<ItemSigConfig>,
+    #[darling(default)]
+    pub(crate) build_from_clone: Option<Override<syn::Meta>>,
 }
 
 impl TopLevelConfig {
