@@ -2,7 +2,7 @@ use crate::builder::builder_gen::{BuilderGenCtx, member::Member};
 use crate::util::prelude::*;
 use proc_macro2::{Ident, Span};
 use quote::quote;
-use syn::{Type, spanned::Spanned};
+use syn::{Type, ext::IdentExt, spanned::Spanned};
 
 pub(super) fn emit(ctx: &BuilderGenCtx, target_ty: &Type) -> Result<TokenStream> {
     let mut tokens = TokenStream::new();
@@ -17,23 +17,25 @@ pub(super) fn emit(ctx: &BuilderGenCtx, target_ty: &Type) -> Result<TokenStream>
 
     let base_name = ctx.finish_fn.ident.clone();
 
-    if ctx.build_from {
+    if ctx.build_from.is_some() {
         tokens.extend(emit_build_from_method(
             false,
             &base_name,
             target_ty,
             &ctx.members,
             &ctor_args,
-        ));
+            ctx.build_from.as_ref(),
+        )?);
     }
 
-    if ctx.build_from_clone {
+    if ctx.build_from_clone.is_some() {
         tokens.extend(emit_build_from_method(
             true,
             &base_name,
             target_ty,
             &ctx.members,
             &ctor_args,
+            ctx.build_from_clone.as_ref(),
         )?);
     }
 
@@ -46,6 +48,7 @@ fn emit_build_from_method(
     target_ty: &Type,
     members: &[Member],
     ctor_args: &[TokenStream],
+    config: Option<&crate::parsing::ItemSigConfig>,
 ) -> Result<TokenStream> {
     let doc = if clone {
         "Fills unset builder fields from a reference to the target type and builds it."
@@ -53,11 +56,15 @@ fn emit_build_from_method(
         "Fills unset builder fields from an owned value of the target type and builds it."
     };
 
-    let method_name = if clone {
-        format_ident!("{}_from_clone", base_name)
-    } else {
-        format_ident!("{}_from", base_name)
-    };
+    let method_name: Ident = config
+        .and_then(|cfg| cfg.name.as_ref().map(|spanned_key| spanned_key.unraw()))
+        .unwrap_or_else(|| {
+            if clone {
+                format_ident!("{}_from_clone", base_name)
+            } else {
+                format_ident!("{}_from", base_name)
+            }
+        });
 
     let arg_type = if clone {
         quote!(&#target_ty)
@@ -136,8 +143,6 @@ fn field_vars_from_members(members: &[Member], clone: bool) -> Vec<TokenStream> 
 }
 
 pub(crate) fn extract_ctor_ident_path(ty: &Type, span: Span) -> Result<TokenStream> {
-    use quote::quote_spanned;
-
     let path = ty.as_path_no_qself().ok_or_else(|| {
         err!(
             &span,

@@ -184,9 +184,9 @@ pub(crate) struct BuilderGenCtx {
     pub(super) start_fn: StartFn,
     pub(super) finish_fn: FinishFn,
     #[cfg(feature = "experimental-build-from")]
-    pub(super) build_from: bool,
+    pub(super) build_from: Option<ItemSigConfig>,
     #[cfg(feature = "experimental-build-from")]
-    pub(super) build_from_clone: bool,
+    pub(super) build_from_clone: Option<ItemSigConfig>,
 }
 
 pub(super) struct BuilderGenCtxParams<'a> {
@@ -217,9 +217,9 @@ pub(super) struct BuilderGenCtxParams<'a> {
     pub(super) start_fn: StartFnParams,
     pub(super) finish_fn: FinishFnParams,
     #[cfg(feature = "experimental-build-from")]
-    pub(super) build_from: bool,
+    pub(super) build_from: Option<ItemSigConfig>,
     #[cfg(feature = "experimental-build-from")]
-    pub(super) build_from_clone: bool,
+    pub(super) build_from_clone: Option<ItemSigConfig>,
 }
 
 impl BuilderGenCtx {

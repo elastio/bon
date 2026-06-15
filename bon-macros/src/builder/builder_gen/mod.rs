@@ -150,12 +150,15 @@ impl BuilderGenCtx {
         let build_froms = {
             #[cfg(feature = "experimental-build-from")]
             {
-                match &self.finish_fn.output {
-                    syn::ReturnType::Type(_, ty) => build_from::emit(self, ty)?,
-                    syn::ReturnType::Default => quote! {},
+                if self.build_from.is_some() || self.build_from_clone.is_some() {
+                    match &self.finish_fn.output {
+                        syn::ReturnType::Type(_, ty) => build_from::emit(self, ty)?,
+                        syn::ReturnType::Default => quote! {},
+                    }
+                } else {
+                    quote! {}
                 }
             }
-
             #[cfg(not(feature = "experimental-build-from"))]
             {
                 quote! {}
