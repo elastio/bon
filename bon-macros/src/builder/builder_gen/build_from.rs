@@ -14,9 +14,7 @@ pub(super) fn emit(ctx: &BuilderGenCtx, target_ty: &Type) -> Result<TokenStream>
             quote! { #ident }
         })
         .collect();
-
     let base_name = ctx.finish_fn.ident.clone();
-
     if ctx.build_from.is_some() {
         tokens.extend(emit_build_from_method(
             false,
@@ -27,7 +25,6 @@ pub(super) fn emit(ctx: &BuilderGenCtx, target_ty: &Type) -> Result<TokenStream>
             ctx.build_from.as_ref(),
         )?);
     }
-
     if ctx.build_from_clone.is_some() {
         tokens.extend(emit_build_from_method(
             true,
@@ -38,7 +35,6 @@ pub(super) fn emit(ctx: &BuilderGenCtx, target_ty: &Type) -> Result<TokenStream>
             ctx.build_from_clone.as_ref(),
         )?);
     }
-
     Ok(tokens)
 }
 
@@ -55,7 +51,6 @@ fn emit_build_from_method(
     } else {
         "Fills unset builder fields from an owned value of the target type and builds it."
     };
-
     let method_name: Ident = config
         .and_then(|cfg| cfg.name.as_ref().map(|spanned_key| spanned_key.unraw()))
         .unwrap_or_else(|| {
@@ -65,22 +60,18 @@ fn emit_build_from_method(
                 format_ident!("{}_from", base_name)
             }
         });
-
     let arg_type = if clone {
         quote!(&#target_ty)
     } else {
         quote!(#target_ty)
     };
-
     let arg_pat = if clone {
         quote!(mut from)
     } else {
         quote!(from)
     };
-
     let ctor_path = extract_ctor_ident_path(target_ty, target_ty.span())?;
     let field_vars = field_vars_from_members(members, clone);
-
     Ok(quote! {
         #[inline(always)]
         #[doc = #doc]
@@ -100,7 +91,6 @@ fn field_vars_from_members(members: &[Member], clone: bool) -> Vec<TokenStream> 
             let ident = member.orig_ident();
             let ty = member.norm_ty();
             let default_expr = quote! { ::core::default::Default::default() };
-
             match member {
                 Member::Field(_) | Member::StartFn(_) => quote! {
                     let #ident: #ty = self.#ident;
@@ -149,15 +139,10 @@ pub(crate) fn extract_ctor_ident_path(ty: &Type, span: Span) -> Result<TokenStre
             "expected a concrete type path (like `MyStruct`) for constructor"
         )
     })?;
-
-    let mut ident = path
-        .segments
-        .last()
-        .ok_or_else(|| err!(&span, "expected a named type, but found an empty path"))?
-        .ident
-        .clone();
-
-    ident.set_span(span);
-
-    Ok(quote! { #ident })
+    let mut clean_path = path.clone();
+    if let Some(last_segment) = clean_path.segments.last_mut() {
+        last_segment.arguments = syn::PathArguments::None;
+        last_segment.ident.set_span(span);
+    }
+    Ok(quote! { #clean_path })
 }
