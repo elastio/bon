@@ -13,6 +13,7 @@ pub mod overrides;
 pub mod private_builder;
 pub mod state_mod;
 
+mod docs_in_private_items;
 mod reexports;
 
 pub use reexports::{UnexportedBuilder, UnexportedStateMod, UnexportedStateModBuilder};

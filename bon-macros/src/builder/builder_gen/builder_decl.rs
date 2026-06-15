@@ -40,6 +40,7 @@ impl super::BuilderGenCtx {
             let ident = &receiver.field_ident;
             let ty = &receiver.without_self_keyword;
             quote! {
+                /// Value of `self` passed to the starting method, that created the builder
                 #ident: #ty,
             }
         });
@@ -51,8 +52,18 @@ impl super::BuilderGenCtx {
 
         let allows = super::allow_warnings_on_member_types();
 
-        let start_fn_args_fields_idents = self.start_fn_args().map(|member| &member.ident);
-        let start_fn_args_fields_types = self.start_fn_args().map(|member| &member.ty.norm);
+        let start_fn_args_fields = self.start_fn_args().map(|member| {
+            let ident = &member.ident;
+            let ty = &member.ty.norm;
+            let doc = format!(
+                "Value of `{ident}` passed as an argument to the starting function,
+                that created the builder",
+            );
+            quote! {
+                #[doc = #doc]
+                #ident: #ty
+            }
+        });
 
         let named_members_types = self.named_members().map(NamedMember::underlying_norm_ty);
 
@@ -96,7 +107,7 @@ impl super::BuilderGenCtx {
 
                 #receiver_field
 
-                #( #start_fn_args_fields_idents: #start_fn_args_fields_types, )*
+                #( #start_fn_args_fields, )*
 
                 #( #custom_fields_idents: #custom_fields_types, )*
 
