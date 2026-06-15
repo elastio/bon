@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.9.3](https://github.com/elastio/bon/compare/v3.9.2...v3.9.3) - 2026-06-15
 
-### Other
+### Fixed
 
 - Fix clippy::missing_docs_in_private_items triggering for start_fn members ([#389](https://github.com/elastio/bon/pull/389))
 
