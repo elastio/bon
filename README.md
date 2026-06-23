@@ -225,17 +225,6 @@ If you can't figure something out, consult the docs and maybe use the `🔍 Sear
 
 This project was heavily inspired by such awesome crates as [`buildstructor`](https://docs.rs/buildstructor), [`typed-builder`](https://docs.rs/typed-builder) and [`derive_builder`](https://docs.rs/derive_builder). This crate was designed with many lessons learned from them.
 
-## Supporters
-
-<div align="center">
-
-Big thanks to `bon`'s current financial supporters ❤️
-
-**Julius Lungys**\
-<sup><code>$1/month</code></sup>
-
-</div>
-
 ## Past Supporters
 
 <div align="center">
@@ -246,6 +235,8 @@ Big thanks to `bon`'s past financial supporters ❤️
 [**Kindness**](https://kindness.ai)
 
 **Ethan Skowronski**
+
+**Julius Lungys**
 
 </div>
 
