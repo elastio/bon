@@ -124,11 +124,6 @@ export default defineConfig({
         socialLinks: [
             { icon: "github", link: "https://github.com/elastio/bon" },
             { icon: "discord", link: "https://bon-rs.com/discord" },
-            {
-                icon: "opencollective",
-                link: "https://opencollective.com/bon-rs",
-            },
-            { icon: "patreon", link: "https://patreon.com/Veetaha" },
         ],
 
         sidebar: {
