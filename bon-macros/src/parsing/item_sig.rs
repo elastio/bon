@@ -96,3 +96,9 @@ impl<'a> ItemSigConfigParsing<'a> {
         Ok(config)
     }
 }
+
+impl<N: FromMeta> FromMeta for ItemSigConfig<N> {
+    fn from_meta(meta: &syn::Meta) -> darling::Result<Self> {
+        ItemSigConfigParsing::new(meta, None).parse()
+    }
+}
