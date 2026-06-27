@@ -61,7 +61,7 @@ I've been using `bon` internally at work. It looked quite nice on API clients wi
 
 I think that _the ability_ not to be forced to pass `None` for `Option<T>` fields/parameters is a very nice feature. I would really like to see it in the language itself. I think the nightly Rust language feature [Default field values](https://github.com/rust-lang/rust/issues/132162) is an awesome start.
 
-Only a _start_? Yeah, well.. It's limited to just struct literals and `const` expressions for defaults. It doesn't cover all the compatibility guarantees that `bon` [offers](../).
+Only a _start_? Yeah, well.. It's limited to just struct literals and `const` expressions for defaults. It doesn't cover all the compatibility guarantees that `bon` [offers](../guide/basics/compatibility).
 
 Here is one of the examples of what it lacks in comparison to `bon`. Imagine we had this code.
 
@@ -87,7 +87,7 @@ struct Example {
 let example = Example { x: Some(42) };
 ```
 
-Bon was designed to [prevent this specific breaking change in your code](http://localhost:5174/guide/basics/compatibility#making-a-required-member-optional). Unfortunately, I don't know of any Rust language initiative that may cleanly solve this problem yet.
+Bon was designed to [prevent this specific breaking change in your code](../guide/basics/compatibility#making-a-required-member-optional). Unfortunately, I don't know of any Rust language initiative that may cleanly solve this problem yet.
 
 Frankly, I'd be happy if the language solved most of the problems `bon` solves, so that it would become fully redundant. However, the language doesn't solve them today, and it won't solve them all, definitely not soon. But why? Why do we have to resort to `bon` for such fundamental language features?
 
