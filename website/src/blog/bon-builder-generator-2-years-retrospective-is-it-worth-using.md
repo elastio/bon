@@ -10,7 +10,7 @@ Hi! It's been approximately 2 years since I released the crate `bon`. I haven't 
 ```rust
 #[bon::builder]
 fn greet(name: &str, level: Option<u32>) -> String {
-    format!("Hello {name}! Your level is {}", level.unwrap_or(0))
+    format!("Hello, {name}! Your level is {}", level.unwrap_or(0))
 }
 
 let greeting = greet()
@@ -77,7 +77,7 @@ let example = Example { x: 42 };
 
 Now we want to make the field `x` optional. This shouldn't be a breaking change, should it? Well, it is, and the default field values Rust feature doesn't help with it.
 
-```rust
+```rust ignore
 // Library code
 struct Example {
     x: Option<u32> = None,
