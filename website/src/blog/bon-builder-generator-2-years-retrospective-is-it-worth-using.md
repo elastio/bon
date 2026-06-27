@@ -95,7 +95,7 @@ Why wouldn't Rust solve my problem? Is it not important enough? Isn't my opinion
 
 _Wow, hey, wait a second. Haven't I seen this line of thought before?_
 
-I've been triaging issues in `bon` and deciding what's important and what's not. I had to say "No" to various feature requests, or even just leave them open with no clear answer. Just like Rust language team decided to keep the problem described above unsovled. Am I or Rust contributors the devil?? _Obviously, no._
+I've been triaging issues in `bon` and deciding what's important and what's not. I had to say "No" to various feature requests, or even just leave them open with no clear answer. Just like Rust language team decided to keep the problem described above unsolved. Am I or Rust contributors the devil?? _Obviously, no._
 
 ## 2 Years Later
 
