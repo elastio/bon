@@ -11,6 +11,7 @@ pub(crate) struct OnConfig {
     pub(crate) into: Flag,
     pub(crate) overwritable: Flag,
     pub(crate) required: Flag,
+    pub(crate) default: Flag,
     pub(crate) setters: OnSettersConfig,
 }
 
@@ -43,6 +44,7 @@ impl Parse for OnConfig {
             into: Flag,
             overwritable: Flag,
             required: Flag,
+            default: Flag,
 
             #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list)]
             setters: OnSettersConfig,
@@ -108,6 +110,7 @@ impl Parse for OnConfig {
             into: parsed.into,
             overwritable: parsed.overwritable,
             required: parsed.required,
+            default: parsed.default,
             setters: parsed.setters,
         })
     }

@@ -97,6 +97,7 @@ There are several attributes supported in the `attributes` position listed below
 
 - [`into`](../member/into)
 - [`required`](../member/required) - currently, this attribute can only be used with the `_` type pattern as the first `on(...)` clause
+- [`default`](../member/default) - applies `#[builder(default)]` to matching required members so they fall back to their `Default` value; passing a custom default value through `on(...)` isn't supported yet (see the issue [#152](https://github.com/elastio/bon/issues/152))
 - [`setters(doc(default(skip)))`](../member/setters#doc-default-skip)
 - [`overwritable`](../member/overwritable) - 🔬 **experimental**, this attribute is available under the cargo feature `"experimental-overwritable"` (see the issue [#149](https://github.com/elastio/bon/issues/149))
 
@@ -126,6 +127,24 @@ Example::builder()
     // so `#[builder(into)]` was applied to them
     .description("accepts an `impl Into<String>` here")
     .alias("builder")
+    .build();
+```
+
+```rust [default]
+use bon::Builder;
+
+#[derive(Builder)]
+#[builder(on(Vec<_>, default))] // [!code highlight]
+struct Example {
+    name: String,
+    // These `Vec<_>` members become optional and default to an empty `Vec`
+    tags: Vec<String>,
+    ids: Vec<u32>,
+}
+
+Example::builder()
+    // Only `name` is required now
+    .name("Bon".to_owned())
     .build();
 ```
 
@@ -209,4 +228,4 @@ Example::builder()
 
 ## Future Releases
 
-There is an issue [#152](https://github.com/elastio/bon/issues/152) about adding support for [`default`](../member/default.md), [`with`](../member/with) and other non-boolean attributes to the `on(...)` clause. We'll be glad if you take a look at the design proposed in that issue and put a 👍 if you like/want this feature or leave a comment if you have some more feedback.
+The `default` attribute above is currently only a boolean switch. There is an issue [#152](https://github.com/elastio/bon/issues/152) about adding support for non-boolean attributes to the `on(...)` clause, such as a custom `default = ...` value, [`with`](../member/with) and others. We'll be glad if you take a look at the design proposed in that issue and put a 👍 if you like/want this feature or leave a comment if you have some more feedback.
