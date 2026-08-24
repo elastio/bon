@@ -6,11 +6,14 @@ pub(crate) use on::OnConfig;
 
 use crate::parsing::{BonCratePath, ItemSigConfig, ItemSigConfigParsing, SpannedKey};
 use crate::util::prelude::*;
-use darling::ast::NestedMeta;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
+use syn::ItemFn;
 use syn::parse::Parser;
 use syn::punctuated::Punctuated;
-use syn::ItemFn;
+
+#[cfg(feature = "experimental-build-from")]
+use darling::util::Override;
 
 fn parse_finish_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
     ItemSigConfigParsing::new(meta, Some("builder struct's impl block")).parse()
@@ -65,6 +68,14 @@ pub(crate) struct TopLevelConfig {
     /// Specifies configuration for generic parameter conversion methods.
     #[darling(default, with = crate::parsing::parse_non_empty_paren_meta_list)]
     pub(crate) generics: Option<SpannedKey<GenericsConfig>>,
+
+    #[cfg(feature = "experimental-build-from")]
+    #[darling(default)]
+    pub(crate) build_from: Option<Override<syn::Meta>>,
+
+    #[cfg(feature = "experimental-build-from")]
+    #[darling(default)]
+    pub(crate) build_from_clone: Option<Override<syn::Meta>>,
 }
 
 impl TopLevelConfig {

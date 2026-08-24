@@ -5,6 +5,12 @@ use crate::parsing::{BonCratePath, ItemSigConfig, SpannedKey};
 use crate::util::prelude::*;
 use std::borrow::Cow;
 
+#[cfg(feature = "experimental-build-from")]
+use darling::util::Override;
+
+#[cfg(feature = "experimental-build-from")]
+use crate::parsing::ItemSigConfigParsing;
+
 pub(super) trait FinishFnBody {
     /// Generate the `finish` function body from the ready-made variables.
     /// The generated function body may assume that there are variables
@@ -183,6 +189,10 @@ pub(crate) struct BuilderGenCtx {
     pub(super) state_mod: StateMod,
     pub(super) start_fn: StartFn,
     pub(super) finish_fn: FinishFn,
+    #[cfg(feature = "experimental-build-from")]
+    pub(super) build_from: Option<ItemSigConfig>,
+    #[cfg(feature = "experimental-build-from")]
+    pub(super) build_from_clone: Option<ItemSigConfig>,
 }
 
 pub(super) struct BuilderGenCtxParams<'a> {
@@ -212,6 +222,10 @@ pub(super) struct BuilderGenCtxParams<'a> {
     pub(super) state_mod: ItemSigConfig,
     pub(super) start_fn: StartFnParams,
     pub(super) finish_fn: FinishFnParams,
+    #[cfg(feature = "experimental-build-from")]
+    pub(super) build_from: Option<Override<syn::Meta>>,
+    #[cfg(feature = "experimental-build-from")]
+    pub(super) build_from_clone: Option<Override<syn::Meta>>,
 }
 
 impl BuilderGenCtx {
@@ -231,7 +245,27 @@ impl BuilderGenCtx {
             state_mod,
             start_fn,
             finish_fn,
+            #[cfg(feature = "experimental-build-from")]
+            build_from,
+            #[cfg(feature = "experimental-build-from")]
+            build_from_clone,
         } = params;
+
+        #[cfg(feature = "experimental-build-from")]
+        let build_from = build_from
+            .map(|wrapped_override| match wrapped_override {
+                Override::Inherit => Ok(ItemSigConfig::default()),
+                Override::Explicit(meta) => ItemSigConfigParsing::new(&meta, None).parse(),
+            })
+            .transpose()?;
+
+        #[cfg(feature = "experimental-build-from")]
+        let build_from_clone = build_from_clone
+            .map(|wrapped_override| match wrapped_override {
+                Override::Inherit => Ok(ItemSigConfig::default()),
+                Override::Explicit(meta) => ItemSigConfigParsing::new(&meta, None).parse(),
+            })
+            .transpose()?;
 
         let builder_type = BuilderType {
             ident: builder_type.ident,
@@ -385,6 +419,10 @@ impl BuilderGenCtx {
             state_mod,
             start_fn,
             finish_fn,
+            #[cfg(feature = "experimental-build-from")]
+            build_from,
+            #[cfg(feature = "experimental-build-from")]
+            build_from_clone,
         })
     }
 }

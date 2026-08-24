@@ -92,6 +92,8 @@ experimental-overwritable = ["bon-macros/experimental-overwritable"]
 # generate methods for converting generic parameters on builders.
 experimental-generics-setters = ["bon-macros/experimental-generics-setters"]
 
+experimental-build-from = ["bon-macros/experimental-build-from"]
+
 # Legacy experimental attribute. It's left here for backwards compatibility,
 # and it will be removed in the next major release.
 #

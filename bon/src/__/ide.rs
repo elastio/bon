@@ -105,6 +105,40 @@ pub mod builder_top_level {
         pub use core::future::IntoFuture;
     }
 
+    /// See the docs at <https://bon-rs.com/reference/builder/top-level/build_from>
+    pub const build_from: Option<Identifier> = None;
+
+    /// See the docs at <https://bon-rs.com/reference/builder/top-level/build_from>
+    pub mod build_from {
+        use super::*;
+
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/build_from#name>
+        pub const name: Identifier = Identifier;
+
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/build_from#vis>
+        pub const vis: VisibilityString = VisibilityString;
+
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/build_from#doc>
+        pub const doc: DocComments = DocComments;
+    }
+
+    /// See the docs at <https://bon-rs.com/reference/builder/top-level/build_from_clone>
+    pub const build_from_clone: Option<Identifier> = None;
+
+    /// See the docs at <https://bon-rs.com/reference/builder/top-level/build_from_clone>
+    pub mod build_from_clone {
+        use super::*;
+
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/build_from_clone#name>
+        pub const name: Identifier = Identifier;
+
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/build_from_clone#vis>
+        pub const vis: VisibilityString = VisibilityString;
+
+        /// See the docs at <https://bon-rs.com/reference/builder/top-level/build_from_clone#doc>
+        pub const doc: DocComments = DocComments;
+    }
+
     /// The real name of this parameter is `crate` (without the underscore).
     /// It's hinted with an underscore due to the limitations of the current
     /// completions limitation. This will be fixed in the future.
