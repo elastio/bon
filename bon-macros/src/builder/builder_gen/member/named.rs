@@ -263,6 +263,8 @@ impl NamedMember {
     }
 
     pub(crate) fn merge_on_config(&mut self, on: &[OnConfig]) -> Result {
+        self.merge_config_default(on)?;
+
         // This is a temporary hack. We only allow `on(_, required)` as the
         // first `on(...)` clause. Instead we should implement the extended design:
         // https://github.com/elastio/bon/issues/152
@@ -286,6 +288,35 @@ impl NamedMember {
             origin: self.origin,
         }
         .eval()?;
+
+        Ok(())
+    }
+
+    /// Applies `on(type_pattern, default)` to this member. It turns a matching
+    /// *required* member into an optional one that falls back to its `Default`
+    /// value. Members that already have a default, and `Option<T>` members
+    /// (which already default to `None`), are left untouched, so this never
+    /// overrides a more specific member-level `#[builder(default = ...)]`.
+    fn merge_config_default(&mut self, on: &[OnConfig]) -> Result {
+        if !self.is_required() {
+            return Ok(());
+        }
+
+        let scrutinee = self.underlying_orig_ty();
+
+        let matched = on
+            .iter()
+            .filter(|params| params.default.is_present())
+            .map(|params| Ok((params, scrutinee.matches(&params.type_pattern)?)))
+            .collect::<Result<Vec<_>>>()?
+            .into_iter()
+            .find(|(_, matched)| *matched)
+            .map(|(params, _)| params);
+
+        if let Some(params) = matched {
+            let key = syn::Ident::new("default", params.default.span());
+            self.config.default = Some(SpannedKey { key, value: None });
+        }
 
         Ok(())
     }
