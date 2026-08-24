@@ -71,7 +71,7 @@ async fn async_fn() {
 #[tokio::test]
 async fn async_fn_with_future_arg() {
     #[builder]
-    async fn sut<Fut: std::future::Future + Send>(fut: Fut) -> Fut::Output {
+    async fn sut<Fut: Future + Send>(fut: Fut) -> Fut::Output {
         fut.await
     }
 

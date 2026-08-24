@@ -27,7 +27,6 @@
 #[macro_export]
 #[cfg(feature = "alloc")]
 #[cfg_attr(docsrs, doc(cfg(any(feature = "std", feature = "alloc"))))]
-#[allow(edition_2024_expr_fragment_specifier)]
 macro_rules! vec {
     () => ($crate::__::alloc::vec::Vec::new());
     ($($item:expr),+ $(,)?) => ($crate::__::alloc::vec![$(::core::convert::Into::into($item)),+ ]);
@@ -65,7 +64,6 @@ macro_rules! vec {
 /// [`Command::args`]: std::process::Command::args
 /// [`bon::vec!`]: crate::vec
 #[macro_export]
-#[allow(edition_2024_expr_fragment_specifier)]
 macro_rules! arr {
     () => ([]);
     ($($item:expr),+ $(,)?) => ([$(::core::convert::Into::into($item)),+]);

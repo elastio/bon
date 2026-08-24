@@ -52,11 +52,17 @@ impl VisitMut for NormalizeLifetimes<'_> {
             .inputs
             .first()
             .and_then(|arg| {
-                let receiver = arg.as_receiver()?;
-                receiver.lifetime().or_else(|| match receiver.ty.as_ref() {
-                    syn::Type::Reference(reference) => reference.lifetime.as_ref(),
+                // Elided lifetimes in the return type are resolved to the
+                // lifetime of `&'a self`, or to the one of the explicit
+                // `self: &'a Self` type.
+                match &arg.as_receiver()?.kind {
+                    syn::ReceiverKind::Reference(_, lifetime, _) => lifetime.as_ref(),
+                    syn::ReceiverKind::Typed(_, ty) => match &**ty {
+                        syn::Type::Reference(reference) => reference.lifetime.as_ref(),
+                        _ => None,
+                    },
                     _ => None,
-                })
+                }
             })
             .or_else(|| {
                 let lifetime = signature
@@ -114,7 +120,7 @@ impl VisitMut for AssignLifetimes<'_> {
         // Don't recurse into nested items because lifetimes aren't available there.
     }
 
-    fn visit_type_bare_fn_mut(&mut self, _bare_fn: &mut syn::TypeBareFn) {
+    fn visit_type_fn_ptr_mut(&mut self, _fn_ptr: &mut syn::TypeFnPtr) {
         // Skip function pointers because anon lifetimes that appear in them
         // don't belong to the surrounding function signature.
     }
@@ -140,32 +146,21 @@ impl VisitMut for AssignLifetimes<'_> {
     }
 
     fn visit_receiver_mut(&mut self, receiver: &mut syn::Receiver) {
-        // If this is a `self: Type` syntax, then it's not a special case
-        // and we can just visit the explicit type of the receiver as usual
-        if receiver.colon_token.is_some() {
-            syn::visit_mut::visit_type_mut(self, &mut receiver.ty);
-            return;
+        match &mut receiver.kind {
+            // If this is a `self: Type` syntax, then it's not a special case
+            // and we can just visit the explicit type of the receiver as usual
+            syn::ReceiverKind::Typed(_colon, ty) => {
+                syn::visit_mut::visit_type_mut(self, ty);
+            }
+            syn::ReceiverKind::Reference(_and, lifetime, _mutability) => {
+                if matches!(lifetime, Some(lifetime) if lifetime.ident != "_") {
+                    return;
+                }
+
+                *lifetime = Some(self.next_lifetime());
+            }
+            _ => {}
         }
-
-        let lifetime = match &mut receiver.reference {
-            Some((_and, lifetime)) => lifetime,
-            _ => return,
-        };
-
-        if matches!(lifetime, Some(lifetime) if lifetime.ident != "_") {
-            return;
-        }
-
-        let receiver_ty = match receiver.ty.as_mut() {
-            syn::Type::Reference(receiver_ty) => receiver_ty,
-            _ => return,
-        };
-
-        let new_lifetime = self.next_lifetime();
-
-        *lifetime = Some(new_lifetime.clone());
-
-        receiver_ty.lifetime = Some(new_lifetime);
     }
 }
 
@@ -207,7 +202,7 @@ impl<'a> Visit<'a> for LifetimeCollector<'a> {
         // Don't recurse into nested items because lifetimes aren't available there.
     }
 
-    fn visit_type_bare_fn(&mut self, _bare_fn: &syn::TypeBareFn) {
+    fn visit_type_fn_ptr(&mut self, _fn_ptr: &syn::TypeFnPtr) {
         // Skip function pointers because anon lifetimes that appear in them
         // don't belong to the surrounding function signature.
     }
@@ -237,7 +232,7 @@ impl VisitMut for ElideOutputLifetime<'_> {
         // Don't recurse into nested items because lifetimes aren't available there.
     }
 
-    fn visit_type_bare_fn_mut(&mut self, _bare_fn: &mut syn::TypeBareFn) {
+    fn visit_type_fn_ptr_mut(&mut self, _fn_ptr: &mut syn::TypeFnPtr) {
         // Skip function pointers because anon lifetimes that appear in them
         // don't belong to the surrounding function signature.
     }

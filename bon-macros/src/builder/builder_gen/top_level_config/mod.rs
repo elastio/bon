@@ -6,11 +6,11 @@ pub(crate) use on::OnConfig;
 
 use crate::parsing::{BonCratePath, ItemSigConfig, ItemSigConfigParsing, SpannedKey};
 use crate::util::prelude::*;
-use darling::ast::NestedMeta;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
+use syn::ItemFn;
 use syn::parse::Parser;
 use syn::punctuated::Punctuated;
-use syn::ItemFn;
 
 fn parse_finish_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
     ItemSigConfigParsing::new(meta, Some("builder struct's impl block")).parse()
@@ -166,15 +166,15 @@ impl TopLevelConfig {
             .peekable();
 
         while let Some((i, _)) = on_configs.next() {
-            if let Some((j, next_on)) = on_configs.peek() {
-                if *j != i + 1 {
-                    bail!(
-                        next_on,
-                        "this `on(...)` clause is out of order; all `on(...)` \
-                        clauses must be consecutive; there shouldn't be any \
-                        other parameters between them",
-                    )
-                }
+            if let Some((j, next_on)) = on_configs.peek()
+                && *j != i + 1
+            {
+                bail!(
+                    next_on,
+                    "this `on(...)` clause is out of order; all `on(...)` \
+                     clauses must be consecutive; there shouldn't be any \
+                     other parameters between them",
+                )
             }
         }
 
@@ -183,17 +183,16 @@ impl TopLevelConfig {
             ..Self::from_list(&configs)?
         };
 
-        if let Some(generics) = &me.generics {
-            if generics.setters.is_some() {
-                if let Some(const_) = &me.const_ {
-                    bail!(
-                        const_,
-                        "`generics(setters(...))` cannot be used together with `const` \
-                         functions; if you have a use case for this, consider opening an \
-                         issue to discuss it!"
-                    );
-                }
-            }
+        if let Some(generics) = &me.generics
+            && generics.setters.is_some()
+            && let Some(const_) = &me.const_
+        {
+            bail!(
+                const_,
+                "`generics(setters(...))` cannot be used together with `const` \
+                 functions; if you have a use case for this, consider opening an \
+                 issue to discuss it!"
+            );
         }
 
         if let Some(on) = me.on.iter().skip(1).find(|on| on.required.is_present()) {
@@ -204,14 +203,14 @@ impl TopLevelConfig {
             );
         }
 
-        if let Some(first_on) = me.on.first().filter(|on| on.required.is_present()) {
-            if !matches!(first_on.type_pattern, syn::Type::Infer(_)) {
-                bail!(
-                    &first_on.type_pattern,
-                    "`required` can only be used with the wildcard type pattern \
-                    i.e. `on(_, required)`; this restriction may be lifted in the future",
-                );
-            }
+        if let Some(first_on) = me.on.first().filter(|on| on.required.is_present())
+            && !matches!(first_on.type_pattern, syn::Type::Infer(_))
+        {
+            bail!(
+                &first_on.type_pattern,
+                "`required` can only be used with the wildcard type pattern \
+                 i.e. `on(_, required)`; this restriction may be lifted in the future",
+            );
         }
 
         Ok(me)

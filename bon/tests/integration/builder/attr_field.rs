@@ -52,7 +52,6 @@ fn test_struct() {
 }
 
 // This tests uses a turbofish with `impl Trait`
-#[rustversion::since(1.63.0)]
 #[test]
 fn test_function() {
     use core::fmt;
@@ -93,7 +92,6 @@ fn test_function() {
 }
 
 // This tests uses a turbofish with `impl Trait`
-#[rustversion::since(1.63.0)]
 #[test]
 fn test_method() {
     use core::fmt;

@@ -2,7 +2,7 @@ mod attr_setters;
 mod syntax_errors;
 
 use crate::util::prelude::*;
-use expect_test::{expect_file, ExpectFile};
+use expect_test::{ExpectFile, expect_file};
 
 fn snapshot(test_name: &str) -> ExpectFile {
     let snapshot_path = format!(

@@ -81,10 +81,10 @@ impl<'a> ItemSigConfigParsing<'a> {
 
         let full: Full<N> = crate::parsing::parse_non_empty_paren_meta_list(meta)?;
 
-        if let Some(context) = self.reject_self_mentions {
-            if let Some(docs) = &full.doc {
-                crate::parsing::reject_self_mentions_in_docs(context, docs)?;
-            }
+        if let Some(context) = self.reject_self_mentions
+            && let Some(docs) = &full.doc
+        {
+            crate::parsing::reject_self_mentions_in_docs(context, docs)?;
         }
 
         let config = ItemSigConfig {

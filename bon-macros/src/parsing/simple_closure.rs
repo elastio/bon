@@ -40,7 +40,9 @@ impl FromMeta for SimpleClosure {
 
         reject_syntax("`for<...>` syntax", &closure.lifetimes)?;
         reject_syntax("`const` keyword", &closure.constness)?;
-        reject_syntax("`static` keyword", &closure.movability)?;
+        // `syn::ClosureModifiers` is `#[non_exhaustive]` and currently holds
+        // nothing, but new modifiers may be added to it in the future.
+        closure.modifiers.require_empty()?;
         reject_syntax("`async` keyword", &closure.asyncness)?;
         reject_syntax("`move` keyword", &closure.capture)?;
         reject_attrs(&closure.attrs)?;

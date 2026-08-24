@@ -3,8 +3,8 @@ mod debug;
 mod into;
 mod into_future;
 
-use super::top_level_config::{DeriveConfig, DerivesConfig};
 use super::BuilderGenCtx;
+use super::top_level_config::{DeriveConfig, DerivesConfig};
 use crate::util::prelude::*;
 use darling::ast::GenericParamExt;
 

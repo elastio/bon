@@ -46,7 +46,7 @@ impl VisitMut for NormalizeSelfTy<'_> {
     fn visit_type_path_mut(&mut self, type_path: &mut syn::TypePath) {
         syn::visit_mut::visit_type_path_mut(self, type_path);
 
-        let syn::TypePath { qself, path } = type_path;
+        let syn::TypePath { qself, path, .. } = type_path;
 
         let is_self_projection =
             qself.is_none() && path.starts_with_segment("Self") && path.segments.len() > 1;

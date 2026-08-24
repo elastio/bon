@@ -1,5 +1,5 @@
 use super::config::MemberConfig;
-use super::{config, MemberOrigin};
+use super::{MemberOrigin, config};
 use crate::builder::builder_gen::member::config::SettersFnsConfig;
 use crate::builder::builder_gen::top_level_config::OnConfig;
 use crate::normalization::SyntaxVariant;
@@ -98,14 +98,14 @@ pub(crate) struct NamedMember {
 
 impl NamedMember {
     pub(super) fn validate(&self) -> Result {
-        if let Some(default) = &self.config.default {
-            if self.is_special_option_ty() {
-                bail!(
-                    &default.key,
-                    "`Option<_>` already implies a default of `None`, \
-                    so explicit #[builder(default)] is redundant",
-                );
-            }
+        if let Some(default) = &self.config.default
+            && self.is_special_option_ty()
+        {
+            bail!(
+                &default.key,
+                "`Option<_>` already implies a default of `None`, \
+                 so explicit #[builder(default)] is redundant",
+            );
         }
 
         let member_docs_not_copied = self
@@ -268,10 +268,10 @@ impl NamedMember {
         // This is a temporary hack. We only allow `on(_, required)` as the
         // first `on(...)` clause. Instead we should implement the extended design:
         // https://github.com/elastio/bon/issues/152
-        if let Some(on) = on.first().filter(|on| on.required.is_present()) {
-            if self.is_special_option_ty() {
-                self.config.required = on.required;
-            }
+        if let Some(on) = on.first().filter(|on| on.required.is_present())
+            && self.is_special_option_ty()
+        {
+            self.config.required = on.required;
         }
 
         self.merge_config_into(on)?;

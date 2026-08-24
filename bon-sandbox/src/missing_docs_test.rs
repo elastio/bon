@@ -1,7 +1,7 @@
 //! This is based on the issue <https://github.com/elastio/bon/issues/38>
 #![warn(missing_docs)]
 
-use bon::{bon, builder, Builder};
+use bon::{Builder, bon, builder};
 
 /// [`MyStruct`] docs
 pub struct MyStruct;

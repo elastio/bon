@@ -287,11 +287,4 @@ doesn't automatically imply `State::X1: IsSet`, so the builder type state return
 after `self.x2()` doesn't imply that the member `x1` is set, and thus `build()`
 can't be called.
 
-This is implemented as a cargo feature to make sure `bon` maintains a lower MSRV by default. If you need this, then enable this in your `Cargo.toml`, but beware that it increases your MSRV to `1.79.0`:
-
-<!-- If you change this, make sure to update `scripts/sync-version.sh` -->
-
-```toml
-[dependencies]
-bon = { version = "3.9", features = ["implied-bounds"] }
-```
+This was previously gated by a cargo feature because it required a higher MSRV. It is now enabled by default and no longer requires a cargo feature.

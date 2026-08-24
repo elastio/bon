@@ -5,8 +5,8 @@ mod named;
 pub(crate) use config::*;
 pub(crate) use named::*;
 
-use super::top_level_config::OnConfig;
 use super::TopLevelConfig;
+use super::top_level_config::OnConfig;
 use crate::normalization::SyntaxVariant;
 use crate::util::prelude::*;
 use config::MemberConfig;

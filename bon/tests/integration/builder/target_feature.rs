@@ -1,6 +1,5 @@
 #[cfg(target_arch = "x86_64")]
-#[rustversion::since(1.86.0)]
-mod msrv_1_86 {
+mod x86_64 {
     #![allow(dead_code)]
     use crate::prelude::*;
 

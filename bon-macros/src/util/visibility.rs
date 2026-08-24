@@ -75,12 +75,12 @@ impl VisibilityExt for syn::Visibility {
                     return Ok(self);
                 }
 
-                if let Some(first_segment) = path.segments.first_mut() {
-                    if first_segment.ident == "self" {
-                        let span = first_segment.ident.span();
-                        *first_segment = syn::parse_quote_spanned!(span=>super);
-                        return Ok(self);
-                    }
+                if let Some(first_segment) = path.segments.first_mut()
+                    && first_segment.ident == "self"
+                {
+                    let span = first_segment.ident.span();
+                    *first_segment = syn::parse_quote_spanned!(span=>super);
+                    return Ok(self);
                 }
 
                 path.segments.insert(0, syn::parse_quote!(super));

@@ -204,7 +204,7 @@ impl<'a> SettersCtx<'a> {
                             err!(
                                 &self.member.underlying_norm_ty(),
                                 "`with = Some` only works for members with the underlying \
-                                    type of `Option`;"
+                                 type of `Option`;"
                             )
                         }
                     })?;
@@ -565,12 +565,11 @@ impl SettersItems {
             });
 
         let default = member.config.default.as_deref().and_then(|default| {
-            if let Some(setters) = &member.config.setters {
-                if let Some(default) = &setters.doc.default {
-                    if default.skip.is_present() {
-                        return None;
-                    }
-                }
+            if let Some(setters) = &member.config.setters
+                && let Some(default) = &setters.doc.default
+                && default.skip.is_present()
+            {
+                return None;
             }
 
             let default = default
@@ -678,7 +677,9 @@ fn optional_setter_docs(
 
 fn well_known_default(ty: &syn::Type) -> Option<syn::Expr> {
     let path = match ty {
-        syn::Type::Path(syn::TypePath { path, qself: None }) => path,
+        syn::Type::Path(syn::TypePath {
+            path, qself: None, ..
+        }) => path,
         _ => return None,
     };
 

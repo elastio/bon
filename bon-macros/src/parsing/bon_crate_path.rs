@@ -1,16 +1,11 @@
 use crate::util::prelude::*;
 use darling::FromMeta;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub(crate) enum BonCratePath {
+    #[default]
     Default,
     Explicit(syn::Path),
-}
-
-impl Default for BonCratePath {
-    fn default() -> Self {
-        Self::Default
-    }
 }
 
 impl FromMeta for BonCratePath {

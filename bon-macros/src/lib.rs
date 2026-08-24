@@ -1,13 +1,10 @@
 #![doc = include_str!("../README.md")]
-#![allow(
+#![expect(
     clippy::redundant_pub_crate,
-    clippy::wildcard_imports,
     clippy::map_unwrap_or,
     clippy::items_after_statements,
     clippy::missing_const_for_fn,
-    clippy::option_option,
     clippy::option_if_let_else,
-    clippy::enum_glob_use,
     clippy::too_many_lines,
     clippy::if_not_else,
 
@@ -16,12 +13,6 @@
     // that take a reference to an `Option<T>` to make the callsite cleaner avoiding
     // the unnecessary `Option::as_ref()` calls.
     clippy::ref_option,
-
-    // We can't use the explicit captures syntax due to the MSRV
-    impl_trait_overcaptures,
-
-    // There are too many false-positives for syn::Ident
-    if_let_rescope,
 )]
 
 mod bon;

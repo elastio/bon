@@ -2,7 +2,7 @@
 //! This was created in response to [this issue](https://github.com/elastio/bon/issues/388).
 #![warn(clippy::missing_docs_in_private_items)]
 
-use bon::{bon, builder, Builder};
+use bon::{Builder, bon, builder};
 
 /// Docs on `ExampleStruct`
 #[derive(Builder)]

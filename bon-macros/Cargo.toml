@@ -7,20 +7,14 @@ This is a proc-macro crate that is supposed to be a private implementation
 detail of the `bon` crate
 """
 
-edition    = "2021"
+edition    = "2024"
 homepage   = "https://bon-rs.com/"
 license    = "MIT OR Apache-2.0"
 repository = "https://github.com/elastio/bon"
 
-# This MSRV was chosen because Rust supports mixing generic type and const
-# parameters only starting with this version. We require this feature for the
-# cases when the builder is generated for a function or struct that uses const
-# generics. The generated builder **always** appends a generic type parameter
-# for the type state at the end of the Builder generics list. So for functions
-# or structs that use const generics the generated builder will have a generic
-# type parameter after the const generic parameter, which is only supported
-# starting from Rust 1.59.0.
-rust-version = "1.59.0"
+# This MSRV is dictated by our dependency on darling@0.24, which is the first
+# version that uses syn@3.0.
+rust-version = "1.88.0"
 
 [package.metadata.docs.rs]
 all-features = true
@@ -39,12 +33,10 @@ workspace = true
 proc-macro = true
 
 [dependencies]
-# Darling `0.23` updated MSRV to `1.88+` without other code changes.
-# Therefore, it should be compatible with `0.22` as well.
-#
-# Version `0.20` is the version of `darling` available in Debian packages:
-# https://salsa.debian.org/rust-team/debcargo-conf. We keep support for it.
-darling = ">=0.20.0, <0.24.0"
+# Darling `0.24` is the first version that uses `syn` `3.0`, which we require.
+# The `.1` patch contains an import fix for this issue:
+# https://github.com/TedDriggs/darling/issues/433
+darling = ">=0.24.1, <0.25.0"
 
 # This dependency is used by `darling` itself, so we use it as well for case
 # conversions to share the same dependency.
@@ -56,11 +48,9 @@ proc-macro2 = "1.0.88"
 
 quote = "1"
 
-# This is the highest version that supports our MSRV
-syn = { version = "2.0.56", features = ["full", "visit-mut", "visit"] }
+syn = { version = "3.0.3", features = ["full", "visit-mut", "visit"] }
 
-prettyplease = "0.2"
-rustversion  = "1.0.18"
+prettyplease = "0.3"
 
 [features]
 default = []

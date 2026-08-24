@@ -1,4 +1,4 @@
-use bon::{builder, Builder};
+use bon::{Builder, builder};
 
 #[builder]
 pub fn full_name_fn(#[builder(getter)] first_name: &str, last_name: &str) -> String {

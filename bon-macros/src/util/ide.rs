@@ -12,7 +12,7 @@
 use crate::util::prelude::*;
 use proc_macro2::TokenTree;
 use syn::parse::{Parse, ParseStream, Parser};
-use syn::{token, Token};
+use syn::{Token, token};
 
 pub(crate) fn parse_comma_separated_meta(input: ParseStream<'_>) -> syn::Result<Vec<Meta>> {
     let mut output = vec![];
@@ -154,13 +154,12 @@ pub(crate) fn generate_completion_triggers(meta: Vec<Meta>) -> TokenStream {
             CompletionsSchema::leaf("state_mod"),
             CompletionsSchema::leaf("on").set_custom_filter(|meta| {
                 if let Some(first) = meta.first() {
-                    if let Meta::Path(path) = first {
-                        if path.is_ident("into")
+                    if let Meta::Path(path) = first
+                        && (path.is_ident("into")
                             || path.is_ident("required")
-                            || path.is_ident("overwritable")
-                        {
-                            return;
-                        }
+                            || path.is_ident("overwritable"))
+                    {
+                        return;
                     }
 
                     meta.remove(0);
