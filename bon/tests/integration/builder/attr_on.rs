@@ -138,3 +138,28 @@ fn default_with_into() {
         expect![[r#"("bon", 2)"#]],
     );
 }
+
+#[test]
+fn default_with_required() {
+    #[derive(Debug, Builder)]
+    #[builder(on(_, required, default))]
+    #[allow(dead_code)]
+    struct Sut {
+        // `required` turns `Option<_>` members into required ones, and it wins
+        // over `default`, so this member must be set with an `Option` value.
+        x: Option<u32>,
+
+        // Non-`Option` members are required, so `default` applies to them.
+        y: u32,
+    }
+
+    assert_debug_eq(
+        Sut::builder().x(None).build(),
+        expect!["Sut { x: None, y: 0 }"],
+    );
+
+    assert_debug_eq(
+        Sut::builder().x(Some(1)).y(2).build(),
+        expect!["Sut { x: Some(1), y: 2 }"],
+    );
+}
