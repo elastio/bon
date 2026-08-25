@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.0](https://github.com/elastio/bon/compare/v3.9.3...v3.10.0) - 2026-08-25
+
+### Added
+
+- support the default switch in the on(...) clause ([#398](https://github.com/elastio/bon/pull/398))
+
+### Other
+
+- Bump MSRV 1.88, syn 3.0 and darling 0.24 ([#399](https://github.com/elastio/bon/pull/399))
+- [Maintenance] Update deps and links ([#392](https://github.com/elastio/bon/pull/392))
+
 ## [3.9.3](https://github.com/elastio/bon/compare/v3.9.2...v3.9.3) - 2026-06-15
 
 ### Fixed
