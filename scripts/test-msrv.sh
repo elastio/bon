@@ -55,24 +55,15 @@ mv Cargo.toml.msrv Cargo.toml
 
 with_log cd bon
 
-step cargo update --precise 1.0.10  -p dissimilar
-step cargo update --precise 0.24.1  -p darling
-step cargo update --precise 1.0.22  -p unicode-ident
-step cargo update --precise 1.0.15  -p itoa
-step cargo update --precise 1.0.101 -p proc-macro2
-step cargo update --precise 1.0.40  -p quote
-step cargo update --precise 1.17.2  -p once_cell
-step cargo update --precise 1.0.89  -p trybuild
-step cargo update --precise 1.0.143 -p serde_json
-step cargo update --precise 1.0.20  -p ryu
-step cargo update --precise 1.0.194 -p serde
-step cargo update --precise 0.3.0   -p prettyplease
-step cargo update --precise 3.0.3   -p syn@3
-step cargo update --precise 1.29.1  -p tokio
-step cargo update --precise 1.4.1   -p expect-test
-step cargo update --precise 0.52.0  -p windows-sys
-step cargo update --precise 0.2.163 -p libc
-step cargo update --precise 0.3.2   -p glob
+# Turn on the MSRV-aware dependency resolution of the workspace's resolver `3`,
+# so that this downgrades the dependencies that don't support our `rust-version`
+# to their latest versions that do. This way we don't have to pin them by hand.
+#
+# The repo disables this by default in `.cargo/config.toml` (see the reasoning
+# there). The env var takes precedence over that config.
+export CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS=fallback
+
+step cargo update
 
 export RUSTFLAGS="${RUSTFLAGS:-} --allow unknown-lints"
 

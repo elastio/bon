@@ -8,7 +8,7 @@ members = [
   "bon-sandbox",
   "website/doctests",
 ]
-resolver = "2"
+resolver = "3"
 
 # This config is used for the benchmarks
 [profile.release]

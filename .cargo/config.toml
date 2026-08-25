@@ -1,0 +1,5 @@
+# We don't want to hold back upgrades for dev dependencies and there is no override
+# for them unfortunately, so we ignore incompatible rust versions for our lock file,
+# but the script `scripts/test-msrv.sh` overrides this.
+[resolver]
+incompatible-rust-versions = "allow"
