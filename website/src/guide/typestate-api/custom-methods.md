@@ -225,7 +225,7 @@ This doesn't scale well, because you need to write `S::{Member}: IsSet` for ever
 You can simplify this code by using the trait `IsComplete`. This trait is defined literally like this in the generated code:
 
 ```rust ignore
-trait IsComplete: State {}
+trait IsComplete: State<X1: IsSet, X2: IsSet> {}
 
 impl<S: State> IsComplete for S
 where
@@ -247,18 +247,7 @@ where
 
 ## Implied Bounds
 
-Rust `1.79.0` added [associated trait bounds](https://blog.rust-lang.org/2024/06/13/Rust-1.79.0.html#bounds-in-associated-type-position) syntax, which can be used to make bounds on generic associated types implied.
-
-This feature is useful for the trait `IsComplete`. If you enable the `implied-bounds` cargo feature, builder macros use the new syntax for bounds in
-associated type position, which enables implied `IsSet` bounds for the type state
-of required members.
-
-The definition of the trait `IsComplete` changes like this:
-
-```rust ignore
-trait IsComplete: State {} // [!code --]
-trait IsComplete: State<X1: IsSet, X2: IsSet> {} // [!code ++]
-```
+The trait `IsComplete` declares its `IsSet` bounds in [associated type position](https://blog.rust-lang.org/2024/06/13/Rust-1.79.0.html#bounds-in-associated-type-position). This makes those bounds _implied_, i.e. a `State: IsComplete` bound alone tells the compiler that `State::X1: IsSet` and `State::X2: IsSet`.
 
 To understand how this is useful consider the following example:
 
@@ -282,9 +271,6 @@ impl<State: example_builder::State> ExampleBuilder<State> {
 }
 ```
 
-This code wouldn't compile without the `implied-bounds` cargo feature enabled. Without it, `State: IsComplete`
-doesn't automatically imply `State::X1: IsSet`, so the builder type state returned
-after `self.x2()` doesn't imply that the member `x1` is set, and thus `build()`
-can't be called.
-
-This was previously gated by a cargo feature because it required a higher MSRV. It is now enabled by default and no longer requires a cargo feature.
+Here `State: IsComplete` implies `State::X1: IsSet`, so the builder type state
+returned by `self.x2()` still carries the knowledge that the member `x1` is set,
+and thus `build()` can be called.

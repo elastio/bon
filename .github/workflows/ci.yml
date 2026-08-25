@@ -134,14 +134,6 @@ jobs:
             --features=experimental-overwritable,alloc
 
       - run: |
-          cd bon && cargo test ${{ matrix.locked }} --no-default-features \
-            --features=experimental-overwritable,implied-bounds
-
-      - run: |
-          cd bon && cargo test ${{ matrix.locked }} --no-default-features \
-            --features=experimental-overwritable,alloc,implied-bounds
-
-      - run: |
           cd bon && cargo test ${{ matrix.locked }} \
             --features=experimental-generics-setters
 
@@ -152,14 +144,6 @@ jobs:
       - run: |
           cd bon && cargo test ${{ matrix.locked }} --no-default-features \
             --features=experimental-generics-setters,alloc
-
-      - run: |
-          cd bon && cargo test ${{ matrix.locked }} --no-default-features \
-            --features=experimental-generics-setters,implied-bounds
-
-      - run: |
-          cd bon && cargo test ${{ matrix.locked }} --no-default-features \
-            --features=experimental-generics-setters,alloc,implied-bounds
 
   test-msrv:
     runs-on: ${{ matrix.os }}-latest
