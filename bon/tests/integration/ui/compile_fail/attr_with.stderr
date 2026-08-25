@@ -25,7 +25,7 @@ error: `const` keyword is not allowed here
 23 |     #[builder(with = const || 1)]
    |                      ^^^^^
 
-error: `static` keyword is not allowed here
+error: expected `|`
   --> tests/integration/ui/compile_fail/attr_with.rs:29:22
    |
 29 |     #[builder(with = static || 1)]

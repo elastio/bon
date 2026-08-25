@@ -227,7 +227,7 @@ impl<'a> GenericSettersCtx<'a> {
                 clause.predicates.push(syn::parse_quote!(#bound));
             }
 
-            (!clause.predicates.is_empty()).then(|| clause)
+            (!clause.predicates.is_empty()).then_some(clause)
         };
 
         quote! {
@@ -311,10 +311,10 @@ impl<'ty> TypeParamFinder<'ty, '_> {
 impl<'ast> Visit<'ast> for TypeParamFinder<'_, 'ast> {
     fn visit_path(&mut self, path: &'ast syn::Path) {
         // Check if this path is one of our type parameters
-        if let Some(param) = path.get_ident() {
-            if self.type_params.contains(&param) {
-                self.found.insert(param);
-            }
+        if let Some(param) = path.get_ident()
+            && self.type_params.contains(&param)
+        {
+            self.found.insert(param);
         }
 
         // Continue visiting nested paths
@@ -337,10 +337,10 @@ fn replace_type_param_in_predicate(
     impl VisitMut for TypeParamReplacer<'_> {
         fn visit_path_mut(&mut self, path: &mut syn::Path) {
             // Replace simple paths like `T`
-            if path.is_ident(self.old_param) {
-                if let Some(segment) = path.segments.first_mut() {
-                    segment.ident = self.new_param.clone();
-                }
+            if path.is_ident(self.old_param)
+                && let Some(segment) = path.segments.first_mut()
+            {
+                segment.ident = self.new_param.clone();
             }
             // Continue visiting nested paths
             syn::visit_mut::visit_path_mut(self, path);

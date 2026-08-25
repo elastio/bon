@@ -167,7 +167,27 @@ impl<'a> FnInputCtx<'a> {
             None => return Ok(None),
         };
 
-        let mut without_self_keyword = receiver.ty.clone();
+        // The type of the receiver as it would appear in a function signature that
+        // takes it as a regular argument. For example, `&'a mut self` produces
+        // `&'a mut Self`, and `self: Box<Self>` produces `Box<Self>`.
+        let receiver_ty = match &receiver.kind {
+            syn::ReceiverKind::Reference(and_token, lifetime, mutability) => {
+                syn::Type::Reference(syn::TypeReference {
+                    attrs: Vec::new(),
+                    and_token: *and_token,
+                    lifetime: lifetime.clone(),
+                    mutability: *mutability,
+                    elem: Box::new(syn::parse_quote!(Self)),
+                })
+            }
+            syn::ReceiverKind::Typed(_, ty) => (**ty).clone(),
+
+            // `self` or `mut self`. The `mut` here is just a binding mode,
+            // so it's not part of the type.
+            _ => syn::parse_quote!(Self),
+        };
+
+        let mut without_self_keyword = Box::new(receiver_ty);
 
         NormalizeSelfTy { self_ty }.visit_type_mut(&mut without_self_keyword);
 
@@ -346,7 +366,12 @@ impl<'a> FnInputCtx<'a> {
         let finish_fn = FinishFnParams {
             ident: finish_fn_ident,
             vis: finish_fn_vis.map(SpannedKey::into_value),
-            unsafety: self.fn_item.norm.sig.unsafety,
+            // `safe fn` is only valid inside of `extern` blocks, which can't
+            // contain a `#[builder]`, so only `unsafe` is relevant here.
+            unsafety: match self.fn_item.norm.sig.safety {
+                syn::Safety::Unsafe(unsafety) => Some(unsafety),
+                _ => None,
+            },
             asyncness: self.fn_item.norm.sig.asyncness,
             special_attrs: get_propagated_attrs(&self.fn_item.norm.attrs)?,
             body: Box::new(finish_fn_body),
@@ -520,15 +545,14 @@ fn find_propagated_attr(attrs: &[syn::Attribute], needle: &str) -> Result<Option
         );
     }
 
-    if let Some(attr) = result {
-        if let syn::AttrStyle::Inner(_) = attr.style {
-            bail!(
-                attr,
-                "#[{}] attribute must be placed on the function itself, \
-                not inside it.",
-                needle
-            );
-        }
+    if let Some(attr) = result
+        && let syn::AttrStyle::Inner(_) = attr.style
+    {
+        bail!(
+            attr,
+            "#[{}] attribute must be placed on the function itself, not inside it.",
+            needle
+        );
     }
 
     Ok(result.cloned())

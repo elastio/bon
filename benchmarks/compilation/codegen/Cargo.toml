@@ -7,7 +7,7 @@ description = """
   Generates code for the compilation benchmarks.
 """
 
-edition = "2021"
+edition = "2024"
 version = "0.1.0"
 
 [dependencies]

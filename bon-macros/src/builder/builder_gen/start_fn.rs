@@ -35,7 +35,9 @@ impl super::BuilderGenCtx {
         let receiver = receiver.map(|receiver| {
             let mut receiver = receiver.with_self_keyword.clone();
 
-            if receiver.reference.is_none() {
+            // The `mut` in `mut self` is just a binding mode of the receiver
+            // inside of the function's body, so it's not part of the API.
+            if !matches!(receiver.kind, syn::ReceiverKind::Reference(..)) {
                 receiver.mutability = None;
             }
 
@@ -96,19 +98,6 @@ impl super::BuilderGenCtx {
             };
 
         let const_ = &self.const_;
-        // add the `clippy::needless_lifetimes` lint if before rust version 1.87
-        // Rust version 1.87 includes a clippy change where `needless_lifetimes`
-        // was split with the more complex part of the lint going to
-        // `elidable_lifetime_names`. For versions since 1.87 we want to block
-        // `elidable_lifetime_names` (See
-        // https://github.com/elastio/bon/pull/341#discussion_r2398893516 for
-        // an explanation).
-        let needless_lifetime_lint = if rustversion::cfg!(before(1.87)) {
-            format_ident!("needless_lifetimes")
-        } else {
-            format_ident!("elidable_lifetime_names")
-        };
-
         let mut start_fn: syn::ItemFn = syn::parse_quote! {
             #(#docs)*
             #[inline(always)]
@@ -120,7 +109,11 @@ impl super::BuilderGenCtx {
                 // Let's keep it as non-const for now to avoid restricting ourselfves to only
                 // const operations.
                 clippy::missing_const_for_fn,
-                clippy::#needless_lifetime_lint
+                // This lint is the part of `needless_lifetimes` that was split
+                // out of it in Rust 1.87 (see
+                // https://github.com/elastio/bon/pull/341#discussion_r2398893516
+                // for an explanation).
+                clippy::elidable_lifetime_names
             )]
             #vis #const_ fn #start_fn_ident< #(#generics_decl),* >(
                 #receiver

@@ -4,7 +4,7 @@ set -euo pipefail
 
 . "$(dirname "${BASH_SOURCE[0]}")/util/lib.sh"
 
-msrv="${1:-1.59.0}"
+msrv="${1:-1.88.0}"
 
 # If not on CI - create temp dir
 if [[ ! -v CI ]]; then
@@ -19,7 +19,7 @@ if [[ ! -v CI ]]; then
         step rm -rf "$temp_dir"
     }
 
-    step cp -r README.md bon bon-macros "$temp_dir"
+    step cp -r README.md Cargo.toml bon bon-macros "$temp_dir"
 
     with_log pushd "$temp_dir"
 
@@ -30,28 +30,40 @@ fi
 
 step cargo --version --verbose
 
+# Reshape the workspace manifest for this run:
+#
+# - Trim the members down to the two published crates. The other members
+#   (benchmarks, the sandbox, the website doctests) aren't bound by the MSRV,
+#   and their dependencies can't be pinned to MSRV-compatible versions.
+#
+# - Drop the `clippy` and `rustdoc` lints. Their config is written for the dev
+#   toolchain, and lint names change between releases, so it isn't necessarily
+#   valid for the MSRV one. The `rust` lints are kept, because they carry the
+#   `check-cfg` config, without which the build warns about `cfg(nightly)`.
+info "Reshaping the workspace manifest for the MSRV run"
+
+awk '
+    /^members = \[/ { print "members = [\"bon\", \"bon-macros\"]"; in_members = 1; next }
+    in_members && /^\]/ { in_members = 0; next }
+    in_members { next }
+
+    /^\[/ { in_dev_lints = ($0 ~ /^\[workspace\.lints\.(clippy|rustdoc)\]/) }
+    !in_dev_lints { print }
+' Cargo.toml > Cargo.toml.msrv
+
+mv Cargo.toml.msrv Cargo.toml
+
 with_log cd bon
 
-step echo '[workspace]' >> Cargo.toml
+# Turn on the MSRV-aware dependency resolution of the workspace's resolver `3`,
+# so that this downgrades the dependencies that don't support our `rust-version`
+# to their latest versions that do. This way we don't have to pin them by hand.
+#
+# The repo disables this by default in `.cargo/config.toml` (see the reasoning
+# there). The env var takes precedence over that config.
+export CARGO_RESOLVER_INCOMPATIBLE_RUST_VERSIONS=fallback
 
-step cargo update --precise 1.0.10  -p dissimilar
-step cargo update --precise 0.21.3  -p darling
-step cargo update --precise 1.0.22  -p unicode-ident
-step cargo update --precise 1.0.15  -p itoa
-step cargo update --precise 1.0.101 -p proc-macro2
-step cargo update --precise 1.0.40  -p quote
-step cargo update --precise 1.17.2  -p once_cell
-step cargo update --precise 1.0.89  -p trybuild
-step cargo update --precise 1.0.143 -p serde_json
-step cargo update --precise 1.0.20  -p ryu
-step cargo update --precise 1.0.194 -p serde
-step cargo update --precise 0.2.17  -p prettyplease
-step cargo update --precise 2.0.56  -p syn
-step cargo update --precise 1.29.1  -p tokio
-step cargo update --precise 1.4.1   -p expect-test
-step cargo update --precise 0.52.0  -p windows-sys
-step cargo update --precise 0.2.163 -p libc
-step cargo update --precise 0.3.2   -p glob
+step cargo update
 
 export RUSTFLAGS="${RUSTFLAGS:-} --allow unknown-lints"
 

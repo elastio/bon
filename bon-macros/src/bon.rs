@@ -1,8 +1,8 @@
 use crate::builder;
 use crate::normalization::{ExpandCfg, Expansion};
 use crate::util::prelude::*;
-use darling::ast::NestedMeta;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
 
 pub(crate) fn generate(params: TokenStream, item: TokenStream) -> TokenStream {
     crate::error::handle_errors(item.clone(), || try_generate(params, item))

@@ -1,5 +1,5 @@
-use super::builder_gen::input_struct::StructInputCtx;
 use super::builder_gen::MacroOutput;
+use super::builder_gen::input_struct::StructInputCtx;
 use crate::util::prelude::*;
 
 pub(crate) fn generate(orig_struct: syn::ItemStruct) -> Result<TokenStream> {

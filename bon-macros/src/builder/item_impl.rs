@@ -1,5 +1,5 @@
-use super::builder_gen::input_fn::{FnInputCtx, FnInputCtxParams, ImplCtx};
 use super::builder_gen::TopLevelConfig;
+use super::builder_gen::input_fn::{FnInputCtx, FnInputCtxParams, ImplCtx};
 use crate::normalization::{GenericsNamespace, SyntaxVariant};
 use crate::parsing::BonCratePath;
 use crate::util::prelude::*;
@@ -25,7 +25,7 @@ pub(crate) fn generate(
     let mut namespace = GenericsNamespace::default();
     namespace.visit_item_impl(&orig_impl_block);
 
-    if let Some((_, trait_path, _)) = &orig_impl_block.trait_ {
+    if let Some((trait_path, _)) = &orig_impl_block.trait_ {
         bail!(trait_path, "Impls of traits are not supported yet");
     }
 
@@ -168,18 +168,21 @@ fn conv_impl_item_fn_into_fn_item(func: syn::ImplItemFn) -> Result<syn::ItemFn> 
     let syn::ImplItemFn {
         attrs,
         vis,
-        defaultness,
+        modifiers,
         sig,
         block,
     } = func;
 
-    if let Some(defaultness) = &defaultness {
+    if let Some(defaultness) = &modifiers.defaultness {
         bail!(defaultness, "Default functions are not supported yet");
     }
 
     Ok(syn::ItemFn {
         attrs,
         vis,
+        // `syn::FnModifiers` is `#[non_exhaustive]`, so it can't be constructed
+        // directly. All the modifiers it holds today are rejected above anyway.
+        modifiers,
         sig,
         block: Box::new(block),
     })

@@ -1,5 +1,4 @@
 use super::GenericsNamespace;
-use crate::util::prelude::*;
 use syn::visit_mut::VisitMut;
 
 pub(crate) struct NormalizeImplTraits<'a> {
@@ -51,7 +50,15 @@ impl VisitMut for AssignTypeParams<'_> {
 
     fn visit_signature_mut(&mut self, signature: &mut syn::Signature) {
         for arg in &mut signature.inputs {
-            self.visit_type_mut(arg.ty_mut());
+            let ty = match arg {
+                syn::FnArg::Receiver(arg) => match &mut arg.kind {
+                    syn::ReceiverKind::Typed(_, ty) => ty,
+                    _ => continue,
+                },
+                syn::FnArg::Typed(arg) => &mut arg.ty,
+            };
+
+            self.visit_type_mut(ty);
         }
     }
 

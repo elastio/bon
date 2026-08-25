@@ -1,5 +1,6 @@
 use super::reject_attrs;
 use crate::util::prelude::*;
+use syn::Expr;
 
 /// At the time of this writing `Rust` doesn't support calling closures in `const`
 /// contexts. This doesn't compile:
@@ -16,7 +17,7 @@ use crate::util::prelude::*;
 /// Therefore, we use this function to allow very simple expressions to still be
 /// embedded in the surrounding context while recommending to delegate to a function
 /// call if more complex expression is required.
-pub(crate) fn require_embeddable_const_expr(expr: &syn::Expr) -> Result {
+pub(crate) fn require_embeddable_const_expr(expr: &Expr) -> Result {
     use require_embeddable_const_expr as recurse;
 
     fn recurse_block(block: &syn::Block) -> Result {
@@ -39,40 +40,38 @@ pub(crate) fn require_embeddable_const_expr(expr: &syn::Expr) -> Result {
         }
     }
 
-    use syn::Expr::*;
-
     match expr {
-        Array(arr) => {
+        Expr::Array(arr) => {
             reject_attrs(&arr.attrs)?;
             arr.elems.iter().try_for_each(recurse)?;
         }
-        Binary(binary) => {
+        Expr::Binary(binary) => {
             reject_attrs(&binary.attrs)?;
             recurse(&binary.left)?;
             recurse(&binary.right)?;
         }
-        Block(block) => {
+        Expr::Block(block) => {
             reject_attrs(&block.attrs)?;
             recurse_block(&block.block)?;
         }
-        Call(call) => {
+        Expr::Call(call) => {
             reject_attrs(&call.attrs)?;
             recurse(&call.func)?;
             call.args.iter().try_for_each(recurse)?;
         }
-        Cast(cast) => {
+        Expr::Cast(cast) => {
             reject_attrs(&cast.attrs)?;
             recurse(&cast.expr)?;
         }
-        Field(field) => {
+        Expr::Field(field) => {
             reject_attrs(&field.attrs)?;
             recurse(&field.base)?;
         }
-        Group(group) => {
+        Expr::Group(group) => {
             reject_attrs(&group.attrs)?;
             recurse(&group.expr)?;
         }
-        If(if_expr) => {
+        Expr::If(if_expr) => {
             reject_attrs(&if_expr.attrs)?;
             recurse(&if_expr.cond)?;
             recurse_block(&if_expr.then_branch)?;
@@ -80,45 +79,45 @@ pub(crate) fn require_embeddable_const_expr(expr: &syn::Expr) -> Result {
                 recurse(else_branch)?;
             }
         }
-        Const(const_block) => {
+        Expr::Const(const_block) => {
             reject_attrs(&const_block.attrs)?;
             recurse_block(&const_block.block)?;
         }
-        Index(index) => {
+        Expr::Index(index) => {
             reject_attrs(&index.attrs)?;
             recurse(&index.expr)?;
             recurse(&index.index)?;
         }
-        Infer(infer) => reject_attrs(&infer.attrs)?,
-        Lit(lit) => reject_attrs(&lit.attrs)?,
-        Loop(loop_expr) => {
+        Expr::Infer(infer) => reject_attrs(&infer.attrs)?,
+        Expr::Lit(lit) => reject_attrs(&lit.attrs)?,
+        Expr::Loop(loop_expr) => {
             reject_attrs(&loop_expr.attrs)?;
             recurse_block(&loop_expr.body)?;
         }
-        Match(expr_match) => {
+        Expr::Match(expr_match) => {
             reject_attrs(&expr_match.attrs)?;
             recurse(&expr_match.expr)?;
             expr_match.arms.iter().try_for_each(|arm| {
                 reject_attrs(&arm.attrs)?;
 
-                if let Some((_if, guard)) = &arm.guard {
-                    recurse(guard)?;
+                if let syn::Pat::Guard(guard) = &arm.pat {
+                    recurse(&guard.guard)?;
                 }
 
                 recurse(&arm.body)
             })?;
         }
-        MethodCall(method_call) => {
+        Expr::MethodCall(method_call) => {
             reject_attrs(&method_call.attrs)?;
             recurse(&method_call.receiver)?;
             method_call.args.iter().try_for_each(recurse)?;
         }
-        Paren(paren) => {
+        Expr::Paren(paren) => {
             reject_attrs(&paren.attrs)?;
             recurse(&paren.expr)?;
         }
-        Path(path) => reject_attrs(&path.attrs)?,
-        Range(range) => {
+        Expr::Path(path) => reject_attrs(&path.attrs)?,
+        Expr::Range(range) => {
             reject_attrs(&range.attrs)?;
             if let Some(start) = &range.start {
                 recurse(start)?;
@@ -128,16 +127,16 @@ pub(crate) fn require_embeddable_const_expr(expr: &syn::Expr) -> Result {
             }
         }
 
-        Reference(reference) => {
+        Expr::Reference(reference) => {
             reject_attrs(&reference.attrs)?;
             recurse(&reference.expr)?;
         }
-        Repeat(repeat) => {
+        Expr::Repeat(repeat) => {
             reject_attrs(&repeat.attrs)?;
             recurse(&repeat.expr)?;
             recurse(&repeat.len)?;
         }
-        Struct(struct_expr) => {
+        Expr::Struct(struct_expr) => {
             reject_attrs(&struct_expr.attrs)?;
             struct_expr.fields.iter().try_for_each(|field| {
                 reject_attrs(&field.attrs)?;
@@ -147,19 +146,19 @@ pub(crate) fn require_embeddable_const_expr(expr: &syn::Expr) -> Result {
                 recurse(rest)?;
             }
         }
-        Tuple(tuple) => {
+        Expr::Tuple(tuple) => {
             reject_attrs(&tuple.attrs)?;
             tuple.elems.iter().try_for_each(recurse)?;
         }
-        Unary(unary) => {
+        Expr::Unary(unary) => {
             reject_attrs(&unary.attrs)?;
             recurse(&unary.expr)?;
         }
-        Unsafe(unsafe_expr) => {
+        Expr::Unsafe(unsafe_expr) => {
             reject_attrs(&unsafe_expr.attrs)?;
             recurse_block(&unsafe_expr.block)?;
         }
-        While(while_expr) => {
+        Expr::While(while_expr) => {
             reject_attrs(&while_expr.attrs)?;
             recurse(&while_expr.cond)?;
             recurse_block(&while_expr.body)?;

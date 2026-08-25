@@ -8,7 +8,9 @@ use darling::FromMeta;
 #[derive(Debug)]
 pub(crate) enum WithConfig {
     /// Closure syntax e.g. `#[builder(with = |param: Type| body)]`
-    Closure(SetterClosure),
+    ///
+    /// Boxed because it is much larger than the other variants.
+    Closure(Box<SetterClosure>),
 
     /// Well-known path [`Option::Some`]
     Some(syn::Path),
@@ -45,7 +47,9 @@ impl FromMeta for WithConfig {
         };
 
         if let syn::Expr::Closure(_) = name_val.value {
-            return SetterClosure::from_meta(meta).map(Self::Closure);
+            return SetterClosure::from_meta(meta)
+                .map(Box::new)
+                .map(Self::Closure);
         }
 
         let path = match &name_val.value {

@@ -280,16 +280,15 @@ impl MemberConfig {
             self.validate_mutually_exclusive(ParamName::With, with.key.span(), &[ParamName::Into])?;
         }
 
-        if let Some(setters) = &self.setters {
-            if let Some(default) = &setters.doc.default {
-                if self.default.is_none() {
-                    bail!(
-                        &default.key,
-                        "`#[builder(setters(doc(default(...)))]` may only be specified \
-                        when #[builder(default)] is also specified",
-                    );
-                }
-            }
+        if let Some(setters) = &self.setters
+            && let Some(default) = &setters.doc.default
+            && self.default.is_none()
+        {
+            bail!(
+                &default.key,
+                "`#[builder(setters(doc(default(...)))]` may only be specified \
+                 when #[builder(default)] is also specified",
+            );
         }
 
         Ok(())
@@ -328,24 +327,24 @@ impl MemberConfig {
             );
         }
 
-        if let Some(getter) = &self.getter {
-            if let Some(getter_kind) = &getter.kind {
-                match &getter_kind.value {
-                    GetterKind::Copy => {}
-                    GetterKind::Clone => {
-                        bail!(
-                            &getter_kind.key,
-                            "#[builder(getter(clone))] is incompatible with #[builder(const)] \
-                            because Clone::clone() can not be called in const context",
-                        )
-                    }
-                    GetterKind::Deref(_) => {
-                        bail!(
-                            &getter_kind.key,
-                            "#[builder(getter(deref))] is incompatible with #[builder(const)] \
-                            because Deref::deref() can not be called in const context",
-                        )
-                    }
+        if let Some(getter) = &self.getter
+            && let Some(getter_kind) = &getter.kind
+        {
+            match &getter_kind.value {
+                GetterKind::Copy => {}
+                GetterKind::Clone => {
+                    bail!(
+                        &getter_kind.key,
+                        "#[builder(getter(clone))] is incompatible with #[builder(const)] \
+                         because Clone::clone() can not be called in const context",
+                    )
+                }
+                GetterKind::Deref(_) => {
+                    bail!(
+                        &getter_kind.key,
+                        "#[builder(getter(deref))] is incompatible with #[builder(const)] \
+                         because Deref::deref() can not be called in const context",
+                    )
                 }
             }
         }

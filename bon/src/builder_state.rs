@@ -11,23 +11,17 @@ use crate::__::{Sealed, Set, Unset};
 
 /// Marker trait that indicates that the member is set, i.e. at least
 /// one of its setters was called.
-#[rustversion::attr(
-    since(1.78.0),
-    diagnostic::on_unimplemented(
-        message = "the member `{Self}` was not set, but this method requires it to be set",
-        label = "the member `{Self}` was not set, but this method requires it to be set"
-    )
+#[diagnostic::on_unimplemented(
+    message = "the member `{Self}` was not set, but this method requires it to be set",
+    label = "the member `{Self}` was not set, but this method requires it to be set"
 )]
 pub trait IsSet: Sealed {}
 
 /// Marker trait that indicates that the member is unset, i.e. none
 /// of its setters was called.
-#[rustversion::attr(
-    since(1.78.0),
-    diagnostic::on_unimplemented(
-        message = "the member `{Self}` was already set, but this method requires it to be unset",
-        label = "the member `{Self}` was already set, but this method requires it to be unset"
-    )
+#[diagnostic::on_unimplemented(
+    message = "the member `{Self}` was already set, but this method requires it to be unset",
+    label = "the member `{Self}` was already set, but this method requires it to be unset"
 )]
 pub trait IsUnset: Sealed {}
 

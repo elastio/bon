@@ -1,7 +1,7 @@
 use crate::parsing::{ItemSigConfig, ItemSigConfigParsing, SpannedKey};
 use crate::util::prelude::*;
-use darling::ast::NestedMeta;
 use darling::FromMeta;
+use darling::ast::NestedMeta;
 use syn::punctuated::Punctuated;
 
 const DOCS_CONTEXT: &str = "builder struct's impl block";

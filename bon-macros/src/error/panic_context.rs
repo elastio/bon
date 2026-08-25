@@ -1,14 +1,8 @@
-// The new name is used on newer rust versions
-#[rustversion::since(1.81.0)]
-use std::panic::PanicHookInfo as StdPanicHookInfo;
-
-// The deprecated name for is used on older rust versions
-#[rustversion::before(1.81.0)]
-use std::panic::PanicInfo as StdPanicHookInfo;
-
 use std::any::Any;
+use std::backtrace::{Backtrace, BacktraceStatus};
 use std::cell::RefCell;
 use std::fmt;
+use std::panic::PanicHookInfo as StdPanicHookInfo;
 use std::rc::Rc;
 
 fn with_global_panic_context<T>(f: impl FnOnce(&mut GlobalPanicContext) -> T) -> T {
@@ -89,8 +83,7 @@ impl PanicListener {
 pub(super) struct PanicContext(Rc<PanicContextShared>);
 
 struct PanicContextShared {
-    #[allow(clippy::incompatible_msrv)]
-    backtrace: backtrace::Backtrace,
+    backtrace: Backtrace,
 
     location: Option<PanicLocation>,
     thread: String,
@@ -102,7 +95,6 @@ struct PanicContextShared {
 }
 
 impl PanicContext {
-    #[allow(clippy::incompatible_msrv)]
     fn from_std(std_panic_info: &StdPanicHookInfo<'_>, panics_count: usize) -> Self {
         let location = std_panic_info.location();
         let current_thread = std::thread::current();
@@ -112,10 +104,7 @@ impl PanicContext {
             .unwrap_or_else(|| format!("{:?}", current_thread.id()));
 
         Self(Rc::new(PanicContextShared {
-            // This is expected, and we handle the compatibility with
-            // conditional compilation via the `rustversion` crate.
-            #[allow(clippy::incompatible_msrv)]
-            backtrace: backtrace::Backtrace::capture(),
+            backtrace: Backtrace::capture(),
             location: location.map(PanicLocation::from_std),
             thread: thread_,
             panics_count,
@@ -150,8 +139,7 @@ impl fmt::Display for PanicContext {
             write!(f, " (total panics observed: {panics_count})")?;
         }
 
-        #[allow(clippy::incompatible_msrv)]
-        if backtrace.status() == backtrace::BacktraceStatus::Captured {
+        if backtrace.status() == BacktraceStatus::Captured {
             write!(f, "\nbacktrace:\n{backtrace}")?;
         }
 
@@ -192,35 +180,5 @@ impl PanicLocation {
 impl fmt::Display for PanicLocation {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}:{}:{}", self.file, self.line, self.col)
-    }
-}
-
-#[rustversion::since(1.65.0)]
-mod backtrace {
-    pub(super) use std::backtrace::{Backtrace, BacktraceStatus};
-}
-
-#[rustversion::before(1.65.0)]
-mod backtrace {
-    #[derive(PartialEq)]
-    pub(super) enum BacktraceStatus {
-        Captured,
-    }
-
-    pub(super) struct Backtrace;
-
-    impl Backtrace {
-        pub(super) fn capture() -> Self {
-            Self
-        }
-        pub(super) fn status(&self) -> BacktraceStatus {
-            BacktraceStatus::Captured
-        }
-    }
-
-    impl std::fmt::Display for Backtrace {
-        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-            f.write_str("{update your Rust compiler to >=1.65.0 to see the backtrace}")
-        }
     }
 }

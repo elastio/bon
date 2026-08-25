@@ -29,7 +29,7 @@ mod prelude {
     };
 
     pub(crate) use super::assert_debug_eq;
-    pub(crate) use bon::{bon, builder, Builder};
+    pub(crate) use bon::{Builder, bon, builder};
     pub(crate) use expect_test::expect;
 }
 

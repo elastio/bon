@@ -9,10 +9,10 @@
 // implementation details and should not be used directly. Unfortunately, this triggers
 // the deprecation warnings within this crate itself everywhere we use them, so we just
 // suppress this lint for the entire crate.
-#![allow(deprecated)]
+#![expect(deprecated)]
 
 // Rexport all macros from the proc-macro crate.
-pub use bon_macros::{bon, builder, map, set, Builder};
+pub use bon_macros::{Builder, bon, builder, map, set};
 
 /// Small utility declarative macros for creating collections with [`Into`] conversions.
 mod collections;

@@ -58,10 +58,10 @@ where
 
         self.visit_generics(&mut sig.generics)?;
 
-        if let Some(variadic) = &mut sig.variadic {
-            if !self.visit(&mut variadic.attrs)? {
-                sig.variadic = None;
-            }
+        if let Some(variadic) = &mut sig.variadic
+            && !self.visit(&mut variadic.attrs)?
+        {
+            sig.variadic = None;
         }
 
         // Where clause doesn't support attributes yet.

@@ -85,7 +85,6 @@ const {
 | No _bare_ [`default`] and [`skip`]                                                                         | `Default::default()` can't be called in `const` context. Specify the value explicitly via `default/skip = ...`                                                             |
 | Only simple expressions are allowed in [`default`], [`skip`], [`with`]                                     | Full support requires [const_closures](https://github.com/rust-lang/rust/issues/106003). In the meantime move your expression into a separate function if `bon` rejects it |
 | No attributes requiring non-const functions ([`into`], [`with = <_>::from_iter`], [`getter(clone)`], etc.) | Non-const functions and trait methods can't be called in `const` context                                                                                                   |
-| `1.61.0` MSRV                                                                                              | Requires [`const_fn_trait_bound`](https://github.com/rust-lang/rust/issues/93706) stabilized in `1.61.0`                                                                   |
 
 [`into`]: ../member/into
 [`default`]: ../member/default

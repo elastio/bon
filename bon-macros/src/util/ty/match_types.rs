@@ -36,18 +36,20 @@ fn match_paths(scrutinee: &syn::Path, pattern: &syn::Path) -> Result<bool> {
 }
 
 fn match_path_args(scrutinee: &syn::PathArguments, pattern: &syn::PathArguments) -> Result<bool> {
-    use syn::PathArguments::*;
+    use syn::PathArguments;
 
     let verdict = match (scrutinee, pattern) {
-        (None, None) => true,
-        (AngleBracketed(scrutinee), AngleBracketed(pattern)) => {
+        (PathArguments::None, PathArguments::None) => true,
+        (PathArguments::AngleBracketed(scrutinee), PathArguments::AngleBracketed(pattern)) => {
             match_angle_bracketed_generic_args(scrutinee, pattern)?
         }
-        (Parenthesized(scrutinee), Parenthesized(pattern)) => {
+        (PathArguments::Parenthesized(scrutinee), PathArguments::Parenthesized(pattern)) => {
             scrutinee
                 .inputs
                 .iter()
-                .try_equals_with(&pattern.inputs, match_types)?
+                .try_equals_with(&pattern.inputs, |scrutinee, pattern| {
+                    match_types(&scrutinee.ty, &pattern.ty)
+                })?
                 && match_return_types(&scrutinee.output, &pattern.output)?
         }
         _ => false,
@@ -82,10 +84,10 @@ fn match_generic_args(
     scrutinee: &syn::GenericArgument,
     pattern: &syn::GenericArgument,
 ) -> Result<bool> {
-    use syn::GenericArgument::*;
+    use syn::GenericArgument;
 
     let verdict = match pattern {
-        Lifetime(pattern) => {
+        GenericArgument::Lifetime(pattern) => {
             if pattern.ident != "_" {
                 return Err(unsupported_syntax_error(
                     pattern,
@@ -95,25 +97,25 @@ fn match_generic_args(
                 ));
             }
 
-            matches!(scrutinee, Lifetime(_))
+            matches!(scrutinee, GenericArgument::Lifetime(_))
         }
-        Type(pattern) => {
+        GenericArgument::Type(pattern) => {
             let scrutinee = match scrutinee {
-                Type(scrutinee) => scrutinee,
+                GenericArgument::Type(scrutinee) => scrutinee,
                 _ => return Ok(false),
             };
             match_types(scrutinee, pattern)?
         }
-        Const(pattern) => {
+        GenericArgument::Const(pattern) => {
             let scrutinee = match scrutinee {
-                Const(scrutinee) => scrutinee,
+                GenericArgument::Const(scrutinee) => scrutinee,
                 _ => return Ok(false),
             };
             match_exprs(scrutinee, pattern)
         }
-        AssocType(pattern) => {
+        GenericArgument::AssocType(pattern) => {
             let scrutinee = match scrutinee {
-                AssocType(scrutinee) => scrutinee,
+                GenericArgument::AssocType(scrutinee) => scrutinee,
                 _ => return Ok(false),
             };
             scrutinee.ident == pattern.ident
@@ -124,9 +126,9 @@ fn match_generic_args(
                     match_angle_bracketed_generic_args,
                 )?
         }
-        AssocConst(pattern) => {
+        GenericArgument::AssocConst(pattern) => {
             let scrutinee = match scrutinee {
-                AssocConst(scrutinee) => scrutinee,
+                GenericArgument::AssocConst(scrutinee) => scrutinee,
                 _ => return Ok(false),
             };
 
@@ -150,74 +152,76 @@ fn match_exprs(scrutinee: &syn::Expr, pattern: &syn::Expr) -> bool {
 }
 
 pub(crate) fn match_types(scrutinee: &syn::Type, pattern: &syn::Type) -> Result<bool> {
-    use syn::Type::*;
+    use syn::Type;
 
     let pattern = pattern.peel();
 
-    if let Infer(_) = pattern {
+    if let Type::Infer(_) = pattern {
         return Ok(true);
     }
 
     let scrutinee = scrutinee.peel();
 
     let verdict = match pattern {
-        Array(pattern) => {
+        Type::Array(pattern) => {
             let scrutinee = match scrutinee {
-                Array(scrutinee) => scrutinee,
+                Type::Array(scrutinee) => scrutinee,
                 _ => return Ok(false),
             };
 
             match_types(&scrutinee.elem, &pattern.elem)?
                 && match_exprs(&scrutinee.len, &pattern.len)
         }
-        Path(pattern) => {
+        Type::Path(pattern) => {
             if let Some(qself) = &pattern.qself {
                 return Err(unsupported_syntax_error(qself, "<T as Trait> syntax"));
             }
 
             let scrutinee = match scrutinee {
-                Path(scrutinee) => scrutinee,
+                Type::Path(scrutinee) => scrutinee,
                 _ => return Ok(false),
             };
 
             scrutinee.qself.is_none() && match_paths(&scrutinee.path, &pattern.path)?
         }
-        Ptr(pattern) => {
+        Type::Ptr(pattern) => {
             let scrutinee = match scrutinee {
-                Ptr(scrutinee) => scrutinee,
+                Type::Ptr(scrutinee) => scrutinee,
                 _ => return Ok(false),
             };
-            scrutinee.const_token == pattern.const_token
-                && scrutinee.mutability == pattern.mutability
+            // `syn::PointerMutability` only implements `PartialEq` under the
+            // `extra-traits` feature, and its variants carry only tokens,
+            // so comparing the discriminants is equivalent and cheaper.
+            std::mem::discriminant(&scrutinee.mutability)
+                == std::mem::discriminant(&pattern.mutability)
                 && match_types(&scrutinee.elem, &pattern.elem)?
         }
-        Reference(pattern) => {
+        Type::Reference(pattern) => {
             if let Some(lifetime) = &pattern.lifetime {
                 return Err(unsupported_syntax_error(
                     lifetime,
-                    "Lifetimes are ignored during type pattern matching. \
-                    Explicit lifetime syntax",
+                    "Lifetimes are ignored during type pattern matching. Explicit lifetime syntax",
                 ));
             }
 
             let scrutinee = match scrutinee {
-                Reference(scrutinee) => scrutinee,
+                Type::Reference(scrutinee) => scrutinee,
                 _ => return Ok(false),
             };
 
             scrutinee.mutability == pattern.mutability
                 && match_types(&scrutinee.elem, &pattern.elem)?
         }
-        Slice(pattern) => {
+        Type::Slice(pattern) => {
             let scrutinee = match scrutinee {
-                Slice(scrutinee) => scrutinee,
+                Type::Slice(scrutinee) => scrutinee,
                 _ => return Ok(false),
             };
             match_types(&scrutinee.elem, &pattern.elem)?
         }
-        Tuple(pattern) => {
+        Type::Tuple(pattern) => {
             let scrutinee = match scrutinee {
-                Tuple(scrutinee) => scrutinee,
+                Type::Tuple(scrutinee) => scrutinee,
                 _ => return Ok(false),
             };
             scrutinee
@@ -226,7 +230,7 @@ pub(crate) fn match_types(scrutinee: &syn::Type, pattern: &syn::Type) -> Result<
                 .try_equals_with(&pattern.elems, match_types)?
         }
 
-        Never(_) => matches!(scrutinee, Never(_)),
+        Type::Never(_) => matches!(scrutinee, Type::Never(_)),
 
         _ => return Err(unsupported_syntax_error(&pattern, "this syntax")),
     };

@@ -235,7 +235,7 @@ fn eval_cfgs(true_predicates: &BTreeSet<String>, attrs: &mut Vec<syn::Attribute>
 
                 true_predicates
                     .contains(&predicate)
-                    .then(|| cfg_attr.then_branch)
+                    .then_some(cfg_attr.then_branch)
             }
         };
 

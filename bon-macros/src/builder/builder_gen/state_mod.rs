@@ -212,16 +212,6 @@ impl<'a> StateModGenCtx<'a> {
             .map(|member| &member.name.pascal)
             .collect::<Vec<_>>();
 
-        // Associated types bounds syntax that provides implied bounds for them
-        // is available only since Rust 1.79.0. So this is an opt-in feature that
-        // bumps the MSRV of the crate. See more details in the comment on this
-        // cargo feature's declaration in `bon/Cargo.toml`.
-        let maybe_assoc_type_bounds = cfg!(feature = "implied-bounds").then(|| {
-            quote! {
-                < #( #required_members_pascal: IsSet, )* >
-            }
-        });
-
         let vis_child = &self.base.state_mod.vis_child;
         let sealed_item_decl = &self.sealed_item_decl;
         let sealed_item_impl = &self.sealed_item_impl;
@@ -237,7 +227,7 @@ impl<'a> StateModGenCtx<'a> {
 
         quote! {
             #[doc = #docs]
-            #vis_child trait IsComplete: State #maybe_assoc_type_bounds {
+            #vis_child trait IsComplete: State< #( #required_members_pascal: IsSet, )* > {
                 #sealed_item_decl
             }
 

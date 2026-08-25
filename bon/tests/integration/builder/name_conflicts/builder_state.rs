@@ -88,6 +88,9 @@ mod conflicts_in_bodies {
         {
             #[builder]
             fn sut(_field1: S, _field2: State) {
+                // The nested block is intentional: this test exists to make sure
+                // this exact code structure is parsed correctly by the macro.
+                #[rustfmt::skip]
                 let _ = {
                     {
                         ((), BuilderState)
@@ -170,6 +173,11 @@ mod conflicts_in_bodies {
                 #[builder]
                 fn with_self(&self) {
                     let _ = self;
+
+                    // The nested block is intentional: this test exists to make
+                    // sure this exact code structure is parsed correctly by the
+                    // macro.
+                    #[rustfmt::skip]
                     let _ = {
                         {
                             ((), BuilderState)

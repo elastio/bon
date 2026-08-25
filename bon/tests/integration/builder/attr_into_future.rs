@@ -1,11 +1,8 @@
-/// [`core::future::IntoFuture`] relies on [`Box`]. Also this trait was
-/// introduced in Rust 1.64, while `bon`'s MSRV is 1.59 at the time of this
-/// writing.
+/// [`core::future::IntoFuture`] relies on [`Box`].
 #[cfg(any(feature = "std", feature = "alloc"))]
-#[rustversion::since(1.64)]
 mod tests {
     use crate::prelude::*;
-    use core::future::{ready, IntoFuture};
+    use core::future::{IntoFuture, ready};
     use core::marker::PhantomData;
 
     async fn assert_send<B>(builder: B) -> B::Output
@@ -13,7 +10,6 @@ mod tests {
         B: IntoFuture + Send,
         B::IntoFuture: Send,
     {
-        #[expect(clippy::incompatible_msrv)]
         let fut = builder.into_future();
         let _: &dyn Send = &fut;
         fut.await

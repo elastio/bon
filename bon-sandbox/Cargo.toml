@@ -10,7 +10,7 @@ description = """
   other than linking to its docs as an example!
 """
 
-edition    = "2021"
+edition    = "2024"
 homepage   = "https://bon-rs.com"
 license    = "MIT OR Apache-2.0"
 repository = "https://github.com/elastio/bon"

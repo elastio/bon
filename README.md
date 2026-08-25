@@ -23,7 +23,7 @@
     /></a>
         <a href="https://docs.rs/bon/latest/bon/"><img
         alt="docs.rs"
-        src="https://img.shields.io/badge/MSRV-1.59.0-b83fbf?style=for-the-badge&labelColor=555555&logo=docs.rs"
+        src="https://img.shields.io/badge/MSRV-1.88.0-b83fbf?style=for-the-badge&labelColor=555555&logo=docs.rs"
         height="25"
     /></a>
 </div>

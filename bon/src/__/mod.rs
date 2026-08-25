@@ -22,7 +22,6 @@ mod cfg_eval;
 // directly instead of using this reexport from `bon::__`.
 pub use crate::builder_state::{IsSet, IsUnset};
 pub use bon_macros::__privatize;
-pub use rustversion;
 
 pub(crate) mod sealed {
     // The purpose of the `Sealed` trait **is** to be unnameable from outside the crate.
