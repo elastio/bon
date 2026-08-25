@@ -212,10 +212,6 @@ impl<'a> StateModGenCtx<'a> {
             .map(|member| &member.name.pascal)
             .collect::<Vec<_>>();
 
-        let maybe_assoc_type_bounds = quote! {
-            < #( #required_members_pascal: IsSet, )* >
-        };
-
         let vis_child = &self.base.state_mod.vis_child;
         let sealed_item_decl = &self.sealed_item_decl;
         let sealed_item_impl = &self.sealed_item_impl;
@@ -231,7 +227,7 @@ impl<'a> StateModGenCtx<'a> {
 
         quote! {
             #[doc = #docs]
-            #vis_child trait IsComplete: State #maybe_assoc_type_bounds {
+            #vis_child trait IsComplete: State< #( #required_members_pascal: IsSet, )* > {
                 #sealed_item_decl
             }
 

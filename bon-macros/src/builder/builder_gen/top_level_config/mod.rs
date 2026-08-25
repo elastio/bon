@@ -29,6 +29,9 @@ fn parse_start_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
 }
 
 #[derive(Debug, FromMeta)]
+// The `FromMeta` derive generates `on: on` for the `#[darling(multiple)]` field,
+// which trips this lint on newer clippy versions.
+#[allow(clippy::redundant_field_names)]
 pub(crate) struct TopLevelConfig {
     /// Specifies whether the generated functions should be `const`.
     ///
