@@ -85,7 +85,8 @@ mod tests {
         assert_eq!(actual, ["foo", "bar", "baz"]);
 
         let actual: [String; 0] = crate::arr![];
-        assert!(actual.is_empty());
+        let expected: [String; 0] = [];
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -94,7 +95,8 @@ mod tests {
         assert_eq!(actual, [1, 2]);
 
         let actual: [u8; 0] = crate::arr![];
-        assert!(actual.is_empty());
+        let expected: [u8; 0] = [];
+        assert_eq!(actual, expected);
     }
 
     #[cfg(feature = "alloc")]
@@ -104,7 +106,8 @@ mod tests {
         assert_eq!(actual, ["foo", "bar", "baz"]);
 
         let actual: Vec<String> = crate::vec![];
-        assert!(actual.is_empty());
+        let expected: [String; 0] = [];
+        assert_eq!(actual, expected);
     }
 
     #[cfg(feature = "std")]
