@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This release raises the minimum supported Rust version from `1.59.0` to `1.88.0`. If you are on an older compiler, stay on `bon@3.9`.
 
-The new MSRV also allowed us to deprecate the `implied-bounds` cargo feature, so be sure to remove it from your `Cargo.toml` if you have it enabled. This feature won't be removed until a major release, and there are no plans for one yet.
+The new MSRV also comes with the deprecation of the `implied-bounds` cargo feature. Implied bounds are now added by default without any feature gate, so be sure to remove that feature from your `Cargo.toml` if you have it enabled. It's currently a no-op, and it won't be removed until a major release, for which there are no plans yet.
 
 The MSRV bump comes from the `darling@0.24` update, which is the first version that uses `syn@3.0`.
 
