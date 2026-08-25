@@ -80,7 +80,7 @@ dependencies = [
 
 [[package]]
 name = "bon-sandbox"
-version = "3.9.4"
+version = "3.10.0"
 dependencies = [
  "bon",
  "buildstructor",
