@@ -1,3 +1,8 @@
+// The `FromMeta` derive generates `on: on` in the `TopLevelConfig` initializer
+// for the `#[darling(multiple)]` field. The generated impl is a sibling of the
+// struct, so the `allow` has to live at the module level to cover it.
+#![allow(clippy::redundant_field_names)]
+
 mod generics;
 mod on;
 
@@ -29,9 +34,6 @@ fn parse_start_fn(meta: &syn::Meta) -> Result<ItemSigConfig> {
 }
 
 #[derive(Debug, FromMeta)]
-// The `FromMeta` derive generates `on: on` for the `#[darling(multiple)]` field,
-// which trips this lint on newer clippy versions.
-#[allow(clippy::redundant_field_names)]
 pub(crate) struct TopLevelConfig {
     /// Specifies whether the generated functions should be `const`.
     ///
