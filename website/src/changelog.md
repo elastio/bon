@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [3.10.1](https://github.com/elastio/bon/compare/v3.10.0...v3.10.1) - 2026-09-07
 
-### Other
+### Changed
 
 - Strip the `r#` prefix from raw identifiers in `derive(Debug)` ([#402](https://github.com/elastio/bon/pull/402))
 
