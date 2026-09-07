@@ -7,11 +7,14 @@ impl BuilderGenCtx {
     pub(super) fn derive_debug(&self, derive: &DeriveConfig) -> TokenStream {
         let bon = &self.bon;
 
+        // The `r#` prefix is a syntactic escape, not a part of the identifier's
+        // name, so it's stripped from every name that ends up in the `Debug`
+        // output, just like the std `#[derive(Debug)]` does.
         let format_members = self.members.iter().filter_map(|member| {
             match member {
                 Member::StartFn(member) => {
                     let member_ident = &member.ident;
-                    let member_ident_str = member_ident.to_string();
+                    let member_ident_str = member_ident.raw_name();
                     let member_ty = &member.ty.norm;
                     Some(quote! {
                         output.field(
@@ -24,7 +27,7 @@ impl BuilderGenCtx {
                 }
                 Member::Field(member) => {
                     let member_ident = &member.ident;
-                    let member_ident_str = member_ident.to_string();
+                    let member_ident_str = member_ident.raw_name();
                     let member_ty = &member.norm_ty;
                     Some(quote! {
                         output.field(
@@ -77,7 +80,7 @@ impl BuilderGenCtx {
         let generic_args = &self.generics.args;
         let builder_ident = &self.builder_type.ident;
         let state_var = &self.state_var;
-        let builder_ident_str = builder_ident.to_string();
+        let builder_ident_str = builder_ident.raw_name();
 
         quote! {
             #[automatically_derived]

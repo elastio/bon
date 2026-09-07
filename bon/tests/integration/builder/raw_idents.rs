@@ -105,3 +105,27 @@ fn test_self_underscore_bug_237() {
 
     assert_eq!(builder.build().self_, 42);
 }
+
+// The `r#` prefix is a syntactic escape, not a part of the identifier's name,
+// so it must not appear in the `Debug` output, just like it doesn't appear in
+// the output of the std `#[derive(Debug)]`.
+#[test]
+#[allow(non_camel_case_types)]
+fn test_derive_debug() {
+    #[derive(Builder)]
+    #[builder(builder_type = r#type, state_mod = r#mod, derive(Debug))]
+    #[allow(dead_code)]
+    struct Sut {
+        #[builder(start_fn)]
+        r#struct: u32,
+
+        #[builder(field)]
+        r#enum: u32,
+
+        r#while: u32,
+    }
+
+    let builder = Sut::builder(1).r#while(2);
+
+    assert_debug_eq(&builder, expect!["type { struct: 1, enum: 0, while: 2 }"]);
+}
