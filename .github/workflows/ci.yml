@@ -208,7 +208,7 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1.16.1
         with:
-          toolchain: nightly-2025-07-12
+          toolchain: nightly-2026-09-22
           components: miri, rust-src
 
       - run: |
