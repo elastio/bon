@@ -39,8 +39,9 @@ pub mod buildstructor {
 }
 
 /// Example docs generated with `typed-builder`
+// `typed-builder` generates an empty enum for the builder's type state.
+#[allow(clippy::empty_enums)]
 pub mod typed_builder {
-
     /// Doc comment on `Struct`
     #[derive(typed_builder::TypedBuilder)]
     #[builder(doc)]
