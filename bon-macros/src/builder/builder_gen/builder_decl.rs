@@ -70,8 +70,17 @@ impl super::BuilderGenCtx {
         let docs = &self.builder_type.docs;
         let state_var = &self.state_var;
 
-        let custom_fields_idents = self.custom_fields().map(|field| &field.ident);
-        let custom_fields_types = self.custom_fields().map(|field| &field.norm_ty);
+        let custom_fields = self.custom_fields().map(|field| {
+            let ident = &field.ident;
+            let ty = &field.norm_ty;
+            let doc = format!(
+                "Private builder field `{ident}` for use in custom methods.",
+            );
+            quote! {
+                #[doc = #doc]
+                #ident: #ty
+            }
+        });
 
         quote! {
             #[must_use = #must_use_message]
@@ -109,7 +118,7 @@ impl super::BuilderGenCtx {
 
                 #( #start_fn_args_fields, )*
 
-                #( #custom_fields_idents: #custom_fields_types, )*
+                #( #custom_fields, )*
 
                 #private_field_attrs
                 __unsafe_private_named: (

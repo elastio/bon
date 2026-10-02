@@ -11,6 +11,10 @@ struct ExampleStruct {
     #[builder(start_fn)]
     start_fn: u32,
 
+    /// Docs on `field` member
+    #[builder(field)]
+    field: u32,
+
     /// Docs on `finish_fn` member
     #[builder(finish_fn)]
     finish_fn: u32,
@@ -27,6 +31,10 @@ impl ExampleStruct {
         #[builder(start_fn)]
         start_fn: u32,
 
+        /// Docs on `field` member
+        #[builder(field)]
+        field: u32,
+
         /// Docs on `finish_fn` member
         #[builder(finish_fn)]
         finish_fn: u32,
@@ -35,6 +43,7 @@ impl ExampleStruct {
         regular: u32,
     ) {
         let _ = start_fn;
+        let _ = field;
         let _ = finish_fn;
         let _ = regular;
     }
@@ -47,6 +56,10 @@ impl ExampleStruct {
         #[builder(start_fn)]
         start_fn: u32,
 
+        /// Docs on `field` member
+        #[builder(field)]
+        field: u32,
+
         /// Docs on `finish_fn` member
         #[builder(finish_fn)]
         finish_fn: u32,
@@ -56,6 +69,7 @@ impl ExampleStruct {
     ) {
         let _ = self;
         let _ = start_fn;
+        let _ = field;
         let _ = finish_fn;
         let _ = regular;
     }
@@ -68,6 +82,10 @@ const fn example_function(
     #[builder(start_fn)]
     start_fn: u32,
 
+    /// Docs on `field` member
+    #[builder(field)]
+    field: u32,
+
     /// Docs on `finish_fn` member
     #[builder(finish_fn)]
     finish_fn: u32,
@@ -76,6 +94,7 @@ const fn example_function(
     regular: u32,
 ) {
     let _ = start_fn;
+    let _ = field;
     let _ = finish_fn;
     let _ = regular;
 }
