@@ -47,7 +47,7 @@ impl<'a> StateModGenCtx<'a> {
                 // to expose this API surface.
                 //
                 // Also, there are some genuinely private items like the `Sealed`
-                // enum and members "name" enums that we don't want to expose even
+                // trait and members "name" enums that we don't want to expose even
                 // to the module that defines the builder. These APIs are not
                 // public, and users instead should only reference the traits
                 // and state transition type aliases from here.
@@ -60,9 +60,7 @@ impl<'a> StateModGenCtx<'a> {
                 use #bon::__::{Set, Unset};
 
                 mod sealed {
-                    #vis_child_child struct Sealed;
-                    #vis_child_child trait IsSealed {}
-                    impl IsSealed for Sealed {}
+                    #vis_child_child trait Sealed {}
                 }
 
                 #state_trait
@@ -124,8 +122,9 @@ impl<'a> StateModGenCtx<'a> {
                 #(
                     type #stateful_members_pascal = Unset<members::#stateful_members_snake>;
                 )*
-                type __Sealed = sealed::Sealed;
             }
+
+            impl sealed::Sealed for Empty {}
 
             #(
                 #[doc(hidden)]
@@ -137,8 +136,9 @@ impl<'a> StateModGenCtx<'a> {
                     #(
                         type #members_after = S::#members_after;
                     )*
-                    type __Sealed = sealed::Sealed;
                 }
+
+                impl<S: State> sealed::Sealed for #structs_idents<S> {}
             )*
         }
     }
@@ -170,18 +170,13 @@ impl<'a> StateModGenCtx<'a> {
 
         quote! {
             #[doc = #docs]
-            #vis_child trait State: ::core::marker::Sized {
+            // Code outside of this module can't name the `Sealed` trait, so it
+            // can't implement the `State` trait.
+            #vis_child trait State: ::core::marker::Sized + sealed::Sealed {
                 #(
                     #[doc = #assoc_types_docs]
                     type #stateful_members_pascal;
                 )*
-
-                // Only the `Sealed` type implements the `IsSealed` trait. Code outside
-                // of this module can't name the `Sealed` type, so it can't implement
-                // the trait. An associated type is cheaper to type-check than an
-                // associated const.
-                #[doc(hidden)]
-                type __Sealed: sealed::IsSealed;
             }
         }
     }

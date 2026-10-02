@@ -1,17 +1,29 @@
-error[E0277]: the trait bound `(): IsSealed` is not satisfied
-  --> tests/integration/ui/compile_fail/sealed_state.rs:12:21
+error[E0277]: the trait bound `CustomState: Sealed` is not satisfied
+  --> tests/integration/ui/compile_fail/sealed_state.rs:10:29
    |
-12 |     type __Sealed = ();
-   |                     ^^ the trait `IsSealed` is not implemented for `()`
+10 | impl sut_builder::State for CustomState {
+   |                             ^^^^^^^^^^^ unsatisfied trait bound
    |
-help: the trait `IsSealed` is implemented for `Sealed`
+help: the trait `Sealed` is not implemented for `CustomState`
+  --> tests/integration/ui/compile_fail/sealed_state.rs:8:1
+   |
+ 8 | struct CustomState;
+   | ^^^^^^^^^^^^^^^^^^
+help: the following other types implement trait `Sealed`
   --> tests/integration/ui/compile_fail/sealed_state.rs:3:10
    |
  3 | #[derive(Builder)]
    |          ^^^^^^^
-note: required by a bound in `State::__Sealed`
+   |          |
+   |          `SetX1<S>`
+   |          `sut_builder::Empty`
+note: required by a bound in `State`
   --> tests/integration/ui/compile_fail/sealed_state.rs:3:10
    |
  3 | #[derive(Builder)]
-   |          ^^^^^^^ required by this bound in `State::__Sealed`
+   |          ^^^^^^^ required by this bound in `State`
+   = note: `State` is a "sealed trait", because to implement it you also need to implement `sut_builder::sealed::Sealed`, which is not accessible; this is usually done to force you to use one of the provided types that already implement it
+   = help: the following types implement the trait:
+             sut_builder::Empty
+             sut_builder::SetX1<S>
    = note: this error originates in the derive macro `Builder` (in Nightly builds, run with -Z macro-backtrace for more info)

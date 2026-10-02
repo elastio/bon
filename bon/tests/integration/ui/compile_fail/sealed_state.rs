@@ -9,7 +9,6 @@ struct CustomState;
 
 impl sut_builder::State for CustomState {
     type X1 = sut_builder::SetX1;
-    type __Sealed = ();
 }
 
 fn main() {}
