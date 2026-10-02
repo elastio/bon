@@ -72,9 +72,9 @@ impl BuilderGenCtx {
             .collect::<Vec<_>>();
 
         // Every item here is a single top-level item. We add the `allow`
-        // attributes to each of them directly. Previously this code converted
-        // the final token stream to string and parsed it to `syn::File`, which
-        // resulted in a significant performance hit. Ouch. Don't do that again!
+        // attributes to each of them directly. Previously this code parsed
+        // the final token stream into a `syn::File`, which resulted in a
+        // significant performance hit. Ouch. Don't do that again!
         let other_items = [builder_decl, builder_impl]
             .into_iter()
             .chain(builder_derives)
