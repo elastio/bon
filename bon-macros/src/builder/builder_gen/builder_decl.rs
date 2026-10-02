@@ -73,9 +73,7 @@ impl super::BuilderGenCtx {
         let custom_fields = self.custom_fields().map(|field| {
             let ident = &field.ident;
             let ty = &field.norm_ty;
-            let doc = format!(
-                "Private builder field `{ident}` for use in custom methods.",
-            );
+            let doc = format!("Private builder field `{ident}` for use in custom methods.");
             quote! {
                 #[doc = #doc]
                 #ident: #ty
