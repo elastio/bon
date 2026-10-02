@@ -258,10 +258,6 @@ impl NamedMember {
         }
     }
 
-    pub(crate) fn is(&self, other: &Self) -> bool {
-        self.index == other.index
-    }
-
     pub(crate) fn merge_on_config(&mut self, on: &[OnConfig]) -> Result {
         self.merge_config_default(on)?;
 

@@ -132,7 +132,21 @@ impl BuilderGenCtx {
             #allows
             // Ignore dead code warnings because some setter/getter methods may
             // not be used
-            #[allow(dead_code)]
+            #[allow(
+                dead_code,
+                // This is intentional. We want the builder syntax to compile away
+                clippy::inline_always,
+                // We don't want to avoid using `impl Trait` in the setter. This way
+                // the setter signature is easier to read, and anyway if you want to
+                // specify a type hint for the method that accepts an `impl Into`, then
+                // your design of this setter already went wrong.
+                clippy::impl_trait_in_params,
+                clippy::missing_const_for_fn,
+                // When having a field which has one of the prefixes listed by
+                // `clippy::wrong_self_convention` you will end up getting said lint
+                // warning in your `bon::Builder` because we take self by value.
+                clippy::wrong_self_convention,
+            )]
             #[automatically_derived]
             impl<
                 #(#generics_decl,)*
