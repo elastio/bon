@@ -64,46 +64,30 @@ impl BuilderGenCtx {
             deprecated
         )]);
 
-        let allows = self.allow_attrs.iter().cloned().chain([default_allows]);
+        let allows = self
+            .allow_attrs
+            .iter()
+            .cloned()
+            .chain([default_allows])
+            .collect::<Vec<_>>();
 
-        // -- Postprocessing --
-        // Here we parse all items back and add the `allow` attributes to them.
-        let other_items = quote! {
-            #builder_decl
-            #builder_impl
-            #builder_derives
-            #state_mod
-        };
+        // Every item here is a single top-level item. We add the `allow`
+        // attributes to each of them directly. Previously this code converted
+        // the final token stream to string and parsed it to `syn::File`, which
+        // resulted in a significant performance hit. Ouch. Don't do that again!
+        let other_items = [builder_decl, builder_impl]
+            .into_iter()
+            .chain(builder_derives)
+            .chain([state_mod])
+            .map(|item| quote!(#(#allows)* #item));
 
-        let other_items_str = other_items.to_string();
-
-        let other_items: syn::File = syn::parse2(other_items).map_err(|err| {
-            err!(
-                &Span::call_site(),
-                "bug in the `bon` crate: the macro generated code that contains syntax errors; \
-                please report this issue at our Github repository: \
-                https://github.com/elastio/bon;\n\
-                syntax error in generated code: {err:#?};\n\
-                generated code:\n\
-                ```rust
-                {other_items_str}\n\
-                ```",
-            )
-        })?;
-
-        let mut other_items = other_items.items;
-
-        for item in &mut other_items {
-            if let Some(attrs) = item.attrs_mut() {
-                attrs.extend(allows.clone());
-            }
-        }
+        let other_items = quote!(#(#other_items)*);
 
         start_fn.attrs.extend(allows);
 
         Ok(MacroOutput {
             start_fn,
-            other_items: quote!(#(#other_items)*),
+            other_items,
         })
     }
 
@@ -148,7 +132,21 @@ impl BuilderGenCtx {
             #allows
             // Ignore dead code warnings because some setter/getter methods may
             // not be used
-            #[allow(dead_code)]
+            #[allow(
+                dead_code,
+                // This is intentional. We want the builder syntax to compile away
+                clippy::inline_always,
+                // We don't want to avoid using `impl Trait` in the setter. This way
+                // the setter signature is easier to read, and anyway if you want to
+                // specify a type hint for the method that accepts an `impl Into`, then
+                // your design of this setter already went wrong.
+                clippy::impl_trait_in_params,
+                clippy::missing_const_for_fn,
+                // When having a field which has one of the prefixes listed by
+                // `clippy::wrong_self_convention` you will end up getting said lint
+                // warning in your `bon::Builder` because we take self by value.
+                clippy::wrong_self_convention,
+            )]
             #[automatically_derived]
             impl<
                 #(#generics_decl,)*

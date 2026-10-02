@@ -458,20 +458,6 @@ impl<'a> SettersCtx<'a> {
 
         quote_spanned! {self.member.span=>
             #( #docs )*
-            #[allow(
-                // This is intentional. We want the builder syntax to compile away
-                clippy::inline_always,
-                // We don't want to avoid using `impl Trait` in the setter. This way
-                // the setter signature is easier to read, and anyway if you want to
-                // specify a type hint for the method that accepts an `impl Into`, then
-                // your design of this setter already went wrong.
-                clippy::impl_trait_in_params,
-                clippy::missing_const_for_fn,
-                // When having a field which has one of the prefixes listed by
-                // `clippy::wrong_self_convention` you will end up getting said lint
-                // warning in your `bon::Builder` because we take self by value.
-                clippy::wrong_self_convention,
-            )]
             #[inline(always)]
             #(#fn_modifiers)* fn #name(#maybe_mut #self_, #( #pats: #types ),*) -> #return_type
             #where_clause
@@ -700,13 +686,12 @@ fn well_known_default(ty: &syn::Type) -> Option<syn::Expr> {
     Some(value)
 }
 
-/// Unfortunately there is no `syn::Parse` impl for `PatIdent` directly,
-/// so we use this workaround instead.
 fn pat_ident(ident_name: &'static str) -> syn::PatIdent {
-    let ident = syn::Ident::new(ident_name, Span::call_site());
-    let pat: syn::Pat = syn::parse_quote!(#ident);
-    match pat {
-        syn::Pat::Ident(pat_ident) => pat_ident,
-        _ => unreachable!("can't parse something else than PatIdent here: {pat:?}"),
+    syn::PatIdent {
+        attrs: vec![],
+        by_ref: None,
+        mutability: None,
+        ident: syn::Ident::new(ident_name, Span::call_site()),
+        subpat: None,
     }
 }

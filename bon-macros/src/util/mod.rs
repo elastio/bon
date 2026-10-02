@@ -3,7 +3,6 @@ mod expr;
 mod fn_arg;
 mod generic_param;
 mod ident;
-mod item;
 mod iterator;
 mod meta_list;
 mod path;
@@ -33,7 +32,6 @@ pub(crate) mod prelude {
     pub(crate) use super::fn_arg::FnArgExt;
     pub(crate) use super::generic_param::GenericParamExt;
     pub(crate) use super::ident::IdentExt;
-    pub(crate) use super::item::ItemExt;
     pub(crate) use super::iterator::{IntoIteratorExt, IteratorExt};
     pub(crate) use super::meta_list::MetaListExt;
     pub(crate) use super::path::PathExt;

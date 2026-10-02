@@ -5,8 +5,6 @@ pub(super) struct StateModGenCtx<'a> {
     base: &'a BuilderGenCtx,
     stateful_members_snake: Vec<&'a syn::Ident>,
     stateful_members_pascal: Vec<&'a syn::Ident>,
-    sealed_item_decl: TokenStream,
-    sealed_item_impl: TokenStream,
 }
 
 impl<'a> StateModGenCtx<'a> {
@@ -23,17 +21,6 @@ impl<'a> StateModGenCtx<'a> {
                 .stateful_members()
                 .map(|member| &member.name.pascal)
                 .collect(),
-
-            // A const item in a trait makes it non-object safe, which is convenient,
-            // because we want that restriction in this case.
-            sealed_item_decl: quote! {
-                #[doc(hidden)]
-                const SEALED: sealed::Sealed;
-            },
-
-            sealed_item_impl: quote! {
-                const SEALED: sealed::Sealed = sealed::Sealed;
-            },
         }
     }
 
@@ -60,7 +47,7 @@ impl<'a> StateModGenCtx<'a> {
                 // to expose this API surface.
                 //
                 // Also, there are some genuinely private items like the `Sealed`
-                // enum and members "name" enums that we don't want to expose even
+                // trait and members "name" enums that we don't want to expose even
                 // to the module that defines the builder. These APIs are not
                 // public, and users instead should only reference the traits
                 // and state transition type aliases from here.
@@ -73,7 +60,7 @@ impl<'a> StateModGenCtx<'a> {
                 use #bon::__::{Set, Unset};
 
                 mod sealed {
-                    #vis_child_child struct Sealed;
+                    #vis_child_child trait Sealed {}
                 }
 
                 #state_trait
@@ -85,65 +72,33 @@ impl<'a> StateModGenCtx<'a> {
     }
 
     fn state_transitions(&self) -> TokenStream {
-        // Not using `Iterator::zip` here to make it possible to scale this in
-        // case if we add more vecs here. We are not using `Itertools`, so
-        // its `multiunzip` is not available.
-        let mut set_members_structs = Vec::with_capacity(self.stateful_members_snake.len());
-        let mut state_impls = Vec::with_capacity(self.stateful_members_snake.len());
-
         let vis_child = &self.base.state_mod.vis_child;
-        let sealed_item_impl = &self.sealed_item_impl;
-
-        for member in self.base.stateful_members() {
-            let member_pascal = &member.name.pascal;
-
-            let docs = format!(
-                "Represents a [`State`] that has [`IsSet`] implemented for [`State::{member_pascal}`].\n\n\
-                The state for all other members is left the same as in the input state.",
-            );
-
-            let struct_ident = format_ident!("Set{}", member.name.pascal_str);
-
-            set_members_structs.push(quote! {
-                #[doc = #docs]
-                #vis_child struct #struct_ident<S: State = Empty>(
-                    // We `S` in an `fn() -> ...` to make the compiler think
-                    // that the builder doesn't "own" an instance of `S`.
-                    // This removes unnecessary requirements when evaluating the
-                    // applicability of the auto traits.
-                    ::core::marker::PhantomData<fn() -> S>
-                );
-            });
-
-            let states = self.base.stateful_members().map(|other_member| {
-                if other_member.is(member) {
-                    let member_snake = &member.name.snake;
-                    quote! {
-                        Set<members::#member_snake>
-                    }
-                } else {
-                    let member_pascal = &other_member.name.pascal;
-                    quote! {
-                        S::#member_pascal
-                    }
-                }
-            });
-
-            let stateful_members_pascal = &self.stateful_members_pascal;
-
-            state_impls.push(quote! {
-                #[doc(hidden)]
-                impl<S: State> State for #struct_ident<S> {
-                    #(
-                        type #stateful_members_pascal = #states;
-                    )*
-                    #sealed_item_impl
-                }
-            });
-        }
-
         let stateful_members_snake = &self.stateful_members_snake;
         let stateful_members_pascal = &self.stateful_members_pascal;
+
+        let docs = stateful_members_pascal.iter().map(|member_pascal| {
+            format!(
+                "Represents a [`State`] that has [`IsSet`] implemented for [`State::{member_pascal}`].\n\n\
+                The state for all other members is left the same as in the input state.",
+            )
+        });
+
+        let structs_idents = self
+            .base
+            .stateful_members()
+            .map(|member| format_ident!("Set{}", member.name.pascal_str))
+            .collect::<Vec<_>>();
+
+        // Each separate token stream costs a call to the compiler when it is
+        // added to another token stream. So, each impl lists the members before
+        // and after the set member in repetitions of a single `quote!`.
+        let (members_before, members_after): (Vec<_>, Vec<_>) = (0..stateful_members_pascal.len())
+            .filter_map(|i| {
+                let (before, rest) = stateful_members_pascal.split_at_checked(i)?;
+                let (_, after) = rest.split_first()?;
+                Some((before, after))
+            })
+            .unzip();
 
         quote! {
             /// Represents a [`State`] that has [`IsUnset`] implemented for all members.
@@ -151,18 +106,40 @@ impl<'a> StateModGenCtx<'a> {
             /// This is the initial state of the builder before any setters are called.
             #vis_child struct Empty(());
 
-            #( #set_members_structs )*
+            #(
+                #[doc = #docs]
+                #vis_child struct #structs_idents<S: State = Empty>(
+                    // We `S` in an `fn() -> ...` to make the compiler think
+                    // that the builder doesn't "own" an instance of `S`.
+                    // This removes unnecessary requirements when evaluating the
+                    // applicability of the auto traits.
+                    ::core::marker::PhantomData<fn() -> S>
+                );
+            )*
 
             #[doc(hidden)]
             impl State for Empty {
                 #(
                     type #stateful_members_pascal = Unset<members::#stateful_members_snake>;
                 )*
-                #sealed_item_impl
             }
 
-            #( #state_impls )*
+            impl sealed::Sealed for Empty {}
 
+            #(
+                #[doc(hidden)]
+                impl<S: State> State for #structs_idents<S> {
+                    #(
+                        type #members_before = S::#members_before;
+                    )*
+                    type #stateful_members_pascal = Set<members::#stateful_members_snake>;
+                    #(
+                        type #members_after = S::#members_after;
+                    )*
+                }
+
+                impl<S: State> sealed::Sealed for #structs_idents<S> {}
+            )*
         }
     }
 
@@ -176,7 +153,6 @@ impl<'a> StateModGenCtx<'a> {
         });
 
         let vis_child = &self.base.state_mod.vis_child;
-        let sealed_item_decl = &self.sealed_item_decl;
         let stateful_members_pascal = &self.stateful_members_pascal;
 
         let docs_suffix = if stateful_members_pascal.is_empty() {
@@ -194,12 +170,13 @@ impl<'a> StateModGenCtx<'a> {
 
         quote! {
             #[doc = #docs]
-            #vis_child trait State: ::core::marker::Sized {
+            // Code outside of this module can't name the `Sealed` trait, so it
+            // can't implement the `State` trait.
+            #vis_child trait State: ::core::marker::Sized + sealed::Sealed {
                 #(
                     #[doc = #assoc_types_docs]
                     type #stateful_members_pascal;
                 )*
-                #sealed_item_decl
             }
         }
     }
@@ -213,8 +190,6 @@ impl<'a> StateModGenCtx<'a> {
             .collect::<Vec<_>>();
 
         let vis_child = &self.base.state_mod.vis_child;
-        let sealed_item_decl = &self.sealed_item_decl;
-        let sealed_item_impl = &self.sealed_item_impl;
 
         let builder_ident = &self.base.builder_type.ident;
         let finish_fn = &self.base.finish_fn.ident;
@@ -225,11 +200,10 @@ impl<'a> StateModGenCtx<'a> {
             [`{builder_ident}::{finish_fn}()`](super::{builder_ident}::{finish_fn}())",
         );
 
+        // This trait doesn't need its own sealing. Its supertrait `State` is sealed.
         quote! {
             #[doc = #docs]
-            #vis_child trait IsComplete: State< #( #required_members_pascal: IsSet, )* > {
-                #sealed_item_decl
-            }
+            #vis_child trait IsComplete: State< #( #required_members_pascal: IsSet, )* > {}
 
             #[doc(hidden)]
             impl<S: State> IsComplete for S
@@ -237,9 +211,7 @@ impl<'a> StateModGenCtx<'a> {
                 #(
                     S::#required_members_pascal: IsSet,
                 )*
-            {
-                #sealed_item_impl
-            }
+            {}
         }
     }
 

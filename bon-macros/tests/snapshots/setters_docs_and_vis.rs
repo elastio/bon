@@ -1,7 +1,13 @@
-#[allow(unused_parens)]
-#[allow(dead_code)]
-#[automatically_derived]
 #[allow(deprecated)]
+#[allow(unused_parens)]
+#[allow(
+    dead_code,
+    clippy::inline_always,
+    clippy::impl_trait_in_params,
+    clippy::missing_const_for_fn,
+    clippy::wrong_self_convention,
+)]
+#[automatically_derived]
 impl<S: sut_builder::State> SutBuilder<S> {
     /**_**Required.**_
 
