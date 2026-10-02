@@ -24,15 +24,16 @@ impl<'a> StateModGenCtx<'a> {
                 .map(|member| &member.name.pascal)
                 .collect(),
 
-            // A const item in a trait makes it non-object safe, which is convenient,
-            // because we want that restriction in this case.
+            // Code outside of this module can't name the `Sealed` type, so it
+            // can't implement the trait. An associated type is cheaper to
+            // type-check than an associated const.
             sealed_item_decl: quote! {
                 #[doc(hidden)]
-                const SEALED: sealed::Sealed;
+                type __Sealed;
             },
 
             sealed_item_impl: quote! {
-                const SEALED: sealed::Sealed = sealed::Sealed;
+                type __Sealed = sealed::Sealed;
             },
         }
     }
@@ -213,8 +214,6 @@ impl<'a> StateModGenCtx<'a> {
             .collect::<Vec<_>>();
 
         let vis_child = &self.base.state_mod.vis_child;
-        let sealed_item_decl = &self.sealed_item_decl;
-        let sealed_item_impl = &self.sealed_item_impl;
 
         let builder_ident = &self.base.builder_type.ident;
         let finish_fn = &self.base.finish_fn.ident;
@@ -225,11 +224,10 @@ impl<'a> StateModGenCtx<'a> {
             [`{builder_ident}::{finish_fn}()`](super::{builder_ident}::{finish_fn}())",
         );
 
+        // This trait doesn't need its own sealing. Its supertrait `State` is sealed.
         quote! {
             #[doc = #docs]
-            #vis_child trait IsComplete: State< #( #required_members_pascal: IsSet, )* > {
-                #sealed_item_decl
-            }
+            #vis_child trait IsComplete: State< #( #required_members_pascal: IsSet, )* > {}
 
             #[doc(hidden)]
             impl<S: State> IsComplete for S
@@ -237,9 +235,7 @@ impl<'a> StateModGenCtx<'a> {
                 #(
                     S::#required_members_pascal: IsSet,
                 )*
-            {
-                #sealed_item_impl
-            }
+            {}
         }
     }
 

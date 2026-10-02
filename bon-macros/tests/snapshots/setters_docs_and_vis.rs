@@ -1,7 +1,7 @@
+#[allow(deprecated)]
 #[allow(unused_parens)]
 #[allow(dead_code)]
 #[automatically_derived]
-#[allow(deprecated)]
 impl<S: sut_builder::State> SutBuilder<S> {
     /**_**Required.**_
 

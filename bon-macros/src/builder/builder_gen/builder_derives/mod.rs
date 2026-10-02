@@ -9,7 +9,8 @@ use crate::util::prelude::*;
 use darling::ast::GenericParamExt;
 
 impl BuilderGenCtx {
-    pub(crate) fn builder_derives(&self) -> Result<TokenStream> {
+    /// Returns a separate [`TokenStream`] for every generated item
+    pub(crate) fn builder_derives(&self) -> Result<Vec<TokenStream>> {
         let DerivesConfig {
             clone,
             debug,
@@ -17,25 +18,25 @@ impl BuilderGenCtx {
             into_future,
         } = &self.builder_type.derives;
 
-        let mut tokens = TokenStream::new();
+        let mut items = vec![];
 
         if let Some(derive) = clone {
-            tokens.extend(self.derive_clone(derive));
+            items.push(self.derive_clone(derive));
         }
 
         if let Some(derive) = debug {
-            tokens.extend(self.derive_debug(derive));
+            items.push(self.derive_debug(derive));
         }
 
         if into.is_present() {
-            tokens.extend(self.derive_into()?);
+            items.push(self.derive_into()?);
         }
 
         if let Some(derive) = into_future {
-            tokens.extend(self.derive_into_future(derive)?);
+            items.push(self.derive_into_future(derive)?);
         }
 
-        Ok(tokens)
+        Ok(items)
     }
 
     /// We follow the logic of the standard `#[derive(...)]` macros such as `Clone` and `Debug`.
