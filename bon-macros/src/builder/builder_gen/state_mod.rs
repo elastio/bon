@@ -24,12 +24,13 @@ impl<'a> StateModGenCtx<'a> {
                 .map(|member| &member.name.pascal)
                 .collect(),
 
-            // Code outside of this module can't name the `Sealed` type, so it
-            // can't implement the trait. An associated type is cheaper to
-            // type-check than an associated const.
+            // Only the `Sealed` type implements the `IsSealed` trait. Code outside
+            // of this module can't name the `Sealed` type, so it can't implement
+            // the trait. An associated type is cheaper to type-check than an
+            // associated const.
             sealed_item_decl: quote! {
                 #[doc(hidden)]
-                type __Sealed;
+                type __Sealed: sealed::IsSealed;
             },
 
             sealed_item_impl: quote! {
@@ -75,6 +76,8 @@ impl<'a> StateModGenCtx<'a> {
 
                 mod sealed {
                     #vis_child_child struct Sealed;
+                    #vis_child_child trait IsSealed {}
+                    impl IsSealed for Sealed {}
                 }
 
                 #state_trait
