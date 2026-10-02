@@ -2,7 +2,8 @@
     missing_docs,
     missing_debug_implementations,
     dead_code,
-    rustdoc::missing_crate_level_docs
+    rustdoc::missing_crate_level_docs,
+    clippy::must_use_candidate
 )]
 
 cfg_if::cfg_if! {

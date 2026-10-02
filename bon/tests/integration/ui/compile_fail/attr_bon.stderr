@@ -85,7 +85,7 @@ error: `const` items in this context need a name
    |
    = note: this error originates in the attribute macro `bon::builder` (in Nightly builds, run with -Z macro-backtrace for more info)
 
-error[E0433]: cannot find `foo` in the crate root
+error[E0433]: cannot find `foo` in the list of imported crates
   --> tests/integration/ui/compile_fail/attr_bon.rs:35:9
    |
 35 |     #[::foo::builder]
