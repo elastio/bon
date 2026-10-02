@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.10.2](https://github.com/elastio/bon/compare/v3.10.1...v3.10.2) - 2026-10-02
+
+### Changed
+
+- Improve the compile time of the builder macros and the code they generate by ~30% ([#405](https://github.com/elastio/bon/pull/405))
+
+### Fixed
+
+- Fix `clippy::missing_docs_in_private_items` triggering for `field` members ([#407](https://github.com/elastio/bon/pull/407))
+
+### Internal
+
+- Regular maintenance ([#404](https://github.com/elastio/bon/pull/404), [#406](https://github.com/elastio/bon/pull/406), [#408](https://github.com/elastio/bon/pull/408))
+
 ## [3.10.1](https://github.com/elastio/bon/compare/v3.10.0...v3.10.1) - 2026-09-07
 
 ### Changed
