@@ -98,7 +98,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04-arm, windows-11-arm, macos-latest]
+        os: [ubuntu-24.04-arm, windows-latest, macos-latest]
         locked: [--locked, ""]
 
     steps:
@@ -151,7 +151,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04-arm, windows-11-arm, macos-latest]
+        os: [ubuntu-24.04-arm, windows-latest, macos-latest]
         toolchain:
           - 1.88.0
 
@@ -227,7 +227,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04-arm, windows-11-arm, macos-latest]
+        os: [ubuntu-24.04-arm, windows-latest, macos-latest]
 
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
