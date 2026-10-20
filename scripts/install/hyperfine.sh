@@ -7,7 +7,7 @@ set -euo pipefail
 : "${TOOL_VERSION:=1.20.0}"
 
 base_url=https://github.com/sharkdp/hyperfine/releases/download/v$TOOL_VERSION
-file_stem=hyperfine-v$TOOL_VERSION-$arch_rust-unknown-linux-musl
+file_stem=hyperfine-v$TOOL_VERSION-$arch_rust-unknown-linux-gnu
 
 download_and_decompress \
     "$base_url/$file_stem.tar.gz" \
