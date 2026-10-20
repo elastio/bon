@@ -16,6 +16,14 @@ cfg_if::cfg_if! {
     }
 }
 
+// With all features on, only one of the builder crates is used.
+// These imports mark the other crates as used.
+#[cfg(feature = "typed-builder")]
+use typed_builder as _;
+
+#[cfg(feature = "derive_builder")]
+use derive_builder as _;
+
 #[cfg(feature = "structs_100_fields_10")]
 pub mod structs_100_fields_10;
 

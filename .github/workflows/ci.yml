@@ -28,7 +28,7 @@ env:
 jobs:
   # Sanity-check that benchmarks work
   runtime-benchmarks:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     strategy:
       matrix:
         benchmark:
@@ -48,7 +48,7 @@ jobs:
       - run: cd ./benchmarks/runtime && ./run.sh ${{ matrix.benchmark }}
 
   compilation-benchmarks:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1.16.1
@@ -57,7 +57,7 @@ jobs:
       - run: cd ./benchmarks/compilation && ./run.sh
 
   version-sync:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - run: ./scripts/sync-version.sh
@@ -70,7 +70,7 @@ jobs:
           synchronized in other files. See diff above" && exit 1 )
 
   cargo-lock:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
 
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -91,14 +91,14 @@ jobs:
           out-of-date. See the diff above. Try rebasing on master" && exit 1 )
 
   test-stable:
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
 
     continue-on-error: ${{ matrix.locked == '' }}
 
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu, windows, macos]
+        os: [ubuntu-24.04-arm, windows-latest, macos-latest]
         locked: [--locked, ""]
 
     steps:
@@ -146,12 +146,12 @@ jobs:
             --features=experimental-generics-setters,alloc
 
   test-msrv:
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu, windows, macos]
+        os: [ubuntu-24.04-arm, windows-latest, macos-latest]
         toolchain:
           - 1.88.0
 
@@ -165,7 +165,7 @@ jobs:
       - run: ./scripts/test-msrv.sh ${{ matrix.toolchain }}
 
   test-unstable:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
 
     # This job is optional to pass. It notifies us about the potential breakages
     # in the future Rust toolchain versions.
@@ -196,7 +196,7 @@ jobs:
             --cfg ${{ matrix.toolchain }}
 
   cargo-miri:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
 
     continue-on-error: ${{ matrix.locked == '' }}
 
@@ -222,12 +222,12 @@ jobs:
             --allow impl-trait-overcaptures
 
   cargo-doc:
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu, windows, macos]
+        os: [ubuntu-24.04-arm, windows-latest, macos-latest]
 
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -235,7 +235,7 @@ jobs:
       - run: cargo doc --no-deps
 
   cargo-fmt:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1.16.1
@@ -247,7 +247,7 @@ jobs:
   # Check for unused dependencies that uses simple regex search,
   # meaning it's ⚡️ blazingly ⚡️ fast
   cargo-machete:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - run: scripts/install/cargo-machete.sh
@@ -255,7 +255,7 @@ jobs:
 
   # Check the formatting of TOML files in the repository
   taplo-fmt:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - run: scripts/install/taplo.sh
@@ -263,7 +263,7 @@ jobs:
 
   # Check the formatting of Markdown, TS, JS, JSON, YAML files in the repository
   prettier:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - run: npm ci
@@ -271,13 +271,13 @@ jobs:
 
   # Check for typos in the repository based on a static dictionary
   typos:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
       - uses: crate-ci/typos@37bb98842b0d8c4ffebdb75301a13db0267cef89 # v1.47.2
 
   website-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
