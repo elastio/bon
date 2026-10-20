@@ -20,6 +20,4 @@ tokio                 = { version = "1.47", features = ["macros", "rt-multi-thre
 typed-builder         = "0.23"
 
 [build-dependencies]
-itertools  = "0.14"
-lazy-regex = "3.3"
-walkdir    = "2.5"
+walkdir = "2.5"

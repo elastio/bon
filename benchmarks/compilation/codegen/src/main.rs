@@ -1,3 +1,5 @@
+//! Generates code for the compilation benchmarks.
+
 use proc_macro2::{Literal, TokenStream};
 use quote::{format_ident, quote};
 use std::path::PathBuf;
