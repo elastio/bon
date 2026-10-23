@@ -23,10 +23,10 @@ The benchmarks measure the time it takes to run `cargo build` against a crate th
 
 | Builder crate    | 10 structs with 50 fields | 100 structs with 10 fields |
 | ---------------- | ------------------------- | -------------------------- |
-| `bon`            | `1.493s`                  | `1.561s`                   |
-| `typed-builder`  | `1.994s`                  | `1.656s`                   |
-| `derive_builder` | `0.418s`                  | `1.027s`                   |
-| no macros        | `0.089s`                  | `0.110s`                   |
+| `bon`            | `1.557s`                  | `1.612s`                   |
+| `typed-builder`  | `2.059s`                  | `1.723s`                   |
+| `derive_builder` | `0.407s`                  | `1.055s`                   |
+| no macros        | `0.094s`                  | `0.114s`                   |
 
 ## Summary
 
@@ -64,10 +64,10 @@ The general rule is that builders make more sense for pervasive structs and func
 
 The benchmarks were run on a dedicated root server `AX51-NVMe` on [Hetzner](https://www.hetzner.com/).
 
-- OS: Ubuntu 22.04 (Linux 5.15)
+- OS: Ubuntu 26.04.1 (Linux 7.0.0-38-generic)
 - CPU: AMD Ryzen 7 3700X 8-Core Processor (x86_64)
 - RAM: 62.8 GiB
-- Rust: 1.99.0
+- Rust: 1.99.1
 
 ## References
 

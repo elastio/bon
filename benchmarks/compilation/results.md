@@ -1,10 +1,10 @@
-| Command                                |      Mean [s] | Min [s] | Max [s] |     Relative |
-| :------------------------------------- | ------------: | ------: | ------: | -----------: |
-| `structs_100_fields_10 bon`            | 1.561 ± 0.018 |   1.515 |   1.580 | 17.55 ± 2.05 |
-| `structs_100_fields_10 typed-builder`  | 1.656 ± 0.019 |   1.617 |   1.678 | 18.62 ± 2.18 |
-| `structs_100_fields_10 derive_builder` | 1.027 ± 0.016 |   1.006 |   1.056 | 11.55 ± 1.36 |
-| `structs_100_fields_10 `               | 0.110 ± 0.011 |   0.096 |   0.130 |  1.23 ± 0.19 |
-| `structs_10_fields_50 bon`             | 1.493 ± 0.022 |   1.464 |   1.525 | 16.79 ± 1.97 |
-| `structs_10_fields_50 typed-builder`   | 1.994 ± 0.021 |   1.963 |   2.032 | 22.42 ± 2.62 |
-| `structs_10_fields_50 derive_builder`  | 0.418 ± 0.016 |   0.402 |   0.449 |  4.70 ± 0.58 |
-| `structs_10_fields_50 `                | 0.089 ± 0.010 |   0.073 |   0.117 |         1.00 |
+| Command                                | Mean Wall Time [s] | Change | Factor         |
+| :------------------------------------- | -----------------: | -----: | :------------- |
+| `structs_100_fields_10 bon`            |      1.612 ± 0.014 |        |                |
+| `structs_100_fields_10 typed-builder`  |      1.723 ± 0.034 |  +6.9% |                |
+| `structs_100_fields_10 derive_builder` |      1.055 ± 0.006 | -34.6% | (1.5x faster)  |
+| `structs_100_fields_10 `               |      0.114 ± 0.004 | -92.9% | (14.1x faster) |
+| `structs_10_fields_50 bon`             |      1.557 ± 0.030 |  -3.4% |                |
+| `structs_10_fields_50 typed-builder`   |      2.059 ± 0.030 | +27.7% |                |
+| `structs_10_fields_50 derive_builder`  |      0.407 ± 0.002 | -74.7% | (4.0x faster)  |
+| `structs_10_fields_50 `                |      0.094 ± 0.001 | -94.2% | (17.2x faster) |
