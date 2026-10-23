@@ -110,9 +110,10 @@ An automatic `Into` conversion in setter methods applies only to types that are 
 The following list describes the types that don't qualify for an automatic `Into` conversion with the explanation of the reason.
 
 1. Primitive types
-   Unsigned integers | Signed integers | Floats | Other
-   -------------------------------------|---------------------------------------|------------|--------------
-   `u8` `u16` `u32` `u64` `u128` `usize`| `i8` `i16` `i32` `i64` `i128` `isize` | `f32` `f64`| `bool` `char`
+
+    | Unsigned integers                     | Signed integers                       | Floats      | Other         |
+    | ------------------------------------- | ------------------------------------- | ----------- | ------------- |
+    | `u8` `u16` `u32` `u64` `u128` `usize` | `i8` `i16` `i32` `i64` `i128` `isize` | `f32` `f64` | `bool` `char` |
 
     ::: details Primitive types aren't qualified for an automatic `Into` conversion for several reasons
 

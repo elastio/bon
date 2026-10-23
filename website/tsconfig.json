@@ -13,8 +13,8 @@
   "compilerOptions": {
     "target": "es2022",
     "module": "ESNext",
-    "moduleResolution": "node",
-    "lib": ["es2022"],
+    "moduleResolution": "bundler",
+    "lib": ["es2022", "dom"],
     "declaration": false,
     "strict": true,
     "noImplicitAny": true,
@@ -30,9 +30,8 @@
     "strictPropertyInitialization": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "esModuleInterop": true
-  },
-  "ts-node": {
-    "esm": true
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true
   }
 }

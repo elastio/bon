@@ -3,7 +3,7 @@ import { withBase } from "vitepress";
 export const latestVersion = "v3";
 export const versions = ["v3", "v2", "v1"];
 
-export const sectionRoots = {
+export const sectionRoots: Record<string, string | undefined> = {
     guide: "guide/overview",
     reference: "reference/builder",
 };

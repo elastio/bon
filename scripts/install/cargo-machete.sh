@@ -4,7 +4,7 @@ set -euo pipefail
 
 . "$(dirname "${BASH_SOURCE[0]}")/lib.sh"
 
-: "${TOOL_VERSION:=0.9.1}"
+: "${TOOL_VERSION:=0.9.2}"
 
 # The release has only a musl binary for x86_64 and only a gnu binary for aarch64
 libc=musl

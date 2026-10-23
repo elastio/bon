@@ -6,9 +6,8 @@ set -euo pipefail
 
 cd website
 
+npm run typecheck
 npm run build
 
 FORCE_COLOR=2 node \
-    --no-warnings=ExperimentalWarning \
-    --loader ts-node/esm \
     ./validate-links.mts

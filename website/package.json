@@ -5,23 +5,24 @@
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",
-    "preview": "vitepress preview"
+    "preview": "vitepress preview",
+    "typecheck": "tsc"
   },
   "devDependencies": {
-    "@mdit/plugin-abbr": "^0.23.1",
-    "@types/node": "^24.6.2",
-    "chalk": "^5.6.2",
+    "@mdit/plugin-abbr": "^1.1.3",
+    "@types/node": "^26.6.5",
+    "chalk": "^6.0.1",
     "css-select": "^7.0.0",
     "fast-diff": "^1.3.0",
-    "globby": "^16.1.1",
+    "globby": "^16.2.4",
     "htmlparser2": "^12.0.0",
     "leven": "^4.1.0",
     "medium-zoom": "^1.1.0",
-    "ts-node": "^10.9.2",
-    "ts-pattern": "^5.9.0",
+    "ts-pattern": "^5.9.2",
+    "typescript": "^7.0.2",
     "vitepress": "^1.6.4"
   },
   "dependencies": {
-    "vue": "^3.5.38"
+    "vue": "^3.5.44"
   }
 }

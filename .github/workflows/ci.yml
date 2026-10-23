@@ -19,8 +19,6 @@ defaults:
 env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
-  RUSTDOCFLAGS: --deny warnings
-  RUSTFLAGS: --deny warnings
   # This disables incremental compilation for workspace packages and path deps.
   # All other dependencies including registry deps will still use the incremental cache.
   CARGO_INCREMENTAL: 0
@@ -28,7 +26,7 @@ env:
 jobs:
   # Sanity-check that benchmarks work
   runtime-benchmarks:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     strategy:
       matrix:
         benchmark:
@@ -40,26 +38,26 @@ jobs:
           - args_20
 
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1.16.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
       - run: ./scripts/install/gungraun-runner.sh
 
       - run: sudo apt-get update && sudo apt-get install -y valgrind
       - run: cd ./benchmarks/runtime && ./run.sh ${{ matrix.benchmark }}
 
   compilation-benchmarks:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1.16.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
       - run: ./scripts/install/hyperfine.sh
 
       - run: cd ./benchmarks/compilation && ./run.sh
 
   version-sync:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: ./scripts/sync-version.sh
         env:
           # Use `cargo` pre-installed in the Github Managed runner image
@@ -70,10 +68,10 @@ jobs:
           synchronized in other files. See diff above" && exit 1 )
 
   cargo-lock:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
 
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # There is a pre-installed cargo in the Github Managed runner image
       # which is totally fine for simple `cargo fetch` usage.
@@ -98,12 +96,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04-arm, windows-latest, macos-latest]
+        os: [ubuntu-26.04-arm, windows-latest, macos-latest]
         locked: [--locked, ""]
 
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1.16.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
         with:
           # rust-src is required to make sure compile errors on CI are rendered
           # the same as locally. The `rust-src` component is installed by default
@@ -151,21 +149,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04-arm, windows-latest, macos-latest]
+        os: [ubuntu-26.04-arm, windows-latest, macos-latest]
         toolchain:
           - 1.88.0
 
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1.16.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
         with:
           components: clippy
           toolchain: ${{ matrix.toolchain }}
 
       - run: ./scripts/test-msrv.sh ${{ matrix.toolchain }}
+        env:
+          # Cargo of the MSRV ignores `CARGO_BUILD_WARNINGS`
+          RUSTFLAGS: --deny warnings
 
   test-unstable:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
 
     # This job is optional to pass. It notifies us about the potential breakages
     # in the future Rust toolchain versions.
@@ -178,8 +179,8 @@ jobs:
         locked: [--locked, ""]
 
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1.16.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
         with:
           toolchain: ${{ matrix.toolchain }}
           components: clippy
@@ -191,12 +192,10 @@ jobs:
             --allow if_let_rescope \
             --allow impl-trait-overcaptures
         env:
-          RUSTFLAGS: >-
-            --deny warnings
-            --cfg ${{ matrix.toolchain }}
+          RUSTFLAGS: --cfg ${{ matrix.toolchain }}
 
   cargo-miri:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
 
     continue-on-error: ${{ matrix.locked == '' }}
 
@@ -205,10 +204,10 @@ jobs:
         locked: [--locked, ""]
 
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1.16.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
         with:
-          toolchain: nightly-2026-09-22
+          toolchain: nightly-2026-10-22
           components: miri, rust-src
 
       - run: |
@@ -216,7 +215,6 @@ jobs:
             --workspace --exclude runtime-benchmarks
         env:
           RUSTFLAGS: >-
-            --deny warnings
             --allow edition-2024-expr-fragment-specifier
             --allow if_let_rescope
             --allow impl-trait-overcaptures
@@ -227,18 +225,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04-arm, windows-latest, macos-latest]
+        os: [ubuntu-26.04-arm, windows-latest, macos-latest]
 
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1.16.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
       - run: cargo doc --no-deps
 
   cargo-fmt:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - uses: actions-rust-lang/setup-rust-toolchain@46268bd060767258de96ed93c1251119784f2ab6 # v1.16.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
         with:
           components: rustfmt
 
@@ -247,46 +245,46 @@ jobs:
   # Check for unused dependencies that uses simple regex search,
   # meaning it's ⚡️ blazingly ⚡️ fast
   cargo-machete:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: scripts/install/cargo-machete.sh
       - run: cargo-machete
 
   # Check the formatting of TOML files in the repository
   taplo-fmt:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: scripts/install/taplo.sh
       - run: taplo fmt --check
 
   # Check the formatting of Markdown, TS, JS, JSON, YAML files in the repository
   prettier:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: npm ci
       - run: npx prettier --check .
 
   # Check for typos in the repository based on a static dictionary
   typos:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
-      - uses: crate-ci/typos@37bb98842b0d8c4ffebdb75301a13db0267cef89 # v1.47.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: crate-ci/typos@7f9d0819ca1c008ade73f4b41fa9d258d48f605b # v1.51.1
 
   website-build:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Needed for "lastUpdated" property in VitePress
           fetch-depth: 0
 
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version: 26
           cache: npm
           cache-dependency-path: website/package-lock.json
 
