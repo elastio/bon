@@ -26,7 +26,7 @@ env:
 jobs:
   # Sanity-check that benchmarks work
   runtime-benchmarks:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     strategy:
       matrix:
         benchmark:
@@ -46,7 +46,7 @@ jobs:
       - run: cd ./benchmarks/runtime && ./run.sh ${{ matrix.benchmark }}
 
   compilation-benchmarks:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
@@ -55,7 +55,7 @@ jobs:
       - run: cd ./benchmarks/compilation && ./run.sh
 
   version-sync:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: ./scripts/sync-version.sh
@@ -68,7 +68,7 @@ jobs:
           synchronized in other files. See diff above" && exit 1 )
 
   cargo-lock:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -96,7 +96,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04-arm, windows-latest, macos-latest]
+        os: [ubuntu-26.04-arm, windows-latest, macos-latest]
         locked: [--locked, ""]
 
     steps:
@@ -149,7 +149,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04-arm, windows-latest, macos-latest]
+        os: [ubuntu-26.04-arm, windows-latest, macos-latest]
         toolchain:
           - 1.88.0
 
@@ -166,7 +166,7 @@ jobs:
           RUSTFLAGS: --deny warnings
 
   test-unstable:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
 
     # This job is optional to pass. It notifies us about the potential breakages
     # in the future Rust toolchain versions.
@@ -195,7 +195,7 @@ jobs:
           RUSTFLAGS: --cfg ${{ matrix.toolchain }}
 
   cargo-miri:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
 
     continue-on-error: ${{ matrix.locked == '' }}
 
@@ -225,7 +225,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04-arm, windows-latest, macos-latest]
+        os: [ubuntu-26.04-arm, windows-latest, macos-latest]
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -233,7 +233,7 @@ jobs:
       - run: cargo doc --no-deps
 
   cargo-fmt:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions-rust-lang/setup-rust-toolchain@ecabd13d1c56bd1345c230e542e9144811ad706f # v2.0.0
@@ -245,7 +245,7 @@ jobs:
   # Check for unused dependencies that uses simple regex search,
   # meaning it's ⚡️ blazingly ⚡️ fast
   cargo-machete:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: scripts/install/cargo-machete.sh
@@ -253,7 +253,7 @@ jobs:
 
   # Check the formatting of TOML files in the repository
   taplo-fmt:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: scripts/install/taplo.sh
@@ -261,7 +261,7 @@ jobs:
 
   # Check the formatting of Markdown, TS, JS, JSON, YAML files in the repository
   prettier:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - run: npm ci
@@ -269,13 +269,13 @@ jobs:
 
   # Check for typos in the repository based on a static dictionary
   typos:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: crate-ci/typos@7f9d0819ca1c008ade73f4b41fa9d258d48f605b # v1.51.1
 
   website-build:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -284,7 +284,7 @@ jobs:
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: 24
+          node-version: 26
           cache: npm
           cache-dependency-path: website/package-lock.json
 
