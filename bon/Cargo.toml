@@ -42,10 +42,10 @@ workspace = true
 bon-macros = { path = "../bon-macros", version = "=3.10.2" }
 
 [dev-dependencies]
-expect-test           = "1.4.1"
+expect-test           = "1.5.1"
 macro_rules_attribute = "0.2"
-tokio                 = { version = "1.29.1", features = ["macros", "rt"] }
-trybuild              = "1.0.89"
+tokio                 = { version = "1.54.1", features = ["macros", "rt"] }
+trybuild              = "1.0.122"
 
 [features]
 alloc   = ["bon-macros/alloc"]
