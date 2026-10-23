@@ -170,8 +170,15 @@ impl ExpandCfg {
     /// However, in most of the cases it will be a simple path, so its combination
     /// with the name of the first function in the `impl` block should be unique enough.
     fn unique_invocation_name(item: &syn::Item, current_macro: &syn::Path) -> Result<String> {
-        let path_to_ident =
-            |path: &syn::Path| path.segments.iter().map(|segment| &segment.ident).join("_");
+        // All identifiers here are converted to strings with `raw_name()` to
+        // strip the `r#` prefix of raw identifiers. Otherwise, the `#` would end
+        // up in the middle of the resulting name, making it an invalid identifier.
+        let path_to_ident = |path: &syn::Path| {
+            path.segments
+                .iter()
+                .map(|segment| segment.ident.raw_name())
+                .join("_")
+        };
 
         // Include the name of the proc macro in the unique name to avoid
         // collisions when different proc macros are placed on the same item
@@ -179,7 +186,7 @@ impl ExpandCfg {
         let macro_path_str = path_to_ident(current_macro);
 
         let item_name = match item {
-            syn::Item::Fn(item) => item.sig.ident.to_string(),
+            syn::Item::Fn(item) => item.sig.ident.raw_name(),
             syn::Item::Impl(item) => {
                 let self_ty = item
                     .self_ty
@@ -191,7 +198,7 @@ impl ExpandCfg {
                     .items
                     .iter()
                     .find_map(|item| match item {
-                        syn::ImplItem::Fn(method) => Some(method.sig.ident.to_string()),
+                        syn::ImplItem::Fn(method) => Some(method.sig.ident.raw_name()),
                         _ => None,
                     })
                     .unwrap_or_default();

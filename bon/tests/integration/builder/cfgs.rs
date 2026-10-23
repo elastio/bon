@@ -158,3 +158,34 @@ fn impl_block() {
 
     assert!(builder.arg1(true).arg3(['a', 'b']).call());
 }
+
+// The cfg evaluation generates identifiers from the name of the function or
+// from the names of the `impl` block's self type and its first method. The `r#`
+// prefix of raw identifiers must not leak into them, otherwise the generated
+// identifiers are invalid (e.g. `__eval_cfg_bon_builder_r#type_0_0`), and the
+// macro panics.
+#[test]
+fn raw_idents() {
+    {
+        #[builder]
+        fn r#type(#[cfg(all())] r#type: u32, #[cfg(any())] r#while: u32) -> u32 {
+            r#type
+        }
+
+        assert_eq!(r#type().r#type(42).call(), 42);
+    }
+
+    {
+        struct r#Type;
+
+        #[bon::bon]
+        impl r#Type {
+            #[builder]
+            fn r#type(#[cfg(all())] r#type: u32, #[cfg(any())] r#while: u32) -> u32 {
+                r#type
+            }
+        }
+
+        assert_eq!(r#Type::r#type().r#type(42).call(), 42);
+    }
+}
