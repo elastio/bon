@@ -31,8 +31,5 @@
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
     "esModuleInterop": true
-  },
-  "ts-node": {
-    "esm": true
   }
 }
