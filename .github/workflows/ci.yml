@@ -19,8 +19,6 @@ defaults:
 env:
   RUST_BACKTRACE: 1
   CARGO_TERM_COLOR: always
-  RUSTDOCFLAGS: --deny warnings
-  RUSTFLAGS: --deny warnings
   # This disables incremental compilation for workspace packages and path deps.
   # All other dependencies including registry deps will still use the incremental cache.
   CARGO_INCREMENTAL: 0
@@ -163,6 +161,9 @@ jobs:
           toolchain: ${{ matrix.toolchain }}
 
       - run: ./scripts/test-msrv.sh ${{ matrix.toolchain }}
+        env:
+          # Cargo of the MSRV ignores `CARGO_BUILD_WARNINGS`
+          RUSTFLAGS: --deny warnings
 
   test-unstable:
     runs-on: ubuntu-24.04-arm
@@ -191,9 +192,7 @@ jobs:
             --allow if_let_rescope \
             --allow impl-trait-overcaptures
         env:
-          RUSTFLAGS: >-
-            --deny warnings
-            --cfg ${{ matrix.toolchain }}
+          RUSTFLAGS: --cfg ${{ matrix.toolchain }}
 
   cargo-miri:
     runs-on: ubuntu-24.04-arm
@@ -216,7 +215,6 @@ jobs:
             --workspace --exclude runtime-benchmarks
         env:
           RUSTFLAGS: >-
-            --deny warnings
             --allow edition-2024-expr-fragment-specifier
             --allow if_let_rescope
             --allow impl-trait-overcaptures
