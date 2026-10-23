@@ -19,32 +19,28 @@ The proc macro crate dynamic library is compiled only once and remains in the bu
 
 ## Measurements
 
-The benchmarks measure the time it takes to run `cargo build` against a crate that uses `#[derive(Builder)]` for the given number of structs with the given number of fields in each of them.
+The benchmarks measure the time it takes to run `cargo build` against a crate that uses `#[derive(Builder)]` for the given number of structs with the given number of fields in each of them. Every struct is also built once with all of its setters called, so the measurements include the cost of the builder usage in addition to the cost of the builder definition.
 
 | Builder crate    | 10 structs with 50 fields | 100 structs with 10 fields |
 | ---------------- | ------------------------- | -------------------------- |
-| `bon`            | `2.096s`                  | `2.340s`                   |
-| `typed-builder`  | `2.088s`                  | `1.831s`                   |
-| `derive_builder` | `0.449s`                  | `1.026s`                   |
-| no macros        | `0.112s`                  | `0.113s`                   |
+| `bon`            | `1.493s`                  | `1.561s`                   |
+| `typed-builder`  | `1.994s`                  | `1.656s`                   |
+| `derive_builder` | `0.418s`                  | `1.027s`                   |
+| no macros        | `0.089s`                  | `0.110s`                   |
 
 ## Summary
 
 Builder macros do add noticeable overhead to the compilation performance due to the number of additional structs and methods they generate.
 
-`bon` has more compile time overhead than other crates, which is likely still reasonable, but let's understand why and what we get in return from this.
-
-### Why does `bon` lose to `typed-builder` in compilation perf?
-
-`bon`'s generated code is a bit more complex than `typed-builder`'s, because `bon` generates additional traits and structs to expose a nice and stable [typestate API](../typestate-api).
-
-This is also done to reduce the builder's type signature size and reduce generic type noise in the generated builders' docs. See [docs comparison](../alternatives#generated-docs-comparison) (the difference is drastic).
+`bon` compiles faster than `typed-builder` in both benchmarks, but slower than `derive_builder`.
 
 ### Can `bon` improve compile times?
 
+`bon` [v3.10.2](../../changelog#_3-10-2-2026-10-02) already improved its compile times by ~30% ([#405](https://github.com/elastio/bon/pull/405)). Before that release, `bon` was slower to compile than `typed-builder`.
+
 Once the [`associated_type_defaults`](https://github.com/rust-lang/rust/issues/29661) nightly Rust feature hits stable, it'll be possible to greatly improve compile times. See [this comment](https://github.com/rust-lang/rust/issues/29661#issuecomment-2466765240), which measures the improvement at 16-58%.
 
-Any other improvements come at a cost 🪙. `bon` prioritizes the convenience of the generated builder API, documentation cleanness, and higher level of compile-time checks by default.
+Other improvements come at a cost 🪙. `bon` generates additional traits and structs to expose a nice and stable [typestate API](../typestate-api). This also reduces the builder's type signature size and the generic type noise in the generated builders' docs. See [docs comparison](../alternatives#generated-docs-comparison) (the difference is drastic). `bon` prioritizes the convenience of the generated builder API, documentation cleanness, and higher level of compile-time checks by default.
 
 If you'd like to improve your compile times, consider disabling compile-time checks for overwrites of optional members in setters with [`#[builder(overwritable)]`](../../reference/builder/member/overwritable). However, don't rush with that, think carefully about the tradeoff you would make.
 
@@ -68,9 +64,10 @@ The general rule is that builders make more sense for pervasive structs and func
 
 The benchmarks were run on a dedicated root server `AX51-NVMe` on [Hetzner](https://www.hetzner.com/).
 
-- OS: Ubuntu 22.04.4 (Linux 5.15.0-76-generic)
+- OS: Ubuntu 22.04 (Linux 5.15)
 - CPU: AMD Ryzen 7 3700X 8-Core Processor (x86_64)
 - RAM: 62.8 GiB
+- Rust: 1.99.0
 
 ## References
 
