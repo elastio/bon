@@ -10,7 +10,8 @@ if [[ -z "${SCRIPT_TEMP:-}" ]]; then
     if [[ -n "${RUNNER_TEMP:-}" ]]; then
         SCRIPT_TEMP="${RUNNER_TEMP}"
     else
-        SCRIPT_TEMP="$(mktemp --directory)"
+        SCRIPT_TEMP="$(mktemp -d)"
+        trap 'rm -rf "$SCRIPT_TEMP"' EXIT
     fi
 fi
 export SCRIPT_TEMP
