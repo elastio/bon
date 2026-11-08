@@ -1,10 +1,10 @@
-error: Only structs with named fields are supported
+error: tuple structs are unsupported; use a struct with named fields instead
  --> tests/integration/ui/compile_fail/derive_builder.rs:4:1
   |
 4 | struct TupleStruct(u32, u32);
   | ^^^^^^
 
-error: Only structs with named fields are supported
+error: tuple structs are unsupported; use a struct with named fields instead
  --> tests/integration/ui/compile_fail/derive_builder.rs:7:1
   |
 7 | struct TupleStructsAreUnsupported(u32, u32);
