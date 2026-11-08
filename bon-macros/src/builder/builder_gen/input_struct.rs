@@ -84,9 +84,12 @@ impl StructInputCtx {
         let fields = self
             .struct_item
             .apply_ref(|struct_item| match &struct_item.fields {
-                syn::Fields::Named(fields) => Ok(fields),
-                _ => {
-                    bail!(&struct_item, "Only structs with named fields are supported")
+                syn::Fields::Named(_) | syn::Fields::Unit => Ok(&struct_item.fields),
+                syn::Fields::Unnamed(_) => {
+                    bail!(
+                        &struct_item,
+                        "tuple structs are unsupported; use a struct with named fields instead"
+                    )
                 }
             });
 
@@ -94,9 +97,8 @@ impl StructInputCtx {
         let orig_fields = fields.orig?;
 
         let members = norm_fields
-            .named
             .iter()
-            .zip(&orig_fields.named)
+            .zip(orig_fields)
             .map(|(norm_field, orig_field)| {
                 let ident = norm_field.ident.clone().ok_or_else(|| {
                     err!(norm_field, "only structs with named fields are supported")

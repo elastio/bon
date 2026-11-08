@@ -107,3 +107,11 @@ fn smoke_struct() {
 
     expected.assert_debug_eq(&actual);
 }
+
+#[test]
+fn unit_struct() {
+    #[derive(Debug, PartialEq, Builder)]
+    struct Sut;
+
+    assert_eq!(Sut::builder().build(), Sut);
+}
